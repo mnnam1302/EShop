@@ -1,0 +1,36 @@
+﻿using Microsoft.EntityFrameworkCore;
+
+namespace EShop.Shared.Contract.Abstractions.Paging;
+
+public class PagedResult<T>
+{
+    public List<T> Items { get; }
+    public int PageIndex { get; }
+    public int PageSize { get; }
+    public int TotalCount { get; }
+    public int TotalPages => (int)Math.Ceiling(TotalCount / (double)PageSize);
+    public bool HasPreviousPage => PageIndex > 1;
+    public bool HasNextPage => PageIndex * PageSize < TotalCount;
+
+    private PagedResult(List<T> items, int pageIndex, int pageSize, int totalCount)
+    {
+        Items = items;
+        PageIndex = pageIndex;
+        PageSize = pageSize;
+        TotalCount = totalCount;
+    }
+
+    public static PagedResult<T> Create(List<T> items, int pageIndex, int pageSize, int totalCount)
+        => new(items, pageIndex, pageSize, totalCount);
+
+    public static async Task<PagedResult<T>> CreateAsync(IQueryable<T> query,
+        int pageIndex,
+        int pageSize,
+        CancellationToken cancellationToken)
+    {
+        var totalCount = await query.CountAsync(cancellationToken);
+        var items = await query.Skip((pageIndex - 1) * pageSize).Take(pageSize).ToListAsync(cancellationToken);
+
+        return new(items, pageIndex, pageSize, totalCount);
+    }
+}
