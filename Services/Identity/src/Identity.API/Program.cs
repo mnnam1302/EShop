@@ -1,11 +1,18 @@
+using Identity.Persistence.DependencuInjections.Extensions;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
+// API
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// Persistence
+builder.Services.ConfigureNgSqlRetryOptionsPersistence(builder.Configuration.GetSection("NgSqlRetryOptions"));
+builder.Services.AddNqSqlPersistence(builder.Configuration);
 
 var app = builder.Build();
 
