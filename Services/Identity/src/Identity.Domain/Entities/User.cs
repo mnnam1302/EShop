@@ -1,10 +1,9 @@
 ﻿using Identity.Domain.Abstractions.Entities;
-using Identity.Domain.Aggregates;
 using System.ComponentModel.DataAnnotations;
 
 namespace Identity.Domain.Entities;
 
-public class User : EntityBase<string>, ICreatedTracking
+public class User : EntityBase<string>, ICreatedTracking //, IScoped
 {
     [MaxLength(ModelConstants.MediumText)]
     [Required]
@@ -18,6 +17,9 @@ public class User : EntityBase<string>, ICreatedTracking
     [EmailAddress]
     public string? Email { get; set; }
 
+    [MaxLength(ModelConstants.StandardText)]
+    public string PasswordHash { get; set; }
+
     [MaxLength(ModelConstants.ShortText)]
     public string? PhoneNumber { get; set; }
 
@@ -27,7 +29,6 @@ public class User : EntityBase<string>, ICreatedTracking
     public string? ManagerId { get; set; }
 
     public string? OrganizationId { get; set; }
-    public virtual Organization? Organization { get; set; }
 
     public DateTimeOffset CreatedDate { get; set; }
 
@@ -35,4 +36,13 @@ public class User : EntityBase<string>, ICreatedTracking
     public string? CreatedBy { get; set; }
 
     public bool IsActive { get; set; } = true;
+
+    public virtual List<Role> Roles { get; set; } = new();
+    public virtual List<UserRole> UserRoles { get; set; } = new();
+
+    //[MaxLength(ModelConstants.ShortText)]
+    //public string? TenantId { get; set; }
+
+    //[MaxLength(ModelConstants.LongText)]
+    //public string? Scope { get; set; }
 }

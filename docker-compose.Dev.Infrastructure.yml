@@ -1,0 +1,52 @@
+services:
+  # Postgres
+  postgres:
+    container_name: 'postgres'
+    image: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: P@ssword
+    ports:
+      - 5432:5432
+    volumes:
+      - postgres_db:/var/lib/postgressql/data
+    networks:
+      - eshop
+  # Redis
+  redis:
+    image: redis:latest
+    container_name: 'redis'
+    restart: always
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis:/data
+    networks:
+      - eshop
+  # RabbitMQ
+  rabbitmq:
+    container_name: rabbitmq
+    image: rabbitmq:3-management-alpine
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 30s
+      timeout: 30s
+      retries: 3
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: "guest"
+      RABBITMQ_DEFAULT_PASS: "guest"
+      RABBITMQ_DEFAULT_VHOST: "nhatnam1302"
+    networks:
+      - eshop
+# Volumes
+volumes:
+  postgres_db:
+  redis:
+    driver: local
+# Networks
+networks:
+  eshop:
+    name: eshop
