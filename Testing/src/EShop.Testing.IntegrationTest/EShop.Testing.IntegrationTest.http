@@ -1,0 +1,6 @@
+@EShop.Testing.IntegrationTest_HostAddress = http://localhost:5045
+
+GET {{EShop.Testing.IntegrationTest_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
