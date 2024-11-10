@@ -8,7 +8,7 @@ public static class Response
         public string UserName { get; init; }
         public string AccessToken { get; init; }
         public string RefreshToken { get; init; }
-        public string TokenType { get; init; }
+        public string TokenType { get; init; } = "Bearer";
         public DateTime RefreshTokenExpiryTime { get; init; }
     }
 }

@@ -51,8 +51,8 @@ public class ExceptionHandlingMiddleware : IMiddleware
         {
             NotFoundException => StatusCodes.Status404NotFound,
             BadRequestException => StatusCodes.Status400BadRequest,
-            //IdentityException.UnauthorizedException => StatusCodes.Status401Unauthorized,
-            //IdentityException.ForbiddenException => StatusCodes.Status403Forbidden,
+            AuthorizationException => StatusCodes.Status401Unauthorized,
+            ForbiddenException => StatusCodes.Status403Forbidden,
             ConflictException => StatusCodes.Status409Conflict,
             _ => StatusCodes.Status500InternalServerError
         };
