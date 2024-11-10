@@ -11,10 +11,10 @@ public class PasswordHasher : IPasswordHasher
     private static readonly HashAlgorithmName _hashAlgorithmName = HashAlgorithmName.SHA256;
     private const char Delimeter = ';';
 
-    public string Hash(string password)
+    public string Hash(string inputPassword)
     {
         var salt = RandomNumberGenerator.GetBytes(SaltSize);
-        var hash = Rfc2898DeriveBytes.Pbkdf2(password, salt, Interations, _hashAlgorithmName, KeySize);
+        var hash = Rfc2898DeriveBytes.Pbkdf2(inputPassword, salt, Interations, _hashAlgorithmName, KeySize);
 
         return string.Join(Delimeter, Convert.ToBase64String(salt), Convert.ToBase64String(hash));
     }

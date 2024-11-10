@@ -18,7 +18,6 @@
 
   <ItemGroup>
     <Folder Include="UseCases\V1\Events\" />
-    <Folder Include="UseCases\V1\Queries\" />
     <Folder Include="UseCases\V2\" />
   </ItemGroup>
 

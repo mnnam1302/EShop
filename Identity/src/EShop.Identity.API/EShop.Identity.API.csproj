@@ -32,8 +32,4 @@
     <ProjectReference Include="..\EShop.Identity.Persistence\EShop.Identity.Persistence.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Filters\" />
-  </ItemGroup>
-
 </Project>
