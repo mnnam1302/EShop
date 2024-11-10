@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Shared\src\EShop.Shared.Contracts\EShop.Shared.Contracts.csproj" />
+    <ProjectReference Include="..\EShop.Identity.Domain\EShop.Identity.Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+  	<PackageReference Include="FluentValidation" Version="11.10.0" />
+  	<PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.10.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="UseCases\V1\Events\" />
+    <Folder Include="UseCases\V1\Queries\" />
+    <Folder Include="UseCases\V2\" />
+  </ItemGroup>
+
+</Project>

@@ -3,8 +3,20 @@
 ## Infrastructure local
 docker-compose -f docker-compose.Dev.Infrastructure.yml up -d
 
-## Standard
-Integration Events using interface
+## Standard Command
+### Integration Events using interface
+
+### Cross Cutting Concern
+- Authentication & Authorization
+
+- Logging and tracing
+
+- Exception Handling
+
+- Validation
+
+- Caching
+
 
 ## Identity
 
