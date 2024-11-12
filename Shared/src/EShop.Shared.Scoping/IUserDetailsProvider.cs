@@ -5,18 +5,12 @@ namespace EShop.Shared.Scoping;
 public interface IUserDetailsProvider
 {
     UserData AuthenticatedUser { get; }
-
     bool IsAuthenticatedUser { get; }
     bool IsSystemUser { get; }
-
     void SetSystemUserContext(string onBehalfOfTenantId, string? onBehalfOfUserId = null, string? onBehalfOfUserType = null);
-
     void SetSystemUserContextWithEmptyScope();
-
     void ClearSystemUserContext();
-
     bool IsCurrentUser(string userId);
-
     string GetRawAccessToken();
 }
 

@@ -1,6 +1,8 @@
 ﻿using Asp.Versioning;
 using EShop.Identity.API.Abstractions;
 using EShop.Shared.Contracts.Services.Identity;
+using EShop.Shared.JsonApi.ResourceAccessControl;
+using EShop.Shared.Scoping.ResourceAccessControl;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -19,6 +21,7 @@ namespace EShop.Identity.API.Controllers
         }
 
         [HttpPost]
+        //[RequirePermission(Permission = PermissionConstants.ManageRolesPermissionId)]
         public async Task<IResult> CreateRole([FromBody] Command.CreateRole command)
         {
             var result = await _sender.Send(command);
@@ -29,6 +32,20 @@ namespace EShop.Identity.API.Controllers
             }
 
             return Results.Created("", result);
+        }
+
+        [HttpGet]
+        //[RequirePermission(Permission = PermissionConstants.ViewRolesPermissionId)]
+        public async Task<IResult> GetRoles()
+        {
+            var result = await _sender.Send(new Query.GetRoles());
+
+            if (result.IsFailure)
+            {
+                return HandlerFailure(result);
+            }
+
+            return Results.Ok(result);
         }
     }
 }
