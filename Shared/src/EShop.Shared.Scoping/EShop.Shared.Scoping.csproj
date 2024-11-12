@@ -8,6 +8,12 @@
 
   <ItemGroup>
   	<PackageReference Include="EventFlow" Version="0.83.4713" />
+  	<PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="8.2.0" />
+  	<PackageReference Include="Serilog.AspNetCore" Version="8.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\EShop.Shared.Contracts\EShop.Shared.Contracts.csproj" />
   </ItemGroup>
 
 </Project>

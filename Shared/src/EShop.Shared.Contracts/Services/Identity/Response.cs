@@ -11,4 +11,11 @@ public static class Response
         public string TokenType { get; init; } = "Bearer";
         public DateTime RefreshTokenExpiryTime { get; init; }
     }
+
+    public record RolesResponse
+    {
+        public string Id { get; init; }
+        public string? Name { get; init; }
+        public string? Description { get; init; }
+    }
 }

@@ -40,6 +40,8 @@ options.SubstituteApiVersionInUrl = true;
 
 // Application
 builder.Services.AddMediatRApplication();
+builder.Services.AddAutoMapperApplication();
+builder.Services.AddServicesApplication();
 
 // Persistence
 builder.Services.ConfigureNgSqlRetryOptionsPersistence(builder.Configuration.GetSection("NgSqlRetryOptions"));
@@ -49,6 +51,7 @@ builder.Services.AddRepositoryPersistence();
 
 // Infrastructure
 builder.Services.AddServicesInfrastructure();
+builder.Services.AddRedisAndServicesInfrastructure(builder.Configuration);
 
 // Middleware
 builder.Services.AddTransient<ExceptionHandlingMiddleware>();

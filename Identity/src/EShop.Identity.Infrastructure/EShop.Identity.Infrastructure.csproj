@@ -15,6 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\Shared\src\EShop.Shared.Cache\EShop.Shared.Cache.csproj" />
     <ProjectReference Include="..\EShop.Identity.Application\EShop.Identity.Application.csproj" />
   </ItemGroup>
 
