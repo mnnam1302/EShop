@@ -1,8 +1,10 @@
-﻿using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserPermissionProvider;
+﻿using EShop.Shared.Cache.CacheKeys;
+using EShop.Shared.Cache.Providers;
+using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserPermissionProvider;
 using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
 
-namespace EShop.Shared.Cache;
+namespace EShop.Shared.Cache.Services;
 
 public class PermissionRedisCachingService : IPermissionCachingOwnerService, IPermissionCachingService
 {
@@ -23,6 +25,7 @@ public class PermissionRedisCachingService : IPermissionCachingOwnerService, IPe
     }
 
     public void RemoveCache(string userId)
+
     {
         redisCachingProvider.ClearCache(UserPermissionCacheKeyProvider.GetCacheKey(userId));
     }

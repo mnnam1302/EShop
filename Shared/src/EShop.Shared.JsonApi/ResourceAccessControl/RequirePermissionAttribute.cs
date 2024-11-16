@@ -53,12 +53,12 @@ public class RequirePermissionAttribute : Attribute, IFilterFactory, IUserPermis
 
         public async Task OnAuthorizationAsync(AuthorizationFilterContext context)
         {
-            //if (!_userDetailsProvider.IsAuthenticatedUser || string.IsNullOrWhiteSpace(this._userDetailsProvider.AuthenticatedUser.TenantId))
-            //{
-            //    context.Result = new StatusCodeResult(StatusCodes.Status401Unauthorized);
-            //    _logger.LogTrace("Rejecting authorizated user");
-            //    return;
-            //}
+            if (!_userDetailsProvider.IsAuthenticatedUser)
+            {
+                context.Result = new StatusCodeResult(StatusCodes.Status401Unauthorized);
+                _logger.LogTrace("Rejecting authorizated user");
+                return;
+            }
 
             if (!await _permissionValidator.HasPermissionAsync(_requirePermission))
             {

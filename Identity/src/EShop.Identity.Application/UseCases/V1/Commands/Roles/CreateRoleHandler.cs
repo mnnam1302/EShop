@@ -4,7 +4,7 @@ using EShop.Identity.Domain.Entities;
 using EShop.Identity.Domain.Exceptions;
 using EShop.Shared.Contracts.Abstractions.Requests;
 using EShop.Shared.Contracts.Abstractions.Shared;
-using EShop.Shared.Contracts.Services.Identity;
+using EShop.Shared.Contracts.Services.Identity.Roles;
 
 namespace EShop.Identity.Application.UseCases.V1.Commands.Roles;
 

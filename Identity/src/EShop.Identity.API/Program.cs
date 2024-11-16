@@ -3,13 +3,23 @@ using EShop.Identity.API.Middlewares;
 using EShop.Identity.Application.DependencyInjections.Extensions;
 using EShop.Identity.Infrastructure.DependencyInjections.Extensions;
 using EShop.Identity.Persistence.DependencyInjections.Extensions;
+using EShop.Shared.JsonApi.DependencyInjections;
 using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-// API
+
+// Shared: include interface and implementation
+builder.Services.AddUserScoping();
+
+/*
+ * Rule: DI at API layer
+ * - Jwt Authentication
+ * - Swagger
+ * - Interface from Shared and implemented in owner service
+ */
 builder.Services.AddControllers();
 
 Log.Logger = new LoggerConfiguration().ReadFrom
@@ -21,7 +31,6 @@ builder.Logging
     .AddSerilog();
 
 builder.Host.UseSerilog();
-
 builder.Services.AddControllers();
 
 builder.Services
@@ -33,10 +42,13 @@ builder.Services
 builder.Services
     .AddApiVersioning(options => options.ReportApiVersions = true)
     .AddApiExplorer(options =>
-{
-options.GroupNameFormat = "'v'VVV";
-options.SubstituteApiVersionInUrl = true;
-});
+    {
+    options.GroupNameFormat = "'v'VVV";
+    options.SubstituteApiVersionInUrl = true;
+    });
+
+builder.Services.AddTokenCachingServiceForOwnerServiceAPI();
+builder.Services.AddUserPermissionForOwnerServiceAPI();
 
 // Application
 builder.Services.AddMediatRApplication();
@@ -51,7 +63,7 @@ builder.Services.AddRepositoryPersistence();
 
 // Infrastructure
 builder.Services.AddServicesInfrastructure();
-builder.Services.AddRedisAndServicesInfrastructure(builder.Configuration);
+builder.Services.AddRedisCachingInfrastructure(builder.Configuration);
 
 // Middleware
 builder.Services.AddTransient<ExceptionHandlingMiddleware>();

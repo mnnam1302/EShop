@@ -4,7 +4,9 @@ using EShop.Identity.Infrastructure.Authentication;
 using EShop.Identity.Infrastructure.DependencyInjections.Options;
 using EShop.Identity.Infrastructure.HashServices;
 using EShop.Shared.Cache;
-using EShop.Shared.Contracts.Services.Identity;
+using EShop.Shared.Cache.Providers;
+using EShop.Shared.Cache.Services;
+using EShop.Shared.Contracts.Services.Identity.Auth;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserPermissionProvider;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserTokenProvider;
@@ -21,7 +23,7 @@ public static class ServiceCollectionExtensions
         services.AddTransient<ITokenService, TokenService>();
     }
 
-    public static void AddRedisAndServicesInfrastructure(this IServiceCollection services, IConfiguration configuration)
+    public static void AddRedisCachingInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
         var redisOptions = new RedisOptions();
         configuration.GetSection(nameof(RedisOptions)).Bind(redisOptions);
@@ -36,15 +38,5 @@ public static class ServiceCollectionExtensions
             var connectionString = redisOptions.ConnectionString;
             options.Configuration = connectionString;
         });
-
-        services.AddTransient<IRedisResiliencePolicyProvider, RedisResiliencePolicyProvider>();
-        services.AddTransient(typeof(CachedRemoteConfiguration));
-        services.AddTransient<IRedisCachingProvider<string[]>, RedisCachingProvider<string[]>>();
-        services.AddTransient<IPermissionCachingOwnerService, PermissionRedisCachingService>(); // tùy vào service mà mình triển khai
-        services.AddTransient<IUserPermissionsProvider, OwnerCacheUserPermissionService>();
-
-        services.AddTransient<IRedisCachingProvider
-            <Response.AuthenticatedResponse>, RedisCachingProvider<Response.AuthenticatedResponse>>();
-        services.AddTransient<ITokenCachingService, TokenRedisCachingService>();
     }
 }

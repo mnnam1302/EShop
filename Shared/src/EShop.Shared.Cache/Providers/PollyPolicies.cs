@@ -3,7 +3,7 @@ using Polly.CircuitBreaker;
 using Polly.Retry;
 using StackExchange.Redis;
 
-namespace EShop.Shared.Cache;
+namespace EShop.Shared.Cache.Providers;
 
 public static class PollyPolicies
 {

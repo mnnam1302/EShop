@@ -11,6 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\EShop.Shared.Cache\EShop.Shared.Cache.csproj" />
     <ProjectReference Include="..\EShop.Shared.Scoping\EShop.Shared.Scoping.csproj" />
   </ItemGroup>
 

@@ -1,9 +1,11 @@
-﻿using EShop.Shared.Contracts.Services.Identity;
+﻿using EShop.Shared.Cache.CacheKeys;
+using EShop.Shared.Cache.Providers;
+using EShop.Shared.Contracts.Services.Identity.Auth;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserTokenProvider;
 using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
 
-namespace EShop.Shared.Cache;
+namespace EShop.Shared.Cache.Services;
 
 public class TokenRedisCachingService : ITokenCachingService
 {
