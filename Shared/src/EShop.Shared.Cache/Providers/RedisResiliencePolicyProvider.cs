@@ -1,6 +1,6 @@
 ﻿using Polly;
 
-namespace EShop.Shared.Cache;
+namespace EShop.Shared.Cache.Providers;
 
 public interface IRedisResiliencePolicyProvider
 {

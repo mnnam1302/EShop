@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using EShop.Shared.Contracts.Services.Identity;
+using EShop.Shared.Contracts.Services.Identity.Roles;
 
 namespace EShop.Identity.Application.Mappers;
 

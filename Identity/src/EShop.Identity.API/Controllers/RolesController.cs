@@ -1,6 +1,6 @@
 ﻿using Asp.Versioning;
 using EShop.Identity.API.Abstractions;
-using EShop.Shared.Contracts.Services.Identity;
+using EShop.Shared.Contracts.Services.Identity.Roles;
 using EShop.Shared.JsonApi.ResourceAccessControl;
 using EShop.Shared.Scoping.ResourceAccessControl;
 using MediatR;

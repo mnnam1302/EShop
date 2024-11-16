@@ -1,6 +1,6 @@
 ﻿using EShop.Shared.Contracts.Abstractions.Requests;
 
-namespace EShop.Shared.Contracts.Services.Identity;
+namespace EShop.Shared.Contracts.Services.Identity.Roles;
 
 public static class Command
 {

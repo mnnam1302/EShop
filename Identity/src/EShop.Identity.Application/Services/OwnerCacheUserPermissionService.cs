@@ -4,7 +4,7 @@ namespace EShop.Identity.Application.Services;
 
 public class OwnerCacheUserPermissionService : IUserPermissionsProvider
 {
-    public readonly IPermissionCachingOwnerService permissionCache;
+    private readonly IPermissionCachingOwnerService permissionCache;
     private readonly IPermissionCalculator permissionCalculator;
 
     public OwnerCacheUserPermissionService(IPermissionCachingOwnerService permissionCache, IPermissionCalculator permissionCalculator)

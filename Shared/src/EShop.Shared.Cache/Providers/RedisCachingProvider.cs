@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 using Polly.CircuitBreaker;
 using System.Text;
 
-namespace EShop.Shared.Cache
+namespace EShop.Shared.Cache.Providers
 {
     public interface IRedisCachingProvider<TValue> where TValue : class
     {

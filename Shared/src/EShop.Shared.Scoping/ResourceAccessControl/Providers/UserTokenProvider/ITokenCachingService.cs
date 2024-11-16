@@ -1,4 +1,4 @@
-﻿using EShop.Shared.Contracts.Services.Identity;
+﻿using EShop.Shared.Contracts.Services.Identity.Auth;
 
 namespace EShop.Shared.Scoping.ResourceAccessControl.Providers.UserTokenProvider;
 

@@ -1,4 +1,4 @@
-﻿namespace EShop.Shared.Cache;
+﻿namespace EShop.Shared.Cache.CacheKeys;
 
 public static class UserTokenCacheKeyProvider
 {

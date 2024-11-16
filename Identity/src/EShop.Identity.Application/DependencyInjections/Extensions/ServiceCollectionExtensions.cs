@@ -23,9 +23,9 @@ public static class ServiceCollectionExtensions
         services.AddAutoMapper(AssemblyReference.Assembly);
     }
 
-    public static void AddServicesApplication(this IServiceCollection services)
+    public static IServiceCollection AddServicesApplication(this IServiceCollection services)
     {
-        services.AddTransient<IPermissionCalculator, PermissionCalculator>(); // Interface inside service users
-        //services.AddTransient<IUserPermissionsProvider, PermissionCalculator>(); // Interface inside Shared.Scoping
+        services.AddTransient<IPermissionCalculator, PermissionCalculator>();
+        return services;
     }
 }

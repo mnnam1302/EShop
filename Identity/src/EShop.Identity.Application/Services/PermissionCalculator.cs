@@ -3,7 +3,6 @@ using EShop.Identity.Domain.Entities;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserPermissionProvider;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using System.Threading;
 
 namespace EShop.Identity.Application.Services;
 

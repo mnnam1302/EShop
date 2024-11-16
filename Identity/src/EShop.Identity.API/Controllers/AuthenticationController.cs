@@ -1,6 +1,6 @@
 ﻿using Asp.Versioning;
 using EShop.Identity.API.Abstractions;
-using EShop.Shared.Contracts.Services.Identity;
+using EShop.Shared.Contracts.Services.Identity.Auth;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 

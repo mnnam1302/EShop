@@ -1,4 +1,4 @@
-﻿namespace EShop.Shared.Contracts.Services.Identity;
+﻿namespace EShop.Shared.Contracts.Services.Identity.Auth;
 
 public static class Response
 {
@@ -10,12 +10,5 @@ public static class Response
         public string RefreshToken { get; init; }
         public string TokenType { get; init; } = "Bearer";
         public DateTime RefreshTokenExpiryTime { get; init; }
-    }
-
-    public record RolesResponse
-    {
-        public string Id { get; init; }
-        public string? Name { get; init; }
-        public string? Description { get; init; }
     }
 }
