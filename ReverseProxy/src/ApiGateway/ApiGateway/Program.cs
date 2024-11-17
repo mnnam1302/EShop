@@ -1,14 +1,23 @@
 using ApiGateway.DependencyInjections.Extensions;
 using ApiGateway.Middlewares;
+using EShop.Shared.Cache.DependencyInejctions.Extensions;
+using EShop.Shared.JsonApi.DependencyInjections;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
+// Shared.JsonApi
+builder.Services.AddUserScoping();
+
+// Shared.Cache
+builder.Services.AddRedisInfrastructure(builder.Configuration);
+builder.Services.AddUserTokenCachingService();
+
 builder.Services.AddCorsApiGateway();
 builder.Services.AddYarpReverseProxy(builder.Configuration);
-
+builder.Services.AddAuthenticationApiGateway(builder.Configuration);
 builder.Services.AddSingleton<ExceptionHandlingMiddleware>();
 
 var app = builder.Build();
@@ -21,8 +30,8 @@ if (app.Environment.IsDevelopment())
 }
 
 //app.UseHttpsRedirection();
-//app.UseAuthentication();
-//app.UseAuthorization();
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapReverseProxy();
 

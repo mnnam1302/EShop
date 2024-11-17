@@ -28,15 +28,15 @@ public class RequirePermissionAttribute : Attribute, IFilterFactory, IUserPermis
         return new InternalRequirePermissionFilter(
             servicePrsovider.GetRequiredService<IPermissionValidator>(),
             servicePrsovider.GetRequiredService<IUserDetailsProvider>(),
-            servicePrsovider.GetRequiredService<ILogger<InternalRequirePermissionFilter>>(), // no need here
+            servicePrsovider.GetRequiredService<ILogger<InternalRequirePermissionFilter>>(),
             Permission);
     }
 
     private sealed class InternalRequirePermissionFilter : IAsyncAuthorizationFilter
     {
         private readonly string _requirePermission;
-        private readonly IPermissionValidator _permissionValidator; // get permission and validator
-        private readonly IUserDetailsProvider _userDetailsProvider; // contain info authenticated user
+        private readonly IPermissionValidator _permissionValidator;
+        private readonly IUserDetailsProvider _userDetailsProvider;
         private readonly ILogger _logger;
 
         public InternalRequirePermissionFilter(

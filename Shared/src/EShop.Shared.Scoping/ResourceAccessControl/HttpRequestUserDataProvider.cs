@@ -202,7 +202,6 @@ public class HttpRequestUserDataProvider : IUserDetailsProvider
         {
             return null;
         }
-
         return new JsonWebTokenHandler().ReadJsonWebToken(accessTokenEncoded);
     }
 }

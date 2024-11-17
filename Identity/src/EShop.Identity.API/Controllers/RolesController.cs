@@ -21,12 +21,12 @@ namespace EShop.Identity.API.Controllers
         }
 
         [HttpPost]
-        //[RequirePermission(Permission = PermissionConstants.ManageRolesPermissionId)]
+        [RequirePermission(Permission = PermissionConstants.ManageRolesPermissionId)]
         public async Task<IResult> CreateRole([FromBody] Command.CreateRole command)
         {
             var result = await _sender.Send(command);
 
-            if (result.IsSuccess)
+            if (result.IsFailure)
             {
                 return HandlerFailure(result);
             }
@@ -35,7 +35,7 @@ namespace EShop.Identity.API.Controllers
         }
 
         [HttpGet]
-        //[RequirePermission(Permission = PermissionConstants.ViewRolesPermissionId)]
+        [RequirePermission(Permission = PermissionConstants.ViewRolesPermissionId)]
         public async Task<IResult> GetRoles()
         {
             var result = await _sender.Send(new Query.GetRoles());

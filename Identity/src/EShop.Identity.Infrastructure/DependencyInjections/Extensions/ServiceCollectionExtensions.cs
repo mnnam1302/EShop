@@ -22,21 +22,4 @@ public static class ServiceCollectionExtensions
         services.AddTransient<IPasswordHasher, PasswordHasher>();
         services.AddTransient<ITokenService, TokenService>();
     }
-
-    public static void AddRedisCachingInfrastructure(this IServiceCollection services, IConfiguration configuration)
-    {
-        var redisOptions = new RedisOptions();
-        configuration.GetSection(nameof(RedisOptions)).Bind(redisOptions);
-
-        services.AddSingleton(redisOptions);
-
-        if (!redisOptions.Enabled)
-            return;
-
-        services.AddStackExchangeRedisCache(options =>
-        {
-            var connectionString = redisOptions.ConnectionString;
-            options.Configuration = connectionString;
-        });
-    }
 }
