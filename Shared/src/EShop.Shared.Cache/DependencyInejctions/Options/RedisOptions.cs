@@ -1,4 +1,4 @@
-﻿namespace ApiGateway.DependencyInjections.Options;
+﻿namespace EShop.Shared.Cache.DependencyInejctions.Options;
 
 public record RedisOptions
 {

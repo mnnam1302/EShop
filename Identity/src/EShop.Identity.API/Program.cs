@@ -3,6 +3,7 @@ using EShop.Identity.API.Middlewares;
 using EShop.Identity.Application.DependencyInjections.Extensions;
 using EShop.Identity.Infrastructure.DependencyInjections.Extensions;
 using EShop.Identity.Persistence.DependencyInjections.Extensions;
+using EShop.Shared.Cache.DependencyInejctions.Extensions;
 using EShop.Shared.JsonApi.DependencyInjections;
 using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
 using Serilog;
@@ -11,12 +12,16 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-// Shared: include interface and implementation
+// Shared.JsonApi
 builder.Services.AddUserScoping();
 
+// Shared.Cache
+builder.Services.AddRedisInfrastructure(builder.Configuration);
+builder.Services.AddUserTokenCachingService();
+
 /*
- * Rule: DI at API layer
- * - Jwt Authentication
+ * API - Rule DI
+ * - Jwt Authentication owner service
  * - Swagger
  * - Interface from Shared and implemented in owner service
  */
@@ -47,7 +52,6 @@ builder.Services
     options.SubstituteApiVersionInUrl = true;
     });
 
-builder.Services.AddTokenCachingServiceForOwnerServiceAPI();
 builder.Services.AddUserPermissionForOwnerServiceAPI();
 
 // Application
@@ -63,11 +67,11 @@ builder.Services.AddRepositoryPersistence();
 
 // Infrastructure
 builder.Services.AddServicesInfrastructure();
-builder.Services.AddRedisCachingInfrastructure(builder.Configuration);
 
 // Middleware
 builder.Services.AddTransient<ExceptionHandlingMiddleware>();
 
+//builder.Services.AddAuthorization();
 var app = builder.Build();
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
@@ -75,10 +79,10 @@ app.UseMiddleware<ExceptionHandlingMiddleware>();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment() || app.Environment.IsStaging())
 {
-app.UseSwaggerAPI();
+    app.UseSwaggerAPI();
 }
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 //app.UseAuthentication();
 //app.UseAuthorization();
 app.MapControllers();

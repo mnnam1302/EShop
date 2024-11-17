@@ -41,7 +41,6 @@ public class PermissionRedisCachingService : IPermissionCachingOwnerService, IPe
         }
         catch (RedisConnectionException ex)
         {
-            //logger.LogWarning(LogEvents.RedisConnectionError, ex, "Redis connection exception '{FailureType}' while retrieving cached permission for user '{userId}'", ex.FailureType, userId);
             logger.LogWarning(ex, "Redis connection exception '{FailureType}' while retrieving cached permission for user '{userId}'", ex.FailureType, userId);
         }
         catch (Exception e)
