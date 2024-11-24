@@ -25,7 +25,6 @@ public static class PermissionConstants
 
     // Roles
     public const string ViewRolesPermissionId = "Users_ViewRoles";
-
     public const string ManageRolesPermissionId = "Users_ManageRoles";
 
     // Account

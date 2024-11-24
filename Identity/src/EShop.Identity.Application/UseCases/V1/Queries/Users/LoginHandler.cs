@@ -1,6 +1,5 @@
 ﻿using EShop.Identity.Application.Abstractions;
 using EShop.Identity.Domain.Abstractions.Repositories;
-using EShop.Identity.Domain.Entities;
 using EShop.Identity.Domain.Exceptions;
 using EShop.Shared.Contracts.Abstractions.Requests;
 using EShop.Shared.Contracts.Abstractions.Shared;
@@ -13,14 +12,14 @@ namespace EShop.Identity.Application.UseCases.V1.Queries.Users;
 
 public class LoginHandler : IQueryHandler<Query.Login, Response.AuthenticatedResponse>
 {
-    private readonly IRepositoryBase<User, string> _userRepository;
+    private readonly IRepositoryBase<Domain.Entities.User, string> _userRepository;
     private readonly ITokenService _tokenService;
     private readonly IPasswordHasher _passwordHasher;
     private readonly IUserPermissionsProvider _userPermissions;
     private readonly ITokenCachingService _tokenCachingService;
 
     public LoginHandler(
-        IRepositoryBase<User, string> userRepository,
+        IRepositoryBase<Domain.Entities.User, string> userRepository,
         ITokenService tokenService,
         IPasswordHasher passwordHasher,
         IUserPermissionsProvider userPermissions,
@@ -66,7 +65,7 @@ public class LoginHandler : IQueryHandler<Query.Login, Response.AuthenticatedRes
         return Result.Success(response);
     }
 
-    private Claim[] GetClaims(User user)
+    private Claim[] GetClaims(Domain.Entities.User user)
     {
         return new Claim[]
         {

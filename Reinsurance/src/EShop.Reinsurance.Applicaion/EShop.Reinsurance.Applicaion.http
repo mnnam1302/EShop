@@ -1,0 +1,6 @@
+@EShop.Reinsurance.Applicaion_HostAddress = http://localhost:5118
+
+GET {{EShop.Reinsurance.Applicaion_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

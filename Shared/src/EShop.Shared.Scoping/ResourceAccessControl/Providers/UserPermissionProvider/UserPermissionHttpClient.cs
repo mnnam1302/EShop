@@ -15,8 +15,6 @@ public class UserPermissionHttpClient
 
     public async Task<string[]> GetPermissionsForCurrentUser()
     {
-        //var authenticatedClient = SystemInternalJwtTokenFactory.AddUserContext(client, userDetailsProvider.AuthenticatedUser);
-        //var response = await authenticatedClient.GetStringAsync("/api/v1/userPermissions");
         var response = await _httpClient.GetStringAsync("/api/v1/userPermissions");
 
         var permissions = JsonConvert.DeserializeObject<string[]>(response);

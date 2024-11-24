@@ -182,7 +182,6 @@ public class HttpRequestUserDataProvider : IUserDetailsProvider
             var username = accessToken.Claims.First(x => x.Type == "username").Value;
 
             user = new UserData(username, username);
-
             return true;
         }
         catch (Exception ex)

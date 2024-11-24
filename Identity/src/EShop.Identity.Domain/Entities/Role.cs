@@ -21,6 +21,16 @@ public class Role : EntityBase<string> //, IScoped
         PhoneNumber = phoneNumber;
     }
 
+    public void Update(string name, string? description, string? phoneNumber)
+    {
+        ValidateName(name);
+        ValidateDescription(description);
+        ValidatePhoneNumber(phoneNumber);
+        Name = name;
+        Description = description;
+        PhoneNumber = phoneNumber;
+    }
+
     private void ValidateName(string name)
     {
         if (string.IsNullOrWhiteSpace(name))
