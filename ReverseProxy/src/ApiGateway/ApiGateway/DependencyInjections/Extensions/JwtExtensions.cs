@@ -57,7 +57,7 @@ namespace ApiGateway.DependencyInjections.Extensions
 
             services.AddAuthorization(policy =>
             {
-                policy.AddPolicy("DefaultAuthorization", policy =>
+                policy.AddPolicy("DefaultAuthentication", policy =>
                 {
                     policy.RequireAuthenticatedUser();
                 });

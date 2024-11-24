@@ -7,7 +7,6 @@ using Serilog;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
 // Shared.JsonApi
 builder.Services.AddUserScoping();
 
@@ -15,18 +14,25 @@ builder.Services.AddUserScoping();
 builder.Services.AddRedisInfrastructure(builder.Configuration);
 builder.Services.AddUserTokenCachingService();
 
+// ApiGatewat
 builder.Services.AddCorsApiGateway();
 builder.Services.AddYarpReverseProxy(builder.Configuration);
 builder.Services.AddAuthenticationApiGateway(builder.Configuration);
 builder.Services.AddSingleton<ExceptionHandlingMiddleware>();
 
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
 var app = builder.Build();
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
+app.UseCors();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
 //app.UseHttpsRedirection();

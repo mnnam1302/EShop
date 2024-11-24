@@ -31,7 +31,7 @@ public class CustomJwtBearEvents : JwtBearerEvents
 
         _cacheService.TryGetToken(userId, out var authenticatedCaching);
 
-        if (authenticatedCaching != null ||
+        if (authenticatedCaching == null ||
             authenticatedCaching?.AccessToken != requestToken)
         {
             context.HttpContext.Response.Headers.TryAdd("IS-TOKEN-REVOKED", "true");

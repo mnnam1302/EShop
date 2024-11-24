@@ -15,7 +15,6 @@ public class CacheUserPermissionService : IUserPermissionsProvider
         _permissionCache = permissionCache;
         _userPermissionHttpClient = userPermissionHttpClient;
     }
-
     public async Task<string[]> GetPermissions(string userId)
     {
         if (string.IsNullOrEmpty(userId))

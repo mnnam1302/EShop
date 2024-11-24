@@ -1,4 +1,5 @@
 ﻿using EShop.Shared.Contracts.Abstractions.Requests;
+using System.Text.Json.Serialization;
 
 namespace EShop.Shared.Contracts.Services.Identity.Auth;
 

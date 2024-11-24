@@ -20,8 +20,13 @@ public class PagedResult<T>
         TotalCount = totalCount;
     }
 
-    public static PagedResult<T> Create(List<T> items, int pageIndex, int pageSize, int totalCount)
-        => new(items, pageIndex, pageSize, totalCount);
+    public static PagedResult<T> Create(List<T> items,
+        int pageIndex, 
+        int pageSize, 
+        int totalCount)
+    {
+        return new (items, pageIndex, pageSize, totalCount);
+    }
 
     public static async Task<PagedResult<T>> CreateAsync(IQueryable<T> query,
         int pageIndex,
@@ -29,8 +34,12 @@ public class PagedResult<T>
         CancellationToken cancellationToken)
     {
         var totalCount = await query.CountAsync(cancellationToken);
-        var items = await query.Skip((pageIndex - 1) * pageSize).Take(pageSize).ToListAsync(cancellationToken);
 
-        return new(items, pageIndex, pageSize, totalCount);
+        var items = await query
+            .Skip((pageIndex - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(cancellationToken);
+
+        return new (items, pageIndex, pageSize, totalCount);
     }
 }

@@ -71,7 +71,7 @@ builder.Services.AddServicesInfrastructure();
 // Middleware
 builder.Services.AddTransient<ExceptionHandlingMiddleware>();
 
-//builder.Services.AddAuthorization();
+builder.Services.AddAuthorization();
 var app = builder.Build();
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
