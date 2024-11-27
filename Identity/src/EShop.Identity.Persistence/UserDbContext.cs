@@ -21,5 +21,4 @@ public class UserDbContext : DbContext
     public DbSet<Permission> Permissions { get; set; }
     public DbSet<UserRole> UserRoles { get; set; }
     public DbSet<RolePermission> RolePermissions { get; set; }
-    public DbSet<ApplicationUser> ApplicationUsers { get; set; }
 }

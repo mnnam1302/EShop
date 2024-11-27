@@ -6,10 +6,12 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using EShop.Shared.Cache.DependencyInejctions.Extensions;
 using EShop.Shared.Scoping.ResourceAccessControl;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace EShop.Shared.JsonApi.DependencyInjections;
 
-public static class UserPermissionExtensions
+public static class UserPermissionsExtensions
 {
     public static IServiceCollection AddUserPermissionsProvider(this IServiceCollection services, IConfiguration configuration)
     {
@@ -34,5 +36,11 @@ public static class UserPermissionExtensions
         services.AddTransient<IRedisCachingProvider<string[]>, RedisCachingProvider<string[]>>();
         services.AddTransient<IPermissionCachingService, PermissionRedisCachingService>();
         services.AddTransient<IUserPermissionsProvider, CacheUserPermissionService>();
+    }
+
+    public static void AddDefaultAuthorizationFilter(this MvcOptions mvc)
+    {
+        //var policy = new AuthorizationPolicyBuilder()
+        //    .AddRequirements(new)
     }
 }
