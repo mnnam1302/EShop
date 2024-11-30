@@ -13,9 +13,6 @@ public static class Query
 
     public record Refresh : IQuery<Response.AuthenticatedResponse>
     {
-        //[JsonIgnore]
-        //public string? UserId { get; set; }
-
         [JsonIgnore]
         public string? AccessToken { get; set; }
 

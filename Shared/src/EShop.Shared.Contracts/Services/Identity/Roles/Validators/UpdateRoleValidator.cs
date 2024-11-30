@@ -6,6 +6,7 @@ public class UpdateRoleValidator : AbstractValidator<Command.UpdateRole>
 {
     public UpdateRoleValidator()
     {
+        RuleFor(x => x.Id).NotEmpty();
         RuleFor(x => x.Name).NotEmpty();
     }
 }
