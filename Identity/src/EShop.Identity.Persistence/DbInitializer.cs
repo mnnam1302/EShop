@@ -6,7 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System.Data;
 
-namespace EShop.Identity.Persistence.SeedingData;
+namespace EShop.Identity.Persistence;
 
 public class DbInitializer
 {
@@ -49,7 +49,7 @@ public class DbInitializer
             await SeedSystemAdminRole();
             await SeedAdminUser();
             await _dbContext.SaveChangesAsync();
-            
+
             // Relationships
             await SeedRolePermissionAdmin();
             await AssignRoleUserAdmin();
@@ -61,7 +61,7 @@ public class DbInitializer
             _logger.LogError(ex, "Database initialization error");
         }
     }
-    
+
     private async Task EnsureOrganizationCreated()
     {
         var organization = new Organization()
@@ -214,18 +214,14 @@ public class DbInitializer
         if (user == null)
         {
             var passwordHasher = _serviceProvider.GetRequiredService<IPasswordHasher>();
-            user = new User
-            {
-                Id = testUserName,
-                Username = testUserName,
-                Email = testUserName,
-                DisplayName = "Kodi Mai",
-                PasswordHash = passwordHasher.Hash("P@ssword"),
-                PhoneNumber = "+477" + new Random().Next(0, 1000000000),
-                IsActive = true,
-                CreatedDate = DateTime.UtcNow,
-                CreatedBy = "System",
-            };
+            user = new User(
+                testUserName,
+                passwordHasher.Hash("P@ssword"),
+                "Kodi Mai",
+                testUserName,
+                "+477" + new Random().Next(0, 1000000000),
+                DateTime.Now.AddYears(-20),
+                "System");
 
             _dbContext.Add(user);
             await _dbContext.SaveChangesAsync();
@@ -285,7 +281,7 @@ public class DbInitializer
 
         if (string.IsNullOrEmpty(user.OrganizationId) || user.OrganizationId != organization.Id)
         {
-            user.OrganizationId = organization.Id;
+            user.AssignOrganization(organization.Id);
 
             _dbContext.Update(user);
             await _dbContext.SaveChangesAsync();

@@ -36,11 +36,7 @@ namespace ApiGateway.DependencyInjections.Extensions
 
                 options.Events = new JwtBearerEvents
                 {
-                    // Custom here by Attributes and after add EventsType
-                    //OnTokenValidated = (context) =>
-                    //{
-                    //    return Task.CompletedTask;
-                    //},
+                    // [Obsolete] - because it's validate token expire in IUSerDetailsProvider
                     OnAuthenticationFailed = (context) =>
                     {
                         if (context.Exception.GetType() == typeof(SecurityTokenExpiredException))

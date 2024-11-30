@@ -14,4 +14,4 @@ public class ForbiddenException : DomainException
         : base("Forbidden Exception", message)
     {
     }
-}   
+}

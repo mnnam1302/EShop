@@ -57,7 +57,6 @@ builder.Services.AddUserPermissionForOwnerServiceAPI();
 // Application
 builder.Services.AddMediatRApplication();
 builder.Services.AddAutoMapperApplication();
-builder.Services.AddServicesApplication();
 
 // Persistence
 builder.Services.ConfigureNgSqlRetryOptionsPersistence(builder.Configuration.GetSection("NgSqlRetryOptions"));

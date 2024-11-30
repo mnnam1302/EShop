@@ -18,15 +18,11 @@ builder.Services.AddUserScoping();
 builder.Services.AddRedisInfrastructure(builder.Configuration);
 builder.Services.AddUserTokenCachingService();
 
-// ApiGatewat
+// ApiGateway
 builder.Services.AddCorsApiGateway();
-builder.Services.AddServiceDiscoveryApiGateway();
 builder.Services.AddYarpReverseProxy(builder.Configuration);
 builder.Services.AddAuthenticationApiGateway(builder.Configuration);
 builder.Services.AddSingleton<ExceptionHandlingMiddleware>();
-
-builder.Services.AddIdentityHttpClientOptions(builder.Configuration.GetSection(nameof(IdentityHttpClientOptions)));
-builder.Services.AddUserApiHttpClient();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -39,25 +35,13 @@ app.UseCors();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    //app.UseSwagger();
+    //app.UseSwaggerUI();
 }
 
 //app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
-
-// Temp using Service Discovery here - Refactor into foler like project BFF, maybe more apply GRPC
-app.MapPost("identity-api/v1/auth/login", async ([FromBody] Query.Login request, IHttpClientFactory factory) =>
-{
-    using var client = factory.CreateClient("UserService");
-
-    var response = await client.PostAsJsonAsync("api/v1/auth/login", request);
-    response.EnsureSuccessStatusCode();
-
-    var jsonResponse = await response.Content.ReadFromJsonAsync<Result<Response.AuthenticatedResponse>>();
-    return jsonResponse;
-});
 
 app.MapReverseProxy();
 

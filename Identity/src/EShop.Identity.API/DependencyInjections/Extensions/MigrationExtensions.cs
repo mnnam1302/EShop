@@ -1,5 +1,4 @@
 ﻿using EShop.Identity.Persistence;
-using EShop.Identity.Persistence.SeedingData;
 using Microsoft.EntityFrameworkCore;
 
 namespace EShop.Identity.API.DependencyInjections.Extensions;

@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.JsonWebTokens;
+using System.Security.Claims;
 
 namespace EShop.Shared.Scoping.ResourceAccessControl;
 
@@ -179,9 +180,9 @@ public class HttpRequestUserDataProvider : IUserDetailsProvider
         try
         {
             // We are using username as id for users stored in our local database (as it is unique across tenants anyway)
-            var username = accessToken.Claims.First(x => x.Type == "username").Value;
+            var userId = accessToken.Claims.First(x => x.Type == ClaimTypes.NameIdentifier).Value;
 
-            user = new UserData(username, username);
+            user = new UserData(userId, userId);
             return true;
         }
         catch (Exception ex)
@@ -201,6 +202,26 @@ public class HttpRequestUserDataProvider : IUserDetailsProvider
         {
             return null;
         }
-        return new JsonWebTokenHandler().ReadJsonWebToken(accessTokenEncoded);
+
+        var tokenHandler = new JsonWebTokenHandler();
+        var token = tokenHandler.ReadJsonWebToken(accessTokenEncoded);
+
+        if (token == null)
+        {
+            return null;
+        }
+
+        var expirationClaim = token.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Exp);
+        if (expirationClaim != null && long.TryParse(expirationClaim.Value, out var exp))
+        {
+            var expirationTime = DateTimeOffset.FromUnixTimeSeconds(exp).UtcDateTime;
+            if (expirationTime < DateTime.UtcNow)
+            {
+                _logger.LogWarning("Access token has expired");
+                return null;
+            }
+        }
+
+        return token;
     }
 }

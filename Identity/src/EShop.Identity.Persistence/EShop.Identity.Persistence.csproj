@@ -20,4 +20,8 @@
     <ProjectReference Include="..\EShop.Identity.Domain\EShop.Identity.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Interceptors\" />
+  </ItemGroup>
+
 </Project>

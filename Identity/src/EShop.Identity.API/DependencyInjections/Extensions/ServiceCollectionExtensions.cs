@@ -21,6 +21,7 @@ public static class ServiceCollectionExtensions
     {
         services.AddTransient<IRedisCachingProvider<string[]>, RedisCachingProvider<string[]>>();
         services.AddTransient<IPermissionCachingOwnerService, PermissionRedisCachingService>();
+        services.AddTransient<IPermissionCalculator, PermissionCalculator>();
         services.AddTransient<IUserPermissionsProvider, OwnerCacheUserPermissionService>();
     }
 }
