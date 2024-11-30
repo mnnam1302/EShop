@@ -2,7 +2,6 @@
 using EShop.Identity.Domain.Abstractions.UnitOfWorks;
 using EShop.Identity.Persistence.DependencyInjections.Options;
 using EShop.Identity.Persistence.Repositories;
-using EShop.Identity.Persistence.SeedingData;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,8 +12,6 @@ namespace EShop.Identity.Persistence.DependencyInjections.Extensions;
 
 public static class ServiceCollectionExtensions
 {
-    #region Postgres
-
     public static void AddNqSqlPersistence(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddDbContextPool<DbContext, UserDbContext>((provider, builder) =>
@@ -53,8 +50,6 @@ public static class ServiceCollectionExtensions
             .ValidateDataAnnotations()
             .ValidateOnStart();
     }
-
-    #endregion Postgres
 
     public static void ConfigureServices(this IServiceCollection services)
     {

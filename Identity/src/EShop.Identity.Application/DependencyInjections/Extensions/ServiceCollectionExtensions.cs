@@ -22,10 +22,4 @@ public static class ServiceCollectionExtensions
     {
         services.AddAutoMapper(AssemblyReference.Assembly);
     }
-
-    public static IServiceCollection AddServicesApplication(this IServiceCollection services)
-    {
-        services.AddTransient<IPermissionCalculator, PermissionCalculator>();
-        return services;
-    }
 }

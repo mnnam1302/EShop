@@ -2,6 +2,6 @@
 
 public interface IModifiedTracking
 {
-    DateTimeOffset? ModifiedDate { get; set; }
     string? ModifiedBy { get; set; }
+    DateTimeOffset? ModifiedDate { get; set; }
 }

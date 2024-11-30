@@ -2,6 +2,6 @@
 
 public interface ICreatedTracking
 {
+    string CreatedBy { get; set; }
     DateTimeOffset CreatedDate { get; set; }
-    string? CreatedBy { get; set; }
 }
