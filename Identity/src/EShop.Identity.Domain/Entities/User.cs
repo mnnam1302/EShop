@@ -1,12 +1,13 @@
 ﻿using EShop.Identity.Domain.Abstractions.Entities;
 using EShop.Identity.Domain.Exceptions;
 using EShop.Shared.Contracts.Services.Identity.Users;
+using EShop.Shared.Scoping;
 using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 
 namespace EShop.Identity.Domain.Entities;
 
-public class User : EntityBase<string>, ICreatedTracking //, IScoped
+public class User : EntityBase<string>, ICreatedTracking, IScoped
 {
     protected User()
     { }
@@ -144,23 +145,28 @@ public class User : EntityBase<string>, ICreatedTracking //, IScoped
 
     public DateTime? DateOfBirth { get; private set; }
 
-    public bool IsDirector { get; set; }
-    public bool IsHeadOfDepartment { get; set; }
+    public bool IsDirector { get; set; } = false;
+    public bool IsHeadOfDepartment { get; set; } = false;
+
+    [MaxLength(ModelConstants.ShortText)]
     public string? ManagerId { get; set; }
+
+    [MaxLength(ModelConstants.ShortText)]
     public string? OrganizationId { get; private set; }
     public bool IsActive { get; set; } = true;
 
     public virtual List<Role> Roles { get; set; } = new();
     public virtual List<UserRole> UserRoles { get; set; } = new();
 
-    [MaxLength(ModelConstants.MediumText)]
-    public string CreatedBy { get; set; } = string.Empty;
-
     public DateTimeOffset CreatedDate { get; set; }
 
-    //[MaxLength(ModelConstants.ShortText)]
-    //public string? TenantId { get; set; }
+    [MaxLength(ModelConstants.ShortText)]
+    public string CreatedBy { get; set; } = string.Empty;
 
-    //[MaxLength(ModelConstants.LongText)]
-    //public string? Scope { get; set; }
+
+    [MaxLength(ModelConstants.ShortText)]
+    public string? TenantId { get; set; }
+
+    [MaxLength(ModelConstants.LongText)]
+    public string? Scope { get; set; }
 }

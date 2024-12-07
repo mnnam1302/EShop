@@ -1,9 +1,10 @@
 ﻿using EShop.Identity.Domain.Abstractions.Entities;
+using EShop.Shared.Scoping;
 using System.ComponentModel.DataAnnotations;
 
 namespace EShop.Identity.Domain.Entities;
 
-public class Organization : EntityBase<string> //, IScoped
+public class Organization : EntityBase<string>, IScoped
 {
     [MaxLength(ModelConstants.MediumText)]
     [Required]
@@ -31,14 +32,15 @@ public class Organization : EntityBase<string> //, IScoped
     [MaxLength(ModelConstants.LongText)]
     public string? Description { get; set; }
 
-    public virtual Organization? ParentOrganization { get; set; }
+    [MaxLength(ModelConstants.ShortText)]
     public string? ParentOrganizationId { get; set; }
+    public virtual Organization? ParentOrganization { get; set; }
 
     public virtual List<User>? Users { get; set; }
 
-    //[MaxLength(ModelConstants.ShortText)]
-    //public string? TenantId { get; set; }
+    [MaxLength(ModelConstants.ShortText)]
+    public string? TenantId { get; set; }
 
-    //[MaxLength(ModelConstants.LongText)]
-    //public string? Scope { get; set; }
+    [MaxLength(ModelConstants.LongText)]
+    public string? Scope { get; set; }
 }

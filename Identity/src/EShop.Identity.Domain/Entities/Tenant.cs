@@ -1,9 +1,10 @@
 ﻿using EShop.Identity.Domain.Abstractions.Entities;
+using EShop.Shared.Scoping;
 using System.ComponentModel.DataAnnotations;
 
 namespace EShop.Identity.Domain.Entities;
 
-public class Tenant : EntityBase<string>
+public class Tenant : EntityBase<string>, IExcludedFromScoping
 {
     [MaxLength(ModelConstants.MediumText)]
     public string? Name { get; set; }

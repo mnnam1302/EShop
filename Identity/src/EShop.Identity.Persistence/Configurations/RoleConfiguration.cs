@@ -13,8 +13,8 @@ internal class RoleConfiguration : IEntityTypeConfiguration<Role>
 
         builder.HasKey(x => x.Id);
 
-        //builder
-        //    .HasIndex(x => new { x.TenantId, x.Name }).IsUnique();
+        builder
+            .HasIndex(x => new { x.TenantId, x.Name }).IsUnique();
 
         builder
             .HasMany(x => x.Permissions)
