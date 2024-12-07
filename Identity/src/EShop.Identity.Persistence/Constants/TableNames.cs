@@ -8,7 +8,6 @@ public static class TableNames
     public const string Permissions = "Permissions";
     public const string RolePermissions = "RolePermissions";
     public const string UserRoles = "UserRoles";
-    public const string ApplicationUsers = "ApplicationUsers";
 
     public const string Tenants = "Tenants";
     public const string TenantSettings = "TenantSettings";

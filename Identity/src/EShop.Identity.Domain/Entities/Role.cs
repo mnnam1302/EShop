@@ -1,10 +1,11 @@
 ﻿using EShop.Identity.Domain.Abstractions.Entities;
 using EShop.Identity.Domain.Exceptions;
+using EShop.Shared.Scoping;
 using System.ComponentModel.DataAnnotations;
 
 namespace EShop.Identity.Domain.Entities;
 
-public class Role : EntityBase<string> //, IScoped
+public class Role : EntityBase<string>, IScoped
 {
     public Role()
     {
@@ -76,9 +77,9 @@ public class Role : EntityBase<string> //, IScoped
     public virtual List<Permission> Permissions { get; set; } = new();
     public virtual List<RolePermission> RolePermissions { get; set; } = new();
 
-    //[MaxLength(ModelConstants.ShortText)]
-    //public string? TenantId { get; set; }
+    [MaxLength(ModelConstants.ShortText)]
+    public string? TenantId { get; set; }
 
-    //[MaxLength(ModelConstants.LongText)]
-    //public string? Scope { get; set; }
+    [MaxLength(ModelConstants.LongText)]
+    public string? Scope { get; set; }
 }

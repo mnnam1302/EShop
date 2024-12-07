@@ -120,20 +120,6 @@ public class DbInitializer
                 },
                 new Permission
                 {
-                    Id = PermissionConstants.ViewPortalUserAccountsPermissionId,
-                    Name = "View portal user accounts",
-                    Description = "Allows viewing portal user accounts.",
-                    RelatedTo = "User Management"
-                },
-                new Permission
-                {
-                    Id = PermissionConstants.ManagePortalUserAccountsPermissionId,
-                    Name = "Manage portal user accounts",
-                    Description = "Allows viewing, inviting, updating, and deleting portal user accounts.",
-                    RelatedTo = "User Management"
-                },
-                new Permission
-                {
                     Id = PermissionConstants.ViewRolesPermissionId,
                     Name = "View roles",
                     Description = "Allows users viewing roles list and their details",
@@ -145,20 +131,6 @@ public class DbInitializer
                     Name = "Manage roles",
                     Description = "Allows users to add, create and delete roles",
                     RelatedTo = "Role Management",
-                },
-                new Permission
-                {
-                    Id = PermissionConstants.ViewSystemSettingsPermissionId,
-                    Name = "View system settings",
-                    Description = "Allows users to view system settings",
-                    RelatedTo = "System Settings",
-                },
-                new Permission
-                {
-                    Id = PermissionConstants.ManageSystemSettingsPermissionId,
-                    Name = "Manage system settings",
-                    Description = "Allows users to view, edit system settings",
-                    RelatedTo = "System Settings",
                 }
         };
     }
