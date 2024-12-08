@@ -54,6 +54,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ApiGateway", "ReverseProxy\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EShop.Identity.Tests", "Identity\tests\EShop.Identity.Tests\EShop.Identity.Tests.csproj", "{52EE93A7-6BD0-4C40-8870-9B349D1636E6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EShop.Shared.DbResourceAccessControl", "Shared\src\EShop.Shared.DbResourceAccessControl\EShop.Shared.DbResourceAccessControl.csproj", "{69CA6CF8-9D98-489E-AB72-2BCD3631C36E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -108,6 +110,10 @@ Global
 		{52EE93A7-6BD0-4C40-8870-9B349D1636E6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{52EE93A7-6BD0-4C40-8870-9B349D1636E6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{52EE93A7-6BD0-4C40-8870-9B349D1636E6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{69CA6CF8-9D98-489E-AB72-2BCD3631C36E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{69CA6CF8-9D98-489E-AB72-2BCD3631C36E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{69CA6CF8-9D98-489E-AB72-2BCD3631C36E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{69CA6CF8-9D98-489E-AB72-2BCD3631C36E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -132,6 +138,7 @@ Global
 		{F7472776-89AF-480D-B7DF-D820B1C5FC96} = {DF247757-C88D-4BD6-9946-FDEAC84BF886}
 		{FB425731-B71F-4FD7-BA19-9BBE161FF8BF} = {EC3BE313-F5F4-48E6-B4E7-A01F33861EED}
 		{52EE93A7-6BD0-4C40-8870-9B349D1636E6} = {EF8AB2FA-B259-423A-B24A-DC8E7ECA5970}
+		{69CA6CF8-9D98-489E-AB72-2BCD3631C36E} = {DF247757-C88D-4BD6-9946-FDEAC84BF886}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {BB890EFB-EE36-4A0E-A948-F28A53D375E6}

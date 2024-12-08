@@ -1,4 +1,5 @@
-﻿using EShop.Shared.Scoping;
+﻿using EShop.Shared.DbResourceAccessControl;
+using EShop.Shared.Scoping;
 using EShop.Shared.Scoping.ResourceAccessControl;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -10,6 +11,17 @@ public static class ServiceCollectionExtensions
     {
         services.AddHttpContextAccessor();
         services.AddScoped<IUserDetailsProvider, HttpRequestUserDataProvider>();
+        return services;
+    }
+
+    public static IServiceCollection AddMultiTenantScoping(this IServiceCollection services)
+    {
+        services.AddHttpContextAccessor();
+        services.AddScoped<IUserDetailsProvider, HttpRequestUserDataProvider>();
+        //services.AddScoped<IMultiTenantConnectionInterceptor, PostgresMultiTenantConnectionInterceptor>();
+        services.AddTransient<IMultiTenantConnectionInterceptor, PostgresMultiTenantConnectionInterceptor>(); // why transient here?
+        services.AddScoped<ITenantIsolationStrategy, PostgresRowLevelSecurityPolicyIsolation>();
+        
         return services;
     }
 

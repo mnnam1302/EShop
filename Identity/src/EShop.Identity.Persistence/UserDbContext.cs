@@ -15,6 +15,8 @@ public class UserDbContext : DbContext
         builder.ApplyConfigurationsFromAssembly(typeof(AssemblyReference).Assembly);
     }
 
+    public DbSet<Tenant> Tenants { get; set; }
+    public DbSet<TenantSetting> TenantSettings { get; set; }
     public DbSet<Organization> Organizations { get; set; }
     public DbSet<User> Users { get; set; }
     public DbSet<Role> Roles { get; set; }

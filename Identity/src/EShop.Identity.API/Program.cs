@@ -2,6 +2,7 @@ using EShop.Identity.API.DependencyInjections.Extensions;
 using EShop.Identity.API.Middlewares;
 using EShop.Identity.Application.DependencyInjections.Extensions;
 using EShop.Identity.Infrastructure.DependencyInjections.Extensions;
+using EShop.Identity.Persistence;
 using EShop.Identity.Persistence.DependencyInjections.Extensions;
 using EShop.Shared.Cache.DependencyInejctions.Extensions;
 using EShop.Shared.JsonApi.DependencyInjections;
@@ -13,7 +14,8 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 // Shared.JsonApi
-builder.Services.AddUserScoping();
+//builder.Services.AddUserScoping();
+//builder.Services.AddMultiTenantScoping();
 
 // Shared.Cache
 builder.Services.AddRedisInfrastructure(builder.Configuration);
@@ -59,8 +61,10 @@ builder.Services.AddMediatRApplication();
 builder.Services.AddAutoMapperApplication();
 
 // Persistence
-builder.Services.ConfigureNgSqlRetryOptionsPersistence(builder.Configuration.GetSection("NgSqlRetryOptions"));
-builder.Services.AddNqSqlPersistence(builder.Configuration);
+//builder.Services.ConfigureNgSqlRetryOptionsPersistence(builder.Configuration.GetSection("NgSqlRetryOptions"));
+//builder.Services.AddNqSqlPersistence(builder.Configuration);
+
+builder.Services.AddDbContextWithScoping<UserDbContext>(builder.Configuration, false);
 builder.Services.ConfigureServices();
 builder.Services.AddRepositoryPersistence();
 
