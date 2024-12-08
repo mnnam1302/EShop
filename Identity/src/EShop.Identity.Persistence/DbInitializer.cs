@@ -1,37 +1,52 @@
 ﻿using EShop.Identity.Application.Abstractions;
 using EShop.Identity.Domain.Entities;
+using EShop.Shared.DbResourceAccessControl;
+using EShop.Shared.Scoping;
 using EShop.Shared.Scoping.ResourceAccessControl;
+using MassTransit;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using System.Data;
 
 namespace EShop.Identity.Persistence;
 
-public class DbInitializer
+public class DbInitializer // Transient
 {
-    private readonly UserDbContext _dbContext;
+    private readonly UserDbContext _dbContext; // Scope
+    private readonly IUserDetailsProvider _userDetailsProvider; // Scope
+    private readonly ITenantIsolationStrategy _tenantIsolationStrategy; // Scope, but inside
+    private readonly IPasswordHasher _passwordHasher; // Scope
+    private readonly IConfiguration _configuration;
     private readonly ILogger _logger;
-    private readonly IServiceProvider _serviceProvider;
-
-    private const string testOrganizationName = "eshop-stagging";
-    private const string testUserName = "kodi.mai@seamless.insure";
-    private const string testRoleName = "Admin";
 
     public DbInitializer(
-        UserDbContext dbContext,
-        ILogger<DbInitializer> logger,
-        IServiceProvider serviceProvider)
+        UserDbContext userDbContext,
+        IUserDetailsProvider userDetailsProvider,
+        ITenantIsolationStrategy tenantIsolationStrategy,
+        IPasswordHasher passwordHasher,
+        IConfiguration configuration,
+        ILogger<DbInitializer> logger)
     {
-        _dbContext = dbContext;
+        _dbContext = userDbContext;
+        _userDetailsProvider = userDetailsProvider;
+        _tenantIsolationStrategy = tenantIsolationStrategy;
+        _passwordHasher = passwordHasher;
+        _configuration = configuration;
         _logger = logger;
-        _serviceProvider = serviceProvider;
     }
+
+    private const string tenantName = "eshop-stagging";
+    private const string roleName = "Owner";
+    private const string userName = "nam608072@@gmail.com";
+    private const string displayName = "Nhat Nam";
 
     public async Task Initialize(bool applyMigrations = true, bool applyTenantIsolation = true, bool applyRingFencing = true)
     {
         try
         {
+            //_userDetailsProvider.SetSystemUserContextWithEmptyScope(); // attention
+            _userDetailsProvider.SetSystemUserContext(tenantName);
+
             if (applyMigrations)
             {
                 _logger.LogDebug("Applying any pending migrations...");
@@ -43,44 +58,50 @@ public class DbInitializer
                 _dbContext.Database.EnsureCreated();
             }
 
-            // Data system
-            await EnsureOrganizationCreated();
-            await SeedSystemWidePermissions();
-            await SeedSystemAdminRole();
-            await SeedAdminUser();
-            await _dbContext.SaveChangesAsync();
+            if (applyTenantIsolation && _configuration.GetValue<bool>("AllowTenantIsolation", true))
+            {
+                _tenantIsolationStrategy.AddTenantIsolation(_dbContext, applyRingFencing);
+            }
 
-            // Relationships
-            await SeedRolePermissionAdmin();
-            await AssignRoleUserAdmin();
-            await AssignOrganizationForAdminUser();
-
+            await SeedDataForTenant();
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Database initialization error");
         }
+        finally
+        {
+            _userDetailsProvider.ClearSystemUserContext();
+        }
     }
 
-    private async Task EnsureOrganizationCreated()
+    private async Task SeedDataForTenant()
     {
-        var organization = new Organization()
+        await SeedTenant();
+        await SeedSystemWidePermissions();
+        await SeedRole();
+        await SeedOrganization();
+        await SeedUser();
+    }
+
+    private async Task SeedTenant()
+    {
+        var tenant = new Tenant()
         {
-            Id = testOrganizationName,
-            Name = testOrganizationName,
-            Description = "Root organization",
-            Email = "eshop-stagging@seamless.insure",
-            PhoneNumber = "+477" + new Random().Next(0, 1000000000),
+            Id = tenantName,
+            Name = tenantName,
         };
 
-        if (await _dbContext.Organizations.AnyAsync(org => org.Name == organization.Name))
+        if (await _dbContext.Tenants.AnyAsync(t => t.Id == tenantName || t.Name == tenantName))
         {
-            _dbContext.Update(organization);
+            _dbContext.Update(tenant);
         }
         else
         {
-            _dbContext.Add(organization);
+            _dbContext.Add(tenant);
         }
+
+        await _dbContext.SaveChangesAsync();
     }
 
     private async Task SeedSystemWidePermissions()
@@ -98,165 +119,167 @@ public class DbInitializer
                 _dbContext.Add(permission);
             }
         }
+
+        await _dbContext.SaveChangesAsync();
     }
 
     private Permission[] GetWidePermissions()
     {
         return new Permission[]
         {
-                new Permission
-                {
-                    Id = PermissionConstants.ViewUsersPermissionId,
-                    Name = "View users",
-                    Description = "Allows listing of users and organizations currently registered in the system",
-                    RelatedTo = "User Management",
-                },
-                new Permission
-                {
-                    Id = PermissionConstants.ManageUsersPermissionId,
-                    Name = "Manage users",
-                    Description = "Allows inviting new users, adding new organizations to the system and changing their details",
-                    RelatedTo = "User Management",
-                },
-                new Permission
-                {
-                    Id = PermissionConstants.ViewRolesPermissionId,
-                    Name = "View roles",
-                    Description = "Allows users viewing roles list and their details",
-                    RelatedTo = "Role Management",
-                },
-                new Permission
-                {
-                    Id = PermissionConstants.ManageRolesPermissionId,
-                    Name = "Manage roles",
-                    Description = "Allows users to add, create and delete roles",
-                    RelatedTo = "Role Management",
-                }
+            new Permission
+            {
+                Id = PermissionConstants.ViewUsersPermissionId,
+                Name = "View users",
+                Description = "Allows listing of users and organizations currently registered in the system",
+                RelatedTo = "User Management",
+            },
+            new Permission
+            {
+                Id = PermissionConstants.ManageUsersPermissionId,
+                Name = "Manage users",
+                Description = "Allows inviting new users, adding new organizations to the system and changing their details",
+                RelatedTo = "User Management",
+            },
+            new Permission
+            {
+                Id = PermissionConstants.ViewPortalUserAccountsPermissionId,
+                Name = "View portal user accounts",
+                Description = "Allows viewing portal user accounts.",
+                RelatedTo = "User Management"
+            },
+            new Permission
+            {
+                Id = PermissionConstants.ManagePortalUserAccountsPermissionId,
+                Name = "Manage portal user accounts",
+                Description = "Allows viewing, inviting, updating, and deleting portal user accounts.",
+                RelatedTo = "User Management"
+            },
+            new Permission
+            {
+                Id = PermissionConstants.ViewRolesPermissionId,
+                Name = "View roles",
+                Description = "Allows users viewing roles list and their details",
+                RelatedTo = "Role Management",
+            },
+            new Permission
+            {
+                Id = PermissionConstants.ManageRolesPermissionId,
+                Name = "Manage roles",
+                Description = "Allows users to add, create and delete roles",
+                RelatedTo = "Role Management",
+            },
+            new Permission
+            {
+                Id = PermissionConstants.ViewSystemSettingsPermissionId,
+                Name = "View system settings",
+                Description = "Allows users to view system settings",
+                RelatedTo = "System Settings",
+            },
+            new Permission
+            {
+                Id = PermissionConstants.ManageSystemSettingsPermissionId,
+                Name = "Manage system settings",
+                Description = "Allows users to view, edit system settings",
+                RelatedTo = "System Settings",
+            }
         };
     }
 
-    private async Task SeedSystemAdminRole()
+    private async Task SeedRole()
     {
-        var role = new Role(Guid.NewGuid(), testRoleName, "Admin of the system");
+        var role = new Role(Guid.NewGuid(), roleName, "Owner of the account");
+        role.TenantId = tenantName;
+        role.Scope = tenantName;
 
         if (!await _dbContext.Roles.AnyAsync(r => r.Name == role.Name))
         {
             _dbContext.Add(role);
+            await SeedPermissionsForRole(role, GetWidePermissions());
         }
+
+        await _dbContext.SaveChangesAsync();
     }
 
-    private async Task SeedRolePermissionAdmin()
+    private async Task SeedPermissionsForRole(Role role, Permission[] permissions)
     {
-        var role = await _dbContext.Roles
-            .Include(r => r.RolePermissions)
-            .FirstOrDefaultAsync(r => r.Name == testRoleName);
-
-        if (role == null)
-        {
-            _logger.LogWarning("Role Admin not found");
-            return;
-        }
-
-        var permissions = GetWidePermissions();
-
         foreach (var permission in permissions)
         {
-            if (role.RolePermissions.Any(rp => rp.PermissionId == permission.Id))
+            if (!await _dbContext.RolePermissions.AnyAsync(x => x.RoleId == role.Id && x.PermissionId == permission.Id))
             {
-                continue;
+                role.RolePermissions.Add(new RolePermission
+                {
+                    RoleId = role.Id,
+                    PermissionId = permission.Id
+                });
             }
+        }
+    }
 
-            role.RolePermissions.Add(new RolePermission
-            {
-                RoleId = role.Id,
-                PermissionId = permission.Id
-            });
+    private async Task SeedOrganization()
+    {
+        var organization = new Organization()
+        {
+            Id = tenantName,
+            Name = tenantName,
+            Description = "Root organization",
+            Email = "eshop-stagging@gmail.com",
+            PhoneNumber = "+477" + new Random().Next(0, 1000000000),
+        };
+        organization.TenantId = tenantName;
+        organization.Scope = tenantName;
+
+        if (await _dbContext.Organizations.AnyAsync(org => org.Name == organization.Name))
+        {
+            _dbContext.Update(organization);
+        }
+        else
+        {
+            _dbContext.Add(organization);
         }
 
-        _dbContext.Update(role);
         await _dbContext.SaveChangesAsync();
     }
 
-
-    private async Task SeedAdminUser()
+    private async Task SeedUser()
     {
-        var user = await _dbContext.Users
-            .FirstOrDefaultAsync(u => u.Username == testUserName || u.Email == testUserName);
+        var organization = await _dbContext.Organizations.AsNoTracking()
+            .Where(x => x.Name == tenantName)
+            .FirstOrDefaultAsync();
 
-        if (user == null)
+        if (organization != null 
+            && !await _dbContext.Users.AnyAsync(u => u.Id == userName || u.Username == userName))
         {
-            var passwordHasher = _serviceProvider.GetRequiredService<IPasswordHasher>();
-            user = new User(
-                testUserName,
-                passwordHasher.Hash("P@ssword"),
-                "Kodi Mai",
-                testUserName,
+            var user = new User(
+                userName,
+                _passwordHasher.Hash("P@ssword"),
+                userName,
+                displayName,
                 "+477" + new Random().Next(0, 1000000000),
-                DateTime.Now.AddYears(-20),
-                "System");
+                DateTime.Now.AddYears(-20));
+            user.TenantId = tenantName;
+            user.Scope = tenantName;
+            user.CreatedBy = _userDetailsProvider.AuthenticatedUser.ActionUserId;
+            user.AssignOrganization(tenantName);
 
+            await SeedRolesForUser(user);
             _dbContext.Add(user);
-            await _dbContext.SaveChangesAsync();
-        }
-    }
-
-    private async Task AssignRoleUserAdmin()
-    {
-        var role = await _dbContext.Roles
-            .Include(r => r.Users)
-            .FirstOrDefaultAsync(r => r.Name == testRoleName);
-        if (role == null)
-        {
-            _logger.LogWarning("Role Admin not found");
-            return;
         }
 
-        var user = await _dbContext.Users
-            .Include(u => u.UserRoles)
-            .FirstOrDefaultAsync(u => u.Username == testUserName || u.Email == testUserName);
-        if (user == null)
-        {
-            _logger.LogWarning("User Admin not found");
-            return;
-        }
-
-        if (!user.UserRoles.Any(x => x.RoleId == role.Id))
-        {
-            user.UserRoles.Add(new UserRole
-            {
-                RoleId = role.Id,
-                UserId = user.Id
-            });
-        }
-
-        _dbContext.Update(user);
         await _dbContext.SaveChangesAsync();
     }
 
-    private async Task AssignOrganizationForAdminUser()
+    private async Task SeedRolesForUser(User user)
     {
-        var organization = await _dbContext.Organizations
-            .FirstOrDefaultAsync(o => o.Name == testOrganizationName);
-        if (organization == null)
-        {
-            _logger.LogWarning("Organization not found");
-            return;
-        }
+        var role = await _dbContext.Roles.AsNoTracking()
+            .Where(r => r.Name == roleName)
+            .FirstOrDefaultAsync();
 
-        var user = await _dbContext.Users
-            .FirstOrDefaultAsync(u => u.Username == testUserName || u.Email == testUserName);
-        if (user == null)
+        if (role != null 
+            && !await _dbContext.UserRoles.AnyAsync(ur => ur.UserId == user.Id && ur.RoleId == roleName))
         {
-            _logger.LogWarning("User admin not found");
-            return;
-        }
-
-        if (string.IsNullOrEmpty(user.OrganizationId) || user.OrganizationId != organization.Id)
-        {
-            user.AssignOrganization(organization.Id);
-
-            _dbContext.Update(user);
-            await _dbContext.SaveChangesAsync();
+            //user.AssignRole(roleName); // incorrect as RoleId is string that combine "role-Guid"
+            user.AssignRole(role.Id);
         }
     }
 }

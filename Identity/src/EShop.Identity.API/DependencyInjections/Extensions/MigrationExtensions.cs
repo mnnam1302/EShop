@@ -9,10 +9,8 @@ public static class MigrationExtensions
     {
         using (var scope = app.ApplicationServices.CreateScope())
         {
-            using UserDbContext dbContext = scope.ServiceProvider.GetRequiredService<UserDbContext>();
             var dbInitializer = scope.ServiceProvider.GetRequiredService<DbInitializer>();
 
-            await dbContext.Database.MigrateAsync();
             await dbInitializer.Initialize();
         }
     }

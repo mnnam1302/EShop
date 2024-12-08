@@ -15,6 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\Shared\src\EShop.Shared.DbResourceAccessControl\EShop.Shared.DbResourceAccessControl.csproj" />
     <ProjectReference Include="..\..\..\Shared\src\EShop.Shared.Scoping\EShop.Shared.Scoping.csproj" />
     <ProjectReference Include="..\EShop.Identity.Application\EShop.Identity.Application.csproj" />
     <ProjectReference Include="..\EShop.Identity.Domain\EShop.Identity.Domain.csproj" />

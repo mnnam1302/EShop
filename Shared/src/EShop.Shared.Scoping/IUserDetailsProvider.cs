@@ -10,6 +10,9 @@ public interface IUserDetailsProvider
     UserData AuthenticatedUser { get; }
     bool IsAuthenticatedUser { get; }
     bool IsSystemUser { get; }
+
+    void SetSystemUserContext(string onBehalfOfTenantId, string? onBehalfOfUserId = null, string? onBehalfOfUserType = null);
+    void SetSystemUserContextWithEmptyScope();
     void ClearSystemUserContext();
     bool IsCurrentUser(string userId);
     string GetRawAccessToken();
@@ -18,16 +21,17 @@ public interface IUserDetailsProvider
 public class UserData : ValueObject
 {
     public const string SystemUsername = "System";
-    public const string ContemiSupportGroup = "Contemi_Support";
+    public const string EShopSupportGroup = "EShop_Support";
 
-    public UserData(string id, string username)
-        : this(id, username, false, id)
+    public UserData(string id, string username, string tenantId)
+        : this(id, username, tenantId, false, id)
     {
     }
 
     public UserData(
         string id,
         string username,
+        string tenantId,
         bool isSupportUser,
         string? actionUserId = null,
         string userType = UserTypes.TenantUsers,
@@ -35,6 +39,7 @@ public class UserData : ValueObject
     {
         Id = id.ToLower();
         Username = username.ToLower();
+        TenantId = tenantId;
         IsSupportUser = isSupportUser;
         ActionUserId = actionUserId?.ToLower() ?? this.Id;
         UserType = userType;
@@ -43,13 +48,16 @@ public class UserData : ValueObject
 
     public string Id { get; }
     public string Username { get; }
+    public string TenantId { get; }
     public bool IsSupportUser { get; }
     public string ActionUserId { get; }
     public string UserType { get; }
     public string ActionUserType { get; }
 
-    public static UserData GetSystemUser(string actionUserId, string? actionUserType = null)
-        => new UserData(SystemUsername, SystemUsername, false, actionUserId, UserTypes.SystemUsers, actionUserType: actionUserType);
+    public static UserData GetSystemUser(string? tenantId) => new UserData(SystemUsername, SystemUsername, tenantId ?? string.Empty);
+
+    public static UserData GetSystemUser(string? tenantId, string actionUserId, string? actionUserType = null)
+        => new UserData(SystemUsername, SystemUsername, tenantId ?? string.Empty, false, actionUserId, UserTypes.SystemUsers, actionUserType: actionUserType);
 
     public static bool IsSystemUser(string username) => username.Equals(SystemUsername, StringComparison.OrdinalIgnoreCase);
 }

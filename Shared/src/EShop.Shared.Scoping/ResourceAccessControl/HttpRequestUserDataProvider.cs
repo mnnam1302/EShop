@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.JsonWebTokens;
-using System.Security.Claims;
 
 namespace EShop.Shared.Scoping.ResourceAccessControl;
 
@@ -9,6 +8,8 @@ public class HttpRequestUserDataProvider : IUserDetailsProvider
 {
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly ILogger<HttpRequestUserDataProvider> _logger;
+
+    public const string TenantIdCustomHeaderName = "eshop-tenant-id";
 
     /// <summary>
     /// This is either <see cref="UserTypes.AppClientWithoutIndividualUsers"/> or <see cref="UserTypes.AppClientWithIndividualUsers"/>.
@@ -31,6 +32,7 @@ public class HttpRequestUserDataProvider : IUserDetailsProvider
 
     private Lazy<UserData> currentUser;
     private IDisposable? userLogContext;
+    private IDisposable? tenantLogContext;
 
     public HttpRequestUserDataProvider(
         IHttpContextAccessor httpContextAccessor,
@@ -39,6 +41,7 @@ public class HttpRequestUserDataProvider : IUserDetailsProvider
         _httpContextAccessor = httpContextAccessor;
         _logger = logger;
 
+        // Read Lazy<T>: https://learn.microsoft.com/en-us/dotnet/framework/performance/lazy-initialization
         this.currentUser = new Lazy<UserData>(() => CreateUserFromRequest(), System.Threading.LazyThreadSafetyMode.PublicationOnly);
     }
 
@@ -73,12 +76,43 @@ public class HttpRequestUserDataProvider : IUserDetailsProvider
         }
     }
 
+    public void SetSystemUserContextWithEmptyScope()
+    {
+        _logger.LogDebug("Setting user context to System with no tenant scope [{providerHash}]", this.GetHashCode());
+        this.currentUser = new Lazy<UserData>(() => UserData.GetSystemUser(null), System.Threading.LazyThreadSafetyMode.PublicationOnly);
+
+        var updatedToUser = this.currentUser.Value ?? throw new InvalidOperationException("User should have been set");
+        //this.userLogContext = Serilog.Context.LogContext.PushProperty(TenantUserEnricher.UserPropertyName, updatedToUser.ActionUserId);
+        //this.tenantLogContext = Serilog.Context.LogContext.PushProperty(TenantUserEnricher.TenantPropertyName, updatedToUser.TenantId);
+        _logger.LogTrace("User context set to '{userId}'('{tenantId}').", updatedToUser.Id, updatedToUser.TenantId);
+    }
+
+    public void SetSystemUserContext(string onBehalfOfTenantId, string? onBehalfOfUserId = null, string? onBehalfOfUserType = null)
+    {
+        if (string.IsNullOrWhiteSpace(onBehalfOfTenantId))
+        {
+            throw new ArgumentException($"'{nameof(onBehalfOfTenantId)}' cannot be null or whitespace", nameof(onBehalfOfTenantId));
+        }
+
+        _logger.LogDebug("Setting user context to System (Tenant ID='{tenantId}', User Id='{userId}') [{providerHash}].", onBehalfOfTenantId, onBehalfOfUserId, this.GetHashCode());
+        this.currentUser =
+            string.IsNullOrWhiteSpace(onBehalfOfUserId)
+            ? new Lazy<UserData>(() => UserData.GetSystemUser(onBehalfOfTenantId), System.Threading.LazyThreadSafetyMode.PublicationOnly)
+            : new Lazy<UserData>(() => UserData.GetSystemUser(onBehalfOfTenantId, onBehalfOfUserId, onBehalfOfUserType), System.Threading.LazyThreadSafetyMode.PublicationOnly);
+
+        var updatedToUser = this.currentUser.Value ?? throw new InvalidOperationException("User should have been set");
+        //this.userLogContext = Serilog.Context.LogContext.PushProperty(TenantUserEnricher.UserPropertyName, updatedToUser.ActionUserId);
+        //this.tenantLogContext = Serilog.Context.LogContext.PushProperty(TenantUserEnricher.TenantPropertyName, updatedToUser.TenantId);
+        _logger.LogTrace("User context set to '{userId}'('{tenantId}').", updatedToUser.Id, updatedToUser.TenantId);
+    }
+
     public void ClearSystemUserContext()
     {
         _logger.LogDebug("Resetting user context [{providerHash}].", this.GetHashCode());
         this.currentUser = new Lazy<UserData>(() => CreateUserFromRequest(), System.Threading.LazyThreadSafetyMode.PublicationOnly);
 
         this.userLogContext?.Dispose();
+        this.tenantLogContext?.Dispose();
     }
 
     public string GetRawAccessToken()
@@ -134,19 +168,22 @@ public class HttpRequestUserDataProvider : IUserDetailsProvider
             return TryGetUserFromHeaders(request, UserTypes.AppClientWithIndividualUsers, out user);
         }
 
-        return TryGetUserFromAccessToken(out user);
+        return TryGetTenantUserFromAccessToken(out user);
     }
 
     private bool TryGetUserFromHeaders(HttpRequest request, string userType, out UserData? user)
     {
         var userId = request.Headers[UserIdCustomHeaderName].FirstOrDefault();
+        var tenantId = request.Headers[TenantIdCustomHeaderName].FirstOrDefault();
         var actionUserId = request.Headers[ActionUserIdCustomHeaderName].FirstOrDefault();
 
         try
         {
-            if (UserData.SystemUsername.Equals(userId, StringComparison.OrdinalIgnoreCase) && actionUserId is not null)
+            if (UserData.SystemUsername.Equals(userId, StringComparison.OrdinalIgnoreCase))
             {
-                user = UserData.GetSystemUser(actionUserId, actionUserType: userType);
+                user = actionUserId is null
+                    ? UserData.GetSystemUser(tenantId)
+                    : UserData.GetSystemUser(tenantId, actionUserId, actionUserType: userType);
                 return true;
             }
 
@@ -155,7 +192,12 @@ public class HttpRequestUserDataProvider : IUserDetailsProvider
                 throw new ArgumentException("User ID cannot be empty.");
             }
 
-            user = new UserData(userId, userId, false, actionUserId, userType, actionUserType: userType);
+            if (string.IsNullOrWhiteSpace(tenantId))
+            {
+                throw new ArgumentException("Tenant ID cannot be empty.");
+            }
+
+            user = new UserData(userId, userId, tenantId, false, actionUserId, userType, actionUserType: userType);
             return true;
         }
         catch (Exception ex)
@@ -166,7 +208,7 @@ public class HttpRequestUserDataProvider : IUserDetailsProvider
         }
     }
 
-    private bool TryGetUserFromAccessToken(out UserData? user)
+    private bool TryGetTenantUserFromAccessToken(out UserData? user)
     {
         var accessToken = ReadAccessToken();
 
@@ -180,9 +222,16 @@ public class HttpRequestUserDataProvider : IUserDetailsProvider
         try
         {
             // We are using username as id for users stored in our local database (as it is unique across tenants anyway)
-            var userId = accessToken.Claims.First(x => x.Type == ClaimTypes.NameIdentifier).Value;
+            var username = accessToken.Claims.First(x => x.Type == "username").Value;
+            var tenantId = accessToken.Claims.First(x => x.Type == "tenant_id").Value;
 
-            user = new UserData(userId, userId);
+            user = new UserData(
+                username,
+                username,
+                tenantId,
+                tenantId.Equals(UserData.EShopSupportGroup),
+                username);
+
             return true;
         }
         catch (Exception ex)
@@ -204,7 +253,7 @@ public class HttpRequestUserDataProvider : IUserDetailsProvider
         }
 
         var tokenHandler = new JsonWebTokenHandler();
-        var token = tokenHandler.ReadJsonWebToken(accessTokenEncoded);
+        var token = tokenHandler.ReadJsonWebToken(accessTokenEncoded); // Read JsonWebToken: not validation
 
         if (token == null)
         {

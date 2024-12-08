@@ -12,7 +12,7 @@ public class User : EntityBase<string>, ICreatedTracking, IScoped
     protected User()
     { }
 
-    public User(string userName, string password, string email, string? displayName, string? phoneNumber, DateTime? dateofBirth, string createBy = "")
+    public User(string userName, string password, string email, string? displayName, string? phoneNumber, DateTime? dateofBirth)
     {
         AssetUserName(userName);
         AssetPassword(password);
@@ -26,9 +26,8 @@ public class User : EntityBase<string>, ICreatedTracking, IScoped
         Email = email;
         DisplayName = displayName;
         PhoneNumber = phoneNumber;
-        DateOfBirth = dateofBirth?.ToUniversalTime();
+        DateOfBirth = dateofBirth;
         IsActive = true;
-        CreatedBy = createBy ?? string.Empty;
     }
 
     public static User Create(Command.RegisterUser command)
@@ -51,14 +50,26 @@ public class User : EntityBase<string>, ICreatedTracking, IScoped
         {
             new Claim(ClaimTypes.NameIdentifier, Id),
             new Claim("username", Username),
-            new Claim(ClaimTypes.Name, DisplayName ?? ""),
+            new Claim(ClaimTypes.Name, DisplayName ?? string.Empty),
             new Claim(ClaimTypes.Email, Email),
+            new Claim("tenant_id", OrganizationId ?? string.Empty)
         };
     }
 
     public void AssignOrganization(string organizationId)
     {
         OrganizationId = organizationId;
+    }
+
+    public void AssignRole(string roleId)
+    {
+        var userRole = new UserRole()
+        {
+            RoleId = roleId,
+            UserId = Id
+        };
+
+        UserRoles.Add(userRole);
     }
 
     private void AssetUserName(string userName)
@@ -161,7 +172,7 @@ public class User : EntityBase<string>, ICreatedTracking, IScoped
     public DateTimeOffset CreatedDate { get; set; }
 
     [MaxLength(ModelConstants.ShortText)]
-    public string CreatedBy { get; set; } = string.Empty;
+    public string? CreatedBy { get; set; }
 
 
     [MaxLength(ModelConstants.ShortText)]

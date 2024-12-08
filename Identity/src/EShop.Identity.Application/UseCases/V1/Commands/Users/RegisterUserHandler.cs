@@ -44,8 +44,7 @@ public class RegisterUserHandler : ICommandHandler<Command.RegisterUser>
             request.Email,
             request.DisplayName,
             request.PhoneNumber, 
-            request.DateOfBirth,
-            _userDetailsProvider.IsAuthenticatedUser? _userDetailsProvider.AuthenticatedUser.ActionUserId : string.Empty);
+            request.DateOfBirth);
 
         if (!string.IsNullOrEmpty(request.OrganizationId))
         {
