@@ -1,6 +1,12 @@
-﻿using EShop.Identity.Persistence;
+﻿using EShop.Identity.API.DependencyInjections.Extensions;
+using EShop.Identity.API.Middlewares;
+using EShop.Identity.Application.DependencyInjections.Extensions;
+using EShop.Identity.Infrastructure.DependencyInjections.Extensions;
+using EShop.Identity.Persistence;
+using EShop.Identity.Persistence.DependencyInjections.Extensions;
+using EShop.Shared.Cache.DependencyInejctions.Extensions;
 using EShop.Shared.JsonApi.DependencyInjections;
-using Serilog;
+using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
 
 namespace EShop.Identity.API
 {
@@ -20,8 +26,14 @@ namespace EShop.Identity.API
             // Shared - Common
             services.AddCors();
 
+            services.AddRedisInfrastructure(Configuration);
+            services.AddUserTokenCachingService();
+
             services.AddDbContextWithScoping<UserDbContext>(Configuration, false);
             services.AddTransient<DbInitializer>();
+
+            // Middleware
+            services.AddTransient<ExceptionHandlingMiddleware>();
 
             /*
              * API
@@ -29,22 +41,56 @@ namespace EShop.Identity.API
              * - Api Versioning
              * - Swagger
              * - Health Checks
-             * - Logger - later bring to shared folder
+             * - Logging - shared
              */
+            services.AddControllers();
+            services
+                .AddSwaggerGenNewtonsoftSupport()
+                .AddFluentValidationRulesToSwagger()
+                .AddEndpointsApiExplorer()
+                .AddSwaggerAPI();
+
+            services
+                .AddApiVersioning(options => options.ReportApiVersions = true)
+                .AddApiExplorer(options =>
+                {
+                    options.GroupNameFormat = "'v'VVV";
+                    options.SubstituteApiVersionInUrl = true;
+                });
+
+            services.AddUserPermissionForOwnerServiceAPI();
 
             /*
              * Application
              * - Automapper
              * - MediatR
              */
+            services.AddMediatRApplication();
+            services.AddAutoMapperApplication();
 
             // Persistence
+            services.AddRepositoryAndUnitOfWorkPersistence();
 
             // Infrastructure
+            services.AddServicesInfrastructure();
         }
 
         public void Configure(IApplicationBuilder app, IHostApplicationLifetime applicationLifetime, ILoggerFactory loggerFactory)
         {
+            app.UseMiddleware<ExceptionHandlingMiddleware>();
+
+            if (Environment.IsDevelopment() || Environment.IsStaging())
+            {
+                app.UseCors(x => x.AllowAnyOrigin()
+                                  .AllowAnyHeader()
+                                  .AllowAnyMethod());
+                app.UseSwaggerAPI();
+            }
+
+            app.UseRouting();
+            app.UseAuthentication();
+            app.UseAuthorization();
+            app.UseEndpoints(endpoints => endpoints.MapControllers());
         }
     }
 }

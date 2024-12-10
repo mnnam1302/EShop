@@ -1,109 +1,57 @@
-using EShop.Identity.API.DependencyInjections.Extensions;
-using EShop.Identity.API.Middlewares;
-using EShop.Identity.Application.DependencyInjections.Extensions;
-using EShop.Identity.Infrastructure.DependencyInjections.Extensions;
 using EShop.Identity.Persistence;
-using EShop.Identity.Persistence.DependencyInjections.Extensions;
-using EShop.Shared.Cache.DependencyInejctions.Extensions;
-using EShop.Shared.JsonApi.DependencyInjections;
-using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
+using EShop.Shared.Diagnostics;
 using Serilog;
 
-var builder = WebApplication.CreateBuilder(args);
+namespace EShop.Identity.API;
 
-// Add services to the container.
+public static class Program
+{
+    private const int ShutdownTimeoutInSeconds = 90;
+    internal const string ApplicationName = "Identity";
 
-// Shared.JsonApi
-//builder.Services.AddUserScoping();
-//builder.Services.AddMultiTenantScoping();
-
-// Shared.Cache
-builder.Services.AddRedisInfrastructure(builder.Configuration);
-builder.Services.AddUserTokenCachingService();
-
-/*
- * API - Rule DI
- * - Jwt Authentication owner service
- * - Swagger
- * - Interface from Shared and implemented in owner service
- */
-builder.Services.AddControllers();
-
-Log.Logger = new LoggerConfiguration().ReadFrom
-    .Configuration(builder.Configuration)
-    .CreateLogger();
-
-builder.Logging
-    .ClearProviders()
-    .AddSerilog();
-
-builder.Host.UseSerilog();
-builder.Services.AddControllers();
-
-builder.Services
-    .AddSwaggerGenNewtonsoftSupport()
-    .AddFluentValidationRulesToSwagger()
-    .AddEndpointsApiExplorer()
-    .AddSwaggerAPI();
-
-builder.Services
-    .AddApiVersioning(options => options.ReportApiVersions = true)
-    .AddApiExplorer(options =>
+    public static async Task<int> Main(string[] args)
     {
-    options.GroupNameFormat = "'v'VVV";
-    options.SubstituteApiVersionInUrl = true;
-    });
+        Logging.SetSerilog(ApplicationName);
 
-builder.Services.AddUserPermissionForOwnerServiceAPI();
+        Log.Information("Initilizing {ApplicationName} ....", ApplicationName);
 
-// Application
-builder.Services.AddMediatRApplication();
-builder.Services.AddAutoMapperApplication();
+        try
+        {
+            var host = CreateHostBuilder(args);
 
-// Persistence
-//builder.Services.ConfigureNgSqlRetryOptionsPersistence(builder.Configuration.GetSection("NgSqlRetryOptions"));
-//builder.Services.AddNqSqlPersistence(builder.Configuration);
+            await using (var scope = host.Services.CreateAsyncScope())
+            {
+                var services = scope.ServiceProvider;
+                var dbInitializer = services.GetRequiredService<DbInitializer>();
+                await dbInitializer.Initialize();
+            }
 
-builder.Services.AddDbContextWithScoping<UserDbContext>(builder.Configuration, false);
-builder.Services.ConfigureServices();
-builder.Services.AddRepositoryPersistence();
+            Log.Information("Starting up {ApplicationName}...", ApplicationName);
+            await host.RunAsync();
+            Log.Information("Stop {ApplicationName}...", ApplicationName);
+            return 0;
+        }
+        catch (Exception ex)
+        {
+            Log.Fatal(ex, "Host terminated unexpectedly");
+            return 1;
+        }
+        finally
+        {
+            await Log.CloseAndFlushAsync();
+        }
+    }
 
-// Infrastructure
-builder.Services.AddServicesInfrastructure();
-
-// Middleware
-builder.Services.AddTransient<ExceptionHandlingMiddleware>();
-
-builder.Services.AddAuthorization();
-var app = builder.Build();
-
-app.UseMiddleware<ExceptionHandlingMiddleware>();
-
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment() || app.Environment.IsStaging())
-{
-    app.UseSwaggerAPI();
+    private static IHost CreateHostBuilder(string[] args)
+    {
+        // generic host: https://learn.microsoft.com/en-us/dotnet/core/extensions/generic-host?tabs=appbuilder
+        return Host.CreateDefaultBuilder()
+            .ConfigureWebHostDefaults(webBuilder =>
+            {
+                webBuilder.UseStartup<Startup>()
+                    .UseShutdownTimeout(TimeSpan.FromSeconds(ShutdownTimeoutInSeconds));
+            })
+            .UseSerilog()
+            .Build();
+    }
 }
-
-//app.UseHttpsRedirection();
-//app.UseAuthentication();
-//app.UseAuthorization();
-app.MapControllers();
-
-try
-{
-    app.ApplyMigrations();
-    await app.RunAsync();
-    Log.Information("Stop cleanly");
-}
-catch (Exception ex)
-{
-    Log.Fatal(ex, "An unhandled exception occured during bootstrapping");
-}
-finally
-{
-    Log.CloseAndFlush();
-    await app.DisposeAsync();
-}
-
-public partial class Program { }
