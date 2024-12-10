@@ -51,18 +51,13 @@ public static class ServiceCollectionExtensions
             .ValidateOnStart();
     }
 
-    public static void ConfigureServices(this IServiceCollection services)
-    {
-        services.AddTransient<DbInitializer>();
-    }
-
     public static void AddInterceptorPersistence(this IServiceCollection services)
     {
         //services.AddSingleton<UpdateAuditableEntitiesInterceptor>();
         //services.AddSingleton<ConvertDomainEventsToEventsInterceptor>();
     }
 
-    public static void AddRepositoryPersistence(this IServiceCollection services)
+    public static void AddRepositoryAndUnitOfWorkPersistence(this IServiceCollection services)
     {
         services.AddScoped(typeof(IUnitOfWork), typeof(UnitOfWork));
         services.AddScoped(typeof(IRepositoryBase<,>), typeof(RepositoryBase<,>));
