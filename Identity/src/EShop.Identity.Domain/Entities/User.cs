@@ -7,7 +7,7 @@ using System.Security.Claims;
 
 namespace EShop.Identity.Domain.Entities;
 
-public class User : EntityBase<string>, ICreatedTracking, IScoped
+public class User : EntityBase<string>, ICreatedTracking, IExcludedFromScoping
 {
     protected User()
     { }
@@ -52,7 +52,7 @@ public class User : EntityBase<string>, ICreatedTracking, IScoped
             new Claim("username", Username),
             new Claim(ClaimTypes.Name, DisplayName ?? string.Empty),
             new Claim(ClaimTypes.Email, Email),
-            new Claim("tenant_id", OrganizationId ?? string.Empty)
+            new Claim("tenant_id", OrganizationId!)
         };
     }
 
@@ -173,11 +173,4 @@ public class User : EntityBase<string>, ICreatedTracking, IScoped
 
     [MaxLength(ModelConstants.ShortText)]
     public string? CreatedBy { get; set; }
-
-
-    [MaxLength(ModelConstants.ShortText)]
-    public string? TenantId { get; set; }
-
-    [MaxLength(ModelConstants.LongText)]
-    public string? Scope { get; set; }
 }

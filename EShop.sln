@@ -10,6 +10,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8E7A2034-660E-44F6-870D-F0CD1CF9DB4E}"
 	ProjectSection(SolutionItems) = preProject
 		docker-compose.Dev.Infrastructure.yml = docker-compose.Dev.Infrastructure.yml
+		postgres-init.sql = postgres-init.sql
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Testing", "Testing", "{8769BF17-9FEC-492C-94E6-E906EA96C6E9}"
@@ -56,7 +57,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EShop.Identity.Tests", "Ide
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EShop.Shared.DbResourceAccessControl", "Shared\src\EShop.Shared.DbResourceAccessControl\EShop.Shared.DbResourceAccessControl.csproj", "{69CA6CF8-9D98-489E-AB72-2BCD3631C36E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EShop.Shared.Diagnostics", "Shared\src\EShop.Shared.Diagnostics\EShop.Shared.Diagnostics.csproj", "{8B702549-4DF6-4D90-BCFA-12484DAF8A85}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EShop.Shared.Diagnostics", "Shared\src\EShop.Shared.Diagnostics\EShop.Shared.Diagnostics.csproj", "{8B702549-4DF6-4D90-BCFA-12484DAF8A85}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

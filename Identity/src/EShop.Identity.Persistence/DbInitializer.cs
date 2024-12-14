@@ -35,10 +35,10 @@ public class DbInitializer // Transient
         _logger = logger;
     }
 
-    private const string tenantName = "eshop-stagging";
+    private const string tenantName = "eshop-staging";
     private const string roleName = "Owner";
-    private const string userName = "nam608072@@gmail.com";
-    private const string displayName = "Nhat Nam";
+    private const string userName = "owner.staging@gmail.com";
+    private const string displayName = "Owner Staging";
 
     public async Task Initialize(bool applyMigrations = true, bool applyTenantIsolation = true, bool applyRingFencing = true)
     {
@@ -182,19 +182,38 @@ public class DbInitializer // Transient
                 Name = "Manage system settings",
                 Description = "Allows users to view, edit system settings",
                 RelatedTo = "System Settings",
-            }
+            },
+            new Permission
+            {
+                Id = PermissionConstants.ViewOrganizationsPermissionId,
+                Name = "View organizations",
+                Description = "Allows users to view organizations",
+                RelatedTo = "Organization Management",
+            },
+            new Permission
+            {
+                Id = PermissionConstants.ManageOrganizationsPermissionId,
+                Name = "Manage organizations",
+                Description = "Allows users to view, edit, delete organizations",
+                RelatedTo = "Organization Management",
+            },
         };
     }
 
     private async Task SeedRole()
     {
-        var role = new Role(Guid.NewGuid(), roleName, "Owner of the account");
-        role.TenantId = tenantName;
-        role.Scope = tenantName;
-
-        if (!await _dbContext.Roles.AnyAsync(r => r.Name == role.Name))
+        var role = await _dbContext.Roles.FirstOrDefaultAsync(x => x.Name == roleName);
+        if (role == null)
         {
-            _dbContext.Add(role);
+            var newRole = new Role(Guid.NewGuid(), roleName, "Owner of the account");
+            newRole.TenantId = tenantName;
+            newRole.Scope = tenantName;
+
+            await SeedPermissionsForRole(newRole, GetWidePermissions());
+            _dbContext.Add(newRole);
+        }
+        else
+        {
             await SeedPermissionsForRole(role, GetWidePermissions());
         }
 
@@ -256,9 +275,7 @@ public class DbInitializer // Transient
                 userName,
                 displayName,
                 "+477" + new Random().Next(0, 1000000000),
-                DateTime.Now.AddYears(-20));
-            user.TenantId = tenantName;
-            user.Scope = tenantName;
+                DateTime.UtcNow.AddYears(-20));
             user.CreatedBy = _userDetailsProvider.AuthenticatedUser.ActionUserId;
             user.AssignOrganization(tenantName);
 

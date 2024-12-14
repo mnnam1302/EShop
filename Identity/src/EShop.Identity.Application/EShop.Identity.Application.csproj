@@ -17,7 +17,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="UseCases\V1\Commands\Organizations\" />
     <Folder Include="UseCases\V1\Events\" />
     <Folder Include="UseCases\V1\Queries\Organizations\" />
     <Folder Include="UseCases\V2\" />

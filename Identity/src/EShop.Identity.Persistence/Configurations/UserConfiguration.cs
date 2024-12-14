@@ -14,8 +14,6 @@ internal class UserConfiguration : IEntityTypeConfiguration<User>
         builder.HasKey(x => x.Id);
 
         builder.HasIndex(x => x.Username).IsUnique();
-        builder.HasIndex(x => x.TenantId);
-        builder.HasIndex(x => x.Scope);
 
         builder.Property(x => x.IsDirector)
             .IsRequired()

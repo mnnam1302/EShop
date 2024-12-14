@@ -6,6 +6,9 @@ public static class PermissionConstants
     public const string ViewUsersPermissionId = "Users_ViewUsers";
     public const string ManageUsersPermissionId = "Users_ManageUsers";
 
+    public const string ViewOrganizationsPermissionId = "Users_ViewOrganizations";
+    public const string ManageOrganizationsPermissionId = "Users_ManageOrganizations";
+
     public const string ViewRolesPermissionId = "Users_ViewRoles";
     public const string ManageRolesPermissionId = "Users_ManageRoles";
 

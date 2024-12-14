@@ -4,9 +4,18 @@ namespace EShop.Shared.Contracts.Services.Identity.Organizations;
 
 public static class Command
 {
-    public record CreateOrganization(string Name, string Description, string? ParentId, string? TenantId) : ICommand;
+    public record CreateOrganization(
+        string Name, 
+        string? OrganizationNumber,
+        string? PhoneNumber,
+        string? Email,
+        string? Address,
+        string? City,
+        string? PostCode,
+        string? Description,
+        string? ParentOrganizationId) : ICommand;
 
-    public record UpdateOrganization(string Id, string Name, string Description, string? ParentId, string? TenantId) : ICommand;
+    public record UpdateOrganization(string Id, string Name, string Description) : ICommand;
 
     public record DeleteOrganization(string Id) : ICommand;
 

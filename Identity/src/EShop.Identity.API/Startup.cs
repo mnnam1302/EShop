@@ -8,89 +8,88 @@ using EShop.Shared.Cache.DependencyInejctions.Extensions;
 using EShop.Shared.JsonApi.DependencyInjections;
 using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
 
-namespace EShop.Identity.API
+namespace EShop.Identity.API;
+
+public class Startup
 {
-    public class Startup
+    public IConfiguration Configuration { get; }
+    public IWebHostEnvironment Environment { get; }
+
+    public Startup(IConfiguration configuration, IWebHostEnvironment environment)
     {
-        public IConfiguration Configuration { get; }
-        public IWebHostEnvironment Environment { get; }
+        Configuration = configuration;
+        Environment = environment;
+    }
 
-        public Startup(IConfiguration configuration, IWebHostEnvironment environment)
-        {
-            Configuration = configuration;
-            Environment = environment;
-        }
+    public void ConfigureServices(IServiceCollection services)
+    {
+        // Shared - Common
+        services.AddCors();
 
-        public void ConfigureServices(IServiceCollection services)
-        {
-            // Shared - Common
-            services.AddCors();
+        services.AddRedisInfrastructure(Configuration);
+        services.AddUserTokenCachingService();
 
-            services.AddRedisInfrastructure(Configuration);
-            services.AddUserTokenCachingService();
+        services.AddDbContextWithScoping<UserDbContext>(Configuration, false);
+        services.AddTransient<DbInitializer>();
 
-            services.AddDbContextWithScoping<UserDbContext>(Configuration, false);
-            services.AddTransient<DbInitializer>();
+        // Middleware
+        services.AddTransient<ExceptionHandlingMiddleware>();
 
-            // Middleware
-            services.AddTransient<ExceptionHandlingMiddleware>();
+        /*
+         * API
+         * - Controllers
+         * - Api Versioning
+         * - Swagger
+         * - Health Checks
+         * - Logging - shared
+         */
+        services.AddControllers();
+        services
+            .AddSwaggerGenNewtonsoftSupport()
+            .AddFluentValidationRulesToSwagger()
+            .AddEndpointsApiExplorer()
+            .AddSwaggerAPI();
 
-            /*
-             * API
-             * - Controllers
-             * - Api Versioning
-             * - Swagger
-             * - Health Checks
-             * - Logging - shared
-             */
-            services.AddControllers();
-            services
-                .AddSwaggerGenNewtonsoftSupport()
-                .AddFluentValidationRulesToSwagger()
-                .AddEndpointsApiExplorer()
-                .AddSwaggerAPI();
-
-            services
-                .AddApiVersioning(options => options.ReportApiVersions = true)
-                .AddApiExplorer(options =>
-                {
-                    options.GroupNameFormat = "'v'VVV";
-                    options.SubstituteApiVersionInUrl = true;
-                });
-
-            services.AddUserPermissionForOwnerServiceAPI();
-
-            /*
-             * Application
-             * - Automapper
-             * - MediatR
-             */
-            services.AddMediatRApplication();
-            services.AddAutoMapperApplication();
-
-            // Persistence
-            services.AddRepositoryAndUnitOfWorkPersistence();
-
-            // Infrastructure
-            services.AddServicesInfrastructure();
-        }
-
-        public void Configure(IApplicationBuilder app, IHostApplicationLifetime applicationLifetime, ILoggerFactory loggerFactory)
-        {
-            app.UseMiddleware<ExceptionHandlingMiddleware>();
-
-            if (Environment.IsDevelopment() || Environment.IsStaging())
+        services
+            .AddApiVersioning(options => options.ReportApiVersions = true)
+            .AddApiExplorer(options =>
             {
-                app.UseCors(x => x.AllowAnyOrigin()
-                                  .AllowAnyHeader()
-                                  .AllowAnyMethod());
-                app.UseSwaggerAPI();
-            }
+                options.GroupNameFormat = "'v'VVV";
+                options.SubstituteApiVersionInUrl = true;
+            });
 
-            app.UseRouting();
-            app.UseAuthentication();
-            app.UseAuthorization();
-            app.UseEndpoints(endpoints => endpoints.MapControllers());
+        services.AddUserPermissionForOwnerServiceAPI();
+
+        /*
+         * Application
+         * - Automapper
+         * - MediatR
+         */
+        services.AddMediatRApplication();
+        services.AddAutoMapperApplication();
+
+        // Persistence
+        services.AddRepositoryAndUnitOfWorkPersistence();
+
+        // Infrastructure
+        services.AddServicesInfrastructure();
+    }
+
+    public void Configure(IApplicationBuilder app, IHostApplicationLifetime applicationLifetime, ILoggerFactory loggerFactory)
+    {
+        app.UseMiddleware<ExceptionHandlingMiddleware>();
+
+        if (Environment.IsDevelopment() || Environment.IsStaging())
+        {
+            app.UseCors(x => x.AllowAnyOrigin()
+                              .AllowAnyHeader()
+                              .AllowAnyMethod());
+            app.UseSwaggerAPI();
         }
+
+        app.UseRouting();
+        app.UseAuthentication();
+        app.UseAuthorization();
+        app.UseEndpoints(endpoints => endpoints.MapControllers());
     }
 }

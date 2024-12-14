@@ -1,4 +1,5 @@
 ﻿using EShop.Identity.Domain.Abstractions.Entities;
+using EShop.Shared.Contracts.Services.Identity.Organizations;
 using EShop.Shared.Scoping;
 using System.ComponentModel.DataAnnotations;
 
@@ -6,6 +7,51 @@ namespace EShop.Identity.Domain.Entities;
 
 public class Organization : EntityBase<string>, IScoped
 {
+    public Organization()
+    {
+    }
+
+    public Organization(
+        string name, 
+        string? organizationNumber, 
+        string? phoneNumber,
+        string? email, 
+        string? address, 
+        string? city, 
+        string? postcode, 
+        string? description, 
+        string? parentOrganizationId)
+    {
+        Id = name;
+        Name = name;
+        OrganizationNumber = organizationNumber;
+        PhoneNumber = phoneNumber;
+        Email = email;
+        Address = address;
+        City = city;
+        Postcode = postcode;
+        Description = description;
+        ParentOrganizationId = parentOrganizationId;
+        TenantId = name;
+        Scope = name;
+    }
+
+    public static Organization Create(Command.CreateOrganization command)
+    {
+        var organization = new Organization(
+            command.Name, 
+            command.OrganizationNumber, 
+            command.PhoneNumber, 
+            command.Email, 
+            command.Address, 
+            command.City, 
+            command.PostCode, 
+            command.Description, 
+            command.ParentOrganizationId);
+
+        return organization;
+    }
+
     [MaxLength(ModelConstants.MediumText)]
     [Required]
     public string? Name { get; set; }
