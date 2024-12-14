@@ -217,7 +217,6 @@ namespace EShop.Identity.Persistence.Migrations
                         .HasColumnType("character varying(50)");
 
                     b.Property<string>("CreatedBy")
-                        .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
 
@@ -266,14 +265,6 @@ namespace EShop.Identity.Persistence.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
 
-                    b.Property<string>("Scope")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
-
-                    b.Property<string>("TenantId")
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
                     b.Property<string>("Username")
                         .IsRequired()
                         .HasMaxLength(150)
@@ -282,10 +273,6 @@ namespace EShop.Identity.Persistence.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("OrganizationId");
-
-                    b.HasIndex("Scope");
-
-                    b.HasIndex("TenantId");
 
                     b.HasIndex("Username")
                         .IsUnique();

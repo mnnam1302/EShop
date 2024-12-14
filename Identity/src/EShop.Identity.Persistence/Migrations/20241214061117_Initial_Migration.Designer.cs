@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace EShop.Identity.Persistence.Migrations
 {
     [DbContext(typeof(UserDbContext))]
-    [Migration("20241125144732_Remove_Entity_ApplicationUser")]
-    partial class Remove_Entity_ApplicationUser
+    [Migration("20241214061117_Initial_Migration")]
+    partial class Initial_Migration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -31,7 +31,8 @@ namespace EShop.Identity.Persistence.Migrations
             modelBuilder.Entity("EShop.Identity.Domain.Entities.Organization", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("text");
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
                     b.Property<string>("Address")
                         .HasMaxLength(500)
@@ -59,7 +60,8 @@ namespace EShop.Identity.Persistence.Migrations
                         .HasColumnType("character varying(50)");
 
                     b.Property<string>("ParentOrganizationId")
-                        .HasColumnType("text");
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
                     b.Property<string>("PhoneNumber")
                         .HasMaxLength(50)
@@ -68,6 +70,14 @@ namespace EShop.Identity.Persistence.Migrations
                     b.Property<string>("Postcode")
                         .HasMaxLength(10)
                         .HasColumnType("character varying(10)");
+
+                    b.Property<string>("Scope")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("TenantId")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
                     b.HasKey("Id");
 
@@ -82,7 +92,8 @@ namespace EShop.Identity.Persistence.Migrations
             modelBuilder.Entity("EShop.Identity.Domain.Entities.Permission", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("text");
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
                     b.Property<string>("Description")
                         .HasMaxLength(500)
@@ -107,7 +118,8 @@ namespace EShop.Identity.Persistence.Migrations
             modelBuilder.Entity("EShop.Identity.Domain.Entities.Role", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("text");
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
                     b.Property<string>("Description")
                         .HasMaxLength(500)
@@ -122,7 +134,18 @@ namespace EShop.Identity.Persistence.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
 
+                    b.Property<string>("Scope")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("TenantId")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "Name")
+                        .IsUnique();
 
                     b.ToTable("Roles", (string)null);
                 });
@@ -130,10 +153,10 @@ namespace EShop.Identity.Persistence.Migrations
             modelBuilder.Entity("EShop.Identity.Domain.Entities.RolePermission", b =>
                 {
                     b.Property<string>("RoleId")
-                        .HasColumnType("text");
+                        .HasColumnType("character varying(50)");
 
                     b.Property<string>("PermissionId")
-                        .HasColumnType("text");
+                        .HasColumnType("character varying(50)");
 
                     b.HasKey("RoleId", "PermissionId");
 
@@ -142,14 +165,63 @@ namespace EShop.Identity.Persistence.Migrations
                     b.ToTable("RolePermissions", (string)null);
                 });
 
+            modelBuilder.Entity("EShop.Identity.Domain.Entities.Tenant", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("ExternalUsersUserPoolId")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("Name")
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Tenants", (string)null);
+                });
+
+            modelBuilder.Entity("EShop.Identity.Domain.Entities.TenantSetting", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<bool>("CustomerPortalEnabled")
+                        .HasMaxLength(255)
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("CustomerPortalUrl")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.Property<string>("Scope")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("TenantId")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId");
+
+                    b.ToTable("TenantSettings", (string)null);
+                });
+
             modelBuilder.Entity("EShop.Identity.Domain.Entities.User", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("text");
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
                     b.Property<string>("CreatedBy")
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
                     b.Property<DateTimeOffset>("CreatedDate")
                         .HasColumnType("timestamp with time zone");
@@ -180,10 +252,12 @@ namespace EShop.Identity.Persistence.Migrations
                         .HasDefaultValue(false);
 
                     b.Property<string>("ManagerId")
-                        .HasColumnType("text");
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
                     b.Property<string>("OrganizationId")
-                        .HasColumnType("text");
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()
@@ -201,9 +275,6 @@ namespace EShop.Identity.Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Email")
-                        .IsUnique();
-
                     b.HasIndex("OrganizationId");
 
                     b.HasIndex("Username")
@@ -215,10 +286,10 @@ namespace EShop.Identity.Persistence.Migrations
             modelBuilder.Entity("EShop.Identity.Domain.Entities.UserRole", b =>
                 {
                     b.Property<string>("UserId")
-                        .HasColumnType("text");
+                        .HasColumnType("character varying(50)");
 
                     b.Property<string>("RoleId")
-                        .HasColumnType("text");
+                        .HasColumnType("character varying(50)");
 
                     b.HasKey("UserId", "RoleId");
 
@@ -253,6 +324,14 @@ namespace EShop.Identity.Persistence.Migrations
                     b.Navigation("Permission");
 
                     b.Navigation("Role");
+                });
+
+            modelBuilder.Entity("EShop.Identity.Domain.Entities.TenantSetting", b =>
+                {
+                    b.HasOne("EShop.Identity.Domain.Entities.Tenant", null)
+                        .WithMany("TenantSettings")
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("EShop.Identity.Domain.Entities.User", b =>
@@ -291,6 +370,11 @@ namespace EShop.Identity.Persistence.Migrations
                     b.Navigation("RolePermissions");
 
                     b.Navigation("UserRoles");
+                });
+
+            modelBuilder.Entity("EShop.Identity.Domain.Entities.Tenant", b =>
+                {
+                    b.Navigation("TenantSettings");
                 });
 
             modelBuilder.Entity("EShop.Identity.Domain.Entities.User", b =>

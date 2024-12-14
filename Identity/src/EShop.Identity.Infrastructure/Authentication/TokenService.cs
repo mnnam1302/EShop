@@ -27,8 +27,8 @@ public class TokenService : ITokenService
             issuer: jwtOptions.Issuer,
             audience: jwtOptions.Audience,
             claims: claims,
-            //expires: DateTime.Now.AddHours(jwtOptions.AccessExpireHour),
-            expires: DateTime.UtcNow.AddSeconds(30),
+            expires: DateTime.Now.AddHours(jwtOptions.AccessExpireHour),
+            //expires: DateTime.UtcNow.AddSeconds(30),
             signingCredentials: signatureCredentials
         );
 

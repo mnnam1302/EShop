@@ -1,4 +1,4 @@
-using EShop.Identity.Persistence;
+﻿using EShop.Identity.Persistence;
 using EShop.Shared.Diagnostics;
 using Serilog;
 
@@ -17,7 +17,8 @@ public static class Program
 
         try
         {
-            var host = CreateHostBuilder(args);
+            var host = CreateHostBuilder(args).Build();
+            //var app = CreateBuilder(args).Build();
 
             await using (var scope = host.Services.CreateAsyncScope())
             {
@@ -42,7 +43,7 @@ public static class Program
         }
     }
 
-    private static IHost CreateHostBuilder(string[] args)
+    private static IHostBuilder CreateHostBuilder(string[] args)
     {
         // generic host: https://learn.microsoft.com/en-us/dotnet/core/extensions/generic-host?tabs=appbuilder
         return Host.CreateDefaultBuilder()
@@ -51,7 +52,21 @@ public static class Program
                 webBuilder.UseStartup<Startup>()
                     .UseShutdownTimeout(TimeSpan.FromSeconds(ShutdownTimeoutInSeconds));
             })
-            .UseSerilog()
-            .Build();
+            .UseSerilog();
+    }
+
+    private static WebApplicationBuilder CreateBuilder(string[] args)
+    {
+        var builder = WebApplication.CreateBuilder(args);
+
+        builder.Host
+            .ConfigureWebHostDefaults(webBuilder =>
+            {
+                webBuilder.UseStartup<Startup>()
+                    .UseShutdownTimeout(TimeSpan.FromSeconds(ShutdownTimeoutInSeconds));
+            })
+            .UseSerilog();
+
+        return builder;
     }
 }
