@@ -4,7 +4,7 @@ using Serilog;
 
 namespace EShop.Identity.API;
 
-public static class Program
+public class Program
 {
     private const int ShutdownTimeoutInSeconds = 90;
     internal const string ApplicationName = "Identity";
@@ -18,7 +18,7 @@ public static class Program
         try
         {
             var host = CreateHostBuilder(args).Build();
-            //var app = CreateBuilder(args).Build();
+            //var app = CreateBuilder(args);
 
             await using (var scope = host.Services.CreateAsyncScope())
             {
@@ -65,7 +65,8 @@ public static class Program
                 webBuilder.UseStartup<Startup>()
                     .UseShutdownTimeout(TimeSpan.FromSeconds(ShutdownTimeoutInSeconds));
             })
-            .UseSerilog();
+            .UseSerilog()
+            .Build();
 
         return builder;
     }
