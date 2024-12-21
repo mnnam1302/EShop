@@ -28,11 +28,12 @@ public static class DataAccessConfigurationExtensions
         bool useRingFencedScoping = false)
         where TContext : DbContext
     {
-        services.ConfigureNgSqlRetryOptionsPersistence(configuration.GetSection(nameof(NgSqlRetryOptions)));
+        services.ConfigureNgSqlRetryOptions(configuration.GetSection(nameof(NgSqlRetryOptions)));
 
         services.AddDbContext<DbContext, TContext>((provider, builder) =>
         {
-            var options = provider.GetRequiredService<IOptionsMonitor<NgSqlRetryOptions>>(); // singleton
+            var ngsqlRetryOptions = provider.GetRequiredService<IOptionsMonitor<NgSqlRetryOptions>>();
+            var ngsqlVersionOptions = provider.GetRequiredService<IOptionsMonitor<NgSqlVersionOptions>>();
             var multiTeantConnectionInterceptor = provider.GetRequiredService<IMultiTenantConnectionInterceptor>(); // transient
 
             builder
@@ -43,11 +44,12 @@ public static class DataAccessConfigurationExtensions
                     connectionString: configuration.GetConnectionString("DefaultConnection"),
                     npgsqlOptionsAction: optionsBuilder
                         => optionsBuilder
+                            .SetPostgresVersion(ngsqlVersionOptions.CurrentValue.Major, ngsqlVersionOptions.CurrentValue.Minor)
                             .ExecutionStrategy(dependencies => new NpgsqlRetryingExecutionStrategy(
                                 dependencies: dependencies,
-                                maxRetryCount: options.CurrentValue.MaxRetryCount,
-                                maxRetryDelay: options.CurrentValue.MaxRetryDelay,
-                                errorCodesToAdd: options.CurrentValue.ErrorNumbersoAdd))
+                                maxRetryCount: ngsqlRetryOptions.CurrentValue.MaxRetryCount,
+                                maxRetryDelay: ngsqlRetryOptions.CurrentValue.MaxRetryDelay,
+                                errorCodesToAdd: ngsqlRetryOptions.CurrentValue.ErrorNumbersoAdd))
                             .MigrationsAssembly(typeof(TContext).Assembly.GetName().Name))
                 .AddInterceptors(multiTeantConnectionInterceptor);
         })
@@ -61,7 +63,7 @@ public static class DataAccessConfigurationExtensions
         return services;
     }
 
-    private static OptionsBuilder<NgSqlRetryOptions> ConfigureNgSqlRetryOptionsPersistence(
+    private static OptionsBuilder<NgSqlRetryOptions> ConfigureNgSqlRetryOptions(
         this IServiceCollection services,
         IConfiguration section)
     {
@@ -71,4 +73,16 @@ public static class DataAccessConfigurationExtensions
             .ValidateDataAnnotations()
             .ValidateOnStart();
     }
+
+    private static OptionsBuilder<NgSqlVersionOptions> ConfigureNgSqlVersionOptions(
+        this IServiceCollection services,
+        IConfiguration section)
+    {
+        return services
+            .AddOptions<NgSqlVersionOptions>()
+            .Bind(section)
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+    }
+
 }

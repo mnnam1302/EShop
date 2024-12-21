@@ -21,7 +21,7 @@ public class Startup
         Environment = environment;
     }
 
-    public void ConfigureServices(IServiceCollection services)
+    public virtual void ConfigureServices(IServiceCollection services)
     {
         // Shared - Common
         services.AddCors();
@@ -75,7 +75,7 @@ public class Startup
         services.AddServicesInfrastructure();
     }
 
-    public void Configure(IApplicationBuilder app, IHostApplicationLifetime applicationLifetime, ILoggerFactory loggerFactory)
+    public virtual void Configure(IApplicationBuilder app, IHostApplicationLifetime applicationLifetime, ILoggerFactory loggerFactory)
     {
         app.UseMiddleware<ExceptionHandlingMiddleware>();
 

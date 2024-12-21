@@ -1,8 +1,14 @@
 services:
   # Postgres
   postgres:
+    image: postgres:17.0
     container_name: 'postgres'
-    image: postgres
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    command: postgres -c 'max_connections=200'
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: P@ssword
@@ -12,6 +18,7 @@ services:
       - postgres_db:/var/lib/postgressql/data
     networks:
       - eshop
+
   # Redis
   redis:
     image: redis:latest
@@ -23,6 +30,7 @@ services:
       - redis:/data
     networks:
       - eshop
+
   # RabbitMQ
   rabbitmq:
     container_name: rabbitmq
@@ -41,6 +49,7 @@ services:
       RABBITMQ_DEFAULT_VHOST: "nhatnam1302"
     networks:
       - eshop
+
 # Volumes
 volumes:
   postgres_db:
