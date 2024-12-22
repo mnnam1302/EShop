@@ -8,9 +8,9 @@ namespace EShop.Identity.Persistence.Repositories;
 public class RepositoryBase<TEntity, TKey> : IRepositoryBase<TEntity, TKey>, IDisposable
     where TEntity : class, IEntityBase<TKey>
 {
-    private readonly UserDbContext _dbContext;
+    private readonly UsersDbContext _dbContext;
 
-    public RepositoryBase(UserDbContext dbContext)
+    public RepositoryBase(UsersDbContext dbContext)
     {
         _dbContext = dbContext;
     }

@@ -34,7 +34,7 @@ public static class DataAccessConfigurationExtensions
         {
             var ngsqlRetryOptions = provider.GetRequiredService<IOptionsMonitor<NgSqlRetryOptions>>();
             var ngsqlVersionOptions = provider.GetRequiredService<IOptionsMonitor<NgSqlVersionOptions>>();
-            var multiTeantConnectionInterceptor = provider.GetRequiredService<IMultiTenantConnectionInterceptor>(); // transient
+            var multiTeantConnectionInterceptor = provider.GetRequiredService<IMultiTenantIsolationStategy>(); // transient
 
             builder
                 .EnableDetailedErrors(true)

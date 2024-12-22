@@ -29,7 +29,7 @@ public class Startup
         services.AddRedisInfrastructure(Configuration);
         services.AddUserTokenCachingService();
 
-        services.AddDbContextWithScoping<UserDbContext>(Configuration, false);
+        services.AddDbContextWithScoping<UsersDbContext>(Configuration, false);
         services.AddTransient<DbInitializer>();
 
         // Middleware

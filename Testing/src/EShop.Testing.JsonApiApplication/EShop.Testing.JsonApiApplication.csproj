@@ -15,6 +15,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\Shared\src\EShop.Shared.JsonApi\EShop.Shared.JsonApi.csproj" />
+    <ProjectReference Include="..\..\..\Shared\src\EShop.Shared.Scoping\EShop.Shared.Scoping.csproj" />
   </ItemGroup>
 
 </Project>

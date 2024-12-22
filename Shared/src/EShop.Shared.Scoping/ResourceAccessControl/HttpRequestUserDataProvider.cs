@@ -223,7 +223,7 @@ public class HttpRequestUserDataProvider : IUserDetailsProvider
         {
             // We are using username as id for users stored in our local database (as it is unique across tenants anyway)
             var username = accessToken.Claims.First(x => x.Type == "username").Value;
-            var tenantId = accessToken.Claims.First(x => x.Type == "tenant_id").Value;
+            var tenantId = accessToken.Claims.First(x => x.Type == "tenant:groups").Value;
 
             user = new UserData(
                 username,

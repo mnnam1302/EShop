@@ -4,9 +4,9 @@ namespace EShop.Identity.Persistence;
 
 public class UnitOfWork : IUnitOfWork
 {
-    private readonly UserDbContext _dbContext;
+    private readonly UsersDbContext _dbContext;
 
-    public UnitOfWork(UserDbContext dbContext)
+    public UnitOfWork(UsersDbContext dbContext)
     {
         _dbContext = dbContext;
     }

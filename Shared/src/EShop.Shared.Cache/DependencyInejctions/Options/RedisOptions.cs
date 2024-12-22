@@ -2,6 +2,6 @@
 
 public record RedisOptions
 {
-    public bool Enabled { get; init; }
-    public string ConnectionString { get; init; }
+    public bool Enabled { get; init; } = true;
+    public string ConnectionString { get; init; } = string.Empty;
 }

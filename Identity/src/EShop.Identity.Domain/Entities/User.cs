@@ -48,11 +48,9 @@ public class User : EntityBase<string>, ICreatedTracking, IExcludedFromScoping
     {
         return new Claim[]
         {
-            new Claim(ClaimTypes.NameIdentifier, Id),
+            new Claim("sub", Id),
             new Claim("username", Username),
-            new Claim(ClaimTypes.Name, DisplayName ?? string.Empty),
-            new Claim(ClaimTypes.Email, Email),
-            new Claim("tenant_id", OrganizationId!)
+            new Claim("tenant:groups", OrganizationId!) // later parent org & child org
         };
     }
 

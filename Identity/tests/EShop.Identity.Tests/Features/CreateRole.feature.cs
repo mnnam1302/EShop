@@ -26,8 +26,8 @@ namespace EShop.Identity.Tests.Features
         
         private static string[] featureTags = ((string[])(null));
         
-        private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new System.Globalization.CultureInfo("en-US"), "Features", "CreateRole", "\tAs user with role Owner of the tenantA \r\n\tI\'d like to create new role in my tena" +
-                "nt", global::Reqnroll.ProgrammingLanguage.CSharp, featureTags);
+        private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new System.Globalization.CultureInfo("en-US"), "Features", "CreateRole", "\tIn order to define the functional boundary for users across the system\r\n\tAs an a" +
+                "uthorized user\r\n\tI want to be able to create roles", global::Reqnroll.ProgrammingLanguage.CSharp, featureTags);
         
         private Xunit.Abstractions.ITestOutputHelper _testOutputHelper;
         
@@ -101,7 +101,7 @@ namespace EShop.Identity.Tests.Features
             string[] tagsOfScenario = ((string[])(null));
             System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
             global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Create new role for tenant", null, tagsOfScenario, argumentsOfScenario, featureTags);
-#line 5
+#line 12
 this.ScenarioInitialize(scenarioInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
@@ -119,10 +119,10 @@ this.ScenarioInitialize(scenarioInfo);
                             "Role test",
                             "description test",
                             "+8469957900"});
-#line 6
+#line 13
  await testRunner.GivenAsync("There is a new role with the following data", ((string)(null)), table1, "Given ");
 #line hidden
-#line 9
+#line 16
  await testRunner.WhenAsync("Create new role", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
                 global::Reqnroll.Table table2 = new global::Reqnroll.Table(new string[] {
@@ -133,7 +133,7 @@ this.ScenarioInitialize(scenarioInfo);
                             "Role test",
                             "description test",
                             "+8469957900"});
-#line 10
+#line 17
  await testRunner.ThenAsync("A new role created with following data", ((string)(null)), table2, "Then ");
 #line hidden
             }

@@ -1,15 +1,61 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using EShop.Shared.JsonApi.DependencyInjections;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace EShop.Testing.JsonApiApplication.DependencyInjections;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddPostgreSqlDbContext<TContext>(
+    public static IServiceCollection AddPostgreSqlTestDbContext<TContext>(
         this IServiceCollection services,
         PostgreSqlTestDatabase testDatabase,
-        Action<IServiceProvider, DbContextOptionsBuilder> addtionalDbContextConfig = null)
+        Action<IServiceProvider, DbContextOptionsBuilder> additionalDbContextConfig = null)
+        where TContext : DbContext
     {
         services.AddSingleton(testDatabase);
+        services.AddTransient<ITestDatabaseConnectionInterceptor, PostgreSqlTestDatabaseConnectionInterceptor>();
+
+        services.AddDbContext<TContext>((provider, builder) =>
+        {
+            ConfigurePostgreSqlTestDbContext(provider, builder, additionalDbContextConfig);
+        })
+            .AddMultiTenantScoping();
+
+        return services;
+    }
+
+    private static void ConfigurePostgreSqlTestDbContext(
+        IServiceProvider sp,
+        DbContextOptionsBuilder builder,
+        Action<IServiceProvider, DbContextOptionsBuilder> additionalDbContextConfig)
+    {
+        builder.EnableDetailedErrors()
+            .EnableSensitiveDataLogging()
+            .UseNpgsql();
+
+        var testDatabaseConnectionInterceptor = sp.GetRequiredService<ITestDatabaseConnectionInterceptor>();
+        builder.AddInterceptors(testDatabaseConnectionInterceptor);
+
+        //DbLoggingExtensions.ConfigureEntityFrameworkLogs(builder);
+
+        additionalDbContextConfig?.Invoke(sp, builder);
+    }
+
+    public static IServiceCollection AddPostgreSqlTestDbContextFactory<TContext>(
+        this IServiceCollection services,
+        PostgreSqlTestDatabase testDatabase,
+        Action<IServiceProvider, DbContextOptionsBuilder> additionalDbContextConfig = null)
+        where TContext : DbContext
+    {
+        services.AddSingleton(testDatabase);
+        services.AddTransient<ITestDatabaseConnectionInterceptor, PostgreSqlTestDatabaseConnectionInterceptor>();
+
+        services.AddDbContextFactory<TContext>((provider, builder) =>
+        {
+            ConfigurePostgreSqlTestDbContext(provider, builder, additionalDbContextConfig);
+        })
+            .AddMultiTenantScoping();
+
+        return services;
     }
 }

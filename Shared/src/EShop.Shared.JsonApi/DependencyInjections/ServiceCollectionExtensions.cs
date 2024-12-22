@@ -2,6 +2,7 @@
 using EShop.Shared.Scoping;
 using EShop.Shared.Scoping.ResourceAccessControl;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace EShop.Shared.JsonApi.DependencyInjections;
 
@@ -18,7 +19,7 @@ public static class ServiceCollectionExtensions
     {
         services.AddHttpContextAccessor();
         services.AddScoped<IUserDetailsProvider, HttpRequestUserDataProvider>();
-        services.AddTransient<IMultiTenantConnectionInterceptor, PostgresMultiTenantConnectionInterceptor>(); // why transient here?
+        services.AddTransient<IMultiTenantIsolationStategy, PostgresMultiTenantConnectionInterceptor>(); // why transient here?
         services.AddScoped<ITenantIsolationStrategy, PostgresRowLevelSecurityPolicyIsolation>();
         
         return services;
@@ -31,6 +32,23 @@ public static class ServiceCollectionExtensions
             options.Headers.Add("Authorization");
             options.Headers.Add("eshop-user-id");
         });
+
+        return services;
+    }
+
+    /// <summary>
+    /// Replaces all registrations of service type <see cref="TService"/> in the <see cref="IServiceCollection"/>
+    /// with new implementation type <see cref="TImplementation"/>.
+    /// </summary>
+    /// <param name="services">The <see cref="IServiceCollection"/>.</param>
+    /// <param name="lifetime">The <see cref="ServiceLifetime"/> of the service.</param>
+    /// <typeparam name="TService">The service type to be replaced.</typeparam>
+    /// <typeparam name="TImplementation">The replacing service implementation.</typeparam>
+    /// <returns>The <see cref="IServiceCollection"/> for chaining.</returns>
+    public static IServiceCollection ReplaceAll<TService, TImplementation>(this IServiceCollection services, ServiceLifetime lifetime)
+    {
+        services.RemoveAll<TService>();
+        services.Add(new ServiceDescriptor(typeof(TService), typeof(TImplementation), lifetime));
 
         return services;
     }

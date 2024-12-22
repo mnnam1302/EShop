@@ -11,7 +11,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace EShop.Identity.Persistence.Migrations
 {
-    [DbContext(typeof(UserDbContext))]
+    [DbContext(typeof(UsersDbContext))]
     [Migration("20241214061117_Initial_Migration")]
     partial class Initial_Migration
     {
