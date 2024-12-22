@@ -1,5 +1,12 @@
-﻿namespace EShop.Identity.Tests.Setups;
+﻿using EShop.Testing.JsonApiApplication;
 
-public sealed class ApiContext
+namespace EShop.Identity.Tests.Setups;
+
+public sealed class ApiContext : ApiTestContextBase<TestStartup>
 {
+    public ApiContext(PostgreSqlTestDatabase testDatabase)
+        : base(startupFactory: context => 
+            new TestStartup(context.Configuration, context.HostingEnvironment, testDatabase))
+    {
+    }
 }

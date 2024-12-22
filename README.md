@@ -1,21 +1,22 @@
 # EShop Kodi
 
-## Infrastructure local
-docker-compose -f docker-compose.Dev.Infrastructure.yml up -d
+## Setup infrastructure local
+> Run docker-compose to build Infrastructure such as Redis, MSSQL Server, RabbitMQ, Seq for development environment.
+```
+docker-compose -f docker-compose.Development.Infrastructure.yaml up -d
+```
 
 ## Standard Command
 ### Integration Events using interface
 
 ### Cross Cutting Concern
-- Authentication & Authorization
-
-- Logging and tracing
-
-- Exception Handling
-
-- Validation
-
-- Caching
+| STT     | Name		                     |
+|---------|----------------------------------|
+| 1       | Authentication and Authorization |
+| 2       | Logging and tracing              |
+| 3       | Exception Handling               |
+| 4       | Validation                       |
+| 5       | Caching                          |
 
 
 ## Identity
@@ -31,8 +32,9 @@ Permission:
 ### Integration Events
 UserEvents : Integration
 
-- Organization
-AgencyContactDetailUpdated : UserEvent {
+- Organization integration events
+```
+AgencyContactDetailUpdated : UserEvents {
 	Name
 	OrganizationId		// important - unique
 	OrganizationNumber  // important - unique
@@ -42,10 +44,15 @@ AgencyContactDetailUpdated : UserEvent {
 	City
 	Postcode
 }
+```
 
-- User
-UserCreated
-UserUpdated
+
+- User integration events
+```
+UserCreated : UserEvents { }
+
+UserUpdated : UserEvents { }
+```
 
 
 ## Sale

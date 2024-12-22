@@ -3,9 +3,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EShop.Identity.Persistence;
 
-public class UserDbContext : DbContext
+public class UsersDbContext : DbContext
 {
-    public UserDbContext(DbContextOptions<UserDbContext> options)
+    public UsersDbContext(DbContextOptions<UsersDbContext> options)
     : base(options)
     {
     }

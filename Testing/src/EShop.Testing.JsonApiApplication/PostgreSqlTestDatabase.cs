@@ -4,7 +4,6 @@ using Testcontainers.PostgreSql;
 
 namespace EShop.Testing.JsonApiApplication
 {
-    // Can consider apply inherit ILifetimeAsync
     public sealed class PostgreSqlTestDatabase
     {
         private readonly ConcurrentDictionary<string, string> tenantSpecificConnectionStrings = new();
@@ -22,8 +21,8 @@ namespace EShop.Testing.JsonApiApplication
         /// <param name="onDatabaseCreated">Called after the database was created.</param>
         /// <returns>The connection string to the shared database.</returns>
         public async Task<string> CreateSharedDatabaseAsync(
-            string databaseName = null,
-            PostgreSqlTestDatabaseCreated onDatabaseCreated = null)
+            string? databaseName = null,
+            PostgreSqlTestDatabaseCreated? onDatabaseCreated = null)
         {
             this.SharedConnectionString = await CreateDatabaseAsync(
                 databaseName: databaseName ?? Guid.NewGuid().ToString(),
@@ -112,16 +111,16 @@ namespace EShop.Testing.JsonApiApplication
             }
         }
 
-        private async Task<string> CreateDatabaseAsync(string databaseName, PostgreSqlTestDatabaseCreated onDatabaseCreated)
+        private async Task<string> CreateDatabaseAsync(string databaseName, PostgreSqlTestDatabaseCreated? onDatabaseCreated)
         {
             var masterConnectionString = PostgreSqlContainer.GetConnectionString();
             var username = new NpgsqlConnectionStringBuilder(masterConnectionString).Username;
 
             var createDatabaseScript =
                 $"""
-            CREATE DATABASE "{databaseName}";
-            GRANT ALL PRIVILEGES ON DATABASE "{databaseName}" TO {username};
-            """;
+                CREATE DATABASE "{databaseName}";
+                GRANT ALL PRIVILEGES ON DATABASE "{databaseName}" TO {username};
+                """;
 
             await PostgreSqlContainer.ExecScriptAsync(createDatabaseScript);
 

@@ -14,7 +14,7 @@ public static class ServiceCollectionExtensions
 {
     public static void AddNqSqlPersistence(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddDbContextPool<DbContext, UserDbContext>((provider, builder) =>
+        services.AddDbContextPool<DbContext, UsersDbContext>((provider, builder) =>
         {
             //var auditableInterceptor = provider.GetService<UpdateAuditableEntitiesInterceptor>();
             //var domainEventsInterceptor = provider.GetService<ConvertDomainEventsToEventsInterceptor>();
@@ -33,7 +33,7 @@ public static class ServiceCollectionExtensions
                                 maxRetryCount: options.CurrentValue.MaxRetryCount,
                                 maxRetryDelay: options.CurrentValue.MaxRetryDelay,
                                 errorCodesToAdd: options.CurrentValue.ErrorNumbersoAdd))
-                            .MigrationsAssembly(typeof(UserDbContext).Assembly.GetName().Name));
+                            .MigrationsAssembly(typeof(UsersDbContext).Assembly.GetName().Name));
             //.AddInterceptors(
             //    auditableInterceptor,
             //    domainEventsInterceptor);

@@ -3,7 +3,7 @@ using Reqnroll;
 namespace EShop.Identity.Tests.Steps.Roles
 {
     [Binding]
-    public sealed class CreateRoleStepDefinitions
+    public sealed class CreateRoleSteps
     {
         //public CreateRoleStepDefinitions(Role role)
         //{

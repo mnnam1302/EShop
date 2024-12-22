@@ -16,7 +16,7 @@ public sealed class PostgresRowLevelSecurityPolicyIsolation : PostgresRowLevelSe
 
     protected override bool AdjustRlsPolicyOnStartUp => false;
 
-    public void AddTenantIsolation(DbContext dbContext, bool appliedRingFencing = false)
+    public void AddTenantIsolation(DbContext dbContext)
     {
         IEnumerable<PropertyInfo> resourceProperties = dbContext.GetType().GetProperties()
             .Where(p => p.PropertyType.IsGenericType

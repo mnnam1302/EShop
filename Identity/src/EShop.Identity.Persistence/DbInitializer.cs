@@ -12,7 +12,7 @@ namespace EShop.Identity.Persistence;
 
 public class DbInitializer // Transient
 {
-    private readonly UserDbContext _dbContext; // Scope
+    private readonly UsersDbContext _dbContext; // Scope
     private readonly IUserDetailsProvider _userDetailsProvider; // Scope
     private readonly ITenantIsolationStrategy _tenantIsolationStrategy; // Scope, but inside
     private readonly IPasswordHasher _passwordHasher; // Scope
@@ -20,7 +20,7 @@ public class DbInitializer // Transient
     private readonly ILogger _logger;
 
     public DbInitializer(
-        UserDbContext userDbContext,
+        UsersDbContext userDbContext,
         IUserDetailsProvider userDetailsProvider,
         ITenantIsolationStrategy tenantIsolationStrategy,
         IPasswordHasher passwordHasher,
@@ -40,7 +40,7 @@ public class DbInitializer // Transient
     private const string userName = "owner.staging@gmail.com";
     private const string displayName = "Owner Staging";
 
-    public async Task Initialize(bool applyMigrations = true, bool applyTenantIsolation = true, bool applyRingFencing = true)
+    public async Task Initialize(bool applyMigrations = true, bool applyTenantIsolation = true)
     {
         try
         {
@@ -50,17 +50,17 @@ public class DbInitializer // Transient
             if (applyMigrations)
             {
                 _logger.LogDebug("Applying any pending migrations...");
-                _dbContext.Database.Migrate();
+                await _dbContext.Database.MigrateAsync();
             }
             else
             {
                 _logger.LogInformation("Ensuring database is created without running migrations...");
-                _dbContext.Database.EnsureCreated();
+                await _dbContext.Database.EnsureCreatedAsync();
             }
 
             if (applyTenantIsolation && _configuration.GetValue<bool>("AllowTenantIsolation", true))
             {
-                _tenantIsolationStrategy.AddTenantIsolation(_dbContext, applyRingFencing);
+                _tenantIsolationStrategy.AddTenantIsolation(_dbContext);
             }
 
             await SeedDataForTenant();
