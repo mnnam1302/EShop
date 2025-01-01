@@ -41,7 +41,7 @@ public class TestStartup : Identity.API.Startup
         services.AddTransient<IRedisResiliencePolicyProvider, RedisResiliencePolicyProvider>();
         services.AddDistributedMemoryCache();
         services.AddUserTokenCachingService();
-        services.AddUserPermissionForOwnerServiceAPI();
+        services.AddUserPermissionForOwnerService();
 
         services.AddPostgreSqlTestDbContext<UsersDbContext>(_testDatabase);
 

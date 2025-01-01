@@ -1,12 +1,5 @@
 ﻿using EShop.Identity.API.DependencyInjections.Extensions;
 using EShop.Identity.API.Middlewares;
-using EShop.Identity.Application.DependencyInjections.Extensions;
-using EShop.Identity.Infrastructure.DependencyInjections.Extensions;
-using EShop.Identity.Persistence;
-using EShop.Identity.Persistence.DependencyInjections.Extensions;
-using EShop.Shared.Cache.DependencyInejctions.Extensions;
-using EShop.Shared.JsonApi.DependencyInjections;
-using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
 
 namespace EShop.Identity.API;
 
@@ -23,17 +16,27 @@ public class Startup
 
     public virtual void ConfigureServices(IServiceCollection services)
     {
+        /*
+         * Refactor clean code
+         * - AddBoostrapping
+         * - AddShared
+         */
+
+        services
+            .AddShared(Configuration, Environment)
+            .AddBoostrapping(Configuration, Environment);
+
         // Shared - Common
-        services.AddCors();
+        //services.AddCors();
 
-        services.AddRedisInfrastructure(Configuration);
-        services.AddUserTokenCachingService();
+        //services.AddRedisInfrastructure(Configuration);
+        //services.AddUserTokenCachingService();
 
-        services.AddDbContextWithScoping<UsersDbContext>(Configuration, false);
-        services.AddTransient<DbInitializer>();
+        //services.AddDbContextWithScoping<UsersDbContext>(Configuration, false);
+        //services.AddTransient<DbInitializer>();
 
         // Middleware
-        services.AddTransient<ExceptionHandlingMiddleware>();
+        //services.AddTransient<ExceptionHandlingMiddleware>();
 
         /*
          * API
@@ -43,36 +46,36 @@ public class Startup
          * - Health Checks
          * - Logging - shared
          */
-        services.AddControllers();
-        services
-            .AddSwaggerGenNewtonsoftSupport()
-            .AddFluentValidationRulesToSwagger()
-            .AddEndpointsApiExplorer()
-            .AddSwaggerAPI();
+        //services.AddControllers();
+        //services
+        //    .AddSwaggerGenNewtonsoftSupport()
+        //    .AddFluentValidationRulesToSwagger()
+        //    .AddEndpointsApiExplorer()
+        //    .AddSwaggerAPI();
 
-        services
-            .AddApiVersioning(options => options.ReportApiVersions = true)
-            .AddApiExplorer(options =>
-            {
-                options.GroupNameFormat = "'v'VVV";
-                options.SubstituteApiVersionInUrl = true;
-            });
+        //services
+        //    .AddApiVersioning(options => options.ReportApiVersions = true)
+        //    .AddApiExplorer(options =>
+        //    {
+        //        options.GroupNameFormat = "'v'VVV";
+        //        options.SubstituteApiVersionInUrl = true;
+        //    });
 
-        services.AddUserPermissionForOwnerServiceAPI();
+        //services.AddUserPermissionForOwnerService();
 
         /*
          * Application
          * - Automapper
          * - MediatR
          */
-        services.AddMediatRApplication();
-        services.AddAutoMapperApplication();
+        //services.AddMediatRApplication();
+        //services.AddAutoMapperApplication();
 
         // Persistence
-        services.AddRepositoryAndUnitOfWorkPersistence();
+        //services.AddRepositoryAndUnitOfWorkPersistence();
 
         // Infrastructure
-        services.AddServicesInfrastructure();
+        //services.AddServicesInfrastructure();
     }
 
     public virtual void Configure(IApplicationBuilder app, IHostApplicationLifetime applicationLifetime, ILoggerFactory loggerFactory)
@@ -81,9 +84,8 @@ public class Startup
 
         if (Environment.IsDevelopment() || Environment.IsStaging())
         {
-            app.UseCors(x => x.AllowAnyOrigin()
-                              .AllowAnyHeader()
-                              .AllowAnyMethod());
+            app.UseDeveloperExceptionPage();
+            app.UseCors(x => x.AllowAnyMethod());
             app.UseSwaggerAPI();
         }
 

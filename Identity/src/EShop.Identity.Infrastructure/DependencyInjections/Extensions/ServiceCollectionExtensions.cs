@@ -17,7 +17,13 @@ namespace EShop.Identity.Infrastructure.DependencyInjections.Extensions;
 
 public static class ServiceCollectionExtensions
 {
-    public static void AddServicesInfrastructure(this IServiceCollection services)
+    public static IServiceCollection AddServicesInfrastructureLayer(this IServiceCollection services)
+    {
+        services.AddServices();
+        return services;
+    }
+
+    private static void AddServices(this IServiceCollection services)
     {
         services.AddTransient<IPasswordHasher, PasswordHasher>();
         services.AddTransient<ITokenService, TokenService>();

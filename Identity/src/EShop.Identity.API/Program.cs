@@ -4,7 +4,7 @@ using Serilog;
 
 namespace EShop.Identity.API;
 
-public class Program
+public static class Program
 {
     private const int ShutdownTimeoutInSeconds = 90;
     internal const string ApplicationName = "Identity";
@@ -18,14 +18,11 @@ public class Program
         try
         {
             var host = CreateHostBuilder(args).Build();
-            //var app = CreateBuilder(args);
 
-            await using (var scope = host.Services.CreateAsyncScope())
-            {
-                var services = scope.ServiceProvider;
-                var dbInitializer = services.GetRequiredService<DbInitializer>();
-                await dbInitializer.Initialize();
-            }
+            await using var scope = host.Services.CreateAsyncScope();
+            var dbInitializer = ActivatorUtilities.CreateInstance<DbInitializer>(scope.ServiceProvider);
+
+            await dbInitializer.Initialize();
 
             Log.Information("Starting up {ApplicationName}...", ApplicationName);
             await host.RunAsync();
@@ -53,21 +50,5 @@ public class Program
                     .UseShutdownTimeout(TimeSpan.FromSeconds(ShutdownTimeoutInSeconds));
             })
             .UseSerilog();
-    }
-
-    private static WebApplicationBuilder CreateBuilder(string[] args)
-    {
-        var builder = WebApplication.CreateBuilder(args);
-
-        builder.Host
-            .ConfigureWebHostDefaults(webBuilder =>
-            {
-                webBuilder.UseStartup<Startup>()
-                    .UseShutdownTimeout(TimeSpan.FromSeconds(ShutdownTimeoutInSeconds));
-            })
-            .UseSerilog()
-            .Build();
-
-        return builder;
     }
 }
