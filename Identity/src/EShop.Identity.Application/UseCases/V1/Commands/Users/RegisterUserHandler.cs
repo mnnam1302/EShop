@@ -16,19 +16,16 @@ public class RegisterUserHandler : ICommandHandler<Command.RegisterUser>
     private readonly IRepositoryBase<Organization, string> _organizationRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IPasswordHasher _passwordHasher;
-    private readonly IUserDetailsProvider _userDetailsProvider;
 
     public RegisterUserHandler(IRepositoryBase<User, string> userRepository,
         IRepositoryBase<Organization, string> organizationRepository,
         IUnitOfWork unitOfWork,
-        IPasswordHasher passwordHasher,
-        IUserDetailsProvider userDetailsProvider)
+        IPasswordHasher passwordHasher)
     {
         _userRepository = userRepository;
         _organizationRepository = organizationRepository;
         _unitOfWork = unitOfWork;
         _passwordHasher = passwordHasher;
-        _userDetailsProvider = userDetailsProvider;
     }
 
     public async Task<Result> Handle(Command.RegisterUser request, CancellationToken cancellationToken)

@@ -60,12 +60,10 @@ public class RequirePermissionAttribute : Attribute, IFilterFactory, IUserPermis
                 return;
             }
 
-            // Error here: maybe, it's not have DI for IPermissionValidator
             if (!await _permissionValidator.HasPermissionAsync(_requirePermission))
             {
                 context.Result = new StatusCodeResult(StatusCodes.Status403Forbidden);
                 _logger.LogTrace("Rejecting user without {expectedPermission} permissions", _requirePermission);
-                return;
             }
         }
     }

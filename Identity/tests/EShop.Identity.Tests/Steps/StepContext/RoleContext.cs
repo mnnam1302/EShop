@@ -1,5 +1,6 @@
 ﻿using EShop.Identity.Domain.Entities;
 using EShop.Identity.Tests.Setups;
+using EShop.Shared.Contracts.Abstractions.Paging;
 using EShop.Shared.Contracts.Services.Identity.Roles;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -35,14 +36,14 @@ internal class RoleContext
 
     public User[] UsersOfRole { get; internal set; }
 
-    internal async Task CreateRoleAsync(string creatorUserName, string roleName)
+    internal async Task CreateRoleAsync(string creatorUserName)
     {
         try
         {
             var operationalUser = _apiContext.GetUserByUsername(creatorUserName);
-            var command = new Command.CreateRole(roleName, string.Empty, string.Empty);
+            var command = new Command.CreateRole(this.Name, string.Empty, string.Empty);
 
-            var result = await _apiContext.Post<Command.CreateRole>(
+            await _apiContext.Post<Command.CreateRole>(
                 RolesCollectionUri,
                 command,
                 operationalUser);
@@ -52,5 +53,11 @@ internal class RoleContext
             _logger.LogWarning(ex, "Role error");
             this.Error = ex;
         }
+    }
+
+    internal async Task GetAllRolesAsync(string? operationUsername = null)
+    {
+        var operationalUser = _apiContext.GetUserByUsername(operationUsername);
+        var query = new Query.GetRoles(null, Paging.Create(1, 50));
     }
 }

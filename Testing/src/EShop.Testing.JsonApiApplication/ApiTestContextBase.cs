@@ -26,7 +26,7 @@ public interface IApiTestContextBase
     Exception LastApiError { get; }
 
     HttpClient GetAuthorizedClient(UserData user, string acceptHeader = "application/vnd.api+json");
-    UserData GetUserByUsername(string username = null);
+    UserData GetUserByUsername(string? username = null);
 }
 
 public abstract class ApiTestContextBase
@@ -113,7 +113,7 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
 
     public string LoggedInUser { get; set; }
 
-    public HttpStatusCode LastStatusCode { get; private set; }
+    public HttpStatusCode LastStatusCode { get; set; }
 
     public void AddUser(UserData user, bool setAsDefault)
     {
@@ -142,7 +142,7 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
         }
     }
 
-    public UserData GetUserByUsername(string username = null)
+    public UserData GetUserByUsername(string? username = null)
     {
         var operationalUsername = username ?? LoggedInUser;
         operationalUsername = operationalUsername?.ToLower();
@@ -183,6 +183,15 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
         foreach (var permissionId in permissionIds)
         {
             AddPermissionToUser(adminUser.Id, permissionId);
+        }
+    }
+
+    public void SetupPermissionsForUser(string username, string[] permissionIds)
+    {
+        var user = GetUserByUsername(username);
+        foreach (var permissionId in permissionIds)
+        {
+            AddPermissionToUser(user.Id, permissionId);
         }
     }
 
@@ -289,7 +298,7 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
     public async Task<HttpResponseMessage> Post<TRequest>(
         string relativeUri,
         TRequest request,
-        UserData? user = null)
+        UserData user = null)
         where TRequest : ICommand
     {
         if (string.IsNullOrEmpty(relativeUri))
@@ -317,9 +326,11 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
 
             var response = await client.SendAsync(requestBody);
 
-            //var result = await ProcessResultResource<Result>(response);
-            //return result;
-
+            /*
+             * Example, handle response and apply result pattern to validate
+                ProcessResultResource(response) : Result
+                ProcessResultResource<RoleResponse>(response) : Result<RoleResponse>
+             */
             return response;
         }
         catch (Exception ex)

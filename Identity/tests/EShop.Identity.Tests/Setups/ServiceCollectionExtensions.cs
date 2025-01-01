@@ -37,6 +37,14 @@ internal static class ServiceCollectionExtensions
         return services;
     }
 
+    private static IServiceCollection AddTestUserPermissions(this IServiceCollection services)
+    {
+        services.AddTransient<IPermissionValidator, CurrentUserPermissionsValidator>();
+        services.AddSingleton<IUserPermissionsProvider, TestUserPermissionProvider>();
+
+        return services;
+    }
+
     private static IServiceCollection AddTestServicesApiLayer(this IServiceCollection services)
     {
         services.AddTransient<ExceptionHandlingMiddleware>();
@@ -72,15 +80,6 @@ internal static class ServiceCollectionExtensions
 
         services
             .AddPostgreSqlTestDbContext<UsersDbContext>(testDatabase);
-
-        return services;
-    }
-
-    // Consider
-    private static IServiceCollection AddTestUserPermissions(this IServiceCollection services)
-    {
-        services.AddTransient<IPermissionValidator, CurrentUserPermissionsValidator>();
-        services.AddSingleton<IUserPermissionsProvider, TestUserPermissionProvider>();
 
         return services;
     }

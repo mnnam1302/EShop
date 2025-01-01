@@ -88,16 +88,16 @@ namespace EShop.Identity.Tests.Features
 #line 6
 #line hidden
             global::Reqnroll.Table table1 = new global::Reqnroll.Table(new string[] {
-                        "TenantName",
                         "Username",
                         "DisplayName",
-                        "Email"});
+                        "Email",
+                        "TenantName"});
             table1.AddRow(new string[] {
-                        "Tenant1",
                         "tenantOwner1",
                         "Tenant Owner1",
-                        "owner1@tenant1.com"});
-#line 7
+                        "owner1@tenant1.com",
+                        "Tenant1"});
+#line 10
  await testRunner.GivenAsync("following tenant users added to the system", ((string)(null)), table1, "Given ");
 #line hidden
         }
@@ -120,7 +120,7 @@ namespace EShop.Identity.Tests.Features
             string[] tagsOfScenario = ((string[])(null));
             System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
             global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Create new role for tenant", null, tagsOfScenario, argumentsOfScenario, featureTags);
-#line 12
+#line 15
 this.ScenarioInitialize(scenarioInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
@@ -133,7 +133,7 @@ this.ScenarioInitialize(scenarioInfo);
 #line 6
 await this.FeatureBackgroundAsync();
 #line hidden
-#line 13
+#line 16
  await testRunner.WhenAsync("user \'tenantOwner1\' create role \'NewRole\'", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
                 global::Reqnroll.Table table2 = new global::Reqnroll.Table(new string[] {
@@ -145,7 +145,7 @@ await this.FeatureBackgroundAsync();
                 table2.AddRow(new string[] {
                             "NewRole",
                             "Tenant1"});
-#line 14
+#line 17
  await testRunner.ThenAsync("there are following Roles in the system", ((string)(null)), table2, "Then ");
 #line hidden
             }

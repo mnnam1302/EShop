@@ -2,6 +2,8 @@
 using EShop.Identity.Tests.Setups;
 using EShop.Shared.Contracts.Services.Identity.Users;
 using EShop.Shared.Scoping;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace EShop.Identity.Tests.Steps.StepContext;
 
@@ -13,10 +15,12 @@ internal class UserContext
     private const string PermissionsCollectionUrl = "api/v1/permissions";
 
     private readonly ApiContext _apiContext;
+    private readonly ILogger<UserContext> _logger;
 
     public UserContext(ApiContext apiContext)
     {
         _apiContext = apiContext;
+        _logger = apiContext.ServiceProvider.GetRequiredService<ILogger<UserContext>>();
     }
 
     public List<User> RetrievedUsers = new List<User>();
@@ -31,7 +35,7 @@ internal class UserContext
     public Organization RetrievedUserOrganization { get; private set; }
     public string UserGroup { get; internal set; }
 
-    internal async void SimulateTenantCreationAsync(
+    internal async Task SimulateTenantUserCreationAsync(
         string tenantId,
         string username,
         string displayName,
@@ -39,14 +43,25 @@ internal class UserContext
         string group,
         bool setAsDefault = true)
     {
-        username = $"{username}@{tenantId}".ToLower();
+        try
+        {
+            //username = $"{username}@{tenantId}".ToLower();
+            var command = new Command.RegisterUser(username, "password", email, displayName)
+            {
+                //OrganizationId = tenantId
+            };
+            var result = await _apiContext.Post<Command.RegisterUser>(AuthCollectionUri, command);
 
-        // Create tenant or user here
-        var command = new Command.RegisterUser(username, "password", email, displayName);
-        var result = await _apiContext.Post<Command.RegisterUser>(AuthCollectionUri, command);
+            _apiContext.AddUser(
+                new UserData(username, username, tenantId, group == UserData.EShopSupportGroup),
+                setAsDefault);
 
-        _apiContext.AddUser(
-            new UserData(username, username, tenantId, group == UserData.EShopSupportGroup),
-            setAsDefault);
+            _apiContext.GrantAllPermissionsToUser(username);
+        }
+        catch(Exception ex)
+        {
+            _logger.LogWarning("User error");
+            this.Error = ex;
+        }
     }
 }

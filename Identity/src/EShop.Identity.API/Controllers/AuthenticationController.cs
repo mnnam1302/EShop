@@ -33,7 +33,7 @@ namespace EShop.Identity.API.Controllers
                 return HandlerFailure(result);
             }
 
-            return Results.Ok(result);
+            return Results.Created("", result);
         }
 
         [HttpPost("login")]

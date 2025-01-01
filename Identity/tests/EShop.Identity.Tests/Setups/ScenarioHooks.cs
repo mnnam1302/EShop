@@ -55,7 +55,6 @@ public sealed class ScenarioHooks
         await using var databaseConnection = new NpgsqlConnection(testDatabase.SharedConnectionString);
         await using var dbContext = scope.ServiceProvider.GetRequiredService<UsersDbContext>();
 
-        //dbContext.Database.SetConnectionString(databaseConnection.ConnectionString, contextOwnsConnection: true);
         dbContext.Database.SetConnectionString(databaseConnection.ConnectionString);
 
         var dbInitilize = new DbInitializer(
@@ -75,7 +74,6 @@ public sealed class ScenarioHooks
         if (scenarioContext.StepContext.StepInfo.StepDefinitionType == StepDefinitionType.Given)
         {
             apiContext.LastApiError.Should().BeNull();
-            // later here
         }
     }
 

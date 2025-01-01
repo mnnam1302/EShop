@@ -4,7 +4,7 @@ using Serilog;
 
 namespace EShop.Identity.API;
 
-public static class Program
+public class Program
 {
     private const int ShutdownTimeoutInSeconds = 90;
     internal const string ApplicationName = "Identity";
