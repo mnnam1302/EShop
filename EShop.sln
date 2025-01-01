@@ -11,6 +11,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		docker-compose.Dev.Infrastructure.yml = docker-compose.Dev.Infrastructure.yml
 		postgres-init.sql = postgres-init.sql
+		README.md = README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Testing", "Testing", "{8769BF17-9FEC-492C-94E6-E906EA96C6E9}"
@@ -59,7 +60,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EShop.Shared.Diagnostics", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EShop.Identity.Tests", "Identity\tests\EShop.Identity.Tests\EShop.Identity.Tests.csproj", "{CAF55E52-A2D9-4174-90D9-BE7A157031E0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EShop.Testing.JsonApiApplication", "Testing\src\EShop.Testing.JsonApiApplication\EShop.Testing.JsonApiApplication.csproj", "{340F0CA0-F88F-4E71-8818-10473DBD99F0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EShop.Testing.JsonApiApplication", "Testing\src\EShop.Testing.JsonApiApplication\EShop.Testing.JsonApiApplication.csproj", "{340F0CA0-F88F-4E71-8818-10473DBD99F0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

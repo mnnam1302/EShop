@@ -81,6 +81,5 @@ namespace EShop.Identity.API.Controllers
 
             return Results.Ok(result);
         }
-        
     }
 }

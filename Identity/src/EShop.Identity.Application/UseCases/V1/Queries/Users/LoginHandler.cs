@@ -5,9 +5,7 @@ using EShop.Identity.Domain.Exceptions;
 using EShop.Shared.Contracts.Abstractions.Requests;
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.Contracts.Services.Identity.Auth;
-using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserPermissionProvider;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserTokenProvider;
-using System.Security.Claims;
 
 namespace EShop.Identity.Application.UseCases.V1.Queries.Users;
 

@@ -5,12 +5,12 @@ namespace EShop.Identity.Application.Services;
 public class OwnerCacheUserPermissionService : IUserPermissionsProvider
 {
     private readonly IPermissionCachingOwnerService permissionCache;
-    private readonly IPermissionCalculator permissionCalculator;
+    private readonly IPermissionCalculator _permissionCalculator;
 
     public OwnerCacheUserPermissionService(IPermissionCachingOwnerService permissionCache, IPermissionCalculator permissionCalculator)
     {
         this.permissionCache = permissionCache;
-        this.permissionCalculator = permissionCalculator;
+        this._permissionCalculator = permissionCalculator;
     }
 
     public async Task<string[]> GetPermissions(string userId)
@@ -25,7 +25,7 @@ public class OwnerCacheUserPermissionService : IUserPermissionsProvider
             return userPermissionsFromCache;
         }
 
-        var calculatedPermissions = await this.permissionCalculator.CalculateFor(userId.ToLower());
+        var calculatedPermissions = await _permissionCalculator.CalculateFor(userId.ToLower());
 
         permissionCache.AddPermissions(userId, calculatedPermissions);
 

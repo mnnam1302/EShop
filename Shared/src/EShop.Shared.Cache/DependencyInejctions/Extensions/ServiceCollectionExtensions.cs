@@ -34,7 +34,10 @@ public static class ServiceCollectionExtensions
 
     public static IServiceCollection AddMemoryInfrastructure(this IServiceCollection services)
     {
+        services.AddTransient(typeof(CachedRemoteConfiguration));
+        services.AddTransient<IRedisResiliencePolicyProvider, RedisResiliencePolicyProvider>();
         services.AddDistributedMemoryCache();
+
         return services;
     }
 

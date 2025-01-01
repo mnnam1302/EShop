@@ -35,7 +35,8 @@ public static class ServiceCollectionExtensions
             .AddServicesApiLayer()
             .AddServicesApplicationLayer()
             .AddServicesPersistenceLayer()
-            .AddServicesInfrastructureLayer();
+            .AddServicesInfrastructureLayer()
+            .AddUserPermissionForOwnerService();
 
         return services;
     }
@@ -43,8 +44,6 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddServicesApiLayer(this IServiceCollection services)
     {
         services.AddTransient<ExceptionHandlingMiddleware>();
-
-        services.AddUserPermissionForOwnerService();
 
         services.AddControllers();
         services

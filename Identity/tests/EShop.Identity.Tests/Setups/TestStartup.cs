@@ -35,73 +35,15 @@ public class TestStartup : Identity.API.Startup
 
     public override void ConfigureServices(IServiceCollection services)
     {
-        services.AddCors();
-
-        services.AddTransient(typeof(CachedRemoteConfiguration));
-        services.AddTransient<IRedisResiliencePolicyProvider, RedisResiliencePolicyProvider>();
-        services.AddDistributedMemoryCache();
-        services.AddUserTokenCachingService();
-        services.AddUserPermissionForOwnerService();
-
-        services.AddPostgreSqlTestDbContext<UsersDbContext>(_testDatabase);
-
-        // Middleware
-        services.AddTransient<ExceptionHandlingMiddleware>();
-
-        /*
-         * API
-         * - Controllers
-         * - Api Versioning
-         * - Swagger
-         * - Health Checks
-         * - Logging - shared
-         */
-        services.AddControllers()
-            .AddApplicationPart(typeof(Identity.API.Startup).Assembly);
-
-        //services.AddMvc(options =>
-        //{
-        //    options.AddDefaultAuthorizationFilter();
-        //})
-        //    .AddNewtonsoftJson(options => options.UseCamelCasing(processDictionaryKeys: false))
-        //    .AddApplicationPart(typeof(Identity.API.Startup).Assembly)
-        //    .AddControllersAsServices();
-
         services
-            .AddSwaggerGenNewtonsoftSupport()
-            .AddFluentValidationRulesToSwagger()
-            .AddEndpointsApiExplorer()
-            .AddSwaggerAPI();
-
-        services
-            .AddApiVersioning(options => options.ReportApiVersions = true)
-            .AddApiExplorer(options =>
-            {
-                options.GroupNameFormat = "'v'VVV";
-                options.SubstituteApiVersionInUrl = true;
-            });
-
-        services.ReplaceAll<IAsyncRedisCachingService, FakeRedisCachingService>(ServiceLifetime.Singleton);
-        services.ReplaceAll<IRedisCachingService, FakeRedisCachingService>(ServiceLifetime.Singleton);
-
-        /*
-         * Application
-         * - Automapper
-         * - MediatR
-         */
-        services.AddMediatRApplication();
-        services.AddAutoMapperApplication();
-
-        // Persistence
-        services.AddRepositoryAndUnitOfWorkPersistence();
-
-        // Infrastructure
-        services.AddServicesInfrastructure();
+            .AddTestShared(Configuration, Environment, _testDatabase)
+            .AddTestBoostrapping(Configuration, Environment);
     }
 
     public override void Configure(IApplicationBuilder app, IHostApplicationLifetime applicationLifetime, ILoggerFactory loggerFactory)
     {
         app.UseMiddleware<ExceptionHandlingMiddleware>();
+
         app.UseRouting();
         app.UseEndpoints(endpoints => endpoints.MapControllers());
     }
