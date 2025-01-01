@@ -1,9 +1,9 @@
-﻿using System.Net;
+﻿using EShop.Shared.Contracts.Abstractions.Shared;
+using System.Net;
 
 namespace EShop.Testing.JsonApiApplication;
 
-public sealed class HttpRequestResult<TResource>
-    where TResource : class
+public sealed class HttpRequestResult<T>
 {
     public HttpStatusCode ResponseStatusCode { get; init; }
 
@@ -17,7 +17,7 @@ public sealed class HttpRequestResult<TResource>
     }
 
     public string ReasonPhrase { get; init; }
-    public TResource Resource { get; init; }
+    public T Resource { get; init; }
     public dynamic Included { get; init; }
 
     public void EnsureSuccessStatusCode()

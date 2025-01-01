@@ -1,4 +1,6 @@
-﻿using EShop.Shared.Scoping;
+﻿using EShop.Shared.Contracts.Abstractions.Requests;
+using EShop.Shared.Contracts.Abstractions.Shared;
+using EShop.Shared.Scoping;
 using EShop.Shared.Scoping.ResourceAccessControl;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserPermissionProvider;
 using Microsoft.AspNetCore.Hosting;
@@ -8,6 +10,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Primitives;
+using Newtonsoft.Json;
 using Serilog;
 using System.Linq.Expressions;
 using System.Net;
@@ -196,7 +199,7 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
         }
     }
 
-    public HttpClient GetAuthorizedClient(UserData user, string acceptHeader = "application/vnd.api+json")
+    public HttpClient GetAuthorizedClient(UserData user, string acceptHeader = "application/json")
     {
         return GetAuthorisedClientCore(user, acceptHeader);
     }
@@ -205,7 +208,7 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
     {
         var client = _server.CreateClient();
         client.DefaultRequestHeaders.Accept.Clear();
-        //client.DefaultRequestHeaders.Accept.ParseAdd(acceptHeader);
+        client.DefaultRequestHeaders.Accept.ParseAdd(acceptHeader);
 
         if (user?.UserType is UserTypes.AppClientWithIndividualUsers or UserTypes.AppClientWithoutIndividualUsers)
         {
@@ -283,64 +286,28 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
         return doesMatchTargetValue;
     }
 
-    public Task<HttpRequestResult<T>> Post<T>(
+    public async Task<HttpResponseMessage> Post<TRequest>(
         string relativeUri,
-        T request,
-        UserData user = null,
-        Expression<Func<T, dynamic>> relationshipSelector = null)
-        where T : class
-    {
-        return Post<T, T>(relativeUri, request, user, relationshipSelector);
-    }
-
-    public async Task<HttpRequestResult<TResultResource>> Post<TPostedResource, TResultResource>(
-        string relativeUri,
-        TPostedResource resource,
-        UserData user = null,
-        Expression<Func<TPostedResource, dynamic>> relationshipSelector = null)
-        where TPostedResource : class
-        where TResultResource : class
-    {
-        using var response = await PostInternal<TPostedResource>(
-            relativeUri,
-            resource,
-            user,
-            relationshipSelector);
-
-        var responseContent = await response.Content.ReadAsStringAsync();
-        var result = JsonSerializer.Deserialize<TResultResource>(responseContent);
-
-        return new HttpRequestResult<TResultResource>
-        {
-            ResponseStatusCode = response.StatusCode,
-            ReasonPhrase = response?.ReasonPhrase,
-            Resource = result
-        };
-    }
-
-    private Task<HttpResponseMessage> PostInternal<TPostedResource>(
-        string relativeUri,
-        TPostedResource resource,
-        UserData user = null,
-        Expression<Func<TPostedResource, dynamic>> relationshipSelector = null)
-        where TPostedResource : class
+        TRequest request,
+        UserData? user = null)
+        where TRequest : ICommand
     {
         if (string.IsNullOrEmpty(relativeUri))
         {
             throw new ArgumentNullException(nameof(relativeUri));
         }
 
-        if (resource == null)
+        if (request == null)
         {
-            throw new ArgumentNullException(nameof(resource));
+            throw new ArgumentNullException(nameof(request));
         }
 
         try
         {
             var client = GetAuthorizedClient(user);
-            var request = new HttpRequestMessage(HttpMethod.Post, relativeUri)
+            var requestBody = new HttpRequestMessage(HttpMethod.Post, relativeUri)
             {
-                Content = new StringContent(JsonSerializer.Serialize(resource), Encoding.UTF8)
+                Content = new StringContent(System.Text.Json.JsonSerializer.Serialize(request), Encoding.UTF8, "application/json")
             };
 
             _logger.LogInformation(
@@ -348,7 +315,12 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
                     user?.Username ?? _defaultUser?.Username,
                     relativeUri);
 
-            return client.SendAsync(request);
+            var response = await client.SendAsync(requestBody);
+
+            //var result = await ProcessResultResource<Result>(response);
+            //return result;
+
+            return response;
         }
         catch (Exception ex)
         {
@@ -358,12 +330,19 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
         }
     }
 
-    //private async Task<HttpResponseMessage> PostInternal(
-    //        string relativeUri,
-    //        IIdentifiable resource,
-    //        UserData user = null)
-    //{
-    //}
+    private async Task<HttpRequestResult<T>> ProcessResultResource<T>(HttpResponseMessage response) 
+        where T : class
+    {
+        var resourceJson = await response.Content.ReadAsStringAsync();
+
+        return new HttpRequestResult<T>
+        {
+            ResponseStatusCode = response.StatusCode,
+            ReasonPhrase = response.ReasonPhrase,
+            Resource = JsonConvert.DeserializeObject<T>(resourceJson),
+            Included = null
+        };
+    }
 
     public void Dispose()
     {

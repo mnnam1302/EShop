@@ -97,13 +97,8 @@ namespace EShop.Identity.Tests.Features
                         "tenantOwner1",
                         "Tenant Owner1",
                         "owner1@tenant1.com"});
-            table1.AddRow(new string[] {
-                        "Tenant2",
-                        "tenantOwner2",
-                        "Tenant Ownwe2",
-                        "ownwe2@tenant2.com"});
 #line 7
- await testRunner.GivenAsync("following tenants added to the system", ((string)(null)), table1, "Given ");
+ await testRunner.GivenAsync("following tenant users added to the system", ((string)(null)), table1, "Given ");
 #line hidden
         }
         
@@ -147,9 +142,6 @@ await this.FeatureBackgroundAsync();
                 table2.AddRow(new string[] {
                             "Owner",
                             "Tenant1"});
-                table2.AddRow(new string[] {
-                            "Owner",
-                            "Tenant2"});
                 table2.AddRow(new string[] {
                             "NewRole",
                             "Tenant1"});

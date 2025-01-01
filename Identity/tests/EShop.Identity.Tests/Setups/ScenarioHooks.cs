@@ -25,7 +25,7 @@ public sealed class ScenarioHooks
     public static async Task BeforeTestRun()
     {
         PostgreSqlContainer = new PostgreSqlBuilder()
-                .WithPortBinding(64305, 5432)
+                .WithPortBinding(49999, 5432)
                 .WithImage("postgres:17.0")
                 .Build();
 

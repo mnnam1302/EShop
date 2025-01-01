@@ -14,10 +14,10 @@ internal class CreateRoleSteps
     }
 
     [When("user '(.*)' create role '(.*)'")]
-    public async Task WhenUserCreateRole(string creatorUsername = null, string roleName= null)
+    public async Task WhenUserCreateRole(string creatorUsername, string roleName)
     {
         _roleContext.Name = roleName ?? _roleContext.Name;
-        await _roleContext.CreateRoleAsync(creatorUsername);
+        await _roleContext.CreateRoleAsync(creatorUsername, roleName);
     }
 
     [Then("there are following Roles in the system")]

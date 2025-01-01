@@ -29,6 +29,7 @@ public class TestStartup : Identity.API.Startup
     public TestStartup(IConfiguration configuration, IWebHostEnvironment env, PostgreSqlTestDatabase testDatabase)
         : base(configuration, env)
     {
+        this.Environment.EnvironmentName = "Development";
         _testDatabase = testDatabase;
     }
 
@@ -36,17 +37,13 @@ public class TestStartup : Identity.API.Startup
     {
         services.AddCors();
 
-        // Problem here, look at see env inside constructor is Production environment. Seamless using DistributedMemoryCache
-        //services.AddRedisInfrastructure(Configuration); // Redis Infrastructure, cannot load appsettings.Development.json
-        //services.AddDistributedMemoryCache();
-        //services.AddUserTokenCachingService();
-
-        //services.AddPostgreSqlTestDbContext<UsersDbContext>(_testDatabase)
-        //    .AddPostgreSqlTestDbContextFactory<UsersDbContext>(_testDatabase);
+        services.AddTransient(typeof(CachedRemoteConfiguration));
+        services.AddTransient<IRedisResiliencePolicyProvider, RedisResiliencePolicyProvider>();
+        services.AddDistributedMemoryCache();
+        services.AddUserTokenCachingService();
+        services.AddUserPermissionForOwnerServiceAPI();
 
         services.AddPostgreSqlTestDbContext<UsersDbContext>(_testDatabase);
-
-        services.AddMultiTenantScoping();
 
         // Middleware
         services.AddTransient<ExceptionHandlingMiddleware>();
@@ -100,18 +97,6 @@ public class TestStartup : Identity.API.Startup
 
         // Infrastructure
         services.AddServicesInfrastructure();
-
-
-        // TEST
-        services.AddTransient(typeof(CachedRemoteConfiguration));
-        services.AddTransient<IRedisResiliencePolicyProvider, RedisResiliencePolicyProvider>();
-        services.AddDistributedMemoryCache();
-
-        //services.AddRedisInfrastructure(Configuration);
-        services.AddUserTokenCachingService();
-        services.AddUserPermissionForOwnerServiceAPI();
-
-
     }
 
     public override void Configure(IApplicationBuilder app, IHostApplicationLifetime applicationLifetime, ILoggerFactory loggerFactory)
@@ -119,10 +104,5 @@ public class TestStartup : Identity.API.Startup
         app.UseMiddleware<ExceptionHandlingMiddleware>();
         app.UseRouting();
         app.UseEndpoints(endpoints => endpoints.MapControllers());
-    }
-
-    private static void AddUserPermissionsProvider(IServiceCollection services)
-    {
-
     }
 }

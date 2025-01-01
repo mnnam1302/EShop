@@ -16,8 +16,8 @@ namespace EShop.Identity.Tests.Steps.Users
             _userContext = userContext;
         }
 
-        [Given("following tenants added to the system")]
-        public void GivenFollowingTenantsAddedToTheSystem(DataTable dataTable)
+        [Given("following tenant users added to the system")]
+        public void GivenFollowingTenantUsersAddedToTheSystem(DataTable dataTable)
         {
             foreach (var tenant in dataTable.Rows)
             {
