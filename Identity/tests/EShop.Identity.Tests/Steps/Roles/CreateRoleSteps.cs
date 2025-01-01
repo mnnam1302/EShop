@@ -1,29 +1,29 @@
+using EShop.Identity.Tests.Steps.StepContext;
 using Reqnroll;
 
-namespace EShop.Identity.Tests.Steps.Roles
+namespace EShop.Identity.Tests.Steps.Roles;
+
+[Binding]
+internal class CreateRoleSteps
 {
-    [Binding]
-    public sealed class CreateRoleSteps
+    private readonly RoleContext _roleContext;
+
+    public CreateRoleSteps(RoleContext roleContext)
     {
-        //public CreateRoleStepDefinitions(Role role)
-        //{
-        //    _role = role;
-        //}
-
-        [Given("There is a new role with the following data")]
-        public void GivenThereIsANewRoleWithTheFollowingData(DataTable dataTable)
-        {
-            var a = 10;
-        }
-
-        [When("Create new role")]
-        public void WhenCreateNewRole()
-        {
-        }
-
-        [Then("A new role created with following data")]
-        public void ThenANewRoleCreatedWithFollowingData(DataTable dataTable)
-        {
-        }
+        _roleContext = roleContext;
     }
+
+    [When("user '(.*)' create role '(.*)'")]
+    public async Task WhenUserCreateRole(string creatorUsername = null, string roleName= null)
+    {
+        _roleContext.Name = roleName ?? _roleContext.Name;
+        await _roleContext.CreateRoleAsync(creatorUsername);
+    }
+
+    [Then("there are following Roles in the system")]
+    public void ThenThereAreFollowingRolesInTheSystem(DataTable dataTable)
+    {
+        var test = 10;
+    }
+
 }

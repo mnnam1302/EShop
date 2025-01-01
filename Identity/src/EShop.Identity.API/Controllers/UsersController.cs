@@ -17,18 +17,5 @@ namespace EShop.Identity.API.Controllers
         {
             _sender = sender;
         }
-
-        [HttpPost("register")]
-        public async Task<IResult> Register([FromBody] Command.RegisterUser command)
-        {
-            var result = await _sender.Send(command);
-
-            if (result.IsFailure)
-            {
-                return HandlerFailure(result);
-            }
-
-            return Results.Ok(result);
-        }
     }
 }

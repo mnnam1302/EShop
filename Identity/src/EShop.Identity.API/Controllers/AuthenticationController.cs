@@ -23,6 +23,19 @@ namespace EShop.Identity.API.Controllers
             _userDetailsProvider = userDetailsProvider;
         }
 
+        [HttpPost("register")]
+        public async Task<IResult> Register([FromBody] EShop.Shared.Contracts.Services.Identity.Users.Command.RegisterUser command)
+        {
+            var result = await _sender.Send(command);
+
+            if (result.IsFailure)
+            {
+                return HandlerFailure(result);
+            }
+
+            return Results.Ok(result);
+        }
+
         [HttpPost("login")]
         public async Task<IResult> Login([FromBody] Query.Login query)
         {

@@ -5,8 +5,10 @@ using EShop.Identity.Infrastructure.DependencyInjections.Extensions;
 using EShop.Identity.Persistence;
 using EShop.Identity.Persistence.DependencyInjections.Extensions;
 using EShop.Shared.Cache.DependencyInejctions.Extensions;
+using EShop.Shared.Cache.Providers;
 using EShop.Shared.Cache.Services;
 using EShop.Shared.JsonApi.DependencyInjections;
+using EShop.Shared.Scoping.ResourceAccessControl.Providers;
 using EShop.Testing.JsonApiApplication;
 using EShop.Testing.JsonApiApplication.DependencyInjections;
 using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
@@ -23,7 +25,7 @@ namespace EShop.Identity.Tests.Setups;
 public class TestStartup : Identity.API.Startup
 {
     private readonly PostgreSqlTestDatabase _testDatabase;
-
+    
     public TestStartup(IConfiguration configuration, IWebHostEnvironment env, PostgreSqlTestDatabase testDatabase)
         : base(configuration, env)
     {
@@ -34,9 +36,10 @@ public class TestStartup : Identity.API.Startup
     {
         services.AddCors();
 
-        // No problem here, Fake implment IRedisCaching, cứ register như startup, dùng services.ReplaceAll
-        services.AddRedisInfrastructure(Configuration);
-        services.AddUserTokenCachingService();
+        // Problem here, look at see env inside constructor is Production environment. Seamless using DistributedMemoryCache
+        //services.AddRedisInfrastructure(Configuration); // Redis Infrastructure, cannot load appsettings.Development.json
+        //services.AddDistributedMemoryCache();
+        //services.AddUserTokenCachingService();
 
         //services.AddPostgreSqlTestDbContext<UsersDbContext>(_testDatabase)
         //    .AddPostgreSqlTestDbContextFactory<UsersDbContext>(_testDatabase);
@@ -81,8 +84,6 @@ public class TestStartup : Identity.API.Startup
                 options.SubstituteApiVersionInUrl = true;
             });
 
-        services.AddUserPermissionForOwnerServiceAPI();
-
         services.ReplaceAll<IAsyncRedisCachingService, FakeRedisCachingService>(ServiceLifetime.Singleton);
         services.ReplaceAll<IRedisCachingService, FakeRedisCachingService>(ServiceLifetime.Singleton);
 
@@ -99,6 +100,18 @@ public class TestStartup : Identity.API.Startup
 
         // Infrastructure
         services.AddServicesInfrastructure();
+
+
+        // TEST
+        services.AddTransient(typeof(CachedRemoteConfiguration));
+        services.AddTransient<IRedisResiliencePolicyProvider, RedisResiliencePolicyProvider>();
+        services.AddDistributedMemoryCache();
+
+        //services.AddRedisInfrastructure(Configuration);
+        services.AddUserTokenCachingService();
+        services.AddUserPermissionForOwnerServiceAPI();
+
+
     }
 
     public override void Configure(IApplicationBuilder app, IHostApplicationLifetime applicationLifetime, ILoggerFactory loggerFactory)
@@ -106,5 +119,10 @@ public class TestStartup : Identity.API.Startup
         app.UseMiddleware<ExceptionHandlingMiddleware>();
         app.UseRouting();
         app.UseEndpoints(endpoints => endpoints.MapControllers());
+    }
+
+    private static void AddUserPermissionsProvider(IServiceCollection services)
+    {
+
     }
 }

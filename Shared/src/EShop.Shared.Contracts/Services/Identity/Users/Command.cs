@@ -7,8 +7,8 @@ public static class Command
     public record RegisterUser(string UserName,
         string Password,
         string Email,
-        string? DisplayName,
-        string? PhoneNumber,
-        DateTime? DateOfBirth,
-        string? OrganizationId) : ICommand;
+        string? DisplayName = null,
+        string? PhoneNumber = null,
+        DateTime? DateOfBirth = null,
+        string? OrganizationId = null) : ICommand;
 }

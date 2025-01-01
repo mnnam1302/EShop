@@ -32,6 +32,12 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
+    public static IServiceCollection AddMemoryInfrastructure(this IServiceCollection services)
+    {
+        services.AddDistributedMemoryCache();
+        return services;
+    }
+
     public static IServiceCollection AddUserTokenCachingService(this IServiceCollection services)
     {
         services.AddTransient<

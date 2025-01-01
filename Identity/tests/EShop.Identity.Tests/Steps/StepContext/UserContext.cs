@@ -1,10 +1,13 @@
 ﻿using EShop.Identity.Domain.Entities;
 using EShop.Identity.Tests.Setups;
+using EShop.Shared.Contracts.Services.Identity.Users;
+using EShop.Shared.Scoping;
 
 namespace EShop.Identity.Tests.Steps.StepContext;
 
 internal class UserContext
 {
+    private const string AuthCollectionUri = "api/v1/auth/register";
     private const string UsersCollectionUrl = "api/v1/users";
     private const string RolesCollectionUrl = "api/v1/roles";
     private const string PermissionsCollectionUrl = "api/v1/permissions";
@@ -26,6 +29,24 @@ internal class UserContext
     public Permission[] Permissions { get; private set; }
     public string OrganizationName { get; internal set; }
     public Organization RetrievedUserOrganization { get; private set; }
-    public string LanguageCode { get; internal set; }
     public string UserGroup { get; internal set; }
+
+    internal async void SimulateTenantCreationAsync(
+        string tenantId,
+        string username,
+        string displayName,
+        string email,
+        string group,
+        bool setAsDefault = true)
+    {
+        username = $"{username}@{tenantId}".ToLower();
+
+        // Create tenant or user here
+        var command = new Command.RegisterUser(username, "password", email, displayName);
+        var result = await _apiContext.Post<Command.RegisterUser>(AuthCollectionUri, command);
+
+        _apiContext.AddUser(
+            new UserData(username, username, tenantId, group == UserData.EShopSupportGroup),
+            setAsDefault);
+    }
 }

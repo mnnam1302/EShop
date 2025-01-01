@@ -4,7 +4,6 @@ using EShop.Shared.DbResourceAccessControl;
 using EShop.Shared.Scoping;
 using EShop.Testing.JsonApiApplication;
 using FluentAssertions;
-using Gherkin.Ast;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -26,6 +25,7 @@ public sealed class ScenarioHooks
     public static async Task BeforeTestRun()
     {
         PostgreSqlContainer = new PostgreSqlBuilder()
+                .WithPortBinding(64305, 5432)
                 .WithImage("postgres:17.0")
                 .Build();
 

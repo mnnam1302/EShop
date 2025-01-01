@@ -16,11 +16,19 @@ namespace EShop.Identity.Tests.Steps.Users
             _userContext = userContext;
         }
 
-
         [Given("following tenants added to the system")]
         public void GivenFollowingTenantsAddedToTheSystem(DataTable dataTable)
         {
-            throw new PendingStepException();
+            foreach (var tenant in dataTable.Rows)
+            {
+                _userContext.SimulateTenantCreationAsync(
+                    tenant["TenantName"],
+                    tenant["Username"],
+                    tenant["DisplayName"],
+                    tenant["Email"],
+                    tenant.ContainsKey("Group") ? tenant["Group"] : string.Empty,
+                    !tenant.ContainsKey("SetAsDefault") || bool.Parse(tenant["SetAsDefault"]));
+            }
         }
     }
 }

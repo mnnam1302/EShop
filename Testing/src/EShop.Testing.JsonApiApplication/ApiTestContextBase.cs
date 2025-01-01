@@ -9,7 +9,11 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Primitives;
 using Serilog;
+using System.Linq.Expressions;
+using System.Net;
 using System.Reflection;
+using System.Text;
+using System.Text.Json;
 
 namespace EShop.Testing.JsonApiApplication;
 
@@ -48,7 +52,9 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
     private readonly Microsoft.Extensions.Logging.ILogger _logger;
     private readonly Dictionary<string, UserData> _users = new Dictionary<string, UserData>();
     private readonly TestUserPermissionProvider _testUserPermissionProvider;
-    private UserData _defaultUser = new UserData("TEST_ADMIN", "TEST_ADMIN", DefaultTenantId, isSupportUser: true);
+
+    private UserData _defaultUser
+        = new UserData("TEST_ADMIN", "TEST_ADMIN", DefaultTenantId, isSupportUser: true);
 
     protected ApiTestContextBase() : this(startupFactory: null)
     {
@@ -104,7 +110,19 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
 
     public string LoggedInUser { get; set; }
 
+    public HttpStatusCode LastStatusCode { get; private set; }
+
     public void AddUser(UserData user, bool setAsDefault)
+    {
+        _users.Add(user.Username, user);
+        if (setAsDefault)
+        {
+            _defaultUser = user;
+            _logger.LogWarning("Changing default user to '{username}'({tenantId})", user.Username, user.TenantId);
+        }
+    }
+
+    public void AddOrUpdateUser(UserData user, bool setAsDefault)
     {
         if (_users.ContainsKey(user.Username))
         {
@@ -253,7 +271,9 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
     }
 
     private static bool CheckLogContextProperty(
-            IReadOnlyDictionary<string, Serilog.Events.LogEventPropertyValue> logContextProperties, string propertyName, string targetTextValue)
+        IReadOnlyDictionary<string, Serilog.Events.LogEventPropertyValue> logContextProperties,
+        string propertyName,
+        string targetTextValue)
     {
         bool doesMatchTargetValue = false;
         if (logContextProperties.ContainsKey(propertyName))
@@ -262,6 +282,88 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
         }
         return doesMatchTargetValue;
     }
+
+    public Task<HttpRequestResult<T>> Post<T>(
+        string relativeUri,
+        T request,
+        UserData user = null,
+        Expression<Func<T, dynamic>> relationshipSelector = null)
+        where T : class
+    {
+        return Post<T, T>(relativeUri, request, user, relationshipSelector);
+    }
+
+    public async Task<HttpRequestResult<TResultResource>> Post<TPostedResource, TResultResource>(
+        string relativeUri,
+        TPostedResource resource,
+        UserData user = null,
+        Expression<Func<TPostedResource, dynamic>> relationshipSelector = null)
+        where TPostedResource : class
+        where TResultResource : class
+    {
+        using var response = await PostInternal<TPostedResource>(
+            relativeUri,
+            resource,
+            user,
+            relationshipSelector);
+
+        var responseContent = await response.Content.ReadAsStringAsync();
+        var result = JsonSerializer.Deserialize<TResultResource>(responseContent);
+
+        return new HttpRequestResult<TResultResource>
+        {
+            ResponseStatusCode = response.StatusCode,
+            ReasonPhrase = response?.ReasonPhrase,
+            Resource = result
+        };
+    }
+
+    private Task<HttpResponseMessage> PostInternal<TPostedResource>(
+        string relativeUri,
+        TPostedResource resource,
+        UserData user = null,
+        Expression<Func<TPostedResource, dynamic>> relationshipSelector = null)
+        where TPostedResource : class
+    {
+        if (string.IsNullOrEmpty(relativeUri))
+        {
+            throw new ArgumentNullException(nameof(relativeUri));
+        }
+
+        if (resource == null)
+        {
+            throw new ArgumentNullException(nameof(resource));
+        }
+
+        try
+        {
+            var client = GetAuthorizedClient(user);
+            var request = new HttpRequestMessage(HttpMethod.Post, relativeUri)
+            {
+                Content = new StringContent(JsonSerializer.Serialize(resource), Encoding.UTF8)
+            };
+
+            _logger.LogInformation(
+                    "Sending REQUEST as '{username}': POST {relativeUri} {jsonBody}",
+                    user?.Username ?? _defaultUser?.Username,
+                    relativeUri);
+
+            return client.SendAsync(request);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Tracking error after API call to {relativeUri}", relativeUri);
+            this.LastApiError = ex;
+            throw;
+        }
+    }
+
+    //private async Task<HttpResponseMessage> PostInternal(
+    //        string relativeUri,
+    //        IIdentifiable resource,
+    //        UserData user = null)
+    //{
+    //}
 
     public void Dispose()
     {
