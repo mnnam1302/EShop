@@ -19,20 +19,9 @@ public static class ServiceCollectionExtensions
     {
         services.AddHttpContextAccessor();
         services.AddScoped<IUserDetailsProvider, HttpRequestUserDataProvider>();
-        services.AddTransient<IMultiTenantIsolationStategy, PostgresMultiTenantConnectionInterceptor>(); // why transient here?
+        services.AddTransient<IMultiTenantIsolationStategy, PostgresMultiTenantConnectionInterceptor>();
         services.AddScoped<ITenantIsolationStrategy, PostgresRowLevelSecurityPolicyIsolation>();
         
-        return services;
-    }
-
-    public static IServiceCollection PropagateStandardHeaders(this IServiceCollection services)
-    {
-        services.AddHeaderPropagation(options =>
-        {
-            options.Headers.Add("Authorization");
-            options.Headers.Add("eshop-user-id");
-        });
-
         return services;
     }
 

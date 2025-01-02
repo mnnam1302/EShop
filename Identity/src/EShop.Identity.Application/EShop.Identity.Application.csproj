@@ -7,6 +7,18 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="UseCases\V1\Events\**" />
+    <Compile Remove="UseCases\V1\Queries\Organizations\**" />
+    <Compile Remove="UseCases\V2\**" />
+    <EmbeddedResource Remove="UseCases\V1\Events\**" />
+    <EmbeddedResource Remove="UseCases\V1\Queries\Organizations\**" />
+    <EmbeddedResource Remove="UseCases\V2\**" />
+    <None Remove="UseCases\V1\Events\**" />
+    <None Remove="UseCases\V1\Queries\Organizations\**" />
+    <None Remove="UseCases\V2\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\..\Shared\src\EShop.Shared.Contracts\EShop.Shared.Contracts.csproj" />
     <ProjectReference Include="..\EShop.Identity.Domain\EShop.Identity.Domain.csproj" />
   </ItemGroup>
@@ -14,12 +26,6 @@
   <ItemGroup>
   	<PackageReference Include="AutoMapper" Version="13.0.1" />
   	<PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.10.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="UseCases\V1\Events\" />
-    <Folder Include="UseCases\V1\Queries\Organizations\" />
-    <Folder Include="UseCases\V2\" />
   </ItemGroup>
 
 </Project>

@@ -64,7 +64,6 @@ public class RequirePermissionAttribute : Attribute, IFilterFactory, IUserPermis
             {
                 context.Result = new StatusCodeResult(StatusCodes.Status403Forbidden);
                 _logger.LogTrace("Rejecting user without {expectedPermission} permissions", _requirePermission);
-                return;
             }
         }
     }

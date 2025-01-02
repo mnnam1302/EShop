@@ -4,7 +4,6 @@ using EShop.Shared.DbResourceAccessControl;
 using EShop.Shared.Scoping;
 using EShop.Testing.JsonApiApplication;
 using FluentAssertions;
-using Gherkin.Ast;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -26,6 +25,7 @@ public sealed class ScenarioHooks
     public static async Task BeforeTestRun()
     {
         PostgreSqlContainer = new PostgreSqlBuilder()
+                .WithPortBinding(49999, 5432)
                 .WithImage("postgres:17.0")
                 .Build();
 
@@ -55,7 +55,6 @@ public sealed class ScenarioHooks
         await using var databaseConnection = new NpgsqlConnection(testDatabase.SharedConnectionString);
         await using var dbContext = scope.ServiceProvider.GetRequiredService<UsersDbContext>();
 
-        //dbContext.Database.SetConnectionString(databaseConnection.ConnectionString, contextOwnsConnection: true);
         dbContext.Database.SetConnectionString(databaseConnection.ConnectionString);
 
         var dbInitilize = new DbInitializer(
@@ -75,7 +74,6 @@ public sealed class ScenarioHooks
         if (scenarioContext.StepContext.StepInfo.StepDefinitionType == StepDefinitionType.Given)
         {
             apiContext.LastApiError.Should().BeNull();
-            // later here
         }
     }
 

@@ -1,5 +1,4 @@
 ﻿using EShop.Identity.Application.Behaviors;
-using EShop.Identity.Application.Services;
 using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
@@ -8,7 +7,15 @@ namespace EShop.Identity.Application.DependencyInjections.Extensions;
 
 public static class ServiceCollectionExtensions
 {
-    public static void AddMediatRApplication(this IServiceCollection services)
+    public static IServiceCollection AddServicesApplicationLayer(this IServiceCollection services)
+    {
+        services.AddMediatR();
+        services.AddAutoMapperService();
+
+        return services;
+    }
+
+    private static void AddMediatR(this IServiceCollection services)
     {
         services.AddMediatR(cfg =>
             cfg.RegisterServicesFromAssemblies(AssemblyReference.Assembly))
@@ -18,7 +25,7 @@ public static class ServiceCollectionExtensions
                 .AddValidatorsFromAssembly(EShop.Shared.Contracts.AssemblyReference.Assembly, includeInternalTypes: true);
     }
 
-    public static void AddAutoMapperApplication(this IServiceCollection services)
+    private static void AddAutoMapperService(this IServiceCollection services)
     {
         services.AddAutoMapper(AssemblyReference.Assembly);
     }

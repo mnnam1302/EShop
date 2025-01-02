@@ -2,7 +2,14 @@
 
 public class Result
 {
-    protected internal Result(bool isSuccess, Error error)
+    //public Result()
+    //{
+    //    IsSuccess = false;
+    //    Error = Error.None;
+    //}
+
+    //protected internal Result(bool isSuccess, Error error)
+    public Result(bool isSuccess, Error error)
     {
         if (isSuccess && error != Error.None)
         {

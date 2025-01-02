@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
-namespace EShop.Shared.Contract.Abstractions.Paging;
+namespace EShop.Shared.Contracts.Abstractions.Paging;
 
 public class PagedResult<T>
 {
@@ -12,7 +12,7 @@ public class PagedResult<T>
     public bool HasPreviousPage => PageIndex > 1;
     public bool HasNextPage => PageIndex * PageSize < TotalCount;
 
-    private PagedResult(List<T> items, int pageIndex, int pageSize, int totalCount)
+    public PagedResult(List<T> items, int pageIndex, int pageSize, int totalCount)
     {
         Items = items;
         PageIndex = pageIndex;

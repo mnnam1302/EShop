@@ -83,6 +83,25 @@ namespace EShop.Identity.Tests.Features
             await testRunner.CollectScenarioErrorsAsync();
         }
         
+        public virtual async System.Threading.Tasks.Task FeatureBackgroundAsync()
+        {
+#line 6
+#line hidden
+            global::Reqnroll.Table table1 = new global::Reqnroll.Table(new string[] {
+                        "Username",
+                        "DisplayName",
+                        "Email",
+                        "TenantName"});
+            table1.AddRow(new string[] {
+                        "tenantOwner1",
+                        "Tenant Owner1",
+                        "owner1@tenant1.com",
+                        "Tenant1"});
+#line 7
+ await testRunner.GivenAsync("following tenant users added to the system", ((string)(null)), table1, "Given ");
+#line hidden
+        }
+        
         async System.Threading.Tasks.Task Xunit.IAsyncLifetime.InitializeAsync()
         {
             await this.TestInitializeAsync();
@@ -101,7 +120,7 @@ namespace EShop.Identity.Tests.Features
             string[] tagsOfScenario = ((string[])(null));
             System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
             global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Create new role for tenant", null, tagsOfScenario, argumentsOfScenario, featureTags);
-#line 12
+#line 11
 this.ScenarioInitialize(scenarioInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
@@ -111,30 +130,20 @@ this.ScenarioInitialize(scenarioInfo);
             else
             {
                 await this.ScenarioStartAsync();
-                global::Reqnroll.Table table1 = new global::Reqnroll.Table(new string[] {
-                            "Name",
-                            "Description",
-                            "PhoneNumber"});
-                table1.AddRow(new string[] {
-                            "Role test",
-                            "description test",
-                            "+8469957900"});
-#line 13
- await testRunner.GivenAsync("There is a new role with the following data", ((string)(null)), table1, "Given ");
+#line 6
+await this.FeatureBackgroundAsync();
 #line hidden
-#line 16
- await testRunner.WhenAsync("Create new role", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line 12
+ await testRunner.WhenAsync("user \'tenantOwner1\' create role \'NewRole\'", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
                 global::Reqnroll.Table table2 = new global::Reqnroll.Table(new string[] {
-                            "Name",
-                            "Description",
-                            "PhoneNumber"});
+                            "Name"});
                 table2.AddRow(new string[] {
-                            "Role test",
-                            "description test",
-                            "+8469957900"});
-#line 17
- await testRunner.ThenAsync("A new role created with following data", ((string)(null)), table2, "Then ");
+                            "Owner"});
+                table2.AddRow(new string[] {
+                            "NewRole"});
+#line 13
+ await testRunner.ThenAsync("there are following Roles in the system", ((string)(null)), table2, "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();

@@ -5,9 +5,7 @@ using EShop.Identity.Domain.Exceptions;
 using EShop.Shared.Contracts.Abstractions.Requests;
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.Contracts.Services.Identity.Auth;
-using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserPermissionProvider;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserTokenProvider;
-using System.Security.Claims;
 
 namespace EShop.Identity.Application.UseCases.V1.Queries.Users;
 
@@ -16,20 +14,17 @@ public class LoginHandler : IQueryHandler<Query.Login, Response.AuthenticatedRes
     private readonly IRepositoryBase<User, string> _userRepository;
     private readonly ITokenService _tokenService;
     private readonly IPasswordHasher _passwordHasher;
-    private readonly IUserPermissionsProvider _userPermissions;
     private readonly ITokenCachingService _tokenCachingService;
 
     public LoginHandler(
         IRepositoryBase<User, string> userRepository,
         ITokenService tokenService,
         IPasswordHasher passwordHasher,
-        IUserPermissionsProvider userPermissions,
         ITokenCachingService tokenCachingService)
     {
         _userRepository = userRepository;
         _tokenService = tokenService;
         _passwordHasher = passwordHasher;
-        _userPermissions = userPermissions;
         _tokenCachingService = tokenCachingService;
     }
 
@@ -60,7 +55,6 @@ public class LoginHandler : IQueryHandler<Query.Login, Response.AuthenticatedRes
             RefreshTokenExpiryTime = DateTime.Now.AddHours(6)
         };
 
-        var permissions = await _userPermissions.GetPermissions(user.Id);
         _tokenCachingService.AddToken(user.Id, response);
 
         return Result.Success(response);

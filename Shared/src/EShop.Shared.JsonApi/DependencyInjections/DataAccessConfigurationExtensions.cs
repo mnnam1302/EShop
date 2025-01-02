@@ -29,12 +29,13 @@ public static class DataAccessConfigurationExtensions
         where TContext : DbContext
     {
         services.ConfigureNgSqlRetryOptions(configuration.GetSection(nameof(NgSqlRetryOptions)));
+        services.ConfigureNgSqlVersionOptions(configuration.GetSection(nameof(NgSqlVersionOptions)));
 
         services.AddDbContext<DbContext, TContext>((provider, builder) =>
         {
             var ngsqlRetryOptions = provider.GetRequiredService<IOptionsMonitor<NgSqlRetryOptions>>();
             var ngsqlVersionOptions = provider.GetRequiredService<IOptionsMonitor<NgSqlVersionOptions>>();
-            var multiTeantConnectionInterceptor = provider.GetRequiredService<IMultiTenantIsolationStategy>(); // transient
+            var multiTeantConnectionInterceptor = provider.GetRequiredService<IMultiTenantIsolationStategy>();
 
             builder
                 .EnableDetailedErrors(true)
@@ -54,11 +55,6 @@ public static class DataAccessConfigurationExtensions
                 .AddInterceptors(multiTeantConnectionInterceptor);
         })
             .AddMultiTenantScoping();
-
-        //if (useRingFencedScoping)
-        //{
-        //    services.AddRingFencedScoping();
-        //}
 
         return services;
     }

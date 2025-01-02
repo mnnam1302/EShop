@@ -1,6 +1,8 @@
 ﻿using Asp.Versioning;
 using EShop.Identity.API.Abstractions;
 using EShop.Shared.Contracts.Services.Identity.Users;
+using EShop.Shared.JsonApi.ResourceAccessControl;
+using EShop.Shared.Scoping;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -12,17 +14,22 @@ namespace EShop.Identity.API.Controllers
     public class UsersController : ApiEndpoint
     {
         private readonly ISender _sender;
+        private readonly IUserDetailsProvider _userDetailsProvider;
 
-        public UsersController(ISender sender)
+        public UsersController(ISender sender, IUserDetailsProvider userDetailsProvider)
         {
             _sender = sender;
+            _userDetailsProvider = userDetailsProvider;
         }
 
-        [HttpPost("register")]
-        public async Task<IResult> Register([FromBody] Command.RegisterUser command)
+        [HttpGet("{id}/permissions")]
+        [RequireAuthenticatedUser]
+        public async Task<IResult> GetCurrentUserPermissions([FromRoute] string id)
         {
-            var result = await _sender.Send(command);
+            var userId = _userDetailsProvider.AuthenticatedUser.Id ?? id;
+            var request = new Query.GetUserPermissionsRequest(userId);
 
+            var result = await _sender.Send(request);
             if (result.IsFailure)
             {
                 return HandlerFailure(result);

@@ -1,29 +1,51 @@
+using EShop.Identity.Tests.Steps.StepContext;
+using EShop.Shared.Contracts.Services.Identity.Roles;
+using FluentAssertions;
 using Reqnroll;
 
-namespace EShop.Identity.Tests.Steps.Roles
+namespace EShop.Identity.Tests.Steps.Roles;
+
+[Binding]
+internal class CreateRoleSteps
 {
-    [Binding]
-    public sealed class CreateRoleSteps
+    private readonly RoleContext _roleContext;
+
+    public CreateRoleSteps(RoleContext roleContext)
     {
-        //public CreateRoleStepDefinitions(Role role)
-        //{
-        //    _role = role;
-        //}
+        _roleContext = roleContext;
+    }
 
-        [Given("There is a new role with the following data")]
-        public void GivenThereIsANewRoleWithTheFollowingData(DataTable dataTable)
-        {
-            var a = 10;
-        }
+    [When("user '(.*)' create role '(.*)'")]
+    public async Task WhenUserCreateRole(string creatorUsername, string roleName)
+    {
+        _roleContext.Name = roleName ?? _roleContext.Name;
+        await _roleContext.CreateRoleAsync(creatorUsername);
+    }
 
-        [When("Create new role")]
-        public void WhenCreateNewRole()
-        {
-        }
+    [Then("there are following Roles in the system")]
+    public async Task ThenThereAreFollowingRolesInTheSystem(DataTable dataTable)
+    {
+        var actualRoles = await _roleContext.GetAllRolesAsync();
+        AssertRolesList(actualRoles, dataTable);
+    }
 
-        [Then("A new role created with following data")]
-        public void ThenANewRoleCreatedWithFollowingData(DataTable dataTable)
+    private void AssertRolesList(List<Response.RolesResponse> actualRoles, DataTable table)
+    {
+        actualRoles.Count.Should().Be(table.RowCount);
+
+        //actualRoles.Select(x => new { Name = x.Name, TenantId = x.TenantId })
+        //    .Should()
+        //    .BeEquivalentTo(table.Rows.Select(row => new { Name = row["Name"], TenantId = row["TenantId"] }));
+        
+        actualRoles.Select(x => new { Name = x.Name })
+            .Should()
+            .BeEquivalentTo(table.Rows.Select(row => new { Name = row["Name"] }));
+
+        if (table.ContainsColumn("Description"))
         {
+            actualRoles.Select(x => x.Description)
+                .Should()
+                .BeEquivalentTo(table.Rows.Select(row => row["Description"]));
         }
     }
 }
