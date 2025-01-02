@@ -1,4 +1,5 @@
-﻿using EShop.Shared.Contracts.Abstractions.Requests;
+﻿using EShop.Shared.Contracts.Abstractions.Paging;
+using EShop.Shared.Contracts.Abstractions.Requests;
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.Scoping;
 using EShop.Shared.Scoping.ResourceAccessControl;
@@ -12,11 +13,9 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Primitives;
 using Newtonsoft.Json;
 using Serilog;
-using System.Linq.Expressions;
 using System.Net;
 using System.Reflection;
 using System.Text;
-using System.Text.Json;
 
 namespace EShop.Testing.JsonApiApplication;
 
@@ -26,6 +25,7 @@ public interface IApiTestContextBase
     Exception LastApiError { get; }
 
     HttpClient GetAuthorizedClient(UserData user, string acceptHeader = "application/vnd.api+json");
+
     UserData GetUserByUsername(string? username = null);
 }
 
@@ -208,12 +208,12 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
         }
     }
 
-    public HttpClient GetAuthorizedClient(UserData user, string acceptHeader = "application/json")
+    public HttpClient GetAuthorizedClient(UserData? user, string acceptHeader = "application/json")
     {
         return GetAuthorisedClientCore(user, acceptHeader);
     }
 
-    private HttpClient GetAuthorisedClientCore(UserData user, string acceptHeader)
+    private HttpClient GetAuthorisedClientCore(UserData? user, string acceptHeader)
     {
         var client = _server.CreateClient();
         client.DefaultRequestHeaders.Accept.Clear();
@@ -258,22 +258,7 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
             .Filter.ByExcluding(e => e.MessageTemplate.Text.StartsWith("Executed endpoint", StringComparison.InvariantCulture))
             .Filter.ByExcluding(e => e.MessageTemplate.Text.StartsWith("Executing ObjectResult", StringComparison.InvariantCulture))
             .Filter.ByExcluding(e => e.MessageTemplate.Text.StartsWith("Configured endpoint test_queue", StringComparison.InvariantCulture))
-            //.Filter.ByExcluding("@m like '%CREATE TABLE%'")
-            //.Filter.ByExcluding("@m like '%CREATE INDEX%'")
-            //.Filter.ByExcluding("@m like '%CREATE UNIQUE INDEX%'")
-            //.Filter.ByExcluding("@m like '%Configured endpoint%'")
-            //.Filter.ByExcluding("@m like '%Execution loop%'")
-            //.Filter.ByExcluding("@m like '%Endpoint Ready%'")
-            //.Filter.ByExcluding("@m like '%Entity Framework Core%initialized%'")
-            //.Filter.ByExcluding("@m like '%Starting bus%'")
-            //.Filter.ByExcluding("@m like '%User context set to%'")
             .Filter.ByExcluding(e => CheckLogContextProperty(e.Properties, "RequestPath", "\"/api/v1/userPermissions\""))
-            .Filter.ByExcluding(e => e.Level == Serilog.Events.LogEventLevel.Verbose
-                && CheckLogContextProperty(e.Properties, "SourceContext", "\"JsonApiDotNetCore.Data.DefaultResourceRepository\""))
-            .Filter.ByExcluding(e => e.Level == Serilog.Events.LogEventLevel.Verbose
-                && CheckLogContextProperty(e.Properties, "SourceContext", "\"JsonApiDotNetCore.Controllers.BaseJsonApiController\""))
-            .Filter.ByExcluding(e => e.Level == Serilog.Events.LogEventLevel.Verbose
-                && CheckLogContextProperty(e.Properties, "SourceContext", "\"JsonApiDotNetCore.Services.DefaultResourceService\""))
             .Enrich.FromLogContext()
             .Enrich.WithThreadId()
             .Enrich.WithThreadName()
@@ -295,24 +280,20 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
         return doesMatchTargetValue;
     }
 
-    public async Task<HttpResponseMessage> Post<TRequest>(
+    public async Task<Result> Post<TRequest>(
         string relativeUri,
         TRequest request,
-        UserData user = null)
+        UserData? user = null)
         where TRequest : ICommand
     {
-        if (string.IsNullOrEmpty(relativeUri))
-        {
-            throw new ArgumentNullException(nameof(relativeUri));
-        }
-
-        if (request == null)
-        {
-            throw new ArgumentNullException(nameof(request));
-        }
-
         try
         {
+            if (string.IsNullOrEmpty(relativeUri))
+                throw new ArgumentNullException(nameof(relativeUri));
+
+            if (request == null)
+                throw new ArgumentNullException(nameof(request));
+
             var client = GetAuthorizedClient(user);
             var requestBody = new HttpRequestMessage(HttpMethod.Post, relativeUri)
             {
@@ -324,14 +305,8 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
                     user?.Username ?? _defaultUser?.Username,
                     relativeUri);
 
-            var response = await client.SendAsync(requestBody);
-
-            /*
-             * Example, handle response and apply result pattern to validate
-                ProcessResultResource(response) : Result
-                ProcessResultResource<RoleResponse>(response) : Result<RoleResponse>
-             */
-            return response;
+            using var response = await client.SendAsync(requestBody);
+            return await ProcessResultResponse(response);
         }
         catch (Exception ex)
         {
@@ -341,18 +316,83 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
         }
     }
 
-    private async Task<HttpRequestResult<T>> ProcessResultResource<T>(HttpResponseMessage response) 
-        where T : class
+    private static async Task<Result> ProcessResultResponse(HttpResponseMessage response)
     {
-        var resourceJson = await response.Content.ReadAsStringAsync();
+        var responseJson = await response.Content.ReadAsStringAsync();
+        return JsonConvert.DeserializeObject<Result>(responseJson)
+            ?? new Result(false, Error.NullValue);
+    }
 
-        return new HttpRequestResult<T>
+    //public async Task<Result<TResponse>> Post<TRequest, TResponse>(
+    //    string relativeUri,
+    //    TRequest request,
+    //    UserData? user = null)
+    //    where TRequest : ICommand<TResponse>
+    //    where TResponse : class
+    //{
+    //    try
+    //    {
+    //        if (string.IsNullOrEmpty(relativeUri))
+    //            throw new ArgumentNullException(nameof(relativeUri));
+
+    //        if (request == null)
+    //            throw new ArgumentNullException(nameof(request));
+
+    //        var client = GetAuthorizedClient(user);
+    //        var requestBody = new HttpRequestMessage(HttpMethod.Post, relativeUri)
+    //        {
+    //            Content = new StringContent(System.Text.Json.JsonSerializer.Serialize(request), Encoding.UTF8, "application/json")
+    //        };
+
+    //        _logger.LogInformation(
+    //                "Sending REQUEST as '{username}': POST {relativeUri} {jsonBody}",
+    //                user?.Username ?? _defaultUser?.Username,
+    //                relativeUri);
+
+    //        using var response = await client.SendAsync(requestBody);
+    //        return await ProcessResultValueResponse<TResponse>(response);
+    //    }
+    //    catch (Exception ex)
+    //    {
+    //        _logger.LogWarning(ex, "Tracking error after API call to {relativeUri}", relativeUri);
+    //        this.LastApiError = ex;
+    //        throw;
+    //    }
+    //}
+
+    public async Task<Result<TResponse>> GetAll<TRequest, TResponse>(
+        string relativeUri,
+        TRequest request,
+        UserData? user = null)
+        where TRequest : IQuery<TResponse>
+        where TResponse : class
+    {
+        try
         {
-            ResponseStatusCode = response.StatusCode,
-            ReasonPhrase = response.ReasonPhrase,
-            Resource = JsonConvert.DeserializeObject<T>(resourceJson),
-            Included = null
-        };
+            if (string.IsNullOrEmpty(relativeUri))
+                throw new ArgumentNullException(nameof(relativeUri));
+
+            if (request == null)
+                throw new ArgumentNullException(nameof(request));
+
+            var client = GetAuthorizedClient(user);
+            var response = await client.GetAsync(relativeUri);
+            return await ProcessResultValueResponse<TResponse>(response);
+        }
+        catch(Exception ex)
+        {
+            _logger.LogWarning(ex, "Tracking error after API call to {relativeUri}", relativeUri);
+            this.LastApiError = ex;
+            throw;
+        }
+    }
+
+    private static async Task<Result<TValue>> ProcessResultValueResponse<TValue>(
+        HttpResponseMessage response)
+        where TValue : class
+    {
+        var responseJson = await response.Content.ReadAsStringAsync();
+        return JsonConvert.DeserializeObject<Result<TValue>>(responseJson);
     }
 
     public void Dispose()

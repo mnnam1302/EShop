@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using EShop.Identity.Domain.Abstractions.Repositories;
 using EShop.Identity.Domain.Entities;
-using EShop.Shared.Contract.Abstractions.Paging;
+using EShop.Shared.Contracts.Abstractions.Paging;
 using EShop.Shared.Contracts.Abstractions.Requests;
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.Contracts.Services.Identity.Roles;
@@ -26,9 +26,9 @@ public class GetRolesHandler : IQueryHandler<Query.GetRoles, PagedResult<Respons
             : _roleRepository.FindAll(x => x.Name!.Contains(request.Name));
 
         var pagedResult = await PagedResult<Role>.CreateAsync(
-            rolesQuery, 
+            rolesQuery,
             request.Paging.PageIndex,
-            request.Paging.PageSize, 
+            request.Paging.PageSize,
             cancellationToken);
 
         var response = _mapper.Map<PagedResult<Response.RolesResponse>>(pagedResult);

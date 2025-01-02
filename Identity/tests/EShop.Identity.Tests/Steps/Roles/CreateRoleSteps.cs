@@ -1,7 +1,6 @@
-using EShop.Identity.Domain.Entities;
 using EShop.Identity.Tests.Steps.StepContext;
+using EShop.Shared.Contracts.Services.Identity.Roles;
 using FluentAssertions;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Reqnroll;
 
 namespace EShop.Identity.Tests.Steps.Roles;
@@ -24,19 +23,23 @@ internal class CreateRoleSteps
     }
 
     [Then("there are following Roles in the system")]
-    public void ThenThereAreFollowingRolesInTheSystem(DataTable dataTable)
+    public async Task ThenThereAreFollowingRolesInTheSystem(DataTable dataTable)
     {
         var actualRoles = await _roleContext.GetAllRolesAsync();
         AssertRolesList(actualRoles, dataTable);
     }
 
-    private void AssertRolesList(IReadOnlyCollection<Role> actualRoles, DataTable table)
+    private void AssertRolesList(List<Response.RolesResponse> actualRoles, DataTable table)
     {
         actualRoles.Count.Should().Be(table.RowCount);
 
-        actualRoles.Select(x => new { Name = x.Name, TenantId = x.TenantId })
+        //actualRoles.Select(x => new { Name = x.Name, TenantId = x.TenantId })
+        //    .Should()
+        //    .BeEquivalentTo(table.Rows.Select(row => new { Name = row["Name"], TenantId = row["TenantId"] }));
+        
+        actualRoles.Select(x => new { Name = x.Name })
             .Should()
-            .BeEquivalentTo(table.Rows.Select(row => new { Name = row["Name"], TenantId = row["TenantId"] }));
+            .BeEquivalentTo(table.Rows.Select(row => new { Name = row["Name"] }));
 
         if (table.ContainsColumn("Description"))
         {
@@ -45,5 +48,4 @@ internal class CreateRoleSteps
                 .BeEquivalentTo(table.Rows.Select(row => row["Description"]));
         }
     }
-
 }

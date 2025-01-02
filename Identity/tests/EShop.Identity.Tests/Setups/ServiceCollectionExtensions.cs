@@ -22,8 +22,8 @@ namespace EShop.Identity.Tests.Setups;
 
 internal static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddTestBoostrapping(this IServiceCollection services, 
-        IConfiguration configuration, 
+    public static IServiceCollection AddTestBoostrapping(this IServiceCollection services,
+        IConfiguration configuration,
         IWebHostEnvironment environment)
     {
         services
@@ -87,10 +87,9 @@ internal static class ServiceCollectionExtensions
     // Consider
     private static IServiceCollection AddTestUserTokens(this IServiceCollection services)
     {
-        services.AddTransient<IRedisCachingProvider<Response.AuthenticatedResponse>,TestUserTokenProvider>();
+        services.AddTransient<IRedisCachingProvider<Response.AuthenticatedResponse>, TestUserTokenProvider>();
         services.AddTransient<ITokenCachingService, TokenRedisCachingService>();
 
         return services;
     }
-
 }

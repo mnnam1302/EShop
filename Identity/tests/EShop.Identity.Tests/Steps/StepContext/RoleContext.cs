@@ -1,6 +1,7 @@
 ﻿using EShop.Identity.Domain.Entities;
 using EShop.Identity.Tests.Setups;
 using EShop.Shared.Contracts.Abstractions.Paging;
+using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.Contracts.Services.Identity.Roles;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -22,7 +23,7 @@ internal class RoleContext
 
     public string Name { get; internal set; }
 
-    public string TenentId { get; internal set; }
+    public string TenentId { get;internal set; }
 
     public string Description { get; internal set; }
 
@@ -43,21 +44,37 @@ internal class RoleContext
             var operationalUser = _apiContext.GetUserByUsername(creatorUserName);
             var command = new Command.CreateRole(this.Name, string.Empty, string.Empty);
 
-            await _apiContext.Post<Command.CreateRole>(
+            var result = await _apiContext.Post<Command.CreateRole>(
                 RolesCollectionUri,
                 command,
                 operationalUser);
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "Role error");
+            _logger.LogWarning(ex, "Create role error");
             this.Error = ex;
         }
     }
 
-    internal async Task GetAllRolesAsync(string? operationUsername = null)
+    internal async Task<List<Response.RolesResponse>> GetAllRolesAsync(string? operationUsername = null)
     {
-        var operationalUser = _apiContext.GetUserByUsername(operationUsername);
-        var query = new Query.GetRoles(null, Paging.Create(1, 50));
+        try
+        {
+            var operationalUser = _apiContext.GetUserByUsername(operationUsername);
+            var query = new Query.GetRoles(null, Paging.Create(1, 50));
+
+            var result = await _apiContext.GetAll<Query.GetRoles, PagedResult<Response.RolesResponse>>(
+                RolesCollectionUri,
+                query,
+                operationalUser);
+
+            return result.Value.Items;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Get roles error");
+            this.Error = ex;
+            return new List<Response.RolesResponse>();
+        }
     }
 }

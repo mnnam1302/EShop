@@ -45,7 +45,6 @@ internal class UserContext
     {
         try
         {
-            //username = $"{username}@{tenantId}".ToLower();
             var command = new Command.RegisterUser(username, "password", email, displayName)
             {
                 //OrganizationId = tenantId

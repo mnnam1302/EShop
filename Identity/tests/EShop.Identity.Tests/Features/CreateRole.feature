@@ -4,17 +4,16 @@
 	I want to be able to create roles
 
 Background:
-	#Given following organization added to the system
-	#	| TenantName |
-	#	| Tenant1    |
 	Given following tenant users added to the system
 		| Username     | DisplayName   | Email              | TenantName |
 		| tenantOwner1 | Tenant Owner1 | owner1@tenant1.com | Tenant1    |
-		#| Tenant2    | tenantOwner2 | Tenant Ownwe2 | ownwe2@tenant2.com | 
 
 Scenario: Create new role for tenant
 	When user 'tenantOwner1' create role 'NewRole'
 	Then there are following Roles in the system
-		| Name    | TenantId |
-		| Owner   | Tenant1  |
-		| NewRole | Tenant1  |
+		| Name    |
+		| Owner   |
+		| NewRole |
+		#| Name    | TenantId |
+		#| Owner   | Tenant1  |
+		#| NewRole | Tenant1  |

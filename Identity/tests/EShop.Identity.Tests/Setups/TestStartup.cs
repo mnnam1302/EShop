@@ -26,7 +26,10 @@ public class TestStartup : Identity.API.Startup
 {
     private readonly PostgreSqlTestDatabase _testDatabase;
     
-    public TestStartup(IConfiguration configuration, IWebHostEnvironment env, PostgreSqlTestDatabase testDatabase)
+    public TestStartup(
+        IConfiguration configuration, 
+        IWebHostEnvironment env, 
+        PostgreSqlTestDatabase testDatabase)
         : base(configuration, env)
     {
         this.Environment.EnvironmentName = "Development";
@@ -40,10 +43,12 @@ public class TestStartup : Identity.API.Startup
             .AddTestBoostrapping(Configuration, Environment);
     }
 
-    public override void Configure(IApplicationBuilder app, IHostApplicationLifetime applicationLifetime, ILoggerFactory loggerFactory)
+    public override void Configure(
+        IApplicationBuilder app, 
+        IHostApplicationLifetime applicationLifetime, 
+        ILoggerFactory loggerFactory)
     {
         app.UseMiddleware<ExceptionHandlingMiddleware>();
-
         app.UseRouting();
         app.UseEndpoints(endpoints => endpoints.MapControllers());
     }
