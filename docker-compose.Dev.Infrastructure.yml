@@ -50,6 +50,18 @@ services:
     networks:
       - eshop
 
+  # Seq log
+  seq:
+     container_name: seq
+     image: datalust/seq:latest
+     ports:
+        - 5341:5341
+        - 8081:80
+     environment:
+        ACCEPT_EULA: Y
+     networks:
+        - eshop
+
 # Volumes
 volumes:
   postgres_db:

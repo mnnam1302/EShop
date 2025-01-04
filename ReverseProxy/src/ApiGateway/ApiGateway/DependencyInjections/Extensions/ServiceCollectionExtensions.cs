@@ -1,14 +1,25 @@
-﻿using ApiGateway.DependencyInjections.Options;
-using EShop.Shared.JsonApi;
-using Microsoft.Extensions.Options;
+﻿using ApiGateway.Middlewares;
+using EShop.Shared.Cache.DependencyInejctions.Extensions;
+using EShop.Shared.JsonApi.DependencyInjections;
 
 namespace ApiGateway.DependencyInjections.Extensions;
 
 public static class ServiceCollectionExtensions
 {
-    //private const int DefaultExternalServiceTimeoutInSeconds = 30;
+    internal const string ApplicationName = "ApiGateway";
 
-    public static IServiceCollection AddCorsApiGateway(this IServiceCollection services)
+    public static IServiceCollection AddBoostrapping(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddSingleton<ExceptionHandlingMiddleware>();
+        services
+            .AddCorsApiGateway()
+            .AddYarpReverseProxy(configuration)
+            .AddAuthenticationApiGateway(configuration);
+
+        return services;
+    }
+
+    private static IServiceCollection AddCorsApiGateway(this IServiceCollection services)
     {
         services.AddCors(options =>
         {
@@ -21,17 +32,26 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    public static IServiceCollection AddYarpReverseProxy(this IServiceCollection services, IConfiguration configuration)
+    private static IServiceCollection AddYarpReverseProxy(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddServiceDiscovery();
-
-        // Research other way to config: https://dev.to/leandroveiga/building-a-centralized-api-proxy-with-yarp-in-net-8-using-minimal-apis-1hna
-        services.AddReverseProxy()
+        services
+            .AddReverseProxy()
             .LoadFromConfig(configuration.GetSection("ReverseProxy"))
             .AddServiceDiscoveryDestinationResolver();
         return services;
     }
 
+    public static IServiceCollection AddShared(this IServiceCollection services, IConfiguration configuration)
+    {
+        services
+            .AddUserScoping()
+            .AddRedisInfrastructure(configuration)
+            .AddUserTokenCachingService();
+        return services;
+    }
+
+    // dont't remove, can reference later
     //public static OptionsBuilder<IdentityHttpClientOptions> AddIdentityHttpClientOptions(this IServiceCollection services, IConfiguration section)
     //{
     //    return services

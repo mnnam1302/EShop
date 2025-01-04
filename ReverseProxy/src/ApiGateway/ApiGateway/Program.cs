@@ -1,58 +1,39 @@
 using ApiGateway.DependencyInjections.Extensions;
-using ApiGateway.DependencyInjections.Options;
 using ApiGateway.Middlewares;
-using EShop.Shared.Cache.DependencyInejctions.Extensions;
-using EShop.Shared.Contracts.Abstractions.Shared;
-using EShop.Shared.Contracts.Services.Identity.Auth;
-using EShop.Shared.JsonApi.DependencyInjections;
-using Microsoft.AspNetCore.Mvc;
+using EShop.Shared.Diagnostics;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Shared.JsonApi
-builder.Services.AddUserScoping();
+Logging.SetSerilog("ApiGateway");
+builder.Host.UseSerilog();
 
-// Shared.Cache
-builder.Services.AddRedisInfrastructure(builder.Configuration);
-builder.Services.AddUserTokenCachingService();
-
-// ApiGateway
-builder.Services.AddCorsApiGateway();
-builder.Services.AddYarpReverseProxy(builder.Configuration);
-builder.Services.AddAuthenticationApiGateway(builder.Configuration);
-builder.Services.AddSingleton<ExceptionHandlingMiddleware>();
+builder.Services
+    .AddBoostrapping(builder.Configuration)
+    .AddShared(builder.Configuration);
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
+app.UseSerilogRequestLogging();
+
 app.UseCors();
-
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    //app.UseSwagger();
-    //app.UseSwaggerUI();
-}
-
 //app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
-
 app.MapReverseProxy();
 
 try
 {
+    Log.Information("Starting up ApiGateway...");
     await app.RunAsync();
     Log.Information("Stopped cleanly");
 }
 catch (Exception ex)
 {
-    Log.Fatal(ex, "An unhandled exception occured during bootstrapping");
+    Log.Fatal(ex, "Host terminated unexpectedly");
     await app.StopAsync();
 }
 finally
