@@ -1,35 +1,38 @@
 ﻿using EShop.Identity.Domain.Abstractions.Entities;
 using EShop.Identity.Domain.Exceptions;
 using EShop.Shared.Scoping;
+using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations;
 
 namespace EShop.Identity.Domain.Entities;
 
-public class Role : EntityBase<string>, IScoped
+public class Role : IdentityRole<string>, IEntityBase<string>, IScoped
 {
     public Role()
-    {
-    }
+    { }
 
     public Role(Guid id, string name, string? description = "", string? phoneNumber = "")
     {
-        ValidateName(name);
-        ValidateDescription(description);
-        ValidatePhoneNumber(phoneNumber);
         Id = $"role-{id}";
         Name = name;
         Description = description;
         PhoneNumber = phoneNumber;
+        AssertRole();
     }
 
     public void Update(string name, string? description, string? phoneNumber)
     {
-        ValidateName(name);
-        ValidateDescription(description);
-        ValidatePhoneNumber(phoneNumber);
         Name = name;
         Description = description;
         PhoneNumber = phoneNumber;
+        AssertRole();
+    }
+
+    private void AssertRole()
+    {
+        ValidateName(Name);
+        ValidateDescription(Description);
+        ValidatePhoneNumber(PhoneNumber);
     }
 
     private void ValidateName(string name)
@@ -61,9 +64,11 @@ public class Role : EntityBase<string>, IScoped
         }
     }
 
+    [MaxLength(ModelConstants.ShortText)]
+    public string Id { get; private set; }
+
     [MaxLength(ModelConstants.MediumText)]
-    [Required]
-    public string? Name { get; private set; }
+    public string Name { get; private set; }
 
     [MaxLength(ModelConstants.LongText)]
     public string? Description { get; private set; }

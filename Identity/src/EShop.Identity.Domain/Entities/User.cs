@@ -2,12 +2,13 @@
 using EShop.Identity.Domain.Exceptions;
 using EShop.Shared.Contracts.Services.Identity.Users;
 using EShop.Shared.Scoping;
+using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 
 namespace EShop.Identity.Domain.Entities;
 
-public class User : EntityBase<string>, ICreatedTracking, IExcludedFromScoping
+public class User : IdentityUser<string>, IEntityBase<string>, IExcludedFromScoping
 {
     protected User()
     { }
@@ -139,20 +140,20 @@ public class User : EntityBase<string>, ICreatedTracking, IExcludedFromScoping
         UserRoles.Add(userRole);
     }
 
+    [MaxLength(ModelConstants.ShortText)]
+    public string Id { get; private set; }
+
     [MaxLength(ModelConstants.MediumText)]
-    [Required]
     public string Username { get; private set; }
 
     [MaxLength(ModelConstants.MediumText)]
     public string? DisplayName { get; private set; }
 
     [MaxLength(ModelConstants.MediumText)]
-    [Required]
     [EmailAddress]
     public string Email { get; private set; }
 
     [MaxLength(ModelConstants.StandardText)]
-    [Required]
     public string PasswordHash { get; private set; }
 
     [MaxLength(ModelConstants.ShortText)]
@@ -174,8 +175,9 @@ public class User : EntityBase<string>, ICreatedTracking, IExcludedFromScoping
     public virtual List<Role> Roles { get; set; } = new();
     public virtual List<UserRole> UserRoles { get; set; } = new();
 
-    public DateTimeOffset CreatedDate { get; set; }
-
     [MaxLength(ModelConstants.ShortText)]
     public string? CreatedBy { get; set; }
+
+    public DateTimeOffset CreatedOnUtc { get; set; }
+    public DateTimeOffset? LastModifiedOnUtc { get; set; }
 }

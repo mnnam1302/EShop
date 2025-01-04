@@ -11,6 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\Shared\src\Eshop.Shared.DomainTools\Eshop.Shared.DomainTools.csproj" />
     <ProjectReference Include="..\..\..\Shared\src\EShop.Shared.Scoping\EShop.Shared.Scoping.csproj" />
   </ItemGroup>
 

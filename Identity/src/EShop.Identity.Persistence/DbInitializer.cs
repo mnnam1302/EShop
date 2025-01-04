@@ -62,7 +62,7 @@ public class DbInitializer
                 _tenantIsolationStrategy.AddTenantIsolation(_dbContext);
             }
 
-            await SeedDataForTenant();
+            //await SeedDataForTenant();
         }
         catch (Exception ex)
         {

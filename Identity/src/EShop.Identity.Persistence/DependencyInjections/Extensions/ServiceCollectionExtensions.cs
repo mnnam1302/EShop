@@ -1,5 +1,6 @@
 ﻿using EShop.Identity.Domain.Abstractions.Repositories;
 using EShop.Identity.Domain.Abstractions.UnitOfWorks;
+using EShop.Identity.Domain.Entities;
 using EShop.Identity.Persistence.Repositories;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -9,9 +10,19 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddServicesPersistenceLayer(this IServiceCollection services)
     {
-        services.AddDbInitializer();
-        services.AddRepositoryAndUnitOfWork();
+        services
+            .AddEntityFramerokIndentity()
+            .AddDbInitializer()
+            .AddRepositoryAndUnitOfWork();
 
+        return services;
+    }
+
+    private static IServiceCollection AddEntityFramerokIndentity(this IServiceCollection services)
+    {
+        services.AddIdentityCore<User>()
+            .AddRoles<Role>()
+            .AddEntityFrameworkStores<UsersDbContext>();
         return services;
     }
 

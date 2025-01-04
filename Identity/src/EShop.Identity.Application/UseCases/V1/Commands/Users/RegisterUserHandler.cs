@@ -6,7 +6,6 @@ using EShop.Identity.Domain.Exceptions;
 using EShop.Shared.Contracts.Abstractions.Requests;
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.Contracts.Services.Identity.Users;
-using EShop.Shared.Scoping;
 
 namespace EShop.Identity.Application.UseCases.V1.Commands.Users;
 
@@ -14,15 +13,17 @@ public class RegisterUserHandler : ICommandHandler<Command.RegisterUser>
 {
     private readonly IRepositoryBase<User, string> _userRepository;
     private readonly IRepositoryBase<Organization, string> _organizationRepository;
+
     private readonly IUnitOfWork _unitOfWork;
     private readonly IPasswordHasher _passwordHasher;
 
-    public RegisterUserHandler(IRepositoryBase<User, string> userRepository,
+    public RegisterUserHandler(
+        IRepositoryBase<User, string> userRepository,
         IRepositoryBase<Organization, string> organizationRepository,
         IUnitOfWork unitOfWork,
         IPasswordHasher passwordHasher)
     {
-        _userRepository = userRepository;
+        //_userRepository = userRepository;
         _organizationRepository = organizationRepository;
         _unitOfWork = unitOfWork;
         _passwordHasher = passwordHasher;
@@ -36,11 +37,11 @@ public class RegisterUserHandler : ICommandHandler<Command.RegisterUser>
             throw new BadRequestException("User's username has already used");
         }
 
-        var user = new User(request.UserName, 
+        var user = new User(request.UserName,
             _passwordHasher.Hash(request.Password),
             request.Email,
             request.DisplayName,
-            request.PhoneNumber, 
+            request.PhoneNumber,
             request.DateOfBirth);
 
         if (!string.IsNullOrEmpty(request.OrganizationId))
