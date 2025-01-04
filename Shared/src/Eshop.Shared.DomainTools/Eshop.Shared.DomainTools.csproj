@@ -7,9 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Aggregates\" />
     <Folder Include="UnitOfWorks\" />
     <Folder Include="Repositories\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\EShop.Shared.Contracts\EShop.Shared.Contracts.csproj" />
   </ItemGroup>
 
 </Project>
