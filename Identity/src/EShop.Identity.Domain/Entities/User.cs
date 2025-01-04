@@ -139,7 +139,6 @@ public class User : EntityBase<string>, ICreatedTracking, IExcludedFromScoping
         UserRoles.Add(userRole);
     }
 
-
     [MaxLength(ModelConstants.MediumText)]
     [Required]
     public string Username { get; private set; }
@@ -169,6 +168,7 @@ public class User : EntityBase<string>, ICreatedTracking, IExcludedFromScoping
 
     [MaxLength(ModelConstants.ShortText)]
     public string? OrganizationId { get; private set; }
+
     public bool IsActive { get; set; } = true;
 
     public virtual List<Role> Roles { get; set; } = new();
