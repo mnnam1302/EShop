@@ -1,10 +1,10 @@
-﻿using Eshop.Shared.DomainTools.Entities;
+﻿using Eshop.Shared.DomainTools.Aggregates;
 using System.Linq.Expressions;
 
 namespace Eshop.Shared.DomainTools.Repositories;
 
 public interface IRepositoryBase<TEntity, in TKey>
-    where TEntity : IEntityBase<TKey>
+    where TEntity : IAggregateRoot<TKey>
 {
     Task<TEntity?> FindByIdAsync(
         TKey id,

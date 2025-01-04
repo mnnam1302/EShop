@@ -82,8 +82,6 @@ public class HttpRequestUserDataProvider : IUserDetailsProvider
         this.currentUser = new Lazy<UserData>(() => UserData.GetSystemUser(null), System.Threading.LazyThreadSafetyMode.PublicationOnly);
 
         var updatedToUser = this.currentUser.Value ?? throw new InvalidOperationException("User should have been set");
-        //this.userLogContext = Serilog.Context.LogContext.PushProperty(TenantUserEnricher.UserPropertyName, updatedToUser.ActionUserId);
-        //this.tenantLogContext = Serilog.Context.LogContext.PushProperty(TenantUserEnricher.TenantPropertyName, updatedToUser.TenantId);
         _logger.LogTrace("User context set to '{userId}'('{tenantId}').", updatedToUser.Id, updatedToUser.TenantId);
     }
 
@@ -101,8 +99,6 @@ public class HttpRequestUserDataProvider : IUserDetailsProvider
             : new Lazy<UserData>(() => UserData.GetSystemUser(onBehalfOfTenantId, onBehalfOfUserId, onBehalfOfUserType), System.Threading.LazyThreadSafetyMode.PublicationOnly);
 
         var updatedToUser = this.currentUser.Value ?? throw new InvalidOperationException("User should have been set");
-        //this.userLogContext = Serilog.Context.LogContext.PushProperty(TenantUserEnricher.UserPropertyName, updatedToUser.ActionUserId);
-        //this.tenantLogContext = Serilog.Context.LogContext.PushProperty(TenantUserEnricher.TenantPropertyName, updatedToUser.TenantId);
         _logger.LogTrace("User context set to '{userId}'('{tenantId}').", updatedToUser.Id, updatedToUser.TenantId);
     }
 

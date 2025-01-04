@@ -1,4 +1,4 @@
-﻿using Eshop.Shared.DomainTools.Entities;
+﻿using Eshop.Shared.DomainTools.Aggregates;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
@@ -6,7 +6,7 @@ namespace Eshop.Shared.DomainTools.Repositories;
 
 public class RepositoryBaseDbContext<TDbContext, TEntity, TKey> : IRepositoryBase<TEntity, TKey>, IDisposable
     where TDbContext : DbContext
-    where TEntity : class, IEntityBase<TKey>
+    where TEntity : class, IAggregateRoot<TKey>
 {
     private readonly TDbContext _dbContext;
 
@@ -21,8 +21,8 @@ public class RepositoryBaseDbContext<TDbContext, TEntity, TKey> : IRepositoryBas
     }
 
     public async Task<TEntity?> FindByIdAsync(
-        TKey id, 
-        CancellationToken cancellationToken = default, 
+        TKey id,
+        CancellationToken cancellationToken = default,
         params Expression<Func<TEntity, object>>[] includeProperties)
     {
         return await FindAll(x => x.Id!.Equals(id), includeProperties)
@@ -31,8 +31,8 @@ public class RepositoryBaseDbContext<TDbContext, TEntity, TKey> : IRepositoryBas
     }
 
     public async Task<TEntity?> FindSingleAsync(
-        Expression<Func<TEntity, bool>>? predicate = null, 
-        CancellationToken cancellationToken = default, 
+        Expression<Func<TEntity, bool>>? predicate = null,
+        CancellationToken cancellationToken = default,
         params Expression<Func<TEntity, object>>[] includeProperties)
     {
         return await FindAll(predicate, includeProperties)

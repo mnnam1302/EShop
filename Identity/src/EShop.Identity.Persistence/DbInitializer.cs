@@ -44,7 +44,6 @@ public class DbInitializer
     {
         try
         {
-            //_userDetailsProvider.SetSystemUserContextWithEmptyScope(); // attention
             _userDetailsProvider.SetSystemUserContext(tenantName);
 
             if (applyMigrations)
@@ -79,8 +78,8 @@ public class DbInitializer
     {
         await SeedTenant();
         await SeedSystemWidePermissions();
-        await SeedRole();
         await SeedOrganization();
+        await SeedRole();
         await SeedUser();
     }
 
