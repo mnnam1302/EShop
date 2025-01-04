@@ -6,6 +6,7 @@ using Serilog;
 var builder = WebApplication.CreateBuilder(args);
 
 Logging.SetSerilog("ApiGateway");
+builder.Host.UseSerilog();
 
 builder.Services
     .AddBoostrapping(builder.Configuration)
@@ -16,6 +17,8 @@ builder.Services.AddEndpointsApiExplorer();
 var app = builder.Build();
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
+app.UseSerilogRequestLogging();
+
 app.UseCors();
 //app.UseHttpsRedirection();
 app.UseAuthentication();
@@ -24,8 +27,6 @@ app.MapReverseProxy();
 
 try
 {
-    Logging.SetSerilog("ApiGateway");
-
     Log.Information("Starting up ApiGateway...");
     await app.RunAsync();
     Log.Information("Stopped cleanly");
