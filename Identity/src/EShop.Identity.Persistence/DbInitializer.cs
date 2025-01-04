@@ -10,12 +10,12 @@ using Microsoft.Extensions.Logging;
 
 namespace EShop.Identity.Persistence;
 
-public class DbInitializer // Transient
+public class DbInitializer
 {
-    private readonly UsersDbContext _dbContext; // Scope
-    private readonly IUserDetailsProvider _userDetailsProvider; // Scope
-    private readonly ITenantIsolationStrategy _tenantIsolationStrategy; // Scope, but inside
-    private readonly IPasswordHasher _passwordHasher; // Scope
+    private readonly UsersDbContext _dbContext;
+    private readonly IUserDetailsProvider _userDetailsProvider;
+    private readonly ITenantIsolationStrategy _tenantIsolationStrategy;
+    private readonly IPasswordHasher _passwordHasher;
     private readonly IConfiguration _configuration;
     private readonly ILogger _logger;
 
