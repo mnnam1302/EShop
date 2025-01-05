@@ -1,4 +1,5 @@
-﻿using EShop.Identity.Domain.Abstractions.Repositories;
+﻿
+using Eshop.Shared.DomainTools.Repositories;
 using EShop.Identity.Domain.Abstractions.UnitOfWorks;
 using EShop.Identity.Domain.Entities;
 using EShop.Identity.Domain.Exceptions;
@@ -29,14 +30,10 @@ namespace EShop.Identity.Application.UseCases.V1.Commands.Organizations
         {
             if (request.ParentOrganizationId != null)
             {
-                var parentOrganization = await _organizationRepository.FindByIdAsync(request.ParentOrganizationId);
-                if (parentOrganization != null)
-                {
-                    throw new NotFoundException("Parent organization not found");
-                }
+                await _organizationRepository.FindByIdAsync(request.ParentOrganizationId);
             }
 
-            var organizationExists = await _organizationRepository.FindByIdAsync(request.Name);
+            var organizationExists = await _organizationRepository.FindSingleAsync(x => x.Name.Equals(request.Name));
             if (organizationExists != null)
             {
                 throw new ConflictException("Organization already exists");

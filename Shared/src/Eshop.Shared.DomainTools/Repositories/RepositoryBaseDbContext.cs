@@ -1,12 +1,15 @@
 ﻿using Eshop.Shared.DomainTools.Aggregates;
+using Eshop.Shared.DomainTools.DomainExceptions;
+using Eshop.Shared.DomainTools.Entities;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
 namespace Eshop.Shared.DomainTools.Repositories;
 
-public class RepositoryBaseDbContext<TDbContext, TEntity, TKey> : IRepositoryBase<TEntity, TKey>, IDisposable
+public class RepositoryBaseDbContext<TDbContext, TEntity, TKey> 
+    : IRepositoryBase<TEntity, TKey>, IDisposable
     where TDbContext : DbContext
-    where TEntity : class, IAggregateRoot<TKey>
+    where TEntity : class, IEntityBase<TKey>
 {
     private readonly TDbContext _dbContext;
 
@@ -20,14 +23,16 @@ public class RepositoryBaseDbContext<TDbContext, TEntity, TKey> : IRepositoryBas
         _dbContext.Dispose();
     }
 
-    public async Task<TEntity?> FindByIdAsync(
+    public async Task<TEntity> FindByIdAsync(
         TKey id,
         CancellationToken cancellationToken = default,
         params Expression<Func<TEntity, object>>[] includeProperties)
     {
-        return await FindAll(x => x.Id!.Equals(id), includeProperties)
+        var entity = await FindAll(x => x.Id!.Equals(id), includeProperties)
             .AsNoTracking()
             .SingleOrDefaultAsync(cancellationToken);
+
+        return entity ?? throw new NotFoundException($"{typeof(TEntity).Name} not found");
     }
 
     public async Task<TEntity?> FindSingleAsync(

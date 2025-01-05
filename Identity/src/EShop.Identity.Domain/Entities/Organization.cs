@@ -1,11 +1,12 @@
-﻿using EShop.Identity.Domain.Abstractions.Entities;
+﻿using Eshop.Shared.DomainTools.Aggregates;
+using EShop.Identity.Domain.Abstractions.Entities;
 using EShop.Shared.Contracts.Services.Identity.Organizations;
 using EShop.Shared.Scoping;
 using System.ComponentModel.DataAnnotations;
 
 namespace EShop.Identity.Domain.Entities;
 
-public class Organization : EntityBase<string>, IScoped
+public class Organization : AggregateRoot<string>, IScoped
 {
     public Organization()
     {
@@ -44,8 +45,7 @@ public class Organization : EntityBase<string>, IScoped
     }
 
     [MaxLength(ModelConstants.MediumText)]
-    [Required]
-    public string? Name { get; set; }
+    public string Name { get; set; }
 
     [MaxLength(ModelConstants.ShortText)]
     public string? OrganizationNumber { get; set; }
