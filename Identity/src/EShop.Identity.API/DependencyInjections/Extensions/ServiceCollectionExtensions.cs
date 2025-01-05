@@ -49,7 +49,7 @@ public static class ServiceCollectionExtensions
 
     public static IServiceCollection AddServicesApiLayer(this IServiceCollection services)
     {
-        services.AddTransient<ExceptionHandlingMiddleware>();
+        services.AddSingleton<ExceptionHandlingMiddleware>();
 
         services.AddControllers();
         services
