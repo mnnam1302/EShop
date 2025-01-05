@@ -60,7 +60,7 @@ public class DbInitializer
 
             await SeedSystemWidePermissions();
             await SeedSupportUserForSystem();
-            await SeedInitialDataForTenant();
+            await SeedInitialDataForTenant(); // consider, other solution better
         }
         catch (Exception ex)
         {
@@ -74,7 +74,7 @@ public class DbInitializer
 
     private const string TenantName = "eshop-staging";
     private const string RoleName = "Owner";
-    private const string UserName = "owner.staging@gmail.com";  
+    private const string UserName = "owner.staging@gmail.com"; // need other solution, need to username unique for each tenant
     private const string DisplayName = "Owner Staging";
 
     /// <summary>

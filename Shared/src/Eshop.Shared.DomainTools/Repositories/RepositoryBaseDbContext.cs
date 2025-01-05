@@ -1,12 +1,10 @@
-﻿using Eshop.Shared.DomainTools.Aggregates;
-using Eshop.Shared.DomainTools.DomainExceptions;
-using Eshop.Shared.DomainTools.Entities;
+﻿using Eshop.Shared.DomainTools.Entities;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
 namespace Eshop.Shared.DomainTools.Repositories;
 
-public class RepositoryBaseDbContext<TDbContext, TEntity, TKey> 
+public class RepositoryBaseDbContext<TDbContext, TEntity, TKey>
     : IRepositoryBase<TEntity, TKey>, IDisposable
     where TDbContext : DbContext
     where TEntity : class, IEntityBase<TKey>
@@ -32,7 +30,7 @@ public class RepositoryBaseDbContext<TDbContext, TEntity, TKey>
             .AsNoTracking()
             .SingleOrDefaultAsync(cancellationToken);
 
-        return entity ?? throw new NotFoundException($"{typeof(TEntity).Name} not found");
+        return entity ?? throw new DomainExceptions.NotFoundException($"{typeof(TEntity).Name} not found");
     }
 
     public async Task<TEntity?> FindSingleAsync(
@@ -70,7 +68,7 @@ public class RepositoryBaseDbContext<TDbContext, TEntity, TKey>
         }
 
         if (predicate != null)
-            items.Where(predicate);
+            items = items.Where(predicate);
 
         return items;
     }

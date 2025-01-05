@@ -2,17 +2,18 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace EShop.Shared.JsonApi.ResourceAccessControl;
 
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
 public class RequireSupportUserAttribute : Attribute, IFilterFactory, IUserPermissionFilter
 {
-    public bool IsReusable => throw new NotImplementedException();
+    public bool IsReusable => false;
 
     public IFilterMetadata CreateInstance(IServiceProvider serviceProvider)
     {
-        throw new NotImplementedException();
+        return new InternalRequirePermissionFilter(serviceProvider.GetRequiredService<IPermissionValidator>());
     }
 
     private sealed class InternalRequirePermissionFilter : IAsyncAuthorizationFilter

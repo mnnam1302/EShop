@@ -7,6 +7,7 @@ using EShop.Shared.Contracts.Abstractions.Requests;
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.Contracts.Services.Identity.Organizations;
 using EShop.Shared.Scoping;
+using Microsoft.Extensions.Logging;
 
 namespace EShop.Identity.Application.UseCases.V1.Commands.Organizations
 {
@@ -30,7 +31,7 @@ namespace EShop.Identity.Application.UseCases.V1.Commands.Organizations
                 await _organizationRepository.FindByIdAsync(request.ParentOrganizationId);
             }
 
-            var organizationExists = await _organizationRepository.FindSingleAsync(x => x.Name.Equals(request.Name));
+            var organizationExists = await _organizationRepository.FindSingleAsync(x => x.Name == request.Name);
             if (organizationExists != null)
             {
                 throw new ConflictException("Organization already exists");
