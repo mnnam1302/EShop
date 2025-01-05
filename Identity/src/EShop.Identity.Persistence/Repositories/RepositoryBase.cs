@@ -5,6 +5,7 @@ using System.Linq.Expressions;
 
 namespace EShop.Identity.Persistence.Repositories;
 
+[Obsolete("Use RepositoryBaseDbContext instead in Domain.Tools to generic")]
 public class RepositoryBase<TEntity, TKey> : IRepositoryBase<TEntity, TKey>, IDisposable
     where TEntity : class, IEntityBase<TKey>
 {

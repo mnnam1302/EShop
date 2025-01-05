@@ -1,6 +1,5 @@
 ﻿using EShop.Identity.Domain.Abstractions.Repositories;
 using EShop.Identity.Domain.Abstractions.UnitOfWorks;
-using EShop.Identity.Domain.Entities;
 using EShop.Identity.Persistence.Repositories;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -12,7 +11,8 @@ public static class ServiceCollectionExtensions
     {
         services
             .AddDbInitializer()
-            .AddRepositoryAndUnitOfWork();
+            .AddRepositoryAndUnitOfWork()
+            .AddRepositories();
 
         return services;
     }
@@ -27,6 +27,12 @@ public static class ServiceCollectionExtensions
     {
         services.AddScoped(typeof(IUnitOfWork), typeof(UnitOfWork));
         services.AddScoped(typeof(IRepositoryBase<,>), typeof(RepositoryBase<,>));
+        return services;
+    }
+
+    private static IServiceCollection AddRepositories(this IServiceCollection services)
+    {
+        services.AddScoped(typeof(IIdentityRepository<,>), typeof(IdentityRepository<,>));
         return services;
     }
 

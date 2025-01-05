@@ -5,6 +5,7 @@ using EShop.Identity.Domain.Exceptions;
 using EShop.Shared.Contracts.Abstractions.Requests;
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.Contracts.Services.Identity.Roles;
+using EShop.Shared.Scoping;
 
 namespace EShop.Identity.Application.UseCases.V1.Commands.Roles;
 
@@ -14,7 +15,7 @@ public class CreateRoleHandler : ICommandHandler<Command.CreateRole>
     private readonly IUnitOfWork _unitOfWork;
 
     public CreateRoleHandler(
-        IRepositoryBase<Role, string> roleRepository,
+        IRepositoryBase<Role, string> roleRepository, 
         IUnitOfWork unitOfWork)
     {
         _roleRepository = roleRepository;

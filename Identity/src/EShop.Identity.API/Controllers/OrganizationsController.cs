@@ -21,7 +21,8 @@ namespace EShop.Identity.API.Controllers
         }
 
         [HttpPost]
-        [RequirePermission(PermissionConstants.ManageOrganizationsPermissionId)]
+        [RequireSupportUser]
+        //[RequirePermission(PermissionConstants.ManageOrganizationsPermissionId)]
         public async Task<IResult> CreateOrganization([FromBody] Command.CreateOrganization command)
         {
             var result = await _sender.Send(command);

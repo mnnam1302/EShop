@@ -1,5 +1,5 @@
-﻿
-using Eshop.Shared.DomainTools.Repositories;
+﻿using Eshop.Shared.DomainTools.Repositories;
+using EShop.Identity.Domain.Abstractions.Repositories;
 using EShop.Identity.Domain.Abstractions.UnitOfWorks;
 using EShop.Identity.Domain.Entities;
 using EShop.Identity.Domain.Exceptions;
@@ -12,18 +12,15 @@ namespace EShop.Identity.Application.UseCases.V1.Commands.Organizations
 {
     public class CreateOrganizationHandler : ICommandHandler<Command.CreateOrganization>
     {
-        private readonly IRepositoryBase<Organization, string> _organizationRepository;
+        private readonly IIdentityRepository<Organization, string> _organizationRepository;
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IUserDetailsProvider _userDetailsProvider;
 
         public CreateOrganizationHandler(
-            IRepositoryBase<Organization, string> organizationRepository,
-            IUnitOfWork unitOfWork,
-            IUserDetailsProvider userDetailsProvider)
+            IIdentityRepository<Organization, string> organizationRepository,
+            IUnitOfWork unitOfWork)
         {
             _organizationRepository = organizationRepository;
             _unitOfWork = unitOfWork;
-            _userDetailsProvider = userDetailsProvider;
         }
 
         public async Task<Result> Handle(Command.CreateOrganization request, CancellationToken cancellationToken)

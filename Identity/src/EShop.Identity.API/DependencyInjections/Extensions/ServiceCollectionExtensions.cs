@@ -1,6 +1,4 @@
-﻿using Eshop.Shared.DomainTools.Repositories;
-using Eshop.Shared.DomainTools.UnitOfWorks;
-using EShop.Identity.API.Middlewares;
+﻿using EShop.Identity.API.Middlewares;
 using EShop.Identity.Application.DependencyInjections.Extensions;
 using EShop.Identity.Application.Services;
 using EShop.Identity.Infrastructure.DependencyInjections.Extensions;
@@ -18,7 +16,10 @@ namespace EShop.Identity.API.DependencyInjections.Extensions;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddShared(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment)
+    public static IServiceCollection AddShared(
+        this IServiceCollection services,
+        IConfiguration configuration,
+        IWebHostEnvironment environment)
     {
         services
             .AddRedisInfrastructure(configuration)
@@ -27,12 +28,13 @@ public static class ServiceCollectionExtensions
         services
             .AddDbContextWithScoping<UsersDbContext>(configuration);
 
-        
-
         return services;
     }
 
-    public static IServiceCollection AddBoostrapping(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment)
+    public static IServiceCollection AddBoostrapping(
+        this IServiceCollection services,
+        IConfiguration configuration,
+        IWebHostEnvironment environment)
     {
         services
             .AddCors()

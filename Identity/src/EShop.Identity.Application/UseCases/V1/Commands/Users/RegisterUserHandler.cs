@@ -12,19 +12,19 @@ namespace EShop.Identity.Application.UseCases.V1.Commands.Users;
 public class RegisterUserHandler : ICommandHandler<Command.RegisterUser>
 {
     private readonly IRepositoryBase<User, string> _userRepository;
-    private readonly IRepositoryBase<Organization, string> _organizationRepository;
+    //private readonly IRepositoryBase<Organization, string> _organizationRepository;
 
     private readonly IUnitOfWork _unitOfWork;
     private readonly IPasswordHasher _passwordHasher;
 
     public RegisterUserHandler(
         IRepositoryBase<User, string> userRepository,
-        IRepositoryBase<Organization, string> organizationRepository,
+        //IRepositoryBase<Organization, string> organizationRepository,
         IUnitOfWork unitOfWork,
         IPasswordHasher passwordHasher)
     {
         //_userRepository = userRepository;
-        _organizationRepository = organizationRepository;
+        //_organizationRepository = organizationRepository;
         _unitOfWork = unitOfWork;
         _passwordHasher = passwordHasher;
     }
@@ -44,16 +44,16 @@ public class RegisterUserHandler : ICommandHandler<Command.RegisterUser>
             request.PhoneNumber,
             request.DateOfBirth);
 
-        if (!string.IsNullOrEmpty(request.OrganizationId))
-        {
-            var organization = await _organizationRepository.FindSingleAsync(x => x.Id == request.OrganizationId, cancellationToken);
-            if (organization == null)
-            {
-                throw new BadRequestException("Organization is not found");
-            }
+        //if (!string.IsNullOrEmpty(request.OrganizationId))
+        //{
+        //    var organization = await _organizationRepository.FindSingleAsync(x => x.Id == request.OrganizationId, cancellationToken);
+        //    if (organization == null)
+        //    {
+        //        throw new BadRequestException("Organization is not found");
+        //    }
 
-            user.AssignOrganization(request.OrganizationId);
-        }
+        //    user.AssignOrganization(request.OrganizationId);
+        //}
 
         _userRepository.Add(user);
         await _unitOfWork.SaveChangesAsync(cancellationToken);

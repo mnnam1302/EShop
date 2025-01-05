@@ -1,12 +1,10 @@
-﻿using Eshop.Shared.DomainTools.Aggregates;
-using Microsoft.EntityFrameworkCore;
-using System.Linq.Expressions;
+﻿using System.Linq.Expressions;
 
 namespace Eshop.Shared.DomainTools.Repositories;
 
 public interface IRepositoryBase<TEntity, in TKey>
     where TEntity : class // Why class here without IEntity<TKey>, IAggregateRoot<TKey>? What purpose does it serve?
-    //where TEntity : IAggregateRoot<TKey>
+                          //where TEntity : IAggregateRoot<TKey>
 {
     Task<TEntity> FindByIdAsync(
         TKey id,

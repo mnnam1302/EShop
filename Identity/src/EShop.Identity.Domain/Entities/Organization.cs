@@ -41,6 +41,20 @@ public class Organization : AggregateRoot<string>, IScoped
             command.Description, 
             command.ParentOrganizationId);
 
+         //Raise Domain Event
+         organization.RaiseDomainEvent(new DomainEvent.OrganizationCreated
+         {
+             EventId = Guid.NewGuid(),
+             TimeStamp = DateTimeOffset.Now,
+             SourceId = organization.Id,
+             Name = organization.Name,
+             OrganizationNumber = organization.OrganizationNumber,
+             PhoneNumber = organization.PhoneNumber,
+             Email = organization.Email,
+             Address = organization.Address,
+             City = organization.City
+         });
+
         return organization;
     }
 
