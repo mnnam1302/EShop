@@ -21,6 +21,7 @@ public static class ServiceCollectionExtensions
         services.AddHttpContextAccessor();
         services.AddScoped<IUserDetailsProvider, HttpRequestUserDataProvider>();
         services.AddTransient<IMultiTenantIsolationStategy, PostgresMultiTenantConnectionInterceptor>();
+        services.AddTransient<MultiTenantSaveChangesInterceptor>();
         services.AddScoped<ITenantIsolationStrategy, PostgresRowLevelSecurityPolicyIsolation>();
         
         return services;
