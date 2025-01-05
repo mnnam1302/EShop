@@ -10,4 +10,8 @@
     <ProjectReference Include="..\EShop.Shared.Contracts\EShop.Shared.Contracts.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="ValueObjects\" />
+  </ItemGroup>
+
 </Project>

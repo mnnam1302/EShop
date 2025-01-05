@@ -11,16 +11,7 @@ public class Organization : EntityBase<string>, IScoped
     {
     }
 
-    public Organization(
-        string name, 
-        string? organizationNumber, 
-        string? phoneNumber,
-        string? email, 
-        string? address, 
-        string? city, 
-        string? postcode, 
-        string? description, 
-        string? parentOrganizationId)
+    public Organization(string name, string? organizationNumber, string? phoneNumber, string? email, string? address, string? city, string? postcode, string? description,  string? parentOrganizationId)
     {
         Id = name;
         Name = name;
