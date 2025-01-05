@@ -1,4 +1,5 @@
 ﻿using EShop.Shared.DbResourceAccessControl;
+using EShop.Shared.DbResourceAccessControl.Interceptors;
 using EShop.Shared.Scoping;
 using EShop.Shared.Scoping.ResourceAccessControl;
 using Microsoft.Extensions.DependencyInjection;

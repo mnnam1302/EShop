@@ -1,4 +1,4 @@
-﻿using EShop.Shared.DbResourceAccessControl;
+﻿using EShop.Shared.DbResourceAccessControl.Interceptors;
 using EShop.Shared.DbResourceAccessControl.Options;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;

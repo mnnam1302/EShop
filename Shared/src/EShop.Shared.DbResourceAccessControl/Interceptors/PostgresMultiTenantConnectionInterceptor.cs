@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 using System.Data.Common;
 using System.Diagnostics.CodeAnalysis;
 
-namespace EShop.Shared.DbResourceAccessControl;
+namespace EShop.Shared.DbResourceAccessControl.Interceptors;
 
 public class PostgresMultiTenantConnectionInterceptor : DbConnectionInterceptor, IMultiTenantIsolationStategy
 {
@@ -42,17 +42,17 @@ public class PostgresMultiTenantConnectionInterceptor : DbConnectionInterceptor,
 
     private bool TryCreateTenantContext(DbConnection dbConnection, [NotNullWhen(true)] out DbCommand? setContextCommand)
     {
-        if (!this._userDetailsProvider.IsAuthenticatedUser)
+        if (!_userDetailsProvider.IsAuthenticatedUser)
         {
             // Any calls without user in http context would crash but might be needed in some cases (e.g. VS debugger).
             // It is not responsibility of this class to make sure only authenticated users will get access
             // but if the connection doesn't have 'app.tenant_id' set the query will not return results anyway.
-            _logger.LogWarning("Opening db connection without tenant isolation. Scoped queries will not return any results! [{providerId}]", this._userDetailsProvider.GetHashCode());
+            _logger.LogWarning("Opening db connection without tenant isolation. Scoped queries will not return any results! [{providerId}]", _userDetailsProvider.GetHashCode());
             setContextCommand = null;
             return false;
         }
 
-        var tenantId = this._userDetailsProvider.AuthenticatedUser.TenantId;
+        var tenantId = _userDetailsProvider.AuthenticatedUser.TenantId;
         if (!string.IsNullOrEmpty(tenantId))
         {
             // PostgreSQL SET statement cannot be parameterized.
