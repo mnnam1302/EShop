@@ -6,7 +6,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace EShop.Identity.Domain.Entities;
 
-public class Role : IdentityRole<string>, IEntityBase<string>, IScoped
+public class Role : EntityBase<string>, IScoped
 {
     public Role()
     { }
@@ -63,9 +63,6 @@ public class Role : IdentityRole<string>, IEntityBase<string>, IScoped
             throw new BadRequestException($"Role's phone number must not exceed {ModelConstants.ShortText}");
         }
     }
-
-    [MaxLength(ModelConstants.ShortText)]
-    public string Id { get; private set; }
 
     [MaxLength(ModelConstants.MediumText)]
     public string Name { get; private set; }

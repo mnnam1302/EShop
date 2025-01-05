@@ -2,13 +2,12 @@
 using EShop.Identity.Domain.Exceptions;
 using EShop.Shared.Contracts.Services.Identity.Users;
 using EShop.Shared.Scoping;
-using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 
 namespace EShop.Identity.Domain.Entities;
 
-public class User : IdentityUser<string>, IEntityBase<string>, IExcludedFromScoping
+public class User : EntityBase<string>, IExcludedFromScoping
 {
     protected User()
     { }
@@ -139,9 +138,6 @@ public class User : IdentityUser<string>, IEntityBase<string>, IExcludedFromScop
 
         UserRoles.Add(userRole);
     }
-
-    [MaxLength(ModelConstants.ShortText)]
-    public string Id { get; private set; }
 
     [MaxLength(ModelConstants.MediumText)]
     public string Username { get; private set; }

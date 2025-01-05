@@ -62,7 +62,8 @@ public class DbInitializer
                 _tenantIsolationStrategy.AddTenantIsolation(_dbContext);
             }
 
-            //await SeedDataForTenant();
+            await SeedSystemWidePermissions();
+            await SeedDataForTenant();
         }
         catch (Exception ex)
         {
@@ -77,7 +78,7 @@ public class DbInitializer
     private async Task SeedDataForTenant()
     {
         await SeedTenant();
-        await SeedSystemWidePermissions();
+        //await SeedSystemWidePermissions(); // no belong to tenant, so if put here, it violates `no side effect` in clean code
         await SeedOrganization();
         await SeedRole();
         await SeedUser();
@@ -199,9 +200,35 @@ public class DbInitializer
         };
     }
 
+    private async Task SeedOrganization()
+    {
+        var organization = new Organization()
+        {
+            Id = tenantName,
+            Name = tenantName,
+            Description = "Root organization",
+            Email = "eshop-stagging@gmail.com",
+            PhoneNumber = "+477" + new Random().Next(0, 1000000000),
+        };
+        organization.TenantId = tenantName;
+        organization.Scope = tenantName;
+
+        if (await _dbContext.Organizations.AnyAsync(org => org.Name == organization.Name))
+        {
+            _dbContext.Update(organization);
+        }
+        else
+        {
+            _dbContext.Add(organization);
+        }
+
+        await _dbContext.SaveChangesAsync();
+    }
+
     private async Task SeedRole()
     {
-        var role = await _dbContext.Roles.FirstOrDefaultAsync(x => x.Name == roleName);
+        var role = await _dbContext.Roles
+            .FirstOrDefaultAsync(x => x.Name == roleName);
         if (role == null)
         {
             var newRole = new Role(Guid.NewGuid(), roleName, "Owner of the account");
@@ -232,31 +259,6 @@ public class DbInitializer
                 });
             }
         }
-    }
-
-    private async Task SeedOrganization()
-    {
-        var organization = new Organization()
-        {
-            Id = tenantName,
-            Name = tenantName,
-            Description = "Root organization",
-            Email = "eshop-stagging@gmail.com",
-            PhoneNumber = "+477" + new Random().Next(0, 1000000000),
-        };
-        organization.TenantId = tenantName;
-        organization.Scope = tenantName;
-
-        if (await _dbContext.Organizations.AnyAsync(org => org.Name == organization.Name))
-        {
-            _dbContext.Update(organization);
-        }
-        else
-        {
-            _dbContext.Add(organization);
-        }
-
-        await _dbContext.SaveChangesAsync();
     }
 
     private async Task SeedUser()
