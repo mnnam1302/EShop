@@ -119,7 +119,7 @@ public class User : EntityBase<string>, IExcludedFromScoping
         {
             new Claim("sub", Id),
             new Claim("username", Username),
-            new Claim("tenant:groups", OrganizationId!) // later parent org & child org
+            new Claim("tenant:groups", OrganizationId ?? string.Empty)
         };
     }
 

@@ -7,6 +7,7 @@ using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using System.Data;
 
 namespace EShop.Identity.Persistence;
 
@@ -35,16 +36,11 @@ public class DbInitializer
         _logger = logger;
     }
 
-    private const string tenantName = "eshop-staging";
-    private const string roleName = "Owner";
-    private const string userName = "owner.staging@gmail.com";
-    private const string displayName = "Owner Staging";
-
     public async Task Initialize(bool applyMigrations = true, bool applyTenantIsolation = true)
     {
         try
         {
-            _userDetailsProvider.SetSystemUserContext(tenantName);
+            _userDetailsProvider.SetSystemUserContext(TenantName);
 
             if (applyMigrations)
             {
@@ -63,7 +59,8 @@ public class DbInitializer
             }
 
             await SeedSystemWidePermissions();
-            await SeedDataForTenant();
+            await SeedSupportUserForSystem();
+            await SeedInitialDataForTenant();
         }
         catch (Exception ex)
         {
@@ -75,33 +72,38 @@ public class DbInitializer
         }
     }
 
-    private async Task SeedDataForTenant()
-    {
-        await SeedTenant();
-        //await SeedSystemWidePermissions(); // no belong to tenant, so if put here, it violates `no side effect` in clean code
-        await SeedOrganization();
-        await SeedRole();
-        await SeedUser();
-    }
+    private const string TenantName = "eshop-staging";
+    private const string RoleName = "Owner";
+    private const string UserName = "owner.staging@gmail.com";  
+    private const string DisplayName = "Owner Staging";
 
-    private async Task SeedTenant()
+    /// <summary>
+    /// Support user support to create and manage tenant, organizaiton, tenant feature, permissions
+    /// </summary>
+    /// <returns></returns>
+    private async Task SeedSupportUserForSystem()
     {
-        var tenant = new Tenant()
-        {
-            Id = tenantName,
-            Name = tenantName,
-        };
-
-        if (await _dbContext.Tenants.AnyAsync(t => t.Id == tenantName || t.Name == tenantName))
-        {
-            _dbContext.Update(tenant);
-        }
-        else
-        {
-            _dbContext.Add(tenant);
-        }
+        await SeedOrganization(UserData.EShopSupportGroup, "Support for all organization");
+        await SeedOrganizationUser($"{UserData.EShopSupportGroup}@gmail.com", "Support User", UserData.EShopSupportGroup);
 
         await _dbContext.SaveChangesAsync();
+    }
+
+    /// <summary>
+    /// Seed an organizaion, user that manage their organization, role for specific tenant
+    /// </summary>
+    /// <returns></returns>
+    private async Task SeedInitialDataForTenant()
+    {
+        await SeedTenant();
+        await SeedOrganization(TenantName, "Root organization");
+        await _dbContext.SaveChangesAsync();
+
+        await SeedRole(RoleName, TenantName);
+        await SeedOrganizationUser(UserName, DisplayName, TenantName);
+        await _dbContext.SaveChangesAsync();
+
+        await SeedUserRoles(UserName, RoleName);
     }
 
     private async Task SeedSystemWidePermissions()
@@ -200,53 +202,66 @@ public class DbInitializer
         };
     }
 
-    private async Task SeedOrganization()
+    private async Task SeedTenant(string tenantName = TenantName)
+    {
+        var tenant = new Tenant()
+        {
+            Id = tenantName,
+            Name = tenantName,
+        };
+
+        if (await _dbContext.Tenants.AnyAsync(t => t.Id == tenantName || t.Name == tenantName))
+        {
+            _dbContext.Update(tenant);
+        }
+        else
+        {
+            _dbContext.Add(tenant);
+        }
+    }
+
+    private async Task SeedOrganization(string tenantName, string desciption)
     {
         var organization = new Organization()
         {
             Id = tenantName,
             Name = tenantName,
-            Description = "Root organization",
-            Email = "eshop-stagging@gmail.com",
+            Description = desciption,
+            Email = $"{tenantName}@gmail.com",
             PhoneNumber = "+477" + new Random().Next(0, 1000000000),
         };
-        organization.TenantId = tenantName;
-        organization.Scope = tenantName;
 
-        if (await _dbContext.Organizations.AnyAsync(org => org.Name == organization.Name))
-        {
-            _dbContext.Update(organization);
-        }
-        else
+        if (!await _dbContext.Organizations.AnyAsync(org => org.Name == organization.Name))
         {
             _dbContext.Add(organization);
         }
-
-        await _dbContext.SaveChangesAsync();
+        else
+        {
+            _dbContext.Update(organization);
+        }
     }
 
-    private async Task SeedRole()
+    private async Task SeedRole(string roleName, string tenantName)
     {
         var role = await _dbContext.Roles
             .FirstOrDefaultAsync(x => x.Name == roleName);
-        if (role == null)
+
+        if (role != null && await _dbContext.Organizations.AnyAsync())
+        {
+            await SeedRolePermissions(role, GetWidePermissions());
+        }
+        else
         {
             var newRole = new Role(Guid.NewGuid(), roleName, "Owner of the account");
             newRole.TenantId = tenantName;
             newRole.Scope = tenantName;
 
-            await SeedPermissionsForRole(newRole, GetWidePermissions());
+            await SeedRolePermissions(newRole, GetWidePermissions());
             _dbContext.Add(newRole);
         }
-        else
-        {
-            await SeedPermissionsForRole(role, GetWidePermissions());
-        }
-
-        await _dbContext.SaveChangesAsync();
     }
 
-    private async Task SeedPermissionsForRole(Role role, Permission[] permissions)
+    private async Task SeedRolePermissions(Role role, Permission[] permissions)
     {
         foreach (var permission in permissions)
         {
@@ -261,13 +276,13 @@ public class DbInitializer
         }
     }
 
-    private async Task SeedUser()
+    private async Task SeedOrganizationUser(string userName, string displayName, string tenantName)
     {
         var organization = await _dbContext.Organizations.AsNoTracking()
             .Where(x => x.Name == tenantName)
             .FirstOrDefaultAsync();
 
-        if (organization != null 
+        if (organization != null
             && !await _dbContext.Users.AnyAsync(u => u.Id == userName || u.Username == userName))
         {
             var user = new User(
@@ -277,27 +292,30 @@ public class DbInitializer
                 displayName,
                 "+477" + new Random().Next(0, 1000000000),
                 DateTime.UtcNow.AddYears(-20));
+
             user.CreatedBy = _userDetailsProvider.AuthenticatedUser.ActionUserId;
+            user.CreatedOnUtc = DateTime.UtcNow;
             user.AssignOrganization(tenantName);
 
-            await SeedRolesForUser(user);
             _dbContext.Add(user);
+        }
+    }
+
+    private async Task SeedUserRoles(string userName, string roleName)
+    {
+        var user = await _dbContext.Users
+            .Where(u => u.Username == userName)
+            .FirstOrDefaultAsync();
+
+        var role = await _dbContext.Roles.AsNoTracking()
+            .FirstOrDefaultAsync(x => x.Name == roleName);
+
+        if (user != null && role != null
+            && !await _dbContext.UserRoles.AnyAsync(x => x.UserId == user.Id && x.RoleId == role.Id))
+        {
+            user.AssignRole(role.Id);
         }
 
         await _dbContext.SaveChangesAsync();
-    }
-
-    private async Task SeedRolesForUser(User user)
-    {
-        var role = await _dbContext.Roles.AsNoTracking()
-            .Where(r => r.Name == roleName)
-            .FirstOrDefaultAsync();
-
-        if (role != null 
-            && !await _dbContext.UserRoles.AnyAsync(ur => ur.UserId == user.Id && ur.RoleId == roleName))
-        {
-            //user.AssignRole(roleName); // incorrect as RoleId is string that combine "role-Guid"
-            user.AssignRole(role.Id);
-        }
     }
 }

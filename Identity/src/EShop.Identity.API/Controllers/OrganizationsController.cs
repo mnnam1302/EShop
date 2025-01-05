@@ -2,7 +2,6 @@
 using EShop.Identity.API.Abstractions;
 using EShop.Shared.Contracts.Services.Identity.Organizations;
 using EShop.Shared.JsonApi.ResourceAccessControl;
-using EShop.Shared.Scoping.ResourceAccessControl;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -22,7 +21,6 @@ namespace EShop.Identity.API.Controllers
 
         [HttpPost]
         [RequireSupportUser]
-        //[RequirePermission(PermissionConstants.ManageOrganizationsPermissionId)]
         public async Task<IResult> CreateOrganization([FromBody] Command.CreateOrganization command)
         {
             var result = await _sender.Send(command);

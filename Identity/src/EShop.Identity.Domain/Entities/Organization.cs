@@ -6,7 +6,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace EShop.Identity.Domain.Entities;
 
-public class Organization : AggregateRoot<string>, IScoped
+public class Organization : AggregateRoot<string>, IExcludedFromScoping
 {
     public Organization()
     {
@@ -24,8 +24,6 @@ public class Organization : AggregateRoot<string>, IScoped
         Postcode = postcode;
         Description = description;
         ParentOrganizationId = parentOrganizationId;
-        TenantId = name;
-        Scope = name;
     }
 
     public static Organization Create(Command.CreateOrganization command)
@@ -88,10 +86,4 @@ public class Organization : AggregateRoot<string>, IScoped
     public virtual Organization? ParentOrganization { get; set; }
 
     public virtual List<User>? Users { get; set; }
-
-    [MaxLength(ModelConstants.ShortText)]
-    public string? TenantId { get; set; }
-
-    [MaxLength(ModelConstants.LongText)]
-    public string? Scope { get; set; }
 }
