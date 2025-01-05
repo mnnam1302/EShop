@@ -5,22 +5,18 @@ using EShop.Identity.Domain.Exceptions;
 using EShop.Shared.Contracts.Abstractions.Requests;
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.Contracts.Services.Identity.Roles;
-using Microsoft.AspNetCore.Identity;
 
 namespace EShop.Identity.Application.UseCases.V1.Commands.Roles;
 
 public class CreateRoleHandler : ICommandHandler<Command.CreateRole>
 {
-    private readonly RoleManager<Role> _roleManager;
     private readonly IRepositoryBase<Role, string> _roleRepository;
     private readonly IUnitOfWork _unitOfWork;
 
     public CreateRoleHandler(
-        RoleManager<Role> roleManager,
         IRepositoryBase<Role, string> roleRepository,
         IUnitOfWork unitOfWork)
     {
-        _roleManager = roleManager;
         _roleRepository = roleRepository;
         _unitOfWork = unitOfWork;
     }

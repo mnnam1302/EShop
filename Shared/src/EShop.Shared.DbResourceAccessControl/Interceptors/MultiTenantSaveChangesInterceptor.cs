@@ -5,11 +5,11 @@ using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace EShop.Shared.DbResourceAccessControl.Interceptors;
 
-public sealed class MultiTenantSavesChangeInterceptor : SaveChangesInterceptor
+public sealed class MultiTenantSaveChangesInterceptor : SaveChangesInterceptor
 {
     private readonly IUserDetailsProvider _userDetailsProvider;
 
-    public MultiTenantSavesChangeInterceptor(IUserDetailsProvider userDetailsProvider)
+    public MultiTenantSaveChangesInterceptor(IUserDetailsProvider userDetailsProvider)
     {
         _userDetailsProvider = userDetailsProvider;
     }

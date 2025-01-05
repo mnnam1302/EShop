@@ -61,9 +61,7 @@ namespace EShop.Identity.Persistence.Migrations
                     Description = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
                     PhoneNumber = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true),
                     TenantId = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true),
-                    Scope = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
-                    NormalizedName = table.Column<string>(type: "text", nullable: true),
-                    ConcurrencyStamp = table.Column<string>(type: "text", nullable: true)
+                    Scope = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -101,18 +99,7 @@ namespace EShop.Identity.Persistence.Migrations
                     IsActive = table.Column<bool>(type: "boolean", nullable: false),
                     CreatedBy = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true),
                     CreatedOnUtc = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    LastModifiedOnUtc = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
-                    UserName = table.Column<string>(type: "text", nullable: true),
-                    NormalizedUserName = table.Column<string>(type: "text", nullable: true),
-                    NormalizedEmail = table.Column<string>(type: "text", nullable: true),
-                    EmailConfirmed = table.Column<bool>(type: "boolean", nullable: false),
-                    SecurityStamp = table.Column<string>(type: "text", nullable: true),
-                    ConcurrencyStamp = table.Column<string>(type: "text", nullable: true),
-                    PhoneNumberConfirmed = table.Column<bool>(type: "boolean", nullable: false),
-                    TwoFactorEnabled = table.Column<bool>(type: "boolean", nullable: false),
-                    LockoutEnd = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
-                    LockoutEnabled = table.Column<bool>(type: "boolean", nullable: false),
-                    AccessFailedCount = table.Column<int>(type: "integer", nullable: false)
+                    LastModifiedOnUtc = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
                 {
