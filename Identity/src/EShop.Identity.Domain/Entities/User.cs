@@ -12,7 +12,7 @@ public class User : EntityBase<string>, IExcludedFromScoping
     protected User()
     { }
 
-    public User(string userName, string password, string email, string? displayName, string? phoneNumber, DateTime? dateofBirth)
+    public User(string userName, string password, string email, string? displayName, string? phoneNumber, DateTime? dateofBirth, string organizationId)
     {
         Id = userName;
         Username = userName;
@@ -21,6 +21,7 @@ public class User : EntityBase<string>, IExcludedFromScoping
         DisplayName = displayName;
         PhoneNumber = phoneNumber;
         DateOfBirth = dateofBirth;
+        OrganizationId = organizationId;
         IsActive = true;
     }
 
@@ -31,7 +32,8 @@ public class User : EntityBase<string>, IExcludedFromScoping
             command.Email,
             command.DisplayName,
             command.PhoneNumber,
-            command.DateOfBirth);
+            command.DateOfBirth,
+            command.OrganizationId);
 
         user.AssertCreateUser();
 
@@ -121,11 +123,6 @@ public class User : EntityBase<string>, IExcludedFromScoping
             new Claim("username", Username),
             new Claim("tenant:groups", OrganizationId ?? string.Empty)
         };
-    }
-
-    public void AssignOrganization(string organizationId)
-    {
-        OrganizationId = organizationId;
     }
 
     public void AssignRole(string roleId)

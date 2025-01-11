@@ -42,7 +42,8 @@ public class RegisterUserHandler : ICommandHandler<Command.RegisterUser>
             request.Email,
             request.DisplayName,
             request.PhoneNumber,
-            request.DateOfBirth);
+            request.DateOfBirth,
+            request.OrganizationId);
 
         //if (!string.IsNullOrEmpty(request.OrganizationId))
         //{

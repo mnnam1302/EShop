@@ -1,5 +1,5 @@
 ﻿using Eshop.Shared.DomainTools.Aggregates;
-using EShop.Identity.Domain.Abstractions.Entities;
+using EShop.Identity.Domain.Exceptions;
 using EShop.Shared.Contracts.Services.Identity.Organizations;
 using EShop.Shared.Scoping;
 using System.ComponentModel.DataAnnotations;
@@ -12,7 +12,7 @@ public class Organization : AggregateRoot<string>, IExcludedFromScoping
     {
     }
 
-    public Organization(string name, string? organizationNumber, string? phoneNumber, string? email, string? address, string? city, string? postcode, string? description,  string? parentOrganizationId)
+    public Organization(string name, string? organizationNumber, string? phoneNumber, string? email, string? address, string? city, string? postcode, string? description, string? parentOrganizationId)
     {
         Id = name;
         Name = name;
@@ -29,31 +29,44 @@ public class Organization : AggregateRoot<string>, IExcludedFromScoping
     public static Organization Create(Command.CreateOrganization command)
     {
         var organization = new Organization(
-            command.Name, 
-            command.OrganizationNumber, 
-            command.PhoneNumber, 
-            command.Email, 
-            command.Address, 
-            command.City, 
-            command.PostCode, 
-            command.Description, 
+            command.Name,
+            command.OrganizationNumber,
+            command.PhoneNumber,
+            command.Email,
+            command.Address,
+            command.City,
+            command.PostCode,
+            command.Description,
             command.ParentOrganizationId);
 
-         //Raise Domain Event
-         organization.RaiseDomainEvent(new DomainEvent.OrganizationCreated
-         {
-             EventId = Guid.NewGuid(),
-             TimeStamp = DateTimeOffset.Now,
-             SourceId = organization.Id,
-             Name = organization.Name,
-             OrganizationNumber = organization.OrganizationNumber,
-             PhoneNumber = organization.PhoneNumber,
-             Email = organization.Email,
-             Address = organization.Address,
-             City = organization.City
-         });
+        //Raise Domain Event
+        organization.RaiseDomainEvent(new DomainEvent.OrganizationCreated
+        {
+            EventId = Guid.NewGuid(),
+            TimeStamp = DateTimeOffset.Now,
+            SourceId = organization.Id,
+            Name = organization.Name,
+            OrganizationNumber = organization.OrganizationNumber,
+            PhoneNumber = organization.PhoneNumber,
+            Email = organization.Email,
+            Address = organization.Address,
+            City = organization.City
+        });
 
         return organization;
+    }
+
+    public void AddUser(User user)
+    {
+        if (user == null)
+            throw new BadRequestException("User must be required");
+
+        if (Users.Any(u => u.Id == user.Id))
+        {
+            throw new ConflictException("User has already exists");
+        }
+
+        Users.Add(user);
     }
 
     [MaxLength(ModelConstants.MediumText)]
@@ -83,7 +96,8 @@ public class Organization : AggregateRoot<string>, IExcludedFromScoping
 
     [MaxLength(ModelConstants.ShortText)]
     public string? ParentOrganizationId { get; set; }
+
     public virtual Organization? ParentOrganization { get; set; }
 
-    public virtual List<User>? Users { get; set; }
+    public virtual List<User>? Users { get; set; } = new List<User>();
 }
