@@ -20,8 +20,8 @@ public interface IUserDetailsProvider
 
 public class UserData : ValueObject
 {
-    public const string SystemUsername = "System";
-    public const string EShopSupportGroup = "EShop_Support";
+    public const string SystemUsername = "system";
+    public const string EShopSupportGroup = "eshop-support";
 
     public UserData(string id, string username, string tenantId)
         : this(id, username, tenantId, false, id)
@@ -54,10 +54,18 @@ public class UserData : ValueObject
     public string UserType { get; }
     public string ActionUserType { get; }
 
-    public static UserData GetSystemUser(string? tenantId) => new UserData(SystemUsername, SystemUsername, tenantId ?? string.Empty);
+    public static UserData GetSystemUser(string? tenantId) 
+        => new UserData(SystemUsername, SystemUsername, tenantId ?? string.Empty);
 
     public static UserData GetSystemUser(string? tenantId, string actionUserId, string? actionUserType = null)
-        => new UserData(SystemUsername, SystemUsername, tenantId ?? string.Empty, false, actionUserId, UserTypes.SystemUsers, actionUserType: actionUserType);
+        => new UserData(
+            SystemUsername, 
+            SystemUsername, 
+            tenantId ?? string.Empty, 
+            false, 
+            actionUserId, 
+            UserTypes.SystemUsers, 
+            actionUserType: actionUserType);
 
     public static bool IsSystemUser(string username) => username.Equals(SystemUsername, StringComparison.OrdinalIgnoreCase);
 }

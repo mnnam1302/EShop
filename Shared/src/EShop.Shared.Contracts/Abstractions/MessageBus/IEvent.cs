@@ -5,6 +5,8 @@ namespace EShop.Shared.Contracts.Abstractions.MessageBus;
 [ExcludeFromTopology]
 public interface IEvent : IMessage
 {
+    Guid EventId { get; }
+    string SourceId { get; }
 }
 
 [ExcludeFromTopology]
@@ -21,7 +23,7 @@ public interface IDelayedEvent : IEvent { }
 [ExcludeFromTopology]
 public interface IVersionedEvent : IEvent
 {
-    long Version { get; }
+    //long Version { get; }
 }
 
 [ExcludeFromTopology]

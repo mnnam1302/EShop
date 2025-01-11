@@ -16,7 +16,10 @@ namespace EShop.Identity.API.DependencyInjections.Extensions;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddShared(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment)
+    public static IServiceCollection AddShared(
+        this IServiceCollection services,
+        IConfiguration configuration,
+        IWebHostEnvironment environment)
     {
         services
             .AddRedisInfrastructure(configuration)
@@ -28,7 +31,10 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    public static IServiceCollection AddBoostrapping(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment)
+    public static IServiceCollection AddBoostrapping(
+        this IServiceCollection services,
+        IConfiguration configuration,
+        IWebHostEnvironment environment)
     {
         services
             .AddCors()
@@ -43,7 +49,7 @@ public static class ServiceCollectionExtensions
 
     public static IServiceCollection AddServicesApiLayer(this IServiceCollection services)
     {
-        services.AddTransient<ExceptionHandlingMiddleware>();
+        services.AddSingleton<ExceptionHandlingMiddleware>();
 
         services.AddControllers();
         services

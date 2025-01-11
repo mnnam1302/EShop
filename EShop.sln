@@ -9,6 +9,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ReverseProxy", "ReverseProx
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8E7A2034-660E-44F6-870D-F0CD1CF9DB4E}"
 	ProjectSection(SolutionItems) = preProject
+		delete-tables.sql = delete-tables.sql
 		docker-compose.Dev.Infrastructure.yml = docker-compose.Dev.Infrastructure.yml
 		postgres-init.sql = postgres-init.sql
 		README.md = README.md
@@ -62,7 +63,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EShop.Identity.Tests", "Ide
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EShop.Testing.JsonApiApplication", "Testing\src\EShop.Testing.JsonApiApplication\EShop.Testing.JsonApiApplication.csproj", "{340F0CA0-F88F-4E71-8818-10473DBD99F0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Eshop.Shared.DomainTools", "Shared\src\Eshop.Shared.DomainTools\Eshop.Shared.DomainTools.csproj", "{36998902-464E-4184-A369-6E1933D0AEAE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Eshop.Shared.DomainTools", "Shared\src\Eshop.Shared.DomainTools\Eshop.Shared.DomainTools.csproj", "{36998902-464E-4184-A369-6E1933D0AEAE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

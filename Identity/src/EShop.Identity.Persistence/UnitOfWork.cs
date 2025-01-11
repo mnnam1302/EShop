@@ -2,6 +2,7 @@
 
 namespace EShop.Identity.Persistence;
 
+[Obsolete("This class is obsolete. Use IUnitOfWork instead in Domain.Tools to generic.")]
 public class UnitOfWork : IUnitOfWork
 {
     private readonly UsersDbContext _dbContext;
