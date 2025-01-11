@@ -10,9 +10,19 @@ public class Organization : AggregateRoot<string>, IExcludedFromScoping
 {
     public Organization()
     {
+        Name = string.Empty;
+        Users = new List<User>();
     }
 
-    public Organization(string name, string? organizationNumber, string? phoneNumber, string? email, string? address, string? city, string? postcode, string? description, string? parentOrganizationId)
+    public Organization(string name, 
+        string? organizationNumber, 
+        string? phoneNumber, 
+        string? email,
+        string? address, 
+        string? city, 
+        string? postcode, 
+        string? description, 
+        string? parentOrganizationId)
     {
         Id = name;
         Name = name;
@@ -24,6 +34,7 @@ public class Organization : AggregateRoot<string>, IExcludedFromScoping
         Postcode = postcode;
         Description = description;
         ParentOrganizationId = parentOrganizationId;
+        Users = new List<User>();
     }
 
     public static Organization Create(Command.CreateOrganization command)
@@ -58,15 +69,26 @@ public class Organization : AggregateRoot<string>, IExcludedFromScoping
 
     public void AddUser(User user)
     {
-        if (user == null)
-            throw new BadRequestException("User must be required");
-
-        if (Users.Any(u => u.Id == user.Id))
-        {
-            throw new ConflictException("User has already exists");
-        }
+        ValidateUser(user);
+        EnsureUserDoesNotExist(user);
 
         Users.Add(user);
+    }
+
+    private void ValidateUser(User user)
+    {
+        if (user == null)
+        {
+            throw new BadRequestException("User must be required");
+        }
+    }
+
+    private void EnsureUserDoesNotExist(User user)
+    {
+        if (Users.Any(u => u.Id == user.Id))
+        {
+            throw new ConflictException("User already exists");
+        }
     }
 
     [MaxLength(ModelConstants.MediumText)]

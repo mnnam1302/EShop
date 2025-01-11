@@ -1,6 +1,5 @@
 ﻿using EShop.Identity.Application.Abstractions;
 using EShop.Identity.Domain.Entities;
-using EShop.Identity.Domain.Exceptions;
 using EShop.Shared.DbResourceAccessControl;
 using EShop.Shared.Scoping;
 using EShop.Shared.Scoping.ResourceAccessControl;
@@ -8,7 +7,6 @@ using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using System.Data;
 
 namespace EShop.Identity.Persistence;
 
@@ -59,10 +57,7 @@ public class DbInitializer
                 _tenantIsolationStrategy.AddTenantIsolation(_dbContext);
             }
 
-            
-            await SeedDataForSystem();
-
-            await _dbContext.SaveChangesAsync();
+            await SeedDataForEShopSystem();
         }
         catch (Exception ex)
         {
@@ -74,19 +69,20 @@ public class DbInitializer
         }
     }
 
-
     /// <summary>
-    /// Seed data for system, shoukd use within one transaction
+    /// Seed data for system, shoukd use within one transaction to consistency data
     /// </summary>
     /// <returns></returns>
-    private async Task SeedDataForSystem()
+    private async Task SeedDataForEShopSystem()
     {
-        await SeedTenant(UserData.EShopSupportGroup);
-        await SeedOrganization(UserData.EShopSupportGroup, "Root System Organization");
-        await SeedSystemWidePermissions();
+        await SeedTenantAsync(UserData.EShopSupportGroup);
+        await SeedOrganizationAsync(UserData.EShopSupportGroup, "Root System Organization");
+        await SeedSystemWidePermissionsAsync();
+
+        await _dbContext.SaveChangesAsync();
     }
 
-    private async Task SeedTenant(string tenantName)
+    private async Task SeedTenantAsync(string tenantName)
     {
         var tenant = new Tenant()
         {
@@ -104,37 +100,43 @@ public class DbInitializer
         }
     }
 
-    private async Task SeedOrganization(string tenantName, string desciption)
+    private async Task SeedOrganizationAsync(string tenantName, string description)
     {
-        var organization = new Organization()
-        {
-            Id = tenantName,
-            Name = tenantName,
-            Description = desciption,
-            Email = $"{tenantName}@gmail.com",
-            PhoneNumber = "+477" + new Random().Next(0, 1000000000),
-        };
-
-        var user = SeedSystemUser(
+        var organization = CreateOrganization(tenantName, description);
+        var user = CreateSystemUser(
             UserData.SystemUsername,
-            $"{UserData.SystemUsername}@gmail.com",
+            $"{UserData.SystemUsername}.{tenantName}@gmail.com",
             "System User",
             UserData.EShopSupportGroup);
 
-        var foundOrganization = await _dbContext.Organizations.FirstOrDefaultAsync(org => org.Id == tenantName);
+        var existingOrganization = await _dbContext.Organizations
+            .FirstOrDefaultAsync(org => org.Id == tenantName);
 
-        if (foundOrganization == null)
+        if (existingOrganization == null)
         {
             organization.AddUser(user);
             _dbContext.Add(organization);
         }
         else
         {
-            _dbContext.Update(organization);
+            UpdateExistingOrganization(existingOrganization, organization);
         }
     }
 
-    private User SeedSystemUser(string userName, string email, string displayName, string tenantName)
+    private Organization CreateOrganization(string tenantName, string description)
+    {
+        return new Organization()
+        {
+            Id = tenantName,
+            Name = tenantName,
+            Description = description,
+            Email = $"{tenantName}@gmail.com",
+            OrganizationNumber = new Random().Next(0, 1000000000).ToString(),
+            PhoneNumber = "+477" + new Random().Next(0, 1000000000).ToString()
+        };
+    }
+
+    private User CreateSystemUser(string userName, string email, string displayName, string tenantName)
     {
         var user = new User(
             userName,
@@ -143,14 +145,26 @@ public class DbInitializer
             displayName,
             "+477" + new Random().Next(0, 1000000000),
             DateTime.UtcNow.AddYears(-20),
-            tenantName);
+            tenantName)
+        {
+            CreatedBy = _userDetailsProvider.AuthenticatedUser.ActionUserId,
+            CreatedOnUtc = DateTime.UtcNow
+        };
 
-        user.CreatedBy = _userDetailsProvider.AuthenticatedUser.ActionUserId;
-        user.CreatedOnUtc = DateTime.UtcNow;
         return user;
     }
 
-    private async Task SeedSystemWidePermissions()
+    private void UpdateExistingOrganization(Organization existingOrganization, Organization newOrganization)
+    {
+        existingOrganization.Name = newOrganization.Name;
+        existingOrganization.Description = newOrganization.Description;
+        existingOrganization.Email = newOrganization.Email;
+        existingOrganization.PhoneNumber = newOrganization.PhoneNumber;
+        existingOrganization.OrganizationNumber = newOrganization.OrganizationNumber;
+        _dbContext.Update(existingOrganization);
+    }
+
+    private async Task SeedSystemWidePermissionsAsync()
     {
         var permissions = GetWidePermissions();
 
