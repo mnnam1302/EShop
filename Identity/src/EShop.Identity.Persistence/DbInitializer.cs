@@ -7,6 +7,7 @@ using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using System.Xml.Linq;
 
 namespace EShop.Identity.Persistence;
 
@@ -125,15 +126,14 @@ public class DbInitializer
 
     private Organization CreateOrganization(string tenantName, string description)
     {
-        return new Organization()
-        {
-            Id = tenantName,
-            Name = tenantName,
-            Description = description,
-            Email = $"{tenantName}@gmail.com",
-            OrganizationNumber = new Random().Next(0, 1000000000).ToString(),
-            PhoneNumber = "+477" + new Random().Next(0, 1000000000).ToString()
-        };
+        return new Organization(tenantName,
+            new Random().Next(0, 1000000000).ToString(),
+            "+477" + new Random().Next(0, 1000000000).ToString(),
+            $"{tenantName}@gmail.com",
+            "Hiep Binh Phuoc",
+            "Thu Duc",
+            "22000",
+            description);
     }
 
     private User CreateSystemUser(string userName, string email, string displayName, string tenantName)
@@ -161,6 +161,9 @@ public class DbInitializer
         existingOrganization.Email = newOrganization.Email;
         existingOrganization.PhoneNumber = newOrganization.PhoneNumber;
         existingOrganization.OrganizationNumber = newOrganization.OrganizationNumber;
+        existingOrganization.Address = newOrganization.Address;
+        existingOrganization.City = newOrganization.City;
+        existingOrganization.Postcode = newOrganization.Postcode;
         _dbContext.Update(existingOrganization);
     }
 

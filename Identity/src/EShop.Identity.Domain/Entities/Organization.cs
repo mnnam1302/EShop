@@ -9,7 +9,7 @@ namespace EShop.Identity.Domain.Entities;
 
 public class Organization : AggregateRoot<string>, IExcludedFromScoping
 {
-    private Organization()
+    public Organization()
     {
         // Empty constructor for ORMs
     }
@@ -22,7 +22,7 @@ public class Organization : AggregateRoot<string>, IExcludedFromScoping
         string? city, 
         string? postcode, 
         string? description, 
-        string? parentOrganizationId)
+        string? parentOrganizationId = null)
     {
         Id = name;
         Name = Check.NotNullOrWhiteSpace(name, nameof(name));

@@ -1,16 +1,16 @@
-﻿using EShop.Shared.Scoping;
-using FluentValidation;
+﻿using FluentValidation;
 
 namespace EShop.Shared.Contracts.Services.Identity.Users.Validators;
 
-public class CreateUserRequestValidator : AbstractValidator<Command.CreateUserCommand>
+public class CreateUserValidator : AbstractValidator<Command.CreateUserCommand>
 {
-    public CreateUserRequestValidator()
+    public CreateUserValidator()
     {
         // Username not null, and must not equal UserData.SystemUser
         RuleFor(x => x.Username)
             .NotEmpty()
-            .NotEqual(UserData.SystemUsername)
+            .NotEqual("System")
+            .NotEqual("system")
             .WithMessage("Invalid username.");
 
         RuleFor(x => x.Password)
