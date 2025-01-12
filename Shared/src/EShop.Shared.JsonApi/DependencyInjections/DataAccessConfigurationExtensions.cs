@@ -37,7 +37,7 @@ public static class DataAccessConfigurationExtensions
             var ngsqlVersionOptions = provider.GetRequiredService<IOptionsMonitor<NgSqlVersionOptions>>();
             var multiTenantConnectionInterceptor = provider.GetRequiredService<IMultiTenantIsolationStategy>();
             var multiTenantSaveChangesInterceptor = provider.GetRequiredService<MultiTenantSaveChangesInterceptor>();
-            var auditableInterceptor = provider.GetRequiredService<AuditableInterceptor>();
+        //var auditableInterceptor = provider.GetRequiredService<AuditableInterceptor>();
 
         builder
             .EnableDetailedErrors(true)
@@ -56,8 +56,8 @@ public static class DataAccessConfigurationExtensions
                         .MigrationsAssembly(typeof(TContext).Assembly.GetName().Name))
             .AddInterceptors(
                 multiTenantConnectionInterceptor,
-                multiTenantSaveChangesInterceptor,
-                auditableInterceptor);
+                multiTenantSaveChangesInterceptor);
+                //auditableInterceptor);
             })
             .AddMultiTenantScoping()
             .AddAuditableInterceptor();

@@ -18,7 +18,7 @@ public static class Command
         public string Username { get; init; }
 
         [JsonIgnore]
-        public string Password { get; init; } = "P@assword123";
+        public string Password { get; set; } = string.Empty;
         public string Email { get; init; }
         public string DisplayName { get; init; }
         public string? PhoneNumber { get; init; }

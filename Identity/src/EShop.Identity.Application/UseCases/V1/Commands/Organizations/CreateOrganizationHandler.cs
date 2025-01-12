@@ -25,7 +25,8 @@ namespace EShop.Identity.Application.UseCases.V1.Commands.Organizations
         {
             if (request.ParentOrganizationId != null)
             {
-                await _organizationRepository.FindByIdAsync(request.ParentOrganizationId);
+                var foundParentOrganization = await _organizationRepository.FindByIdAsync(request.ParentOrganizationId)
+                    ?? throw new NotFoundException("Parent organization was not found");
             }
 
             var organizationExists = await _organizationRepository.FindSingleAsync(x => x.Name == request.Name);

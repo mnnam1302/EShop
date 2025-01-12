@@ -1,5 +1,6 @@
 ﻿using Eshop.Shared.DomainTools.DomainExceptions;
 using Eshop.Shared.DomainTools.UnitOfWorks;
+using EShop.Identity.Application.Abstractions;
 using EShop.Identity.Domain.Abstractions.Repositories;
 using EShop.Identity.Domain.Entities;
 using EShop.Shared.Contracts.Abstractions.Requests;
@@ -13,26 +14,22 @@ public class CreateUserCommandHandler : ICommandHandler<Command.CreateUserComman
     private readonly IIdentityAggregateRepository<Organization, string> _organizationRepository;
     private readonly IIdentityRepositoryBase<Role, string> _roleRepository;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IPasswordHasher _passwordHasher;
 
     public CreateUserCommandHandler(
         IIdentityAggregateRepository<Organization, string> organizationRepository,
         IIdentityRepositoryBase<Role, string> roleRepository,
-        IUnitOfWork unitOfWork)
+        IUnitOfWork unitOfWork,
+        IPasswordHasher passwordHasher)
     {
         _organizationRepository = organizationRepository;
         _roleRepository = roleRepository;
         _unitOfWork = unitOfWork;
+        _passwordHasher = passwordHasher;
     }
 
     public async Task<Result> Handle(Command.CreateUserCommand request, CancellationToken cancellationToken)
     {
-        // 1. check organization exists
-        // 2. check roleIds exists
-        // 3. create user
-        // 4. add roles to user
-        // 5. add user to organization
-        // 6. save changes
-
         var organization = await _organizationRepository.FindByIdAsync(request.OrganizationId, true);
         if (organization is null)
         {
@@ -45,6 +42,7 @@ public class CreateUserCommandHandler : ICommandHandler<Command.CreateUserComman
             throw new NotFoundException("Roles were not found");
         }
 
+        request.Password = _passwordHasher.Hash("P@ssword123"); // auto-generate and send email, must change pass when first login
         var user = User.Create(request);
         user.AddRoles(roles.Select(r => r.Id).ToList());
 

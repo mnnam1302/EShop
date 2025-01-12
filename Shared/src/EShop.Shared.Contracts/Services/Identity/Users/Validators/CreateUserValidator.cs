@@ -13,9 +13,6 @@ public class CreateUserValidator : AbstractValidator<Command.CreateUserCommand>
             .NotEqual("system")
             .WithMessage("Invalid username.");
 
-        RuleFor(x => x.Password)
-            .NotEmpty();
-
         RuleFor(x => x.Email)
             .NotEmpty()
             .EmailAddress();

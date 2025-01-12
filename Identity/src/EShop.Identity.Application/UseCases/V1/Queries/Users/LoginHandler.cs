@@ -33,8 +33,7 @@ public class LoginHandler : IQueryHandler<Query.Login, Response.AuthenticatedRes
 
     public async Task<Result<Response.AuthenticatedResponse>> Handle(Query.Login request, CancellationToken cancellationToken)
     {
-        var user = await _userRepository.FindSingleAsync(
-            x => x.Username == request.Username, false, cancellationToken, x => x.Roles);
+        var user = await _userRepository.FindSingleAsync(x => x.Username == request.Username);
         if (user == null)
         {
             throw new AuthorizationException("User not found");
