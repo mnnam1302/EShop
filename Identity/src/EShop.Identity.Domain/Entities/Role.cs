@@ -1,12 +1,12 @@
-﻿using EShop.Identity.Domain.Abstractions.Entities;
+﻿using Eshop.Shared.DomainTools.Entities;
+using EShop.Identity.Domain.Abstractions.Entities;
 using EShop.Identity.Domain.Exceptions;
 using EShop.Shared.Scoping;
-using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations;
 
 namespace EShop.Identity.Domain.Entities;
 
-public class Role : EntityBase<string>, IScoped
+public class Role : Eshop.Shared.DomainTools.Entities.EntityBase<string>, IScoped
 {
     public Role()
     { }

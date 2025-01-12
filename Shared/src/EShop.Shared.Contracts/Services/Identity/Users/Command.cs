@@ -19,6 +19,7 @@ public static class Command
         public string Email { get; init; }
         public string DisplayName { get; init; }
         public string? PhoneNumber { get; init; }
+        public DateTime? DateOfBirth { get; init; }
         public List<string> RoleIds { get; init; }
         public string OrganizationId { get; init; }
     }

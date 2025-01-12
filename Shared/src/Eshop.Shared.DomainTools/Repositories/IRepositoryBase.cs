@@ -3,8 +3,7 @@
 namespace Eshop.Shared.DomainTools.Repositories;
 
 /// <summary>
-/// Why class here without IEntity<TKey>, IAggregateRoot<TKey>? What purpose?
-/// where TEntity : IAggregateRoot<TKey>
+/// This interface is used to define a repository for an entity.
 /// </summary>
 /// <typeparam name="TEntity"></typeparam>
 /// <typeparam name="TKey"></typeparam>

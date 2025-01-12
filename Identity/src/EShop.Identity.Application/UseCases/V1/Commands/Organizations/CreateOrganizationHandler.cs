@@ -13,11 +13,11 @@ namespace EShop.Identity.Application.UseCases.V1.Commands.Organizations
 {
     public class CreateOrganizationHandler : ICommandHandler<Command.CreateOrganization>
     {
-        private readonly IIdentityRepository<Organization, string> _organizationRepository;
+        private readonly IIdentityAggregateRepository<Organization, string> _organizationRepository;
         private readonly IUnitOfWork _unitOfWork;
 
         public CreateOrganizationHandler(
-            IIdentityRepository<Organization, string> organizationRepository,
+            IIdentityAggregateRepository<Organization, string> organizationRepository,
             IUnitOfWork unitOfWork)
         {
             _organizationRepository = organizationRepository;

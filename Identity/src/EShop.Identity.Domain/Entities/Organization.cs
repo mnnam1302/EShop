@@ -3,6 +3,7 @@ using Eshop.Shared.DomainTools.Extensions;
 using EShop.Identity.Domain.Exceptions;
 using EShop.Shared.Contracts.Services.Identity.Organizations;
 using EShop.Shared.Scoping;
+using Microsoft.Extensions.Configuration;
 using System.ComponentModel.DataAnnotations;
 
 namespace EShop.Identity.Domain.Entities;
@@ -71,8 +72,20 @@ public class Organization : AggregateRoot<string>, IExcludedFromScoping
     {
         ValidateUser(user);
         EnsureUserDoesNotExist(user);
-
         Users.Add(user);
+
+        // Raise Domain Event
+        RaiseDomainEvent(new Shared.Contracts.Services.Identity.Users.DomainEvent.UserCreated
+        {
+            EventId = Guid.NewGuid(),
+            TimeStamp = DateTimeOffset.Now,
+            SourceId = user.Id,
+            Username = user.Username,
+            Email = user.Email,
+            DisplayName = user.DisplayName,
+            PhoneNumber = user.PhoneNumber,
+            OrganizationId = user.OrganizationId!
+        });
     }
 
     private void ValidateUser(User user)

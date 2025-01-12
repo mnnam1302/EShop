@@ -25,9 +25,9 @@ public class User : EntityBase<string>, IExcludedFromScoping
         IsActive = true;
     }
 
-    public static User Create(Command.RegisterUser command)
+    public static User Create(Command.CreateUserCommand command)
     {
-        var user = new User(command.UserName,
+        var user = new User(command.Username,
             command.Password,
             command.Email,
             command.DisplayName,
@@ -36,9 +36,6 @@ public class User : EntityBase<string>, IExcludedFromScoping
             command.OrganizationId);
 
         user.AssertCreateUser();
-
-        // Raise domain event: TODO
-
         return user;
     }
 
@@ -125,7 +122,20 @@ public class User : EntityBase<string>, IExcludedFromScoping
         };
     }
 
-    public void AssignRole(string roleId)
+    public void AddRoles(IEnumerable<string> roleIds)
+    {
+        foreach (var roleId in roleIds)
+        {
+            if (UserRoles.Any(ur => ur.RoleId == roleId))
+            {
+                throw new BadRequestException($"User already has the role: {roleId}");
+            }
+
+            AssignRole(roleId);
+        }
+    }
+
+    private void AssignRole(string roleId)
     {
         var userRole = new UserRole()
         {

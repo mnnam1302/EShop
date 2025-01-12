@@ -34,7 +34,8 @@ public static class ServiceCollectionExtensions
 
     private static IServiceCollection AddRepositories(this IServiceCollection services)
     {
-        services.AddScoped(typeof(IIdentityRepository<,>), typeof(IdentityRepository<,>));
+        services.AddScoped(typeof(IIdentityAggregateRepository<,>), typeof(IdentityAggregateRepository<,>));
+        services.AddScoped(typeof(IIdentityRepositoryBase<,>), typeof(IdentityRepositoryBase<,>));
         services.AddScoped<Eshop.Shared.DomainTools.UnitOfWorks.IUnitOfWork, UnitOfWorkDbContext<UsersDbContext>>();
         return services;
     }

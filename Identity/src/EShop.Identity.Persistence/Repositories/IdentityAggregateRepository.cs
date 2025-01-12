@@ -4,11 +4,11 @@ using EShop.Identity.Domain.Abstractions.Repositories;
 
 namespace EShop.Identity.Persistence.Repositories;
 
-public class IdentityRepository<TEntity, TKey> : AggregateRepositoryBaseDbContext<UsersDbContext, TEntity, TKey>,
-    IIdentityRepository<TEntity, TKey>
+public class IdentityAggregateRepository<TEntity, TKey> : AggregateRepository<UsersDbContext, TEntity, TKey>,
+    IIdentityAggregateRepository<TEntity, TKey>
     where TEntity : class, IAggregateRoot<TKey>
 {
-    public IdentityRepository(UsersDbContext dbContext) : base(dbContext)
+    public IdentityAggregateRepository(UsersDbContext dbContext) : base(dbContext)
     {
     }
 }

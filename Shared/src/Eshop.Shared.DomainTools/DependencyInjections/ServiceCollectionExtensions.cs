@@ -28,7 +28,7 @@ public static class ServiceCollectionExtensions
     {
         services.AddScoped(
             typeof(IRepositoryBase<TEntity, TKey>), 
-            typeof(AggregateRepositoryBaseDbContext<TDbContext, TEntity, TKey>));
+            typeof(AggregateRepository<TDbContext, TEntity, TKey>));
         return services;
     }
 
