@@ -11,4 +11,15 @@ public static class Command
         string? PhoneNumber = null,
         DateTime? DateOfBirth = null,
         string? OrganizationId = null) : ICommand;
+
+    public record CreateUserCommand : ICommand
+    {
+        public string Username { get; init; }
+        public string Password { get; init; }
+        public string Email { get; init; }
+        public string DisplayName { get; init; }
+        public string? PhoneNumber { get; init; }
+        public List<string> RoleIds { get; init; }
+        public string OrganizationId { get; init; }
+    }
 }

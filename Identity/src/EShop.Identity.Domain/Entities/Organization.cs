@@ -1,4 +1,5 @@
 ﻿using Eshop.Shared.DomainTools.Aggregates;
+using Eshop.Shared.DomainTools.Extensions;
 using EShop.Identity.Domain.Exceptions;
 using EShop.Shared.Contracts.Services.Identity.Organizations;
 using EShop.Shared.Scoping;
@@ -8,10 +9,9 @@ namespace EShop.Identity.Domain.Entities;
 
 public class Organization : AggregateRoot<string>, IExcludedFromScoping
 {
-    public Organization()
+    private Organization()
     {
-        Name = string.Empty;
-        Users = new List<User>();
+        // Empty constructor for ORMs
     }
 
     public Organization(string name, 
@@ -25,7 +25,7 @@ public class Organization : AggregateRoot<string>, IExcludedFromScoping
         string? parentOrganizationId)
     {
         Id = name;
-        Name = name;
+        Name = Check.NotNullOrWhiteSpace(name, nameof(name));
         OrganizationNumber = organizationNumber;
         PhoneNumber = phoneNumber;
         Email = email;
