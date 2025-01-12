@@ -27,6 +27,12 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
+    public static IServiceCollection AddAuditableInterceptor(this IServiceCollection services)
+    {
+        services.TryAddScoped<AuditableInterceptor>();
+        return services;
+    }
+
     /// <summary>
     /// Replaces all registrations of service type <see cref="TService"/> in the <see cref="IServiceCollection"/>
     /// with new implementation type <see cref="TImplementation"/>.

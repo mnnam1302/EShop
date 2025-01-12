@@ -1,4 +1,5 @@
 ﻿using EShop.Shared.Contracts.Abstractions.Requests;
+using Newtonsoft.Json;
 
 namespace EShop.Shared.Contracts.Services.Identity.Users;
 
@@ -15,7 +16,9 @@ public static class Command
     public record CreateUserCommand : ICommand
     {
         public string Username { get; init; }
-        public string Password { get; init; }
+
+        [JsonIgnore]
+        public string Password { get; init; } = "P@assword123";
         public string Email { get; init; }
         public string DisplayName { get; init; }
         public string? PhoneNumber { get; init; }

@@ -1,4 +1,4 @@
-﻿using EShop.Identity.Domain.Abstractions.Entities;
+﻿using Eshop.Shared.DomainTools.Entities;
 using EShop.Identity.Domain.Exceptions;
 using EShop.Shared.Contracts.Services.Identity.Users;
 using EShop.Shared.Scoping;
@@ -7,7 +7,7 @@ using System.Security.Claims;
 
 namespace EShop.Identity.Domain.Entities;
 
-public class User : EntityBase<string>, IExcludedFromScoping
+public class User : EntityBase<string>, IDateTracking, IExcludedFromScoping
 {
     protected User()
     { }
@@ -20,7 +20,7 @@ public class User : EntityBase<string>, IExcludedFromScoping
         Email = email;
         DisplayName = displayName;
         PhoneNumber = phoneNumber;
-        DateOfBirth = dateofBirth;
+        DateOfBirth = dateofBirth?.ToUniversalTime();
         OrganizationId = organizationId;
         IsActive = true;
     }

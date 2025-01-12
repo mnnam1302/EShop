@@ -65,7 +65,7 @@ namespace EShop.Identity.API.Controllers
 
         [HttpPost]
         [RequirePermission(Permission = PermissionConstants.ManageRolesPermissionId)]
-        public async Task<IResult> CreateRole([FromBody] Command.CreateRole request, CancellationToken cancellationToken)
+        public async Task<IResult> CreateRole([FromBody] Command.CreateRoleCommand request, CancellationToken cancellationToken)
         {
             var result = await _sender.Send(request, cancellationToken);
 

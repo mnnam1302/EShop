@@ -11,7 +11,7 @@ namespace EShop.Identity.Application.UseCases.V1.Commands.Users;
 public class CreateUserCommandHandler : ICommandHandler<Command.CreateUserCommand>
 {
     private readonly IIdentityAggregateRepository<Organization, string> _organizationRepository;
-    private readonly IIdentityRepositoryBase<Role, string> _roleRepository; 
+    private readonly IIdentityRepositoryBase<Role, string> _roleRepository;
     private readonly IUnitOfWork _unitOfWork;
 
     public CreateUserCommandHandler(
@@ -47,7 +47,7 @@ public class CreateUserCommandHandler : ICommandHandler<Command.CreateUserComman
 
         var user = User.Create(request);
         user.AddRoles(roles.Select(r => r.Id).ToList());
-        
+
         organization.AddUser(user);
         _organizationRepository.Update(organization);
 

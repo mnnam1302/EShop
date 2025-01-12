@@ -10,10 +10,10 @@ namespace EShop.Identity.Application.UseCases.V1.Commands.Users;
 
 public class LogoutHandler : ICommandHandler<Command.Logout>
 {
-    private readonly IRepositoryBase<User, string> _userRepository;
+    private readonly IIdentityRepositoryBase<User, string> _userRepository;
     private readonly ITokenCachingService _tokenCachingService;
 
-    public LogoutHandler(IRepositoryBase<User, string> userRepository,
+    public LogoutHandler(IIdentityRepositoryBase<User, string> userRepository,
         ITokenCachingService tokenCachingService)
     {
         _userRepository = userRepository;
@@ -22,7 +22,7 @@ public class LogoutHandler : ICommandHandler<Command.Logout>
 
     public async Task<Result> Handle(Command.Logout request, CancellationToken cancellationToken)
     {
-        var user = await _userRepository.FindSingleAsync(x => x.Id == request.UserId, cancellationToken);
+        var user = await _userRepository.FindSingleAsync(x => x.Id == request.UserId);
         if (user == null)
         {
             throw new NotFoundException("Invalid request");

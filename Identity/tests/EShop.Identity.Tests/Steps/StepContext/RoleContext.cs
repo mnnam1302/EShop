@@ -42,9 +42,9 @@ internal class RoleContext
         try
         {
             var operationalUser = _apiContext.GetUserByUsername(creatorUserName);
-            var command = new Command.CreateRole(this.Name, string.Empty, string.Empty);
+            var command = new Command.CreateRoleCommand(this.Name, string.Empty, string.Empty);
 
-            var result = await _apiContext.Post<Command.CreateRole>(
+            var result = await _apiContext.Post<Command.CreateRoleCommand>(
                 RolesCollectionUri,
                 command,
                 operationalUser);

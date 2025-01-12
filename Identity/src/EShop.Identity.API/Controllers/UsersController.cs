@@ -24,7 +24,7 @@ namespace EShop.Identity.API.Controllers
         }
 
         [HttpPost]
-        [RequirePermission(PermissionConstants.ManageUsersPermissionId)]s
+        [RequirePermission(PermissionConstants.ManageUsersPermissionId)]
         public async Task<IResult> CreateUser([FromBody] Command.CreateUserCommand request)
         {
             var result = await _sender.Send(request);

@@ -1,6 +1,6 @@
-﻿using EShop.Identity.Application.Abstractions;
+﻿using Eshop.Shared.DomainTools.UnitOfWorks;
+using EShop.Identity.Application.Abstractions;
 using EShop.Identity.Domain.Abstractions.Repositories;
-using EShop.Identity.Domain.Abstractions.UnitOfWorks;
 using EShop.Identity.Domain.Entities;
 using EShop.Identity.Domain.Exceptions;
 using EShop.Shared.Contracts.Abstractions.Requests;
@@ -11,15 +11,12 @@ namespace EShop.Identity.Application.UseCases.V1.Commands.Users;
 
 public class RegisterUserHandler : ICommandHandler<Command.RegisterUser>
 {
-    private readonly IRepositoryBase<User, string> _userRepository;
-    //private readonly IRepositoryBase<Organization, string> _organizationRepository;
-
+    private readonly IIdentityRepositoryBase<User, string> _userRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IPasswordHasher _passwordHasher;
 
     public RegisterUserHandler(
-        IRepositoryBase<User, string> userRepository,
-        //IRepositoryBase<Organization, string> organizationRepository,
+        IIdentityRepositoryBase<User, string> userRepository,
         IUnitOfWork unitOfWork,
         IPasswordHasher passwordHasher)
     {
@@ -31,7 +28,7 @@ public class RegisterUserHandler : ICommandHandler<Command.RegisterUser>
 
     public async Task<Result> Handle(Command.RegisterUser request, CancellationToken cancellationToken)
     {
-        var existingUser = await _userRepository.FindSingleAsync(x => x.Username == request.UserName, cancellationToken);
+        var existingUser = await _userRepository.FindSingleAsync(x => x.Username == request.UserName);
         if (existingUser != null)
         {
             throw new BadRequestException("User's username has already used");
@@ -44,17 +41,6 @@ public class RegisterUserHandler : ICommandHandler<Command.RegisterUser>
             request.PhoneNumber,
             request.DateOfBirth,
             request.OrganizationId);
-
-        //if (!string.IsNullOrEmpty(request.OrganizationId))
-        //{
-        //    var organization = await _organizationRepository.FindSingleAsync(x => x.Id == request.OrganizationId, cancellationToken);
-        //    if (organization == null)
-        //    {
-        //        throw new BadRequestException("Organization is not found");
-        //    }
-
-        //    user.AssignOrganization(request.OrganizationId);
-        //}
 
         _userRepository.Add(user);
         await _unitOfWork.SaveChangesAsync(cancellationToken);

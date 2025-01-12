@@ -1,6 +1,7 @@
 ﻿using Eshop.Shared.DomainTools.Entities;
 using EShop.Identity.Domain.Abstractions.Entities;
 using EShop.Identity.Domain.Exceptions;
+using EShop.Shared.Contracts.Services.Identity.Roles;
 using EShop.Shared.Scoping;
 using System.ComponentModel.DataAnnotations;
 
@@ -17,7 +18,14 @@ public class Role : Eshop.Shared.DomainTools.Entities.EntityBase<string>, IScope
         Name = name;
         Description = description;
         PhoneNumber = phoneNumber;
-        AssertRole();
+    }
+
+    public static Role Create(Command.CreateRoleCommand command)
+    {
+        var role = new Role(Guid.NewGuid(), command.Name, command.Description, command.PhoneNumber);
+        role.AssertRole();
+
+        return role;
     }
 
     public void Update(string name, string? description, string? phoneNumber)
