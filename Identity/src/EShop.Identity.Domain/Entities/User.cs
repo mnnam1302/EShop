@@ -1,4 +1,4 @@
-﻿using EShop.Identity.Domain.Abstractions.Entities;
+﻿using Eshop.Shared.DomainTools.Entities;
 using EShop.Identity.Domain.Exceptions;
 using EShop.Shared.Contracts.Services.Identity.Users;
 using EShop.Shared.Scoping;
@@ -7,12 +7,12 @@ using System.Security.Claims;
 
 namespace EShop.Identity.Domain.Entities;
 
-public class User : EntityBase<string>, IExcludedFromScoping
+public class User : EntityBase<string>, IDateTracking, IExcludedFromScoping
 {
     protected User()
     { }
 
-    public User(string userName, string password, string email, string? displayName, string? phoneNumber, DateTime? dateofBirth)
+    public User(string userName, string password, string email, string? displayName, string? phoneNumber, DateTime? dateofBirth, string organizationId)
     {
         Id = userName;
         Username = userName;
@@ -20,23 +20,22 @@ public class User : EntityBase<string>, IExcludedFromScoping
         Email = email;
         DisplayName = displayName;
         PhoneNumber = phoneNumber;
-        DateOfBirth = dateofBirth;
+        DateOfBirth = dateofBirth?.ToUniversalTime();
+        OrganizationId = organizationId;
         IsActive = true;
     }
 
-    public static User Create(Command.RegisterUser command)
+    public static User Create(Command.CreateUserCommand command)
     {
-        var user = new User(command.UserName,
+        var user = new User(command.Username,
             command.Password,
             command.Email,
             command.DisplayName,
             command.PhoneNumber,
-            command.DateOfBirth);
+            command.DateOfBirth,
+            command.OrganizationId);
 
         user.AssertCreateUser();
-
-        // Raise domain event: TODO
-
         return user;
     }
 
@@ -123,12 +122,20 @@ public class User : EntityBase<string>, IExcludedFromScoping
         };
     }
 
-    public void AssignOrganization(string organizationId)
+    public void AddRoles(IEnumerable<string> roleIds)
     {
-        OrganizationId = organizationId;
+        foreach (var roleId in roleIds)
+        {
+            if (UserRoles.Any(ur => ur.RoleId == roleId))
+            {
+                throw new BadRequestException($"User already has the role: {roleId}");
+            }
+
+            AssignRole(roleId);
+        }
     }
 
-    public void AssignRole(string roleId)
+    private void AssignRole(string roleId)
     {
         var userRole = new UserRole()
         {

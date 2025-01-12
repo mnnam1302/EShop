@@ -2,34 +2,47 @@
 
 namespace Eshop.Shared.DomainTools.Repositories;
 
+/// <summary>
+/// This interface is used to define a repository for an entity.
+/// </summary>
+/// <typeparam name="TEntity"></typeparam>
+/// <typeparam name="TKey"></typeparam>
 public interface IRepositoryBase<TEntity, in TKey>
-    where TEntity : class // Why class here without IEntity<TKey>, IAggregateRoot<TKey>? What purpose does it serve?
-                          //where TEntity : IAggregateRoot<TKey>
+    where TEntity : class
 {
-    Task<TEntity> FindByIdAsync(
+    Task<TEntity?> FindByIdAsync(
         TKey id,
+        bool trackChanges = false,
         CancellationToken cancellationToken = default,
         params Expression<Func<TEntity, object>>[] includeProperties);
 
     Task<TEntity?> FindSingleAsync(
         Expression<Func<TEntity, bool>>? predicate = null,
+        bool trackChanges = false,
         CancellationToken cancellationToken = default,
+        params Expression<Func<TEntity, object>>[] includeProperties);
+    
+    Task<ICollection<TEntity>> FindByConditionAsync(
+        Expression<Func<TEntity, bool>>? predicate = null,
+        bool trackChanges = false,
+        CancellationToken cancellationToken = default,
+        params Expression<Func<TEntity, object>>[] includeProperties);
+
+    IQueryable<TEntity> FindByCondition(
+        Expression<Func<TEntity, bool>>? predicate = null,
+        bool trackChanges = false,
         params Expression<Func<TEntity, object>>[] includeProperties);
 
     IQueryable<TEntity> FindAll(
-        Expression<Func<TEntity, bool>>? predicate = null,
+        bool trackChanges = false,
         params Expression<Func<TEntity, object>>[] includeProperties);
 
-    Task<ICollection<TEntity>> FindAllAsync(
-        Expression<Func<TEntity, bool>>? predicate = null,
-        CancellationToken cancellationToken = default,
-        params Expression<Func<TEntity, object>>[] includeProperties);
 
     void Add(TEntity entity);
 
     void Update(TEntity entity);
 
-    void Remove(TEntity entity);
+    void Delete(TEntity entity);
 
-    void RemoveMultiple(List<TEntity> entities);
+    void DeleteMultiple(ICollection<TEntity> entities);
 }

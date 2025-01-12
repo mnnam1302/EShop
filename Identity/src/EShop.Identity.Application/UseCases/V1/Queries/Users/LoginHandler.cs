@@ -9,15 +9,18 @@ using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserTokenProvider;
 
 namespace EShop.Identity.Application.UseCases.V1.Queries.Users;
 
+/// <summary>
+/// Existsing a problem, if user is include role, error because role is isolation strategy
+/// </summary>
 public class LoginHandler : IQueryHandler<Query.Login, Response.AuthenticatedResponse>
 {
-    private readonly IRepositoryBase<User, string> _userRepository;
+    private readonly IIdentityRepositoryBase<User, string> _userRepository;
     private readonly ITokenService _tokenService;
     private readonly IPasswordHasher _passwordHasher;
     private readonly ITokenCachingService _tokenCachingService;
 
     public LoginHandler(
-        IRepositoryBase<User, string> userRepository,
+        IIdentityRepositoryBase<User, string> userRepository,
         ITokenService tokenService,
         IPasswordHasher passwordHasher,
         ITokenCachingService tokenCachingService)

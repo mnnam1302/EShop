@@ -1,5 +1,5 @@
-﻿using EShop.Identity.Domain.Abstractions.Repositories;
-using EShop.Identity.Domain.Abstractions.UnitOfWorks;
+﻿using Eshop.Shared.DomainTools.UnitOfWorks;
+using EShop.Identity.Domain.Abstractions.Repositories;
 using EShop.Identity.Persistence.Repositories;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -11,8 +11,8 @@ public static class ServiceCollectionExtensions
     {
         services
             .AddDbInitializer()
-            .AddRepositoryAndUnitOfWork()
-            .AddRepositories();
+            .AddRepositories()
+            .AddUnitOfWorks();
 
         return services;
     }
@@ -23,16 +23,16 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    private static IServiceCollection AddRepositoryAndUnitOfWork(this IServiceCollection services)
+    private static IServiceCollection AddRepositories(this IServiceCollection services)
     {
-        services.AddScoped(typeof(IUnitOfWork), typeof(UnitOfWork));
-        services.AddScoped(typeof(IRepositoryBase<,>), typeof(RepositoryBase<,>));
+        services.AddScoped(typeof(IIdentityAggregateRepository<,>), typeof(IdentityAggregateRepository<,>));
+        services.AddScoped(typeof(IIdentityRepositoryBase<,>), typeof(IdentityRepositoryBase<,>));
         return services;
     }
 
-    private static IServiceCollection AddRepositories(this IServiceCollection services)
+    private static IServiceCollection AddUnitOfWorks(this IServiceCollection services)
     {
-        services.AddScoped(typeof(IIdentityRepository<,>), typeof(IdentityRepository<,>));
+        services.AddScoped<IUnitOfWork, UnitOfWorkDbContext<UsersDbContext>>();
         return services;
     }
 

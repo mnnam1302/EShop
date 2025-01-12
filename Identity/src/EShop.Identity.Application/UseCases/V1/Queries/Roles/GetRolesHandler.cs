@@ -10,10 +10,10 @@ namespace EShop.Identity.Application.UseCases.V1.Queries.Roles;
 
 public class GetRolesHandler : IQueryHandler<Query.GetRoles, PagedResult<Response.RolesResponse>>
 {
-    private readonly IRepositoryBase<Role, string> _roleRepository;
+    private readonly IIdentityRepositoryBase<Role, string> _roleRepository;
     private readonly IMapper _mapper;
 
-    public GetRolesHandler(IRepositoryBase<Role, string> roleRepository, IMapper mapper)
+    public GetRolesHandler(IIdentityRepositoryBase<Role, string> roleRepository, IMapper mapper)
     {
         _roleRepository = roleRepository;
         _mapper = mapper;
@@ -23,7 +23,7 @@ public class GetRolesHandler : IQueryHandler<Query.GetRoles, PagedResult<Respons
     {
         var rolesQuery = string.IsNullOrWhiteSpace(request.Name)
             ? _roleRepository.FindAll()
-            : _roleRepository.FindAll(x => x.Name!.Contains(request.Name));
+            : _roleRepository.FindByCondition(x => x.Name!.Contains(request.Name));
 
         var pagedResult = await PagedResult<Role>.CreateAsync(
             rolesQuery,

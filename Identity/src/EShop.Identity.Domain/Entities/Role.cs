@@ -1,12 +1,13 @@
-﻿using EShop.Identity.Domain.Abstractions.Entities;
+﻿using Eshop.Shared.DomainTools.Entities;
+using EShop.Identity.Domain.Abstractions.Entities;
 using EShop.Identity.Domain.Exceptions;
+using EShop.Shared.Contracts.Services.Identity.Roles;
 using EShop.Shared.Scoping;
-using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations;
 
 namespace EShop.Identity.Domain.Entities;
 
-public class Role : EntityBase<string>, IScoped
+public class Role : Eshop.Shared.DomainTools.Entities.EntityBase<string>, IScoped
 {
     public Role()
     { }
@@ -17,7 +18,14 @@ public class Role : EntityBase<string>, IScoped
         Name = name;
         Description = description;
         PhoneNumber = phoneNumber;
-        AssertRole();
+    }
+
+    public static Role Create(Command.CreateRoleCommand command)
+    {
+        var role = new Role(Guid.NewGuid(), command.Name, command.Description, command.PhoneNumber);
+        role.AssertRole();
+
+        return role;
     }
 
     public void Update(string name, string? description, string? phoneNumber)

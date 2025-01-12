@@ -21,43 +21,55 @@ public class RepositoryBaseDbContext<TDbContext, TEntity, TKey>
         _dbContext.Dispose();
     }
 
-    public async Task<TEntity> FindByIdAsync(
+    public async Task<TEntity?> FindByIdAsync(
         TKey id,
+        bool trackChanges = false,
         CancellationToken cancellationToken = default,
         params Expression<Func<TEntity, object>>[] includeProperties)
     {
-        var entity = await FindAll(x => x.Id!.Equals(id), includeProperties)
-            .AsNoTracking()
-            .SingleOrDefaultAsync(cancellationToken);
 
-        return entity ?? throw new DomainExceptions.NotFoundException($"{typeof(TEntity).Name} not found");
+        var entity = await FindByCondition(
+                x => x.Id!.Equals(id), 
+                trackChanges, 
+                includeProperties)
+            .FirstOrDefaultAsync(cancellationToken);
+
+        return entity;
     }
 
     public async Task<TEntity?> FindSingleAsync(
         Expression<Func<TEntity, bool>>? predicate = null,
+        bool trackChanges = false,
         CancellationToken cancellationToken = default,
         params Expression<Func<TEntity, object>>[] includeProperties)
     {
-        return await FindAll(predicate, includeProperties)
-            .AsNoTracking()
+        return await FindByCondition(
+                predicate,
+                trackChanges,
+                includeProperties)
             .SingleOrDefaultAsync(cancellationToken);
     }
 
-    public async Task<ICollection<TEntity>> FindAllAsync(
+
+    public async Task<ICollection<TEntity>> FindByConditionAsync(
         Expression<Func<TEntity, bool>>? predicate = null,
+        bool trackChanges = false,
         CancellationToken cancellationToken = default,
         params Expression<Func<TEntity, object>>[] includeProperties)
     {
-        return await FindAll(predicate, includeProperties)
+        return await FindByCondition(
+                predicate,
+                trackChanges,
+                includeProperties)
             .ToListAsync(cancellationToken);
     }
 
-    public IQueryable<TEntity> FindAll(
-        Expression<Func<TEntity, bool>>? predicate = null,
+    public IQueryable<TEntity> FindByCondition(
+        Expression<Func<TEntity, bool>>? predicate = null, 
+        bool trackChanges = false, 
         params Expression<Func<TEntity, object>>[] includeProperties)
     {
-        // Important to use AsNoTracking to improve performance - Always include AsNoTracking for Query Side
-        IQueryable<TEntity> items = _dbContext.Set<TEntity>().AsNoTracking();
+        var items = FindAll(trackChanges, includeProperties);
 
         if (includeProperties != null)
         {
@@ -68,7 +80,29 @@ public class RepositoryBaseDbContext<TDbContext, TEntity, TKey>
         }
 
         if (predicate != null)
+        {
             items = items.Where(predicate);
+        }
+ 
+        return items;
+    }
+
+    public IQueryable<TEntity> FindAll(
+        bool trackChanges = false,
+        params Expression<Func<TEntity, object>>[] includeProperties)
+    {
+        // Important to use AsNoTracking to improve performance - Always include AsNoTracking for Query Side
+        IQueryable<TEntity> items = !trackChanges
+            ? _dbContext.Set<TEntity>().AsNoTracking()
+            : _dbContext.Set<TEntity>();
+
+        if (includeProperties != null)
+        {
+            foreach (var includeProperty in includeProperties)
+            {
+                items = items.Include(includeProperty);
+            }
+        }
 
         return items;
     }
@@ -83,12 +117,12 @@ public class RepositoryBaseDbContext<TDbContext, TEntity, TKey>
         _dbContext.Set<TEntity>().Update(entity);
     }
 
-    public void Remove(TEntity entity)
+    public void Delete(TEntity entity)
     {
         _dbContext.Set<TEntity>().Remove(entity);
     }
 
-    public void RemoveMultiple(List<TEntity> entities)
+    public void DeleteMultiple(ICollection<TEntity> entities)
     {
         _dbContext.Set<TEntity>().RemoveRange(entities);
     }

@@ -36,7 +36,8 @@ public static class DataAccessConfigurationExtensions
             var ngsqlRetryOptions = provider.GetRequiredService<IOptionsMonitor<NgSqlRetryOptions>>();
             var ngsqlVersionOptions = provider.GetRequiredService<IOptionsMonitor<NgSqlVersionOptions>>();
             var multiTenantConnectionInterceptor = provider.GetRequiredService<IMultiTenantIsolationStategy>();
-            //var multiTenantSaveChangesInterceptor = provider.GetRequiredService<MultiTenantSaveChangesInterceptor>();
+            var multiTenantSaveChangesInterceptor = provider.GetRequiredService<MultiTenantSaveChangesInterceptor>();
+        //var auditableInterceptor = provider.GetRequiredService<AuditableInterceptor>();
 
         builder
             .EnableDetailedErrors(true)
@@ -54,10 +55,12 @@ public static class DataAccessConfigurationExtensions
                             errorCodesToAdd: ngsqlRetryOptions.CurrentValue.ErrorNumbersoAdd))
                         .MigrationsAssembly(typeof(TContext).Assembly.GetName().Name))
             .AddInterceptors(
-                multiTenantConnectionInterceptor);
-                    //multiTenantSaveChangesInterceptor);
-    })
-            .AddMultiTenantScoping();
+                multiTenantConnectionInterceptor,
+                multiTenantSaveChangesInterceptor);
+                //auditableInterceptor);
+            })
+            .AddMultiTenantScoping()
+            .AddAuditableInterceptor();
 
         return services;
     }

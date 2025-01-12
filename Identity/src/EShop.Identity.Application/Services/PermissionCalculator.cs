@@ -13,10 +13,10 @@ public interface IPermissionCalculator
 
 public class PermissionCalculator : IPermissionCalculator, IUserPermissionsProvider
 {
-    private readonly IRepositoryBase<User, string> _userRepository;
+    private readonly IIdentityRepositoryBase<User, string> _userRepository;
     private readonly ILogger<PermissionCalculator> _logger;
 
-    public PermissionCalculator(IRepositoryBase<User, string> userRepository, ILogger<PermissionCalculator> logger)
+    public PermissionCalculator(IIdentityRepositoryBase<User, string> userRepository, ILogger<PermissionCalculator> logger)
     {
         _userRepository = userRepository;
         _logger = logger;
@@ -24,7 +24,7 @@ public class PermissionCalculator : IPermissionCalculator, IUserPermissionsProvi
 
     public async Task<string[]> CalculateFor(string userId, CancellationToken cancellationToken = default)
     {
-        var user = _userRepository.FindAll(x => x.Id == userId, x => x.Roles);
+        var user = _userRepository.FindByCondition(x => x.Id == userId, false, x => x.Roles);
 
         var userPermissions = user
             .Include(u => u.UserRoles)
