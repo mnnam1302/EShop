@@ -32,7 +32,7 @@ internal static class ServiceCollectionExtensions
             .AddServicesApplicationLayer()
             .AddServicesPersistenceLayer()
             .AddServicesInfrastructureLayer()
-            .AddTestUserPermissions(); // because user permissions related cache and user services, thus it's is putted
+            .AddTestUserPermissions(); // because user permissions related cache and user services, thus it's putted
 
         return services;
     }

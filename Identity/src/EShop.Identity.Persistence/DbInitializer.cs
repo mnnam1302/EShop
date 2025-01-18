@@ -81,10 +81,10 @@ public class DbInitializer
     /// <returns></returns>
     private async Task SeedDataForEShopSystem()
     {
-        await SeedSystemWidePermissionsAsync();
-        await SeedTenantAsync(UserData.EShopSupportGroup);
-        await SeedOrganizationAsync(UserData.EShopSupportGroup, "Root System Organization", null);
-        await SeedUserAsync(
+        await SeedSystemWidePermissions();
+        await SeedTenant(UserData.EShopSupportGroup);
+        await SeedOrganization(UserData.EShopSupportGroup, "Root System Organization");
+        await SeedUser(
             UserData.SystemUsername,
             $"{UserData.SystemUsername}.{UserData.EShopSupportGroup}@gmail.com",
             "System User",
@@ -97,13 +97,13 @@ public class DbInitializer
     /// <returns></returns>
     private async Task SeedDataForSpecificTenant()
     {
-        await SeedTenantAsync(TenantName);
-        await SeedOrganizationAsync(TenantName, "Root Organization", UserData.EShopSupportGroup);
-        await SeedUserAsync(UserName, UserName, DisplayName, TenantName); // user
-        await SeedRoleAsync(RoleName, TenantName); // role, role permissions, user roles
+        await SeedTenant(TenantName);
+        await SeedOrganization(TenantName, "Root Organization");
+        await SeedUser(UserName, UserName, DisplayName, TenantName); // user
+        await SeedRole(RoleName, TenantName); // role, role permissions, user roles
     }
 
-    private async Task SeedTenantAsync(string tenantName)
+    private async Task SeedTenant(string tenantName)
     {
         var tenant = new Tenant()
         {
@@ -121,9 +121,9 @@ public class DbInitializer
         }
     }
 
-    private async Task SeedOrganizationAsync(string tenantName, string organizationDescription, string? parentOrganization)
+    private async Task SeedOrganization(string tenantName, string organizationDescription)
     {
-        var organization = CreateOrganization(tenantName, organizationDescription, parentOrganization);
+        var organization = CreateOrganization(tenantName, organizationDescription);
         if (await _dbContext.Organizations.AnyAsync(org => org.Id == tenantName || org.Name == tenantName))
         {
             _dbContext.Update(organization);
@@ -134,7 +134,7 @@ public class DbInitializer
         }
     }
 
-    private async Task<Organization> CreateOrganization(string tenantName, string description, string? parentOrganization = null)
+    private Organization CreateOrganization(string tenantName, string description)
     {
         var organization = new Organization(tenantName,
             new Random().Next(0, 1000000000).ToString(),
@@ -143,18 +143,12 @@ public class DbInitializer
             string.Empty,
             string.Empty,
             string.Empty,
-            description,
-            parentOrganization);
-
-        if (!string.IsNullOrWhiteSpace(parentOrganization) && await _dbContext.Organizations.AnyAsync(org => org.Name == parentOrganization))
-        {
-            organization.ParentOrganizationId = parentOrganization;
-        }
+            description);
 
         return organization;
     }
 
-    private async Task SeedUserAsync(string userName, string email, string displayName, string tenantName)
+    private async Task SeedUser(string userName, string email, string displayName, string tenantName)
     {
         var user = new User(
             userName,
@@ -178,7 +172,7 @@ public class DbInitializer
         }
     }
 
-    private async Task SeedRoleAsync(string roleName, string tenantName)
+    private async Task SeedRole(string roleName, string tenantName)
     {
         if (!await _dbContext.Roles.AnyAsync(r => r.Name == roleName && r.TenantId == tenantName))
         {
@@ -209,7 +203,7 @@ public class DbInitializer
         }
     }
 
-    private async Task SeedSystemWidePermissionsAsync()
+    private async Task SeedSystemWidePermissions()
     {
         var permissions = GetWidePermissions();
 

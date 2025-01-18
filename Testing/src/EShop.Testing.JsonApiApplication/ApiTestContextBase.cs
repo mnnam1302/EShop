@@ -1,5 +1,4 @@
-﻿using EShop.Shared.Contracts.Abstractions.Paging;
-using EShop.Shared.Contracts.Abstractions.Requests;
+﻿using EShop.Shared.Contracts.Abstractions.Requests;
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.Scoping;
 using EShop.Shared.Scoping.ResourceAccessControl;
@@ -24,8 +23,7 @@ public interface IApiTestContextBase
     IServiceProvider ServiceProvider { get; }
     Exception LastApiError { get; }
 
-    HttpClient GetAuthorizedClient(UserData user, string acceptHeader = "application/vnd.api+json");
-
+    HttpClient GetAuthorizedClient(UserData user, string acceptHeader = "application/json");
     UserData GetUserByUsername(string? username = null);
 }
 
@@ -379,7 +377,7 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
             var response = await client.GetAsync(relativeUri);
             return await ProcessResultValueResponse<TResponse>(response);
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             _logger.LogWarning(ex, "Tracking error after API call to {relativeUri}", relativeUri);
             this.LastApiError = ex;

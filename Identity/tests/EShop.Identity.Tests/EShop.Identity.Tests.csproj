@@ -27,6 +27,7 @@
 
   <ItemGroup>
     <Folder Include="Features\" />
+    <Folder Include="Steps\Organizations\" />
   </ItemGroup>
 
   <ItemGroup>
