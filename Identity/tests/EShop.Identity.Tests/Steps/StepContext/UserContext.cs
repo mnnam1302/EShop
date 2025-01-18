@@ -49,7 +49,7 @@ internal class UserContext
             {
                 //OrganizationId = tenantId
             };
-            var result = await _apiContext.Post<Command.RegisterUser>(AuthCollectionUri, command);
+            var result = await _apiContext.PostAsync<Command.RegisterUser>(AuthCollectionUri, command);
 
             _apiContext.AddUser(
                 new UserData(username, username, tenantId, group == UserData.EShopSupportGroup),

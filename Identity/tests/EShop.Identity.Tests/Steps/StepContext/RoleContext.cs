@@ -44,7 +44,7 @@ internal class RoleContext
             var operationalUser = _apiContext.GetUserByUsername(creatorUserName);
             var command = new Command.CreateRoleCommand(this.Name, string.Empty, string.Empty);
 
-            var result = await _apiContext.Post<Command.CreateRoleCommand>(
+            var result = await _apiContext.PostAsync<Command.CreateRoleCommand>(
                 RolesCollectionUri,
                 command,
                 operationalUser);
@@ -63,7 +63,7 @@ internal class RoleContext
             var operationalUser = _apiContext.GetUserByUsername(operationUsername);
             var query = new Query.GetRoles(null, Paging.Create(1, 50));
 
-            var result = await _apiContext.GetAll<Query.GetRoles, PagedResult<Response.RolesResponse>>(
+            var result = await _apiContext.GetAsync<Query.GetRoles, PagedResult<Response.RolesResponse>>(
                 RolesCollectionUri,
                 query,
                 operationalUser);
