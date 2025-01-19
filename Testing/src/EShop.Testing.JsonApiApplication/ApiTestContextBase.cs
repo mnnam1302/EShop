@@ -186,6 +186,11 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
         }
     }
 
+    public void AddPermissionToUser(string userId, string permissionId)
+    {
+        _testUserPermissionProvider.AddPermission(userId, permissionId);
+    }
+
     public void SetupPermissionsForUser(string username, string[] permissionIds)
     {
         var user = GetUserByUsername(username);
@@ -193,11 +198,6 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
         {
             AddPermissionToUser(user.Id, permissionId);
         }
-    }
-
-    public void AddPermissionToUser(string userId, string permissionId)
-    {
-        _testUserPermissionProvider.AddPermission(userId, permissionId);
     }
 
     public void GrantAllPermissionsToUser(string userId)
