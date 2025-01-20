@@ -7,7 +7,7 @@ namespace EShop.Identity.Tests;
 
 public class IntegrationFixture : IAsyncLifetime
 {
-    // class fixture: when use it: when you want to create a single test context and share it among all the tests in the class, and have it cleaned up after all the tests in the class have finished.
+    // class fixture: when use it: when you want to create a single test context and share it among all the tests IN a class, and have it cleaned up after all the tests in the class have finished.
     // https://xunit.net/docs/shared-context#class-fixture
 
     private readonly PostgreSqlContainer _postgreSqlContainer;
@@ -61,7 +61,7 @@ public class IntegrationFixture : IAsyncLifetime
 public class IntegrationFixtureCollection : ICollectionFixture<IntegrationFixture>
 {
     /*
-     * collection fixture: when use it: when you want to create a single test context and share it among tests in several test classes, and have it cleaned up after all the tests in the test classes have finished.
+     * collection fixture: when use it: when you want to create a single test context and share it among tests in SERVERAL test classes, and have it cleaned up after all the tests in the test classes have finished.
      * recieve an instance of fixture data IntegrationFixture, which is initialized before the first tests run, and disposed after the last test in the collection run
      *
      * a constructor argument of type IntegrationFixture is required for the IntegrationTest class

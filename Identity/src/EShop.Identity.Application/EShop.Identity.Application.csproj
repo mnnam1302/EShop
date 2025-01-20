@@ -8,13 +8,10 @@
 
   <ItemGroup>
     <Compile Remove="UseCases\V1\Events\**" />
-    <Compile Remove="UseCases\V1\Queries\Organizations\**" />
     <Compile Remove="UseCases\V2\**" />
     <EmbeddedResource Remove="UseCases\V1\Events\**" />
-    <EmbeddedResource Remove="UseCases\V1\Queries\Organizations\**" />
     <EmbeddedResource Remove="UseCases\V2\**" />
     <None Remove="UseCases\V1\Events\**" />
-    <None Remove="UseCases\V1\Queries\Organizations\**" />
     <None Remove="UseCases\V2\**" />
   </ItemGroup>
 

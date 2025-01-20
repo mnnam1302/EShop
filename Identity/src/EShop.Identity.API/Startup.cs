@@ -27,7 +27,6 @@ public class Startup
 
         if (Environment.IsDevelopment() || Environment.IsStaging())
         {
-            //app.UseDeveloperExceptionPage();
             app.UseCors(x => x.AllowAnyMethod());
             app.UseSwaggerAPI();
         }

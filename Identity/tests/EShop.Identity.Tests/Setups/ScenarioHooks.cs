@@ -25,7 +25,7 @@ public sealed class ScenarioHooks
     public static async Task BeforeTestRun()
     {
         PostgreSqlContainer = new PostgreSqlBuilder()
-                .WithPortBinding(49999, 5432)
+                .WithPortBinding(36200, 5432)
                 .WithImage("postgres:17.0")
                 .Build();
 
@@ -40,7 +40,7 @@ public sealed class ScenarioHooks
             PostgreSqlContainer = PostgreSqlContainer
         };
 
-        await testDatabase.CreateSharedDatabaseAsync();
+        await testDatabase.CreateSharedDatabaseAsync("test-database");
         objectContainer.RegisterInstanceAs<PostgreSqlTestDatabase>(testDatabase);
 
         var apiContext = new ApiContext(testDatabase);
