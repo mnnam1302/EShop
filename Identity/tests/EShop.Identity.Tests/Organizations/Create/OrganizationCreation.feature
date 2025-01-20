@@ -9,8 +9,8 @@ Background:
 Scenario: Creating a new organzaition
 	When Admin user creates a new organization with the following
 	| Name          | OrganizationNumber | PhoneNumber   | Email                   | Address | City | Postcode | Description                              |
-	| nordic marine | 22000              | +477311593200 | organization@test.gmail | Oslo    | Oslo | 0105     | Marine services provider based in Norway |
+	| nordic-marine | 22000              | +477311593200 | organization@test.gmail | Oslo    | Oslo | 0105     | Marine services provider based in Norway |
 	Then there are following organization
 	| Name          | OrganizationNumber | PhoneNumber   | Email                   | Address | City | Postcode | Description                              |
-    | nordic marine | 22000              | +477311593200 | organization@test.gmail | Oslo    | Oslo | 0105     | Marine services provider based in Norway |
+    | nordic-marine | 22000              | +477311593200 | organization@test.gmail | Oslo    | Oslo | 0105     | Marine services provider based in Norway |
 

@@ -1,4 +1,6 @@
-﻿using EShop.Shared.Contracts.Services.Identity.Organizations;
+﻿using EShop.Identity.Domain.Entities;
+using EShop.Shared.Contracts.Services.Identity.Organizations;
+using FluentAssertions;
 using Reqnroll;
 
 namespace EShop.Identity.Tests.Organizations.Create;
@@ -22,8 +24,17 @@ public class StepDefinitions
 
 
     [Then("there are following organization")]
-    public void ThenThereAreFollowingOrganization(DataTable dataTable)
+    public async Task ThenThereAreFollowingOrganization(DataTable dataTable)
     {
-        //var actualOrganizations = _stepContext.GetAllOrganizations();
+        // Arrange
+        var expectedOrganization = dataTable.CreateInstance<Organization>();
+        var request = new Query.GetOrganizationById(expectedOrganization.Name);
+
+        // Act
+        var actualOrganization = await _stepContext.GetOrganizationByIdAsync(request);
+
+        // Assert
+        actualOrganization.IsSuccess.Should().BeTrue();
+        dataTable.CompareToInstance(actualOrganization.Value);
     }
 }

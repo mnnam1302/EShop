@@ -39,7 +39,7 @@ namespace EShop.Identity.API.Controllers
             PermissionConstants.ViewOrganizationsPermissionId,
             PermissionConstants.ManageOrganizationsPermissionId
         )]
-        public async Task<IResult> GetOrganizationById([FromRoute] string id, CancellationToken cancellationToken)
+        public async Task<IResult> GetOrganizationById([FromRoute] string id)
         {
             var result = await _sender.Send(new Query.GetOrganizationById(id));
 

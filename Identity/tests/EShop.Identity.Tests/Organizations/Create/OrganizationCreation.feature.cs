@@ -136,7 +136,7 @@ await this.FeatureBackgroundAsync();
                             "Postcode",
                             "Description"});
                 table3.AddRow(new string[] {
-                            "nordic marine",
+                            "nordic-marine",
                             "22000",
                             "+477311593200",
                             "organization@test.gmail",
@@ -157,7 +157,7 @@ await this.FeatureBackgroundAsync();
                             "Postcode",
                             "Description"});
                 table4.AddRow(new string[] {
-                            "nordic marine",
+                            "nordic-marine",
                             "22000",
                             "+477311593200",
                             "organization@test.gmail",

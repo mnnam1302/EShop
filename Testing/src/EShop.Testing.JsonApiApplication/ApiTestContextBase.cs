@@ -251,18 +251,14 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
     #endregion
 
     #region Http Action Method
-    public async Task<Result<TResponse>> GetAsync<TRequest, TResponse>(string relativeUri, TRequest request, UserData? user = null)
+    public async Task<Result<TResponse>> GetAsync<TResponse>(string relativeUri, UserData? user = null)
     {
         try
         {
             if (string.IsNullOrEmpty(relativeUri))
                 throw new ArgumentNullException(nameof(relativeUri));
 
-            if (request == null)
-                throw new ArgumentNullException(nameof(request));
-
             var client = GetAuthorizedClient(user);
-            var requestBody = new StringContent(System.Text.Json.JsonSerializer.Serialize(request), Encoding.UTF8, "application/json");
 
             using var response = await client.GetAsync(relativeUri);
 

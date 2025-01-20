@@ -63,12 +63,13 @@ internal class RoleContext
             var operationalUser = _apiContext.GetUserByUsername(operationUsername);
             var query = new Query.GetRoles(null, Paging.Create(1, 50));
 
-            var result = await _apiContext.GetAsync<Query.GetRoles, PagedResult<Response.RolesResponse>>(
-                RolesCollectionUri,
-                query,
-                operationalUser);
+            //var result = await _apiContext.GetAsync<Query.GetRoles, PagedResult<Response.RolesResponse>>(
+            //    RolesCollectionUri,
+            //    query,
+            //    operationalUser);
 
-            return result.Value.Items;
+            //return result.Value.Items;
+            return null;
         }
         catch (Exception ex)
         {

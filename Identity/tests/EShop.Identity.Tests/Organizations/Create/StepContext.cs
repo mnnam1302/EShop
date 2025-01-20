@@ -1,4 +1,5 @@
 ﻿using EShop.Identity.Tests.Setups;
+using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.Contracts.Services.Identity.Organizations;
 using Reqnroll;
 
@@ -27,8 +28,19 @@ public sealed class StepContext
         }
     }
 
-    //public async Task GetAllOrganizations(Query)
-    //{
+    public async Task<Result<Response.OrganizationResponse>> GetOrganizationByIdAsync(Query.GetOrganizationById request, string? operationUsername = null)
+    {
+        try
+        {
+            var result = await _apiContext.GetAsync<Response.OrganizationResponse>(
+                $"{BaseUrl}/{request.Id}");
 
-    //}
+            return result;
+        }
+        catch (Exception ex)
+        {
+            _apiContext.LastApiError = ex;
+            return Result.Failure<Response.OrganizationResponse>(Error.NullValue);
+        }
+    }
 }
