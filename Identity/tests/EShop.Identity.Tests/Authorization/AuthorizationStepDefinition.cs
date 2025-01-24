@@ -11,6 +11,7 @@ public class AuthorizationStepDefinition
         PermissionConstants.ViewOrganizationsPermissionId,
         PermissionConstants.ManageOrganizationsPermissionId
     ];
+
     private readonly ApiContext _apiContext;
 
     public AuthorizationStepDefinition(ApiContext apiContext)

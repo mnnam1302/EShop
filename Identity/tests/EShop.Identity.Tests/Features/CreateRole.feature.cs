@@ -112,43 +112,6 @@ namespace EShop.Identity.Tests.Features
             await this.TestTearDownAsync();
         }
         
-        [Xunit.SkippableFactAttribute(DisplayName="Create new role for tenant")]
-        [Xunit.TraitAttribute("FeatureTitle", "CreateRole")]
-        [Xunit.TraitAttribute("Description", "Create new role for tenant")]
-        public async System.Threading.Tasks.Task CreateNewRoleForTenant()
-        {
-            string[] tagsOfScenario = ((string[])(null));
-            System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Create new role for tenant", null, tagsOfScenario, argumentsOfScenario, featureTags);
-#line 11
-this.ScenarioInitialize(scenarioInfo);
-#line hidden
-            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
-            {
-                testRunner.SkipScenario();
-            }
-            else
-            {
-                await this.ScenarioStartAsync();
-#line 6
-await this.FeatureBackgroundAsync();
-#line hidden
-#line 12
- await testRunner.WhenAsync("user \'tenantOwner1\' create role \'NewRole\'", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
-#line hidden
-                global::Reqnroll.Table table2 = new global::Reqnroll.Table(new string[] {
-                            "Name"});
-                table2.AddRow(new string[] {
-                            "Owner"});
-                table2.AddRow(new string[] {
-                            "NewRole"});
-#line 13
- await testRunner.ThenAsync("there are following Roles in the system", ((string)(null)), table2, "Then ");
-#line hidden
-            }
-            await this.ScenarioCleanupAsync();
-        }
-        
         [System.CodeDom.Compiler.GeneratedCodeAttribute("Reqnroll", "2.0.0.0")]
         [System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
         public class FixtureData : object, Xunit.IAsyncLifetime
