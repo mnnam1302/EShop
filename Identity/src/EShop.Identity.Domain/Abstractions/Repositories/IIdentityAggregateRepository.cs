@@ -1,4 +1,4 @@
-﻿using Eshop.Shared.DomainTools.Aggregates;
+﻿using EShop.Shared.DomainTools.Aggregates;
 
 namespace EShop.Identity.Domain.Abstractions.Repositories;
 
@@ -7,8 +7,8 @@ namespace EShop.Identity.Domain.Abstractions.Repositories;
 /// </summary>
 /// <typeparam name="TAggregate">Represent aggregate root entity to consistency</typeparam>
 /// <typeparam name="TKey">Represent aggregate root entity's id</typeparam>
-public interface IIdentityAggregateRepository<TAggregate, TKey> 
-    : Eshop.Shared.DomainTools.Repositories.IAggregateRepository<TAggregate, TKey>
+public interface IIdentityAggregateRepository<TAggregate, TKey>
+    : EShop.Shared.DomainTools.Repositories.IAggregateRepository<TAggregate, TKey>
     where TAggregate : class, IAggregateRoot<TKey>
 {
 }

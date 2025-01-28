@@ -1,10 +1,10 @@
 ﻿using AutoMapper;
-using Eshop.Shared.DomainTools.DomainExceptions;
 using EShop.Identity.Domain.Abstractions.Repositories;
 using EShop.Identity.Domain.Entities;
 using EShop.Shared.Contracts.Abstractions.Requests;
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.Contracts.Services.Identity.Organizations;
+using EShop.Shared.DomainTools.DomainExceptions;
 
 namespace EShop.Identity.Application.UseCases.V1.Queries.Organizations;
 

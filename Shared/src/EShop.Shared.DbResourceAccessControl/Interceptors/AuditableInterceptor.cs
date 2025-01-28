@@ -1,4 +1,4 @@
-﻿using Eshop.Shared.DomainTools.Entities;
+﻿using EShop.Shared.DomainTools.Entities;
 using EShop.Shared.Scoping;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;

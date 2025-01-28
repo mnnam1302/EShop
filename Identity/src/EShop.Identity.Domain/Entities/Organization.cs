@@ -1,9 +1,8 @@
-﻿using Eshop.Shared.DomainTools.Aggregates;
-using Eshop.Shared.DomainTools.Extensions;
-using EShop.Identity.Domain.Exceptions;
+﻿using EShop.Identity.Domain.Exceptions;
 using EShop.Shared.Contracts.Services.Identity.Organizations;
+using EShop.Shared.DomainTools.Aggregates;
+using EShop.Shared.DomainTools.Extensions;
 using EShop.Shared.Scoping;
-using Microsoft.Extensions.Configuration;
 using System.ComponentModel.DataAnnotations;
 
 namespace EShop.Identity.Domain.Entities;
@@ -15,14 +14,14 @@ public class Organization : AggregateRoot<string>, IExcludedFromScoping
         // Empty constructor for ORMs
     }
 
-    public Organization(string name, 
-        string? organizationNumber, 
-        string? phoneNumber, 
+    public Organization(string name,
+        string? organizationNumber,
+        string? phoneNumber,
         string? email,
-        string? address, 
-        string? city, 
-        string? postcode, 
-        string? description, 
+        string? address,
+        string? city,
+        string? postcode,
+        string? description,
         string? parentOrganizationId = null)
     {
         Id = name;

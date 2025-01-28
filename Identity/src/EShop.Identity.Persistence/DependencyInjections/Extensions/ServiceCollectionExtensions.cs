@@ -1,4 +1,4 @@
-﻿using Eshop.Shared.DomainTools.UnitOfWorks;
+﻿using EShop.Shared.DomainTools.UnitOfWorks;
 using EShop.Identity.Domain.Abstractions.Repositories;
 using EShop.Identity.Persistence.Repositories;
 using Microsoft.Extensions.DependencyInjection;

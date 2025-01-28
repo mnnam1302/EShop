@@ -1,7 +1,7 @@
-﻿using Eshop.Shared.DomainTools.Entities;
-using EShop.Shared.Contracts.Abstractions.MessageBus;
+﻿using EShop.Shared.Contracts.Abstractions.MessageBus;
+using EShop.Shared.DomainTools.Entities;
 
-namespace Eshop.Shared.DomainTools.Aggregates;
+namespace EShop.Shared.DomainTools.Aggregates;
 
 public interface IAggregateRoot<TKey> : IEntityBase<TKey>
 {

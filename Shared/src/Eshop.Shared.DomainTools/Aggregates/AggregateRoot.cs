@@ -1,7 +1,7 @@
-﻿using Eshop.Shared.DomainTools.Entities;
-using EShop.Shared.Contracts.Abstractions.MessageBus;
+﻿using EShop.Shared.Contracts.Abstractions.MessageBus;
+using EShop.Shared.DomainTools.Entities;
 
-namespace Eshop.Shared.DomainTools.Aggregates;
+namespace EShop.Shared.DomainTools.Aggregates;
 
 public abstract class AggregateRoot<TKey> : EntityBase<TKey>, IAggregateRoot<TKey>
 {
@@ -13,6 +13,7 @@ public abstract class AggregateRoot<TKey> : EntityBase<TKey>, IAggregateRoot<TKe
     {
         _uncommittedDomainEvents.Add(domainEvent);
     }
+
     public void ClearDomainEvents()
     {
         _uncommittedDomainEvents.Clear();

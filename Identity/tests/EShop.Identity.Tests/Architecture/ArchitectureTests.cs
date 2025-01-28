@@ -21,6 +21,7 @@ public class ArchitectureTests
             ApplicationNamespace,
             InfrastructureNamespace,
             PersistenceNamespace,
+            PresentationNamespace,
             ApiNamespace
         };
 

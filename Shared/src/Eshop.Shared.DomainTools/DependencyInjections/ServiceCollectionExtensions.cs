@@ -1,10 +1,10 @@
-﻿using Eshop.Shared.DomainTools.Aggregates;
-using Eshop.Shared.DomainTools.Repositories;
-using Eshop.Shared.DomainTools.UnitOfWorks;
+﻿using EShop.Shared.DomainTools.Aggregates;
+using EShop.Shared.DomainTools.Repositories;
+using EShop.Shared.DomainTools.UnitOfWorks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Eshop.Shared.DomainTools.DependencyInjections;
+namespace EShop.Shared.DomainTools.DependencyInjections;
 
 public static class ServiceCollectionExtensions
 {
@@ -27,7 +27,7 @@ public static class ServiceCollectionExtensions
        where TEntity : class, IAggregateRoot<TKey>
     {
         services.AddScoped(
-            typeof(IRepositoryBase<TEntity, TKey>), 
+            typeof(IRepositoryBase<TEntity, TKey>),
             typeof(AggregateRepository<TDbContext, TEntity, TKey>));
         return services;
     }

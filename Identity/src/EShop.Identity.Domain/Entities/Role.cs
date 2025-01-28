@@ -1,13 +1,11 @@
-﻿using Eshop.Shared.DomainTools.Entities;
-using EShop.Identity.Domain.Abstractions.Entities;
-using EShop.Identity.Domain.Exceptions;
+﻿using EShop.Identity.Domain.Exceptions;
 using EShop.Shared.Contracts.Services.Identity.Roles;
 using EShop.Shared.Scoping;
 using System.ComponentModel.DataAnnotations;
 
 namespace EShop.Identity.Domain.Entities;
 
-public class Role : Eshop.Shared.DomainTools.Entities.EntityBase<string>, IScoped
+public class Role : EShop.Shared.DomainTools.Entities.EntityBase<string>, IScoped
 {
     public Role()
     { }

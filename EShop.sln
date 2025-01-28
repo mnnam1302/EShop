@@ -63,7 +63,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EShop.Identity.Tests", "Ide
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EShop.Testing.JsonApiApplication", "Testing\src\EShop.Testing.JsonApiApplication\EShop.Testing.JsonApiApplication.csproj", "{340F0CA0-F88F-4E71-8818-10473DBD99F0}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Eshop.Shared.DomainTools", "Shared\src\Eshop.Shared.DomainTools\Eshop.Shared.DomainTools.csproj", "{36998902-464E-4184-A369-6E1933D0AEAE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EShop.Shared.DomainTools", "Shared\src\Eshop.Shared.DomainTools\EShop.Shared.DomainTools.csproj", "{36998902-464E-4184-A369-6E1933D0AEAE}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EShop.Identity.Presentation", "Identity\src\EShop.Identity.Presentation\EShop.Identity.Presentation.csproj", "{2CF4D487-2272-4BCF-ABAB-B238BACC3DAD}"
 EndProject

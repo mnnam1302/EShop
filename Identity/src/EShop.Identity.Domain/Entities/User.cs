@@ -1,6 +1,6 @@
-﻿using Eshop.Shared.DomainTools.Entities;
-using EShop.Identity.Domain.Exceptions;
+﻿using EShop.Identity.Domain.Exceptions;
 using EShop.Shared.Contracts.Services.Identity.Users;
+using EShop.Shared.DomainTools.Entities;
 using EShop.Shared.Scoping;
 using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
