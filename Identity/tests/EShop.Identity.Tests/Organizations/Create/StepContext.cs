@@ -16,11 +16,13 @@ public sealed class StepContext
         _apiContext = apiContext;
     }
 
-    public async Task CreateOrganizationAsync(Command.CreateOrganization request, string? operationUsername = null)
+    public async Task CreateOrganizationAsync(
+        Command.CreateOrganization request, 
+        string? operationUsername = null)
     {
         try
         {
-            var result = await _apiContext.PostAsync<Command.CreateOrganization>(BaseUrl, request);
+            var result = await _apiContext.PostAsync(BaseUrl, request);
         }
         catch (Exception ex)
         {
@@ -28,7 +30,9 @@ public sealed class StepContext
         }
     }
 
-    public async Task<Result<Response.OrganizationResponse>> GetOrganizationByIdAsync(Query.GetOrganizationById request, string? operationUsername = null)
+    public async Task<Result<Response.OrganizationResponse>> GetOrganizationByIdAsync(
+        Query.GetOrganizationById request, 
+        string? operationUsername = null)
     {
         try
         {

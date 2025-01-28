@@ -65,6 +65,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EShop.Testing.JsonApiApplic
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Eshop.Shared.DomainTools", "Shared\src\Eshop.Shared.DomainTools\Eshop.Shared.DomainTools.csproj", "{36998902-464E-4184-A369-6E1933D0AEAE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EShop.Identity.Presentation", "Identity\src\EShop.Identity.Presentation\EShop.Identity.Presentation.csproj", "{2CF4D487-2272-4BCF-ABAB-B238BACC3DAD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -135,6 +137,10 @@ Global
 		{36998902-464E-4184-A369-6E1933D0AEAE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{36998902-464E-4184-A369-6E1933D0AEAE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{36998902-464E-4184-A369-6E1933D0AEAE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2CF4D487-2272-4BCF-ABAB-B238BACC3DAD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2CF4D487-2272-4BCF-ABAB-B238BACC3DAD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2CF4D487-2272-4BCF-ABAB-B238BACC3DAD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2CF4D487-2272-4BCF-ABAB-B238BACC3DAD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -163,6 +169,7 @@ Global
 		{CAF55E52-A2D9-4174-90D9-BE7A157031E0} = {EF8AB2FA-B259-423A-B24A-DC8E7ECA5970}
 		{340F0CA0-F88F-4E71-8818-10473DBD99F0} = {15DCCDF8-690A-4E9E-A8CD-AEDF2A2E0C6A}
 		{36998902-464E-4184-A369-6E1933D0AEAE} = {DF247757-C88D-4BD6-9946-FDEAC84BF886}
+		{2CF4D487-2272-4BCF-ABAB-B238BACC3DAD} = {60184982-32FB-4E5F-8923-8E7B618B5F26}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {BB890EFB-EE36-4A0E-A948-F28A53D375E6}
