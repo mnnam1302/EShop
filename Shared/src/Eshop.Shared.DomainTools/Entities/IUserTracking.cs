@@ -1,4 +1,4 @@
-﻿namespace Eshop.Shared.DomainTools.Entities;
+﻿namespace EShop.Shared.DomainTools.Entities;
 
 public interface IUserTracking
 {

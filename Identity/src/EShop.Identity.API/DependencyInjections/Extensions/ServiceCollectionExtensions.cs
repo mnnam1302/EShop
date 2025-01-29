@@ -51,7 +51,10 @@ public static class ServiceCollectionExtensions
     {
         services.AddSingleton<ExceptionHandlingMiddleware>();
 
-        services.AddControllers();
+        services
+            .AddControllers()
+            .AddApplicationPart(Identity.Presentation.AssemblyReference.Assembly);
+
         services
             .AddSwaggerGenNewtonsoftSupport()
             .AddFluentValidationRulesToSwagger()

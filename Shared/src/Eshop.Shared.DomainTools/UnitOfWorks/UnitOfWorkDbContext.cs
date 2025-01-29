@@ -1,8 +1,6 @@
-﻿
+﻿using Microsoft.EntityFrameworkCore;
 
-using Microsoft.EntityFrameworkCore;
-
-namespace Eshop.Shared.DomainTools.UnitOfWorks;
+namespace EShop.Shared.DomainTools.UnitOfWorks;
 
 public class UnitOfWorkDbContext<TDbContext> : IUnitOfWork
     where TDbContext : DbContext

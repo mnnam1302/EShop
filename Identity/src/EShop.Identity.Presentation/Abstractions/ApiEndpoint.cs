@@ -1,7 +1,8 @@
 ﻿using EShop.Shared.Contracts.Abstractions.Shared;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
-namespace EShop.Identity.API.Abstractions;
+namespace EShop.Identity.Presentation.Abstractions;
 
 public abstract class ApiEndpoint : ControllerBase
 {

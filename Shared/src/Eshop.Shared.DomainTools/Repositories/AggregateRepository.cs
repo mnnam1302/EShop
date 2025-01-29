@@ -1,7 +1,7 @@
-﻿using Eshop.Shared.DomainTools.Aggregates;
+﻿using EShop.Shared.DomainTools.Aggregates;
 using Microsoft.EntityFrameworkCore;
 
-namespace Eshop.Shared.DomainTools.Repositories;
+namespace EShop.Shared.DomainTools.Repositories;
 
 public class AggregateRepository<TDbContext, TAggregateRoot, TKey>
     : RepositoryBaseDbContext<TDbContext, TAggregateRoot, TKey>, IAggregateRepository<TAggregateRoot, TKey>

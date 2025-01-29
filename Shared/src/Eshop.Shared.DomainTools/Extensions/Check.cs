@@ -1,6 +1,6 @@
-﻿using Eshop.Shared.DomainTools.DomainExceptions;
+﻿using EShop.Shared.DomainTools.DomainExceptions;
 
-namespace Eshop.Shared.DomainTools.Extensions
+namespace EShop.Shared.DomainTools.Extensions
 {
     public static class Check
     {

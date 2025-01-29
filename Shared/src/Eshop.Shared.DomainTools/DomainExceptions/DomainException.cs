@@ -1,4 +1,4 @@
-﻿namespace Eshop.Shared.DomainTools.DomainExceptions;
+﻿namespace EShop.Shared.DomainTools.DomainExceptions;
 
 public class DomainException : Exception
 {

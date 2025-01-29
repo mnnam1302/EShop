@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using EShop.Shared.Contracts.Abstractions.Requests;
+﻿using EShop.Shared.Contracts.Abstractions.Requests;
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.Contracts.Services.Identity.Users;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserPermissionProvider;
@@ -15,7 +14,9 @@ public class GetUserPermissionsRequestHandler : IQueryHandler<Query.GetUserPermi
         _userPermissionsProvider = userPermissionsProvider;
     }
 
-    public async Task<Result<Response.UserPermissionsResponse>> Handle(Query.GetUserPermissionsRequest request, CancellationToken cancellationToken)
+    public async Task<Result<Response.UserPermissionsResponse>> Handle(
+        Query.GetUserPermissionsRequest request,
+        CancellationToken cancellationToken)
     {
         var permissions = await _userPermissionsProvider.GetPermissions(request.UserId);
 

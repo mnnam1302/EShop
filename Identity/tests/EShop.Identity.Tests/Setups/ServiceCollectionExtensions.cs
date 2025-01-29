@@ -50,7 +50,7 @@ internal static class ServiceCollectionExtensions
         services.AddTransient<ExceptionHandlingMiddleware>();
 
         services.AddControllers()
-            .AddApplicationPart(typeof(Identity.API.Startup).Assembly);
+            .AddApplicationPart(Identity.Presentation.AssemblyReference.Assembly);
 
         services
             .AddSwaggerGenNewtonsoftSupport()

@@ -22,18 +22,14 @@ public class StepDefinitions
         await _stepContext.CreateOrganizationAsync(request);
     }
 
-
     [Then("there are following organization")]
     public async Task ThenThereAreFollowingOrganization(DataTable dataTable)
     {
-        // Arrange
         var expectedOrganization = dataTable.CreateInstance<Organization>();
         var request = new Query.GetOrganizationById(expectedOrganization.Name);
 
-        // Act
         var actualOrganization = await _stepContext.GetOrganizationByIdAsync(request);
 
-        // Assert
         actualOrganization.IsSuccess.Should().BeTrue();
         dataTable.CompareToInstance(actualOrganization.Value);
     }

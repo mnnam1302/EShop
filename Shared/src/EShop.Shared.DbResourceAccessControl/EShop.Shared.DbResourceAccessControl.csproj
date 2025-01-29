@@ -13,7 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Eshop.Shared.DomainTools\Eshop.Shared.DomainTools.csproj" />
+    <ProjectReference Include="..\Eshop.Shared.DomainTools\EShop.Shared.DomainTools.csproj" />
     <ProjectReference Include="..\EShop.Shared.Scoping\EShop.Shared.Scoping.csproj" />
   </ItemGroup>
 

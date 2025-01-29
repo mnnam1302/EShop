@@ -1,6 +1,6 @@
-﻿using Eshop.Shared.DomainTools.Aggregates;
+﻿using EShop.Shared.DomainTools.Aggregates;
 
-namespace Eshop.Shared.DomainTools.Repositories;
+namespace EShop.Shared.DomainTools.Repositories;
 
 /// <summary>
 /// This interface is used to define a repository for an aggregate root.

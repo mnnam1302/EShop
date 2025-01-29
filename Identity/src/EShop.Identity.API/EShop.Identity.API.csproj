@@ -32,6 +32,7 @@
     <ProjectReference Include="..\EShop.Identity.Application\EShop.Identity.Application.csproj" />
     <ProjectReference Include="..\EShop.Identity.Infrastructure\EShop.Identity.Infrastructure.csproj" />
     <ProjectReference Include="..\EShop.Identity.Persistence\EShop.Identity.Persistence.csproj" />
+    <ProjectReference Include="..\EShop.Identity.Presentation\EShop.Identity.Presentation.csproj" />
   </ItemGroup>
 
 </Project>

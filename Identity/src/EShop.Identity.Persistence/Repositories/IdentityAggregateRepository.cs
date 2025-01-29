@@ -1,6 +1,6 @@
-﻿using Eshop.Shared.DomainTools.Aggregates;
-using Eshop.Shared.DomainTools.Repositories;
-using EShop.Identity.Domain.Abstractions.Repositories;
+﻿using EShop.Identity.Domain.Abstractions.Repositories;
+using EShop.Shared.DomainTools.Aggregates;
+using EShop.Shared.DomainTools.Repositories;
 
 namespace EShop.Identity.Persistence.Repositories;
 

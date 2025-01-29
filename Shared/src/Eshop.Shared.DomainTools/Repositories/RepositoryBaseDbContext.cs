@@ -1,8 +1,8 @@
-﻿using Eshop.Shared.DomainTools.Entities;
+﻿using EShop.Shared.DomainTools.Entities;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
-namespace Eshop.Shared.DomainTools.Repositories;
+namespace EShop.Shared.DomainTools.Repositories;
 
 public class RepositoryBaseDbContext<TDbContext, TEntity, TKey>
     : IRepositoryBase<TEntity, TKey>, IDisposable
@@ -27,10 +27,9 @@ public class RepositoryBaseDbContext<TDbContext, TEntity, TKey>
         CancellationToken cancellationToken = default,
         params Expression<Func<TEntity, object>>[] includeProperties)
     {
-
         var entity = await FindByCondition(
-                x => x.Id!.Equals(id), 
-                trackChanges, 
+                x => x.Id!.Equals(id),
+                trackChanges,
                 includeProperties)
             .FirstOrDefaultAsync(cancellationToken);
 
@@ -50,7 +49,6 @@ public class RepositoryBaseDbContext<TDbContext, TEntity, TKey>
             .SingleOrDefaultAsync(cancellationToken);
     }
 
-
     public async Task<ICollection<TEntity>> FindByConditionAsync(
         Expression<Func<TEntity, bool>>? predicate = null,
         bool trackChanges = false,
@@ -65,8 +63,8 @@ public class RepositoryBaseDbContext<TDbContext, TEntity, TKey>
     }
 
     public IQueryable<TEntity> FindByCondition(
-        Expression<Func<TEntity, bool>>? predicate = null, 
-        bool trackChanges = false, 
+        Expression<Func<TEntity, bool>>? predicate = null,
+        bool trackChanges = false,
         params Expression<Func<TEntity, object>>[] includeProperties)
     {
         var items = FindAll(trackChanges, includeProperties);
@@ -83,7 +81,7 @@ public class RepositoryBaseDbContext<TDbContext, TEntity, TKey>
         {
             items = items.Where(predicate);
         }
- 
+
         return items;
     }
 
