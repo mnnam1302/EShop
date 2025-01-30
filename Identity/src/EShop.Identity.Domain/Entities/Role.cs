@@ -1,5 +1,5 @@
-﻿using EShop.Identity.Domain.Exceptions;
-using EShop.Shared.Contracts.Services.Identity.Roles;
+﻿using EShop.Shared.Contracts.Services.Identity.Roles;
+using EShop.Shared.DomainTools.DomainExceptions;
 using EShop.Shared.Scoping;
 using System.ComponentModel.DataAnnotations;
 

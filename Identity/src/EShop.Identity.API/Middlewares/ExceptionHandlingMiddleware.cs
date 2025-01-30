@@ -1,5 +1,5 @@
-﻿using EShop.Identity.Domain.Exceptions;
-using EShop.Shared.Contracts.Abstractions.Shared;
+﻿using EShop.Shared.Contracts.Abstractions.Shared;
+using EShop.Shared.DomainTools.DomainExceptions;
 using System.Text.Json;
 
 namespace EShop.Identity.API.Middlewares;
@@ -68,7 +68,7 @@ public class ExceptionHandlingMiddleware : IMiddleware
     {
         IReadOnlyCollection<Error>? errors = null;
 
-        if (exception is EShop.Identity.Application.Exceptions.ValidationException validationException)
+        if (exception is Application.Exceptions.ValidationException validationException)
         {
             errors = validationException.Errors;
         }
