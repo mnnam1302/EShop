@@ -37,7 +37,7 @@ public class Organization : AggregateRoot<string>, IExcludedFromScoping
         Users = new List<User>();
     }
 
-    public static Organization Create(Command.CreateOrganization command)
+    public static Organization Create(Command.CreateOrganizationCommand command)
     {
         var organization = new Organization(
             command.Name,
@@ -50,7 +50,6 @@ public class Organization : AggregateRoot<string>, IExcludedFromScoping
             command.Description,
             command.ParentOrganizationId);
 
-        //Raise Domain Event
         organization.RaiseDomainEvent(new DomainEvent.OrganizationCreated
         {
             EventId = Guid.NewGuid(),
@@ -65,6 +64,32 @@ public class Organization : AggregateRoot<string>, IExcludedFromScoping
         });
 
         return organization;
+    }
+
+    public void Update(Command.UpdateOrganizationCommand command)
+    {
+        Name = command.Name;
+        OrganizationNumber = command.OrganizationNumber;
+        PhoneNumber = command.PhoneNumber;
+        Email = command.Email;
+        Address = command.Address;
+        City = command.City;
+        Postcode = command.PostCode;
+        Description = command.Description;
+        ParentOrganizationId = command.ParentOrganizationId;
+
+        RaiseDomainEvent(new DomainEvent.OrganizationUpdated
+        {
+            EventId = Guid.NewGuid(),
+            TimeStamp = DateTimeOffset.Now,
+            SourceId = Id,
+            Name = Name,
+            OrganizationNumber = OrganizationNumber,
+            PhoneNumber = PhoneNumber,
+            Email = Email,
+            Address = Address,
+            City = City
+        });
     }
 
     public void AddUser(User user)
@@ -132,6 +157,5 @@ public class Organization : AggregateRoot<string>, IExcludedFromScoping
     public string? ParentOrganizationId { get; set; }
 
     public virtual Organization? ParentOrganization { get; set; }
-
     public virtual List<User>? Users { get; set; } = new List<User>();
 }

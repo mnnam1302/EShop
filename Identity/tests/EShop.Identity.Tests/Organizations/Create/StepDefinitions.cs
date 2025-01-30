@@ -18,18 +18,22 @@ public class StepDefinitions
     [When("Admin user creates a new organization with the following")]
     public async Task WhenAdminUserCreatesANewOrganizationWithTheFollowing(DataTable dataTable)
     {
-        var request = dataTable.CreateInstance<Command.CreateOrganization>();
+        var request = dataTable.CreateInstance<Command.CreateOrganizationCommand>();
         await _stepContext.CreateOrganizationAsync(request);
     }
+
 
     [Then("there are following organization")]
     public async Task ThenThereAreFollowingOrganization(DataTable dataTable)
     {
+        // Arrange
         var expectedOrganization = dataTable.CreateInstance<Organization>();
         var request = new Query.GetOrganizationById(expectedOrganization.Name);
 
+        // Act
         var actualOrganization = await _stepContext.GetOrganizationByIdAsync(request);
 
+        // Assert
         actualOrganization.IsSuccess.Should().BeTrue();
         dataTable.CompareToInstance(actualOrganization.Value);
     }
