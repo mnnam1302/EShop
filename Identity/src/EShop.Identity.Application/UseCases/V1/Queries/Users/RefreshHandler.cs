@@ -1,8 +1,8 @@
 ﻿using EShop.Identity.Application.Abstractions;
-using EShop.Identity.Domain.Exceptions;
 using EShop.Shared.Contracts.Abstractions.Requests;
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.Contracts.Services.Identity.Auth;
+using EShop.Shared.DomainTools.DomainExceptions;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserTokenProvider;
 using System.Security.Claims;
 

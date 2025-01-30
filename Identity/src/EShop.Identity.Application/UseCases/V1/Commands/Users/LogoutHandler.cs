@@ -1,9 +1,9 @@
 ﻿using EShop.Identity.Domain.Abstractions.Repositories;
 using EShop.Identity.Domain.Entities;
-using EShop.Identity.Domain.Exceptions;
 using EShop.Shared.Contracts.Abstractions.Requests;
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.Contracts.Services.Identity.Auth;
+using EShop.Shared.DomainTools.DomainExceptions;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserTokenProvider;
 
 namespace EShop.Identity.Application.UseCases.V1.Commands.Users;

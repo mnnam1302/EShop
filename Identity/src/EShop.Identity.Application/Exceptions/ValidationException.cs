@@ -1,5 +1,5 @@
-﻿using EShop.Identity.Domain.Exceptions;
-using EShop.Shared.Contracts.Abstractions.Shared;
+﻿using EShop.Shared.Contracts.Abstractions.Shared;
+using EShop.Shared.DomainTools.DomainExceptions;
 
 namespace EShop.Identity.Application.Exceptions;
 

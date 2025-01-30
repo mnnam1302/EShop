@@ -1,12 +1,9 @@
 ﻿using EShop.Identity.Tests.Setups;
-using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.Contracts.Services.Identity.Organizations;
-using Reqnroll;
 
-namespace EShop.Identity.Tests.Organizations.Create;
+namespace EShop.Identity.Tests.Organizations.Update;
 
-[Binding]
-public sealed class StepContext
+public class StepContext
 {
     private const string BaseUrl = "/api/v1/organizations";
     private readonly ApiContext _apiContext;
@@ -16,11 +13,14 @@ public sealed class StepContext
         _apiContext = apiContext;
     }
 
-    public async Task CreateOrganizationAsync(Command.CreateOrganizationCommand request, string? operationUsername = null)
+    public async Task UpdateOrganizationAsync(
+        string organizationName, 
+        Command.UpdateOrganizationCommand request, 
+        string? operationUsername = null)
     {
         try
         {
-            var result = await _apiContext.PostAsync<Command.CreateOrganizationCommand>(BaseUrl, request);
+            var result = await _apiContext.PutAsync($"{BaseUrl}/{organizationName}", request);
         }
         catch (Exception ex)
         {

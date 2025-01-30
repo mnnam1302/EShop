@@ -1,14 +1,14 @@
 ﻿using EShop.Identity.Domain.Abstractions.Repositories;
 using EShop.Identity.Domain.Entities;
-using EShop.Identity.Domain.Exceptions;
 using EShop.Shared.Contracts.Abstractions.Requests;
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.Contracts.Services.Identity.Organizations;
+using EShop.Shared.DomainTools.DomainExceptions;
 using EShop.Shared.DomainTools.UnitOfWorks;
 
 namespace EShop.Identity.Application.UseCases.V1.Commands.Organizations
 {
-    public class CreateOrganizationHandler : ICommandHandler<Command.CreateOrganization>
+    public class CreateOrganizationHandler : ICommandHandler<Command.CreateOrganizationCommand>
     {
         private readonly IIdentityAggregateRepository<Organization, string> _organizationRepository;
         private readonly IUnitOfWork _unitOfWork;
@@ -21,7 +21,7 @@ namespace EShop.Identity.Application.UseCases.V1.Commands.Organizations
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<Result> Handle(Command.CreateOrganization request, CancellationToken cancellationToken)
+        public async Task<Result> Handle(Command.CreateOrganizationCommand request, CancellationToken cancellationToken)
         {
             if (request.ParentOrganizationId != null)
             {

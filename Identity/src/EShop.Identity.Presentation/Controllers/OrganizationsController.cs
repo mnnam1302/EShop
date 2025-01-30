@@ -23,9 +23,9 @@ public class OrganizationsController : ApiEndpoint
 
     [HttpPost]
     [RequireSupportUser]
-    public async Task<IResult> CreateOrganization([FromBody] Command.CreateOrganization command)
+    public async Task<IResult> CreateOrganization([FromBody] Command.CreateOrganizationCommand request)
     {
-        var result = await _sender.Send(command);
+        var result = await _sender.Send(request);
 
         if (result.IsFailure)
         {
@@ -33,6 +33,21 @@ public class OrganizationsController : ApiEndpoint
         }
 
         return Results.Created("", result);
+    }
+
+    [HttpPut("{id}")]
+    [RequireOneOfPermissions(PermissionConstants.ManageOrganizationsPermissionId)]
+    public async Task<IResult> UpdateOrganization([FromRoute] string id, [FromBody] Command.UpdateOrganizationCommand request)
+    {
+        var command = request with { Id = id };
+
+        var result = await _sender.Send(command);
+        if (result.IsFailure)
+        {
+            HandlerFailure(result);
+        }
+
+        return Results.Ok(result);
     }
 
     [HttpGet("{id}")]
