@@ -9,15 +9,9 @@ public static class PermissionConstants
     public const string ViewOrganizationsPermissionId = "Identity_ViewOrganizations";
     public const string ManageOrganizationsPermissionId = "Identity_ManageOrganizations";
 
-    /// <summary>
-    /// Two roles that can create, update, delete and assign or unassign permissions to role.
-    /// </summary>
     public const string ViewRolesPermissionId = "Identity_ViewRoles";
     public const string ManageRolesPermissionId = "Identity_ManageRoles";
 
-    /// <summary>
-    /// Two roles that can invite (require organization, roles), update info user or employee per tenant.
-    /// </summary>
     public const string ViewUsersPermissionId = "Identity_ViewUsers";
     public const string ManageUsersPermissionId = "Identity_ManageUsers";
 
