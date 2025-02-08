@@ -1,4 +1,4 @@
-# EShop Kodi
+# EShop Kodi Project
 
 ## Setup infrastructure local
 > Run docker-compose to build Infrastructure such as Redis, MSSQL Server, RabbitMQ, Seq for development environment.
@@ -18,6 +18,9 @@ docker-compose -f docker-compose.Dev.Infrastructure.yml up -d
 | 4       | Validation                       |
 | 5       | Caching                          |
 
+### Multi-tenancy
+
+### Unit testing and Behavior driven design
 
 ## Identity
 
@@ -34,7 +37,7 @@ UserEvents : Integration
 
 - Organization integration events
 ```
-AgencyContactDetailUpdated : UserEvents {
+OrganizaitionCreated : UserEvents {
 	Name
 	OrganizationId		// important - unique
 	OrganizationNumber  // important - unique
@@ -55,7 +58,7 @@ UserUpdated : UserEvents { }
 ```
 
 
-## Sale
+## Product
 
 ### Ubiquitous language
 Agency - Consume from Organization
