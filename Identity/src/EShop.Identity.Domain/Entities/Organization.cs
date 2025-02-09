@@ -4,6 +4,7 @@ using EShop.Shared.DomainTools.DomainExceptions;
 using EShop.Shared.DomainTools.Extensions;
 using EShop.Shared.Scoping;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics.CodeAnalysis;
 
 namespace EShop.Identity.Domain.Entities;
 
@@ -12,6 +13,7 @@ public class Organization : AggregateRoot<string>, IExcludedFromScoping
     public Organization()
     {
         // Empty constructor for ORMs
+        Context = OrganisationContext.New();
     }
 
     public Organization(string name,
