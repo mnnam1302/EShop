@@ -506,14 +506,6 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
     {
         loggerConfig
             .MinimumLevel.Debug()
-            .Filter.ByExcluding(e => e.MessageTemplate.Text.Contains("does not implement 'IIdentifiable'", StringComparison.InvariantCulture))
-            .Filter.ByExcluding(e => e.MessageTemplate.Text.StartsWith("Executing endpoint", StringComparison.InvariantCulture))
-            .Filter.ByExcluding(e => e.MessageTemplate.Text.StartsWith("Route matched with", StringComparison.InvariantCulture))
-            .Filter.ByExcluding(e => e.MessageTemplate.Text.StartsWith("Executed action", StringComparison.InvariantCulture))
-            .Filter.ByExcluding(e => e.MessageTemplate.Text.StartsWith("Executed endpoint", StringComparison.InvariantCulture))
-            .Filter.ByExcluding(e => e.MessageTemplate.Text.StartsWith("Executing ObjectResult", StringComparison.InvariantCulture))
-            .Filter.ByExcluding(e => e.MessageTemplate.Text.StartsWith("Configured endpoint test_queue", StringComparison.InvariantCulture))
-            .Filter.ByExcluding(e => CheckLogContextProperty(e.Properties, "RequestPath", "\"/api/v1/userPermissions\""))
             .Enrich.FromLogContext()
             .Enrich.WithThreadId()
             .Enrich.WithThreadName()

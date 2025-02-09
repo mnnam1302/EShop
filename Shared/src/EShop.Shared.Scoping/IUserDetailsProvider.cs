@@ -59,12 +59,12 @@ public class UserData : ValueObject
 
     public static UserData GetSystemUser(string? tenantId, string actionUserId, string? actionUserType = null)
         => new UserData(
+            SystemUsername,
             SystemUsername, 
-            SystemUsername, 
-            tenantId ?? string.Empty, 
-            false, 
-            actionUserId, 
-            UserTypes.SystemUsers, 
+            tenantId ?? string.Empty,
+            false,
+            actionUserId,
+            UserTypes.SystemUsers,
             actionUserType: actionUserType);
 
     public static bool IsSystemUser(string username) => username.Equals(SystemUsername, StringComparison.OrdinalIgnoreCase);

@@ -42,7 +42,7 @@ public static class ServiceCollectionExtensions
             .AddServicesApplicationLayer()
             .AddServicesPersistenceLayer()
             .AddServicesInfrastructureLayer()
-            .AddUserPermissionForOwnerService();
+            .AddUserPermissionForOwnerService(); // should move this dependency to application layer properly
 
         return services;
     }

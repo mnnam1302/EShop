@@ -4,6 +4,7 @@ using EShop.Shared.DomainTools.DomainExceptions;
 using EShop.Shared.DomainTools.Extensions;
 using EShop.Shared.Scoping;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics.CodeAnalysis;
 
 namespace EShop.Identity.Domain.Entities;
 
@@ -12,6 +13,7 @@ public class Organization : AggregateRoot<string>, IExcludedFromScoping
     public Organization()
     {
         // Empty constructor for ORMs
+        Context = OrganisationContext.New();
     }
 
     public Organization(string name,
@@ -153,9 +155,17 @@ public class Organization : AggregateRoot<string>, IExcludedFromScoping
     [MaxLength(ModelConstants.LongText)]
     public string? Description { get; set; }
 
+    [MaxLength(ModelConstants.TinyText)]
+    public string LanguageCode { get; set; } = DefaultLanguageCode;
+
+    public OrganisationContext Context { get; set; }
+
     [MaxLength(ModelConstants.ShortText)]
     public string? ParentOrganizationId { get; set; }
 
     public virtual Organization? ParentOrganization { get; set; }
+
     public virtual List<User>? Users { get; set; } = new List<User>();
+
+    public const string DefaultLanguageCode = "en-gb";
 }

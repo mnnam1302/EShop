@@ -3,6 +3,7 @@ using System;
 using EShop.Identity.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace EShop.Identity.Persistence.Migrations
 {
     [DbContext(typeof(UsersDbContext))]
-    partial class UsersDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250209065825_AddLanguageCodeColumn_ToOrganization")]
+    partial class AddLanguageCodeColumn_ToOrganization
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -253,6 +256,9 @@ namespace EShop.Identity.Persistence.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
 
+                    b.Property<string>("OrganizationId1")
+                        .HasColumnType("text");
+
                     b.Property<string>("PasswordHash")
                         .IsRequired()
                         .HasMaxLength(255)
@@ -270,6 +276,8 @@ namespace EShop.Identity.Persistence.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("OrganizationId");
+
+                    b.HasIndex("OrganizationId1");
 
                     b.HasIndex("Username")
                         .IsUnique();
@@ -297,26 +305,6 @@ namespace EShop.Identity.Persistence.Migrations
                     b.HasOne("EShop.Identity.Domain.Entities.Organization", "ParentOrganization")
                         .WithMany()
                         .HasForeignKey("ParentOrganizationId");
-
-                    b.OwnsOne("EShop.Shared.Scoping.OrganisationContext", "Context", b1 =>
-                        {
-                            b1.Property<string>("OrganizationId")
-                                .HasColumnType("text");
-
-                            b1.Property<string>("Path")
-                                .IsRequired()
-                                .HasColumnType("text");
-
-                            b1.HasKey("OrganizationId");
-
-                            b1.ToTable("Organizations");
-
-                            b1.WithOwner()
-                                .HasForeignKey("OrganizationId");
-                        });
-
-                    b.Navigation("Context")
-                        .IsRequired();
 
                     b.Navigation("ParentOrganization");
                 });
@@ -350,10 +338,13 @@ namespace EShop.Identity.Persistence.Migrations
 
             modelBuilder.Entity("EShop.Identity.Domain.Entities.User", b =>
                 {
-                    b.HasOne("EShop.Identity.Domain.Entities.Organization", "Organization")
+                    b.HasOne("EShop.Identity.Domain.Entities.Organization", null)
                         .WithMany("Users")
-                        .HasForeignKey("OrganizationId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .HasForeignKey("OrganizationId");
+
+                    b.HasOne("EShop.Identity.Domain.Entities.Organization", "Organization")
+                        .WithMany()
+                        .HasForeignKey("OrganizationId1");
 
                     b.Navigation("Organization");
                 });

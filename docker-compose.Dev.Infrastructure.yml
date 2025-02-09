@@ -2,7 +2,7 @@ services:
   # Postgres
   postgres:
     image: postgres:17.0
-    container_name: 'postgres'
+    container_name: 'eshop-postgres'
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 10s
@@ -32,8 +32,8 @@ services:
 
   # RabbitMQ
   rabbitmq:
-    container_name: rabbitmq
     image: rabbitmq:3-management-alpine
+    container_name: 'eshop-rabbitmq'
     healthcheck:
       test: rabbitmq-diagnostics -q ping
       interval: 30s
@@ -51,8 +51,8 @@ services:
 
   # Seq log
   seq:
-     container_name: seq
      image: datalust/seq:latest
+     container_name: 'eshop-seq'
      ports:
         - 5341:5341
         - 8081:80

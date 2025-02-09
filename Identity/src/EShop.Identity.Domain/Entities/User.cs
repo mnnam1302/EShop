@@ -9,8 +9,7 @@ namespace EShop.Identity.Domain.Entities;
 
 public class User : EntityBase<string>, IDateTracking, IExcludedFromScoping
 {
-    protected User()
-    { }
+    protected User() { }
 
     public User(string userName, string password, string email, string? displayName, string? phoneNumber, DateTime? dateofBirth, string organizationId)
     {
@@ -172,6 +171,8 @@ public class User : EntityBase<string>, IDateTracking, IExcludedFromScoping
 
     [MaxLength(ModelConstants.ShortText)]
     public string? OrganizationId { get; private set; }
+
+    public virtual Organization? Organization { get; set; }
 
     public bool IsActive { get; set; } = true;
 

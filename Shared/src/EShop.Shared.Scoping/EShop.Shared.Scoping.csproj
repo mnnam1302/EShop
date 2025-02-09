@@ -14,10 +14,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\EShop.Shared.Contracts\EShop.Shared.Contracts.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="ResourceAccessControl\Providers\UserOrganizationProvider\" />
+    <ProjectReference Include="..\EShop.Shared.DomainTools\EShop.Shared.DomainTools.csproj" />
   </ItemGroup>
 
 </Project>
