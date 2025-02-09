@@ -11,19 +11,22 @@ internal class OrganizaitionConfiguration : IEntityTypeConfiguration<Organizatio
     {
         builder.ToTable(TableNames.Organizations);
 
-        builder.HasKey(x => x.Id);
+        builder.HasKey(o => o.Id);
 
-        builder.HasIndex(x => x.Name).IsUnique();
+        builder.HasIndex(o => o.Name).IsUnique();
 
         builder
-            .HasOne(x => x.ParentOrganization)
+            .OwnsOne(o => o.Context);
+
+        builder
+            .HasOne(o => o.ParentOrganization)
             .WithMany()
             .HasForeignKey(x => x.ParentOrganizationId);
 
         builder
-            .HasMany(x => x.Users)
-            .WithOne(x => x.Organization)
-            .HasForeignKey(x => x.OrganizationId)
+            .HasMany(o => o.Users)
+            .WithOne(u => u.Organization)
+            .HasForeignKey(u => u.OrganizationId)
             .OnDelete(DeleteBehavior.Restrict);
     }
 }

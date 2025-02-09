@@ -156,6 +156,8 @@ public class Organization : AggregateRoot<string>, IExcludedFromScoping
     [MaxLength(ModelConstants.TinyText)]
     public string LanguageCode { get; set; } = DefaultLanguageCode;
 
+    public OrganisationContext Context { get; set; }
+
     [MaxLength(ModelConstants.ShortText)]
     public string? ParentOrganizationId { get; set; }
 
