@@ -22,7 +22,8 @@ internal class OrganizaitionConfiguration : IEntityTypeConfiguration<Organizatio
 
         builder
             .HasMany(x => x.Users)
-            .WithOne()
-            .HasForeignKey(x => x.OrganizationId);
+            .WithOne(x => x.Organization)
+            .HasForeignKey(x => x.OrganizationId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

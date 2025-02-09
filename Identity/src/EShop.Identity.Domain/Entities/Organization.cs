@@ -153,9 +153,15 @@ public class Organization : AggregateRoot<string>, IExcludedFromScoping
     [MaxLength(ModelConstants.LongText)]
     public string? Description { get; set; }
 
+    [MaxLength(ModelConstants.TinyText)]
+    public string LanguageCode { get; set; } = DefaultLanguageCode;
+
     [MaxLength(ModelConstants.ShortText)]
     public string? ParentOrganizationId { get; set; }
 
     public virtual Organization? ParentOrganization { get; set; }
+
     public virtual List<User>? Users { get; set; } = new List<User>();
+
+    public const string DefaultLanguageCode = "en-gb";
 }
