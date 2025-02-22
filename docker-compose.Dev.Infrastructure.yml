@@ -73,6 +73,15 @@ services:
         ACCEPT_EULA: Y
      networks:
         - eshop
+  
+  # Consul
+  consul:
+    image: hashicorp/consul:latest
+    container_name: 'eshop-consul'
+    ports:
+      - 8500:8500
+    networks:
+      - eshop
 
 # Volumes
 volumes:
