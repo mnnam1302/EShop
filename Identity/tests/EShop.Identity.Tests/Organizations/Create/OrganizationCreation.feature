@@ -8,23 +8,23 @@ Background:
 
 Scenario: Creating a new organzaition
 	When Admin user creates a new organization with the following
-	| Field              | Value                                    |
-	| Name               | test-organization                        |
-	| OrganizationNumber | 22000                                    |
-	| PhoneNumber        | +477311593200                            |
-	| Email              | organization@test.com                    |
-	| Address            | Oslo                                     |
-	| City               | Oslo                                     |
-	| Postcode           | 0105                                     |
-	| Description        | Marine services provider based in Norway |
+		| Field              | Value                                    |
+		| Name               | test-organization                        |
+		| OrganizationNumber | 22000                                    |
+		| PhoneNumber        | +477311593200                            |
+		| Email              | organization@test.com                    |
+		| Address            | Oslo                                     |
+		| City               | Oslo                                     |
+		| Postcode           | 0105                                     |
+		| Description        | Marine services provider based in Norway |
 	Then there are following organization
-	| Field              | Value                                    |
-	| Name               | test-organization                        |
-	| OrganizationNumber | 22000                                    |
-	| PhoneNumber        | +477311593200                            |
-	| Email              | organization@test.com                    |
-	| Address            | Oslo                                     |
-	| City               | Oslo                                     |
-	| Postcode           | 0105                                     |
-	| Description        | Marine services provider based in Norway |
+		| Field              | Value                                    |
+		| Name               | test-organization                        |
+		| OrganizationNumber | 22000                                    |
+		| PhoneNumber        | +477311593200                            |
+		| Email              | organization@test.com                    |
+		| Address            | Oslo                                     |
+		| City               | Oslo                                     |
+		| Postcode           | 0105                                     |
+		| Description        | Marine services provider based in Norway |
 
