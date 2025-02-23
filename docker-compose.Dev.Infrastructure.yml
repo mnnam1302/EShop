@@ -29,6 +29,19 @@ services:
       - redis:/data
     networks:
       - eshop
+    
+  # MongoDB
+  mongo:
+      image: mongo
+      container_name: 'eshop-mongo'
+      ports:
+        - 27017:27017
+      restart: always
+      environment:
+        MONGO_INITDB_ROOT_USERNAME: sa
+        MONGO_INITDB_ROOT_PASSWORD: sa1302139
+      networks:
+          - eshop
 
   # RabbitMQ
   rabbitmq:
@@ -60,6 +73,15 @@ services:
         ACCEPT_EULA: Y
      networks:
         - eshop
+  
+  # Consul
+  consul:
+    image: hashicorp/consul:latest
+    container_name: 'eshop-consul'
+    ports:
+      - 8500:8500
+    networks:
+      - eshop
 
 # Volumes
 volumes:

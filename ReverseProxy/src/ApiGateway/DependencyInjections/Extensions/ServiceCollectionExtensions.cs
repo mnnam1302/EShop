@@ -13,6 +13,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<ExceptionHandlingMiddleware>();
         services
             .AddCorsApiGateway()
+            //.AddConsul()
             .AddYarpReverseProxy(configuration)
             .AddAuthenticationApiGateway(configuration);
 
@@ -32,13 +33,26 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
+    //private static IServiceCollection AddConsul(this IServiceCollection services)
+    //{
+    //    // Read more document: https://docs.steeltoe.io/api/v3/discovery/hashicorp-consul.html
+    //    services.AddServiceDiscovery(o => o.UseConsul());
+    //    return services;
+    //}
+
     private static IServiceCollection AddYarpReverseProxy(this IServiceCollection services, IConfiguration configuration)
     {
+        /*
+         *  Old code apply service discovery destination resolver for Yarp Reverse Proxy
+         *  Microsoft.Extensions.ServiceDiscovery
+         *  Microsoft.Extensions.ServiceDiscovery.Yarp
+         */
         services.AddServiceDiscovery();
         services
             .AddReverseProxy()
             .LoadFromConfig(configuration.GetSection("ReverseProxy"))
             .AddServiceDiscoveryDestinationResolver();
+
         return services;
     }
 
@@ -48,6 +62,7 @@ public static class ServiceCollectionExtensions
             .AddUserScoping()
             .AddRedisInfrastructure(configuration)
             .AddUserTokenCachingService();
+
         return services;
     }
 

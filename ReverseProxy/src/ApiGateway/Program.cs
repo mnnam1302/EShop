@@ -42,5 +42,4 @@ finally
     await app.DisposeAsync();
 }
 
-public partial class Program
-{ }
+public partial class Program { }
