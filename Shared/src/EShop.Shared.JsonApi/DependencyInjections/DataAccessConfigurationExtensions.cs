@@ -31,34 +31,34 @@ public static class DataAccessConfigurationExtensions
         services.ConfigureNgSqlRetryOptions(configuration.GetSection(nameof(NgSqlRetryOptions)));
         services.ConfigureNgSqlVersionOptions(configuration.GetSection(nameof(NgSqlVersionOptions)));
 
-        services.AddDbContext<DbContext, TContext>((provider, builder) =>
+        services.AddDbContextPool<DbContext, TContext>((provider, builder) =>
         {
             var ngsqlRetryOptions = provider.GetRequiredService<IOptionsMonitor<NgSqlRetryOptions>>();
             var ngsqlVersionOptions = provider.GetRequiredService<IOptionsMonitor<NgSqlVersionOptions>>();
             var multiTenantConnectionInterceptor = provider.GetRequiredService<IMultiTenantIsolationStategy>();
             var multiTenantSaveChangesInterceptor = provider.GetRequiredService<MultiTenantSaveChangesInterceptor>();
-        //var auditableInterceptor = provider.GetRequiredService<AuditableInterceptor>();
+            //var auditableInterceptor = provider.GetRequiredService<AuditableInterceptor>();
 
-        builder
-            .EnableDetailedErrors(true)
-            .EnableSensitiveDataLogging(true)
-            .UseLazyLoadingProxies(true)
-            .UseNpgsql(
-                connectionString: configuration.GetConnectionString("DefaultConnection"),
-                npgsqlOptionsAction: optionsBuilder
-                    => optionsBuilder
-                        .SetPostgresVersion(ngsqlVersionOptions.CurrentValue.Major, ngsqlVersionOptions.CurrentValue.Minor)
-                        .ExecutionStrategy(dependencies => new NpgsqlRetryingExecutionStrategy(
-                            dependencies: dependencies,
-                            maxRetryCount: ngsqlRetryOptions.CurrentValue.MaxRetryCount,
-                            maxRetryDelay: ngsqlRetryOptions.CurrentValue.MaxRetryDelay,
-                            errorCodesToAdd: ngsqlRetryOptions.CurrentValue.ErrorNumbersoAdd))
-                        .MigrationsAssembly(typeof(TContext).Assembly.GetName().Name))
-            .AddInterceptors(
-                multiTenantConnectionInterceptor,
-                multiTenantSaveChangesInterceptor);
-                //auditableInterceptor);
-            })
+            builder
+                .EnableDetailedErrors(true)
+                .EnableSensitiveDataLogging(true)
+                .UseLazyLoadingProxies(true)
+                .UseNpgsql(
+                    connectionString: configuration.GetConnectionString("DefaultConnection"),
+                    npgsqlOptionsAction: optionsBuilder
+                        => optionsBuilder
+                            .SetPostgresVersion(ngsqlVersionOptions.CurrentValue.Major, ngsqlVersionOptions.CurrentValue.Minor)
+                            .ExecutionStrategy(dependencies => new NpgsqlRetryingExecutionStrategy(
+                                dependencies: dependencies,
+                                maxRetryCount: ngsqlRetryOptions.CurrentValue.MaxRetryCount,
+                                maxRetryDelay: ngsqlRetryOptions.CurrentValue.MaxRetryDelay,
+                                errorCodesToAdd: ngsqlRetryOptions.CurrentValue.ErrorNumbersoAdd))
+                            .MigrationsAssembly(typeof(TContext).Assembly.GetName().Name))
+                .AddInterceptors(
+                    multiTenantConnectionInterceptor,
+                    multiTenantSaveChangesInterceptor);
+                    //auditableInterceptor);
+        })
             .AddMultiTenantScoping()
             .AddAuditableInterceptor();
 

@@ -10,4 +10,14 @@
     <PackageReference Include="Swashbuckle.AspNetCore" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="DependencyInjections\Options\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Shared\src\EShop.Shared.JsonApi\EShop.Shared.JsonApi.csproj" />
+    <ProjectReference Include="..\..\..\Shared\src\EShop.Shared.Scoping\EShop.Shared.Scoping.csproj" />
+    <ProjectReference Include="..\EShop.Tenancy.Persistence\EShop.Tenancy.Persistence.csproj" />
+  </ItemGroup>
+
 </Project>

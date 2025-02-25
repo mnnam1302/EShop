@@ -14,6 +14,8 @@ public class TenantFeature : EntityBase<string>, IScoped
     [MaxLength(ModelConstants.ShortText)]
     public string FeatureId { get; set; }
 
+    public virtual Feature Feature { get; set; }
+
     [MaxLength(ModelConstants.TinyText)]
     public string State { get; set; } = StateFeature.Enabled;
 
