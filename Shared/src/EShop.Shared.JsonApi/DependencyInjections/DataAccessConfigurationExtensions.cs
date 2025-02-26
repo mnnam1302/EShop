@@ -31,7 +31,7 @@ public static class DataAccessConfigurationExtensions
         services.ConfigureNgSqlRetryOptions(configuration.GetSection(nameof(NgSqlRetryOptions)));
         services.ConfigureNgSqlVersionOptions(configuration.GetSection(nameof(NgSqlVersionOptions)));
 
-        services.AddDbContextPool<DbContext, TContext>((provider, builder) =>
+        services.AddDbContext<DbContext, TContext>((provider, builder) =>
         {
             var ngsqlRetryOptions = provider.GetRequiredService<IOptionsMonitor<NgSqlRetryOptions>>();
             var ngsqlVersionOptions = provider.GetRequiredService<IOptionsMonitor<NgSqlVersionOptions>>();
