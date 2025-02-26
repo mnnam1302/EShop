@@ -15,11 +15,6 @@ public class DbInitializer
     private readonly IConfiguration _configuration;
     private readonly ILogger _logger;
 
-    private const string TenantName = "eshop-staging";
-    private const string RoleName = "Owner";
-    private const string UserName = "owner.staging@gmail.com";
-    private const string DisplayName = "Owner Staging";
-
     public DbInitializer(
         TenancyDbContext tenancyDbContext,
         IUserDetailsProvider userDetailsProvider,
@@ -38,7 +33,7 @@ public class DbInitializer
     {
         try
         {
-            _userDetailsProvider.SetSystemUserContext(TenantName);
+            _userDetailsProvider.SetSystemUserContextWithEmptyScope();
 
             if (applyMigrations)
             {
@@ -56,7 +51,6 @@ public class DbInitializer
                 _tenantIsolationStrategy.AddTenantIsolation(_tenancyDbContext);
             }
 
-            await SeedFeaturesSystem();
             await _tenancyDbContext.SaveChangesAsync();
         }
         catch (Exception ex)
@@ -67,10 +61,5 @@ public class DbInitializer
         {
             _userDetailsProvider.ClearSystemUserContext();
         }
-    }
-
-    private async Task SeedFeaturesSystem()
-    {
-        
     }
 }
