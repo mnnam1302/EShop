@@ -1,5 +1,4 @@
-﻿using EShop.Identity.API.Middlewares;
-using EShop.Identity.Application.DependencyInjections.Extensions;
+﻿using EShop.Identity.Application.DependencyInjections.Extensions;
 using EShop.Identity.Application.Services;
 using EShop.Identity.Infrastructure.DependencyInjections.Extensions;
 using EShop.Identity.Persistence;
@@ -8,6 +7,7 @@ using EShop.Shared.Cache.DependencyInejctions.Extensions;
 using EShop.Shared.Cache.Providers;
 using EShop.Shared.Cache.Services;
 using EShop.Shared.JsonApi.DependencyInjections;
+using EShop.Shared.JsonApi.Middlewares;
 using EShop.Shared.Scoping.ResourceAccessControl;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserPermissionProvider;
 using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
@@ -42,7 +42,7 @@ public static class ServiceCollectionExtensions
             .AddServicesApplicationLayer()
             .AddServicesPersistenceLayer()
             .AddServicesInfrastructureLayer()
-            .AddUserPermissionForOwnerService(); // should move this dependency to application layer properly
+            .AddUserPermissionForOwnerService(); // here, because should be clearly
 
         return services;
     }

@@ -1,7 +1,7 @@
 ﻿using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.DomainTools.DomainExceptions;
 
-namespace EShop.Identity.Application.Exceptions;
+namespace EShop.Shared.JsonApi.Middlewares;
 
 public class ValidationException : DomainException
 {

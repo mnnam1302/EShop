@@ -2,7 +2,7 @@
 using FluentValidation;
 using MediatR;
 
-namespace EShop.Identity.Application.Behaviors;
+namespace EShop.Shared.JsonApi.Behaviors;
 
 public class ValidationPipelineBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
     where TRequest : IRequest<TResponse>

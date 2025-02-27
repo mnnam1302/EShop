@@ -1,6 +1,6 @@
-﻿using ApiGateway.Middlewares;
-using EShop.Shared.Cache.DependencyInejctions.Extensions;
+﻿using EShop.Shared.Cache.DependencyInejctions.Extensions;
 using EShop.Shared.JsonApi.DependencyInjections;
+using EShop.Shared.JsonApi.Middlewares;
 
 namespace ApiGateway.DependencyInjections.Extensions;
 
@@ -13,7 +13,6 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<ExceptionHandlingMiddleware>();
         services
             .AddCorsApiGateway()
-            //.AddConsul()
             .AddYarpReverseProxy(configuration)
             .AddAuthenticationApiGateway(configuration);
 
@@ -24,29 +23,19 @@ public static class ServiceCollectionExtensions
     {
         services.AddCors(options =>
         {
-            options.AddPolicy("CorsPolicy",
-                builder => builder
-                    .AllowAnyOrigin()
+            options.AddPolicy("CorsPolicy", builder =>
+            {
+                builder
+                    .AllowAnyHeader()
                     .AllowAnyMethod()
-                    .AllowAnyHeader());
+                    .AllowAnyOrigin();
+            });
         });
         return services;
     }
 
-    //private static IServiceCollection AddConsul(this IServiceCollection services)
-    //{
-    //    // Read more document: https://docs.steeltoe.io/api/v3/discovery/hashicorp-consul.html
-    //    services.AddServiceDiscovery(o => o.UseConsul());
-    //    return services;
-    //}
-
     private static IServiceCollection AddYarpReverseProxy(this IServiceCollection services, IConfiguration configuration)
     {
-        /*
-         *  Old code apply service discovery destination resolver for Yarp Reverse Proxy
-         *  Microsoft.Extensions.ServiceDiscovery
-         *  Microsoft.Extensions.ServiceDiscovery.Yarp
-         */
         services.AddServiceDiscovery();
         services
             .AddReverseProxy()

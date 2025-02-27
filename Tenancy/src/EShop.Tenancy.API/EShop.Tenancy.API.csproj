@@ -7,7 +7,23 @@
   </PropertyGroup>
 
   <ItemGroup>
+	<PackageReference Include="Asp.Versioning.Mvc.ApiExplorer" />
+	<PackageReference Include="Microsoft.EntityFrameworkCore.Design">
+	 <PrivateAssets>all</PrivateAssets>
+	 <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+	</PackageReference>
+	<PackageReference Include="Microsoft.EntityFrameworkCore.Tools">
+	 <PrivateAssets>all</PrivateAssets>
+	 <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+	</PackageReference>
     <PackageReference Include="Swashbuckle.AspNetCore" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Shared\src\EShop.Shared.Diagnostics\EShop.Shared.Diagnostics.csproj" />
+    <ProjectReference Include="..\..\..\Shared\src\EShop.Shared.JsonApi\EShop.Shared.JsonApi.csproj" />
+    <ProjectReference Include="..\..\..\Shared\src\EShop.Shared.Scoping\EShop.Shared.Scoping.csproj" />
+    <ProjectReference Include="..\EShop.Tenancy.Persistence\EShop.Tenancy.Persistence.csproj" />
   </ItemGroup>
 
 </Project>

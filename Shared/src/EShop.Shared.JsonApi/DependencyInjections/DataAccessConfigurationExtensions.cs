@@ -1,6 +1,5 @@
 ﻿using EShop.Shared.DbResourceAccessControl.Interceptors;
 using EShop.Shared.DbResourceAccessControl.Options;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -31,34 +30,35 @@ public static class DataAccessConfigurationExtensions
         services.ConfigureNgSqlRetryOptions(configuration.GetSection(nameof(NgSqlRetryOptions)));
         services.ConfigureNgSqlVersionOptions(configuration.GetSection(nameof(NgSqlVersionOptions)));
 
+        // Consider DI carefully, I'd like to use AddDbContextPool, but it's scope lifetime
         services.AddDbContext<DbContext, TContext>((provider, builder) =>
         {
             var ngsqlRetryOptions = provider.GetRequiredService<IOptionsMonitor<NgSqlRetryOptions>>();
             var ngsqlVersionOptions = provider.GetRequiredService<IOptionsMonitor<NgSqlVersionOptions>>();
             var multiTenantConnectionInterceptor = provider.GetRequiredService<IMultiTenantIsolationStategy>();
             var multiTenantSaveChangesInterceptor = provider.GetRequiredService<MultiTenantSaveChangesInterceptor>();
-        //var auditableInterceptor = provider.GetRequiredService<AuditableInterceptor>();
+            //var auditableInterceptor = provider.GetRequiredService<AuditableInterceptor>();
 
-        builder
-            .EnableDetailedErrors(true)
-            .EnableSensitiveDataLogging(true)
-            .UseLazyLoadingProxies(true)
-            .UseNpgsql(
-                connectionString: configuration.GetConnectionString("DefaultConnection"),
-                npgsqlOptionsAction: optionsBuilder
-                    => optionsBuilder
-                        .SetPostgresVersion(ngsqlVersionOptions.CurrentValue.Major, ngsqlVersionOptions.CurrentValue.Minor)
-                        .ExecutionStrategy(dependencies => new NpgsqlRetryingExecutionStrategy(
-                            dependencies: dependencies,
-                            maxRetryCount: ngsqlRetryOptions.CurrentValue.MaxRetryCount,
-                            maxRetryDelay: ngsqlRetryOptions.CurrentValue.MaxRetryDelay,
-                            errorCodesToAdd: ngsqlRetryOptions.CurrentValue.ErrorNumbersoAdd))
-                        .MigrationsAssembly(typeof(TContext).Assembly.GetName().Name))
-            .AddInterceptors(
-                multiTenantConnectionInterceptor,
-                multiTenantSaveChangesInterceptor);
-                //auditableInterceptor);
-            })
+            builder
+                .EnableDetailedErrors(true)
+                .EnableSensitiveDataLogging(true)
+                .UseLazyLoadingProxies(true)
+                .UseNpgsql(
+                    connectionString: configuration.GetConnectionString("DefaultConnection"),
+                    npgsqlOptionsAction: optionsBuilder
+                        => optionsBuilder
+                            .SetPostgresVersion(ngsqlVersionOptions.CurrentValue.Major, ngsqlVersionOptions.CurrentValue.Minor)
+                            .ExecutionStrategy(dependencies => new NpgsqlRetryingExecutionStrategy(
+                                dependencies: dependencies,
+                                maxRetryCount: ngsqlRetryOptions.CurrentValue.MaxRetryCount,
+                                maxRetryDelay: ngsqlRetryOptions.CurrentValue.MaxRetryDelay,
+                                errorCodesToAdd: ngsqlRetryOptions.CurrentValue.ErrorNumbersoAdd))
+                            .MigrationsAssembly(typeof(TContext).Assembly.GetName().Name))
+                .AddInterceptors(
+                    multiTenantConnectionInterceptor,
+                    multiTenantSaveChangesInterceptor);
+            //auditableInterceptor);
+        })
             .AddMultiTenantScoping()
             .AddAuditableInterceptor();
 
@@ -86,5 +86,4 @@ public static class DataAccessConfigurationExtensions
             .ValidateDataAnnotations()
             .ValidateOnStart();
     }
-
 }

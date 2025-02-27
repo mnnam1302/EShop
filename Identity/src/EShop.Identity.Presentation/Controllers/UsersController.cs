@@ -1,6 +1,6 @@
 ﻿using Asp.Versioning;
-using EShop.Identity.Presentation.Abstractions;
 using EShop.Shared.Contracts.Services.Identity.Users;
+using EShop.Shared.JsonApi.Abstractions;
 using EShop.Shared.JsonApi.ResourceAccessControl;
 using EShop.Shared.Scoping;
 using EShop.Shared.Scoping.ResourceAccessControl;
@@ -13,7 +13,7 @@ namespace EShop.Identity.Presentation.Controllers;
 [ApiController]
 [ApiVersion("1.0")]
 [Route("api/v{api:apiVersion}/[controller]")]
-public class UsersController : ApiEndpoint
+public class UsersController : ApiEndpointBase
 {
     private readonly ISender _sender;
     private readonly IUserDetailsProvider _userDetailsProvider;

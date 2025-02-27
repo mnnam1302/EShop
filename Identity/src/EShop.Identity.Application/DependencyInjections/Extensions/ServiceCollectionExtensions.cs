@@ -1,4 +1,4 @@
-﻿using EShop.Identity.Application.Behaviors;
+﻿using EShop.Shared.JsonApi.Behaviors;
 using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
@@ -22,7 +22,7 @@ public static class ServiceCollectionExtensions
                 .AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationPipelineBehavior<,>))
                 .AddTransient(typeof(IPipelineBehavior<,>), typeof(PerformancePipelineBehavior<,>))
                 .AddTransient(typeof(IPipelineBehavior<,>), typeof(TracingPipelineBehavior<,>))
-                .AddValidatorsFromAssembly(EShop.Shared.Contracts.AssemblyReference.Assembly, includeInternalTypes: true);
+                .AddValidatorsFromAssembly(Shared.Contracts.AssemblyReference.Assembly, includeInternalTypes: true);
     }
 
     private static void AddAutoMapperService(this IServiceCollection services)

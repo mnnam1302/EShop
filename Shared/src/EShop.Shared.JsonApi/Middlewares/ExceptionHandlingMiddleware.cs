@@ -1,12 +1,14 @@
 ﻿using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.DomainTools.DomainExceptions;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 using System.Text.Json;
 
-namespace EShop.Identity.API.Middlewares;
+namespace EShop.Shared.JsonApi.Middlewares;
 
 public class ExceptionHandlingMiddleware : IMiddleware
 {
-    private readonly ILogger<ExceptionHandlingMiddleware> _logger;
+    private readonly ILogger _logger;
 
     public ExceptionHandlingMiddleware(ILogger<ExceptionHandlingMiddleware> logger)
     {
@@ -68,7 +70,7 @@ public class ExceptionHandlingMiddleware : IMiddleware
     {
         IReadOnlyCollection<Error>? errors = null;
 
-        if (exception is Application.Exceptions.ValidationException validationException)
+        if (exception is ValidationException validationException)
         {
             errors = validationException.Errors;
         }

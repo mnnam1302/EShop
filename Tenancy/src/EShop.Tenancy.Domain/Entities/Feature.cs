@@ -1,9 +1,11 @@
-﻿using EShop.Tenancy.Domain.Enumerations;
+﻿using EShop.Shared.DomainTools.Entities;
+using EShop.Shared.Scoping;
+using EShop.Tenancy.Domain.Enumerations;
 using System.ComponentModel.DataAnnotations;
 
 namespace EShop.Tenancy.Domain.Entities;
 
-public class Feature
+public class Feature : EntityBase<string>, IExcludedFromScoping
 {
     [MaxLength(ModelConstants.ShortMediumText)]
     public string Name { get; set; }

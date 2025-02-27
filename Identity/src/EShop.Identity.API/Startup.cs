@@ -1,5 +1,5 @@
 ﻿using EShop.Identity.API.DependencyInjections.Extensions;
-using EShop.Identity.API.Middlewares;
+using EShop.Shared.JsonApi.Middlewares;
 
 namespace EShop.Identity.API;
 
@@ -25,7 +25,7 @@ public class Startup
     {
         app.UseMiddleware<ExceptionHandlingMiddleware>();
 
-        if (Environment.IsDevelopment() || Environment.IsStaging())
+        if (Environment.IsDevelopment())
         {
             app.UseCors(x => x.AllowAnyMethod());
             app.UseSwaggerAPI();
