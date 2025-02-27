@@ -1,6 +1,6 @@
 ﻿using Asp.Versioning;
-using EShop.Identity.Presentation.Abstractions;
 using EShop.Shared.Contracts.Services.Identity.Organizations;
+using EShop.Shared.JsonApi.Abstractions;
 using EShop.Shared.JsonApi.ResourceAccessControl;
 using EShop.Shared.Scoping.ResourceAccessControl;
 using MediatR;
@@ -12,7 +12,7 @@ namespace EShop.Identity.Presentation.Controllers;
 [ApiController]
 [ApiVersion("1.0")]
 [Route("api/v{version:apiVersion}/organizations")]
-public class OrganizationsController : ApiEndpoint
+public class OrganizationsController : ApiEndpointBase
 {
     private readonly ISender _sender;
 
