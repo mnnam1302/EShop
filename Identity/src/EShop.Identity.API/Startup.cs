@@ -25,7 +25,7 @@ public class Startup
     {
         app.UseMiddleware<ExceptionHandlingMiddleware>();
 
-        if (Environment.IsDevelopment() || Environment.IsStaging())
+        if (Environment.IsDevelopment())
         {
             app.UseCors(x => x.AllowAnyMethod());
             app.UseSwaggerAPI();

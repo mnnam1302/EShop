@@ -1,6 +1,6 @@
 using ApiGateway.DependencyInjections.Extensions;
-using ApiGateway.Middlewares;
 using EShop.Shared.Diagnostics;
+using EShop.Shared.JsonApi.Middlewares;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -19,7 +19,11 @@ var app = builder.Build();
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseSerilogRequestLogging();
 
-app.UseCors();
+if (app.Environment.IsDevelopment())
+{
+    app.UseCors("CorsPolicy");
+}
+
 //app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
