@@ -10,7 +10,7 @@ public class ExceptionHandlingMiddleware : IMiddleware
 {
     private readonly ILogger _logger;
 
-    public ExceptionHandlingMiddleware(ILogger logger)
+    public ExceptionHandlingMiddleware(ILogger<ExceptionHandlingMiddleware> logger)
     {
         _logger = logger;
     }

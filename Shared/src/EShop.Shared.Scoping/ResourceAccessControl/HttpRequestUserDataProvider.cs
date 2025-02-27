@@ -125,7 +125,7 @@ public class HttpRequestUserDataProvider : IUserDetailsProvider
     {
         if (!TryReadUserDataFromRequest(out var user))
         {
-            throw new InvalidRequestException((int)System.Net.HttpStatusCode.Unauthorized);
+            throw new InvalidRequestException((int)System.Net.HttpStatusCode.Unauthorized, "Invalid request");
         }
 
         return user!;

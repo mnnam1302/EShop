@@ -5,6 +5,9 @@ using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace EShop.Shared.DbResourceAccessControl.Interceptors;
 
+/// <summary>
+/// Consider, because this is business should not apply here and hidden, should show clearly
+/// </summary>
 public sealed class MultiTenantSaveChangesInterceptor : SaveChangesInterceptor
 {
     private readonly IUserDetailsProvider _userDetailsProvider;
@@ -32,7 +35,6 @@ public sealed class MultiTenantSaveChangesInterceptor : SaveChangesInterceptor
 
         foreach (EntityEntry<IScoped> entityEntry in entities)
         {
-            // consider, because this is business should not apply here and hiden, should show clearly
             entityEntry.Property(x => x.TenantId).CurrentValue = _userDetailsProvider.AuthenticatedUser.TenantId;
             entityEntry.Property(x => x.Scope).CurrentValue = _userDetailsProvider.AuthenticatedUser.TenantId;
         }

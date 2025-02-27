@@ -33,7 +33,7 @@ public class AuditableInterceptor : SaveChangesInterceptor
         return base.SavingChangesAsync(eventData, result, cancellationToken);
     }
 
-    private void UpdateDateTrackingEntities(DbContext dbContext)
+    private static void UpdateDateTrackingEntities(DbContext dbContext)
     {
         IEnumerable<EntityEntry<IDateTracking>> entities = dbContext.ChangeTracker.Entries<IDateTracking>();
 

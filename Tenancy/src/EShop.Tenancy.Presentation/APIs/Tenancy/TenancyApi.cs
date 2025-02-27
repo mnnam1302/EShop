@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using EShop.Shared.JsonApi.Abstractions;
 
-namespace EShop.Tenancy.Presentation.APIs.Tenancy
+namespace EShop.Tenancy.Presentation.APIs.Tenancy;
+
+public class TenancyApi : ApiEndpointBase
 {
-    internal class TenancyApi
-    {
-    }
+
 }

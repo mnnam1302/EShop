@@ -1,5 +1,4 @@
-﻿using EShop.Identity.API.Middlewares;
-using EShop.Identity.Application.DependencyInjections.Extensions;
+﻿using EShop.Identity.Application.DependencyInjections.Extensions;
 using EShop.Identity.Application.Services;
 using EShop.Identity.Infrastructure.DependencyInjections.Extensions;
 using EShop.Identity.Persistence;

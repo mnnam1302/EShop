@@ -1,4 +1,5 @@
-﻿using EShop.Tenancy.API.DependencyInjections.Extensions;
+﻿using EShop.Shared.JsonApi.Middlewares;
+using EShop.Tenancy.API.DependencyInjections.Extensions;
 
 namespace EShop.Tenancy.API;
 
@@ -22,9 +23,12 @@ public class Startup
 
     public virtual void Configure(IApplicationBuilder app, IHostApplicationLifetime applicationLifetime, ILoggerFactory loggerFactory)
     {
+        app.UseMiddleware<ExceptionHandlingMiddleware>();
+
+
         if (Environment.IsDevelopment() || Environment.IsStaging())
         {
-            app.UseCors(x => x.AllowAnyMethod());
+            //app.UseCors(x => x.AllowAnyMethod());
         }
     }
 }

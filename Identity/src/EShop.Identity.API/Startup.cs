@@ -1,5 +1,5 @@
 ﻿using EShop.Identity.API.DependencyInjections.Extensions;
-using EShop.Identity.API.Middlewares;
+using EShop.Shared.JsonApi.Middlewares;
 
 namespace EShop.Identity.API;
 

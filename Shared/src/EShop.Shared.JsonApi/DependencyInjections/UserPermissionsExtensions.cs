@@ -1,13 +1,10 @@
-﻿using EShop.Shared.Cache.Providers;
+﻿using EShop.Shared.Cache.DependencyInejctions.Extensions;
+using EShop.Shared.Cache.Providers;
 using EShop.Shared.Cache.Services;
+using EShop.Shared.Scoping.ResourceAccessControl;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserPermissionProvider;
-using EShop.Shared.Scoping.ResourceAccessControl.Providers;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using EShop.Shared.Cache.DependencyInejctions.Extensions;
-using EShop.Shared.Scoping.ResourceAccessControl;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
 
 namespace EShop.Shared.JsonApi.DependencyInjections;
 
@@ -37,4 +34,6 @@ public static class UserPermissionsExtensions
         services.AddTransient<IPermissionCachingService, PermissionRedisCachingService>();
         services.AddTransient<IUserPermissionsProvider, CacheUserPermissionService>();
     }
+
+    // Need to configure HttpClient for ExternalServices.UsersApiUrl, if possible configure service discovery
 }

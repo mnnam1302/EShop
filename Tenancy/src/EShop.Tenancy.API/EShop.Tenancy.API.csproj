@@ -20,6 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\Shared\src\EShop.Shared.Diagnostics\EShop.Shared.Diagnostics.csproj" />
     <ProjectReference Include="..\..\..\Shared\src\EShop.Shared.JsonApi\EShop.Shared.JsonApi.csproj" />
     <ProjectReference Include="..\..\..\Shared\src\EShop.Shared.Scoping\EShop.Shared.Scoping.csproj" />
     <ProjectReference Include="..\EShop.Tenancy.Persistence\EShop.Tenancy.Persistence.csproj" />

@@ -1,6 +1,5 @@
 ﻿using EShop.Shared.DbResourceAccessControl.Interceptors;
 using EShop.Shared.DbResourceAccessControl.Options;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -58,7 +57,7 @@ public static class DataAccessConfigurationExtensions
                 .AddInterceptors(
                     multiTenantConnectionInterceptor,
                     multiTenantSaveChangesInterceptor);
-                    //auditableInterceptor);
+            //auditableInterceptor);
         })
             .AddMultiTenantScoping()
             .AddAuditableInterceptor();
@@ -87,5 +86,4 @@ public static class DataAccessConfigurationExtensions
             .ValidateDataAnnotations()
             .ValidateOnStart();
     }
-
 }
