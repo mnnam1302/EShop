@@ -37,10 +37,4 @@ public static class UserPermissionsExtensions
         services.AddTransient<IPermissionCachingService, PermissionRedisCachingService>();
         services.AddTransient<IUserPermissionsProvider, CacheUserPermissionService>();
     }
-
-    public static void AddDefaultAuthorizationFilter(this MvcOptions mvc)
-    {
-        //var policy = new AuthorizationPolicyBuilder()
-        //    .AddRequirements(new)
-    }
 }
