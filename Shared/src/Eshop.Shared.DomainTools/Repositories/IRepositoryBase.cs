@@ -1,4 +1,5 @@
-﻿using System.Linq.Expressions;
+﻿using EShop.Shared.DomainTools.Entities;
+using System.Linq.Expressions;
 
 namespace EShop.Shared.DomainTools.Repositories;
 
@@ -8,7 +9,7 @@ namespace EShop.Shared.DomainTools.Repositories;
 /// <typeparam name="TEntity"></typeparam>
 /// <typeparam name="TKey"></typeparam>
 public interface IRepositoryBase<TEntity, in TKey>
-    where TEntity : class
+    where TEntity : class, IEntityBase<TKey>
 {
     Task<TEntity?> FindByIdAsync(
         TKey id,

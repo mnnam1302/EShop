@@ -1,6 +1,10 @@
 ﻿using EShop.Shared.JsonApi.DependencyInjections;
 using EShop.Shared.JsonApi.Middlewares;
+using EShop.Tenancy.Application.DependencyInjections;
 using EShop.Tenancy.Persistence;
+using EShop.Tenancy.Persistence.DependencyInjections;
+using EShop.Tenancy.Presentation.DependencyInjections;
+using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
 
 namespace EShop.Tenancy.API.DependencyInjections.Extensions
 {
@@ -18,14 +22,35 @@ namespace EShop.Tenancy.API.DependencyInjections.Extensions
         {
             services.AddUserPermissionsProvider(configuration);
 
-            services.AddServicesApiLayer();
+            //services.AddAuthentication();
+            //services.AddAuthorization();
+
+            services.AddTenancyPresentation(); // Must before API project, because contain DI Carter
+            services.AddTenancyAPI();
+            services.AddTenancyPersistence();
+            services.AddTenancyApplication();
 
             return services;
         }
 
-        private static void AddServicesApiLayer(this IServiceCollection services)
+        private static void AddTenancyAPI(this IServiceCollection services)
         {
+            services.AddCors();
             services.AddSingleton<ExceptionHandlingMiddleware>();
+
+            services
+                .AddSwaggerGenNewtonsoftSupport()
+                .AddFluentValidationRulesToSwagger()
+                .AddEndpointsApiExplorer()
+                .AddSwaggerAPI();
+
+            services
+                .AddApiVersioning(options => options.ReportApiVersions = true)
+                .AddApiExplorer(options =>
+                {
+                    options.GroupNameFormat = "'v'VVV";
+                    options.SubstituteApiVersionInUrl = true;
+                });
         }
     }
 }

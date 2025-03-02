@@ -6,4 +6,20 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Folder Include="UseCases\V1\Events\" />
+    <Folder Include="UseCases\V1\Queries\" />
+  </ItemGroup>
+
+  <ItemGroup>
+  	<PackageReference Include="AutoMapper" />
+  	<PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Shared\src\EShop.Shared.Contracts\EShop.Shared.Contracts.csproj" />
+    <ProjectReference Include="..\..\..\Shared\src\EShop.Shared.JsonApi\EShop.Shared.JsonApi.csproj" />
+    <ProjectReference Include="..\EShop.Tenancy.Domain\EShop.Tenancy.Domain.csproj" />
+  </ItemGroup>
+
 </Project>

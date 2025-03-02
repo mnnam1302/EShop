@@ -16,15 +16,17 @@ public class Program
 
         try
         {
-            var host = CreateHostBuilder(args).Build();
+            var app = BuidlWebApp(args);
 
-            await using var scope = host.Services.CreateAsyncScope();
-            var dbInitializer = ActivatorUtilities.CreateInstance<DbInitializer>(scope.ServiceProvider);
+            await using (var scope = app.Services.CreateAsyncScope())
+            {
+                var dbInitializer = ActivatorUtilities.CreateInstance<DbInitializer>(scope.ServiceProvider);
 
-            await dbInitializer.Initialize();
+                await dbInitializer.Initialize();                
+            }
 
             Log.Information("Starting up {ApplicationName}...", ApplicationName);
-            await host.RunAsync();
+            await app.RunAsync();
             Log.Information("Stop {ApplicationName}...", ApplicationName);
             return 0;
         }
@@ -39,15 +41,24 @@ public class Program
         }
     }
 
-    private static IHostBuilder CreateHostBuilder(string[] args)
+    private static WebApplication BuidlWebApp(string[] args)
     {
-        // generic host: https://learn.microsoft.com/en-us/dotnet/core/extensions/generic-host?tabs=appbuilder
-        return Host.CreateDefaultBuilder()
-            .ConfigureWebHostDefaults(webBuilder =>
-            {
-                webBuilder.UseStartup<Startup>()
-                    .UseShutdownTimeout(TimeSpan.FromSeconds(ShutdownTimeoutInSeconds));
-            })
+        var builder = WebApplication.CreateBuilder(args);
+
+        var startup = new Startup(builder.Configuration, builder.Environment);
+        startup.ConfigureServices(builder.Services);
+
+        builder.Host
             .UseSerilog();
+
+        builder.WebHost
+            .UseShutdownTimeout(TimeSpan.FromSeconds(ShutdownTimeoutInSeconds));
+
+        var app = builder.Build();
+
+        var loggerFactory = app.Services.GetRequiredService<ILoggerFactory>();
+        startup.Configure(app, app.Lifetime, loggerFactory);
+
+        return app;
     }
 }

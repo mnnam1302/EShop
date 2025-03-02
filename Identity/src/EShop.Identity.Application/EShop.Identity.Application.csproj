@@ -16,14 +16,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Shared\src\EShop.Shared.Contracts\EShop.Shared.Contracts.csproj" />
-    <ProjectReference Include="..\..\..\Shared\src\EShop.Shared.JsonApi\EShop.Shared.JsonApi.csproj" />
-    <ProjectReference Include="..\EShop.Identity.Domain\EShop.Identity.Domain.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
   	<PackageReference Include="AutoMapper" />
   	<PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Shared\src\EShop.Shared.Contracts\EShop.Shared.Contracts.csproj" />
+    <ProjectReference Include="..\..\..\Shared\src\EShop.Shared.JsonApi\EShop.Shared.JsonApi.csproj" />
+    <ProjectReference Include="..\EShop.Identity.Domain\EShop.Identity.Domain.csproj" />
+  </ItemGroup>
 </Project>
