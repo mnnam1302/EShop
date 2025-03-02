@@ -14,13 +14,15 @@ public interface IPermissionCalculator
 public class PermissionCalculator : IPermissionCalculator, IUserPermissionsProvider
 {
     private readonly IIdentityRepositoryBase<User, string> _userRepository;
-    private readonly ILogger<PermissionCalculator> _logger;
+    private readonly ILogger _logger;
 
     public PermissionCalculator(IIdentityRepositoryBase<User, string> userRepository, ILogger<PermissionCalculator> logger)
     {
         _userRepository = userRepository;
         _logger = logger;
     }
+
+    public Task<string[]> GetPermissions(string userId) => CalculateFor(userId.ToLower());
 
     public async Task<string[]> CalculateFor(string userId, CancellationToken cancellationToken = default)
     {
@@ -36,11 +38,9 @@ public class PermissionCalculator : IPermissionCalculator, IUserPermissionsProvi
                     .Select(rp => rp.PermissionId!)));
 
         var distinctPermissions = await userPermissions.Distinct().ToArrayAsync();
-        _logger.LogDebug("Calculated permissions for user '{id}' based on roles stored in the database. Result: {count} permissions available.",
-            userId, distinctPermissions.Length);
+
+        _logger.LogDebug("Calculated permissions for user '{UserId}' based on roles stored in the database. Result: {Count} permissions available.", userId, distinctPermissions.Length);
 
         return distinctPermissions;
     }
-
-    public Task<string[]> GetPermissions(string userId) => CalculateFor(userId.ToLower());
 }

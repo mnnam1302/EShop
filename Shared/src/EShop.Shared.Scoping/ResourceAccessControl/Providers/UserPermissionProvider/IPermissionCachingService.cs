@@ -2,9 +2,9 @@
 
 public interface IPermissionCachingService
 {
-    bool TryGetPermissions(string userId, out string[] permissions);
+    Task<string[]> GetPermissionsAsync(string userId);
 
-    void AddPermissions(string userId, string[] permissions);
+    Task AddPermissionsAsync(string userId, string[] permissions);
 
-    void RemoveCache(string userId);
+    Task RemoveCacheAsync(string userId);
 }

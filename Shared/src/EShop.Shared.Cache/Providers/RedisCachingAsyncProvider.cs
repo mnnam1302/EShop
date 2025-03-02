@@ -1,12 +1,11 @@
-﻿using EShop.Shared.Cache.Providers;
-using Microsoft.Extensions.Caching.Distributed;
+﻿using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using System.Text;
 using System.Text.Json;
 
-namespace EShop.Shared.Cache.Services;
+namespace EShop.Shared.Cache.Providers;
 
-public interface IRedisCachingAsyncService<TValue>
+public interface IRedisCachingAsyncProvider<TValue>
     where TValue : class
 {
     Task AddAsync(string cacheKey, TValue value, DistributedCacheEntryOptions options, CancellationToken cancellationToken = default);
@@ -16,7 +15,7 @@ public interface IRedisCachingAsyncService<TValue>
     Task<TValue?> GetAsync(string cacheKey, CancellationToken cancellationToken = default);
 }
 
-public class RedisCachingAsyncService<TValue> : IRedisCachingAsyncService<TValue>
+public class RedisCachingAsyncProvider<TValue> : IRedisCachingAsyncProvider<TValue>
     where TValue : class
 {
     private readonly IDistributedCache _distributedCache;
@@ -24,10 +23,10 @@ public class RedisCachingAsyncService<TValue> : IRedisCachingAsyncService<TValue
     private readonly ILogger _logger;
     private static readonly JsonSerializerOptions jsonSerializerOptions = new(JsonSerializerDefaults.Web);
 
-    public RedisCachingAsyncService(
+    public RedisCachingAsyncProvider(
         IDistributedCache distributedCache,
         IRedisResiliencePolicyProvider resiliencePolicyProvider,
-        ILogger<RedisCachingAsyncService<TValue>> logger)
+        ILogger<RedisCachingAsyncProvider<TValue>> logger)
     {
         _distributedCache = distributedCache;
         _resiliencePolicyProvider = resiliencePolicyProvider;
@@ -83,13 +82,13 @@ public class RedisCachingAsyncService<TValue> : IRedisCachingAsyncService<TValue
             contextData,
             cancellationToken);
 
-        return DeserializeCachedValue<TValue>(valueFromCache);
+        return DeserializeCachedValue(valueFromCache);
     }
 
-    private static byte[] SerializeValueForCaching<TValue>(TValue value)
+    private static byte[] SerializeValueForCaching(TValue value)
         => Encoding.UTF8.GetBytes(JsonSerializer.Serialize(value, jsonSerializerOptions));
 
-    private static TValue? DeserializeCachedValue<TValue>(byte[]? value)
+    private static TValue? DeserializeCachedValue(byte[]? value)
         => value is null ? default : JsonSerializer.Deserialize<TValue>(Encoding.UTF8.GetString(value), jsonSerializerOptions);
 
     private Dictionary<string, object> CreatePollyContextData()

@@ -1,4 +1,5 @@
 ﻿using EShop.Shared.Cache.CacheKeys;
+using EShop.Shared.Cache.Providers;
 using EShop.Shared.Contracts.Services.Identity.Auth;
 using EShop.Shared.DomainTools.DomainExceptions;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers;
@@ -9,11 +10,11 @@ namespace EShop.Shared.Cache.Services;
 
 public class TokenRedisCachingService : ITokenCachingService
 {
-    private readonly IRedisCachingAsyncService<Response.AuthenticatedResponse> _redisCachingService;
+    private readonly IRedisCachingAsyncProvider<Response.AuthenticatedResponse> _redisCachingService;
     private readonly CachedRemoteConfiguration _cachedRemoteConfiguration;
 
     public TokenRedisCachingService(
-        IRedisCachingAsyncService<Response.AuthenticatedResponse> redisCachingService,
+        IRedisCachingAsyncProvider<Response.AuthenticatedResponse> redisCachingService,
         CachedRemoteConfiguration cachedRemoteConfiguration)
     {
         _redisCachingService = redisCachingService;

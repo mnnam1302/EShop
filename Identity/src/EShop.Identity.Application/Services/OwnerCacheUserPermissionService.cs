@@ -4,10 +4,10 @@ namespace EShop.Identity.Application.Services;
 
 public class OwnerCacheUserPermissionService : IUserPermissionsProvider
 {
-    private readonly IPermissionCachingOwnerService _permissionCache;
+    private readonly IPermissionCachingService _permissionCache;
     private readonly IPermissionCalculator _permissionCalculator;
 
-    public OwnerCacheUserPermissionService(IPermissionCachingOwnerService permissionCache, IPermissionCalculator permissionCalculator)
+    public OwnerCacheUserPermissionService(IPermissionCachingService permissionCache, IPermissionCalculator permissionCalculator)
     {
         _permissionCache = permissionCache;
         _permissionCalculator = permissionCalculator;
@@ -20,14 +20,15 @@ public class OwnerCacheUserPermissionService : IUserPermissionsProvider
             throw new ArgumentException("User Id is required", nameof(userId));
         }
 
-        if (_permissionCache.TryGetPermissions(userId, out var userPermissionsFromCache))
+        var permissionsCache = await _permissionCache.GetPermissionsAsync(userId);
+        if (permissionsCache.Any())
         {
-            return userPermissionsFromCache;
+            return permissionsCache;
         }
 
         var calculatedPermissions = await _permissionCalculator.CalculateFor(userId.ToLower());
 
-        _permissionCache.AddPermissions(userId, calculatedPermissions);
+        await _permissionCache.AddPermissionsAsync(userId, calculatedPermissions);
 
         return calculatedPermissions;
     }

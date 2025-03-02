@@ -20,7 +20,6 @@ public static class ServiceCollectionExtensions
     {
         services
             .AddRedisInfrastructure(configuration)
-            .AddRedisCachingService()
             .AddUserTokenCachingService();
 
         services
@@ -78,8 +77,8 @@ public static class ServiceCollectionExtensions
 
     private static void AddPermissionCachingServiceForOwnService(IServiceCollection services)
     {
-        services.AddTransient<IRedisCachingProvider<string[]>, RedisCachingProvider<string[]>>();
-        services.AddTransient<IPermissionCachingOwnerService, PermissionRedisCachingService>();
+        services.AddTransient<IRedisCachingAsyncProvider<string[]>, RedisCachingAsyncProvider<string[]>>();
+        services.AddTransient<IPermissionCachingService, PermissionRedisCachingService>();
         services.AddTransient<IPermissionCalculator, PermissionCalculator>();
         services.AddTransient<IUserPermissionsProvider, OwnerCacheUserPermissionService>();
     }

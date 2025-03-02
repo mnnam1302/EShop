@@ -30,10 +30,9 @@ public static class UserPermissionsExtensions
 
         services.AddRedisInfrastructure(configuration);
         services.AddTransient<IRedisResiliencePolicyProvider, RedisResiliencePolicyProvider>();
-        services.AddTransient<IRedisCachingProvider<string[]>, RedisCachingProvider<string[]>>();
+
+        services.AddTransient<IRedisCachingAsyncProvider<string[]>, RedisCachingAsyncProvider<string[]>>();
         services.AddTransient<IPermissionCachingService, PermissionRedisCachingService>();
         services.AddTransient<IUserPermissionsProvider, CacheUserPermissionService>();
     }
-
-    // Need to configure HttpClient for ExternalServices.UsersApiUrl, if possible configure service discovery
 }

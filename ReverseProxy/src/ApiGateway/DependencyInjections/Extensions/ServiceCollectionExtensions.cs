@@ -11,7 +11,6 @@ public static class ServiceCollectionExtensions
         services
             .AddUserScoping()
             .AddRedisInfrastructure(configuration)
-            .AddRedisCachingService()
             .AddUserTokenCachingService();
 
         return services;

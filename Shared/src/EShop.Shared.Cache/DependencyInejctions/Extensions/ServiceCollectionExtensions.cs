@@ -40,14 +40,9 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    public static IServiceCollection AddRedisCachingService(this IServiceCollection services)
-    {
-        services.AddTransient(typeof(IRedisCachingAsyncService<>), typeof(RedisCachingAsyncService<>));
-        return services;
-    }
-
     public static IServiceCollection AddUserTokenCachingService(this IServiceCollection services)
     {
+        services.AddTransient<IRedisCachingAsyncProvider<Response.AuthenticatedResponse>, RedisCachingAsyncProvider<Response.AuthenticatedResponse>>();
         services.AddTransient<ITokenCachingService, TokenRedisCachingService>();
         return services;
     }

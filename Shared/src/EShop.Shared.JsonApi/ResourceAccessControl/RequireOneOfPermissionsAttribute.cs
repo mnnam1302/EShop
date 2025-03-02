@@ -8,17 +8,17 @@ using Microsoft.Extensions.Logging;
 
 namespace EShop.Shared.JsonApi.ResourceAccessControl;
 
-public class RequireOneOfPermissionsAttribute : Attribute, IFilterFactory, IUserPermissionFilter
+[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
+public class RequireOneOfPermissionsAttribute : Attribute, IUserPermissionFilter
 {
-    public RequireOneOfPermissionsAttribute()
-    { }
+    public RequireOneOfPermissionsAttribute() { }
 
     public RequireOneOfPermissionsAttribute(params string[] permissions)
     {
         Permissions = permissions;
     }
 
-    public string[] Permissions { get; set; }
+    public string[] Permissions { get; set; } = [];
     public bool IsReusable => false;
 
     public IFilterMetadata CreateInstance(IServiceProvider serviceProvider)
@@ -55,14 +55,12 @@ public class RequireOneOfPermissionsAttribute : Attribute, IFilterFactory, IUser
             {
                 context.Result = new StatusCodeResult(StatusCodes.Status401Unauthorized);
                 _logger.LogTrace("Rejecting authorizated user");
-                return;
             }
 
             if (!await _permissionValidator.HasAtLeastOneOfSpecificPermissionAsync(_requirePermissions))
             {
                 context.Result = new StatusCodeResult(StatusCodes.Status403Forbidden);
-                _logger.LogTrace("Rejecting user without {expectedPermission} permissions", _requirePermissions.ToString());
-                return;
+                _logger.LogTrace("Rejecting user without {ExpectedPermission} permissions", _requirePermissions.ToString());
             }
         }
     }
