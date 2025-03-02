@@ -7,7 +7,7 @@ namespace EShop.Identity.Persistence.DependencyInjections.Extensions;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddServicesPersistenceLayer(this IServiceCollection services)
+    public static IServiceCollection AddIdentityPersistence(this IServiceCollection services)
     {
         services
             .AddDbInitializer()

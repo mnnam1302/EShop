@@ -7,11 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="DependencyInjections\Extensions\" />
-    <Folder Include="DependencyInjections\Options\" />
-  </ItemGroup>
-
-  <ItemGroup>
   	<PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" />
   	<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
   	<PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" />

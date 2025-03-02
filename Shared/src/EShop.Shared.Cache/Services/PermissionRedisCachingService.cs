@@ -1,52 +1,62 @@
 ﻿using EShop.Shared.Cache.CacheKeys;
 using EShop.Shared.Cache.Providers;
+using EShop.Shared.Scoping.ResourceAccessControl.Providers;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserPermissionProvider;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
 
 namespace EShop.Shared.Cache.Services;
 
-public class PermissionRedisCachingService : IPermissionCachingOwnerService, IPermissionCachingService
+public class PermissionRedisCachingService : IPermissionCachingService
 {
-    private readonly IRedisCachingProvider<string[]> redisCachingProvider;
-    private readonly ILogger<PermissionRedisCachingService> logger;
+    private readonly IRedisCachingAsyncProvider<string[]> _redisCachingAsyncProvider;
+    private readonly ILogger _logger;
+    private readonly CachedRemoteConfiguration _cachedRemoteConfiguration;
 
     public PermissionRedisCachingService(
-        IRedisCachingProvider<string[]> redisCachingProvider,
-        ILogger<PermissionRedisCachingService> logger)
+        IRedisCachingAsyncProvider<string[]> redisCachingAsyncProvider,
+        ILogger<PermissionRedisCachingService> logger,
+        CachedRemoteConfiguration cachedRemoteConfiguration)
     {
-        this.redisCachingProvider = redisCachingProvider;
-        this.logger = logger;
+        _redisCachingAsyncProvider = redisCachingAsyncProvider;
+        _logger = logger;
+        _cachedRemoteConfiguration = cachedRemoteConfiguration;
     }
 
-    public void AddPermissions(string userId, string[] permissions)
+    public async Task AddPermissionsAsync(string userId, string[] permissions)
     {
-        redisCachingProvider.AddValue(UserPermissionCacheKeyProvider.GetCacheKey(userId), permissions);
+        await _redisCachingAsyncProvider.AddAsync(
+            UserPermissionCacheKeyProvider.GetCacheKey(userId),
+            permissions,
+            new DistributedCacheEntryOptions { SlidingExpiration = _cachedRemoteConfiguration.GetSlidingExpiration() });
     }
 
-    public void RemoveCache(string userId)
+    public async Task RemoveCacheAsync(string userId)
 
     {
-        redisCachingProvider.ClearCache(UserPermissionCacheKeyProvider.GetCacheKey(userId));
+        await _redisCachingAsyncProvider.ClearAsync(UserPermissionCacheKeyProvider.GetCacheKey(userId));
     }
 
-    public bool TryGetPermissions(string userId, out string[] permissions)
+    public async Task<string[]> GetPermissionsAsync(string userId)
     {
-        permissions = Array.Empty<string>();
+        var permissions = Array.Empty<string>();
         try
         {
-            var cachedPermission = redisCachingProvider.GetValue(UserPermissionCacheKeyProvider.GetCacheKey(userId));
+            var cachedPermission = await _redisCachingAsyncProvider.GetAsync(UserPermissionCacheKeyProvider.GetCacheKey(userId));
             permissions = cachedPermission ?? permissions;
-            return cachedPermission != null && cachedPermission.Length > 0;
+
+            return permissions;
         }
         catch (RedisConnectionException ex)
         {
-            logger.LogWarning(ex, "Redis connection exception '{FailureType}' while retrieving cached permission for user '{userId}'", ex.FailureType, userId);
+            _logger.LogWarning(ex, "Redis connection exception '{FailureType}' while retrieving cached permission for user '{UserId}'", ex.FailureType, userId);
+            return permissions;
         }
         catch (Exception e)
         {
-            logger.LogError(e, "Exception while retrieving cached permission for user '{userId}'", userId);
+            _logger.LogError(e, "Exception while retrieving cached permission for user '{UserId}'", userId);
+            return permissions;
         }
-        return false;
     }
 }

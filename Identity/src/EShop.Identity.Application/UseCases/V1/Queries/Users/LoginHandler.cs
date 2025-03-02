@@ -6,6 +6,7 @@ using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.Contracts.Services.Identity.Auth;
 using EShop.Shared.DomainTools.DomainExceptions;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserTokenProvider;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace EShop.Identity.Application.UseCases.V1.Queries.Users;
 
@@ -15,41 +16,41 @@ namespace EShop.Identity.Application.UseCases.V1.Queries.Users;
 public class LoginHandler : IQueryHandler<Query.Login, Response.AuthenticatedResponse>
 {
     private readonly IIdentityRepositoryBase<User, string> _userRepository;
-    private readonly ITokenService _tokenService;
     private readonly IPasswordHasher _passwordHasher;
+    private readonly ITokenService _tokenService;
     private readonly ITokenCachingService _tokenCachingService;
 
     public LoginHandler(
         IIdentityRepositoryBase<User, string> userRepository,
-        ITokenService tokenService,
         IPasswordHasher passwordHasher,
+        ITokenService tokenService,
         ITokenCachingService tokenCachingService)
     {
         _userRepository = userRepository;
-        _tokenService = tokenService;
         _passwordHasher = passwordHasher;
+        _tokenService = tokenService;
         _tokenCachingService = tokenCachingService;
     }
 
     public async Task<Result<Response.AuthenticatedResponse>> Handle(Query.Login request, CancellationToken cancellationToken)
     {
         var user = await _userRepository.FindSingleAsync(x => x.Username == request.Username);
-        if (user == null)
+        if (user is null)
         {
-            throw new AuthorizationException("User not found");
+            throw new AuthorizationException("User is not found");
         }
 
         var isMatching = _passwordHasher.Verify(user.PasswordHash, request.Password);
         if (!isMatching)
         {
-            throw new AuthorizationException("Invalid password");
+            throw new AuthorizationException("Incorrect password");
         }
 
         var claims = user.GenerateClaims();
         var accessToken = _tokenService.GenerateAccessToken(claims);
         var refreshToken = _tokenService.GenerateRefreshToken();
 
-        var response = new Response.AuthenticatedResponse()
+        var result = new Response.AuthenticatedResponse()
         {
             UserId = user.Id,
             UserName = user.Username!,
@@ -58,8 +59,10 @@ public class LoginHandler : IQueryHandler<Query.Login, Response.AuthenticatedRes
             RefreshTokenExpiryTime = DateTime.Now.AddHours(6)
         };
 
-        _tokenCachingService.AddToken(user.Id, response);
+        await _tokenCachingService.AddTokenAsync(
+            user.Id, 
+            result);
 
-        return Result.Success(response);
+        return Result.Success(result);
     }
 }

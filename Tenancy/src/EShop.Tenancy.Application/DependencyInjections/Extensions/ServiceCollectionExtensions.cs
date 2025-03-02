@@ -1,9 +1,10 @@
 ﻿using EShop.Shared.JsonApi.Behaviors;
+using EShop.Tenancy.Application.DependencyInjections.Extensions;
 using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace EShop.Tenancy.Application.DependencyInjections;
+namespace EShop.Tenancy.Application.DependencyInjections.Extensions;
 
 public static class ServiceCollectionExtensions
 {

@@ -1,4 +1,6 @@
-﻿using Polly;
+﻿using EShop.Shared.Diagnostics;
+using Microsoft.Extensions.Logging;
+using Polly;
 using Polly.CircuitBreaker;
 using Polly.Retry;
 using StackExchange.Redis;
@@ -19,10 +21,10 @@ public static class PollyPolicies
                 RetryCount,
                 (exception, retryAttempt, context) =>
                 {
-                    //if (context.TryGetLogger(out var logger))
-                    //{
-                    //    logger.LogDebug(exception, "RedisTimeoutException/RedisConnectionException handled, Retry number {current}/{max}'", retryAttempt, RetryCount);
-                    //}
+                    if (context.TryGetLogger(out var logger))
+                    {
+                        logger.LogDebug(exception, "RedisTimeoutException/RedisConnectionException handled, Retry number {current}/{max}'", retryAttempt, RetryCount);
+                    }
                 });
 
     public static readonly CircuitBreakerPolicy RedisCircuitBreakerPolicy =
@@ -32,16 +34,16 @@ public static class PollyPolicies
             .CircuitBreaker(ExceptionsAllowedBeforeBreaking, TimeSpan.FromSeconds(DurationOfBreakInSeconds),
             (exception, timespan, context) =>
             {
-                //if (context.TryGetLogger(out var logger))
-                //{
-                //    logger.LogWarning(LogEvents.RedisCircuitBreakerActivated, exception, "Redis circuit breaker activated due to server connection issues");
-                //}
+                if (context.TryGetLogger(out var logger))
+                {
+                    logger.LogWarning(LogEvents.RedisCircuitBreakerActivated, exception, "Redis circuit breaker activated due to server connection issues");
+                }
             },
             context =>
             {
-                //if (context.TryGetLogger(out var logger))
-                //{
-                //    logger.LogInformation("Redis circuit breaker deactivated, connection back and working");
-                //}
+                if (context.TryGetLogger(out var logger))
+                {
+                    logger.LogInformation("Redis circuit breaker deactivated, connection back and working");
+                }
             });
 }

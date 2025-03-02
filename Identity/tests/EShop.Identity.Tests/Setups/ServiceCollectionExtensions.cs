@@ -29,9 +29,9 @@ internal static class ServiceCollectionExtensions
         services
             .AddCors()
             .AddTestServicesApiLayer()
-            .AddServicesApplicationLayer()
-            .AddServicesPersistenceLayer()
-            .AddServicesInfrastructureLayer()
+            .AddIdentityApplication()
+            .AddIdentityPersistence()
+            .AddIdentityInfrastructure()
             .AddTestUserPermissions(); // because user permissions related cache and user services, thus it's putted
 
         return services;

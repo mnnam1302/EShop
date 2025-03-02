@@ -22,9 +22,10 @@ public class CacheUserPermissionService : IUserPermissionsProvider
             throw new ArgumentException("User Id is required", nameof(userId));
         }
 
-        if (_permissionCache.TryGetPermissions(userId, out var userPermissionsFromCache))
+        var permissionsCache = await _permissionCache.GetPermissionsAsync(userId);
+        if (permissionsCache.Any())
         {
-            return userPermissionsFromCache;
+            return permissionsCache;
         }
 
         var permissions = await _userPermissionHttpClient.GetPermissionsForCurrentUser();

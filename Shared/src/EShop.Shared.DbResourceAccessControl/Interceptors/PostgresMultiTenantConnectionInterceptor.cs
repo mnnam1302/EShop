@@ -7,10 +7,10 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace EShop.Shared.DbResourceAccessControl.Interceptors;
 
-public class PostgresMultiTenantConnectionInterceptor : DbConnectionInterceptor, IMultiTenantIsolationStategy
+public class PostgresMultiTenantConnectionInterceptor : DbConnectionInterceptor, IMultiTenantIsolationStrategy
 {
     private readonly IUserDetailsProvider _userDetailsProvider;
-    private readonly ILogger<PostgresMultiTenantConnectionInterceptor> _logger;
+    private readonly ILogger _logger;
 
     public PostgresMultiTenantConnectionInterceptor(
         IUserDetailsProvider userDetailsProvider,
@@ -36,7 +36,7 @@ public class PostgresMultiTenantConnectionInterceptor : DbConnectionInterceptor,
         if (TryCreateTenantContext(connection, out DbCommand? setContextCommand))
         {
             await setContextCommand.ExecuteNonQueryAsync(cancellationToken);
-            setContextCommand.Dispose();
+            await setContextCommand.DisposeAsync();
         }
     }
 

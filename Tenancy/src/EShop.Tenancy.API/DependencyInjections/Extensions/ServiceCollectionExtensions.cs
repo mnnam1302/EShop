@@ -1,9 +1,9 @@
 ﻿using EShop.Shared.JsonApi.DependencyInjections;
 using EShop.Shared.JsonApi.Middlewares;
-using EShop.Tenancy.Application.DependencyInjections;
+using EShop.Tenancy.Application.DependencyInjections.Extensions;
 using EShop.Tenancy.Persistence;
-using EShop.Tenancy.Persistence.DependencyInjections;
-using EShop.Tenancy.Presentation.DependencyInjections;
+using EShop.Tenancy.Persistence.DependencyInjections.Extensions;
+using EShop.Tenancy.Presentation.DependencyInjections.Extensions;
 using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
 
 namespace EShop.Tenancy.API.DependencyInjections.Extensions

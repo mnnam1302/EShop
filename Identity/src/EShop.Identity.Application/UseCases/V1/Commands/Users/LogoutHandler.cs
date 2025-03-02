@@ -28,7 +28,7 @@ public class LogoutHandler : ICommandHandler<Command.Logout>
             throw new NotFoundException("Invalid request");
         }
 
-        _tokenCachingService.RemoveCache(user.Id);
+        await _tokenCachingService.RemoveCacheAsync(user.Id);
         return Result.Success();
     }
 }

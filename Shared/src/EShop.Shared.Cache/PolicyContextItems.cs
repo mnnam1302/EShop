@@ -1,7 +1,6 @@
-﻿namespace EShop.Shared.Cache
+﻿namespace EShop.Shared.Cache;
+
+public static class PolicyContextItems
 {
-    public static class PolicyContextItems
-    {
-        public const string Logger = "Logger";
-    }
+    public const string Logger = "Logger";
 }
