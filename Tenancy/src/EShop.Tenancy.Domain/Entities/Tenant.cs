@@ -1,4 +1,5 @@
-﻿using EShop.Shared.DomainTools.Aggregates;
+﻿using EShop.Shared.Contracts.Services.Tenancy.Tenants;
+using EShop.Shared.DomainTools.Aggregates;
 using EShop.Shared.Scoping;
 using EShop.Tenancy.Domain.Aggregates;
 using System.ComponentModel.DataAnnotations;
@@ -7,24 +8,43 @@ namespace EShop.Tenancy.Domain.Entities;
 
 public class Tenant : TenantAggregate, IExcludedFromScoping
 {
+    public Tenant() { }
+
+    private Tenant(string id, string name, string ownerUsername, string email, string? phoneNumber, string? description)
+    {
+        Id = id;
+        Name = name;
+        OwnerUsername = ownerUsername;
+        Email = email;
+        PhoneNumber = phoneNumber;
+        Description = description;
+    }
+
+    public static Tenant Create(Command.CreateTenantCommand command)
+    {
+        var tenant = new Tenant($"tenant-{Guid.NewGuid()}", command.Name, command.OwnerUsername, command.Email, command.PhoneNumber, command.Description);
+
+        return tenant;
+    }
+
     [MaxLength(ModelConstants.ShortMediumText)]
     [Required]
-    public string Name { get; set; }
+    public string Name { get; private set; } = string.Empty;
 
     [MaxLength(ModelConstants.LongText)]
-    public string? Description { get; set; }
+    public string? Description { get; private set; }
 
     [MaxLength(ModelConstants.MediumText)]
     [Required]
-    public string? OwnerUsername { get; set; }
+    public string? OwnerUsername { get; private set; }
 
     [MaxLength(ModelConstants.MediumLongText)]
     [EmailAddress]
     [Required]
-    public string? Email { get; set; }
+    public string? Email { get; private set; }
 
     [MaxLength(ModelConstants.MediumText)]
-    public string? PhoneNumber { get; set; }
+    public string? PhoneNumber { get; private set; }
 
     private readonly List<TenantFeature>? _tenantFeatures = new();
     public virtual IReadOnlyCollection<TenantFeature>? TenantFeatures => _tenantFeatures;

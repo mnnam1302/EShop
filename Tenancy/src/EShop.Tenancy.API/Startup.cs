@@ -1,4 +1,5 @@
-﻿using EShop.Shared.JsonApi.Middlewares;
+﻿using Carter;
+using EShop.Shared.JsonApi.Middlewares;
 using EShop.Tenancy.API.DependencyInjections.Extensions;
 
 namespace EShop.Tenancy.API;
@@ -21,14 +22,19 @@ public class Startup
             .AddBoostrapping(Configuration, Environment);
     }
 
-    public virtual void Configure(IApplicationBuilder app, IHostApplicationLifetime applicationLifetime, ILoggerFactory loggerFactory)
+    public virtual void Configure(WebApplication app, IHostApplicationLifetime applicationLifetime, ILoggerFactory loggerFactory)
     {
         app.UseMiddleware<ExceptionHandlingMiddleware>();
 
-
         if (Environment.IsDevelopment() || Environment.IsStaging())
         {
-            //app.UseCors(x => x.AllowAnyMethod());
+            app.UseCors(x => x.AllowAnyMethod());
+            app.UseSwaggerAPI();
         }
+
+        app.UseRouting();
+        //app.UseAuthentication();
+        //app.UseAuthorization();
+        app.MapCarter();
     }
 }

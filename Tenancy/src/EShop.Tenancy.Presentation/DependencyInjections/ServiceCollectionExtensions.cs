@@ -1,23 +1,13 @@
-﻿using Microsoft.AspNetCore.Routing;
+﻿using Carter;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace EShop.Tenancy.Presentation.DependencyInjections;
 
 public static class ServiceCollectionExtensions
 {
-    public static IEndpointRouteBuilder MapTenancyServiceEndpoints(this IEndpointRouteBuilder routerBuilder)
+    public static IServiceCollection AddTenancyPresentation(this IServiceCollection services)
     {
-        MapTenancyEndpoints(routerBuilder);
-        MapFeatureEndpoints(routerBuilder);
-        return routerBuilder;
-    }
-
-    private static void MapTenancyEndpoints(this IEndpointRouteBuilder routeBuilder)
-    {
-
-    }
-
-    private static void MapFeatureEndpoints(this IEndpointRouteBuilder routeBuilder)
-    {
-
+        services.AddCarter();
+        return services;
     }
 }

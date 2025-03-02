@@ -9,8 +9,6 @@
   <ItemGroup>
     <Folder Include="DependencyInjections\Extensions\" />
     <Folder Include="DependencyInjections\Options\" />
-    <Folder Include="UnitOfWorks\" />
-    <Folder Include="Repositories\" />
   </ItemGroup>
 
   <ItemGroup>

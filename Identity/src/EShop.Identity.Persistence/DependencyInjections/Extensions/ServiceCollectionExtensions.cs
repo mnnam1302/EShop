@@ -35,10 +35,4 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IUnitOfWork, UnitOfWorkDbContext<UsersDbContext>>();
         return services;
     }
-
-    //private static void AddInterceptorPersistence(this IServiceCollection services)
-    //{
-    //    services.AddSingleton<UpdateAuditableEntitiesInterceptor>();
-    //    services.AddSingleton<ConvertDomainEventsToEventsInterceptor>();
-    //}
 }
