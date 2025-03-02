@@ -21,22 +21,20 @@ public class RefreshHandler : IQueryHandler<Query.Refresh, Response.Authenticate
 
     public async Task<Result<Response.AuthenticatedResponse>> Handle(Query.Refresh request, CancellationToken cancellationToken)
     {
-        // Verify access token and get userId
         var principles = _tokenService.GetPrincipalFromExpiredToken(request.AccessToken);
         var userId = principles.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-        if (userId == null)
+        if (userId is null)
         {
             throw new AuthorizationException("Invalid token");
         }
 
-        // Check token verfied with info token caching
-        var authenticatedCaching = IsValidToGenerateNewToken(userId, request);
+        var authenticatedCaching = await ValidateAndRetrieveTokenAsync(userId, request);
 
         var accessToken = _tokenService.GenerateAccessToken(principles.Claims);
         var refreshToken = _tokenService.GenerateRefreshToken();
 
-        var newAuthenticatedCaching = new Response.AuthenticatedResponse
+        var newToken = new Response.AuthenticatedResponse
         {
             UserId = userId,
             UserName = authenticatedCaching.UserName,
@@ -45,26 +43,24 @@ public class RefreshHandler : IQueryHandler<Query.Refresh, Response.Authenticate
             RefreshTokenExpiryTime = authenticatedCaching.RefreshTokenExpiryTime
         };
 
-        _tokenCacheService.AddToken(userId, newAuthenticatedCaching);
-        return Result.Success(newAuthenticatedCaching);
+        await _tokenCacheService.AddTokenAsync(userId, newToken);
+        return Result.Success(newToken);
     }
 
-    private Response.AuthenticatedResponse IsValidToGenerateNewToken(string userId, Query.Refresh request)
+    private async Task<Response.AuthenticatedResponse> ValidateAndRetrieveTokenAsync(string userId, Query.Refresh request)
     {
-        _tokenCacheService.TryGetToken(userId, out var authenticatedCaching);
+        var tokenCached = await _tokenCacheService.TryGetTokenAsync(userId);
 
-        if (authenticatedCaching == null ||
-            authenticatedCaching.AccessToken != request.AccessToken)
+        if (tokenCached is null || tokenCached.AccessToken != request.AccessToken)
         {
             throw new AuthorizationException("Invalid token");
         }
 
-        if (authenticatedCaching?.RefreshToken != request.RefreshToken ||
-            authenticatedCaching.RefreshTokenExpiryTime < DateTime.Now)
+        if (tokenCached?.RefreshToken != request.RefreshToken || tokenCached.RefreshTokenExpiryTime < DateTime.Now)
         {
             throw new AuthorizationException("Invalid token");
         }
 
-        return authenticatedCaching;
+        return tokenCached;
     }
 }

@@ -1,23 +1,13 @@
 ﻿using EShop.Identity.Application.Abstractions;
-using EShop.Identity.Application.Services;
 using EShop.Identity.Infrastructure.Authentication;
-using EShop.Identity.Infrastructure.DependencyInjections.Options;
 using EShop.Identity.Infrastructure.HashServices;
-using EShop.Shared.Cache;
-using EShop.Shared.Cache.Providers;
-using EShop.Shared.Cache.Services;
-using EShop.Shared.Contracts.Services.Identity.Auth;
-using EShop.Shared.Scoping.ResourceAccessControl.Providers;
-using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserPermissionProvider;
-using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserTokenProvider;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace EShop.Identity.Infrastructure.DependencyInjections.Extensions;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddServicesInfrastructureLayer(this IServiceCollection services)
+    public static IServiceCollection AddIdentityInfrastructure(this IServiceCollection services)
     {
         services.AddServices();
         return services;

@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 
-namespace EShop.Shared.Scoping.DependencyInjections;
+namespace EShop.Shared.Scoping.DependencyInjections.Extensions;
 
 /// <summary>
 /// Provides extension methods that assert that an object or an argument is not null.

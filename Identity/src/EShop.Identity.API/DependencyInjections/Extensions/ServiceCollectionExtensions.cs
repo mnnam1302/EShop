@@ -16,13 +16,11 @@ namespace EShop.Identity.API.DependencyInjections.Extensions;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddShared(
-        this IServiceCollection services,
-        IConfiguration configuration,
-        IWebHostEnvironment environment)
+    public static IServiceCollection AddShared(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment)
     {
         services
             .AddRedisInfrastructure(configuration)
+            .AddRedisCachingService()
             .AddUserTokenCachingService();
 
         services
@@ -31,24 +29,22 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    public static IServiceCollection AddBoostrapping(
-        this IServiceCollection services,
-        IConfiguration configuration,
-        IWebHostEnvironment environment)
+    public static IServiceCollection AddBoostrapping(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment)
     {
+        services.AddUserPermissionForOwnerService();
+
         services
-            .AddCors()
-            .AddServicesApiLayer()
-            .AddServicesApplicationLayer()
-            .AddServicesPersistenceLayer()
-            .AddServicesInfrastructureLayer()
-            .AddUserPermissionForOwnerService(); // here, because should be clearly
+            .AddIdentityApi()
+            .AddIdentityApplication()
+            .AddIdentityPersistence()
+            .AddIdentityInfrastructure();
 
         return services;
     }
 
-    public static IServiceCollection AddServicesApiLayer(this IServiceCollection services)
+    public static IServiceCollection AddIdentityApi(this IServiceCollection services)
     {
+        services.AddCors();
         services.AddSingleton<ExceptionHandlingMiddleware>();
 
         services

@@ -1,5 +1,5 @@
 ﻿using EShop.Identity.Application.Abstractions;
-using EShop.Identity.Infrastructure.DependencyInjections.Options;
+using EShop.Shared.Scoping.DependencyInjections.Options;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -11,24 +11,23 @@ namespace EShop.Identity.Infrastructure.Authentication;
 
 public class TokenService : ITokenService
 {
-    private readonly JwtOptions jwtOptions = new JwtOptions();
+    private readonly JwtOptions _jwtOptions = new JwtOptions();
 
     public TokenService(IConfiguration configuration)
     {
-        configuration.GetSection(nameof(JwtOptions)).Bind(jwtOptions);
+        configuration.GetSection(nameof(JwtOptions)).Bind(_jwtOptions);
     }
 
     public string GenerateAccessToken(IEnumerable<Claim> claims)
     {
-        var screteKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.SecretKey));
+        var screteKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtOptions.SecretKey));
         var signatureCredentials = new SigningCredentials(screteKey, SecurityAlgorithms.HmacSha256);
 
         var tokenOptions = new JwtSecurityToken(
-            issuer: jwtOptions.Issuer,
-            audience: jwtOptions.Audience,
+            issuer: _jwtOptions.Issuer,
+            audience: _jwtOptions.Audience,
             claims: claims,
-            expires: DateTime.Now.AddHours(jwtOptions.AccessExpireHour),
-            //expires: DateTime.UtcNow.AddSeconds(30),
+            expires: DateTime.Now.AddHours(_jwtOptions.AccessTokenExpiryHours),
             signingCredentials: signatureCredentials
         );
 
@@ -48,16 +47,13 @@ public class TokenService : ITokenService
 
     public ClaimsPrincipal GetPrincipalFromExpiredToken(string token)
     {
-        var Key = Encoding.UTF8.GetBytes(jwtOptions.SecretKey);
+        var Key = Encoding.UTF8.GetBytes(_jwtOptions.SecretKey);
 
-        // Cấu hình như th Server Valdate ở JwtExtensions.cs
-        // Đầu tiên, phải kiểm tra token Expire này có đúng token mà mình đã cấp phát hay không - đúng cái secret key hay không?
-        // Lỡ ngta fake rồi sao?
         var tokenValidationParameters = new TokenValidationParameters
         {
-            ValidateAudience = false, // you might want to validate the audience and issuer depending on your use case
+            ValidateAudience = false,
             ValidateIssuer = false,
-            ValidateLifetime = false, // here we are saying that we don't care about the token's expiration date
+            ValidateLifetime = false,
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = new SymmetricSecurityKey(Key),
             ClockSkew = TimeSpan.Zero

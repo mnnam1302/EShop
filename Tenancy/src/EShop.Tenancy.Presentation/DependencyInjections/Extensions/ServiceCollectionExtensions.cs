@@ -1,7 +1,7 @@
 ﻿using Carter;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace EShop.Tenancy.Presentation.DependencyInjections;
+namespace EShop.Tenancy.Presentation.DependencyInjections.Extensions;
 
 public static class ServiceCollectionExtensions
 {

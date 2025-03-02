@@ -31,24 +31,24 @@ public static class ServiceCollectionExtensions
 
         return services;
     }
-
     public static IServiceCollection AddMemoryInfrastructure(this IServiceCollection services)
     {
+        services.AddDistributedMemoryCache();
         services.AddTransient(typeof(CachedRemoteConfiguration));
         services.AddTransient<IRedisResiliencePolicyProvider, RedisResiliencePolicyProvider>();
-        services.AddDistributedMemoryCache();
 
+        return services;
+    }
+
+    public static IServiceCollection AddRedisCachingService(this IServiceCollection services)
+    {
+        services.AddTransient(typeof(IRedisCachingAsyncService<>), typeof(RedisCachingAsyncService<>));
         return services;
     }
 
     public static IServiceCollection AddUserTokenCachingService(this IServiceCollection services)
     {
-        services.AddTransient<
-            IRedisCachingProvider<Response.AuthenticatedResponse>,
-            RedisCachingProvider<Response.AuthenticatedResponse>>();
-
         services.AddTransient<ITokenCachingService, TokenRedisCachingService>();
-
         return services;
     }
 }

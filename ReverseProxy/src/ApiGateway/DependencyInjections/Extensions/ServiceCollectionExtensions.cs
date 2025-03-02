@@ -6,7 +6,16 @@ namespace ApiGateway.DependencyInjections.Extensions;
 
 public static class ServiceCollectionExtensions
 {
-    internal const string ApplicationName = "ApiGateway";
+    public static IServiceCollection AddShared(this IServiceCollection services, IConfiguration configuration)
+    {
+        services
+            .AddUserScoping()
+            .AddRedisInfrastructure(configuration)
+            .AddRedisCachingService()
+            .AddUserTokenCachingService();
+
+        return services;
+    }
 
     public static IServiceCollection AddBoostrapping(this IServiceCollection services, IConfiguration configuration)
     {
@@ -41,16 +50,6 @@ public static class ServiceCollectionExtensions
             .AddReverseProxy()
             .LoadFromConfig(configuration.GetSection("ReverseProxy"))
             .AddServiceDiscoveryDestinationResolver();
-
-        return services;
-    }
-
-    public static IServiceCollection AddShared(this IServiceCollection services, IConfiguration configuration)
-    {
-        services
-            .AddUserScoping()
-            .AddRedisInfrastructure(configuration)
-            .AddUserTokenCachingService();
 
         return services;
     }

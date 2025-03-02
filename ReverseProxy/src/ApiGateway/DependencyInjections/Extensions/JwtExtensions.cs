@@ -1,5 +1,5 @@
 ﻿using ApiGateway.Attributes;
-using ApiGateway.DependencyInjections.Options;
+using EShop.Shared.Scoping.DependencyInjections.Options;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;

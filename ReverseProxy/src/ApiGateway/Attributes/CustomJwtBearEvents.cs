@@ -2,8 +2,6 @@
 using EShop.Shared.Scoping.ResourceAccessControl;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserTokenProvider;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
 
 namespace ApiGateway.Attributes;
 
@@ -19,7 +17,8 @@ public class CustomJwtBearEvents : JwtBearerEvents
     }
 
     /// <summary>
-    /// Purpose validate request's token with authentication info cached in Redis. Check token is used or not.
+    /// Validates the request's token against the cached token in Redis to ensure it is still valid and has not been revoked.
+    /// If the token is not found in the cache or does not match the cached token, the request is marked as failed and a header indicating token revocation is added to the response.
     /// </summary>
     /// <param name="context"></param>
     /// <returns></returns>
@@ -27,12 +26,14 @@ public class CustomJwtBearEvents : JwtBearerEvents
     {
         var userId = _userDetailsProvider.AuthenticatedUser.Id;
         var requestToken = _userDetailsProvider.GetRawAccessToken();
+
         requestToken = JwtEncodedStringHelper.GetJwtEncodedString(requestToken);
 
-        _cacheService.TryGetToken(userId, out var authenticatedCaching);
+        var tokenCached = await _cacheService.TryGetTokenAsync(userId);
 
-        if (authenticatedCaching == null ||
-            authenticatedCaching?.AccessToken != requestToken)
+        if (tokenCached is null ||
+            tokenCached.AccessToken is null ||
+            tokenCached.AccessToken != requestToken)
         {
             context.HttpContext.Response.Headers.TryAdd("IS-TOKEN-REVOKED", "true");
             context.Fail("Authentication fail. Token has been revoked!");

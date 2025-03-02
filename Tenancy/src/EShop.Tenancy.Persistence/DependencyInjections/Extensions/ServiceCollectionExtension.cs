@@ -3,7 +3,7 @@ using EShop.Tenancy.Domain.Aggregates;
 using EShop.Tenancy.Persistence.Repositories;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace EShop.Tenancy.Persistence.DependencyInjections;
+namespace EShop.Tenancy.Persistence.DependencyInjections.Extensions;
 
 public static class ServiceCollectionExtension
 {

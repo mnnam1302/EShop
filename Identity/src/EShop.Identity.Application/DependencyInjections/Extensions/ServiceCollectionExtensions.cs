@@ -7,7 +7,7 @@ namespace EShop.Identity.Application.DependencyInjections.Extensions;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddServicesApplicationLayer(this IServiceCollection services)
+    public static IServiceCollection AddIdentityApplication(this IServiceCollection services)
     {
         services.AddMediatR();
         services.AddAutoMapperService();

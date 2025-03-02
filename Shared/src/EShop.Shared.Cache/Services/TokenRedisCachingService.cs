@@ -1,52 +1,47 @@
 ﻿using EShop.Shared.Cache.CacheKeys;
-using EShop.Shared.Cache.Providers;
 using EShop.Shared.Contracts.Services.Identity.Auth;
+using EShop.Shared.DomainTools.DomainExceptions;
+using EShop.Shared.Scoping.ResourceAccessControl.Providers;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserTokenProvider;
-using Microsoft.Extensions.Logging;
-using StackExchange.Redis;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace EShop.Shared.Cache.Services;
 
 public class TokenRedisCachingService : ITokenCachingService
 {
-    private readonly IRedisCachingProvider<Response.AuthenticatedResponse> _redisCachingProvider;
-    private readonly ILogger<TokenRedisCachingService> _logger;
+    private readonly IRedisCachingAsyncService<Response.AuthenticatedResponse> _redisCachingService;
+    private readonly CachedRemoteConfiguration _cachedRemoteConfiguration;
 
     public TokenRedisCachingService(
-        IRedisCachingProvider<Response.AuthenticatedResponse> redisCachingProvider,
-        ILogger<TokenRedisCachingService> logger)
+        IRedisCachingAsyncService<Response.AuthenticatedResponse> redisCachingService,
+        CachedRemoteConfiguration cachedRemoteConfiguration)
     {
-        _redisCachingProvider = redisCachingProvider;
-        _logger = logger;
+        _redisCachingService = redisCachingService;
+        _cachedRemoteConfiguration = cachedRemoteConfiguration;
     }
 
-    public void AddToken(string userId, Response.AuthenticatedResponse token)
+    public async Task<Response.AuthenticatedResponse?> TryGetTokenAsync(string userId)
     {
-        _redisCachingProvider.AddValue(UserTokenCacheKeyProvider.GetCacheKey(userId), token);
+        var cachedToken = await _redisCachingService.GetAsync(UserTokenCacheKeyProvider.GetCacheKey(userId));
+
+        if (cachedToken is null)
+        {
+            throw new BadRequestException($"Invalid cached token for user '{userId}'");
+        }
+
+        return cachedToken;
     }
 
-    public void RemoveCache(string userId)
+    public async Task AddTokenAsync(string userId, Response.AuthenticatedResponse token)
     {
-        _redisCachingProvider.ClearCache(UserTokenCacheKeyProvider.GetCacheKey(userId));
+        await _redisCachingService.AddAsync(
+            UserTokenCacheKeyProvider.GetCacheKey(userId),
+            token,
+            new DistributedCacheEntryOptions { SlidingExpiration = _cachedRemoteConfiguration.GetSlidingTokenExpiration() });
     }
 
-    public bool TryGetToken(string userId, out Response.AuthenticatedResponse token)
+    public async Task RemoveCacheAsync(string userId)
     {
-        token = new Response.AuthenticatedResponse();
-        try
-        {
-            var cachedToken = _redisCachingProvider.GetValue(UserTokenCacheKeyProvider.GetCacheKey(userId));
-            token = cachedToken ?? token;
-            return token != null && cachedToken?.UserId != "";
-        }
-        catch (RedisConnectionException ex)
-        {
-            _logger.LogWarning(ex, "Redis connection exception '{FailureType}' while retrieving cached permission for user '{userId}'", ex.FailureType, userId);
-        }
-        catch (Exception e)
-        {
-            _logger.LogError(e, "Exception while retrieving cached permission for user '{userId}'", userId);
-        }
-        return false;
+        await _redisCachingService.ClearAsync(UserTokenCacheKeyProvider.GetCacheKey(userId));
     }
 }
