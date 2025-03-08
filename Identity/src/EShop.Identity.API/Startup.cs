@@ -1,6 +1,8 @@
 ﻿using EShop.Identity.API.DependencyInjections.Extensions;
 using EShop.Shared.JsonApi.Middlewares;
 using EShop.Shared.Scoping.DependencyInjections.Extensions;
+using HealthChecks.UI.Client;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 
 namespace EShop.Identity.API;
 
@@ -35,6 +37,11 @@ public class Startup
         }
 
         app.UseRouting();
+        app.MapHealthChecks("/_health",
+            new HealthCheckOptions
+            {
+                ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+            });
         app.UseAuthentication();
         app.UseAuthorization();
         app.MapControllers();

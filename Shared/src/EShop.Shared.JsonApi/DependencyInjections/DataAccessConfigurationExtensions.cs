@@ -10,6 +10,19 @@ namespace EShop.Shared.JsonApi.DependencyInjections;
 
 public static class DataAccessConfigurationExtensions
 {
+    public static IServiceCollection AddPostgreSqlHealthCheck(this IServiceCollection services, IConfiguration configuration)
+    {
+        services
+            .AddHealthChecks()
+            .AddNpgSql(
+                connectionString: configuration.GetConnectionString("DefaultConnection"),
+                name: "postgresql",
+                failureStatus: Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus.Degraded,
+                tags: new[] { "db", "postgresql", "sql" });
+
+        return services;
+    }
+
     /// <summary>
     /// Registers the specified <see cref="TContext"/> type with standard configuration. Also registers necessary
     /// services for tenant isolation and optional ring-fenced scoping.
