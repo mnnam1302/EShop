@@ -1,5 +1,4 @@
 ﻿using EShop.Identity.API.DependencyInjections.Extensions;
-using EShop.Identity.API.Middlewares;
 using EShop.Identity.Application.DependencyInjections.Extensions;
 using EShop.Identity.Infrastructure.DependencyInjections.Extensions;
 using EShop.Identity.Persistence;
@@ -8,6 +7,7 @@ using EShop.Shared.Cache.DependencyInejctions.Extensions;
 using EShop.Shared.Cache.Providers;
 using EShop.Shared.Cache.Services;
 using EShop.Shared.Contracts.Services.Identity.Auth;
+using EShop.Shared.JsonApi.Middlewares;
 using EShop.Shared.Scoping.ResourceAccessControl;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserPermissionProvider;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserTokenProvider;
@@ -27,12 +27,12 @@ internal static class ServiceCollectionExtensions
         IWebHostEnvironment environment)
     {
         services
-            .AddCors()
             .AddTestServicesApiLayer()
             .AddIdentityApplication()
             .AddIdentityPersistence()
-            .AddIdentityInfrastructure()
-            .AddTestUserPermissions(); // because user permissions related cache and user services, thus it's putted
+            .AddIdentityInfrastructure(configuration);
+            
+        services.AddTestUserPermissions();
 
         return services;
     }
@@ -47,6 +47,7 @@ internal static class ServiceCollectionExtensions
 
     private static IServiceCollection AddTestServicesApiLayer(this IServiceCollection services)
     {
+        services.AddCors();
         services.AddTransient<ExceptionHandlingMiddleware>();
 
         services.AddControllers()

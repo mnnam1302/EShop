@@ -30,13 +30,13 @@ public static class ServiceCollectionExtensions
 
     public static IServiceCollection AddBoostrapping(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment)
     {
-        services.AddUserPermissionForOwnerService();
-
         services
             .AddIdentityApi()
             .AddIdentityApplication()
             .AddIdentityPersistence()
-            .AddIdentityInfrastructure();
+            .AddIdentityInfrastructure(configuration);
+
+        services.AddUserPermissionForOwnerService();
 
         return services;
     }

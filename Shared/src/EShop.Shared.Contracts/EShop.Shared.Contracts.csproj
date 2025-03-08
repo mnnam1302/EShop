@@ -14,8 +14,4 @@
   	<PackageReference Include="Newtonsoft.Json" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Services\Tenancy\Features\" />
-  </ItemGroup>
-
 </Project>
