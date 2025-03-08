@@ -10,17 +10,6 @@ public interface IEvent : IMessage
 }
 
 [ExcludeFromTopology]
-public interface IIntegrationEvent : IEvent
-{
-    string TenantId { get; }
-    string ActionUserId { get; }
-    string ActionUserType { get; }
-}
-
-[ExcludeFromTopology]
-public interface IDelayedEvent : IEvent { }
-
-[ExcludeFromTopology]
 public interface IVersionedEvent : IEvent
 {
     //long Version { get; }
@@ -28,3 +17,11 @@ public interface IVersionedEvent : IEvent
 
 [ExcludeFromTopology]
 public interface IDomainEvent : IVersionedEvent { }
+
+[ExcludeFromTopology]
+public interface IIntegrationEvent : IEvent
+{
+    string TenantId { get; }
+    string ActionUserId { get; }
+    string ActionUserType { get; }
+}

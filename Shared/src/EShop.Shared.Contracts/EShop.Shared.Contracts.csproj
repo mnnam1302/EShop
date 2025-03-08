@@ -11,6 +11,7 @@
   	<PackageReference Include="MassTransit" />
   	<PackageReference Include="MediatR" />
   	<PackageReference Include="Microsoft.EntityFrameworkCore" />
+  	<PackageReference Include="MongoDB.Bson" />
   	<PackageReference Include="Newtonsoft.Json" />
   </ItemGroup>
 

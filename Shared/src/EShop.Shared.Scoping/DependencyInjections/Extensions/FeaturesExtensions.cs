@@ -24,7 +24,7 @@ public static class FeatureSExtensions
 
                 foreach (var instance in instances)
                 {
-                    logger.LogInformation("Running feature registration for {Service}", instance.GetType().Name);
+                    logger.LogInformation("Running feature registration for {service}", instance.GetType().Name);
                     AsyncContext.Run(instance.RegisterFeatures);
                 }
             }

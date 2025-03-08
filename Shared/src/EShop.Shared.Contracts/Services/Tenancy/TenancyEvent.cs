@@ -1,7 +1,7 @@
 ﻿using EShop.Shared.Contracts.Abstractions.MessageBus;
+using MassTransit;
 
 namespace EShop.Shared.Contracts.Services.Tenancy;
 
-public interface TenancyEvent : IIntegrationEvent
-{
-}
+[ExcludeFromTopology]
+public interface TenancyEvent : IIntegrationEvent { }
