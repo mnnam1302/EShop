@@ -294,9 +294,7 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
             var client = GetAuthorizedClient(user);
             var requestBody = new StringContent(System.Text.Json.JsonSerializer.Serialize(request), Encoding.UTF8, "application/json");
 
-            _logger.LogInformation( "Sending REQUEST as '{username}': POST {relativeUri} {jsonBody}",
-                    user?.Username ?? _defaultUser?.Username,
-                    relativeUri);
+            _logger.LogInformation("Sending REQUEST as '{username}': POST {relativeUri} {jsonBody}", user?.Username ?? _defaultUser?.Username, relativeUri, requestBody);
 
             using var response = await client.PostAsync(relativeUri, requestBody);
 
@@ -324,10 +322,7 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
             var client = GetAuthorizedClient(user);
             var requestBody = new StringContent(System.Text.Json.JsonSerializer.Serialize(request), Encoding.UTF8, "application/json");
 
-            _logger.LogInformation(
-                    "Sending REQUEST as '{username}': POST {relativeUri} {jsonBody}",
-                    user?.Username ?? _defaultUser?.Username,
-                    relativeUri);
+            _logger.LogInformation("Sending REQUEST as '{username}': POST {relativeUri} {jsonBody}", user?.Username ?? _defaultUser?.Username, relativeUri, requestBody);
 
             using var response = await client.PostAsync(relativeUri, requestBody);
 
@@ -355,10 +350,7 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
             var client = GetAuthorizedClient(user);
             var requestBody = new StringContent(System.Text.Json.JsonSerializer.Serialize(request), Encoding.UTF8, "application/json");
 
-            _logger.LogInformation(
-                    "Sending REQUEST as '{username}': PUT {relativeUri} {jsonBody}",
-                    user?.Username ?? _defaultUser?.Username,
-                    relativeUri);
+            _logger.LogInformation("Sending REQUEST as '{username}': PUT {relativeUri} {jsonBody}", user?.Username ?? _defaultUser?.Username, relativeUri, requestBody);
 
             using var response = await client.PutAsync(relativeUri, requestBody);
 
@@ -386,10 +378,7 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
             var client = GetAuthorizedClient(user);
             var requestBody = new StringContent(System.Text.Json.JsonSerializer.Serialize(request), Encoding.UTF8, "application/json");
 
-            _logger.LogInformation(
-                    "Sending REQUEST as '{username}': PUT {relativeUri} {jsonBody}",
-                    user?.Username ?? _defaultUser?.Username,
-                    relativeUri);
+            _logger.LogInformation("Sending REQUEST as '{username}': PUT {relativeUri} {jsonBody}", user?.Username ?? _defaultUser?.Username, relativeUri, requestBody);
 
             using var response = await client.PutAsync(relativeUri, requestBody);
 
@@ -417,10 +406,7 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
             var client = GetAuthorizedClient(user);
             var requestBody = new StringContent(System.Text.Json.JsonSerializer.Serialize(request), Encoding.UTF8, "application/json");
 
-            _logger.LogInformation(
-                    "Sending REQUEST as '{username}': PATCH {relativeUri} {jsonBody}",
-                    user?.Username ?? _defaultUser?.Username,
-                    relativeUri);
+            _logger.LogInformation("Sending REQUEST as '{username}': PATCH {relativeUri} {jsonBody}", user?.Username ?? _defaultUser?.Username, relativeUri, requestBody);
 
             using var response = await client.PatchAsync(relativeUri, requestBody);
 
@@ -448,10 +434,7 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
             var client = GetAuthorizedClient(user);
             var requestBody = new StringContent(System.Text.Json.JsonSerializer.Serialize(request), Encoding.UTF8, "application/json");
 
-            _logger.LogInformation(
-                    "Sending REQUEST as '{username}': PATCH {relativeUri} {jsonBody}",
-                    user?.Username ?? _defaultUser?.Username,
-                    relativeUri);
+            _logger.LogInformation("Sending REQUEST as '{username}': PATCH {relativeUri} {jsonBody}", user?.Username ?? _defaultUser?.Username, relativeUri, requestBody);
 
             using var response = await client.PatchAsync(relativeUri, requestBody);
 
@@ -474,10 +457,7 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
 
             var client = GetAuthorizedClient(user);
 
-            _logger.LogInformation(
-                    "Sending REQUEST as '{username}': PUT {relativeUri} {jsonBody}",
-                    user?.Username ?? _defaultUser?.Username,
-                    relativeUri);
+            _logger.LogInformation("Sending REQUEST as '{username}': DELETE {relativeUri}", user?.Username ?? _defaultUser?.Username, relativeUri);
 
             using var response = await client.DeleteAsync(relativeUri);
 
@@ -485,7 +465,7 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "Error during PUT request to {relativeUri}", relativeUri);
+            _logger.LogWarning(ex, "Error during DELETE request to {relativeUri}", relativeUri);
             this.LastApiError = ex;
             throw;
         }

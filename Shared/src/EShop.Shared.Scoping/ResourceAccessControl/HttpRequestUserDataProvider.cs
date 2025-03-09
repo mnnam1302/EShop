@@ -111,11 +111,6 @@ public class HttpRequestUserDataProvider : IUserDetailsProvider
         this.tenantLogContext?.Dispose();
     }
 
-    public string GetRawAccessToken()
-    {
-        return _httpContextAccessor.HttpContext?.Request.Headers["Authorization"].FirstOrDefault() ?? string.Empty;
-    }
-
     public bool IsCurrentUser(string userId)
     {
         return string.Equals(userId, this.currentUser.Value.Id, StringComparison.OrdinalIgnoreCase);
@@ -273,4 +268,10 @@ public class HttpRequestUserDataProvider : IUserDetailsProvider
 
         return token;
     }
+
+    public string GetRawAccessToken()
+    {
+        return _httpContextAccessor.HttpContext?.Request.Headers["Authorization"].FirstOrDefault() ?? string.Empty;
+    }
+
 }
