@@ -56,6 +56,7 @@
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageVersion Include="Nito.AsyncEx" Version="5.1.2" />
     <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.10" />
+    <PackageVersion Include="Polly" Version="8.5.2" />
     <PackageVersion Include="Reqnroll.Tools.MsBuild.Generation" Version="2.2.1" />
     <PackageVersion Include="Reqnroll.xUnit" Version="2.2.1" />
     <PackageVersion Include="Serilog" Version="4.2.0" />

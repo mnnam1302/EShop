@@ -7,12 +7,20 @@ namespace EShop.Tenancy.Domain.Entities;
 
 public class TenantFeature : EntityBase<string>, IScoped
 {
+    internal TenantFeature(string tenantId, string featureId, string state, string? scope)
+    {
+        TenantId = tenantId;
+        FeatureId = featureId;
+        State = state;
+        Scope = scope;
+    }
+
     [MaxLength(ModelConstants.ShortText)]
-    public string TenantId { get; set; }
+    public string TenantId { get; set; } = string.Empty;
     public virtual Tenant Tenant { get; set; }
 
     [MaxLength(ModelConstants.ShortText)]
-    public string FeatureId { get; set; }
+    public string FeatureId { get; set; } = string.Empty;
 
     public virtual Feature Feature { get; set; }
 

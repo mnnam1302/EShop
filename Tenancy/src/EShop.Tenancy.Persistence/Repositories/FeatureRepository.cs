@@ -4,9 +4,9 @@ using EShop.Tenancy.Domain.Repositories;
 
 namespace EShop.Tenancy.Persistence.Repositories;
 
-internal class TenantRepository : AggregateRepository<TenancyDbContext, Tenant, string>, ITenantRepository
+internal class FeatureRepository : RepositoryBaseDbContext<TenancyDbContext, Feature, string>, IFeatureRepository
 {
-    public TenantRepository(TenancyDbContext context) : base(context)
+    public FeatureRepository(TenancyDbContext dbContext) : base(dbContext)
     {
     }
 }

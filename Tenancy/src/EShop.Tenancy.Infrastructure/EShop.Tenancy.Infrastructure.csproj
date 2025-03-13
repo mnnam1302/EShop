@@ -6,4 +6,13 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Folder Include="DependencyInjections\Extensions\" />
+    <Folder Include="DependencyInjections\Options\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\EShop.Tenancy.Application\EShop.Tenancy.Application.csproj" />
+  </ItemGroup>
+
 </Project>

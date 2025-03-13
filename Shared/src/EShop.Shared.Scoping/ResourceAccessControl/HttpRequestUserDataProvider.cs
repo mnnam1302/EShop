@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using EShop.Shared.Scoping.Exceptions;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.JsonWebTokens;
 
@@ -120,7 +121,7 @@ public class HttpRequestUserDataProvider : IUserDetailsProvider
     {
         if (!TryReadUserDataFromRequest(out var user))
         {
-            throw new InvalidRequestException((int)System.Net.HttpStatusCode.Unauthorized, "Invalid request");
+            throw new UnauthorizedException("Invalid request");
         }
 
         return user!;

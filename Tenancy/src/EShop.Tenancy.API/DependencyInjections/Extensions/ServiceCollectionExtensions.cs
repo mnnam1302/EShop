@@ -1,4 +1,5 @@
-﻿using EShop.Shared.JsonApi.DependencyInjections;
+﻿using EShop.Shared.DomainTools.DependencyInjections;
+using EShop.Shared.JsonApi.DependencyInjections;
 using EShop.Shared.JsonApi.Middlewares;
 using EShop.Tenancy.Application.DependencyInjections.Extensions;
 using EShop.Tenancy.Persistence;
@@ -15,15 +16,14 @@ namespace EShop.Tenancy.API.DependencyInjections.Extensions
             services
                 .AddDbContextWithScoping<TenancyDbContext>(configuration);
 
+            services.AddResiliencePolicy();
+
             return services;
         }
 
         public static IServiceCollection AddBoostrapping(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment)
         {
             services.AddUserPermissionsProvider(configuration);
-
-            //services.AddAuthentication();
-            //services.AddAuthorization();
 
             services.AddTenancyPresentation(); // Must before API project, because contain DI Carter
             services.AddTenancyAPI();

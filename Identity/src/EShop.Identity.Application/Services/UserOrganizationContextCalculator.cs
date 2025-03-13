@@ -1,7 +1,8 @@
-﻿using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserOrganizationContextProvider;
-using EShop.Shared.Scoping;
-using EShop.Identity.Domain.Abstractions.Repositories;
+﻿using EShop.Identity.Domain.Abstractions.Repositories;
 using EShop.Identity.Domain.Entities;
+using EShop.Shared.Scoping;
+using EShop.Shared.Scoping.Exceptions;
+using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserOrganizationContextProvider;
 using MassTransit.Initializers;
 using Microsoft.EntityFrameworkCore;
 
@@ -33,7 +34,7 @@ public class UserOrganizationContextCalculator : IUserOrganizationContextCalcula
     public async Task<UserOrganizationContext> GetUserOrganizationContextAsync()
     {
         var authenticatedUser = _userDetailsProvider.AuthenticatedUser;
-        
+
         var userOrganizationContext = await CalculateUserOrganizationContextInternal(
             authenticatedUser.Id,
             authenticatedUser.UserType,
@@ -94,5 +95,4 @@ public class UserOrganizationContextCalculator : IUserOrganizationContextCalcula
     {
         throw new NotImplementedException();
     }
-
 }

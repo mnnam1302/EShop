@@ -1,7 +1,7 @@
 ﻿using EShop.Shared.Cache.CacheKeys;
 using EShop.Shared.Cache.Providers;
 using EShop.Shared.Contracts.Services.Identity.Auth;
-using EShop.Shared.DomainTools.DomainExceptions;
+using EShop.Shared.Scoping.Exceptions;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserTokenProvider;
 using Microsoft.Extensions.Caching.Distributed;

@@ -1,6 +1,8 @@
-﻿namespace EShop.Shared.Contracts.Services.Tenancy.Features;
+﻿using EShop.Shared.Contracts.Abstractions.Requests;
 
-public interface SupportedFeaturesUpdated : TenancyEvent
+namespace EShop.Shared.Contracts.Services.Tenancy.Features;
+
+public interface SupportedFeaturesUpdated : TenancyEvent, ICommand
 {
     public string SourceSystemReference { get; }
     public Feature[] Features { get; }
