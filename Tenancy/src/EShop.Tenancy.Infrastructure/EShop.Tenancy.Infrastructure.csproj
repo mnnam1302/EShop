@@ -7,8 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="DependencyInjections\Extensions\" />
-    <Folder Include="DependencyInjections\Options\" />
+    <PackageReference Include="MassTransit.Newtonsoft" />
+    <PackageReference Include="MassTransit.RabbitMQ" />
   </ItemGroup>
 
   <ItemGroup>

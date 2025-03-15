@@ -2,6 +2,7 @@
 using EShop.Shared.JsonApi.DependencyInjections;
 using EShop.Shared.JsonApi.Middlewares;
 using EShop.Tenancy.Application.DependencyInjections.Extensions;
+using EShop.Tenancy.Infrastructure.DependencyInjections.Extensions;
 using EShop.Tenancy.Persistence;
 using EShop.Tenancy.Persistence.DependencyInjections.Extensions;
 using EShop.Tenancy.Presentation.DependencyInjections.Extensions;
@@ -28,6 +29,7 @@ namespace EShop.Tenancy.API.DependencyInjections.Extensions
             services.AddTenancyPresentation(); // Must before API project, because contain DI Carter
             services.AddTenancyAPI();
             services.AddTenancyPersistence();
+            services.AddTenancyInfrastructure(configuration);
             services.AddTenancyApplication();
 
             return services;

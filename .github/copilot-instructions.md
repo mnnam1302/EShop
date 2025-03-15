@@ -1,0 +1,7 @@
+This monorepo contains .NET code for several microservices part of a SaaS multi-tenant ecommerce platform.
+
+Each top-level folder represents a single service with a standard code structure. The "src" folder contains ASPNET RESTful API using controller or minimal API. Changes are handled slightly outside of standard REST with a dedicated POST endpoint which passes the operation details to the domain, or into a command query responsibility separation pattern called EventFlow for complex domains. Usual call chain continues from the Controller, Command published on the Command Bus, executed by a dedicated Command Handler (by convention Command and its Handler are in the same file), which in turn triggers operations on an aggregate with corresponding write mode and read model updates. After successful command execution, domain events are added to event stream and Domain Event Subscribers are invoked. These will often publish an Integration Message onto a cross-service Event Bus which utilizes MassTransit.
+
+We use Gherkin formatted BDD scenarios for testing, in addition to some low level unit tests with xUnit.
+
+Make sure to try to find existing files and classes to extend in this mature codebase, instead of adding a duplicate item. Try to follow established code style from those existing classes. Clean Code rules should be followed when part of the logic can be extracted into a smaller method or a new class. Good variable and method names are preferred over comments.

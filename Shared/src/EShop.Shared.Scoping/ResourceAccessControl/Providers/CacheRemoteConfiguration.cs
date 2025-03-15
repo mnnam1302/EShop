@@ -2,44 +2,42 @@
 using Microsoft.Extensions.Configuration;
 using System.Globalization;
 
-namespace EShop.Shared.Scoping.ResourceAccessControl.Providers
+namespace EShop.Shared.Scoping.ResourceAccessControl.Providers;
+
+public class CachedRemoteConfiguration
 {
-    public class CachedRemoteConfiguration
+    private readonly IConfiguration _configuration;
+
+    public CachedRemoteConfiguration(IConfiguration configuration)
     {
-        private readonly IConfiguration _configuration;
+        _configuration = configuration;
+    }
 
-        public CachedRemoteConfiguration(IConfiguration configuration)
+    public TimeSpan GetSlidingExpiration()
+    {
+        // Default cache set to generous 12 hours because we invalidate cache when user permissions change
+        var slidingExpirationSetting = _configuration.GetSection("CachingService")?.GetValue<string>("SlidingExpiration", "12:00");
+        if (!TimeSpan.TryParse(slidingExpirationSetting, CultureInfo.InvariantCulture, out TimeSpan slidingExpiration))
         {
-            _configuration = configuration;
+            throw new InvalidOperationException($"Cannot use 'SlidingExpiration' setting with value '{slidingExpirationSetting}'.");
         }
 
-        public TimeSpan GetSlidingExpiration()
-        {
-            // Default cache set to generous 12 hours because we invalidate cache when user permissions change
-            var slidingExpirationSetting = _configuration.GetSection("CachingService")?.GetValue<string>("SlidingExpiration", "12:00");
-            if (!TimeSpan.TryParse(slidingExpirationSetting, CultureInfo.InvariantCulture, out TimeSpan slidingExpiration))
-            {
-                throw new InvalidOperationException($"Cannot use 'SlidingExpiration' setting with value '{slidingExpirationSetting}'.");
-            }
+        return slidingExpiration;
+    }
 
-            return slidingExpiration;
+    public TimeSpan GetSlidingTokenExpiration()
+    {
+        // Cache set to generous 01 hour because we invalidated cahce when user token change
+        var jwtOptions = new JwtOptions();
+        _configuration.GetSection(nameof(JwtOptions)).Bind(jwtOptions);
+
+        var slidingTokenExpirationSetting = jwtOptions.AccessTokenExpiryHours.ToString();
+
+        if (!TimeSpan.TryParse(slidingTokenExpirationSetting, CultureInfo.InvariantCulture, out TimeSpan slidingExpiration))
+        {
+            throw new InvalidOperationException($"Cannot use 'SlidingTokenExpiration' setting with value '{slidingTokenExpirationSetting}'.");
         }
 
-        public TimeSpan GetSlidingTokenExpiration()
-        {
-
-            // Cache set to generous 01 hour because we invalidated cahce when user token change
-            var jwtOptions = new JwtOptions();
-            _configuration.GetSection(nameof(JwtOptions)).Bind(jwtOptions);
-
-            var slidingTokenExpirationSetting = jwtOptions.AccessTokenExpiryHours.ToString();
-
-            if (!TimeSpan.TryParse(slidingTokenExpirationSetting, CultureInfo.InvariantCulture, out TimeSpan slidingExpiration))
-            {
-                throw new InvalidOperationException($"Cannot use 'SlidingTokenExpiration' setting with value '{slidingTokenExpirationSetting}'.");
-            }
-
-            return slidingExpiration;
-        }
+        return slidingExpiration;
     }
 }

@@ -4,7 +4,7 @@ using EShop.Identity.Domain.Entities;
 using EShop.Shared.Contracts.Abstractions.Requests;
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.Contracts.Services.Identity.Organizations;
-using EShop.Shared.DomainTools.DomainExceptions;
+using EShop.Shared.Scoping.Exceptions;
 
 namespace EShop.Identity.Application.UseCases.V1.Queries.Organizations;
 

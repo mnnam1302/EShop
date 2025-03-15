@@ -1,6 +1,8 @@
 ﻿using EShop.Shared.Contracts.Abstractions.Requests;
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.Contracts.Services.Tenancy.Features;
+using EShop.Shared.DomainTools;
+using EShop.Tenancy.Application.Services;
 using EShop.Tenancy.Domain;
 using EShop.Tenancy.Domain.Repositories;
 using Microsoft.Extensions.Logging;
@@ -10,17 +12,17 @@ namespace EShop.Tenancy.Application.UseCases.V1.Events;
 
 public sealed class SupportedFeaturesUpdatedConsumerHandler : ICommandHandler<SupportedFeaturesUpdated>
 {
-    private readonly IFeatureRepository _featureRepository;
-    private readonly ITenancyUnitOfWork _tenancyUnitOfWork;
+    private readonly IFeatureService _featureService;
+    private readonly IResiliencePolicyFactory _resiliencePolicyFactory;
     private ILogger _logger;
 
     public SupportedFeaturesUpdatedConsumerHandler(
-        IFeatureRepository featureRepository,
-        ITenancyUnitOfWork tenancyUnitOfWork,
+        IFeatureService featureService,
+        IResiliencePolicyFactory resiliencePolicyFactory,
         ILogger<SupportedFeaturesUpdatedConsumerHandler> logger)
     {
-        _featureRepository = featureRepository;
-        _tenancyUnitOfWork = tenancyUnitOfWork;
+        _featureService = featureService;
+        _resiliencePolicyFactory = resiliencePolicyFactory;
         _logger = logger;
     }
 
@@ -35,7 +37,33 @@ public sealed class SupportedFeaturesUpdatedConsumerHandler : ICommandHandler<Su
         {
             _logger.LogDebug("Processing feature '{action}' (ID='{id}')", request.Action, feature.Id);
 
+            var dbFeature = new Domain.Entities.Feature
+            {
+                Id = feature.Id,
+                Name = feature.Name,
+                Description = feature.Description,
+                Module = feature.Module,
+                State = feature.State,
 
+                // Adding DefaultStateForNewTenant to Feature interface
+                // will cause changes to all microservices. Assuming that DefaultStateForNewTenant
+                // should be initialized with the same value as State.
+                DefaultStateForNewTenant = feature.State
+            };
+
+            await _resiliencePolicyFactory
+                .CreateDbUpdateHandlingAsyncPolly(_logger)
+                .ExecuteAsync(async () =>
+                {
+                    if (request.Action == SupportedFeaturesAction.AddOrUpdate)
+                    {
+                        await _featureService.AddOrUpdateFeatureAsync(dbFeature, feature.State, cancellationToken);
+                    }
+                    else
+                    {
+                        await _featureService.DeleteFeatureAsync(dbFeature, cancellationToken);
+                    }
+                });
         }
 
         return Result.Success();

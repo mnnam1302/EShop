@@ -16,7 +16,6 @@ public abstract class Consumer<TMessage> : IConsumer<TMessage>
     public async Task Consume(ConsumeContext<TMessage> context)
     {
         // Handle inbox message
-
         await _sender.Send(context.Message);
     }
 }

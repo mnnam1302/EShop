@@ -1,7 +1,7 @@
 ﻿using EShop.Shared.Contracts.Services.Identity.Users;
-using EShop.Shared.DomainTools.DomainExceptions;
 using EShop.Shared.DomainTools.Entities;
 using EShop.Shared.Scoping;
+using EShop.Shared.Scoping.Exceptions;
 using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 
@@ -9,7 +9,8 @@ namespace EShop.Identity.Domain.Entities;
 
 public class User : EntityBase<string>, IDateTracking, IExcludedFromScoping
 {
-    protected User() { }
+    protected User()
+    { }
 
     public User(string userName, string password, string email, string? displayName, string? phoneNumber, DateTime? dateofBirth, string organizationId)
     {
