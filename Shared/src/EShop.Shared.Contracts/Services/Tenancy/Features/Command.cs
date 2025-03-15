@@ -4,7 +4,7 @@ namespace EShop.Shared.Contracts.Services.Tenancy.Features;
 
 public static class Command
 {
-    public record UpdateSupportFeaturesCommand : ICommand
+    public record UpdateSupportedFeaturesCommand : ICommand
     {
         public string SourceSystemReference { get; init; }
 

@@ -3,28 +3,29 @@ using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.Contracts.Services.Tenancy.Features;
 using EShop.Shared.DomainTools;
 using EShop.Tenancy.Application.Services;
+using EShop.Tenancy.Application.UseCases.V1.Events;
 using Microsoft.Extensions.Logging;
 using static EShop.Shared.Contracts.Services.Tenancy.Features.Command;
 
-namespace EShop.Tenancy.Application.UseCases.V1.Events;
+namespace EShop.Tenancy.Application.UseCases.V1.Commands.Features;
 
-public sealed class SupportedFeaturesUpdatedConsumerHandler : ICommandHandler<UpdateSupportFeaturesCommand>
+public class UpdateSupportedFeaturesCommandHandler : ICommandHandler<Command.UpdateSupportedFeaturesCommand>
 {
     private readonly IFeatureService _featureService;
     private readonly IResiliencePolicyFactory _resiliencePolicyFactory;
     private ILogger _logger;
 
-    public SupportedFeaturesUpdatedConsumerHandler(
+    public UpdateSupportedFeaturesCommandHandler(
         IFeatureService featureService,
         IResiliencePolicyFactory resiliencePolicyFactory,
-        ILogger<SupportedFeaturesUpdatedConsumerHandler> logger)
+        ILogger<UpdateSupportedFeaturesCommandHandler> logger)
     {
         _featureService = featureService;
         _resiliencePolicyFactory = resiliencePolicyFactory;
         _logger = logger;
     }
 
-    public async Task<Result> Handle(UpdateSupportFeaturesCommand request, CancellationToken cancellationToken)
+    public async Task<Result> Handle(UpdateSupportedFeaturesCommand request, CancellationToken cancellationToken)
     {
         _logger.LogDebug("{action} {count} features of source system: {sourceSystemReference}",
             request.Action,

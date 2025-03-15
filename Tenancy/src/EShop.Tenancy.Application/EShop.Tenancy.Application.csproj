@@ -7,8 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="UseCases\V1\Commands\" />
-    <Folder Include="UseCases\V1\Events\" />
     <Folder Include="UseCases\V1\Queries\" />
   </ItemGroup>
 

@@ -21,7 +21,7 @@ public class FeatureEventConsumers : IConsumer<SupportedFeaturesUpdated>
         // Hanlde idempotent
 
         // Convert context.Message to command
-        var command = _mapper.Map<Command.UpdateSupportFeaturesCommand>(context.Message);
+        var command = _mapper.Map<Command.UpdateSupportedFeaturesCommand>(context.Message);
 
         // Send command to command handler
         await _sender.Send(command);
