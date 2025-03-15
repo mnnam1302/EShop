@@ -1,9 +1,10 @@
-﻿using EShop.Tenancy.Domain.Entities;
+﻿using EShop.Shared.EventBus;
+using EShop.Tenancy.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace EShop.Tenancy.Persistence;
 
-public class TenancyDbContext : DbContext
+public class TenancyDbContext : DbContext, IInboxDbContext
 {
     public TenancyDbContext(DbContextOptions<TenancyDbContext> options) : base(options)
     {
@@ -17,4 +18,5 @@ public class TenancyDbContext : DbContext
     public DbSet<Tenant> Tenants { get; set; }
     public DbSet<Feature> Features { get; set; }
     public DbSet<TenantFeature> TenantFeatures { get; set; }
+    public DbSet<InboxMessage> InboxMessages { get; set; }
 }
