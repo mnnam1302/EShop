@@ -22,7 +22,7 @@ public class Tenant : TenantAggregate, IExcludedFromScoping
 
     public static Tenant Create(Command.CreateTenantCommand command)
     {
-        var tenant = new Tenant($"tenant-{Guid.NewGuid()}", command.Name, command.OwnerUsername, command.Email, command.PhoneNumber, command.Description);
+        var tenant = new Tenant(command.Name, command.Name, command.OwnerUsername, command.Email, command.PhoneNumber, command.Description);
 
         return tenant;
     }

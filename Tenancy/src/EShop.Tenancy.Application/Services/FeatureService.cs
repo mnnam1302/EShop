@@ -78,7 +78,8 @@ public class FeatureService : IFeatureService
 
     private async Task RegisterTenantFeature(Feature feature, string? state, CancellationToken cancellationToken)
     {
-        var tenants = await _tenantRepository.FindAll(includeProperties: t => t.TenantFeatures).ToListAsync(cancellationToken);
+        //var tenants = await _tenantRepository.FindAll(includeProperties: t => t.TenantFeatures).ToListAsync(cancellationToken);
+        var tenants = await _tenantRepository.FindAll(trackChanges: true).ToListAsync(cancellationToken);
         foreach (var tenant in tenants)
         {
             _userDetailsProvider.SetSystemUserContext(tenant.Id);
@@ -89,11 +90,11 @@ public class FeatureService : IFeatureService
                 _tenantRepository.Update(tenant);
                 await _unitOfWork.SaveChangesAsync();
 
-                await _eventBusGateway.PublishAsync<TenantFeaturesUpdated>(new
-                {
-                    TenantId = tenant.Id,
-                    ActionUserId = _userDetailsProvider.AuthenticatedUser.ActionUserId,
-                });
+                //await _eventBusGateway.PublishAsync<TenantFeaturesUpdated>(new
+                //{
+                //    TenantId = tenant.Id,
+                //    ActionUserId = _userDetailsProvider.AuthenticatedUser.ActionUserId,
+                //});
             }
             catch (Exception ex)
             {

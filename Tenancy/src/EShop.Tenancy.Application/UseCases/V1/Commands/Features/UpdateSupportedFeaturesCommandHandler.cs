@@ -3,7 +3,6 @@ using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.Contracts.Services.Tenancy.Features;
 using EShop.Shared.DomainTools;
 using EShop.Tenancy.Application.Services;
-using EShop.Tenancy.Application.UseCases.V1.Events;
 using Microsoft.Extensions.Logging;
 using static EShop.Shared.Contracts.Services.Tenancy.Features.Command;
 
