@@ -1,10 +1,11 @@
-﻿using MassTransit;
+﻿using EShop.Shared.Contracts.Abstractions.MessageBus;
+using MassTransit;
 using MediatR;
 
 namespace EShop.Tenancy.Infrastructure.Consumers;
 
 public abstract class Consumer<TMessage> : IConsumer<TMessage>
-    where TMessage : class
+    where TMessage : class, IEvent
 {
     private readonly ISender _sender;
 

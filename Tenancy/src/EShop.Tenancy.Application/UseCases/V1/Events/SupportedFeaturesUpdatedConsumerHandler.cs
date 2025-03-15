@@ -3,14 +3,12 @@ using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.Contracts.Services.Tenancy.Features;
 using EShop.Shared.DomainTools;
 using EShop.Tenancy.Application.Services;
-using EShop.Tenancy.Domain;
-using EShop.Tenancy.Domain.Repositories;
 using Microsoft.Extensions.Logging;
-using Polly;
+using static EShop.Shared.Contracts.Services.Tenancy.Features.Command;
 
 namespace EShop.Tenancy.Application.UseCases.V1.Events;
 
-public sealed class SupportedFeaturesUpdatedConsumerHandler : ICommandHandler<SupportedFeaturesUpdated>
+public sealed class SupportedFeaturesUpdatedConsumerHandler : ICommandHandler<UpdateSupportFeaturesCommand>
 {
     private readonly IFeatureService _featureService;
     private readonly IResiliencePolicyFactory _resiliencePolicyFactory;
@@ -26,7 +24,7 @@ public sealed class SupportedFeaturesUpdatedConsumerHandler : ICommandHandler<Su
         _logger = logger;
     }
 
-    public async Task<Result> Handle(SupportedFeaturesUpdated request, CancellationToken cancellationToken)
+    public async Task<Result> Handle(UpdateSupportFeaturesCommand request, CancellationToken cancellationToken)
     {
         _logger.LogDebug("{action} {count} features of source system: {sourceSystemReference}",
             request.Action,

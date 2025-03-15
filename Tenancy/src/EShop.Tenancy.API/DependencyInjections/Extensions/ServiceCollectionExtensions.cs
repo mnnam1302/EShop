@@ -28,9 +28,9 @@ namespace EShop.Tenancy.API.DependencyInjections.Extensions
 
             services.AddTenancyPresentation(); // Must before API project, because contain DI Carter
             services.AddTenancyAPI();
-            services.AddTenancyPersistence();
-            services.AddTenancyInfrastructure(configuration);
             services.AddTenancyApplication();
+            services.AddTenancyPersistence();
+            services.AddTenancyInfrastructure(configuration, environment);
 
             return services;
         }

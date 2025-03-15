@@ -55,7 +55,7 @@ public class UserFeatureRegistrationService : IFeatureRegistrationService
         });
     }
 
-    private sealed class IdentityFeature : Feature
+    private sealed class IdentityFeature : IFeature
     {
         public required string Id { get; init; }
         public required string Name { get; init; }

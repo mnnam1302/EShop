@@ -5,11 +5,11 @@ namespace EShop.Shared.Contracts.Services.Tenancy.Features;
 public interface SupportedFeaturesUpdated : TenancyEvent, ICommand
 {
     public string SourceSystemReference { get; }
-    public Feature[] Features { get; }
+    public IFeature[] Features { get; }
     public SupportedFeaturesAction Action { get; }
 }
 
-public interface Feature
+public interface IFeature
 {
     string Id { get; }
     string Name { get; }
