@@ -1,15 +1,15 @@
 ﻿using EShop.Identity.Application.Abstractions;
 using EShop.Identity.Infrastructure.Authentication;
-using EShop.Identity.Infrastructure.DependencyInjections.Options;
 using EShop.Identity.Infrastructure.HashServices;
-using EShop.Identity.Infrastructure.PipelineObservers;
 using EShop.Identity.Infrastructure.Producers;
-using EShop.Shared.Contracts.JsonConverters;
+using EShop.Shared.EventBus.DependencyInjections.Extensions;
+using EShop.Shared.EventBus.DependencyInjections.Options;
+using EShop.Shared.EventBus.JsonConverters;
+using EShop.Shared.EventBus.PipelineObservers;
 using EShop.Shared.Scoping.ResourceAccessControl;
 using MassTransit;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Newtonsoft.Json;
 
 namespace EShop.Identity.Infrastructure.DependencyInjections.Extensions;
 
@@ -83,7 +83,6 @@ public static class ServiceCollectionExtensions
 
                 bus.MessageTopology.SetEntityNameFormatter(new KebabCaseEntityNameFormatter());
                 bus.ConfigureEndpoints(context);
-
             });
         });
 

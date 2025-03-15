@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace EShop.Identity.Infrastructure.DependencyInjections.Options;
+namespace EShop.Shared.EventBus.DependencyInjections.Options;
 
-public record MessageBusOptions
+public class MessageBusOptions
 {
     public int RetryLimit { get; init; }
 

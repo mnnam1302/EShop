@@ -30,7 +30,7 @@ namespace EShop.Tenancy.API.DependencyInjections.Extensions
             services.AddTenancyAPI();
             services.AddTenancyApplication();
             services.AddTenancyPersistence();
-            services.AddTenancyInfrastructure(configuration, environment);
+            services.AddTenancyInfrastructure(configuration, environment, Program.ApplicationName);
 
             return services;
         }

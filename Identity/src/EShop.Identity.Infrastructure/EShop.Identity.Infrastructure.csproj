@@ -8,8 +8,6 @@
 
   <ItemGroup>
     <PackageReference Include="BCrypt.Net-Next" />
-    <PackageReference Include="MassTransit.Newtonsoft" />
-    <PackageReference Include="MassTransit.RabbitMQ" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
     <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" />
     <PackageReference Include="Microsoft.Extensions.Configuration" />
@@ -18,6 +16,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\Shared\src\EShop.Shared.Cache\EShop.Shared.Cache.csproj" />
+    <ProjectReference Include="..\..\..\Shared\src\EShop.Shared.EventBus\EShop.Shared.EventBus.csproj" />
     <ProjectReference Include="..\EShop.Identity.Application\EShop.Identity.Application.csproj" />
   </ItemGroup>
 

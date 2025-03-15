@@ -1,5 +1,7 @@
-﻿using EShop.Shared.DbResourceAccessControl;
+﻿using EShop.Shared.Contracts.Services.Tenancy.Tenants;
+using EShop.Shared.DbResourceAccessControl;
 using EShop.Shared.Scoping;
+using EShop.Tenancy.Domain.Entities;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -51,6 +53,7 @@ public class DbInitializer
                 _tenantIsolationStrategy.AddTenantIsolation(_tenancyDbContext);
             }
 
+            await SeedTenant();
             await _tenancyDbContext.SaveChangesAsync();
         }
         catch (Exception ex)
@@ -60,6 +63,33 @@ public class DbInitializer
         finally
         {
             _userDetailsProvider.ClearSystemUserContext();
+        }
+    }
+
+    private const string TenantName = "eshop-staging";
+    private const string OwnerUserName = "owner.staging@gmail.com";
+    private const string EmailTenant = "eshop.staging@ecommerce.market";
+
+    private async Task SeedTenant()
+    {
+        var command = new Command.CreateTenantCommand
+        {
+            Name = TenantName,
+            OwnerUsername = OwnerUserName,
+            Email = EmailTenant,
+            PhoneNumber = "+477" + new Random().Next(0, 1000000000).ToString(),
+            Description = "EShop Root Organization - Staging Enviroment"
+        };
+
+        var tenant = Tenant.Create(command);
+
+        if (await _tenancyDbContext.Tenants.AnyAsync(t => t.Id == TenantName || t.Name == TenantName))
+        {
+            _tenancyDbContext.Update(tenant);
+        }
+        else
+        {
+            _tenancyDbContext.Add(tenant);
         }
     }
 }

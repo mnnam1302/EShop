@@ -1,6 +1,6 @@
-﻿namespace EShop.Tenancy.Infrastructure.DependencyInjections.Options;
+﻿namespace EShop.Shared.EventBus.DependencyInjections.Options;
 
-public record MasstransitConfiguration
+public class MasstransitConfiguration
 {
     public string Host { get; init; }
 

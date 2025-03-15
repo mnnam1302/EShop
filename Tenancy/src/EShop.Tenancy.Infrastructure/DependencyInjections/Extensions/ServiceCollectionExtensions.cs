@@ -1,21 +1,25 @@
-﻿using EShop.Shared.Contracts.JsonConverters;
+﻿using EShop.Shared.EventBus.DependencyInjections.Extensions;
+using EShop.Shared.EventBus.DependencyInjections.Options;
+using EShop.Shared.EventBus.JsonConverters;
+using EShop.Shared.EventBus.PipelineObservers;
 using EShop.Tenancy.Application.Abstrations;
-using EShop.Tenancy.Infrastructure.DependencyInjections.Options;
-using EShop.Tenancy.Infrastructure.PipelineObservers;
 using EShop.Tenancy.Infrastructure.Producers;
 using MassTransit;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Newtonsoft.Json;
 
 namespace EShop.Tenancy.Infrastructure.DependencyInjections.Extensions;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddTenancyInfrastructure(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment)
+    public static IServiceCollection AddTenancyInfrastructure(
+        this IServiceCollection services,
+        IConfiguration configuration,
+        IWebHostEnvironment environment,
+        string serviceName)
     {
-        services.AddMasstransitRabbitMQ(configuration, environment);
+        services.AddMasstransitRabbitMQ(configuration, environment, serviceName);
         services.AddEventBusGateway();
         return services;
     }
@@ -26,7 +30,11 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    private static IServiceCollection AddMasstransitRabbitMQ(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment)
+    private static IServiceCollection AddMasstransitRabbitMQ(
+        this IServiceCollection services,
+        IConfiguration configuration,
+        IWebHostEnvironment environment,
+        string serviceName)
     {
         var massTransitConfiguration = new MasstransitConfiguration();
         configuration.GetSection(nameof(MasstransitConfiguration)).Bind(massTransitConfiguration);
@@ -57,14 +65,12 @@ public static class ServiceCollectionExtensions
                 bus.UseNewtonsoftJsonSerializer();
                 bus.ConfigureNewtonsoftJsonSerializer(settings =>
                 {
-                    //settings.Converters.Add(new TypeNameHandlingConverter(TypeNameHandling.Objects));
                     settings.Converters.Add(new DateOnlyJsonConverter());
                     settings.Converters.Add(new ExpirationDateOnlyJsonConverter());
                     return settings;
                 });
                 bus.ConfigureNewtonsoftJsonDeserializer(settings =>
                 {
-                    //settings.Converters.Add(new TypeNameHandlingConverter(TypeNameHandling.Objects));
                     settings.Converters.Add(new DateOnlyJsonConverter());
                     settings.Converters.Add(new ExpirationDateOnlyJsonConverter());
                     return settings;
@@ -77,7 +83,7 @@ public static class ServiceCollectionExtensions
 
                 bus.MessageTopology.SetEntityNameFormatter(new KebabCaseEntityNameFormatter());
 
-                bus.ConfigureRecieveEndpoints(context, environment);
+                bus.ConfigureRecieveEndpoints(context, environment, serviceName);
                 bus.ConfigureEndpoints(context);
             });
         });

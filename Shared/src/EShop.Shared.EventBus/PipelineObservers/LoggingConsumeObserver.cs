@@ -1,7 +1,7 @@
 ﻿using MassTransit;
 using Serilog;
 
-namespace EShop.Tenancy.Infrastructure.PipelineObservers;
+namespace EShop.Shared.EventBus.PipelineObservers;
 
 public class LoggingConsumeObserver : IConsumeObserver
 {
