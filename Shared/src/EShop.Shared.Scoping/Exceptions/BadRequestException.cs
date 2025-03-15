@@ -1,4 +1,4 @@
-﻿namespace EShop.Shared.DomainTools.DomainExceptions;
+﻿namespace EShop.Shared.Scoping.Exceptions;
 
 public class BadRequestException : DomainException
 {

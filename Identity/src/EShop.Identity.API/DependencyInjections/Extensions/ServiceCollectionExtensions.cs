@@ -19,10 +19,12 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddShared(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment)
     {
         services
+            .AddRedisHealthCheck(configuration)
             .AddRedisInfrastructure(configuration)
             .AddUserTokenCachingService();
 
         services
+            .AddPostgreSqlHealthCheck(configuration)
             .AddDbContextWithScoping<UsersDbContext>(configuration);
 
         return services;
@@ -30,13 +32,13 @@ public static class ServiceCollectionExtensions
 
     public static IServiceCollection AddBoostrapping(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment)
     {
-        services.AddUserPermissionForOwnerService();
-
         services
             .AddIdentityApi()
             .AddIdentityApplication()
             .AddIdentityPersistence()
-            .AddIdentityInfrastructure();
+            .AddIdentityInfrastructure(configuration);
+
+        services.AddUserPermissionForOwnerService();
 
         return services;
     }

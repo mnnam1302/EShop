@@ -11,6 +11,24 @@ namespace EShop.Shared.Cache.DependencyInejctions.Extensions;
 
 public static class ServiceCollectionExtensions
 {
+    public static IServiceCollection AddRedisHealthCheck(this IServiceCollection services, IConfiguration configuration)
+    {
+        var redisOptions = new RedisOptions();
+        configuration.GetSection(nameof(RedisOptions)).Bind(redisOptions);
+
+        if (!redisOptions.Enabled)
+            return services;
+
+        services.AddHealthChecks()
+            .AddRedis(
+                redisConnectionString: redisOptions.ConnectionString,
+                name: "redis",
+                failureStatus: Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus.Degraded,
+                tags: new[] { "cache", "redis" });
+
+        return services;
+    }
+
     public static IServiceCollection AddRedisInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
         var redisOptions = new RedisOptions();

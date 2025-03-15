@@ -1,6 +1,8 @@
-﻿using EShop.Shared.JsonApi.DependencyInjections;
+﻿using EShop.Shared.DomainTools.DependencyInjections;
+using EShop.Shared.JsonApi.DependencyInjections;
 using EShop.Shared.JsonApi.Middlewares;
 using EShop.Tenancy.Application.DependencyInjections.Extensions;
+using EShop.Tenancy.Infrastructure.DependencyInjections.Extensions;
 using EShop.Tenancy.Persistence;
 using EShop.Tenancy.Persistence.DependencyInjections.Extensions;
 using EShop.Tenancy.Presentation.DependencyInjections.Extensions;
@@ -15,6 +17,8 @@ namespace EShop.Tenancy.API.DependencyInjections.Extensions
             services
                 .AddDbContextWithScoping<TenancyDbContext>(configuration);
 
+            services.AddResiliencePolicy();
+
             return services;
         }
 
@@ -22,13 +26,11 @@ namespace EShop.Tenancy.API.DependencyInjections.Extensions
         {
             services.AddUserPermissionsProvider(configuration);
 
-            //services.AddAuthentication();
-            //services.AddAuthorization();
-
             services.AddTenancyPresentation(); // Must before API project, because contain DI Carter
             services.AddTenancyAPI();
-            services.AddTenancyPersistence();
             services.AddTenancyApplication();
+            services.AddTenancyPersistence();
+            services.AddTenancyInfrastructure(configuration, environment);
 
             return services;
         }

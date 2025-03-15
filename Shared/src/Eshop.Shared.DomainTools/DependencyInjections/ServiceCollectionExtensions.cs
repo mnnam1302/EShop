@@ -8,14 +8,6 @@ namespace EShop.Shared.DomainTools.DependencyInjections;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddDomainTools(this IServiceCollection services)
-    {
-        services
-            .AddRepositoryBase()
-            .AddUnitOfWork();
-        return services;
-    }
-
     public static IServiceCollection AddRepositoryBase(this IServiceCollection services)
     {
         services.AddScoped(typeof(IRepositoryBase<,>), typeof(RepositoryBaseDbContext<,,>));
@@ -35,6 +27,12 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddUnitOfWork(this IServiceCollection services)
     {
         services.AddScoped(typeof(IUnitOfWork), typeof(UnitOfWorkDbContext<>));
+        return services;
+    }
+
+    public static IServiceCollection AddResiliencePolicy(this IServiceCollection services)
+    {
+        services.AddSingleton<IResiliencePolicyFactory, ResiliencePolicyFactory>();
         return services;
     }
 }

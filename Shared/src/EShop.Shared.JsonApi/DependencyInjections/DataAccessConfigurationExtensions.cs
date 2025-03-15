@@ -10,6 +10,19 @@ namespace EShop.Shared.JsonApi.DependencyInjections;
 
 public static class DataAccessConfigurationExtensions
 {
+    public static IServiceCollection AddPostgreSqlHealthCheck(this IServiceCollection services, IConfiguration configuration)
+    {
+        services
+            .AddHealthChecks()
+            .AddNpgSql(
+                connectionString: configuration.GetConnectionString("DefaultConnection"),
+                name: "postgresql",
+                failureStatus: Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus.Degraded,
+                tags: new[] { "db", "postgresql", "sql" });
+
+        return services;
+    }
+
     /// <summary>
     /// Registers the specified <see cref="TContext"/> type with standard configuration. Also registers necessary
     /// services for tenant isolation and optional ring-fenced scoping.
@@ -36,7 +49,6 @@ public static class DataAccessConfigurationExtensions
             var ngsqlRetryOptions = provider.GetRequiredService<IOptionsMonitor<NgSqlRetryOptions>>();
             var ngsqlVersionOptions = provider.GetRequiredService<IOptionsMonitor<NgSqlVersionOptions>>();
             var multiTenantConnectionInterceptor = provider.GetRequiredService<IMultiTenantIsolationStrategy>();
-            var multiTenantSaveChangesInterceptor = provider.GetRequiredService<MultiTenantSaveChangesInterceptor>();
             //var auditableInterceptor = provider.GetRequiredService<AuditableInterceptor>();
 
             builder
@@ -55,8 +67,7 @@ public static class DataAccessConfigurationExtensions
                                 errorCodesToAdd: ngsqlRetryOptions.CurrentValue.ErrorNumbersoAdd))
                             .MigrationsAssembly(typeof(TContext).Assembly.GetName().Name))
                 .AddInterceptors(
-                    multiTenantConnectionInterceptor,
-                    multiTenantSaveChangesInterceptor);
+                    multiTenantConnectionInterceptor);
             //auditableInterceptor);
         })
             .AddMultiTenantScoping()

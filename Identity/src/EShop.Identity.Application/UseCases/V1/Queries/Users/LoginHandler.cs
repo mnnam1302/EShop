@@ -4,9 +4,8 @@ using EShop.Identity.Domain.Entities;
 using EShop.Shared.Contracts.Abstractions.Requests;
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.Contracts.Services.Identity.Auth;
-using EShop.Shared.DomainTools.DomainExceptions;
+using EShop.Shared.Scoping.Exceptions;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserTokenProvider;
-using Microsoft.Extensions.Caching.Distributed;
 
 namespace EShop.Identity.Application.UseCases.V1.Queries.Users;
 
@@ -37,13 +36,13 @@ public class LoginHandler : IQueryHandler<Query.Login, Response.AuthenticatedRes
         var user = await _userRepository.FindSingleAsync(x => x.Username == request.Username);
         if (user is null)
         {
-            throw new AuthorizationException("User is not found");
+            throw new UnauthorizedException("User is not found");
         }
 
         var isMatching = _passwordHasher.Verify(user.PasswordHash, request.Password);
         if (!isMatching)
         {
-            throw new AuthorizationException("Incorrect password");
+            throw new UnauthorizedException("Incorrect password");
         }
 
         var claims = user.GenerateClaims();
@@ -60,7 +59,7 @@ public class LoginHandler : IQueryHandler<Query.Login, Response.AuthenticatedRes
         };
 
         await _tokenCachingService.AddTokenAsync(
-            user.Id, 
+            user.Id,
             result);
 
         return Result.Success(result);

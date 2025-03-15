@@ -13,6 +13,7 @@
   <ItemGroup>
     <ProjectReference Include="..\EShop.Shared.Cache\EShop.Shared.Cache.csproj" />
     <ProjectReference Include="..\EShop.Shared.DbResourceAccessControl\EShop.Shared.DbResourceAccessControl.csproj" />
+    <ProjectReference Include="..\EShop.Shared.DomainTools\EShop.Shared.DomainTools.csproj" />
     <ProjectReference Include="..\EShop.Shared.Scoping\EShop.Shared.Scoping.csproj" />
   </ItemGroup>
 

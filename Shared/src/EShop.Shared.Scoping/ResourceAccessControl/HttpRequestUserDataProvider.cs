@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using EShop.Shared.Scoping.Exceptions;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.JsonWebTokens;
 
@@ -111,11 +112,6 @@ public class HttpRequestUserDataProvider : IUserDetailsProvider
         this.tenantLogContext?.Dispose();
     }
 
-    public string GetRawAccessToken()
-    {
-        return _httpContextAccessor.HttpContext?.Request.Headers["Authorization"].FirstOrDefault() ?? string.Empty;
-    }
-
     public bool IsCurrentUser(string userId)
     {
         return string.Equals(userId, this.currentUser.Value.Id, StringComparison.OrdinalIgnoreCase);
@@ -125,7 +121,7 @@ public class HttpRequestUserDataProvider : IUserDetailsProvider
     {
         if (!TryReadUserDataFromRequest(out var user))
         {
-            throw new InvalidRequestException((int)System.Net.HttpStatusCode.Unauthorized, "Invalid request");
+            throw new UnauthorizedException("Invalid request");
         }
 
         return user!;
@@ -273,4 +269,10 @@ public class HttpRequestUserDataProvider : IUserDetailsProvider
 
         return token;
     }
+
+    public string GetRawAccessToken()
+    {
+        return _httpContextAccessor.HttpContext?.Request.Headers["Authorization"].FirstOrDefault() ?? string.Empty;
+    }
+
 }

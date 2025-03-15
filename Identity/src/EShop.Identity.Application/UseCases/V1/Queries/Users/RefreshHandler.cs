@@ -2,7 +2,7 @@
 using EShop.Shared.Contracts.Abstractions.Requests;
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.Contracts.Services.Identity.Auth;
-using EShop.Shared.DomainTools.DomainExceptions;
+using EShop.Shared.Scoping.Exceptions;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserTokenProvider;
 using System.Security.Claims;
 
@@ -26,7 +26,7 @@ public class RefreshHandler : IQueryHandler<Query.Refresh, Response.Authenticate
 
         if (userId is null)
         {
-            throw new AuthorizationException("Invalid token");
+            throw new UnauthorizedException("Invalid token");
         }
 
         var authenticatedCaching = await ValidateAndRetrieveTokenAsync(userId, request);
@@ -53,12 +53,12 @@ public class RefreshHandler : IQueryHandler<Query.Refresh, Response.Authenticate
 
         if (tokenCached is null || tokenCached.AccessToken != request.AccessToken)
         {
-            throw new AuthorizationException("Invalid token");
+            throw new UnauthorizedException("Invalid token");
         }
 
         if (tokenCached?.RefreshToken != request.RefreshToken || tokenCached.RefreshTokenExpiryTime < DateTime.Now)
         {
-            throw new AuthorizationException("Invalid token");
+            throw new UnauthorizedException("Invalid token");
         }
 
         return tokenCached;

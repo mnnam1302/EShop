@@ -1,6 +1,4 @@
-﻿using EShop.Shared.DomainTools.DomainExceptions;
-
-namespace EShop.Shared.Scoping.ResourceAccessControl.Providers.UserOrganizationContextProvider;
+﻿namespace EShop.Shared.Scoping.Exceptions;
 
 public class UserOrganizationContextNotFound : NotFoundException
 {

@@ -3,8 +3,8 @@ using EShop.Identity.Domain.Entities;
 using EShop.Shared.Contracts.Abstractions.Requests;
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.Contracts.Services.Identity.Organizations;
-using EShop.Shared.DomainTools.DomainExceptions;
 using EShop.Shared.DomainTools.UnitOfWorks;
+using EShop.Shared.Scoping.Exceptions;
 
 namespace EShop.Identity.Application.UseCases.V1.Commands.Organizations;
 
@@ -14,7 +14,7 @@ public class UpdateOrganizationCommandHandler : ICommandHandler<Command.UpdateOr
     private readonly IUnitOfWork _unitOfWork;
 
     public UpdateOrganizationCommandHandler(
-        IIdentityAggregateRepository<Organization, string> organizationRepository, 
+        IIdentityAggregateRepository<Organization, string> organizationRepository,
         IUnitOfWork unitOfWork)
     {
         _organizationRepository = organizationRepository;

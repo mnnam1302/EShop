@@ -55,22 +55,6 @@ public class ArchitectureTests
         result.IsSuccessful.Should().BeTrue();
     }
 
-    //[Fact]
-    //public void Handlers_Should_HaveDependencyOnDomain()
-    //{
-    //    var application = Application.AssemblyReference.Assembly;
-
-    //    var result = Types
-    //        .InAssembly(application)
-    //        .That()
-    //        .HaveNameEndingWith("Handler")
-    //        .Should()
-    //        .HaveDependencyOn(DomainNamespace)
-    //        .GetResult();
-
-    //    result.IsSuccessful.Should().BeTrue();
-    //}
-
     [Fact]
     public void Persistence_Should_Not_HaveDependencyOnOtherProjects()
     {

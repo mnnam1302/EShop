@@ -1,12 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace EShop.Shared.Contracts.Services.Tenancy.Tenants;
 
-namespace EShop.Shared.Contracts.Services.Tenancy.Tenants
+public interface TenantFeaturesUpdated : TenancyEvent
 {
-    internal class IntegrationEvent
-    {
-    }
 }

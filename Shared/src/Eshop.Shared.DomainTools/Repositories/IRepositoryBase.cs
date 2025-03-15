@@ -38,7 +38,6 @@ public interface IRepositoryBase<TEntity, in TKey>
         bool trackChanges = false,
         params Expression<Func<TEntity, object>>[] includeProperties);
 
-
     void Add(TEntity entity);
 
     void Update(TEntity entity);

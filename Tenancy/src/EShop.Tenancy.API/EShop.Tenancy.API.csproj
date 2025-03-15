@@ -28,6 +28,7 @@
     <ProjectReference Include="..\..\..\Shared\src\EShop.Shared.JsonApi\EShop.Shared.JsonApi.csproj" />
     <ProjectReference Include="..\..\..\Shared\src\EShop.Shared.Scoping\EShop.Shared.Scoping.csproj" />
     <ProjectReference Include="..\EShop.Tenancy.Application\EShop.Tenancy.Application.csproj" />
+    <ProjectReference Include="..\EShop.Tenancy.Infrastructure\EShop.Tenancy.Infrastructure.csproj" />
     <ProjectReference Include="..\EShop.Tenancy.Persistence\EShop.Tenancy.Persistence.csproj" />
     <ProjectReference Include="..\EShop.Tenancy.Presentation\EShop.Tenancy.Presentation.csproj" />
   </ItemGroup>

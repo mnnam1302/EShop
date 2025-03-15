@@ -1,5 +1,5 @@
 ﻿using EShop.Shared.Contracts.Abstractions.Shared;
-using EShop.Shared.DomainTools.DomainExceptions;
+using EShop.Shared.Scoping.Exceptions;
 
 namespace EShop.Shared.JsonApi.Middlewares;
 

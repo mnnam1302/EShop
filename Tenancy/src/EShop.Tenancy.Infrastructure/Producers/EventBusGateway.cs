@@ -1,0 +1,21 @@
+﻿using EShop.Shared.Contracts.Abstractions.MessageBus;
+using EShop.Tenancy.Application.Abstrations;
+using MassTransit;
+
+namespace EShop.Tenancy.Infrastructure.Producers;
+
+public class EventBusGateway : IEventBusGateway
+{
+    private readonly IPublishEndpoint _publishEndpoint;
+
+    public EventBusGateway(IPublishEndpoint publishEndpoint)
+    {
+        _publishEndpoint = publishEndpoint;
+    }
+
+    public async Task PublishAsync<TEvent>(object @event, CancellationToken cancellationToken = default)
+        where TEvent : class, IIntegrationEvent
+    {
+        await _publishEndpoint.Publish<TEvent>(@event, cancellationToken);
+    }
+}

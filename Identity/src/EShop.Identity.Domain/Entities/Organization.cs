@@ -1,10 +1,9 @@
 ﻿using EShop.Shared.Contracts.Services.Identity.Organizations;
 using EShop.Shared.DomainTools.Aggregates;
-using EShop.Shared.DomainTools.DomainExceptions;
 using EShop.Shared.DomainTools.Extensions;
 using EShop.Shared.Scoping;
+using EShop.Shared.Scoping.Exceptions;
 using System.ComponentModel.DataAnnotations;
-using System.Diagnostics.CodeAnalysis;
 
 namespace EShop.Identity.Domain.Entities;
 

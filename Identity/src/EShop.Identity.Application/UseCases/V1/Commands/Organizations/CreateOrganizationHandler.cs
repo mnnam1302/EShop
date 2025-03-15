@@ -3,44 +3,43 @@ using EShop.Identity.Domain.Entities;
 using EShop.Shared.Contracts.Abstractions.Requests;
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.Contracts.Services.Identity.Organizations;
-using EShop.Shared.DomainTools.DomainExceptions;
 using EShop.Shared.DomainTools.UnitOfWorks;
+using EShop.Shared.Scoping.Exceptions;
 
-namespace EShop.Identity.Application.UseCases.V1.Commands.Organizations
+namespace EShop.Identity.Application.UseCases.V1.Commands.Organizations;
+
+public class CreateOrganizationHandler : ICommandHandler<Command.CreateOrganizationCommand>
 {
-    public class CreateOrganizationHandler : ICommandHandler<Command.CreateOrganizationCommand>
+    private readonly IIdentityAggregateRepository<Organization, string> _organizationRepository;
+    private readonly IUnitOfWork _unitOfWork;
+
+    public CreateOrganizationHandler(
+        IIdentityAggregateRepository<Organization, string> organizationRepository,
+        IUnitOfWork unitOfWork)
     {
-        private readonly IIdentityAggregateRepository<Organization, string> _organizationRepository;
-        private readonly IUnitOfWork _unitOfWork;
+        _organizationRepository = organizationRepository;
+        _unitOfWork = unitOfWork;
+    }
 
-        public CreateOrganizationHandler(
-            IIdentityAggregateRepository<Organization, string> organizationRepository,
-            IUnitOfWork unitOfWork)
+    public async Task<Result> Handle(Command.CreateOrganizationCommand request, CancellationToken cancellationToken)
+    {
+        if (request.ParentOrganizationId != null)
         {
-            _organizationRepository = organizationRepository;
-            _unitOfWork = unitOfWork;
+            var foundParentOrganization = await _organizationRepository.FindByIdAsync(request.ParentOrganizationId)
+                ?? throw new NotFoundException("Parent organization was not found");
         }
 
-        public async Task<Result> Handle(Command.CreateOrganizationCommand request, CancellationToken cancellationToken)
+        var organizationExists = await _organizationRepository.FindSingleAsync(x => x.Name == request.Name);
+        if (organizationExists != null)
         {
-            if (request.ParentOrganizationId != null)
-            {
-                var foundParentOrganization = await _organizationRepository.FindByIdAsync(request.ParentOrganizationId)
-                    ?? throw new NotFoundException("Parent organization was not found");
-            }
-
-            var organizationExists = await _organizationRepository.FindSingleAsync(x => x.Name == request.Name);
-            if (organizationExists != null)
-            {
-                throw new ConflictException("Organization already exists");
-            }
-
-            var organization = Organization.Create(request);
-
-            _organizationRepository.Add(organization);
-            await _unitOfWork.SaveChangesAsync(cancellationToken);
-
-            return Result.Success();
+            throw new ConflictException("Organization already exists");
         }
+
+        var organization = Organization.Create(request);
+
+        _organizationRepository.Add(organization);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return Result.Success();
     }
 }

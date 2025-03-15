@@ -6,11 +6,11 @@ using Reqnroll;
 namespace EShop.Identity.Tests.Organizations.Get;
 
 [Binding]
-public class StepDefinitions
+public class Steps
 {
     private readonly StepContext _stepContext;
 
-    public StepDefinitions(StepContext stepContext)
+    public Steps(StepContext stepContext)
     {
         _stepContext = stepContext;
     }

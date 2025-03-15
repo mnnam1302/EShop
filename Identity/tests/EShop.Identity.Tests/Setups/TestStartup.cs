@@ -1,5 +1,5 @@
 ﻿using EShop.Identity.API.DependencyInjections.Extensions;
-using EShop.Identity.API.Middlewares;
+using EShop.Shared.JsonApi.Middlewares;
 using EShop.Testing.JsonApiApplication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -15,10 +15,7 @@ public class TestStartup : Identity.API.Startup
 {
     private readonly PostgreSqlTestDatabase _testDatabase;
 
-    public TestStartup(
-        IConfiguration configuration,
-        IWebHostEnvironment env,
-        PostgreSqlTestDatabase testDatabase)
+    public TestStartup(IConfiguration configuration, IWebHostEnvironment env, PostgreSqlTestDatabase testDatabase)
         : base(configuration, env)
     {
         this.Environment.EnvironmentName = "Development";
@@ -33,7 +30,7 @@ public class TestStartup : Identity.API.Startup
     }
 
     public override void Configure(
-        IApplicationBuilder app,
+        WebApplication app,
         IHostApplicationLifetime applicationLifetime,
         ILoggerFactory loggerFactory)
     {
@@ -46,6 +43,6 @@ public class TestStartup : Identity.API.Startup
         }
 
         app.UseRouting();
-        app.UseEndpoints(endpoints => endpoints.MapControllers());
+        app.MapControllers();
     }
 }

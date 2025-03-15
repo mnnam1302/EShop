@@ -12,9 +12,13 @@ public interface IUserDetailsProvider
     bool IsSystemUser { get; }
 
     void SetSystemUserContext(string onBehalfOfTenantId, string? onBehalfOfUserId = null, string? onBehalfOfUserType = null);
+
     void SetSystemUserContextWithEmptyScope();
+
     void ClearSystemUserContext();
+
     bool IsCurrentUser(string userId);
+
     string GetRawAccessToken();
 }
 
@@ -54,13 +58,13 @@ public class UserData : ValueObject
     public string UserType { get; }
     public string ActionUserType { get; }
 
-    public static UserData GetSystemUser(string? tenantId) 
+    public static UserData GetSystemUser(string? tenantId)
         => new UserData(SystemUsername, SystemUsername, tenantId ?? string.Empty);
 
     public static UserData GetSystemUser(string? tenantId, string actionUserId, string? actionUserType = null)
         => new UserData(
             SystemUsername,
-            SystemUsername, 
+            SystemUsername,
             tenantId ?? string.Empty,
             false,
             actionUserId,
@@ -72,8 +76,29 @@ public class UserData : ValueObject
 
 public static class UserTypes
 {
-    public const string TenantUsers = "TenantUsers";
-    public const string SystemUsers = "SystemUsers";
-    public const string AppClientWithoutIndividualUsers = "AppClientWithoutIndividualUsers";
-    public const string AppClientWithIndividualUsers = "AppClientWithIndividualUsers";
+    public const string TenantUsers = nameof(TenantUsers);
+    public const string SystemUsers = nameof(SystemUsers);
+    public const string AppClientWithoutIndividualUsers = nameof(AppClientWithoutIndividualUsers);
+    public const string AppClientWithIndividualUsers = nameof(AppClientWithIndividualUsers);
+
+    private static readonly Dictionary<string, string> UserTypeMappings = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+    {
+        { TenantUsers, TenantUsers },
+        { SystemUsers, SystemUsers },
+        { AppClientWithoutIndividualUsers, AppClientWithoutIndividualUsers },
+        { AppClientWithIndividualUsers, AppClientWithIndividualUsers }
+    };
+
+    public static bool IsTenantUser(string userType) => IsUserType(userType, TenantUsers);
+
+    public static bool IsSystemUser(string userType) => IsUserType(userType, SystemUsers);
+
+    public static bool IsAppClientWithoutIndividualUsers(string userType) => IsUserType(userType, AppClientWithoutIndividualUsers);
+
+    public static bool IsAppClientWithIndividualUsers(string userType) => IsUserType(userType, AppClientWithIndividualUsers);
+
+    public static bool IsUserType(string userType, string targetType)
+    {
+        return UserTypeMappings.TryGetValue(targetType, out var mappedType) && userType.Equals(mappedType, StringComparison.OrdinalIgnoreCase);
+    }
 }

@@ -2,7 +2,8 @@
 $do$
 DECLARE
    userpassword varchar[];
-   users varchar[] := array[['users','users-password-dev']];
+   users varchar[] := array[['users','users-password-dev'], 
+							['tenancy','tenancy-password-dev']];
 BEGIN
    FOREACH userpassword SLICE 1 IN ARRAY users
    LOOP
@@ -25,3 +26,16 @@ GRANT ALL PRIVILEGES ON SCHEMA public TO users;
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO users;
 GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO users;
 GRANT ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA public TO users;
+
+
+CREATE DATABASE eshop_tenancy;
+
+GRANT ALL PRIVILEGES ON DATABASE eshop_tenancy TO tenancy;
+\c eshop_users
+CREATE EXTENSION IF NOT EXISTS citext;
+\c eshop_users
+GRANT ALL PRIVILEGES ON SCHEMA public TO tenancy;
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO tenancy;
+GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO tenancy;
+GRANT ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA public TO tenancy;
+

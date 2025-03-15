@@ -1,5 +1,8 @@
 ﻿using EShop.Identity.API.DependencyInjections.Extensions;
 using EShop.Shared.JsonApi.Middlewares;
+using EShop.Shared.Scoping.DependencyInjections.Extensions;
+using HealthChecks.UI.Client;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 
 namespace EShop.Identity.API;
 
@@ -21,8 +24,10 @@ public class Startup
             .AddBoostrapping(Configuration, Environment);
     }
 
-    public virtual void Configure(IApplicationBuilder app, IHostApplicationLifetime applicationLifetime, ILoggerFactory loggerFactory)
+    public virtual void Configure(WebApplication app, IHostApplicationLifetime applicationLifetime, ILoggerFactory loggerFactory)
     {
+        var logger = loggerFactory.CreateLogger<Startup>();
+
         app.UseMiddleware<ExceptionHandlingMiddleware>();
 
         if (Environment.IsDevelopment())
@@ -32,8 +37,15 @@ public class Startup
         }
 
         app.UseRouting();
+        app.MapHealthChecks("/_health",
+            new HealthCheckOptions
+            {
+                ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+            });
         app.UseAuthentication();
         app.UseAuthorization();
-        app.UseEndpoints(endpoints => endpoints.MapControllers());
+        app.MapControllers();
+
+        app.RegisterFeatures(applicationLifetime, logger);
     }
 }

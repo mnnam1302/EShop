@@ -21,9 +21,11 @@ namespace EShop.Testing.JsonApiApplication;
 public interface IApiTestContextBase
 {
     IServiceProvider ServiceProvider { get; }
+
     Exception LastApiError { get; }
 
     HttpClient GetAuthorizedClient(UserData user, string acceptHeader = "application/json");
+
     UserData GetUserByUsername(string? username = null);
 }
 
@@ -113,8 +115,8 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
 
     public HttpStatusCode LastStatusCode { get; set; }
 
-
     #region Manage User Management
+
     public void AddUser(UserData user, bool setAsDefault)
     {
         _users.Add(user.Username, user);
@@ -207,9 +209,11 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
             _testUserPermissionProvider.AddPermission(userId, permissionId);
         }
     }
-    #endregion
+
+    #endregion Manage User Management
 
     #region HTTP Client Management
+
     private HttpClient GetClientWithHeaderPropagation()
     {
         var client = _server.CreateClient();
@@ -217,12 +221,13 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
 
         // Simulate Header Propagation middleware which doesn't work on the test client
         var httpContext = _server.Services.GetService<IHttpContextAccessor>()?.HttpContext;
-        if (httpContext != null
-            && httpContext.Request.Headers.TryGetValue("Authorization", out var values)
-            && !StringValues.IsNullOrEmpty(values))
+        if (httpContext != null && 
+            httpContext.Request.Headers.TryGetValue("Authorization", out var values) &&
+            !StringValues.IsNullOrEmpty(values))
         {
-            client.DefaultRequestHeaders.TryAddWithoutValidation("Authorization", (string)values);
+            client.DefaultRequestHeaders.TryAddWithoutValidation("Authorization", values.ToString());
         }
+
         return client;
     }
 
@@ -248,9 +253,11 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
         user ??= _defaultUser;
         return SystemInternalJwtTokenFactory.AddUserContext(client, user);
     }
-    #endregion
+
+    #endregion HTTP Client Management
 
     #region Http Action Method
+
     public async Task<Result<TResponse>> GetAsync<TResponse>(string relativeUri, UserData? user = null)
     {
         try
@@ -287,10 +294,7 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
             var client = GetAuthorizedClient(user);
             var requestBody = new StringContent(System.Text.Json.JsonSerializer.Serialize(request), Encoding.UTF8, "application/json");
 
-            _logger.LogInformation(
-                    "Sending REQUEST as '{username}': POST {relativeUri} {jsonBody}",
-                    user?.Username ?? _defaultUser?.Username,
-                    relativeUri);
+            _logger.LogInformation("Sending REQUEST as '{username}': POST {relativeUri} {jsonBody}", user?.Username ?? _defaultUser?.Username, relativeUri, requestBody);
 
             using var response = await client.PostAsync(relativeUri, requestBody);
 
@@ -318,10 +322,7 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
             var client = GetAuthorizedClient(user);
             var requestBody = new StringContent(System.Text.Json.JsonSerializer.Serialize(request), Encoding.UTF8, "application/json");
 
-            _logger.LogInformation(
-                    "Sending REQUEST as '{username}': POST {relativeUri} {jsonBody}",
-                    user?.Username ?? _defaultUser?.Username,
-                    relativeUri);
+            _logger.LogInformation("Sending REQUEST as '{username}': POST {relativeUri} {jsonBody}", user?.Username ?? _defaultUser?.Username, relativeUri, requestBody);
 
             using var response = await client.PostAsync(relativeUri, requestBody);
 
@@ -349,10 +350,7 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
             var client = GetAuthorizedClient(user);
             var requestBody = new StringContent(System.Text.Json.JsonSerializer.Serialize(request), Encoding.UTF8, "application/json");
 
-            _logger.LogInformation(
-                    "Sending REQUEST as '{username}': PUT {relativeUri} {jsonBody}",
-                    user?.Username ?? _defaultUser?.Username,
-                    relativeUri);
+            _logger.LogInformation("Sending REQUEST as '{username}': PUT {relativeUri} {jsonBody}", user?.Username ?? _defaultUser?.Username, relativeUri, requestBody);
 
             using var response = await client.PutAsync(relativeUri, requestBody);
 
@@ -380,10 +378,7 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
             var client = GetAuthorizedClient(user);
             var requestBody = new StringContent(System.Text.Json.JsonSerializer.Serialize(request), Encoding.UTF8, "application/json");
 
-            _logger.LogInformation(
-                    "Sending REQUEST as '{username}': PUT {relativeUri} {jsonBody}",
-                    user?.Username ?? _defaultUser?.Username,
-                    relativeUri);
+            _logger.LogInformation("Sending REQUEST as '{username}': PUT {relativeUri} {jsonBody}", user?.Username ?? _defaultUser?.Username, relativeUri, requestBody);
 
             using var response = await client.PutAsync(relativeUri, requestBody);
 
@@ -411,10 +406,7 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
             var client = GetAuthorizedClient(user);
             var requestBody = new StringContent(System.Text.Json.JsonSerializer.Serialize(request), Encoding.UTF8, "application/json");
 
-            _logger.LogInformation(
-                    "Sending REQUEST as '{username}': PATCH {relativeUri} {jsonBody}",
-                    user?.Username ?? _defaultUser?.Username,
-                    relativeUri);
+            _logger.LogInformation("Sending REQUEST as '{username}': PATCH {relativeUri} {jsonBody}", user?.Username ?? _defaultUser?.Username, relativeUri, requestBody);
 
             using var response = await client.PatchAsync(relativeUri, requestBody);
 
@@ -442,10 +434,7 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
             var client = GetAuthorizedClient(user);
             var requestBody = new StringContent(System.Text.Json.JsonSerializer.Serialize(request), Encoding.UTF8, "application/json");
 
-            _logger.LogInformation(
-                    "Sending REQUEST as '{username}': PATCH {relativeUri} {jsonBody}",
-                    user?.Username ?? _defaultUser?.Username,
-                    relativeUri);
+            _logger.LogInformation("Sending REQUEST as '{username}': PATCH {relativeUri} {jsonBody}", user?.Username ?? _defaultUser?.Username, relativeUri, requestBody);
 
             using var response = await client.PatchAsync(relativeUri, requestBody);
 
@@ -468,10 +457,7 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
 
             var client = GetAuthorizedClient(user);
 
-            _logger.LogInformation(
-                    "Sending REQUEST as '{username}': PUT {relativeUri} {jsonBody}",
-                    user?.Username ?? _defaultUser?.Username,
-                    relativeUri);
+            _logger.LogInformation("Sending REQUEST as '{username}': DELETE {relativeUri}", user?.Username ?? _defaultUser?.Username, relativeUri);
 
             using var response = await client.DeleteAsync(relativeUri);
 
@@ -479,7 +465,7 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "Error during PUT request to {relativeUri}", relativeUri);
+            _logger.LogWarning(ex, "Error during DELETE request to {relativeUri}", relativeUri);
             this.LastApiError = ex;
             throw;
         }
@@ -499,9 +485,10 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
         return result ?? new Result<TValue>(default, false, Error.NullValue);
     }
 
-    #endregion
+    #endregion Http Action Method
 
     #region Logging
+
     private static void SetupLogging(IServiceProvider serviceProvider, LoggerConfiguration loggerConfig)
     {
         loggerConfig
@@ -527,9 +514,10 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
         return doesMatchTargetValue;
     }
 
-    #endregion
+    #endregion Logging
 
     #region Dispose
+
     public void Dispose()
     {
         Dispose(true);
@@ -554,5 +542,5 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
         _disposed = true;
     }
 
-    #endregion
+    #endregion Dispose
 }
