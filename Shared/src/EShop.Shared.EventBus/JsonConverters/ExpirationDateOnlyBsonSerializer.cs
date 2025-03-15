@@ -2,7 +2,7 @@
 using MongoDB.Bson.Serialization.Serializers;
 using System.Globalization;
 
-namespace EShop.Shared.Contracts.JsonConverters;
+namespace EShop.Shared.EventBus.JsonConverters;
 
 public class ExpirationDateOnlyBsonSerializer : SerializerBase<DateOnly>
 {

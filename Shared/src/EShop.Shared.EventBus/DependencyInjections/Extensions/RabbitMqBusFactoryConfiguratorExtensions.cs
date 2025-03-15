@@ -1,0 +1,27 @@
+﻿using EShop.Shared.Contracts.Abstractions.MessageBus;
+using MassTransit;
+
+namespace EShop.Shared.EventBus.DependencyInjections.Extensions;
+
+public static class RabbitMqBusFactoryConfiguratorExtensions
+{
+    public static void ConfigureEventReceiveEndpoint<TConsumer, TEvent>(
+        this IRabbitMqBusFactoryConfigurator bus,
+        IRegistrationContext context,
+        string environment,
+        string serviceName)
+        where TConsumer : class, IConsumer
+        where TEvent : class, IEvent
+    {
+        string santizedQueueName = $"eshop.{environment.Trim().ToLowerInvariant()}.{serviceName.Trim().ToLowerInvariant()}.{typeof(TEvent).ToKebabCaseString()}";
+
+        bus.ReceiveEndpoint(
+            queueName: santizedQueueName,
+            configureEndpoint: endpoint =>
+            {
+                endpoint.ConfigureConsumeTopology = false;
+                endpoint.Bind<TEvent>();
+                endpoint.ConfigureConsumer<TConsumer>(context);
+            });
+    }
+}

@@ -1,7 +1,7 @@
 ﻿using MassTransit;
 using Serilog;
 
-namespace EShop.Identity.Infrastructure.PipelineObservers;
+namespace EShop.Shared.EventBus.PipelineObservers;
 
 public class LoggingPublishObserver : IPublishObserver
 {

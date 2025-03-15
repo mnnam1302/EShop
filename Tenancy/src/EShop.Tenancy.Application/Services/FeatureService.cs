@@ -1,5 +1,4 @@
-﻿using EShop.Shared.Contracts.Services.Tenancy.Tenants;
-using EShop.Shared.Scoping;
+﻿using EShop.Shared.Scoping;
 using EShop.Shared.Scoping.ResourceAccessControl;
 using EShop.Tenancy.Application.Abstrations;
 using EShop.Tenancy.Domain;
@@ -78,7 +77,6 @@ public class FeatureService : IFeatureService
 
     private async Task RegisterTenantFeature(Feature feature, string? state, CancellationToken cancellationToken)
     {
-        //var tenants = await _tenantRepository.FindAll(includeProperties: t => t.TenantFeatures).ToListAsync(cancellationToken);
         var tenants = await _tenantRepository.FindAll(trackChanges: true).ToListAsync(cancellationToken);
         foreach (var tenant in tenants)
         {
@@ -86,7 +84,7 @@ public class FeatureService : IFeatureService
             try
             {
                 tenant.ConfigureFeature(feature.Id, state ?? feature.DefaultStateForNewTenant, _userDetailsProvider.AuthenticatedUser.ActionUserId);
-                
+
                 _tenantRepository.Update(tenant);
                 await _unitOfWork.SaveChangesAsync();
 

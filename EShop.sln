@@ -89,6 +89,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ApiGateway", "ReverseProxy\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EShop.Shared.HealthChecks", "Shared\src\EShop.Shared.HealthChecks\EShop.Shared.HealthChecks.csproj", "{47254B1A-F2BC-4CCE-8502-EA4B59270598}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EShop.Shared.EventBus", "Shared\src\EShop.Shared.EventBus\EShop.Shared.EventBus.csproj", "{AE4051D3-07A5-4A8B-A1F5-16D4DAE6AB64}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -191,6 +193,10 @@ Global
 		{47254B1A-F2BC-4CCE-8502-EA4B59270598}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{47254B1A-F2BC-4CCE-8502-EA4B59270598}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{47254B1A-F2BC-4CCE-8502-EA4B59270598}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AE4051D3-07A5-4A8B-A1F5-16D4DAE6AB64}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AE4051D3-07A5-4A8B-A1F5-16D4DAE6AB64}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AE4051D3-07A5-4A8B-A1F5-16D4DAE6AB64}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AE4051D3-07A5-4A8B-A1F5-16D4DAE6AB64}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -229,6 +235,7 @@ Global
 		{F5E4F8C1-EF38-4E69-A8C1-E5B9E4560CF0} = {9542A4A4-93A2-4312-A8DF-847686EFBF7E}
 		{C8E744F6-2CF3-41A2-AAA6-8649362A64DC} = {EC3BE313-F5F4-48E6-B4E7-A01F33861EED}
 		{47254B1A-F2BC-4CCE-8502-EA4B59270598} = {DF247757-C88D-4BD6-9946-FDEAC84BF886}
+		{AE4051D3-07A5-4A8B-A1F5-16D4DAE6AB64} = {DF247757-C88D-4BD6-9946-FDEAC84BF886}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {BB890EFB-EE36-4A0E-A948-F28A53D375E6}
