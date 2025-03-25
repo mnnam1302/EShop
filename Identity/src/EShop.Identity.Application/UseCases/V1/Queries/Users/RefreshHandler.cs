@@ -10,10 +10,10 @@ namespace EShop.Identity.Application.UseCases.V1.Queries.Users;
 
 public class RefreshHandler : IQueryHandler<Query.Refresh, Response.AuthenticatedResponse>
 {
-    private readonly ITokenCachingService _tokenCacheService;
+    private readonly IUserTokenCachingService _tokenCacheService;
     private readonly ITokenService _tokenService;
 
-    public RefreshHandler(ITokenCachingService cacheService, ITokenService tokenService)
+    public RefreshHandler(IUserTokenCachingService cacheService, ITokenService tokenService)
     {
         _tokenCacheService = cacheService;
         _tokenService = tokenService;

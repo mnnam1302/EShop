@@ -16,4 +16,6 @@ public static class Command
 
         public string ActionUserId { get; init; }
     }
+
+    public record UpdateTenantFeaturesCommand(string TenantId) : ICommand;
 }

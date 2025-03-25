@@ -11,10 +11,10 @@ namespace EShop.Identity.Application.UseCases.V1.Commands.Users;
 public class LogoutHandler : ICommandHandler<Command.Logout>
 {
     private readonly IIdentityRepositoryBase<User, string> _userRepository;
-    private readonly ITokenCachingService _tokenCachingService;
+    private readonly IUserTokenCachingService _tokenCachingService;
 
     public LogoutHandler(IIdentityRepositoryBase<User, string> userRepository,
-        ITokenCachingService tokenCachingService)
+        IUserTokenCachingService tokenCachingService)
     {
         _userRepository = userRepository;
         _tokenCachingService = tokenCachingService;

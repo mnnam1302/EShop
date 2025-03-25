@@ -8,7 +8,7 @@ using Microsoft.Extensions.Caching.Distributed;
 
 namespace EShop.Shared.Cache.Services;
 
-public class TokenRedisCachingService : ITokenCachingService
+public class TokenRedisCachingService : IUserTokenCachingService
 {
     private readonly IRedisCachingAsyncProvider<Response.AuthenticatedResponse> _redisCachingService;
     private readonly CachedRemoteConfiguration _cachedRemoteConfiguration;

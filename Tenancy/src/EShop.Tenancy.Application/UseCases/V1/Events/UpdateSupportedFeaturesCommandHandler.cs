@@ -6,13 +6,13 @@ using EShop.Tenancy.Application.Services;
 using Microsoft.Extensions.Logging;
 using static EShop.Shared.Contracts.Services.Tenancy.Features.Command;
 
-namespace EShop.Tenancy.Application.UseCases.V1.Commands.Features;
+namespace EShop.Tenancy.Application.UseCases.V1.Events;
 
-public class UpdateSupportedFeaturesCommandHandler : ICommandHandler<Command.UpdateSupportedFeaturesCommand>
+public class UpdateSupportedFeaturesCommandHandler : ICommandHandler<UpdateSupportedFeaturesCommand>
 {
     private readonly IFeatureService _featureService;
     private readonly IResiliencePolicyFactory _resiliencePolicyFactory;
-    private ILogger _logger;
+    private readonly ILogger _logger;
 
     public UpdateSupportedFeaturesCommandHandler(
         IFeatureService featureService,

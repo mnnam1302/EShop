@@ -61,7 +61,7 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddUserTokenCachingService(this IServiceCollection services)
     {
         services.AddTransient<IRedisCachingAsyncProvider<Response.AuthenticatedResponse>, RedisCachingAsyncProvider<Response.AuthenticatedResponse>>();
-        services.AddTransient<ITokenCachingService, TokenRedisCachingService>();
+        services.AddTransient<IUserTokenCachingService, TokenRedisCachingService>();
         return services;
     }
 }

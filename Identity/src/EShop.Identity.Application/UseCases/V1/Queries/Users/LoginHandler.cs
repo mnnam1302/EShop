@@ -17,13 +17,13 @@ public class LoginHandler : IQueryHandler<Query.Login, Response.AuthenticatedRes
     private readonly IIdentityRepositoryBase<User, string> _userRepository;
     private readonly IPasswordHasher _passwordHasher;
     private readonly ITokenService _tokenService;
-    private readonly ITokenCachingService _tokenCachingService;
+    private readonly IUserTokenCachingService _tokenCachingService;
 
     public LoginHandler(
         IIdentityRepositoryBase<User, string> userRepository,
         IPasswordHasher passwordHasher,
         ITokenService tokenService,
-        ITokenCachingService tokenCachingService)
+        IUserTokenCachingService tokenCachingService)
     {
         _userRepository = userRepository;
         _passwordHasher = passwordHasher;

@@ -1,4 +1,5 @@
-﻿using EShop.Shared.Scoping;
+﻿using EShop.Shared.Contracts.Services.Tenancy.Features;
+using EShop.Shared.Scoping;
 using EShop.Shared.Scoping.ResourceAccessControl;
 using EShop.Tenancy.Application.Abstrations;
 using EShop.Tenancy.Domain;
@@ -88,11 +89,13 @@ public class FeatureService : IFeatureService
                 _tenantRepository.Update(tenant);
                 await _unitOfWork.SaveChangesAsync();
 
-                //await _eventBusGateway.PublishAsync<TenantFeaturesUpdated>(new
-                //{
-                //    TenantId = tenant.Id,
-                //    ActionUserId = _userDetailsProvider.AuthenticatedUser.ActionUserId,
-                //});
+                await _eventBusGateway.PublishAsync<TenantFeaturesUpdated>(new
+                {
+                    EventId = Guid.NewGuid(),
+                    TenantId = tenant.Id,
+                    ActionUserId = _userDetailsProvider.AuthenticatedUser.ActionUserId,
+                    ActionUserType = _userDetailsProvider.AuthenticatedUser.ActionUserType,
+                });
             }
             catch (Exception ex)
             {
@@ -107,6 +110,6 @@ public class FeatureService : IFeatureService
 
     public async Task DeleteFeatureAsync(Feature feature, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        //var command
     }
 }
