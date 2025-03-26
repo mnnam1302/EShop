@@ -8,9 +8,9 @@ namespace ApiGateway.Attributes;
 public class CustomJwtBearEvents : JwtBearerEvents
 {
     private readonly IUserDetailsProvider _userDetailsProvider;
-    private readonly ITokenCachingService _cacheService;
+    private readonly IUserTokenCachingService _cacheService;
 
-    public CustomJwtBearEvents(IUserDetailsProvider userDetailsProvider, ITokenCachingService cacheService)
+    public CustomJwtBearEvents(IUserDetailsProvider userDetailsProvider, IUserTokenCachingService cacheService)
     {
         _userDetailsProvider = userDetailsProvider;
         _cacheService = cacheService;

@@ -1,9 +1,10 @@
 ﻿using EShop.Shared.Contracts.Shared;
+using EShop.Shared.Scoping;
 using System.ComponentModel.DataAnnotations;
 
 namespace EShop.Shared.EventBus;
 
-public class InboxMessage
+public class InboxMessage : IExcludedFromScoping
 {
     public Guid MessageId { get; set; }
 

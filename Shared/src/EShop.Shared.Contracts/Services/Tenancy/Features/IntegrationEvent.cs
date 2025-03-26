@@ -9,6 +9,8 @@ public interface SupportedFeaturesUpdated : TenancyEvent
     public SupportedFeaturesAction Action { get; }
 }
 
+public interface TenantFeaturesUpdated : TenancyEvent { }
+
 public interface IFeature
 {
     string Id { get; }

@@ -89,7 +89,7 @@ internal static class ServiceCollectionExtensions
     private static IServiceCollection AddTestUserTokens(this IServiceCollection services)
     {
         services.AddTransient<IRedisCachingProvider<Response.AuthenticatedResponse>, TestUserTokenProvider>();
-        services.AddTransient<ITokenCachingService, TokenRedisCachingService>();
+        services.AddTransient<IUserTokenCachingService, TokenRedisCachingService>();
 
         return services;
     }

@@ -14,6 +14,7 @@
   <ItemGroup>
     <ProjectReference Include="..\EShop.Shared.Contracts\EShop.Shared.Contracts.csproj" />
     <ProjectReference Include="..\EShop.Shared.Diagnostics\EShop.Shared.Diagnostics.csproj" />
+    <ProjectReference Include="..\EShop.Shared.Scoping\EShop.Shared.Scoping.csproj" />
   </ItemGroup>
 
 </Project>

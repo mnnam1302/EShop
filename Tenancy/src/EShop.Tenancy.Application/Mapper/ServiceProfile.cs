@@ -8,6 +8,6 @@ public class ServiceProfile : Profile
 {
     public ServiceProfile()
     {
-        CreateMap<SupportedFeaturesUpdated, UpdateSupportedFeaturesCommand>();
+
     }
 }

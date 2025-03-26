@@ -1,4 +1,5 @@
-﻿using EShop.Shared.DomainTools.DependencyInjections;
+﻿using EShop.Shared.Cache.DependencyInejctions.Extensions;
+using EShop.Shared.DomainTools.DependencyInjections;
 using EShop.Shared.JsonApi.DependencyInjections;
 using EShop.Shared.JsonApi.Middlewares;
 using EShop.Tenancy.Application.DependencyInjections.Extensions;
@@ -8,51 +9,56 @@ using EShop.Tenancy.Persistence.DependencyInjections.Extensions;
 using EShop.Tenancy.Presentation.DependencyInjections.Extensions;
 using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
 
-namespace EShop.Tenancy.API.DependencyInjections.Extensions
+namespace EShop.Tenancy.API.DependencyInjections.Extensions;
+
+public static class ServiceCollectionExtensions
 {
-    public static class ServiceCollectionExtensions
+    public static IServiceCollection AddShared(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment)
     {
-        public static IServiceCollection AddShared(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment)
-        {
-            services
-                .AddDbContextWithScoping<TenancyDbContext>(configuration);
+        services.AddResiliencePolicy();
 
-            services.AddResiliencePolicy();
+        services
+            .AddPostgreSqlHealthCheck(configuration)
+            .AddDbContextWithScoping<TenancyDbContext>(configuration);
 
-            return services;
-        }
+        services
+            .AddRedisHealthCheck(configuration)
+            .AddRedisInfrastructure(configuration)
+            .AddTenantFeaturesCachingService();
 
-        public static IServiceCollection AddBoostrapping(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment)
-        {
-            services.AddUserPermissionsProvider(configuration);
+        return services;
+    }
 
-            services.AddTenancyPresentation(); // Must before API project, because contain DI Carter
-            services.AddTenancyAPI();
-            services.AddTenancyApplication();
-            services.AddTenancyPersistence();
-            services.AddTenancyInfrastructure(configuration, environment, Program.ApplicationName);
+    public static IServiceCollection AddBoostrapping(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment)
+    {
+        services.AddUserPermissionsProvider(configuration);
 
-            return services;
-        }
+        services.AddTenancyPresentation(); // Must before API project, because contain DI Carter
+        services.AddTenancyAPI();
+        services.AddTenancyApplication();
+        services.AddTenancyPersistence();
+        services.AddTenancyInfrastructure(configuration, environment, Program.ApplicationName);
 
-        private static void AddTenancyAPI(this IServiceCollection services)
-        {
-            services.AddCors();
-            services.AddSingleton<ExceptionHandlingMiddleware>();
+        return services;
+    }
 
-            services
-                .AddSwaggerGenNewtonsoftSupport()
-                .AddFluentValidationRulesToSwagger()
-                .AddEndpointsApiExplorer()
-                .AddSwaggerAPI();
+    private static void AddTenancyAPI(this IServiceCollection services)
+    {
+        services.AddCors();
+        services.AddSingleton<ExceptionHandlingMiddleware>();
 
-            services
-                .AddApiVersioning(options => options.ReportApiVersions = true)
-                .AddApiExplorer(options =>
-                {
-                    options.GroupNameFormat = "'v'VVV";
-                    options.SubstituteApiVersionInUrl = true;
-                });
-        }
+        services
+            .AddSwaggerGenNewtonsoftSupport()
+            .AddFluentValidationRulesToSwagger()
+            .AddEndpointsApiExplorer()
+            .AddSwaggerAPI();
+
+        services
+            .AddApiVersioning(options => options.ReportApiVersions = true)
+            .AddApiExplorer(options =>
+            {
+                options.GroupNameFormat = "'v'VVV";
+                options.SubstituteApiVersionInUrl = true;
+            });
     }
 }

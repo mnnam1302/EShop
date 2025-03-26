@@ -17,6 +17,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\..\Shared\src\EShop.Shared.DbResourceAccessControl\EShop.Shared.DbResourceAccessControl.csproj" />
     <ProjectReference Include="..\..\..\Shared\src\EShop.Shared.EventBus\EShop.Shared.EventBus.csproj" />
+    <ProjectReference Include="..\..\..\Testing\src\EShop.Testing.IntegrationTest\EShop.Testing.IntegrationTest.csproj" />
     <ProjectReference Include="..\EShop.Tenancy.Domain\EShop.Tenancy.Domain.csproj" />
   </ItemGroup>
 
