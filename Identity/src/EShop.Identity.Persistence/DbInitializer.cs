@@ -3,6 +3,7 @@ using EShop.Identity.Domain.Entities;
 using EShop.Shared.DbResourceAccessControl;
 using EShop.Shared.Scoping;
 using EShop.Shared.Scoping.ResourceAccessControl;
+using EShop.Testing.IntegrationTest;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -17,11 +18,6 @@ public class DbInitializer
     private readonly IPasswordHasher _passwordHasher;
     private readonly IConfiguration _configuration;
     private readonly ILogger _logger;
-
-    private const string TenantName = "eshop-staging";
-    private const string RoleName = "Owner";
-    private const string UserName = "owner.staging@gmail.com";
-    private const string DisplayName = "Owner Staging";
 
     public DbInitializer(
         UsersDbContext userDbContext,
@@ -43,7 +39,7 @@ public class DbInitializer
     {
         try
         {
-            _userDetailsProvider.SetSystemUserContext(TenantName);
+            _userDetailsProvider.SetSystemUserContext(TestTenantSeedingScript.TenantName);
 
             if (applyMigrations)
             {
@@ -83,13 +79,20 @@ public class DbInitializer
     {
         await SeedSystemWidePermissions();
         await SeedTenant(UserData.EShopSupportGroup);
-        await SeedOrganization(UserData.EShopSupportGroup, "Root System Organization");
+        await SeedOrganization(UserData.EShopSupportGroup, $"{UserData.EShopSupportGroup.ToLowerInvariant()}@ecommerce.market", "Root System Organization");
         await SeedUser(
             UserData.SystemUsername,
-            $"{UserData.SystemUsername}.{UserData.EShopSupportGroup}@gmail.com",
+            $"{UserData.SystemUsername}.{UserData.EShopSupportGroup}@ecommerce.market",
             "System User",
             UserData.EShopSupportGroup);
     }
+
+    private const string TenantName = TestTenantSeedingScript.TenantName;
+    private const string TenantEmail = TestTenantSeedingScript.TenantEmail;
+    private const string TenantDescription = TestTenantSeedingScript.TenantDescription;
+    private const string RoleName = TestTenantSeedingScript.RoleName;
+    private const string UserName = TestTenantSeedingScript.UserName;
+    private const string DisplayName = TestTenantSeedingScript.DisplayName;
 
     /// <summary>
     /// Seed data for specific tenant
@@ -98,9 +101,9 @@ public class DbInitializer
     private async Task SeedDataForSpecificTenant()
     {
         await SeedTenant(TenantName);
-        await SeedOrganization(TenantName, "Root Organization");
-        await SeedUser(UserName, UserName, DisplayName, TenantName); // user
-        await SeedRole(RoleName, TenantName); // role, role permissions, user roles
+        await SeedOrganization(TenantName, TenantEmail, TenantDescription);
+        await SeedUser(UserName, UserName, DisplayName, TenantName);
+        await SeedRole(RoleName, TenantName);
     }
 
     private async Task SeedTenant(string tenantName)
@@ -121,9 +124,9 @@ public class DbInitializer
         }
     }
 
-    private async Task SeedOrganization(string tenantName, string organizationDescription)
+    private async Task SeedOrganization(string tenantName, string tenantEmail, string organizationDescription)
     {
-        var organization = CreateOrganization(tenantName, organizationDescription);
+        var organization = CreateOrganization(tenantName, tenantEmail, organizationDescription);
         if (await _dbContext.Organizations.AnyAsync(org => org.Id == tenantName || org.Name == tenantName))
         {
             _dbContext.Update(organization);
@@ -134,12 +137,12 @@ public class DbInitializer
         }
     }
 
-    private Organization CreateOrganization(string tenantName, string description)
+    private static Organization CreateOrganization(string tenantName, string tenantEmail, string description)
     {
         var organization = new Organization(tenantName,
             new Random().Next(0, 1000000000).ToString(),
             "+477" + new Random().Next(0, 1000000000).ToString(),
-            $"{tenantName}@gmail.com",
+            tenantEmail,
             string.Empty,
             string.Empty,
             string.Empty,

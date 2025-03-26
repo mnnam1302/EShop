@@ -2,6 +2,7 @@
 using EShop.Shared.DbResourceAccessControl;
 using EShop.Shared.Scoping;
 using EShop.Tenancy.Domain.Entities;
+using EShop.Testing.IntegrationTest;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -66,9 +67,10 @@ public class DbInitializer
         }
     }
 
-    private const string TenantName = "eshop-staging";
-    private const string OwnerUserName = "owner.staging@gmail.com";
-    private const string EmailTenant = "eshop.staging@ecommerce.market";
+    private const string TenantName = TestTenantSeedingScript.TenantName;
+    private const string OwnerUserName = TestTenantSeedingScript.UserName;
+    private const string EmailTenant = TestTenantSeedingScript.TenantEmail;
+    private const string TenantDescription = TestTenantSeedingScript.TenantDescription;
 
     private async Task SeedTenant()
     {
@@ -78,7 +80,7 @@ public class DbInitializer
             OwnerUsername = OwnerUserName,
             Email = EmailTenant,
             PhoneNumber = "+477" + new Random().Next(0, 1000000000).ToString(),
-            Description = "EShop Root Organization - Staging Enviroment"
+            Description = TenantDescription
         };
 
         var tenant = Tenant.Create(command);
