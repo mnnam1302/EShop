@@ -1,4 +1,5 @@
-﻿using EShop.Shared.Scoping;
+﻿using EShop.Shared.DomainTools.DependencyInjections;
+using EShop.Shared.Scoping;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Reflection;
@@ -28,7 +29,7 @@ public sealed class PostgresRowLevelSecurityPolicyIsolation : PostgresRowLevelSe
 
         if (undeclaredProperties.Any())
         {
-            var invalidResources = undeclaredProperties.Select(p => p.Name);
+            var invalidResources = undeclaredProperties.Select(p => p.Name).ToCommaSeparatedString();
             throw new InvalidOperationException($"Please make sure to declare scoping behaviour on following properties of '{dbContext.GetType().Name}': {invalidResources}.");
         }
 

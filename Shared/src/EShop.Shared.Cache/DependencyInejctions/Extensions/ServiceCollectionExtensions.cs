@@ -3,6 +3,7 @@ using EShop.Shared.Cache.Providers;
 using EShop.Shared.Cache.Services;
 using EShop.Shared.Contracts.Services.Identity.Auth;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers;
+using EShop.Shared.Scoping.ResourceAccessControl.Providers.TenantFeaturesProvider;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserTokenProvider;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -49,6 +50,7 @@ public static class ServiceCollectionExtensions
 
         return services;
     }
+
     public static IServiceCollection AddMemoryInfrastructure(this IServiceCollection services)
     {
         services.AddDistributedMemoryCache();
@@ -62,6 +64,13 @@ public static class ServiceCollectionExtensions
     {
         services.AddTransient<IRedisCachingAsyncProvider<Response.AuthenticatedResponse>, RedisCachingAsyncProvider<Response.AuthenticatedResponse>>();
         services.AddTransient<IUserTokenCachingService, TokenRedisCachingService>();
+        return services;
+    }
+
+    public static IServiceCollection AddTenantFeaturesCachingService(this IServiceCollection services)
+    {
+        services.AddTransient<IRedisCachingAsyncProvider<string[]>, RedisCachingAsyncProvider<string[]>>();
+        services.AddTransient<ITenantFeaturesCachingService, TenantFeaturesRedisCachingService>();
         return services;
     }
 }

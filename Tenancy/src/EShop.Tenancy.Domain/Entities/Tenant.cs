@@ -8,6 +8,7 @@ namespace EShop.Tenancy.Domain.Entities;
 
 public class Tenant : TenantAggregate, IExcludedFromScoping
 {
+    // EF Core
     public Tenant() { }
 
     private Tenant(string id, string name, string ownerUsername, string email, string? phoneNumber, string? description)
@@ -27,20 +28,24 @@ public class Tenant : TenantAggregate, IExcludedFromScoping
         return tenant;
     }
 
-    public void ConfigureFeature(string featureId, string state, string performedBy)
+    public void AddTenantFeature(string featureId, string state, string performedBy)
     {
-        if (string.IsNullOrEmpty(featureId)) throw new ArgumentNullException(nameof(featureId));
-
-        var existingFeature = _tenantFeatures?.FirstOrDefault(f => f.FeatureId == featureId);
-        if (existingFeature != null)
+        if (string.IsNullOrEmpty(featureId))
         {
-            existingFeature.UpdateState(state, performedBy);
-            return;
+            throw new ArgumentNullException(nameof(featureId));
         }
 
         var newTenantFeature = new TenantFeature(Guid.NewGuid().ToString(), Id, featureId, state, Id, performedBy);
-
         _tenantFeatures.Add(newTenantFeature);
+    }
+
+    public void RemoveTenantFeature(string featureId)
+    {
+        var feature = _tenantFeatures.FirstOrDefault(f => f.FeatureId == featureId);
+        if (feature is not null)
+        {
+            _tenantFeatures.Remove(feature);
+        }
     }
 
     public bool DisableFeature(string featureId)
