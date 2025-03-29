@@ -8,7 +8,7 @@ public static class DomainEvent
     {
         public Guid EventId { get; init; }
         public DateTimeOffset TimeStamp { get; init; }
-        public string SourceId { get; init; }
+        public string OrganizationId { get; init; }
         public string Name { get; init; }
         public string? OrganizationNumber { get; init; }
         public string? PhoneNumber { get; init; }
@@ -21,7 +21,7 @@ public static class DomainEvent
     {
         public Guid EventId { get; init; }
         public DateTimeOffset TimeStamp { get; init; }
-        public string SourceId { get; init; }
+        public string OrganizationId { get; init; }
         public string Name { get; init; }
         public string? OrganizationNumber { get; init; }
         public string? PhoneNumber { get; init; }
