@@ -1,4 +1,5 @@
-﻿using EShop.Identity.API.DependencyInjections.Extensions;
+﻿using EShop.Identity.API;
+using EShop.Identity.API.DependencyInjections.Extensions;
 using EShop.Identity.Application.DependencyInjections.Extensions;
 using EShop.Identity.Infrastructure.DependencyInjections.Extensions;
 using EShop.Identity.Persistence;
@@ -30,7 +31,7 @@ internal static class ServiceCollectionExtensions
             .AddTestServicesApiLayer()
             .AddIdentityApplication()
             .AddIdentityPersistence()
-            .AddIdentityInfrastructure(configuration);
+            .AddIdentityInfrastructure(configuration, environment);
             
         services.AddTestUserPermissions();
 

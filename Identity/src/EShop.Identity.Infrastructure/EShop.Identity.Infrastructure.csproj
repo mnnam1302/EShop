@@ -18,6 +18,7 @@
     <ProjectReference Include="..\..\..\Shared\src\EShop.Shared.Cache\EShop.Shared.Cache.csproj" />
     <ProjectReference Include="..\..\..\Shared\src\EShop.Shared.EventBus\EShop.Shared.EventBus.csproj" />
     <ProjectReference Include="..\EShop.Identity.Application\EShop.Identity.Application.csproj" />
+    <ProjectReference Include="..\EShop.Identity.Persistence\EShop.Identity.Persistence.csproj" />
   </ItemGroup>
 
 </Project>

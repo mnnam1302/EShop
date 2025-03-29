@@ -75,7 +75,7 @@ public class Tenant : TenantAggregate, IExcludedFromScoping
         return char.IsLetterOrDigit(c) || c == '-' || c == '_';
     }
 
-    private static string RemoveDomainSuffix(string username, string tenantId) => username.Replace($"@{tenantId}", null, StringComparison.OrdinalIgnoreCase);
+    public static string RemoveDomainSuffix(string username, string tenantId) => username.Replace($"@{tenantId}", null, StringComparison.OrdinalIgnoreCase);
 
     private static void AssertUsername(string usernameWithoutDomainSuffix)
     {

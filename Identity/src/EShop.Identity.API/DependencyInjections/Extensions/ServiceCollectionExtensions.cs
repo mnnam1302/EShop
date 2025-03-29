@@ -36,7 +36,7 @@ public static class ServiceCollectionExtensions
             .AddIdentityApi()
             .AddIdentityApplication()
             .AddIdentityPersistence()
-            .AddIdentityInfrastructure(configuration);
+            .AddIdentityInfrastructure(configuration, environment, Program.ApplicationName);
 
         services.AddUserPermissionForOwnerService();
 

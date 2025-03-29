@@ -52,6 +52,7 @@ public class CreateTenantCommandHandler : ICommandHandler<Shared.Contracts.Servi
             TenantId = tenant.Id,
             TenantName = tenant.Name,
             OwnerUsername = tenant.OwnerUsername,
+            OwnerDisplayName = tenant.Name ?? Tenant.RemoveDomainSuffix(request.OwnerUsername, tenant.Id),
             OwnerEmail = tenant.Email,
             ActionUserId = operationalUser.ActionUserId,
             ActionUserType = operationalUser.ActionUserType

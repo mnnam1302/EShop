@@ -1,9 +1,10 @@
 ﻿using EShop.Identity.Domain.Entities;
+using EShop.Shared.EventBus;
 using Microsoft.EntityFrameworkCore;
 
 namespace EShop.Identity.Persistence;
 
-public class UsersDbContext : DbContext
+public class UsersDbContext : DbContext, IInboxDbContext
 {
     public UsersDbContext(DbContextOptions<UsersDbContext> options)
     : base(options)
@@ -23,4 +24,5 @@ public class UsersDbContext : DbContext
     public DbSet<Permission> Permissions { get; set; }
     public DbSet<UserRole> UserRoles { get; set; }
     public DbSet<RolePermission> RolePermissions { get; set; }
+    public DbSet<InboxMessage> InboxMessages { get; set; }
 }

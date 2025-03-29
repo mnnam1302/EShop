@@ -1,30 +1,38 @@
 ﻿using EShop.Identity.Application.Abstractions;
 using EShop.Identity.Infrastructure.Authentication;
+using EShop.Identity.Infrastructure.Consumers;
 using EShop.Identity.Infrastructure.HashServices;
 using EShop.Identity.Infrastructure.Producers;
+using EShop.Shared.Contracts.Services.Tenancy.Tenants;
 using EShop.Shared.EventBus.DependencyInjections.Extensions;
 using EShop.Shared.EventBus.DependencyInjections.Options;
 using EShop.Shared.EventBus.JsonConverters;
 using EShop.Shared.EventBus.PipelineObservers;
 using EShop.Shared.Scoping.ResourceAccessControl;
 using MassTransit;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using System;
 
 namespace EShop.Identity.Infrastructure.DependencyInjections.Extensions;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddIdentityInfrastructure(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddIdentityInfrastructure(
+        this IServiceCollection services,
+        IConfiguration configuration,
+        IWebHostEnvironment environment,
+        string serviceName = "identity")
     {
-        services.AddServices();
+        services.AddOwnerServices();
         services.AddRegistrationFeatures();
-        services.AddMasstransitRabbitMQ(configuration);
+        services.AddMasstransitRabbitMQ(configuration, environment, serviceName);
 
         return services;
     }
 
-    private static void AddServices(this IServiceCollection services)
+    private static void AddOwnerServices(this IServiceCollection services)
     {
         services.AddTransient<IPasswordHasher, PasswordHasher>();
         services.AddTransient<ITokenService, TokenService>();
@@ -36,7 +44,11 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    private static IServiceCollection AddMasstransitRabbitMQ(this IServiceCollection services, IConfiguration configuration)
+    private static IServiceCollection AddMasstransitRabbitMQ(
+        this IServiceCollection services,
+        IConfiguration configuration,
+        IWebHostEnvironment environment,
+        string serviceName)
     {
         var massTransitConfiguration = new MasstransitConfiguration();
         configuration.GetSection(nameof(MasstransitConfiguration)).Bind(massTransitConfiguration);
@@ -47,6 +59,8 @@ public static class ServiceCollectionExtensions
         services.AddMassTransit(cfg =>
         {
             cfg.SetKebabCaseEndpointNameFormatter();
+
+            cfg.AddConsumers(AssemblyReference.Assembly);
 
             cfg.UsingRabbitMq((context, bus) =>
             {
@@ -82,10 +96,24 @@ public static class ServiceCollectionExtensions
                 bus.ConnectConsumeObserver(new LoggingConsumeObserver());
 
                 bus.MessageTopology.SetEntityNameFormatter(new KebabCaseEntityNameFormatter());
+
+                bus.ConfigureRecieveEndpoints(context, environment, serviceName);
                 bus.ConfigureEndpoints(context);
             });
         });
 
         return services;
+    }
+
+    public static void ConfigureRecieveEndpoints(
+        this IRabbitMqBusFactoryConfigurator bus,
+        IRegistrationContext context,
+        IWebHostEnvironment environment,
+        string serviceName)
+    {
+        bus.ConfigureEventReceiveEndpoint<TenantConsumers.TenantCreatedConsumer, IntegrationEvent.TenantCreated>(
+            context,
+            environment.EnvironmentName,
+            serviceName);
     }
 }

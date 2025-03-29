@@ -25,4 +25,6 @@ public static class Command
         [MaxLength(ModelConstants.LongText)]
         public string? Description { get; set; }
     }
+
+    public record CreateTenantCommandInternal(string TenantId, string TenantName, string OwnerUsername, string OwnerDisplayName, string OwnerEmail) : ICommand;
 }
