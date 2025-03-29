@@ -43,8 +43,7 @@ public class UpdateSupportedFeaturesCommandHandler : ICommandHandler<UpdateSuppo
                 Module = feature.Module,
                 State = feature.State,
 
-                // Adding DefaultStateForNewTenant to Feature interface
-                // will cause changes to all microservices. Assuming that DefaultStateForNewTenant
+                // Adding DefaultStateForNewTenant to Feature interface will cause changes to all microservices. Assuming that DefaultStateForNewTenant
                 // should be initialized with the same value as State.
                 DefaultStateForNewTenant = feature.State
             };

@@ -12,4 +12,8 @@
     <ProjectReference Include="..\EShop.Tenancy.Persistence\EShop.Tenancy.Persistence.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Producers\" />
+  </ItemGroup>
+
 </Project>

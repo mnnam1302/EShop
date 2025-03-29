@@ -76,6 +76,7 @@ public class DbInitializer
     {
         var command = new Command.CreateTenantCommand
         {
+            Id = TenantName,
             Name = TenantName,
             OwnerUsername = OwnerUserName,
             Email = EmailTenant,

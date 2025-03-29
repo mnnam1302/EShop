@@ -2,8 +2,7 @@
 using EShop.Shared.EventBus.DependencyInjections.Options;
 using EShop.Shared.EventBus.JsonConverters;
 using EShop.Shared.EventBus.PipelineObservers;
-using EShop.Tenancy.Application.Abstrations;
-using EShop.Tenancy.Infrastructure.Producers;
+using EShop.Shared.EventBus.Services;
 using MassTransit;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;

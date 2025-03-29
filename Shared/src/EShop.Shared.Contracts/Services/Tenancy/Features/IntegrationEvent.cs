@@ -1,15 +1,16 @@
-﻿using EShop.Shared.Contracts.Abstractions.Requests;
+﻿namespace EShop.Shared.Contracts.Services.Tenancy.Features;
 
-namespace EShop.Shared.Contracts.Services.Tenancy.Features;
-
-public interface SupportedFeaturesUpdated : TenancyEvent
+public static class IntegrationEvent
 {
-    public string SourceSystemReference { get; }
-    public IFeature[] Features { get; }
-    public SupportedFeaturesAction Action { get; }
-}
+    public interface SupportedFeaturesUpdated : TenancyEvent
+    {
+        public string SourceSystemReference { get; }
+        public IFeature[] Features { get; }
+        public SupportedFeaturesAction Action { get; }
+    }
 
-public interface TenantFeaturesUpdated : TenancyEvent { }
+    public interface TenantFeaturesUpdated : TenancyEvent { }
+}
 
 public interface IFeature
 {

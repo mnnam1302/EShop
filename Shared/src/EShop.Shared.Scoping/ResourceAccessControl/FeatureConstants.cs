@@ -2,6 +2,8 @@
 
 public static class FeatureConstants
 {
+    public const string InitialState = nameof(FeatureState.Enabled);
+
     // Identity
     public const string Identity_ExternalApplicationIntegration_FeatureId = "Identity_ExternalApplicationIntegration";
 

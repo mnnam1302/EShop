@@ -45,7 +45,7 @@ public class UserFeatureRegistrationService : IFeatureRegistrationService
     public async Task RegisterFeatures()
     {
         // Read more: new { } is an anonymous objects in C#. Let's see message initilization: https://masstransit.io/documentation/concepts/producers#message-initialization
-        await _publishEndpoint.Publish<SupportedFeaturesUpdated>(new
+        await _publishEndpoint.Publish<IntegrationEvent.SupportedFeaturesUpdated>(new
         {
             SourceSystemReference = ApplicationName,
             Features = features,

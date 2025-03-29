@@ -5,7 +5,7 @@ using EShop.Shared.Scoping.ResourceAccessControl.Providers.TenantFeaturesProvide
 
 namespace EShop.Tenancy.Application.UseCases.V1.Events;
 
-public class UpdateTenantFeaturesCommandHandler : ICommandHandler<Command.UpdateTenantFeaturesCommand>
+public class UpdateTenantFeaturesCommandHandler : ICommandHandler<Shared.Contracts.Services.Tenancy.Features.Command.UpdateTenantFeaturesCommand>
 {
     private readonly ITenantFeaturesCachingService _tenantFeaturesCachingService;
 
@@ -14,7 +14,7 @@ public class UpdateTenantFeaturesCommandHandler : ICommandHandler<Command.Update
         _tenantFeaturesCachingService = tenantFeaturesCachingService;
     }
 
-    public async Task<Result> Handle(Command.UpdateTenantFeaturesCommand request, CancellationToken cancellationToken)
+    public async Task<Result> Handle(Shared.Contracts.Services.Tenancy.Features.Command.UpdateTenantFeaturesCommand request, CancellationToken cancellationToken)
     {
         await _tenantFeaturesCachingService.RemoveTenantFeatures(request.TenantId, cancellationToken);
         return Result.Success();
