@@ -55,7 +55,7 @@ public class Organization : AggregateRoot<string>, IExcludedFromScoping
         {
             EventId = Guid.NewGuid(),
             TimeStamp = DateTimeOffset.Now,
-            SourceId = organization.Id,
+            OrganizationId = organization.Id,
             Name = organization.Name,
             OrganizationNumber = organization.OrganizationNumber,
             PhoneNumber = organization.PhoneNumber,
@@ -83,7 +83,7 @@ public class Organization : AggregateRoot<string>, IExcludedFromScoping
         {
             EventId = Guid.NewGuid(),
             TimeStamp = DateTimeOffset.Now,
-            SourceId = Id,
+            OrganizationId = Id,
             Name = Name,
             OrganizationNumber = OrganizationNumber,
             PhoneNumber = PhoneNumber,

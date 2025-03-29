@@ -14,7 +14,12 @@ public static class RabbitMqBusFactoryConfiguratorExtensions
         IWebHostEnvironment environment,
         string serviceName)
     {
-        bus.ConfigureEventReceiveEndpoint<FeatureEventConsumers, SupportedFeaturesUpdated>(
+        bus.ConfigureEventReceiveEndpoint<SupportedFeaturesUpdatedConsumer, SupportedFeaturesUpdated>(
+            context,
+            environment.EnvironmentName,
+            serviceName ?? "tenancy");
+
+        bus.ConfigureEventReceiveEndpoint<TenantFeaturesUpdatedConsumer, TenantFeaturesUpdated>(
             context,
             environment.EnvironmentName,
             serviceName ?? "tenancy");
