@@ -49,10 +49,13 @@ public class User : EntityBase<string>, IDateTracking, IExcludedFromScoping
     public DateTimeOffset CreatedOnUtc { get; set; }
     public DateTimeOffset? LastModifiedOnUtc { get; set; }
 
+    // Empty constructor for ORMs
     public User() { }
 
     public User(string userName, string password, string email, string? displayName, string organizationId)
     {
+        AssertUsername(userName);
+
         Id = userName;
         Username = userName;
         PasswordHash = password;
@@ -112,5 +115,19 @@ public class User : EntityBase<string>, IDateTracking, IExcludedFromScoping
         };
 
         UserRoles.Add(userRole);
+    }
+
+    private static void AssertUsername(string username)
+    {
+        if (string.IsNullOrWhiteSpace(username))
+        {
+            throw new ArgumentException("Username cannot be null or whitespace");
+        }
+
+        var invalidCharactersPattern = @"[<>;&/\\\s]";
+        if (System.Text.RegularExpressions.Regex.IsMatch(username, invalidCharactersPattern))
+        {
+            throw new UnprocessableEntityException("Username cannot contain special characters");
+        }
     }
 }

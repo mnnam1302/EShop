@@ -1,9 +1,6 @@
 ﻿using EShop.Shared.Contracts.Services.Identity.Organizations;
 using EShop.Shared.DomainTools.Aggregates;
-using EShop.Shared.DomainTools.Extensions;
 using EShop.Shared.Scoping;
-using EShop.Shared.Scoping.Exceptions;
-using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations;
 
 namespace EShop.Identity.Domain.Entities;
@@ -11,6 +8,7 @@ namespace EShop.Identity.Domain.Entities;
 public class Organization : AggregateRoot<string>, IExcludedFromScoping
 {
     public const string DefaultLanguageCode = "en-gb";
+    public const string DefaultOwnerPassword = "P@ssword123";
     private readonly List<User> _users = new();
 
     [MaxLength(ModelConstants.MediumText)]
@@ -133,13 +131,8 @@ public class Organization : AggregateRoot<string>, IExcludedFromScoping
 
     public User AddUser(string username, string password, string displayName, string email, string createdBy)
     {
-        var user = new User()
+        var user = new User(username, password, email, displayName, Id)
         {
-            Id = username,
-            Username = username,
-            PasswordHash = password,
-            DisplayName = displayName,
-            Email = email,
             CreatedBy = createdBy
         };
 

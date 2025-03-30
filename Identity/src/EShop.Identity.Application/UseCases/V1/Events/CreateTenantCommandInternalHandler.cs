@@ -9,7 +9,6 @@ using EShop.Shared.Scoping;
 using EShop.Shared.Scoping.Exceptions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Polly;
 
 namespace EShop.Identity.Application.UseCases.V1.Events;
 
@@ -46,63 +45,113 @@ public class CreateTenantCommandInternalHandler : ICommandHandler<Command.Create
 
     public async Task<Result> Handle(Command.CreateTenantCommandInternal request, CancellationToken cancellationToken)
     {
+        if (string.IsNullOrEmpty(request.TenantId) || string.IsNullOrEmpty(request.TenantName))
+        {
+            return Result.Failure(new Error("Validation.Error", "Tenant ID and Name are required"));
+        }
+
         try
         {
             _userDetailsProvider.SetSystemUserContext(request.TenantId);
-            _logger.LogDebug("Creating owner user for tenant '{id}'...", request.TenantId);
+            _logger.LogInformation("Creating tenant '{id}' with name '{name}'...", request.TenantId, request.TenantName);
 
-            // 1. Create Tenant
-            var tenant = new Tenant
-            {
-                Id = request.TenantId,
-                Name = request.TenantName
-            };
+            var tenant = await CreateTenantInternalAsync(request.TenantId, request.TenantName, cancellationToken);
 
-            // 2. Create organization
-            var rootOrganization = Organization.CreateInternal(request.TenantId, request.TenantName);
+            var rootOrganization = CreateRootOrganization(request.TenantId, request.TenantName);
+            var ownerRole = await CreateOwnerRoleWithPermissionsAsync(request.TenantId, cancellationToken);
+            CreateAndValidateOwnerUser(rootOrganization, request);
 
-            // 3. Create role owner
-            _logger.LogDebug("Creating owner role for tenant '{id}'...", request.TenantId);
-
-            var ownerRole = Role.Create(Role.OwnerRoleName, "Owner of the account", request.TenantId);
-
-            var availablePermissionIds = await _permissionRepository.FindAll().Select(p => p.Id).ToListAsync(cancellationToken);
-            foreach (var permissionId in availablePermissionIds)
-            {
-                ownerRole.GrantPermission(permissionId);
-            }
-
-            // 4. Create user owner
-            var defaultPassword = _passwordHasher.Hash("P@ssword123");
-            var ownerUser = User.Create(
-                request.OwnerUsername,
-                defaultPassword,
-                request.OwnerEmail,
-                request.OwnerDisplayName,
-                request.TenantId,
-                UserData.SystemUsername);
-
-            rootOrganization.AddUser(ownerUser);
-
-            ownerUser.GrantRole(ownerRole.Id);
-
-            // 6. Save to database
+            _logger.LogDebug("Saving tenant entities to database...");
             _tenantRepository.Add(tenant);
             _roleRepository.Add(ownerRole);
             _organizationRepository.Add(rootOrganization);
 
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
+            _logger.LogInformation("Successfully created tenant '{id}' with owner user '{username}'", request.TenantId, request.OwnerUsername);
             return Result.Success();
+        }
+        catch (BadRequestException ex)
+        {
+            _logger.LogWarning(ex, "Validation error creating tenant '{id}': {message}", request.TenantId, ex.Message);
+            return Result.Failure(new Error("Validation.Error", ex.Message));
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error creating tenant '{id}'", request.TenantId);
-            throw new UnprocessableEntityException($"Error creating tenant '{request.TenantId}' with message: {ex.Message}");
+            _logger.LogError(ex, "Error creating tenant '{id}' with message: {message}", request.TenantId, ex.Message);
+            return Result.Failure(new Error("Error.CreateTenant", "Failed to create tenant. See logs for details."));
         }
         finally
         {
             _userDetailsProvider.ClearSystemUserContext();
+        }
+    }
+
+    private async Task<Tenant> CreateTenantInternalAsync(string tenantId, string tenantName, CancellationToken cancellationToken)
+    {
+        _logger.LogDebug("Verifying tenant '{id}' does not already exist...", tenantId);
+
+        var existingTenant = await _tenantRepository.FindByIdAsync(tenantId, true, cancellationToken);
+        if (existingTenant is not null)
+        {
+            throw new BadRequestException($"Tenant with id '{tenantId}' already exists");
+        }
+
+        var tenant = new Tenant
+        {
+            Id = tenantId,
+            Name = tenantName
+        };
+
+        return tenant;
+    }
+
+    private Organization CreateRootOrganization(string tenantId, string tenantName)
+    {
+        _logger.LogDebug("Creating root organization for tenant '{id}'...", tenantId);
+        return Organization.CreateInternal(tenantId, tenantName);
+    }
+
+    private async Task<Role> CreateOwnerRoleWithPermissionsAsync(string tenantId, CancellationToken cancellationToken)
+    {
+        _logger.LogDebug("Creating owner role for tenant '{id}'...", tenantId);
+
+        var ownerRole = Role.Create(Role.OwnerRoleName, "Owner of the account", tenantId);
+
+        var availablePermissionIds = await _permissionRepository
+            .FindAll()
+            .Select(p => p.Id)
+            .ToListAsync(cancellationToken);
+
+        foreach (var permissionId in availablePermissionIds)
+        {
+            ownerRole.GrantPermission(permissionId);
+        }
+
+        return ownerRole;
+    }
+
+    private void CreateAndValidateOwnerUser(Organization organization, Command.CreateTenantCommandInternal request)
+    {
+        _logger.LogDebug("Creating owner user '{username}' for tenant '{id}'...", request.OwnerUsername, request.TenantId);
+
+        if (string.IsNullOrEmpty(request.OwnerEmail))
+        {
+            throw new BadRequestException("Owner email is required");
+        }
+
+        var defaultPassword = _passwordHasher.Hash(Organization.DefaultOwnerPassword);
+
+        var ownerUser = organization.AddUser(
+            request.OwnerUsername,
+            defaultPassword,
+            request.OwnerDisplayName,
+            request.OwnerEmail,
+            UserData.SystemUsername);
+
+        if (ownerUser == null)
+        {
+            throw new InvalidOperationException($"Failed to create owner user for tenant '{request.TenantId}'");
         }
     }
 }
