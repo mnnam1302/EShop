@@ -33,20 +33,29 @@ public abstract class Consumer<TMessage, TDbContext> : IConsumer<TMessage>
         {
             var result = await HandleMessageAsync(message, cancellationToken);
 
+            var consumerId = $"{GetType().Name}:{message.GetType().Name}";
+            var inboxMessage = new InboxMessage
+            {
+                MessageId = messageId!.Value,
+                MessageType = message.GetType().Name,
+                ConsumerId = consumerId,
+                State = InboxMessageStatus.New.ToString(),
+                CreatedOnUtc = DateTime.UtcNow
+            };
+
             if (result.IsSuccess)
             {
-                var consumerId = $"{GetType().Name}:{message.GetType().Name}";
-                var inboxMessage = new InboxMessage
-                {
-                    MessageId = messageId!.Value,
-                    MessageType = message.GetType().Name,
-                    ConsumerId = consumerId,
-                    CreatedOnUtc = DateTime.UtcNow
-                };
-
-                _dbContext.InboxMessages.Add(inboxMessage);
-                await _dbContext.SaveChangesAsync(cancellationToken);
+                inboxMessage.State = InboxMessageStatus.Done.ToString();
             }
+            else
+            {
+                inboxMessage.State = InboxMessageStatus.Failed.ToString();
+                inboxMessage.ReasonFailed = result.Error.Message;
+            }
+
+            inboxMessage.UpdatedOnUtc = DateTime.UtcNow;
+            _dbContext.InboxMessages.Add(inboxMessage);
+            await _dbContext.SaveChangesAsync(cancellationToken);
         }
     }
 

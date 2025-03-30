@@ -14,5 +14,18 @@ public class InboxMessage : IExcludedFromScoping
     [MaxLength(ModelConstants.ShortMediumText)]
     public string ConsumerId { get; set; } = string.Empty;
 
+    public string State { get; set; } = InboxMessageStatus.New.ToString();
+
+    [MaxLength(ModelConstants.LongText)]
+    public string ReasonFailed { get; set; } = string.Empty;
+
     public DateTimeOffset CreatedOnUtc { get; set; }
+    public DateTimeOffset UpdatedOnUtc { get; set; }
+}
+
+public enum InboxMessageStatus
+{
+    New,
+    Done,
+    Failed
 }
