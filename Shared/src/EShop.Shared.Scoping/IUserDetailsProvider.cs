@@ -8,7 +8,9 @@ namespace EShop.Shared.Scoping;
 public interface IUserDetailsProvider
 {
     UserData AuthenticatedUser { get; }
+    
     bool IsAuthenticatedUser { get; }
+    
     bool IsSystemUser { get; }
 
     void SetSystemUserContext(string onBehalfOfTenantId, string? onBehalfOfUserId = null, string? onBehalfOfUserType = null);

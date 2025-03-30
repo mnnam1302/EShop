@@ -1,8 +1,6 @@
-﻿using EShop.Shared.Contracts.Services.Tenancy.Tenants;
-using EShop.Shared.DbResourceAccessControl;
+﻿using EShop.Shared.DbResourceAccessControl;
 using EShop.Shared.Scoping;
 using EShop.Tenancy.Domain.Entities;
-using EShop.Testing.IntegrationTest;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -54,7 +52,7 @@ public class DbInitializer
                 _tenantIsolationStrategy.AddTenantIsolation(_tenancyDbContext);
             }
 
-            await SeedTenant();
+            await SeedTenantAsync(UserData.EShopSupportGroup, $"{UserData.EShopSupportGroup.ToLowerInvariant()}@eshop.ecommerce", "Root system organization");
             await _tenancyDbContext.SaveChangesAsync();
         }
         catch (Exception ex)
@@ -67,25 +65,11 @@ public class DbInitializer
         }
     }
 
-    private const string TenantName = TestTenantSeedingScript.TenantName;
-    private const string OwnerUserName = TestTenantSeedingScript.UserName;
-    private const string EmailTenant = TestTenantSeedingScript.TenantEmail;
-    private const string TenantDescription = TestTenantSeedingScript.TenantDescription;
-
-    private async Task SeedTenant()
+    private async Task SeedTenantAsync(string name, string email, string description)
     {
-        var command = new Command.CreateTenantCommand
-        {
-            Name = TenantName,
-            OwnerUsername = OwnerUserName,
-            Email = EmailTenant,
-            PhoneNumber = "+477" + new Random().Next(0, 1000000000).ToString(),
-            Description = TenantDescription
-        };
+        var tenant = new Tenant(name, name, name, email, null, description);
 
-        var tenant = Tenant.Create(command);
-
-        if (await _tenancyDbContext.Tenants.AnyAsync(t => t.Id == TenantName || t.Name == TenantName))
+        if (await _tenancyDbContext.Tenants.AnyAsync(org => org.Id == name || org.Name == name))
         {
             _tenancyDbContext.Update(tenant);
         }

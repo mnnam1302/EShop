@@ -1,8 +1,7 @@
 ﻿using EShop.Shared.Contracts.Abstractions.MessageBus;
-using EShop.Tenancy.Application.Abstrations;
 using MassTransit;
 
-namespace EShop.Tenancy.Infrastructure.Producers;
+namespace EShop.Shared.EventBus.Services;
 
 public class EventBusGateway : IEventBusGateway
 {

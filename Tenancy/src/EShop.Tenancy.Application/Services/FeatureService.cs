@@ -1,8 +1,8 @@
 ﻿using EShop.Shared.Contracts.Services.Tenancy.Features;
+using EShop.Shared.EventBus.Services;
 using EShop.Shared.Scoping;
 using EShop.Shared.Scoping.Exceptions;
 using EShop.Shared.Scoping.ResourceAccessControl;
-using EShop.Tenancy.Application.Abstrations;
 using EShop.Tenancy.Domain;
 using EShop.Tenancy.Domain.Entities;
 using EShop.Tenancy.Domain.Repositories;
@@ -112,7 +112,6 @@ public class FeatureService : IFeatureService
         }
     }
 
-        
     private async Task PublishTenantFeaturesUpdatedAsync(string tenantId)
     {
         await _eventBusGateway.PublishAsync<TenantFeaturesUpdated>(new
@@ -204,7 +203,7 @@ public class FeatureService : IFeatureService
                     x => x.Id == tenantId && x.TenantFeatures.Any(
                         tf => tf.FeatureId == featureId && tf.State == FeatureState.Enabled.ToString()),
                     cancellationToken: cancellationToken);
-                
+
                 if (tenantUsingFeature != null)
                 {
                     throw new UnprocessableEntityException($"Cannot delete feature id {featureId} because tenant {tenantId} is still using it");

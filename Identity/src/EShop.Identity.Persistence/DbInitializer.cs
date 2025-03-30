@@ -1,9 +1,9 @@
 ﻿using EShop.Identity.Application.Abstractions;
 using EShop.Identity.Domain.Entities;
+using EShop.Shared.Contracts.Services.Identity.Users;
 using EShop.Shared.DbResourceAccessControl;
 using EShop.Shared.Scoping;
 using EShop.Shared.Scoping.ResourceAccessControl;
-using EShop.Testing.IntegrationTest;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -39,7 +39,7 @@ public class DbInitializer
     {
         try
         {
-            _userDetailsProvider.SetSystemUserContext(TestTenantSeedingScript.TenantName);
+            _userDetailsProvider.SetSystemUserContextWithEmptyScope();
 
             if (applyMigrations)
             {
@@ -57,8 +57,7 @@ public class DbInitializer
                 _tenantIsolationStrategy.AddTenantIsolation(_dbContext);
             }
 
-            await SeedDataForEShopSystem();
-            await SeedDataForSpecificTenant();
+            await SeedDataForEShopSystemAsync();
             await _dbContext.SaveChangesAsync();
         }
         catch (Exception ex)
@@ -71,139 +70,24 @@ public class DbInitializer
         }
     }
 
-    /// <summary>
-    /// Seed data for system with eshop-support that include wide permissions, system user, maybe support user
-    /// </summary>
-    /// <returns></returns>
-    private async Task SeedDataForEShopSystem()
+    private async Task SeedDataForEShopSystemAsync()
     {
         await SeedSystemWidePermissions();
+
+        // System user should not depend on any group like eshop-support or any tenant
+        await SeedSystemUser(UserData.SystemUsername, $"{UserData.SystemUsername}@eshop.ecommerce", "System user");
+
+        // Group eshop-support is a tenant, so users can support system and tenant
         await SeedTenant(UserData.EShopSupportGroup);
-        await SeedOrganization(UserData.EShopSupportGroup, $"{UserData.EShopSupportGroup.ToLowerInvariant()}@ecommerce.market", "Root System Organization");
-        await SeedUser(
-            UserData.SystemUsername,
-            $"{UserData.SystemUsername}.{UserData.EShopSupportGroup}@ecommerce.market",
-            "System User",
+        await SeedOrganization(
+            UserData.EShopSupportGroup,
+            $"{UserData.EShopSupportGroup.ToLowerInvariant()}@eshop.ecommerce",
+            "Root system organization");
+        await SeedSupportUser(
+            UserData.EShopSupportGroup,
+            $"{UserData.EShopSupportGroup.ToLowerInvariant()}@eshop.ecommerce",
+            "Support User",
             UserData.EShopSupportGroup);
-    }
-
-    private const string TenantName = TestTenantSeedingScript.TenantName;
-    private const string TenantEmail = TestTenantSeedingScript.TenantEmail;
-    private const string TenantDescription = TestTenantSeedingScript.TenantDescription;
-    private const string RoleName = TestTenantSeedingScript.RoleName;
-    private const string UserName = TestTenantSeedingScript.UserName;
-    private const string DisplayName = TestTenantSeedingScript.DisplayName;
-
-    /// <summary>
-    /// Seed data for specific tenant
-    /// </summary>
-    /// <returns></returns>
-    private async Task SeedDataForSpecificTenant()
-    {
-        await SeedTenant(TenantName);
-        await SeedOrganization(TenantName, TenantEmail, TenantDescription);
-        await SeedUser(UserName, UserName, DisplayName, TenantName);
-        await SeedRole(RoleName, TenantName);
-    }
-
-    private async Task SeedTenant(string tenantName)
-    {
-        var tenant = new Tenant()
-        {
-            Id = tenantName,
-            Name = tenantName,
-        };
-
-        if (await _dbContext.Tenants.AnyAsync(t => t.Id == tenantName || t.Name == tenantName))
-        {
-            _dbContext.Update(tenant);
-        }
-        else
-        {
-            _dbContext.Add(tenant);
-        }
-    }
-
-    private async Task SeedOrganization(string tenantName, string tenantEmail, string organizationDescription)
-    {
-        var organization = CreateOrganization(tenantName, tenantEmail, organizationDescription);
-        if (await _dbContext.Organizations.AnyAsync(org => org.Id == tenantName || org.Name == tenantName))
-        {
-            _dbContext.Update(organization);
-        }
-        else
-        {
-            _dbContext.Add(organization);
-        }
-    }
-
-    private static Organization CreateOrganization(string tenantName, string tenantEmail, string description)
-    {
-        var organization = new Organization(tenantName,
-            new Random().Next(0, 1000000000).ToString(),
-            "+477" + new Random().Next(0, 1000000000).ToString(),
-            tenantEmail,
-            string.Empty,
-            string.Empty,
-            string.Empty,
-            description);
-
-        return organization;
-    }
-
-    private async Task SeedUser(string userName, string email, string displayName, string tenantName)
-    {
-        var user = new User(
-            userName,
-            _passwordHasher.Hash("P@ssword123"),
-            email,
-            displayName,
-            "+477" + new Random().Next(0, 1000000000),
-            DateTime.UtcNow.AddYears(-20),
-            tenantName)
-        {
-            CreatedOnUtc = DateTime.UtcNow
-        };
-
-        if (await _dbContext.Users.AnyAsync(u => u.Id == userName))
-        {
-            _dbContext.Update(user);
-        }
-        else
-        {
-            _dbContext.Add(user);
-        }
-    }
-
-    private async Task SeedRole(string roleName, string tenantName)
-    {
-        if (!await _dbContext.Roles.AnyAsync(r => r.Name == roleName && r.TenantId == tenantName))
-        {
-            var role = new Role(Guid.NewGuid(), roleName, "Role owner for tenant initialization");
-
-            await SeedRolePermissions(role, GetWidePermissions());
-            await SeedUserRolesAsync(role, UserName);
-            _dbContext.Add(role);
-        }
-    }
-
-    private async Task SeedRolePermissions(Role role, Permission[] permissions)
-    {
-        foreach (var permission in permissions)
-        {
-            if (!await _dbContext.RolePermissions.AnyAsync(rp => rp.RoleId == role.Id && rp.PermissionId == permission.Id))
-            {
-                role.RolePermissions.Add((new RolePermission { RoleId = role.Id, PermissionId = permission.Id }));
-            }
-        }
-    }
-
-    private async Task SeedUserRolesAsync(Role role, string userName)
-    {
-        if (!await _dbContext.UserRoles.AnyAsync(ur => ur.UserId == userName && ur.RoleId == role.Id))
-        {
-            role.UserRoles.Add(new UserRole { UserId = userName, RoleId = role.Id });
-        }
     }
 
     private async Task SeedSystemWidePermissions()
@@ -314,5 +198,68 @@ public class DbInitializer
                 RelatedTo = "User management"
             }
         };
+    }
+
+    private async Task SeedSystemUser(string username, string email, string displayName)
+    {
+        var defaultPassword = _passwordHasher.Hash(Organization.DefaultOwnerPassword);
+        var user = User.CreateInternal(username, defaultPassword, email, displayName);
+
+        if (await _dbContext.Users.AnyAsync(u => u.Id == username))
+        {
+            _dbContext.Update(user);
+        }
+        else
+        {
+            _dbContext.Add(user);
+        }
+    }
+
+    private async Task SeedTenant(string tenantName)
+    {
+        var tenant = new Tenant()
+        {
+            Id = tenantName,
+            Name = tenantName,
+        };
+
+        if (await _dbContext.Tenants.AnyAsync(t => t.Id == tenantName || t.Name == tenantName))
+        {
+            _dbContext.Update(tenant);
+        }
+        else
+        {
+            _dbContext.Add(tenant);
+        }
+    }
+
+    private async Task SeedOrganization(string name, string email, string description)
+    {
+        var organization = Organization.CreateInternal(name, name, description);
+        organization.Email = email;
+
+        if (await _dbContext.Organizations.AnyAsync(org => org.Id == name || org.Name == name))
+        {
+            _dbContext.Update(organization);
+        }
+        else
+        {
+            _dbContext.Add(organization);
+        }
+    }
+
+    private async Task SeedSupportUser(string username, string email, string displayName, string tenantName)
+    {
+        var defaultPassword = _passwordHasher.Hash(Organization.DefaultOwnerPassword);
+        var user = User.CreateInternal(username, defaultPassword, email, displayName, tenantName, UserData.SystemUsername);
+
+        if (await _dbContext.Users.AnyAsync(u => u.Id == username))
+        {
+            _dbContext.Update(user);
+        }
+        else
+        {
+            _dbContext.Add(user);
+        }
     }
 }

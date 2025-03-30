@@ -27,7 +27,7 @@ public class UpdateRoleHandler : ICommandHandler<Command.UpdateRole>
             throw new NotFoundException("Role is not found");
         }
 
-        role.Update(request.Name, request.Description, request.PhoneNumer);
+        role.Update(request.Name, request.Description);
 
         _roleRepository.Update(role);
         await _unitOfWork.SaveChangesAsync(cancellationToken);

@@ -3,6 +3,7 @@ using System;
 using EShop.Identity.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace EShop.Identity.Persistence.Migrations
 {
     [DbContext(typeof(UsersDbContext))]
-    partial class UsersDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250329083315_AddInboxMessagesTable")]
+    partial class AddInboxMessagesTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -85,7 +88,8 @@ namespace EShop.Identity.Persistence.Migrations
             modelBuilder.Entity("EShop.Identity.Domain.Entities.Permission", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("text");
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
                     b.Property<string>("Description")
                         .HasMaxLength(500)
@@ -121,6 +125,10 @@ namespace EShop.Identity.Persistence.Migrations
                         .HasMaxLength(150)
                         .HasColumnType("character varying(150)");
 
+                    b.Property<string>("PhoneNumber")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
                     b.Property<string>("Scope")
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)");
@@ -143,7 +151,7 @@ namespace EShop.Identity.Persistence.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("PermissionId")
-                        .HasColumnType("text");
+                        .HasColumnType("character varying(50)");
 
                     b.HasKey("RoleId", "PermissionId");
 
@@ -155,7 +163,8 @@ namespace EShop.Identity.Persistence.Migrations
             modelBuilder.Entity("EShop.Identity.Domain.Entities.Tenant", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("text");
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
                     b.Property<string>("ExternalUsersUserPoolId")
                         .HasMaxLength(50)
@@ -173,7 +182,8 @@ namespace EShop.Identity.Persistence.Migrations
             modelBuilder.Entity("EShop.Identity.Domain.Entities.TenantSetting", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("text");
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
                     b.Property<bool>("CustomerPortalEnabled")
                         .HasMaxLength(255)
@@ -303,18 +313,6 @@ namespace EShop.Identity.Persistence.Migrations
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
-
-                    b.Property<string>("ReasonFailed")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
-
-                    b.Property<string>("State")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTimeOffset>("UpdatedOnUtc")
-                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("MessageId");
 

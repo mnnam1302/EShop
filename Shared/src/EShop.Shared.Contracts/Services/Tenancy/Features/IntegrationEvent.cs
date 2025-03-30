@@ -1,6 +1,4 @@
-﻿using EShop.Shared.Contracts.Abstractions.Requests;
-
-namespace EShop.Shared.Contracts.Services.Tenancy.Features;
+﻿namespace EShop.Shared.Contracts.Services.Tenancy.Features;
 
 public interface SupportedFeaturesUpdated : TenancyEvent
 {

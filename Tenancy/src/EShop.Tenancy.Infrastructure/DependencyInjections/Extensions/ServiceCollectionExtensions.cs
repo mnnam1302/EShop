@@ -1,9 +1,10 @@
-﻿using EShop.Shared.EventBus.DependencyInjections.Extensions;
+﻿using EShop.Shared.Contracts.Services.Tenancy.Features;
+using EShop.Shared.EventBus.DependencyInjections.Extensions;
 using EShop.Shared.EventBus.DependencyInjections.Options;
 using EShop.Shared.EventBus.JsonConverters;
 using EShop.Shared.EventBus.PipelineObservers;
-using EShop.Tenancy.Application.Abstrations;
-using EShop.Tenancy.Infrastructure.Producers;
+using EShop.Shared.EventBus.Services;
+using EShop.Tenancy.Infrastructure.Consumers;
 using MassTransit;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -17,7 +18,7 @@ public static class ServiceCollectionExtensions
         this IServiceCollection services,
         IConfiguration configuration,
         IWebHostEnvironment environment,
-        string serviceName)
+        string serviceName = "tenancy")
     {
         services.AddMasstransitRabbitMQ(configuration, environment, serviceName);
         services.AddEventBusGateway();
@@ -89,5 +90,22 @@ public static class ServiceCollectionExtensions
         });
 
         return services;
+    }
+
+    public static void ConfigureRecieveEndpoints(
+        this IRabbitMqBusFactoryConfigurator bus,
+        IRegistrationContext context,
+        IWebHostEnvironment environment,
+        string serviceName)
+    {
+        bus.ConfigureEventReceiveEndpoint<SupportedFeaturesUpdatedConsumer, SupportedFeaturesUpdated>(
+            context,
+            environment.EnvironmentName,
+            serviceName);
+
+        bus.ConfigureEventReceiveEndpoint<TenantFeaturesUpdatedConsumer, TenantFeaturesUpdated>(
+            context,
+            environment.EnvironmentName,
+            serviceName);
     }
 }
