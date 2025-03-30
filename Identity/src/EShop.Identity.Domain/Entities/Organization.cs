@@ -3,131 +3,15 @@ using EShop.Shared.DomainTools.Aggregates;
 using EShop.Shared.DomainTools.Extensions;
 using EShop.Shared.Scoping;
 using EShop.Shared.Scoping.Exceptions;
+using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations;
 
 namespace EShop.Identity.Domain.Entities;
 
 public class Organization : AggregateRoot<string>, IExcludedFromScoping
 {
-    public Organization()
-    {
-        // Empty constructor for ORMs
-        Context = OrganisationContext.New();
-    }
-
-    public Organization(string name,
-        string? organizationNumber,
-        string? phoneNumber,
-        string? email,
-        string? address,
-        string? city,
-        string? postcode,
-        string? description,
-        string? parentOrganizationId = null)
-    {
-        Id = name;
-        Name = Check.NotNullOrWhiteSpace(name, nameof(name));
-        OrganizationNumber = organizationNumber;
-        PhoneNumber = phoneNumber;
-        Email = email;
-        Address = address;
-        City = city;
-        Postcode = postcode;
-        Description = description;
-        ParentOrganizationId = parentOrganizationId;
-        Users = new List<User>();
-    }
-
-    public static Organization Create(Command.CreateOrganizationCommand command)
-    {
-        var organization = new Organization(
-            command.Name,
-            command.OrganizationNumber,
-            command.PhoneNumber,
-            command.Email,
-            command.Address,
-            command.City,
-            command.PostCode,
-            command.Description,
-            command.ParentOrganizationId);
-
-        organization.RaiseDomainEvent(new DomainEvent.OrganizationCreated
-        {
-            EventId = Guid.NewGuid(),
-            TimeStamp = DateTimeOffset.Now,
-            OrganizationId = organization.Id,
-            Name = organization.Name,
-            OrganizationNumber = organization.OrganizationNumber,
-            PhoneNumber = organization.PhoneNumber,
-            Email = organization.Email,
-            Address = organization.Address,
-            City = organization.City
-        });
-
-        return organization;
-    }
-
-    public void Update(Command.UpdateOrganizationCommand command)
-    {
-        Name = command.Name;
-        OrganizationNumber = command.OrganizationNumber;
-        PhoneNumber = command.PhoneNumber;
-        Email = command.Email;
-        Address = command.Address;
-        City = command.City;
-        Postcode = command.PostCode;
-        Description = command.Description;
-        ParentOrganizationId = command.ParentOrganizationId;
-
-        RaiseDomainEvent(new DomainEvent.OrganizationUpdated
-        {
-            EventId = Guid.NewGuid(),
-            TimeStamp = DateTimeOffset.Now,
-            OrganizationId = Id,
-            Name = Name,
-            OrganizationNumber = OrganizationNumber,
-            PhoneNumber = PhoneNumber,
-            Email = Email,
-            Address = Address,
-            City = City
-        });
-    }
-
-    public void AddUser(User user)
-    {
-        ValidateUser(user);
-        EnsureUserDoesNotExist(user);
-        Users.Add(user);
-
-        // Raise Domain Event
-        RaiseDomainEvent(new Shared.Contracts.Services.Identity.Users.DomainEvent.UserCreated
-        {
-            EventId = Guid.NewGuid(),
-            TimeStamp = DateTimeOffset.Now,
-            SourceId = user.Id,
-            Username = user.Username,
-            Email = user.Email,
-            DisplayName = user.DisplayName,
-            PhoneNumber = user.PhoneNumber,
-            OrganizationId = user.OrganizationId!
-        });
-    }
-
-    private void ValidateUser(User user)
-    {
-        if (user == null)
-        {
-            throw new BadRequestException("User must be required");
-        }
-    }
-
-    private void EnsureUserDoesNotExist(User user)
-    {
-        if (Users.Any(u => u.Id == user.Id))
-        {
-            throw new ConflictException("User already exists");
-        }
-    }
+    public const string DefaultLanguageCode = "en-gb";
+    private readonly List<User> _users = new();
 
     [MaxLength(ModelConstants.MediumText)]
     public string Name { get; set; }
@@ -164,7 +48,102 @@ public class Organization : AggregateRoot<string>, IExcludedFromScoping
 
     public virtual Organization? ParentOrganization { get; set; }
 
-    public virtual List<User>? Users { get; set; } = new List<User>();
+    public virtual IReadOnlyCollection<User>? Users => _users.AsReadOnly();
 
-    public const string DefaultLanguageCode = "en-gb";
+    // Empty constructor for ORMs
+    public Organization()
+    {
+        Context = OrganisationContext.New();
+    }
+
+    public Organization(
+        string id,
+        string name,
+        string? organizationNumber,
+        string? phoneNumber,
+        string? email,
+        string? address,
+        string? city,
+        string? postcode,
+        string? description,
+        string? parentOrganizationId = null)
+    {
+        Id = id;
+        Name = name;
+        OrganizationNumber = organizationNumber;
+        PhoneNumber = phoneNumber;
+        Email = email;
+        Address = address;
+        City = city;
+        Postcode = postcode;
+        Description = description;
+        ParentOrganizationId = parentOrganizationId;
+    }
+
+    public static Organization Create(Command.CreateOrganizationCommand command)
+    {
+        var organization = new Organization(
+            command.Name,
+            command.Name,
+            command.OrganizationNumber,
+            command.PhoneNumber,
+            command.Email,
+            command.Address,
+            command.City,
+            command.PostCode,
+            command.Description,
+            command.ParentOrganizationId);
+
+        return organization;
+    }
+
+    public static Organization CreateInternal(string tenantId, string name, string? description = null)
+    {
+        var organization = new Organization
+        {
+            Id = tenantId,
+            Name = name,
+            Description = description ?? "Root organization",
+            Context = OrganisationContext.NewRoot(tenantId),
+            LanguageCode = DefaultLanguageCode,
+            //TenantId = tenantId,
+            //Scope = tenantId,
+        };
+
+        return organization;
+    }
+
+    public void Update(Command.UpdateOrganizationCommand command)
+    {
+        Name = command.Name;
+        OrganizationNumber = command.OrganizationNumber;
+        PhoneNumber = command.PhoneNumber;
+        Email = command.Email;
+        Address = command.Address;
+        City = command.City;
+        Postcode = command.PostCode;
+        Description = command.Description;
+        ParentOrganizationId = command.ParentOrganizationId;
+    }
+
+    public void AddUser(User user)
+    {
+        _users.Add(user);
+    }
+
+    public User AddUser(string username, string password, string displayName, string email, string createdBy)
+    {
+        var user = new User()
+        {
+            Id = username,
+            Username = username,
+            PasswordHash = password,
+            DisplayName = displayName,
+            Email = email,
+            CreatedBy = createdBy
+        };
+
+        _users.Add(user);
+        return user;
+    }
 }

@@ -31,9 +31,9 @@ GRANT ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA public TO users;
 CREATE DATABASE eshop_tenancy;
 
 GRANT ALL PRIVILEGES ON DATABASE eshop_tenancy TO tenancy;
-\c eshop_users
+\c eshop_tenancy
 CREATE EXTENSION IF NOT EXISTS citext;
-\c eshop_users
+\c eshop_tenancy
 GRANT ALL PRIVILEGES ON SCHEMA public TO tenancy;
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO tenancy;
 GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO tenancy;

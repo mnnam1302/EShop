@@ -58,7 +58,7 @@ public class DbInitializer
             }
 
             await SeedDataForEShopSystem();
-            await SeedDataForSpecificTenant();
+            //await SeedDataForSpecificTenant();
             await _dbContext.SaveChangesAsync();
         }
         catch (Exception ex)
@@ -79,7 +79,7 @@ public class DbInitializer
     {
         await SeedSystemWidePermissions();
         await SeedTenant(UserData.EShopSupportGroup);
-        await SeedOrganization(UserData.EShopSupportGroup, $"{UserData.EShopSupportGroup.ToLowerInvariant()}@ecommerce.market", "Root System Organization");
+        await SeedOrganization(UserData.EShopSupportGroup, $"{UserData.EShopSupportGroup.ToLowerInvariant()}@eshop.ecommerce", "Root System Organization");
         await SeedUser(
             UserData.SystemUsername,
             $"{UserData.SystemUsername}.{UserData.EShopSupportGroup}@ecommerce.market",
@@ -139,29 +139,16 @@ public class DbInitializer
 
     private static Organization CreateOrganization(string tenantName, string tenantEmail, string description)
     {
-        var organization = new Organization(tenantName,
-            new Random().Next(0, 1000000000).ToString(),
-            "+477" + new Random().Next(0, 1000000000).ToString(),
-            tenantEmail,
-            string.Empty,
-            string.Empty,
-            string.Empty,
-            description);
-
+        var organization = Organization.CreateInternal(tenantName, tenantName, description);
         return organization;
     }
 
     private async Task SeedUser(string userName, string email, string displayName, string tenantName)
     {
-        var user = new User(
-            userName,
-            _passwordHasher.Hash("P@ssword123"),
-            email,
-            displayName,
-            "+477" + new Random().Next(0, 1000000000),
-            DateTime.UtcNow.AddYears(-20),
-            tenantName)
+        var user = new User(userName, _passwordHasher.Hash("P@ssword123"), email, displayName, tenantName)
         {
+            PhoneNumber = "+477" + new Random().Next(0, 1000000000),
+            DateOfBirth = DateTime.UtcNow.AddYears(-20),
             CreatedOnUtc = DateTime.UtcNow
         };
 
@@ -179,7 +166,7 @@ public class DbInitializer
     {
         if (!await _dbContext.Roles.AnyAsync(r => r.Name == roleName && r.TenantId == tenantName))
         {
-            var role = new Role(Guid.NewGuid(), roleName, "Role owner for tenant initialization");
+            var role = Role.Create(roleName, "Role owner for tenant initialization", tenantName);
 
             await SeedRolePermissions(role, GetWidePermissions());
             await SeedUserRolesAsync(role, UserName);

@@ -44,7 +44,7 @@ public class CreateUserCommandHandler : ICommandHandler<Command.CreateUserComman
 
         request.Password = _passwordHasher.Hash("P@ssword123"); // auto-generate and send email, must change pass when first login
         var user = User.Create(request);
-        user.AddRoles(roles.Select(r => r.Id).ToList());
+        user.GrantRoles(roles.Select(r => r.Id).ToList());
 
         organization.AddUser(user);
         _organizationRepository.Update(organization);

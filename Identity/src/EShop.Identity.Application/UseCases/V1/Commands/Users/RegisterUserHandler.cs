@@ -32,12 +32,11 @@ public class RegisterUserHandler : ICommandHandler<Command.RegisterUser>
             throw new BadRequestException("User's username has already used");
         }
 
-        var user = new User(request.UserName,
+        var user = new User(
+            request.UserName,
             _passwordHasher.Hash(request.Password),
             request.Email,
             request.DisplayName,
-            request.PhoneNumber,
-            request.DateOfBirth,
             request.OrganizationId);
 
         _userRepository.Add(user);
