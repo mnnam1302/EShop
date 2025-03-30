@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EShop.Tenancy.Application.UseCases.V1.Commands.Tenants;
 
-public class CreateTenantCommandHandler : ICommandHandler<Shared.Contracts.Services.Tenancy.Tenants.Command.CreateTenantCommand>
+public class CreateTenantCommandHandler : ICommandHandler<Command.CreateTenantCommand>
 {
     private readonly ITenantRepository _tenantRepository;
     private readonly ITenancyUnitOfWork _tenancyUnitOfWork;
@@ -34,7 +34,7 @@ public class CreateTenantCommandHandler : ICommandHandler<Shared.Contracts.Servi
         _featureRepository = featureRepository;
     }
 
-    public async Task<Result> Handle(Shared.Contracts.Services.Tenancy.Tenants.Command.CreateTenantCommand request, CancellationToken cancellationToken)
+    public async Task<Result> Handle(Command.CreateTenantCommand request, CancellationToken cancellationToken)
     {
         var existsingTenant = await _tenantRepository.FindSingleAsync(x => x.Name == request.Name);
         if (existsingTenant is not null)
@@ -47,7 +47,7 @@ public class CreateTenantCommandHandler : ICommandHandler<Shared.Contracts.Servi
         var tenant = Tenant.Create(request);
         await EnsureTenantAvaibleFeatures(tenant, operationalUser.ActionUserId);
 
-        await _eventBusGateway.PublishAsync<IntegrationEvent.TenantCreated>(new
+        await _eventBusGateway.PublishAsync<TenantCreated>(new
         {
             TenantId = tenant.Id,
             TenantName = tenant.Name,

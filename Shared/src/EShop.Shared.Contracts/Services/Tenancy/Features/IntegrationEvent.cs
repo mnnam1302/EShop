@@ -1,16 +1,13 @@
 ﻿namespace EShop.Shared.Contracts.Services.Tenancy.Features;
 
-public static class IntegrationEvent
+public interface SupportedFeaturesUpdated : TenancyEvent
 {
-    public interface SupportedFeaturesUpdated : TenancyEvent
-    {
-        public string SourceSystemReference { get; }
-        public IFeature[] Features { get; }
-        public SupportedFeaturesAction Action { get; }
-    }
-
-    public interface TenantFeaturesUpdated : TenancyEvent { }
+    public string SourceSystemReference { get; }
+    public IFeature[] Features { get; }
+    public SupportedFeaturesAction Action { get; }
 }
+
+public interface TenantFeaturesUpdated : TenancyEvent { }
 
 public interface IFeature
 {

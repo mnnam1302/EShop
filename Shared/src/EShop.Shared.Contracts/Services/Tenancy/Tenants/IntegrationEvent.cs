@@ -2,13 +2,10 @@
 
 namespace EShop.Shared.Contracts.Services.Tenancy.Tenants;
 
-public static class IntegrationEvent
+public interface TenantCreated : IIntegrationEvent
 {
-    public interface TenantCreated : IIntegrationEvent
-    {
-        string TenantName { get; }
-        string OwnerUsername { get; }
-        string OwnerDisplayName { get; }
-        string OwnerEmail { get; }
-    }
+    string TenantName { get; }
+    string OwnerUsername { get; }
+    string OwnerDisplayName { get; }
+    string OwnerEmail { get; }
 }

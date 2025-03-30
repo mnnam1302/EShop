@@ -6,7 +6,7 @@ using MediatR;
 
 namespace EShop.Tenancy.Infrastructure.Consumers;
 
-public class SupportedFeaturesUpdatedConsumer : Consumer<IntegrationEvent.SupportedFeaturesUpdated, TenancyDbContext>
+public class SupportedFeaturesUpdatedConsumer : Consumer<SupportedFeaturesUpdated, TenancyDbContext>
 {
     private readonly ISender _sender;
 
@@ -16,7 +16,7 @@ public class SupportedFeaturesUpdatedConsumer : Consumer<IntegrationEvent.Suppor
         _sender = sender;
     }
 
-    protected override async Task<Result> HandleMessageAsync(IntegrationEvent.SupportedFeaturesUpdated message, CancellationToken cancellationToken)
+    protected override async Task<Result> HandleMessageAsync(SupportedFeaturesUpdated message, CancellationToken cancellationToken)
     {
         var command = new Command.UpdateSupportedFeaturesCommand
         {

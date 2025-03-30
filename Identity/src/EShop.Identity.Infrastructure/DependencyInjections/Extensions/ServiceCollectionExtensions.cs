@@ -111,7 +111,7 @@ public static class ServiceCollectionExtensions
         IWebHostEnvironment environment,
         string serviceName)
     {
-        bus.ConfigureEventReceiveEndpoint<TenantConsumers.TenantCreatedConsumer, IntegrationEvent.TenantCreated>(
+        bus.ConfigureEventReceiveEndpoint<TenantConsumers.TenantCreatedConsumer, TenantCreated>(
             context,
             environment.EnvironmentName,
             serviceName);

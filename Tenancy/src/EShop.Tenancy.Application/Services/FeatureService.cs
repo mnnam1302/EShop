@@ -114,7 +114,7 @@ public class FeatureService : IFeatureService
 
     private async Task PublishTenantFeaturesUpdatedAsync(string tenantId)
     {
-        await _eventBusGateway.PublishAsync<IntegrationEvent.TenantFeaturesUpdated>(new
+        await _eventBusGateway.PublishAsync<TenantFeaturesUpdated>(new
         {
             EventId = Guid.NewGuid(),
             TenantId = tenantId,
