@@ -26,18 +26,13 @@ public class RegisterUserHandler : ICommandHandler<Command.RegisterUser>
 
     public async Task<Result> Handle(Command.RegisterUser request, CancellationToken cancellationToken)
     {
-        var existingUser = await _userRepository.FindSingleAsync(x => x.Username == request.UserName);
+        var existingUser = await _userRepository.FindSingleAsync(x => x.Username == request.Username);
         if (existingUser != null)
         {
             throw new BadRequestException("User's username has already used");
         }
 
-        var user = new User(
-            request.UserName,
-            _passwordHasher.Hash(request.Password),
-            request.Email,
-            request.DisplayName,
-            request.OrganizationId);
+        var user = User.Create(request);
 
         _userRepository.Add(user);
         await _unitOfWork.SaveChangesAsync(cancellationToken);

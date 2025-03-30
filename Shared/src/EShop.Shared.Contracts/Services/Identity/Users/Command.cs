@@ -5,10 +5,11 @@ namespace EShop.Shared.Contracts.Services.Identity.Users;
 
 public static class Command
 {
-    public record RegisterUser(string UserName,
+    public record RegisterUser(
+        string Username,
         string Password,
         string Email,
-        string? DisplayName = null,
+        string DisplayName = null,
         string? PhoneNumber = null,
         DateTime? DateOfBirth = null,
         string? OrganizationId = null) : ICommand;
@@ -24,6 +25,6 @@ public static class Command
         public string? PhoneNumber { get; init; }
         public DateTime? DateOfBirth { get; init; }
         public List<string> RoleIds { get; init; }
-        public string OrganizationId { get; init; }
+        public string? OrganizationId { get; init; }
     }
 }

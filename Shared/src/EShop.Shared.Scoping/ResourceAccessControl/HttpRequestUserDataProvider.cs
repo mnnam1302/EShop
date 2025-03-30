@@ -73,7 +73,7 @@ public class HttpRequestUserDataProvider : IUserDetailsProvider
                 return false;
             }
 
-            return userData.Id.Equals(UserData.SystemUsername, StringComparison.OrdinalIgnoreCase);
+            return UserData.IsSystemUser(userData.Id);
         }
     }
 

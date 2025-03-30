@@ -52,34 +52,44 @@ public class User : EntityBase<string>, IDateTracking, IExcludedFromScoping
     // Empty constructor for ORMs
     public User() { }
 
-    public User(string userName, string password, string email, string? displayName, string organizationId)
+    public User(string username, string password, string email, string? displayName)
     {
-        AssertUsername(userName);
-
-        Id = userName;
-        Username = userName;
+        Id = username;
+        Username = username;
         PasswordHash = password;
         Email = email;
         DisplayName = displayName;
-        OrganizationId = organizationId;
+        CreatedOnUtc = DateTimeOffset.UtcNow;
     }
 
-    public static User Create(Command.CreateUserCommand command)
+    public static User Create(Command.RegisterUser command)
     {
-        var user = new User(command.Username,
-            command.Password,
-            command.Email,
-            command.DisplayName,
-            command.OrganizationId);
+        var user = CreateInternal(command.Username, command.Password, command.Email, command.DisplayName, command.OrganizationId);
+        
+        user.PhoneNumber = command.PhoneNumber;
+        user.DateOfBirth = command.DateOfBirth;
 
         return user;
     }
 
-    public static User Create(string username, string password, string email, string displayName, string organizationId, string createdBy = null)
+    public static User Create(Command.CreateUserCommand command)
     {
-        var user = new User(username, password, email, displayName, organizationId);
-        user.CreatedBy = createdBy;
+        var user = CreateInternal(command.Username, command.Password, command.Email, command.DisplayName, command.OrganizationId);
+        return user;
+    }
 
+    public static User CreateInternal(string username, string password, string email, string displayName, string? organizationId = null, string? createdBy = null)
+    {
+        AssertUsername(username);
+
+        var user = new User(username, password, email, displayName);
+        user.CreatedBy = createdBy;
+        
+        if (!string.IsNullOrWhiteSpace(organizationId))
+        {
+            user.OrganizationId = organizationId;
+        }
+        
         return user;
     }
 

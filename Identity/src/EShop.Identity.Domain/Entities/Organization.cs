@@ -131,12 +131,9 @@ public class Organization : AggregateRoot<string>, IExcludedFromScoping
 
     public User AddUser(string username, string password, string displayName, string email, string createdBy)
     {
-        var user = new User(username, password, email, displayName, Id)
-        {
-            CreatedBy = createdBy
-        };
-
+        var user = User.CreateInternal(username, password, email, displayName, Id, createdBy);
         _users.Add(user);
+
         return user;
     }
 }

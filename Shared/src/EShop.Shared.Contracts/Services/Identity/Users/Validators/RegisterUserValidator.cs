@@ -6,7 +6,7 @@ public class RegisterUserValidator : AbstractValidator<Command.RegisterUser>
 {
     public RegisterUserValidator()
     {
-        RuleFor(x => x.UserName)
+        RuleFor(x => x.Username)
             .NotEmpty()
             .MinimumLength(6);
 

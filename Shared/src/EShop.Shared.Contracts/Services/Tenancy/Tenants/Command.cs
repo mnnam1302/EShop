@@ -20,7 +20,7 @@ public static class Command
         [MaxLength(ModelConstants.MediumLongText)]
         public required string Email { get; set; }
 
-        public required string PhoneNumber { get; set; }
+        public string? PhoneNumber { get; set; }
 
         [MaxLength(ModelConstants.LongText)]
         public string? Description { get; set; }
