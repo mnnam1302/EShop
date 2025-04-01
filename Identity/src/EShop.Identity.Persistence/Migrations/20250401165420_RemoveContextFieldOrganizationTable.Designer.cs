@@ -3,6 +3,7 @@ using System;
 using EShop.Identity.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace EShop.Identity.Persistence.Migrations
 {
     [DbContext(typeof(UsersDbContext))]
-    partial class UsersDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250401165420_RemoveContextFieldOrganizationTable")]
+    partial class RemoveContextFieldOrganizationTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -327,26 +330,6 @@ namespace EShop.Identity.Persistence.Migrations
                         .WithMany()
                         .HasForeignKey("ParentOrganizationId")
                         .OnDelete(DeleteBehavior.Restrict);
-
-                    b.OwnsOne("EShop.Shared.Scoping.OrganisationContext", "Context", b1 =>
-                        {
-                            b1.Property<string>("OrganizationId")
-                                .HasColumnType("text");
-
-                            b1.Property<string>("Path")
-                                .IsRequired()
-                                .HasColumnType("text");
-
-                            b1.HasKey("OrganizationId");
-
-                            b1.ToTable("Organizations");
-
-                            b1.WithOwner()
-                                .HasForeignKey("OrganizationId");
-                        });
-
-                    b.Navigation("Context")
-                        .IsRequired();
 
                     b.Navigation("ParentOrganization");
                 });

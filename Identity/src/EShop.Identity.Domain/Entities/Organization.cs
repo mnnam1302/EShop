@@ -91,7 +91,7 @@ public class Organization : AggregateRoot<string>, IExcludedFromScoping
             Id = tenantId,
             Name = name,
             Description = description ?? "Root organization",
-            Context = OrganisationContext.NewRoot(tenantId),
+            //Context = OrganisationContext.NewRoot(tenantId),
             LanguageCode = DefaultLanguageCode,
             //TenantId = tenantId,
             //Scope = tenantId,

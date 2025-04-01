@@ -1,7 +1,6 @@
 ﻿using EShop.Identity.Application.Abstractions;
 using EShop.Identity.Domain.Entities;
 using EShop.Identity.Domain.Repositories;
-using EShop.Identity.Persistence;
 using EShop.Shared.Contracts.Abstractions.Requests;
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.Contracts.Services.Identity.Users;
@@ -20,7 +19,6 @@ public class CreateUserCommandHandler : ICommandHandler<Command.CreateUserComman
     private readonly IUnitOfWork _unitOfWork;
     private readonly IPasswordHasher _passwordHasher;
     private readonly IUserDetailsProvider _userDetailsProvider;
-    private readonly UsersDbContext _dbContext;
 
     public CreateUserCommandHandler(
         IOrganizationRepository organizationRepository,
@@ -28,8 +26,7 @@ public class CreateUserCommandHandler : ICommandHandler<Command.CreateUserComman
         IIdentityRepositoryBase<User, string> userRepository,
         IUnitOfWork unitOfWork,
         IPasswordHasher passwordHasher,
-        IUserDetailsProvider userDetailsProvider,
-        UsersDbContext dbContext)
+        IUserDetailsProvider userDetailsProvider)
     {
         _organizationRepository = organizationRepository;
         _roleRepository = roleRepository;
@@ -37,17 +34,15 @@ public class CreateUserCommandHandler : ICommandHandler<Command.CreateUserComman
         _unitOfWork = unitOfWork;
         _passwordHasher = passwordHasher;
         _userDetailsProvider = userDetailsProvider;
-        _dbContext = dbContext;
     }
 
     public async Task<Result> Handle(Command.CreateUserCommand request, CancellationToken cancellationToken)
     {
         var organization = await _organizationRepository.FindSingleAsync(o => o.Id == request.OrganizationId);
-        //var organization = await _dbContext.Organizations.FindAsync(request.OrganizationId, cancellationToken);
-        //if (organization is null)
-        //{
-        //    throw new NotFoundException($"Organization {request.OrganizationId} was not found");
-        //}
+        if (organization is null)
+        {
+            throw new NotFoundException($"Organization {request.OrganizationId} was not found");
+        }
 
         var existingUser = await _userRepository
             .FindSingleAsync(x =>
@@ -60,7 +55,7 @@ public class CreateUserCommandHandler : ICommandHandler<Command.CreateUserComman
         }
 
         var defaultPassword = _passwordHasher.Hash(Organization.DefaultOwnerPassword);
-        //var user = organization.AddUser(request.Username, defaultPassword, request.DisplayName, request.Email, _userDetailsProvider.AuthenticatedUser.ActionUserId);
+        var user = organization.AddUser(request.Username, defaultPassword, request.DisplayName, request.Email, _userDetailsProvider.AuthenticatedUser.ActionUserId);
 
         var roles = await _roleRepository.FindByConditionAsync(x => request.RoleIds.Contains(x.Id));
         if (roles.Count != request.RoleIds.Length)
@@ -68,10 +63,10 @@ public class CreateUserCommandHandler : ICommandHandler<Command.CreateUserComman
             throw new NotFoundException("One or more roles were not found");
         }
 
-        //user.GrantRoles(roles.Select(r => r.Id).ToArray());
+        user.GrantRoles(roles.Select(r => r.Id).ToArray());
 
         //_userRepository.Add(user);
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
+        //await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Result.Success();
     }
