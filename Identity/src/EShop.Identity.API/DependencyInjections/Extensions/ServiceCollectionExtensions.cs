@@ -66,6 +66,8 @@ public static class ServiceCollectionExtensions
                 options.SubstituteApiVersionInUrl = true;
             });
 
+        services.AddTransient<DbInitializer>();
+
         return services;
     }
 

@@ -28,6 +28,7 @@ public class User : EntityBase<string>, IDateTracking, IExcludedFromScoping
     public DateTime? DateOfBirth { get; set; }
 
     public bool IsDirector { get; set; } = false;
+
     public bool IsHeadOfDepartment { get; set; } = false;
 
     [MaxLength(ModelConstants.ShortText)]
@@ -43,10 +44,12 @@ public class User : EntityBase<string>, IDateTracking, IExcludedFromScoping
     public virtual List<Role> Roles { get; set; } = new();
     public virtual List<UserRole> UserRoles { get; set; } = new();
 
+
     [MaxLength(ModelConstants.ShortText)]
     public string? CreatedBy { get; set; }
 
     public DateTimeOffset CreatedOnUtc { get; set; }
+
     public DateTimeOffset? LastModifiedOnUtc { get; set; }
 
     // Empty constructor for ORMs
@@ -69,12 +72,6 @@ public class User : EntityBase<string>, IDateTracking, IExcludedFromScoping
         user.PhoneNumber = command.PhoneNumber;
         user.DateOfBirth = command.DateOfBirth;
 
-        return user;
-    }
-
-    public static User Create(Command.CreateUserCommand command)
-    {
-        var user = CreateInternal(command.Username, command.Password, command.Email, command.DisplayName, command.OrganizationId);
         return user;
     }
 
@@ -103,15 +100,10 @@ public class User : EntityBase<string>, IDateTracking, IExcludedFromScoping
         };
     }
 
-    public void GrantRoles(IEnumerable<string> roleIds)
+    public void GrantRoles(string[] roleIds)
     {
         foreach (var roleId in roleIds)
         {
-            if (UserRoles.Any(ur => ur.RoleId == roleId))
-            {
-                throw new BadRequestException($"User already has the role: {roleId}");
-            }
-
             GrantRole(roleId);
         }
     }

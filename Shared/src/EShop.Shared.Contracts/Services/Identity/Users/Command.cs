@@ -1,5 +1,7 @@
 ﻿using EShop.Shared.Contracts.Abstractions.Requests;
+using EShop.Shared.Contracts.Shared;
 using Newtonsoft.Json;
+using System.ComponentModel.DataAnnotations;
 
 namespace EShop.Shared.Contracts.Services.Identity.Users;
 
@@ -9,22 +11,29 @@ public static class Command
         string Username,
         string Password,
         string Email,
-        string DisplayName = null,
+        string DisplayName,
         string? PhoneNumber = null,
         DateTime? DateOfBirth = null,
         string? OrganizationId = null) : ICommand;
 
     public record CreateUserCommand : ICommand
     {
-        public string Username { get; init; }
+        [MaxLength(ModelConstants.MediumText)]
+        public required string Username { get; init; }
 
-        [JsonIgnore]
-        public string Password { get; set; } = string.Empty;
-        public string Email { get; init; }
-        public string DisplayName { get; init; }
+        [MaxLength(ModelConstants.MediumText)]
+        [EmailAddress]
+        public required string Email { get; init; }
+
+        [MaxLength(ModelConstants.MediumText)]
+        public required string DisplayName { get; init; }
+
+        [MaxLength(ModelConstants.StandardText)]
         public string? PhoneNumber { get; init; }
-        public DateTime? DateOfBirth { get; init; }
-        public List<string> RoleIds { get; init; }
-        public string? OrganizationId { get; init; }
+
+        [MaxLength(ModelConstants.ShortText)]
+        public required string OrganizationId { get; init; }
+
+        public required string[] RoleIds { get; init; }
     }
 }

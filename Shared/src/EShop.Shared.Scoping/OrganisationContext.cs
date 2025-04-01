@@ -33,7 +33,7 @@ public class OrganisationContext : ValueObject
         return new OrganisationContext(pathWithoutWildcard);
     }
 
-    public static OrganisationContext New() => new OrganisationContext(string.Empty);
+    public static OrganisationContext Empty() => new OrganisationContext(string.Empty);
 
     public static OrganisationContext Parse(string path) => new OrganisationContext(path ?? string.Empty);
 

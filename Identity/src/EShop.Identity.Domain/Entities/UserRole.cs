@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace EShop.Identity.Domain.Entities;
 
-public class UserRole : IdentityUserRole<string>, IExcludedFromScoping
+public class UserRole : IExcludedFromScoping
 {
     public string UserId { get; set; }
     public virtual User User { get; set; }

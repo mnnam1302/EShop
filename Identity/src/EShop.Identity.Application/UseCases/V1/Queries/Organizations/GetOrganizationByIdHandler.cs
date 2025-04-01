@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
-using EShop.Identity.Domain.Abstractions.Repositories;
-using EShop.Identity.Domain.Entities;
+using EShop.Identity.Domain.Repositories;
 using EShop.Shared.Contracts.Abstractions.Requests;
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.Contracts.Services.Identity.Organizations;
@@ -10,11 +9,11 @@ namespace EShop.Identity.Application.UseCases.V1.Queries.Organizations;
 
 public class GetOrganizationByIdHandler : IQueryHandler<Query.GetOrganizationById, Response.OrganizationResponse>
 {
-    private readonly IIdentityAggregateRepository<Organization, string> _organizationRepository;
+    private readonly IOrganizationRepository _organizationRepository;
     private readonly IMapper _mapper;
 
     public GetOrganizationByIdHandler(
-        IIdentityAggregateRepository<Organization, string> organizationRepository,
+        IOrganizationRepository organizationRepository,
         IMapper mapper)
     {
         _organizationRepository = organizationRepository;

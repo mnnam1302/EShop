@@ -1,5 +1,5 @@
-﻿using EShop.Identity.Domain.Abstractions.Repositories;
-using EShop.Identity.Domain.Entities;
+﻿using EShop.Identity.Domain.Entities;
+using EShop.Identity.Domain.Repositories;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserPermissionProvider;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;

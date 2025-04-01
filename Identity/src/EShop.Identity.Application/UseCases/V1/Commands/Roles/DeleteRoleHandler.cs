@@ -1,5 +1,5 @@
-﻿using EShop.Identity.Domain.Abstractions.Repositories;
-using EShop.Identity.Domain.Entities;
+﻿using EShop.Identity.Domain.Entities;
+using EShop.Identity.Domain.Repositories;
 using EShop.Shared.Contracts.Abstractions.Requests;
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.Contracts.Services.Identity.Roles;
@@ -26,7 +26,7 @@ public class DeleteRoleHandler : ICommandHandler<Command.DeleteRole>
         {
             throw new NotFoundException("Role is not found");
         }
-
+        
         _roleRepository.Delete(role);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 

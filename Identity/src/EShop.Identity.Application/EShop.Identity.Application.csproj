@@ -22,5 +22,6 @@
     <ProjectReference Include="..\..\..\Shared\src\EShop.Shared.EventBus\EShop.Shared.EventBus.csproj" />
     <ProjectReference Include="..\..\..\Shared\src\EShop.Shared.JsonApi\EShop.Shared.JsonApi.csproj" />
     <ProjectReference Include="..\EShop.Identity.Domain\EShop.Identity.Domain.csproj" />
+    <ProjectReference Include="..\EShop.Identity.Persistence\EShop.Identity.Persistence.csproj" />
   </ItemGroup>
 </Project>

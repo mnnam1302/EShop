@@ -1,14 +1,12 @@
 ﻿using EShop.Identity.Application.Abstractions;
 using EShop.Identity.Domain.Entities;
-using EShop.Shared.Contracts.Services.Identity.Users;
+using EShop.Identity.Persistence;
 using EShop.Shared.DbResourceAccessControl;
 using EShop.Shared.Scoping;
 using EShop.Shared.Scoping.ResourceAccessControl;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 
-namespace EShop.Identity.Persistence;
+namespace EShop.Identity.API;
 
 public class DbInitializer
 {

@@ -1,5 +1,5 @@
-﻿using EShop.Identity.Domain.Abstractions.Repositories;
-using EShop.Identity.Domain.Entities;
+﻿using EShop.Identity.Domain.Entities;
+using EShop.Identity.Domain.Repositories;
 using EShop.Shared.Contracts.Abstractions.Requests;
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.Contracts.Services.Identity.Organizations;
@@ -10,11 +10,11 @@ namespace EShop.Identity.Application.UseCases.V1.Commands.Organizations;
 
 public class CreateOrganizationHandler : ICommandHandler<Command.CreateOrganizationCommand>
 {
-    private readonly IIdentityAggregateRepository<Organization, string> _organizationRepository;
+    private readonly IOrganizationRepository _organizationRepository;
     private readonly IUnitOfWork _unitOfWork;
 
     public CreateOrganizationHandler(
-        IIdentityAggregateRepository<Organization, string> organizationRepository,
+        IOrganizationRepository organizationRepository,
         IUnitOfWork unitOfWork)
     {
         _organizationRepository = organizationRepository;
