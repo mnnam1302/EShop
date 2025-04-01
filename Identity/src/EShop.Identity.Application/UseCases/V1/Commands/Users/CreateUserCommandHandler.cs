@@ -65,8 +65,8 @@ public class CreateUserCommandHandler : ICommandHandler<Command.CreateUserComman
 
         user.GrantRoles(roles.Select(r => r.Id).ToArray());
 
-        //_userRepository.Add(user);
-        //await _unitOfWork.SaveChangesAsync(cancellationToken);
+        _userRepository.Add(user);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Result.Success();
     }
