@@ -8,6 +8,7 @@ using EShop.Shared.Cache.DependencyInejctions.Extensions;
 using EShop.Shared.Cache.Providers;
 using EShop.Shared.Cache.Services;
 using EShop.Shared.Contracts.Services.Identity.Auth;
+using EShop.Shared.JsonApi.DependencyInjections;
 using EShop.Shared.JsonApi.Middlewares;
 using EShop.Shared.Scoping.ResourceAccessControl;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserPermissionProvider;
@@ -77,11 +78,11 @@ internal static class ServiceCollectionExtensions
         PostgreSqlTestDatabase testDatabase)
     {
         services
-            .AddMemoryInfrastructure()
-            .AddUserTokenCachingService();
+            .AddPostgreSqlTestDbContext<UsersDbContext>(testDatabase);
 
         services
-            .AddPostgreSqlTestDbContext<UsersDbContext>(testDatabase);
+            .AddMemoryInfrastructure()
+            .AddUserTokensProvider(configuration);
 
         return services;
     }

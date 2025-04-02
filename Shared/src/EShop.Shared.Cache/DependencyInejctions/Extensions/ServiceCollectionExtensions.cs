@@ -1,10 +1,6 @@
 ﻿using EShop.Shared.Cache.DependencyInejctions.Options;
 using EShop.Shared.Cache.Providers;
-using EShop.Shared.Cache.Services;
-using EShop.Shared.Contracts.Services.Identity.Auth;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers;
-using EShop.Shared.Scoping.ResourceAccessControl.Providers.TenantFeaturesProvider;
-using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserTokenProvider;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -45,8 +41,8 @@ public static class ServiceCollectionExtensions
             options.Configuration = connectionString;
         });
 
-        services.AddTransient(typeof(CachedRemoteConfiguration));
-        services.AddTransient<IRedisResiliencePolicyProvider, RedisResiliencePolicyProvider>();
+        services.AddScoped(typeof(CachedRemoteConfiguration));
+        services.AddScoped<IRedisResiliencePolicyProvider, RedisResiliencePolicyProvider>();
 
         return services;
     }
@@ -57,20 +53,6 @@ public static class ServiceCollectionExtensions
         services.AddTransient(typeof(CachedRemoteConfiguration));
         services.AddTransient<IRedisResiliencePolicyProvider, RedisResiliencePolicyProvider>();
 
-        return services;
-    }
-
-    public static IServiceCollection AddUserTokenCachingService(this IServiceCollection services)
-    {
-        services.AddTransient<IRedisCachingAsyncProvider<Response.AuthenticatedResponse>, RedisCachingAsyncProvider<Response.AuthenticatedResponse>>();
-        services.AddTransient<IUserTokenCachingService, TokenRedisCachingService>();
-        return services;
-    }
-
-    public static IServiceCollection AddTenantFeaturesCachingService(this IServiceCollection services)
-    {
-        services.AddTransient<IRedisCachingAsyncProvider<string[]>, RedisCachingAsyncProvider<string[]>>();
-        services.AddTransient<ITenantFeaturesCachingService, TenantFeaturesRedisCachingService>();
         return services;
     }
 }

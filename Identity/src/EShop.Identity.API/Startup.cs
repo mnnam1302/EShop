@@ -1,6 +1,6 @@
 ﻿using EShop.Identity.API.DependencyInjections.Extensions;
+using EShop.Shared.JsonApi.DependencyInjections;
 using EShop.Shared.JsonApi.Middlewares;
-using EShop.Shared.Scoping.DependencyInjections.Extensions;
 using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 

@@ -8,10 +8,11 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddShared(this IServiceCollection services, IConfiguration configuration)
     {
+        services.AddUserScoping();
+
         services
-            .AddUserScoping()
             .AddRedisInfrastructure(configuration)
-            .AddUserTokenCachingService();
+            .AddUserTokensProvider(configuration);
 
         return services;
     }

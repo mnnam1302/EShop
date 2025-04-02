@@ -18,6 +18,7 @@ public class UserPermissionHttpClient
         var response = await _httpClient.GetStringAsync("/api/v1/userPermissions");
 
         var permissions = JsonConvert.DeserializeObject<string[]>(response);
-        return permissions;
+
+        return permissions ?? Array.Empty<string>();
     }
 }

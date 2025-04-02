@@ -10,15 +10,20 @@ namespace EShop.Shared.JsonApi.DependencyInjections;
 
 public static class UserPermissionsExtensions
 {
+    //public static IServiceCollection RegisterPermissions(this IApplicationBuilder app, IHostApplicationLifetime applicationLifetime, ILogger logger)
+    //{
+    //    return services;
+    //}
+
     public static IServiceCollection AddUserPermissionsProvider(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddTransient<IPermissionValidator, CurrentUserPermissionsValidator>();
+        services.AddScoped<IPermissionValidator, CurrentUserPermissionsValidator>();
+        AddPermissionHttpClient(services, configuration);
         AddPermissionCachingService(services, configuration);
 
         return services;
     }
-
-    private static void AddPermissionCachingService(IServiceCollection services, IConfiguration configuration)
+    private static void AddPermissionHttpClient(IServiceCollection services, IConfiguration configuration)
     {
         services
             .AddHttpClient<UserPermissionHttpClient>(client =>
@@ -27,12 +32,12 @@ public static class UserPermissionsExtensions
             })
             .AddPolicyHandler(ResilientClientPolicies.GetRetryOnErrorAndNotFoundPolicy())
             .AddPolicyHandler(ResilientClientPolicies.GetCircuitBreakerPolicy());
+    }
 
-        services.AddRedisInfrastructure(configuration);
-        services.AddTransient<IRedisResiliencePolicyProvider, RedisResiliencePolicyProvider>();
-
-        services.AddTransient<IRedisCachingAsyncProvider<string[]>, RedisCachingAsyncProvider<string[]>>();
-        services.AddTransient<IPermissionCachingService, PermissionRedisCachingService>();
-        services.AddTransient<IUserPermissionsProvider, CacheUserPermissionService>();
+    private static void AddPermissionCachingService(IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddScoped<IRedisCachingAsyncProvider<string[]>, RedisCachingAsyncProvider<string[]>>();
+        services.AddScoped<IPermissionCachingService, PermissionRedisCachingService>();
+        services.AddScoped<IUserPermissionsProvider, UserPermissionProvider>();
     }
 }
