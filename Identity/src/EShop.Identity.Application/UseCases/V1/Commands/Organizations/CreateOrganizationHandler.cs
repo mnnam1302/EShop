@@ -22,65 +22,85 @@ public class CreateOrganizationHandler : ICommandHandler<Command.CreateOrganizat
         _unitOfWork = unitOfWork;
     }
 
+    /// <summary>
+    /// Temporary solution for Row-Level Security (RLS) applied to the Organization table.
+    /// Ensures that the combination of TenantId and Name, or TenantId and Id, is unique.
+    /// </summary>
+    /// <param name="request"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
     public async Task<Result> Handle(Command.CreateOrganizationCommand request, CancellationToken cancellationToken)
+    {
+        var parentOrganization = await GetParentOrganization(request.ParentOrganizationId);
+     
+        await ValidateRequest(request, parentOrganization.TenantId!);
+
+        await ValidateOrganizationHierarchy(parentOrganization);
+
+        var childOrganization = parentOrganization.CreateChildOrganization(request);
+
+        _organizationRepository.Add(childOrganization);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return Result.Success();
+    }
+
+    private async Task ValidateRequest(Command.CreateOrganizationCommand request, string tenantId)
     {
         if (string.IsNullOrEmpty(request.ParentOrganizationId))
         {
             throw new BadRequestException("Parent organization ID is required.");
         }
 
-        await AssertNameIsUnique(request.Name);
-        await AssertOrganizationNumberIsUnique(request.Name, request.OrganizationNumber);
-
-        var organization = Organization.Create(request);
-
-        // Handle ring-fencing
-        var parentOrganization = await _organizationRepository.FindByIdAsync(request.ParentOrganizationId);
-        if (parentOrganization == null)
+        await AssertNameIsUnique(tenantId, request.Name);
+        
+        if (!string.IsNullOrEmpty(request.OrganizationNumber))
         {
-            throw new NotFoundException($"Parent organization with ID {request.ParentOrganizationId} not found.");
+            await AssertOrganizationNumberIsUnique(tenantId, request.ParentOrganizationId, request.OrganizationNumber);
         }
-
-        await CheckOrganizationLevel(request.ParentOrganizationId);
-
-        //organization.TenantId = parentOrganization.TenantId;
-        var context = OrganisationContext.NewChild(parentOrganization.Context);
-        organization.Context = context;
-        //organization.Scope = context.Path;
-
-        _organizationRepository.Add(organization);
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
-
-        return Result.Success();
     }
 
-    private async Task AssertNameIsUnique(string name)
+    private async Task AssertNameIsUnique(string tenantId, string name)
     {
-        var organization = await _organizationRepository.FindSingleAsync(o => o.Id == name || o.Name == name);
+        var organization = await _organizationRepository
+            .FindSingleAsync(o => o.TenantId == tenantId && (o.Id == name || o.Name == name));
         if (organization != null)
         {
-            throw new ConflictException("Organization name is already in use.");
+            throw new ConflictException($"The organization name '{name}' is already in use within tenant '{tenantId}'.");
         }
     }
 
-    private async Task AssertOrganizationNumberIsUnique(string id, string organizationNumber)
+    private async Task AssertOrganizationNumberIsUnique(string tenantId, string id, string organizationNumber)
     {
         var existingOrganization = await _organizationRepository.FindSingleAsync(
-            o => o.Id != id && o.OrganizationNumber == organizationNumber);
+            o => o.TenantId == tenantId && o.Id != id && o.OrganizationNumber == organizationNumber);
         if (existingOrganization != null)
         {
             throw new ConflictException("Organization number is already in use.");
         }
     }
 
-    private async Task CheckOrganizationLevel(string parentOrganizationId)
+    private async Task<Organization> GetParentOrganization(string parentOrganizationId)
     {
-        var parentLevel = await GetOrganizationLevel(parentOrganizationId);
+        var parentOrganization = await _organizationRepository.FindByIdAsync(parentOrganizationId);
+
+        if (parentOrganization == null)
+        {
+            throw new NotFoundException($"Parent organization with ID {parentOrganizationId} not found.");
+        }
+
+        return parentOrganization;
+    }
+
+    private async Task ValidateOrganizationHierarchy(Organization parentOrganization)
+    {
+        var parentLevel = await GetOrganizationLevel(parentOrganization.Id);
         int nextLevel = parentLevel + 1;
 
         if (nextLevel > Organization.MaxSupportedLevel)
         {
-            throw new BadRequestException($"Organization structure only supports maximum of {Organization.MaxSupportedLevel} levels.");
+            throw new BadRequestException(
+                $"Organization structure only supports maximum of {Organization.MaxSupportedLevel} levels.");
         }
     }
 

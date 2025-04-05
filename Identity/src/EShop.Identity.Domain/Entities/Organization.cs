@@ -67,9 +67,14 @@ public class Organization : AggregateRoot<string>, IExcludedFromScoping
         OrganizationNumber = organizationNumber;
     }
 
-    public static Organization Create(Command.CreateOrganizationCommand command)
+    public Organization CreateChildOrganization(Command.CreateOrganizationCommand command)
     {
-        var organization = new Organization(command.Name, command.Name, command.OrganizationNumber)
+        if (string.IsNullOrEmpty(command.ParentOrganizationId))
+        {
+            throw new BadRequestException("Parent organization ID is required.");
+        }
+
+        var childOrganization = new Organization(command.Name, command.Name, command.OrganizationNumber)
         {
             PhoneNumber = command.PhoneNumber,
             Email = command.Email,
@@ -80,10 +85,15 @@ public class Organization : AggregateRoot<string>, IExcludedFromScoping
             ParentOrganizationId = command.ParentOrganizationId
         };
 
-        return organization;
+        var context = OrganisationContext.NewChild(Context);
+        childOrganization.Context = context;
+        childOrganization.Scope = context.Path;
+        childOrganization.TenantId = TenantId;
+
+        return childOrganization;
     }
 
-    public static Organization CreateInternal(string tenantId, string name, string? description = null)
+    public static Organization CreateRootOrganizationInternal(string tenantId, string name, string? description = null)
     {
         var organization = new Organization
         {
@@ -92,8 +102,8 @@ public class Organization : AggregateRoot<string>, IExcludedFromScoping
             Description = description ?? "Root organization",
             Context = OrganisationContext.NewRoot(tenantId),
             LanguageCode = DefaultLanguageCode,
-            //TenantId = tenantId,
-            //Scope = tenantId,
+            TenantId = tenantId,
+            Scope = tenantId,
         };
 
         return organization;

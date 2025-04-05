@@ -16,7 +16,7 @@ public static class Command
         public required string Email { get; init; }
 
         [MaxLength(ModelConstants.ShortText)]
-        public required string OrganizationNumber { get; init; }
+        public string? OrganizationNumber { get; init; }
 
         [MaxLength(ModelConstants.ShortText)]
         public string? PhoneNumber { get; init; }

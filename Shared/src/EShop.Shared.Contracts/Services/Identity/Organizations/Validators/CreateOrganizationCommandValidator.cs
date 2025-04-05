@@ -15,7 +15,8 @@ public class CreateOrganizationCommandValidator : AbstractValidator<Command.Crea
 
         RuleFor(x => x.OrganizationNumber)
             .NotEmpty()
-            .Matches(@"^[0-9]{50}$");
+            .Matches(@"^[0-9]{0,50}$")
+            .When(x => !string.IsNullOrEmpty(x.OrganizationNumber));
 
         RuleFor(x => x.PhoneNumber)
             .Matches(@"^\+?[0-9]{10,15}$")

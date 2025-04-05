@@ -233,7 +233,7 @@ public class DbInitializer
 
     private async Task SeedOrganization(string name, string email, string description)
     {
-        var organization = Organization.CreateInternal(name, name, description);
+        var organization = Organization.CreateRootOrganizationInternal(name, name, description);
         organization.Email = email;
 
         if (await _dbContext.Organizations.AnyAsync(org => org.Id == name || org.Name == name))

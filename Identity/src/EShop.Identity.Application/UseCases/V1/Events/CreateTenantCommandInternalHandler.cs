@@ -111,7 +111,7 @@ public class CreateTenantCommandInternalHandler : ICommandHandler<Command.Create
     private Organization CreateRootOrganization(string tenantId, string tenantName)
     {
         _logger.LogDebug("Creating root organization for tenant '{id}'...", tenantId);
-        return Organization.CreateInternal(tenantId, tenantName);
+        return Organization.CreateRootOrganizationInternal(tenantId, tenantName);
     }
 
     private async Task<Role> CreateOwnerRoleWithPermissionsAsync(string tenantId, CancellationToken cancellationToken)
