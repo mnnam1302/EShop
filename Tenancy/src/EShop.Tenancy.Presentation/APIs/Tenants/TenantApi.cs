@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 
-namespace EShop.Tenancy.Presentation.APIs.Tenancy;
+namespace EShop.Tenancy.Presentation.APIs.Tenants;
 
 public class TenantApi : ApiEndpointBase, ICarterModule
 {

@@ -19,13 +19,14 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddShared(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment)
     {
         services
-            .AddRedisHealthCheck(configuration)
-            .AddRedisInfrastructure(configuration)
-            .AddUserTokenCachingService();
-
-        services
             .AddPostgreSqlHealthCheck(configuration)
             .AddDbContextWithScoping<UsersDbContext>(configuration);
+
+        services
+            .AddRedisHealthCheck(configuration)
+            .AddRedisInfrastructure(configuration)
+            .AddUserTokensProvider(configuration)
+            .AddTenantFeaturesProvider(configuration);
 
         return services;
     }
@@ -65,6 +66,8 @@ public static class ServiceCollectionExtensions
                 options.GroupNameFormat = "'v'VVV";
                 options.SubstituteApiVersionInUrl = true;
             });
+
+        services.AddTransient<DbInitializer>();
 
         return services;
     }

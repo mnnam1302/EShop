@@ -10,9 +10,14 @@ namespace EShop.Shared.JsonApi.DependencyInjections;
 
 public static class UserPermissionsExtensions
 {
+    //public static IServiceCollection RegisterPermissions(this IApplicationBuilder app, IHostApplicationLifetime applicationLifetime, ILogger logger)
+    //{
+    //    return services;
+    //}
+
     public static IServiceCollection AddUserPermissionsProvider(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddTransient<IPermissionValidator, CurrentUserPermissionsValidator>();
+        services.AddScoped<IPermissionValidator, CurrentUserPermissionsValidator>();
         AddPermissionCachingService(services, configuration);
 
         return services;
@@ -20,19 +25,24 @@ public static class UserPermissionsExtensions
 
     private static void AddPermissionCachingService(IServiceCollection services, IConfiguration configuration)
     {
+        services.ConfigureHttpClientDefaults(options =>
+        {
+            options.AddServiceDiscovery();
+        });
+
+        services.AddServiceDiscovery();
+
         services
             .AddHttpClient<UserPermissionHttpClient>(client =>
             {
-                client.BaseAddress = configuration.GetSection("ExternalServices").GetValue<Uri>("UsersApiUrl");
+                client.BaseAddress = new Uri("http://UsersServiceUrl");
             })
             .AddPolicyHandler(ResilientClientPolicies.GetRetryOnErrorAndNotFoundPolicy())
             .AddPolicyHandler(ResilientClientPolicies.GetCircuitBreakerPolicy());
 
-        services.AddRedisInfrastructure(configuration);
-        services.AddTransient<IRedisResiliencePolicyProvider, RedisResiliencePolicyProvider>();
+        services.AddScoped<IUserPermissionsProvider, UserPermissionProvider>();
+        services.AddScoped<IPermissionCachingService, PermissionRedisCachingService>();
+        services.AddScoped<IRedisCachingAsyncProvider<string[]>, RedisCachingAsyncProvider<string[]>>();
 
-        services.AddTransient<IRedisCachingAsyncProvider<string[]>, RedisCachingAsyncProvider<string[]>>();
-        services.AddTransient<IPermissionCachingService, PermissionRedisCachingService>();
-        services.AddTransient<IUserPermissionsProvider, CacheUserPermissionService>();
     }
 }

@@ -15,8 +15,6 @@ public static class ServiceCollectionExtensions
             .AddMediatR()
             .AddAutoMapperService();
 
-        services.AddServices();
-
         return services;
     }
 
@@ -36,10 +34,5 @@ public static class ServiceCollectionExtensions
     {
         services.AddAutoMapper(AssemblyReference.Assembly);
         return services;
-    }
-
-    private static void AddServices(this IServiceCollection services)
-    {
-        services.AddScoped<IFeatureService, FeatureService>();
     }
 }

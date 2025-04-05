@@ -72,12 +72,20 @@ namespace EShop.Identity.Persistence.Migrations
                         .HasMaxLength(10)
                         .HasColumnType("character varying(10)");
 
+                    b.Property<string>("Scope")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("TenantId")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("Name")
-                        .IsUnique();
-
                     b.HasIndex("ParentOrganizationId");
+
+                    b.HasIndex("TenantId", "Name")
+                        .IsUnique();
 
                     b.ToTable("Organizations", (string)null);
                 });
@@ -325,7 +333,8 @@ namespace EShop.Identity.Persistence.Migrations
                 {
                     b.HasOne("EShop.Identity.Domain.Entities.Organization", "ParentOrganization")
                         .WithMany()
-                        .HasForeignKey("ParentOrganizationId");
+                        .HasForeignKey("ParentOrganizationId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.OwnsOne("EShop.Shared.Scoping.OrganisationContext", "Context", b1 =>
                         {

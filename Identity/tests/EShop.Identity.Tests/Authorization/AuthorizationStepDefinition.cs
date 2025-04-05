@@ -28,6 +28,6 @@ public class AuthorizationStepDefinition
     [Given("all standard features were turned on for test tenant")]
     public void GivenAllStandardFeaturesWereTurnedOnForTestTenant()
     {
-        // todo, when implement tenancy service
+        _apiContext.SetupStandardFeaturesForDefaultTenant();
     }
 }

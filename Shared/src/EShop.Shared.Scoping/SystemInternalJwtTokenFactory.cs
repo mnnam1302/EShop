@@ -42,21 +42,9 @@ public static class SystemInternalJwtTokenFactory
             tenantGroups.Add(UserData.EShopSupportGroup);
         }
 
-        //var additionalClaims = GetAdditionalClaims(user);
-
         var tokenForSpecificUser = GenerateToken(user.Id, tenantGroups, user.Username);
         return new AuthenticationHeaderValue("Bearer", tokenForSpecificUser);
     }
-
-    //private static IDictionary<string, object>? GetAdditionalClaims(UserData user)
-    //{
-    //    if (user.UserType == UserTypes.TenantUsers || string.IsNullOrWhiteSpace(user.OAuthScopes))
-    //    {
-    //        return null;
-    //    }
-
-    //    return new Dictionary<string, object> { ["scope"] = user.OAuthScopes };
-    //}
 
     public static string GenerateToken(string userId, List<string> tenantGroups, string username, IDictionary<string, object>? additionalClaims = null, int expireInDays = 1)
     {

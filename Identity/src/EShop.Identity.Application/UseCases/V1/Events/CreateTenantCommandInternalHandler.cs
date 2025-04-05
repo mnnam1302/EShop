@@ -1,6 +1,6 @@
 ﻿using EShop.Identity.Application.Abstractions;
-using EShop.Identity.Domain.Abstractions.Repositories;
 using EShop.Identity.Domain.Entities;
+using EShop.Identity.Domain.Repositories;
 using EShop.Shared.Contracts.Abstractions.Requests;
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.Contracts.Services.Tenancy.Tenants;
@@ -17,7 +17,7 @@ public class CreateTenantCommandInternalHandler : ICommandHandler<Command.Create
     private readonly ILogger _logger;
     private readonly IPasswordHasher _passwordHasher;
     private readonly IUserDetailsProvider _userDetailsProvider;
-    private readonly IIdentityAggregateRepository<Organization, string> _organizationRepository;
+    private readonly IOrganizationRepository _organizationRepository;
     private readonly IIdentityRepositoryBase<Permission, string> _permissionRepository;
     private readonly IIdentityRepositoryBase<Tenant, string> _tenantRepository;
     private readonly IIdentityRepositoryBase<Role, string> _roleRepository;
@@ -27,7 +27,7 @@ public class CreateTenantCommandInternalHandler : ICommandHandler<Command.Create
         IPasswordHasher passwordHasher,
         ILogger<CreateTenantCommandInternalHandler> logger,
         IUserDetailsProvider userDetailsProvider,
-        IIdentityAggregateRepository<Organization, string> organizationRepository,
+        IOrganizationRepository organizationRepository,
         IIdentityRepositoryBase<Permission, string> permissionRepository,
         IIdentityRepositoryBase<Tenant, string> tenantRepository,
         IIdentityRepositoryBase<Role, string> roleRepository,
@@ -59,7 +59,9 @@ public class CreateTenantCommandInternalHandler : ICommandHandler<Command.Create
 
             var rootOrganization = CreateRootOrganization(request.TenantId, request.TenantName);
             var ownerRole = await CreateOwnerRoleWithPermissionsAsync(request.TenantId, cancellationToken);
-            CreateAndValidateOwnerUser(rootOrganization, request);
+
+            var ownerUser = CreateAndValidateOwnerUser(rootOrganization, request);
+            ownerUser.GrantRole(ownerRole.Id);
 
             _logger.LogDebug("Saving tenant entities to database...");
             _tenantRepository.Add(tenant);
@@ -109,7 +111,7 @@ public class CreateTenantCommandInternalHandler : ICommandHandler<Command.Create
     private Organization CreateRootOrganization(string tenantId, string tenantName)
     {
         _logger.LogDebug("Creating root organization for tenant '{id}'...", tenantId);
-        return Organization.CreateInternal(tenantId, tenantName);
+        return Organization.CreateRootOrganizationInternal(tenantId, tenantName);
     }
 
     private async Task<Role> CreateOwnerRoleWithPermissionsAsync(string tenantId, CancellationToken cancellationToken)
@@ -131,7 +133,7 @@ public class CreateTenantCommandInternalHandler : ICommandHandler<Command.Create
         return ownerRole;
     }
 
-    private void CreateAndValidateOwnerUser(Organization organization, Command.CreateTenantCommandInternal request)
+    private User CreateAndValidateOwnerUser(Organization organization, Command.CreateTenantCommandInternal request)
     {
         _logger.LogDebug("Creating owner user '{username}' for tenant '{id}'...", request.OwnerUsername, request.TenantId);
 
@@ -153,5 +155,7 @@ public class CreateTenantCommandInternalHandler : ICommandHandler<Command.Create
         {
             throw new InvalidOperationException($"Failed to create owner user for tenant '{request.TenantId}'");
         }
+
+        return ownerUser;
     }
 }

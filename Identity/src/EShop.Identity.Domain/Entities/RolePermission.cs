@@ -4,6 +4,8 @@ namespace EShop.Identity.Domain.Entities;
 
 public class RolePermission : IExcludedFromScoping
 {
+    public RolePermission() { }
+
     public string? RoleId { get; set; }
 
     public virtual Role? Role { get; set; }

@@ -13,10 +13,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="UseCases\V1\Queries\" />
-  </ItemGroup>
-
-  <ItemGroup>
   	<PackageReference Include="AutoMapper" />
   	<PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
   </ItemGroup>

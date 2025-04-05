@@ -1,14 +1,12 @@
 ﻿using EShop.Identity.Application.Abstractions;
 using EShop.Identity.Domain.Entities;
-using EShop.Shared.Contracts.Services.Identity.Users;
+using EShop.Identity.Persistence;
 using EShop.Shared.DbResourceAccessControl;
 using EShop.Shared.Scoping;
 using EShop.Shared.Scoping.ResourceAccessControl;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 
-namespace EShop.Identity.Persistence;
+namespace EShop.Identity.API;
 
 public class DbInitializer
 {
@@ -235,7 +233,7 @@ public class DbInitializer
 
     private async Task SeedOrganization(string name, string email, string description)
     {
-        var organization = Organization.CreateInternal(name, name, description);
+        var organization = Organization.CreateRootOrganizationInternal(name, name, description);
         organization.Email = email;
 
         if (await _dbContext.Organizations.AnyAsync(org => org.Id == name || org.Name == name))

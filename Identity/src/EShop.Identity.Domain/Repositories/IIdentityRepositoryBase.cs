@@ -1,11 +1,11 @@
 ﻿using EShop.Shared.DomainTools.Entities;
 using EShop.Shared.DomainTools.Repositories;
 
-namespace EShop.Identity.Domain.Abstractions.Repositories;
+namespace EShop.Identity.Domain.Repositories;
 
 /// <summary>
-/// Defines a repository for all entities in the Identity service.  
-/// However, consider using <see cref="IIdentityAggregateRepository{TAggregate, TKey}"/> for aggregate roots  
+/// Defines a repository for all entities in the Identity service.
+/// However, consider using <see cref="IIdentityAggregateRepository{TAggregate, TKey}"/> for aggregate roots
 /// to maintain proper Domain-Driven Design (DDD) principles.
 /// </summary>
 /// <typeparam name="TEntity">The entity type.</typeparam>

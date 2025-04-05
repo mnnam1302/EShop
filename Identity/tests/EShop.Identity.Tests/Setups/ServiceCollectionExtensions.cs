@@ -1,5 +1,4 @@
-﻿using EShop.Identity.API;
-using EShop.Identity.API.DependencyInjections.Extensions;
+﻿using EShop.Identity.API.DependencyInjections.Extensions;
 using EShop.Identity.Application.DependencyInjections.Extensions;
 using EShop.Identity.Infrastructure.DependencyInjections.Extensions;
 using EShop.Identity.Persistence;
@@ -23,30 +22,45 @@ namespace EShop.Identity.Tests.Setups;
 
 internal static class ServiceCollectionExtensions
 {
+    public static IServiceCollection AddTestShared(this IServiceCollection services,
+    IConfiguration configuration,
+    IWebHostEnvironment environment,
+    PostgreSqlTestDatabase testDatabase)
+    {
+        services
+            .AddPostgreSqlTestDbContext<UsersDbContext>(testDatabase);
+
+        services
+            .AddMemoryInfrastructure()
+            .AddTestUserTokens();
+
+        return services;
+    }
+
+    private static IServiceCollection AddTestUserTokens(this IServiceCollection services)
+    {
+        services.AddScoped<IUserTokenCachingService, TokenRedisCachingService>();
+        services.AddScoped<IRedisCachingProvider<Response.AuthenticatedResponse>, TestUserTokenProvider>();
+
+        return services;
+    }
+
     public static IServiceCollection AddTestBoostrapping(this IServiceCollection services,
         IConfiguration configuration,
         IWebHostEnvironment environment)
     {
         services
-            .AddTestServicesApiLayer()
+            .AddTestIdentityApi()
             .AddIdentityApplication()
             .AddIdentityPersistence()
             .AddIdentityInfrastructure(configuration, environment);
-            
-        services.AddTestUserPermissions();
+
+        services.AddTestOwnerUserPermissions();
 
         return services;
     }
 
-    private static IServiceCollection AddTestUserPermissions(this IServiceCollection services)
-    {
-        services.AddTransient<IPermissionValidator, CurrentUserPermissionsValidator>();
-        services.AddSingleton<IUserPermissionsProvider, TestUserPermissionProvider>();
-
-        return services;
-    }
-
-    private static IServiceCollection AddTestServicesApiLayer(this IServiceCollection services)
+    private static IServiceCollection AddTestIdentityApi(this IServiceCollection services)
     {
         services.AddCors();
         services.AddTransient<ExceptionHandlingMiddleware>();
@@ -71,26 +85,10 @@ internal static class ServiceCollectionExtensions
         return services;
     }
 
-    public static IServiceCollection AddTestShared(this IServiceCollection services,
-        IConfiguration configuration,
-        IWebHostEnvironment environment,
-        PostgreSqlTestDatabase testDatabase)
+    private static IServiceCollection AddTestOwnerUserPermissions(this IServiceCollection services)
     {
-        services
-            .AddMemoryInfrastructure()
-            .AddUserTokenCachingService();
-
-        services
-            .AddPostgreSqlTestDbContext<UsersDbContext>(testDatabase);
-
-        return services;
-    }
-
-    // Consider
-    private static IServiceCollection AddTestUserTokens(this IServiceCollection services)
-    {
-        services.AddTransient<IRedisCachingProvider<Response.AuthenticatedResponse>, TestUserTokenProvider>();
-        services.AddTransient<IUserTokenCachingService, TokenRedisCachingService>();
+        services.AddTransient<IPermissionValidator, CurrentUserPermissionsValidator>();
+        services.AddSingleton<IUserPermissionsProvider, TestUserPermissionProvider>();
 
         return services;
     }

@@ -15,4 +15,8 @@
     <ProjectReference Include="..\..\..\Shared\src\EShop.Shared.JsonApi\EShop.Shared.JsonApi.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="APIs\TenantFeatures\" />
+  </ItemGroup>
+
 </Project>

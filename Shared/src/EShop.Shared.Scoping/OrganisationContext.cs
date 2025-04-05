@@ -8,12 +8,14 @@ public class OrganisationContext : ValueObject
     private const char Wildcard = '*';
     private static readonly string WildcardSegment = $"{PathSeparator}{Wildcard}";
 
+    public OrganisationContext() { }
+
     private OrganisationContext(string path)
     {
         Path = path ?? throw new ArgumentNullException(nameof(path));
     }
 
-    public string Path { get; private set; }
+    public string Path { get; private set; } = string.Empty;
 
     public static OrganisationContext NewRoot(string rootPath) => new OrganisationContext(SanitizePath(rootPath));
 
@@ -33,7 +35,7 @@ public class OrganisationContext : ValueObject
         return new OrganisationContext(pathWithoutWildcard);
     }
 
-    public static OrganisationContext New() => new OrganisationContext(string.Empty);
+    public static OrganisationContext Empty() => new OrganisationContext(string.Empty);
 
     public static OrganisationContext Parse(string path) => new OrganisationContext(path ?? string.Empty);
 

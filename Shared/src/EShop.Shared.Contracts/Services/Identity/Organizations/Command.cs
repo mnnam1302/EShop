@@ -1,20 +1,41 @@
 ﻿using EShop.Shared.Contracts.Abstractions.Requests;
+using EShop.Shared.Contracts.Shared;
 using Newtonsoft.Json;
+using System.ComponentModel.DataAnnotations;
 
 namespace EShop.Shared.Contracts.Services.Identity.Organizations;
 
 public static class Command
 {
-    public sealed record CreateOrganizationCommand(
-        string Name, 
-        string? OrganizationNumber,
-        string? PhoneNumber,
-        string? Email,
-        string? Address,
-        string? City,
-        string? PostCode,
-        string? Description,
-        string? ParentOrganizationId) : ICommand;
+    public sealed record CreateOrganizationCommand : ICommand
+    {
+        [MaxLength(ModelConstants.MediumText)]
+        public required string Name { get; init; }
+
+        [MaxLength(ModelConstants.MediumText)]
+        public required string Email { get; init; }
+
+        [MaxLength(ModelConstants.ShortText)]
+        public string? OrganizationNumber { get; init; }
+
+        [MaxLength(ModelConstants.ShortText)]
+        public string? PhoneNumber { get; init; }
+
+        [MaxLength(ModelConstants.LongText)]
+        public string? Address { get; init; }
+
+        [MaxLength(ModelConstants.MediumText)]
+        public string? City { get; init; }
+
+        [MaxLength(ModelConstants.TinyText)]
+        public string? PostCode { get; init; }
+
+        [MaxLength(ModelConstants.LongText)]
+        public string? Description { get; init; }
+
+        [MaxLength(ModelConstants.ShortText)]
+        public required string ParentOrganizationId { get; init; }
+    }
 
     public sealed record UpdateOrganizationCommand : ICommand
     {

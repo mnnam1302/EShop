@@ -22,7 +22,8 @@ public class OrganizationsController : ApiEndpointBase
     }
 
     [HttpPost]
-    [RequireSupportUser]
+    [RequireFeature(FeatureConstants.Identity_OrganisationRingFencing_FeatureId)]
+    [RequirePermission(PermissionConstants.ManageOrganizationsPermissionId)]
     public async Task<IResult> CreateOrganization([FromBody] Command.CreateOrganizationCommand request)
     {
         var result = await _sender.Send(request);

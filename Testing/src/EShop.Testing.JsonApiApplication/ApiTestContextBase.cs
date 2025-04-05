@@ -2,6 +2,7 @@
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.Scoping;
 using EShop.Shared.Scoping.ResourceAccessControl;
+using EShop.Shared.Scoping.ResourceAccessControl.Providers.TenantFeaturesProvider;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserPermissionProvider;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -37,6 +38,15 @@ public abstract class ApiTestContextBase
     public const string SourceSystem = "BddTest";
 
     // FeatureContants handle later in service Tenancy
+    protected static readonly string[] AllFeatureIds = typeof(FeatureConstants)
+        .GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy)
+        .Where(fi => fi.IsLiteral && !fi.IsInitOnly && fi.Name != nameof(FeatureConstants.InitialState))
+        .Select(fi => fi.GetValue(null)?.ToString())
+        .Where(featureId => featureId is not null)
+        .ToArray()!;
+
+    protected static readonly string[] StandardFeatureIds = AllFeatureIds
+            .ToArray();
 
     protected static readonly string[] AllPermissionIds = typeof(PermissionConstants)
         .GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy)
@@ -55,6 +65,7 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
     private readonly Microsoft.Extensions.Logging.ILogger _logger;
     private readonly Dictionary<string, UserData> _users = new Dictionary<string, UserData>();
     private readonly TestUserPermissionProvider _testUserPermissionProvider;
+    private readonly TestTenantFeatureProvider _testTenantFeatureProvider;
 
     private UserData _defaultUser
         = new UserData("TEST_ADMIN", "TEST_ADMIN", DefaultTenantId, isSupportUser: true);
@@ -99,20 +110,15 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
         _logger = ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger<ApiTestContextBase<TStartup>>();
 
         _testUserPermissionProvider = ServiceProvider.GetRequiredService<IUserPermissionsProvider>() as TestUserPermissionProvider;
+        _testTenantFeatureProvider = ServiceProvider.GetRequiredService<ITenantFeaturesProvider>() as TestTenantFeatureProvider;
     }
 
     public Microsoft.Extensions.Logging.ILogger Logger => _logger;
-
     public ILoggerFactory LoggerFactory => ServiceProvider.GetRequiredService<ILoggerFactory>();
-
     public IServiceProvider ServiceProvider => _serviceScope.ServiceProvider;
-
     public Exception LastApiError { get; set; }
-
     public HttpClient Client => GetAuthorizedClient(_defaultUser);
-
     public string LoggedInUser { get; set; }
-
     public HttpStatusCode LastStatusCode { get; set; }
 
     #region Manage User Management
@@ -188,11 +194,6 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
         }
     }
 
-    public void AddPermissionToUser(string userId, string permissionId)
-    {
-        _testUserPermissionProvider.AddPermission(userId, permissionId);
-    }
-
     public void SetupPermissionsForUser(string username, string[] permissionIds)
     {
         var user = GetUserByUsername(username);
@@ -202,11 +203,29 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
         }
     }
 
+    public void AddPermissionToUser(string userId, string permissionId)
+    {
+        _testUserPermissionProvider.AddPermission(userId, permissionId);
+    }
+
     public void GrantAllPermissionsToUser(string userId)
     {
         foreach (var permissionId in AllPermissionIds)
         {
             _testUserPermissionProvider.AddPermission(userId, permissionId);
+        }
+    }
+
+    public void SetupStandardFeaturesForDefaultTenant()
+    {
+        SetupFeaturesForTenant(_defaultUser.TenantId, StandardFeatureIds);
+    }
+
+    public void SetupFeaturesForTenant(string tenantId, string[] featureIds)
+    {
+        var user = GetUserByUsername();
+        foreach (var featureId in featureIds)
+        {
         }
     }
 
@@ -221,7 +240,7 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
 
         // Simulate Header Propagation middleware which doesn't work on the test client
         var httpContext = _server.Services.GetService<IHttpContextAccessor>()?.HttpContext;
-        if (httpContext != null && 
+        if (httpContext != null &&
             httpContext.Request.Headers.TryGetValue("Authorization", out var values) &&
             !StringValues.IsNullOrEmpty(values))
         {

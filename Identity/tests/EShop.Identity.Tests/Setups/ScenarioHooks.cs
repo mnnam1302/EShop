@@ -1,4 +1,5 @@
-﻿using EShop.Identity.Application.Abstractions;
+﻿using EShop.Identity.API;
+using EShop.Identity.Application.Abstractions;
 using EShop.Identity.Persistence;
 using EShop.Shared.DbResourceAccessControl;
 using EShop.Shared.Scoping;

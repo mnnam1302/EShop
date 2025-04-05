@@ -6,12 +6,8 @@ public class CreateUserValidator : AbstractValidator<Command.CreateUserCommand>
 {
     public CreateUserValidator()
     {
-        // Username not null, and must not equal UserData.SystemUser
         RuleFor(x => x.Username)
-            .NotEmpty()
-            .NotEqual("System")
-            .NotEqual("system")
-            .WithMessage("Invalid username.");
+            .NotEmpty();
 
         RuleFor(x => x.Email)
             .NotEmpty()
@@ -20,10 +16,10 @@ public class CreateUserValidator : AbstractValidator<Command.CreateUserCommand>
         RuleFor(x => x.DisplayName)
             .NotEmpty();
 
-        RuleFor(x => x.RoleIds)
-            .NotEmpty();
-
         RuleFor(x => x.OrganizationId)
+            .NotEmpty();
+        
+        RuleFor(x => x.RoleIds)
             .NotEmpty();
     }
 }

@@ -1,5 +1,4 @@
-﻿using EShop.Identity.Persistence;
-using EShop.Shared.Diagnostics;
+﻿using EShop.Shared.Diagnostics;
 using Serilog;
 
 namespace EShop.Identity.API;
