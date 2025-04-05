@@ -5,29 +5,27 @@ namespace EShop.Testing.JsonApiApplication;
 
 public class TestUserTokenProvider : IRedisCachingProvider<Response.AuthenticatedResponse>
 {
-    private readonly Dictionary<string, Response.AuthenticatedResponse> userToken = new();
+    private readonly Dictionary<string, Response.AuthenticatedResponse> userTokens = new();
 
     public void AddValue(string cacheKey, Response.AuthenticatedResponse value)
     {
-        if (userToken.ContainsKey(cacheKey))
+        if (userTokens.ContainsKey(cacheKey))
         {
             this.ClearCache(cacheKey);
         }
 
-        userToken.Add(cacheKey, value);
+        userTokens.Add(cacheKey, value);
     }
 
     public void ClearCache(string cacheKey)
     {
-        userToken.Clear();
+        userTokens.Clear();
     }
 
     public Response.AuthenticatedResponse? GetValue(string cacheKey)
     {
         var userIdKey = cacheKey.ToLower();
 
-        return userToken.ContainsKey(userIdKey)
-                ? userToken[userIdKey]
-                : null;
+        return userTokens.ContainsKey(userIdKey) ? userTokens[userIdKey] : null;
     }
 }

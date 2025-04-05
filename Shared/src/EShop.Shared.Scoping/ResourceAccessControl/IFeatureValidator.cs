@@ -12,9 +12,9 @@ public interface IFeatureValidator
 public class CurrentUserFeaturesValidator : IFeatureValidator
 {
     private readonly IUserDetailsProvider _userDetailsProvider;
-    private readonly IUserFeaturesProvider _userFeaturesProvider;
+    private readonly ITenantFeaturesProvider _userFeaturesProvider;
 
-    public CurrentUserFeaturesValidator(IUserDetailsProvider userDetailsProvider, IUserFeaturesProvider userFeaturesProvider)
+    public CurrentUserFeaturesValidator(IUserDetailsProvider userDetailsProvider, ITenantFeaturesProvider userFeaturesProvider)
     {
         _userDetailsProvider = userDetailsProvider;
         _userFeaturesProvider = userFeaturesProvider;
@@ -32,10 +32,9 @@ public class CurrentUserFeaturesValidator : IFeatureValidator
             return false;
         }
 
-        var currentUserId = _userDetailsProvider.AuthenticatedUser.Id;
         var tenantId = _userDetailsProvider.AuthenticatedUser.TenantId;
 
-        var currentFeatures = await _userFeaturesProvider.GetFeatures(currentUserId, tenantId);
+        var currentFeatures = await _userFeaturesProvider.GetFeatures(tenantId);
         return featureIds.Any(featureId => currentFeatures.Contains(featureId));
     }
 }

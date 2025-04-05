@@ -23,6 +23,7 @@ public static class UserPermissionsExtensions
 
         return services;
     }
+
     private static void AddPermissionHttpClient(IServiceCollection services, IConfiguration configuration)
     {
         services

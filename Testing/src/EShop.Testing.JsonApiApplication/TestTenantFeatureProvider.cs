@@ -1,0 +1,41 @@
+﻿namespace EShop.Testing.JsonApiApplication;
+
+public class TestTenantFeatureProvider
+{
+    private readonly Dictionary<string, List<string>> tenantFeatures = new Dictionary<string, List<string>>();
+
+    public void AddTenantFeatures(string tenantId, string featureId)
+    {
+        if (!tenantFeatures.ContainsKey(tenantId))
+        {
+            tenantFeatures.Add(tenantId, new List<string>());
+        }
+
+        if (!tenantFeatures[tenantId].Contains(featureId))
+        {
+            tenantFeatures[tenantId].Add(featureId);
+        }
+    }
+
+    public Task<string[]> GetFeatures(string userId, string tenantId)
+    {
+        var features = tenantFeatures.ContainsKey(tenantId) ? tenantFeatures[tenantId].ToArray() : Array.Empty<string>();
+        return Task.FromResult(features);
+    }
+
+    public void RemoveAllFeatures(string tenantId)
+    {
+        if (tenantFeatures.ContainsKey(tenantId))
+        {
+            tenantFeatures[tenantId].Clear();
+        }
+    }
+
+    public void RemoveFeatureFromTenant(string tenantId, string featureId)
+    {
+        if (tenantFeatures.ContainsKey(tenantId) && tenantFeatures[tenantId].Contains(featureId))
+        {
+            tenantFeatures[tenantId].Remove(featureId);
+        }
+    }
+}

@@ -15,8 +15,8 @@ public class TestStartup : Identity.API.Startup
 {
     private readonly PostgreSqlTestDatabase _testDatabase;
 
-    public TestStartup(IConfiguration configuration, IWebHostEnvironment env, PostgreSqlTestDatabase testDatabase)
-        : base(configuration, env)
+    public TestStartup(IConfiguration configuration, IWebHostEnvironment enviroment, PostgreSqlTestDatabase testDatabase)
+        : base(configuration, enviroment)
     {
         this.Environment.EnvironmentName = "Development";
         _testDatabase = testDatabase;

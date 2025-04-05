@@ -1,6 +1,6 @@
 ﻿namespace EShop.Shared.Scoping.ResourceAccessControl.Providers.TenantFeaturesProvider;
 
-public class TenantFeaturesProvider : IUserFeaturesProvider
+public class TenantFeaturesProvider : ITenantFeaturesProvider
 {
     private readonly ITenantFeaturesCachingService _tenantFeaturesCachingService;
     private readonly TenantFeaturesHttpClient _tenantFeatureHttpClient;
@@ -11,7 +11,7 @@ public class TenantFeaturesProvider : IUserFeaturesProvider
         _tenantFeatureHttpClient = tenantFeatureHttpClient;
     }
 
-    public async Task<string[]> GetFeatures(string userId, string tenantId)
+    public async Task<string[]> GetFeatures(string tenantId)
     {
         if (string.IsNullOrWhiteSpace(tenantId))
         {
