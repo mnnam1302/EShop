@@ -1,15 +1,16 @@
-﻿using Newtonsoft.Json;
+﻿using EShop.Shared.Contracts.Abstractions.Shared;
+using EShop.Shared.Contracts.Services.Tenancy.Features;
+using Newtonsoft.Json;
+using System.Net.Http.Json;
 
 namespace EShop.Shared.Scoping.ResourceAccessControl.Providers.TenantFeaturesProvider;
 
-/// <summary>
-/// Need to use service discovery to get the tenant features
-/// </summary>
 public class TenantFeaturesHttpClient
 {
     private const string tenantFeaturesEndpoint = "api/v1/features";
     private readonly IUserDetailsProvider _userDetailsProvider;
     private readonly HttpClient _httpClient;
+
 
     public TenantFeaturesHttpClient(IUserDetailsProvider userDetailsProvider, HttpClient httpClient)
     {
@@ -26,10 +27,9 @@ public class TenantFeaturesHttpClient
 
         var authenticatedClient = SystemInternalJwtTokenFactory.AddUserContext(_httpClient, UserData.GetSystemUser(tenantId));
 
-        var response = await authenticatedClient.GetStringAsync(tenantFeaturesEndpoint);
+        var response = await authenticatedClient.GetStringAsync($"{tenantFeaturesEndpoint}");
 
-        var featureIds = JsonConvert.DeserializeObject<string[]>(response);
-
-        return featureIds ?? Array.Empty<string>();
+        var features = JsonConvert.DeserializeObject<Result<Response.FeatureResponseInternal>>(response);
+        return features?.Value.FeatureIds ?? Array.Empty<string>();
     }
 }

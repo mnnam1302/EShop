@@ -13,6 +13,8 @@ namespace EShop.Tenancy.Application.Services;
 
 public interface IFeatureService
 {
+    Task<IEnumerable<TenantFeature>> GetTenantFeaturesByTenantIdAsync(string tenantId, string? state = null, CancellationToken cancellationToken = default);
+
     Task AddOrUpdateFeatureAsync(Feature feature, string? state, CancellationToken cancellationToken);
 
     Task DeleteFeatureAsync(Feature feature, CancellationToken cancellationToken);
@@ -213,6 +215,35 @@ public class FeatureService : IFeatureService
             {
                 _userDetailsProvider.ClearSystemUserContext();
             }
+        }
+    }
+
+    public async Task<IEnumerable<TenantFeature>> GetTenantFeaturesByTenantIdAsync(string tenantId, string? state = null, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            tenantId = tenantId.ToLower();
+            _userDetailsProvider.SetSystemUserContext(tenantId);
+
+            var queryTenant = _tenantRepository.FindAll(false, t => t.TenantFeatures);
+
+            if (!string.IsNullOrEmpty(state))
+            {
+                queryTenant = queryTenant.Where(t => t.TenantFeatures.Any(tf => tf.State == state));
+            }
+
+            var tenantFeatures = await queryTenant
+                .SelectMany(t => t.TenantFeatures)
+                .AsNoTracking()
+                .ToListAsync(cancellationToken);
+
+            _logger.LogDebug("Get features for tenant '{id}' stored in the database. Result: {count} features available", tenantId, tenantFeatures.Count);
+
+            return tenantFeatures;
+        }
+        finally
+        {
+            _userDetailsProvider.ClearSystemUserContext();
         }
     }
 }

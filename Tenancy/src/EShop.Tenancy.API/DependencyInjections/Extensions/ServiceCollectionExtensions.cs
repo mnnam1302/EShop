@@ -7,6 +7,7 @@ using EShop.Shared.JsonApi.Middlewares;
 using EShop.Shared.Scoping.ResourceAccessControl;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers.TenantFeaturesProvider;
 using EShop.Tenancy.Application.DependencyInjections.Extensions;
+using EShop.Tenancy.Application.Services;
 using EShop.Tenancy.Infrastructure.DependencyInjections.Extensions;
 using EShop.Tenancy.Persistence;
 using EShop.Tenancy.Persistence.DependencyInjections.Extensions;
@@ -74,7 +75,9 @@ public static class ServiceCollectionExtensions
 
     private static void AddTenantFeatureCachingService(IServiceCollection services)
     {
-        services.AddTransient<IRedisCachingAsyncProvider<string[]>, RedisCachingAsyncProvider<string[]>>();
-        services.AddTransient<ITenantFeaturesCachingService, TenantFeaturesRedisCachingService>();
+        services.AddScoped<ITenantFeaturesProvider, OwnerTenantFeaturesProvider>();
+        services.AddScoped<ITenantFeaturesCachingService, TenantFeaturesRedisCachingService>();
+        services.AddScoped<IRedisCachingAsyncProvider<string[]>, RedisCachingAsyncProvider<string[]>>();
+        services.AddScoped<IFeatureService, FeatureService>();
     }
 }

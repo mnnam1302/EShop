@@ -2,6 +2,7 @@
 using EShop.Shared.Cache.Providers;
 using EShop.Shared.Cache.Services;
 using EShop.Shared.HealthChecks;
+using EShop.Shared.Scoping;
 using EShop.Shared.Scoping.ResourceAccessControl;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers.TenantFeaturesProvider;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserPermissionProvider;
@@ -40,27 +41,28 @@ public static class TenantFeaturesExtensions
     public static IServiceCollection AddTenantFeaturesProvider(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddScoped<IFeatureValidator, CurrentUserFeaturesValidator>();
-        AddTenantFeaturesHttpClient(services, configuration);
         AddTenantFeatureCachingService(services, configuration);
 
         return services;
     }
 
-    private static void AddTenantFeaturesHttpClient(IServiceCollection services, IConfiguration configuration)
-    {
-        services
-            .AddHttpClient<UserPermissionHttpClient>(client =>
-            {
-                client.BaseAddress = configuration.GetSection("ExternalServices").GetValue<Uri>("TenancyApiUrl");
-            })
-            .AddPolicyHandler(ResilientClientPolicies.GetRetryOnErrorAndNotFoundPolicy())
-            .AddPolicyHandler(ResilientClientPolicies.GetCircuitBreakerPolicy());
-    }
-
     private static void AddTenantFeatureCachingService(IServiceCollection services, IConfiguration configuration)
     {
-        services.AddScoped<IRedisCachingAsyncProvider<string[]>, RedisCachingAsyncProvider<string[]>>();
-        services.AddScoped<ITenantFeaturesCachingService, TenantFeaturesRedisCachingService>();
+        services.AddServiceDiscovery();
+        services.ConfigureHttpClientDefaults(options =>
+        {
+            options.AddServiceDiscovery();
+        });
+
+        services.AddHttpClient<TenantFeaturesHttpClient>(client =>
+        {
+            client.BaseAddress = new Uri("http://TenancyServiceUrl");
+        })
+            .AddPolicyHandler(ResilientClientPolicies.GetRetryOnErrorAndNotFoundPolicy())
+            .AddPolicyHandler(ResilientClientPolicies.GetCircuitBreakerPolicy());
+
         services.AddScoped<ITenantFeaturesProvider, TenantFeaturesProvider>();
+        services.AddScoped<ITenantFeaturesCachingService, TenantFeaturesRedisCachingService>();
+        services.AddScoped<IRedisCachingAsyncProvider<string[]>, RedisCachingAsyncProvider<string[]>>();
     }
 }

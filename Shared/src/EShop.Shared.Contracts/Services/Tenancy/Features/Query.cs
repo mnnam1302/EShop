@@ -9,5 +9,5 @@ namespace EShop.Shared.Contracts.Services.Tenancy.Features;
 
 public static class Query
 {
-    public record GetFeaturesQuery() : IQuery<List<Response.FeatureResponseInternal>>;
+    public record GetFeaturesQuery() : IQuery<Response.FeatureResponseInternal>;
 }

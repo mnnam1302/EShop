@@ -18,27 +18,31 @@ public static class UserPermissionsExtensions
     public static IServiceCollection AddUserPermissionsProvider(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddScoped<IPermissionValidator, CurrentUserPermissionsValidator>();
-        AddPermissionHttpClient(services, configuration);
         AddPermissionCachingService(services, configuration);
 
         return services;
     }
 
-    private static void AddPermissionHttpClient(IServiceCollection services, IConfiguration configuration)
+    private static void AddPermissionCachingService(IServiceCollection services, IConfiguration configuration)
     {
+        services.ConfigureHttpClientDefaults(options =>
+        {
+            options.AddServiceDiscovery();
+        });
+
+        services.AddServiceDiscovery();
+
         services
             .AddHttpClient<UserPermissionHttpClient>(client =>
             {
-                client.BaseAddress = configuration.GetSection("ExternalServices").GetValue<Uri>("UsersApiUrl");
+                client.BaseAddress = new Uri("http://UsersServiceUrl");
             })
             .AddPolicyHandler(ResilientClientPolicies.GetRetryOnErrorAndNotFoundPolicy())
             .AddPolicyHandler(ResilientClientPolicies.GetCircuitBreakerPolicy());
-    }
 
-    private static void AddPermissionCachingService(IServiceCollection services, IConfiguration configuration)
-    {
-        services.AddScoped<IRedisCachingAsyncProvider<string[]>, RedisCachingAsyncProvider<string[]>>();
-        services.AddScoped<IPermissionCachingService, PermissionRedisCachingService>();
         services.AddScoped<IUserPermissionsProvider, UserPermissionProvider>();
+        services.AddScoped<IPermissionCachingService, PermissionRedisCachingService>();
+        services.AddScoped<IRedisCachingAsyncProvider<string[]>, RedisCachingAsyncProvider<string[]>>();
+
     }
 }

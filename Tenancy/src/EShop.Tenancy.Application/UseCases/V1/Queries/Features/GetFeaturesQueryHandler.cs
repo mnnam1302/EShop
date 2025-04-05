@@ -1,22 +1,31 @@
 ﻿using EShop.Shared.Contracts.Abstractions.Requests;
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.Contracts.Services.Tenancy.Features;
-using EShop.Tenancy.Domain.Repositories;
+using EShop.Shared.Scoping;
+using EShop.Shared.Scoping.ResourceAccessControl.Providers.TenantFeaturesProvider;
 
 namespace EShop.Tenancy.Application.UseCases.V1.Queries.Features;
 
-public class GetFeaturesQueryHandler : IQueryHandler<Query.GetFeaturesQuery, List<Response.FeatureResponseInternal>>
+public class GetFeaturesQueryHandler : IQueryHandler<Query.GetFeaturesQuery, Response.FeatureResponseInternal>
 {
-    private readonly IFeatureRepository _featureRepository;
+    private readonly ITenantFeaturesProvider _tenantFeaturesProvider;
+    private readonly IUserDetailsProvider _userDetailsProvider;
 
-    public GetFeaturesQueryHandler(IFeatureRepository featureRepository)
+    public GetFeaturesQueryHandler(ITenantFeaturesProvider tenantFeaturesProvider, IUserDetailsProvider userDetailsProvider)
     {
-        _featureRepository = featureRepository;
+        _tenantFeaturesProvider = tenantFeaturesProvider;
+        _userDetailsProvider = userDetailsProvider;
     }
 
-    public Task<Result<List<Response.FeatureResponseInternal>>> Handle(Query.GetFeaturesQuery request, CancellationToken cancellationToken)
+    public async Task<Result<Response.FeatureResponseInternal>> Handle(Query.GetFeaturesQuery request, CancellationToken cancellationToken)
     {
-        // Need implmented get feature owner service tenancy.
-        
+        var features = await _tenantFeaturesProvider.GetFeatures(_userDetailsProvider.AuthenticatedUser.TenantId);
+
+        var result = new Response.FeatureResponseInternal
+        {
+            FeatureIds = features
+        };
+
+        return Result.Success(result);
     }
 }

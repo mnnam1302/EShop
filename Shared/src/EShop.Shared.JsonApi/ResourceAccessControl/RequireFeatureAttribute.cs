@@ -36,7 +36,11 @@ public class RequireFeatureAttribute : Attribute, IFilterFactory
         private readonly IUserDetailsProvider _userDetailsProvider;
         private ILogger _logger;
 
-        internal InternalRequireFeatureFilter(IFeatureValidator featureValidator, IUserDetailsProvider userDetailsProvider, ILogger logger, string requiredFeature)
+        internal InternalRequireFeatureFilter(
+            IFeatureValidator featureValidator,
+            IUserDetailsProvider userDetailsProvider,
+            ILogger logger,
+            string requiredFeature)
         {
             _featureValidator = featureValidator;
             _userDetailsProvider = userDetailsProvider;
