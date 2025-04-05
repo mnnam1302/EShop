@@ -53,35 +53,27 @@ public class Organization : AggregateRoot<string>, IExcludedFromScoping
     // Empty constructor for ORMs
     public Organization() { }
 
-    public Organization(string id, string name, string? organizationNumber, string? phoneNumber, string? email, string? address, string? city, string? postcode, string? description, string? parentOrganizationId = null)
+    public Organization(string id, string name, string? organizationNumber)
     {
         Id = id;
         Name = name;
         OrganizationNumber = organizationNumber;
-        PhoneNumber = phoneNumber;
-        Email = email;
-        Address = address;
-        City = city;
-        Postcode = postcode;
-        Description = description;
-        ParentOrganizationId = parentOrganizationId;
     }
 
     public static Organization Create(Command.CreateOrganizationCommand command)
     {
-        //var organization = new Organization(
-        //    command.Name,
-        //    command.Name,
-        //    command.OrganizationNumber,
-        //    command.PhoneNumber,
-        //    command.Email,
-        //    command.Address,
-        //    command.City,
-        //    command.PostCode,
-        //    command.Description,
-        //    command.ParentOrganizationId);
+        var organization = new Organization(command.Name, command.Name, command.OrganizationNumber)
+        {
+            PhoneNumber = command.PhoneNumber,
+            Email = command.Email,
+            Address = command.Address,
+            City = command.City,
+            Postcode = command.PostCode,
+            Description = command.Description,
+            ParentOrganizationId = command.ParentOrganizationId
+        };
 
-        return new Organization();
+        return organization;
     }
 
     public static Organization CreateInternal(string tenantId, string name, string? description = null)
@@ -91,7 +83,7 @@ public class Organization : AggregateRoot<string>, IExcludedFromScoping
             Id = tenantId,
             Name = name,
             Description = description ?? "Root organization",
-            //Context = OrganisationContext.NewRoot(tenantId),
+            Context = OrganisationContext.NewRoot(tenantId),
             LanguageCode = DefaultLanguageCode,
             //TenantId = tenantId,
             //Scope = tenantId,

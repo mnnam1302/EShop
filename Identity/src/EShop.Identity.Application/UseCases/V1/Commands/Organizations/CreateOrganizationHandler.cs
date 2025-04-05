@@ -23,16 +23,17 @@ public class CreateOrganizationHandler : ICommandHandler<Command.CreateOrganizat
 
     public async Task<Result> Handle(Command.CreateOrganizationCommand request, CancellationToken cancellationToken)
     {
-        if (request.ParentOrganizationId != null)
+        var existsingParentOrganization = await _organizationRepository.FindByIdAsync(request.ParentOrganizationId);
+        if (existsingParentOrganization == null)
         {
-            var foundParentOrganization = await _organizationRepository.FindByIdAsync(request.ParentOrganizationId)
-                ?? throw new NotFoundException("Parent organization was not found");
+            throw new NotFoundException($"Parent organization with ID {request.ParentOrganizationId} not found.");
         }
 
-        var organizationExists = await _organizationRepository.FindSingleAsync(x => x.Name == request.Name);
-        if (organizationExists != null)
+        await AssertNameIsUnique(request.Name);
+
+        if (!string.IsNullOrWhiteSpace(request.OrganizationNumber))
         {
-            throw new ConflictException("Organization already exists");
+            await AssertOrganizationNumberIsUnique(request.Name, request.OrganizationNumber);
         }
 
         var organization = Organization.Create(request);
@@ -41,5 +42,24 @@ public class CreateOrganizationHandler : ICommandHandler<Command.CreateOrganizat
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Result.Success();
+    }
+
+    private async Task AssertNameIsUnique(string name)
+    {
+        var organization = await _organizationRepository.FindSingleAsync(o => o.Id == name || o.Name == name);
+        if (organization != null)
+        {
+            throw new ConflictException("Organization name is already in use.");
+        }
+    }
+
+    private async Task AssertOrganizationNumberIsUnique(string id, string organizationNumber)
+    {
+        var existingOrganization = await _organizationRepository.FindSingleAsync(
+            o => o.Id != id && o.OrganizationNumber == organizationNumber);
+        if (existingOrganization != null)
+        {
+            throw new ConflictException("Organization number is already in use.");
+        }
     }
 }

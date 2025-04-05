@@ -11,8 +11,9 @@ namespace EShop.Shared.JsonApi.ResourceAccessControl;
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
 public class RequireFeatureAttribute : Attribute, IFilterFactory
 {
-    public RequireFeatureAttribute()
+    public RequireFeatureAttribute(string featureId)
     {
+        Feature = featureId;
     }
 
     public string Feature { get; set; } = string.Empty;

@@ -30,4 +30,8 @@
     <ProjectReference Include="..\..\src\EShop.Identity.API\EShop.Identity.API.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Users\InviteUser\" />
+  </ItemGroup>
+
 </Project>

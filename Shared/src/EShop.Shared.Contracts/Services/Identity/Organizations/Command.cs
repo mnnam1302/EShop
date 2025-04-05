@@ -7,14 +7,14 @@ public static class Command
 {
     public sealed record CreateOrganizationCommand(
         string Name, 
+        string Email,
         string? OrganizationNumber,
         string? PhoneNumber,
-        string? Email,
         string? Address,
         string? City,
         string? PostCode,
         string? Description,
-        string? ParentOrganizationId) : ICommand;
+        string ParentOrganizationId) : ICommand;
 
     public sealed record UpdateOrganizationCommand : ICommand
     {
