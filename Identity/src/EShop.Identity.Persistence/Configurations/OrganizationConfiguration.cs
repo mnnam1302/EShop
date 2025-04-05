@@ -13,7 +13,7 @@ internal class OrganizaitionConfiguration : IEntityTypeConfiguration<Organizatio
 
         builder.HasKey(o => o.Id);
 
-        builder.HasIndex(o => o.Name).IsUnique();
+        builder.HasIndex(o => new { o.TenantId, o.Name }).IsUnique();
 
         builder
             .OwnsOne(o => o.Context);

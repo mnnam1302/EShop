@@ -4,6 +4,7 @@ using EShop.Shared.Contracts.Abstractions.Requests;
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.Contracts.Services.Identity.Organizations;
 using EShop.Shared.DomainTools.UnitOfWorks;
+using EShop.Shared.Scoping;
 using EShop.Shared.Scoping.Exceptions;
 
 namespace EShop.Identity.Application.UseCases.V1.Commands.Organizations;
@@ -23,20 +24,29 @@ public class CreateOrganizationHandler : ICommandHandler<Command.CreateOrganizat
 
     public async Task<Result> Handle(Command.CreateOrganizationCommand request, CancellationToken cancellationToken)
     {
-        var existsingParentOrganization = await _organizationRepository.FindByIdAsync(request.ParentOrganizationId);
-        if (existsingParentOrganization == null)
+        if (string.IsNullOrEmpty(request.ParentOrganizationId))
+        {
+            throw new BadRequestException("Parent organization ID is required.");
+        }
+
+        await AssertNameIsUnique(request.Name);
+        await AssertOrganizationNumberIsUnique(request.Name, request.OrganizationNumber);
+
+        var organization = Organization.Create(request);
+
+        // Handle ring-fencing
+        var parentOrganization = await _organizationRepository.FindByIdAsync(request.ParentOrganizationId);
+        if (parentOrganization == null)
         {
             throw new NotFoundException($"Parent organization with ID {request.ParentOrganizationId} not found.");
         }
 
-        await AssertNameIsUnique(request.Name);
+        await CheckOrganizationLevel(request.ParentOrganizationId);
 
-        if (!string.IsNullOrWhiteSpace(request.OrganizationNumber))
-        {
-            await AssertOrganizationNumberIsUnique(request.Name, request.OrganizationNumber);
-        }
-
-        var organization = Organization.Create(request);
+        //organization.TenantId = parentOrganization.TenantId;
+        var context = OrganisationContext.NewChild(parentOrganization.Context);
+        organization.Context = context;
+        //organization.Scope = context.Path;
 
         _organizationRepository.Add(organization);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
@@ -61,5 +71,30 @@ public class CreateOrganizationHandler : ICommandHandler<Command.CreateOrganizat
         {
             throw new ConflictException("Organization number is already in use.");
         }
+    }
+
+    private async Task CheckOrganizationLevel(string parentOrganizationId)
+    {
+        var parentLevel = await GetOrganizationLevel(parentOrganizationId);
+        int nextLevel = parentLevel + 1;
+
+        if (nextLevel > Organization.MaxSupportedLevel)
+        {
+            throw new BadRequestException($"Organization structure only supports maximum of {Organization.MaxSupportedLevel} levels.");
+        }
+    }
+
+    private async Task<int> GetOrganizationLevel(string organizationId)
+    {
+        var level = 1;
+        var organization = await _organizationRepository.FindByIdAsync(organizationId);
+
+        while (organization != null && organization.ParentOrganizationId != null)
+        {
+            level++;
+            organization = await _organizationRepository.FindByIdAsync(organization.ParentOrganizationId);
+        }
+
+        return level;
     }
 }

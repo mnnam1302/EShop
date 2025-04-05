@@ -10,6 +10,7 @@ public class Organization : AggregateRoot<string>, IExcludedFromScoping
 {
     public const string DefaultLanguageCode = "en-gb";
     public const string DefaultOwnerPassword = "P@ssword123";
+    public const int MaxSupportedLevel = 5;
     
     private readonly List<User> _users = new();
 
@@ -49,6 +50,12 @@ public class Organization : AggregateRoot<string>, IExcludedFromScoping
     public virtual Organization? ParentOrganization { get; set; }
 
     public virtual IReadOnlyCollection<User>? Users => _users.AsReadOnly();
+
+    [MaxLength(ModelConstants.ShortText)]
+    public string? TenantId { get; set; }
+
+    [MaxLength(ModelConstants.LongText)]
+    public string? Scope { get; set; }
 
     // Empty constructor for ORMs
     public Organization() { }

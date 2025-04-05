@@ -1,7 +1,6 @@
 ﻿using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.Contracts.Services.Tenancy.Features;
 using Newtonsoft.Json;
-using System.Net.Http.Json;
 
 namespace EShop.Shared.Scoping.ResourceAccessControl.Providers.TenantFeaturesProvider;
 
@@ -10,7 +9,6 @@ public class TenantFeaturesHttpClient
     private const string tenantFeaturesEndpoint = "api/v1/features";
     private readonly IUserDetailsProvider _userDetailsProvider;
     private readonly HttpClient _httpClient;
-
 
     public TenantFeaturesHttpClient(IUserDetailsProvider userDetailsProvider, HttpClient httpClient)
     {
