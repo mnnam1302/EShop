@@ -1,6 +1,4 @@
-﻿using EShop.Identity.Domain.Entities;
-using EShop.Shared.Contracts.Services.Identity.Organizations;
-using FluentAssertions;
+﻿using EShop.Shared.Contracts.Services.Identity.Organizations;
 using Reqnroll;
 
 namespace EShop.Identity.Tests.Organizations.Create;
@@ -13,6 +11,12 @@ public class Steps
     public Steps(StepContext stepContext)
     {
         _stepContext = stepContext;
+    }
+
+    [Given("following tenants added to the system")]
+    public void GivenFollowingTenantsAddedToTheSystem(DataTable dataTable)
+    {
+        throw new PendingStepException();
     }
 
     [Given("Admin user creates a new organization with the following")]

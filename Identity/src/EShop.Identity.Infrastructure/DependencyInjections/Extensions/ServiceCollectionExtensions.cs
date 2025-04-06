@@ -10,6 +10,7 @@ using EShop.Shared.EventBus.DependencyInjections.Extensions;
 using EShop.Shared.EventBus.DependencyInjections.Options;
 using EShop.Shared.EventBus.JsonConverters;
 using EShop.Shared.EventBus.PipelineObservers;
+using EShop.Shared.EventBus.Services;
 using EShop.Shared.Scoping.ResourceAccessControl;
 using MassTransit;
 using Microsoft.AspNetCore.Hosting;
@@ -27,9 +28,11 @@ public static class ServiceCollectionExtensions
         string serviceName = "identity")
     {
         services.AddOwnerServices();
+
+        services.AddMassTransitRabbitMQ(configuration, environment, serviceName);
+        services.AddEventBusGateway();
         services.AddRegistrationFeatures();
         services.AddRegistrationPermissions();
-        services.AddMassTransitRabbitMQ(configuration, environment, serviceName);
 
         return services;
     }
@@ -38,6 +41,12 @@ public static class ServiceCollectionExtensions
     {
         services.AddTransient<IPasswordHasher, PasswordHasher>();
         services.AddTransient<ITokenService, TokenService>();
+    }
+
+    private static IServiceCollection AddEventBusGateway(this IServiceCollection services)
+    {
+        services.AddScoped<IEventBusGateway, EventBusGateway>();
+        return services;
     }
 
     private static IServiceCollection AddRegistrationFeatures(this IServiceCollection services)

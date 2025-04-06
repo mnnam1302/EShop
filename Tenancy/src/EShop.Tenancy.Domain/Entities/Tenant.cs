@@ -48,7 +48,7 @@ public class Tenant : TenantAggregate, IExcludedFromScoping
     {
         EnsureValidTenant(command);
 
-        var tenant = new Tenant(command.Id, command.Name, command.OwnerUsername, command.Email, command.PhoneNumber, command.Description);
+        var tenant = new Tenant(command.Id, command.Name, command.OwnerUsername, command.OwnerEmail, command.PhoneNumber, command.Description);
 
         return tenant;
     }

@@ -37,7 +37,6 @@ public abstract class ApiTestContextBase
     public const string DefaultUserEmail = "test_admin@test.com";
     public const string SourceSystem = "BddTest";
 
-    // FeatureContants handle later in service Tenancy
     protected static readonly string[] AllFeatureIds = typeof(FeatureConstants)
         .GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy)
         .Where(fi => fi.IsLiteral && !fi.IsInitOnly && fi.Name != nameof(FeatureConstants.InitialState))
@@ -45,8 +44,7 @@ public abstract class ApiTestContextBase
         .Where(featureId => featureId is not null)
         .ToArray()!;
 
-    protected static readonly string[] StandardFeatureIds = AllFeatureIds
-            .ToArray();
+    protected static readonly string[] StandardFeatureIds = AllFeatureIds.ToArray();
 
     protected static readonly string[] AllPermissionIds = typeof(PermissionConstants)
         .GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy)
@@ -505,6 +503,11 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
     }
 
     #endregion Http Action Method
+
+    #region Integration Event
+
+
+    #endregion
 
     #region Logging
 

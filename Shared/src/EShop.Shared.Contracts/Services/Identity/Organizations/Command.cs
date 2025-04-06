@@ -7,6 +7,8 @@ namespace EShop.Shared.Contracts.Services.Identity.Organizations;
 
 public static class Command
 {
+    public record CreateTenantCommandInternal(string TenantId, string TenantName, string OwnerUsername, string OwnerDisplayName, string OwnerEmail) : ICommand;
+
     public sealed record CreateOrganizationCommand : ICommand
     {
         [MaxLength(ModelConstants.MediumText)]
@@ -51,22 +53,4 @@ public static class Command
         public string? Description { get; init; }
         public string? ParentOrganizationId { get; init; }
     }
-
-    public record DeleteOrganization(string Id) : ICommand;
-
-    public record AddUserToOrganization(string OrganizationId, string UserId) : ICommand;
-
-    public record RemoveUserFromOrganization(string OrganizationId, string UserId) : ICommand;
-
-    public record AddRoleToOrganization(string OrganizationId, string RoleId) : ICommand;
-
-    public record RemoveRoleFromOrganization(string OrganizationId, string RoleId) : ICommand;
-
-    public record AddPermissionToOrganization(string OrganizationId, string PermissionId) : ICommand;
-
-    public record RemovePermissionFromOrganization(string OrganizationId, string PermissionId) : ICommand;
-
-    public record AddChildOrganization(string ParentId, string ChildId) : ICommand;
-
-    public record RemoveChildOrganization(string ParentId, string ChildId) : ICommand;
 }
