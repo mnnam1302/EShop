@@ -1,19 +1,38 @@
-﻿using EShop.Shared.Cache.DependencyInejctions.Extensions;
-using EShop.Shared.Cache.Providers;
+﻿using EShop.Shared.Cache.Providers;
 using EShop.Shared.Cache.Services;
+using EShop.Shared.HealthChecks;
 using EShop.Shared.Scoping.ResourceAccessControl;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserPermissionProvider;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using Nito.AsyncEx;
 
 namespace EShop.Shared.JsonApi.DependencyInjections;
 
 public static class UserPermissionsExtensions
 {
-    //public static IServiceCollection RegisterPermissions(this IApplicationBuilder app, IHostApplicationLifetime applicationLifetime, ILogger logger)
-    //{
-    //    return services;
-    //}
+    public static void RegisterPermissions(this IApplicationBuilder app, IHostApplicationLifetime applicationLifetime, ILogger logger)
+    {
+        applicationLifetime.ApplicationStarted.Register(async () =>
+        {
+            using (var scope = app.ApplicationServices.CreateScope())
+            {
+                var healthCheckService = scope.ServiceProvider.GetRequiredService<HealthCheckService>();
+                healthCheckService.WaitForHealthyEventBus();
+
+                var instances = scope.ServiceProvider.GetServices<IPermissionRegistrationService>();
+                foreach (var instance in instances)
+                {
+                    logger.LogDebug("Running permission registration for {service}", instance.GetType().Name);
+                    AsyncContext.Run(() => instance.RegisterPermissions());
+                }
+            }
+        });
+    }
 
     public static IServiceCollection AddUserPermissionsProvider(this IServiceCollection services, IConfiguration configuration)
     {
@@ -43,6 +62,5 @@ public static class UserPermissionsExtensions
         services.AddScoped<IUserPermissionsProvider, UserPermissionProvider>();
         services.AddScoped<IPermissionCachingService, PermissionRedisCachingService>();
         services.AddScoped<IRedisCachingAsyncProvider<string[]>, RedisCachingAsyncProvider<string[]>>();
-
     }
 }

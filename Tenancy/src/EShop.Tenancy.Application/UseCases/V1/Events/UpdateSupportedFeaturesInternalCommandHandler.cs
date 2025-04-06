@@ -8,23 +8,23 @@ using static EShop.Shared.Contracts.Services.Tenancy.Features.Command;
 
 namespace EShop.Tenancy.Application.UseCases.V1.Events;
 
-public class UpdateSupportedFeaturesCommandHandler : ICommandHandler<UpdateSupportedFeaturesCommand>
+public class UpdateSupportedFeaturesInternalCommandHandler : ICommandHandler<UpdateSupportedFeaturesInternalCommand>
 {
     private readonly IFeatureService _featureService;
     private readonly IResiliencePolicyFactory _resiliencePolicyFactory;
     private readonly ILogger _logger;
 
-    public UpdateSupportedFeaturesCommandHandler(
+    public UpdateSupportedFeaturesInternalCommandHandler(
         IFeatureService featureService,
         IResiliencePolicyFactory resiliencePolicyFactory,
-        ILogger<UpdateSupportedFeaturesCommandHandler> logger)
+        ILogger<UpdateSupportedFeaturesInternalCommandHandler> logger)
     {
         _featureService = featureService;
         _resiliencePolicyFactory = resiliencePolicyFactory;
         _logger = logger;
     }
 
-    public async Task<Result> Handle(UpdateSupportedFeaturesCommand request, CancellationToken cancellationToken)
+    public async Task<Result> Handle(UpdateSupportedFeaturesInternalCommand request, CancellationToken cancellationToken)
     {
         _logger.LogDebug("{action} {count} features of source system: {sourceSystemReference}",
             request.Action,

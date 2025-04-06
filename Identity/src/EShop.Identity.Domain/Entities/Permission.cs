@@ -6,8 +6,6 @@ namespace EShop.Identity.Domain.Entities;
 
 public class Permission : EntityBase<string>, IExcludedFromScoping
 {
-    public Permission() { }
-
     [MaxLength(ModelConstants.ShortMediumText)]
     public string? Name { get; set; }
 

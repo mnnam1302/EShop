@@ -21,6 +21,8 @@ public static class PermissionConstants
     public const string ViewPortalUserAccountsPermissionId = "Identity_ViewPortalUserAccounts";
     public const string ManagePortalUserAccountsPermissionId = "Identity_ManagePortalUserAccounts";
 
+    // Reports
+    public const string ManageReportsPermissionId = "Reports_ManageReports";
 
     // Accounts
     public const string UserViewAccountsPermissionId = "Accounts_ViewAccounts";

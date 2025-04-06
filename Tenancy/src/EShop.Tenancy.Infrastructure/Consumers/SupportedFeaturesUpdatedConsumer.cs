@@ -18,7 +18,7 @@ public class SupportedFeaturesUpdatedConsumer : Consumer<SupportedFeaturesUpdate
 
     protected override async Task<Result> HandleMessageAsync(SupportedFeaturesUpdated message, CancellationToken cancellationToken)
     {
-        var command = new Command.UpdateSupportedFeaturesCommand
+        var command = new Command.UpdateSupportedFeaturesInternalCommand
         {
             SourceSystemReference = message.SourceSystemReference,
             Features = message.Features,

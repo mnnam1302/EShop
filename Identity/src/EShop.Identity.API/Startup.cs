@@ -47,5 +47,6 @@ public class Startup
         app.MapControllers();
 
         app.RegisterFeatures(applicationLifetime, logger);
+        app.RegisterPermissions(applicationLifetime, logger);
     }
 }

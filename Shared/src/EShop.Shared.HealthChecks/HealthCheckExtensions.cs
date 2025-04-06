@@ -3,7 +3,7 @@ using Nito.AsyncEx;
 
 namespace EShop.Shared.HealthChecks;
 
-public static class HealthCheckExtentions
+public static class HealthCheckExtensions
 {
     public static void WaitForHealthyEventBus(this HealthCheckService healthCheckService)
     {
