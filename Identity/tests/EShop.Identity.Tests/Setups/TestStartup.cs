@@ -8,15 +8,15 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-// Research run parallel testin with Xunit and Reqnroll: https://docs.reqnroll.net/latest/execution/parallel-execution.html
+// Research run parallel testing with XUnit and Reqnroll: https://docs.reqnroll.net/latest/execution/parallel-execution.html
 namespace EShop.Identity.Tests.Setups;
 
 public class TestStartup : Identity.API.Startup
 {
     private readonly PostgreSqlTestDatabase _testDatabase;
 
-    public TestStartup(IConfiguration configuration, IWebHostEnvironment enviroment, PostgreSqlTestDatabase testDatabase)
-        : base(configuration, enviroment)
+    public TestStartup(IConfiguration configuration, IWebHostEnvironment environment, PostgreSqlTestDatabase testDatabase)
+        : base(configuration, environment)
     {
         this.Environment.EnvironmentName = "Development";
         _testDatabase = testDatabase;
@@ -29,8 +29,8 @@ public class TestStartup : Identity.API.Startup
             .AddTestBoostrapping(Configuration, Environment);
     }
 
-    public override void Configure(
-        WebApplication app,
+    public void Configure(
+        IApplicationBuilder app,
         IHostApplicationLifetime applicationLifetime,
         ILoggerFactory loggerFactory)
     {
@@ -43,6 +43,6 @@ public class TestStartup : Identity.API.Startup
         }
 
         app.UseRouting();
-        app.MapControllers();
+        app.UseEndpoints(endpoints => endpoints.MapControllers());
     }
 }

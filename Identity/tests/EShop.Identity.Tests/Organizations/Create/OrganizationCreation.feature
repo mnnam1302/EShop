@@ -5,7 +5,7 @@
 
 Background:
 	Given following tenants added to the system
-		| TenantId | TenantName | OwnerUsername | OwnerDisplayName | OnwerEmail        |
+		| TenantId | TenantName | OwnerUsername | OwnerDisplayName | OwnerEmail        |
 		| tenant-1 | Tenant1    | tenantOwner1  | Tenant Owner1    | owner@tenant1.com |
 		| tenant-2 | Tenant2    | tenantOwner2  | Tenant Owner2    | owner@tenant2.com |
 	And Admin user with all permissions

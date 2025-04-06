@@ -41,7 +41,7 @@ public sealed class ScenarioHooks
             PostgreSqlContainer = PostgreSqlContainer
         };
 
-        await testDatabase.CreateSharedDatabaseAsync("test-database");
+        await testDatabase.CreateSharedDatabaseAsync("identity_test_database");
         objectContainer.RegisterInstanceAs<PostgreSqlTestDatabase>(testDatabase);
 
         var apiContext = new ApiContext(testDatabase);

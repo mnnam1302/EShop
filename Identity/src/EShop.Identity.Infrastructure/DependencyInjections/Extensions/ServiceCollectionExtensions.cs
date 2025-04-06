@@ -4,7 +4,6 @@ using EShop.Identity.Infrastructure.Consumers;
 using EShop.Identity.Infrastructure.HashServices;
 using EShop.Identity.Infrastructure.Producers;
 using EShop.Shared.Contracts.Services.Identity.Permissions;
-using EShop.Shared.Contracts.Services.Tenancy.Features;
 using EShop.Shared.Contracts.Services.Tenancy.Tenants;
 using EShop.Shared.EventBus.DependencyInjections.Extensions;
 using EShop.Shared.EventBus.DependencyInjections.Options;

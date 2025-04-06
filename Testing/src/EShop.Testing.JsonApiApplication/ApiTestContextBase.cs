@@ -1,9 +1,11 @@
 ﻿using EShop.Shared.Contracts.Abstractions.Requests;
 using EShop.Shared.Contracts.Abstractions.Shared;
+using EShop.Shared.EventBus.Services;
 using EShop.Shared.Scoping;
 using EShop.Shared.Scoping.ResourceAccessControl;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers.TenantFeaturesProvider;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserPermissionProvider;
+using EShop.Testing.JsonApiApplication.EventBus;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.TestHost;
@@ -85,6 +87,7 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
             .ConfigureServices(services =>
             {
                 services.AddTransient<HttpClient>(sp => this.GetClientWithHeaderPropagation());
+                services.AddSingleton<IIntegrationEventsTracker, IntegrationEventsTracker>();
                 services.AddSingleton(mutableMemoryConfigurationProvider);
                 services.AddSerilog(SetupLogging);
             })
@@ -106,17 +109,30 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
 
         _serviceScope = _server.Host.Services.CreateScope();
         _logger = ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger<ApiTestContextBase<TStartup>>();
+        
+        _testUserPermissionProvider = ServiceProvider.GetRequiredService<IUserPermissionsProvider>() as TestUserPermissionProvider
+                                     ?? throw new InvalidOperationException("Service provider did not return a TestUserPermissionProvider instance.");
+        
+        _testTenantFeatureProvider = ServiceProvider.GetRequiredService<ITenantFeaturesProvider>() as TestTenantFeatureProvider
+                                     ?? throw new InvalidOperationException("Service provider did not return a TestTenantFeatureProvider instance.");
 
-        _testUserPermissionProvider = ServiceProvider.GetRequiredService<IUserPermissionsProvider>() as TestUserPermissionProvider;
-        _testTenantFeatureProvider = ServiceProvider.GetRequiredService<ITenantFeaturesProvider>() as TestTenantFeatureProvider;
+        EventTracker = ServiceProvider.GetRequiredService<IIntegrationEventsTracker>();
     }
 
     public Microsoft.Extensions.Logging.ILogger Logger => _logger;
+    
     public ILoggerFactory LoggerFactory => ServiceProvider.GetRequiredService<ILoggerFactory>();
+    
     public IServiceProvider ServiceProvider => _serviceScope.ServiceProvider;
+
+    public IIntegrationEventsTracker EventTracker { get; private set; }
+    
     public Exception LastApiError { get; set; }
+    
     public HttpClient Client => GetAuthorizedClient(_defaultUser);
+    
     public string LoggedInUser { get; set; }
+    
     public HttpStatusCode LastStatusCode { get; set; }
 
     #region Manage User Management
@@ -506,6 +522,12 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
 
     #region Integration Event
 
+    public async Task PublishIntegrationEvent<TEvent>(object eventData)
+        where TEvent : class, Shared.Contracts.Abstractions.MessageBus.IIntegrationEvent
+    {
+        var eventBusGateway = ServiceProvider.GetRequiredService<IEventBusGateway>();
+        await eventBusGateway.PublishAsync<TEvent>(eventData);
+    }
 
     #endregion
 

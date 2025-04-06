@@ -1,6 +1,8 @@
-﻿namespace EShop.Testing.JsonApiApplication;
+﻿using EShop.Shared.Scoping.ResourceAccessControl.Providers.TenantFeaturesProvider;
 
-public class TestTenantFeatureProvider
+namespace EShop.Testing.JsonApiApplication;
+
+public class TestTenantFeatureProvider : ITenantFeaturesProvider
 {
     private readonly Dictionary<string, List<string>> tenantFeatures = new Dictionary<string, List<string>>();
 
@@ -17,7 +19,7 @@ public class TestTenantFeatureProvider
         }
     }
 
-    public Task<string[]> GetFeatures(string userId, string tenantId)
+    public Task<string[]> GetFeatures(string tenantId)
     {
         var features = tenantFeatures.ContainsKey(tenantId) ? tenantFeatures[tenantId].ToArray() : Array.Empty<string>();
         return Task.FromResult(features);

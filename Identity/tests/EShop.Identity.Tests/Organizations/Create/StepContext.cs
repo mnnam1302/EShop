@@ -1,4 +1,5 @@
-﻿using EShop.Identity.Tests.Setups;
+﻿
+using EShop.Identity.Tests.Setups;
 using EShop.Shared.Contracts.Services.Identity.Organizations;
 using Reqnroll;
 
@@ -17,7 +18,14 @@ public sealed class StepContext
 
     public async Task SimulateTenantCreationAsync(string tenantId, string tenantName, string ownerUsername, string ownerDisplayName, string ownerEmail)
     {
-        
+        await _apiContext.PublishIntegrationEvent<Shared.Contracts.Services.Tenancy.Tenants.TenantCreated>(new
+        {
+            TenantId = tenantId,
+            TenantName = tenantName,
+            OwnerUsername = ownerUsername,
+            OwnerDisplayName = ownerDisplayName,
+            OwnerEmail = ownerEmail
+        });
     }
 
     public async Task CreateOrganizationAsync(Command.CreateOrganizationCommand request, string? operationUsername = null)

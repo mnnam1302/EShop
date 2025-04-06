@@ -14,9 +14,18 @@ public class Steps
     }
 
     [Given("following tenants added to the system")]
-    public void GivenFollowingTenantsAddedToTheSystem(DataTable dataTable)
+    public async Task GivenFollowingTenantsAddedToTheSystem(DataTable dataTable)
     {
-        throw new PendingStepException();
+        var tenants = dataTable.CreateSet<Command.CreateTenantCommandInternal>();
+        foreach (var tenant in tenants)
+        {
+            await _stepContext.SimulateTenantCreationAsync(
+                tenant.TenantId,
+                tenant.TenantName,
+                tenant.OwnerUsername,
+                tenant.OwnerDisplayName,
+                tenant.OwnerEmail);
+        }
     }
 
     [Given("Admin user creates a new organization with the following")]

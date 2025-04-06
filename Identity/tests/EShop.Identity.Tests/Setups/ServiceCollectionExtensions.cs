@@ -1,18 +1,28 @@
 ﻿using EShop.Identity.API.DependencyInjections.Extensions;
+using EShop.Identity.Application.Abstractions;
 using EShop.Identity.Application.DependencyInjections.Extensions;
-using EShop.Identity.Infrastructure.DependencyInjections.Extensions;
+using EShop.Identity.Infrastructure.Authentication;
+using EShop.Identity.Infrastructure.HashServices;
 using EShop.Identity.Persistence;
 using EShop.Identity.Persistence.DependencyInjections.Extensions;
 using EShop.Shared.Cache.DependencyInejctions.Extensions;
 using EShop.Shared.Cache.Providers;
 using EShop.Shared.Cache.Services;
 using EShop.Shared.Contracts.Services.Identity.Auth;
+using EShop.Shared.Contracts.Services.Tenancy.Tenants;
+using EShop.Shared.DomainTools.DependencyInjections;
+using EShop.Shared.EventBus.JsonConverters;
+using EShop.Shared.EventBus.Services;
+using EShop.Shared.JsonApi.DependencyInjections;
 using EShop.Shared.JsonApi.Middlewares;
 using EShop.Shared.Scoping.ResourceAccessControl;
+using EShop.Shared.Scoping.ResourceAccessControl.Providers.TenantFeaturesProvider;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserPermissionProvider;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserTokenProvider;
 using EShop.Testing.JsonApiApplication;
 using EShop.Testing.JsonApiApplication.DependencyInjections;
+using EShop.Testing.JsonApiApplication.EventBus;
+using MassTransit;
 using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -23,25 +33,16 @@ namespace EShop.Identity.Tests.Setups;
 internal static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddTestShared(this IServiceCollection services,
-    IConfiguration configuration,
-    IWebHostEnvironment environment,
-    PostgreSqlTestDatabase testDatabase)
+        IConfiguration configuration,
+        IWebHostEnvironment environment,
+        PostgreSqlTestDatabase testDatabase)
     {
-        services
-            .AddPostgreSqlTestDbContext<UsersDbContext>(testDatabase);
+        services.AddResiliencePolicy();
 
-        services
-            .AddMemoryInfrastructure()
-            .AddTestUserTokens();
+        services.AddPostgreSqlTestDbContext<UsersDbContext>(testDatabase);
+        services.AddMultiTenantScoping();
 
-        return services;
-    }
-
-    private static IServiceCollection AddTestUserTokens(this IServiceCollection services)
-    {
-        services.AddScoped<IUserTokenCachingService, TokenRedisCachingService>();
-        services.AddScoped<IRedisCachingProvider<Response.AuthenticatedResponse>, TestUserTokenProvider>();
-
+        services.AddMemoryInfrastructure();
         return services;
     }
 
@@ -53,9 +54,16 @@ internal static class ServiceCollectionExtensions
             .AddTestIdentityApi()
             .AddIdentityApplication()
             .AddIdentityPersistence()
-            .AddIdentityInfrastructure(configuration, environment);
+            .AddTestIdentityInfrastructure();
 
-        services.AddTestOwnerUserPermissions();
+        services.AddTransient<IPermissionValidator, CurrentUserPermissionsValidator>();
+        services.AddSingleton<IUserPermissionsProvider, TestUserPermissionProvider>();
+
+        services.AddScoped<IUserTokenCachingService, TokenRedisCachingService>();
+        services.AddTransient<IRedisCachingAsyncProvider<EShop.Shared.Contracts.Services.Identity.Auth.Response.AuthenticatedResponse>, TestUserTokenProvider>();
+
+        services.AddScoped<IFeatureValidator, CurrentUserFeaturesValidator>();
+        services.AddScoped<ITenantFeaturesProvider, TestTenantFeatureProvider>();
 
         return services;
     }
@@ -85,10 +93,40 @@ internal static class ServiceCollectionExtensions
         return services;
     }
 
-    private static IServiceCollection AddTestOwnerUserPermissions(this IServiceCollection services)
+    private static IServiceCollection AddTestIdentityInfrastructure(this IServiceCollection services)
     {
-        services.AddTransient<IPermissionValidator, CurrentUserPermissionsValidator>();
-        services.AddSingleton<IUserPermissionsProvider, TestUserPermissionProvider>();
+        services.AddTransient<IPasswordHasher, PasswordHasher>();
+        services.AddTransient<ITokenService, TokenService>();
+        services.AddScoped<IEventBusGateway, EventBusGateway>();
+
+        services.AddMassTransit(cfg =>
+        {
+            cfg.SetKebabCaseEndpointNameFormatter();
+            cfg.AddConsumers(Identity.Infrastructure.AssemblyReference.Assembly);
+
+            cfg.UsingInMemory((context, bus) =>
+            {
+                bus.UseNewtonsoftJsonSerializer();
+                bus.ConfigureNewtonsoftJsonSerializer(settings =>
+                {
+                    settings.Converters.Add(new DateOnlyJsonConverter());
+                    settings.Converters.Add(new ExpirationDateOnlyJsonConverter());
+                    return settings;
+                });
+                bus.ConfigureNewtonsoftJsonDeserializer(settings =>
+                {
+                    settings.Converters.Add(new DateOnlyJsonConverter());
+                    settings.Converters.Add(new ExpirationDateOnlyJsonConverter());
+                    return settings;
+                });
+
+                bus.ReceiveEndpoint("test_queue", configureEndpoint =>
+                {
+                    configureEndpoint.ConfigureConsumers(context);
+                    configureEndpoint.Observer(new EventObserver<TenantCreated>(context.GetRequiredService<IIntegrationEventsTracker>()));
+                });
+            });
+        });
 
         return services;
     }
