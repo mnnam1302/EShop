@@ -10,7 +10,7 @@ public static class RabbitMqBusFactoryConfiguratorExtensions
         IRegistrationContext context,
         string environment,
         string serviceName)
-        where TConsumer : class, IConsumer
+        where TConsumer : class, IConsumer<TEvent>
         where TEvent : class, IEvent
     {
         string sanitizedQueueName = $"eshop.{environment.Trim().ToLowerInvariant()}.{serviceName.Trim().ToLowerInvariant()}.{typeof(TEvent).ToKebabCaseString()}";
