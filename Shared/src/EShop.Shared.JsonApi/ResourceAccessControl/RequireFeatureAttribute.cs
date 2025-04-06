@@ -53,7 +53,7 @@ public class RequireFeatureAttribute : Attribute, IFilterFactory
             if (!_userDetailsProvider.IsAuthenticatedUser)
             {
                 context.Result = new StatusCodeResult(StatusCodes.Status401Unauthorized);
-                _logger.LogTrace("Rejecting authorized user");
+                _logger.LogTrace("Rejecting unauthenticated user");
                 return;
             }
 
