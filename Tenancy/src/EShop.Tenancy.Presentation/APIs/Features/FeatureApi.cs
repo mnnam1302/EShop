@@ -1,6 +1,7 @@
 ﻿using Carter;
 using EShop.Shared.Contracts.Services.Tenancy.Features;
 using EShop.Shared.JsonApi.Abstractions;
+using EShop.Shared.JsonApi.ResourceAccessControl;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -18,7 +19,8 @@ public class FeatureApi : ApiEndpointBase, ICarterModule
             .MapGroup(BaseUrl)
             .HasApiVersion(1);
 
-        group.MapGet("/", GetFeaturesV1Async);
+        group.MapGet("/", GetFeaturesV1Async)
+            .RequireSystemUserFilter();
     }
 
     private static async Task<IResult> GetFeaturesV1Async(ISender sender)
