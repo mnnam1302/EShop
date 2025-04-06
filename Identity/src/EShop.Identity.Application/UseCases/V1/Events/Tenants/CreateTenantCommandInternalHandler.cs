@@ -10,7 +10,7 @@ using EShop.Shared.Scoping.Exceptions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
-namespace EShop.Identity.Application.UseCases.V1.Events;
+namespace EShop.Identity.Application.UseCases.V1.Events.Tenants;
 
 public class CreateTenantCommandInternalHandler : ICommandHandler<Command.CreateTenantCommandInternal>
 {

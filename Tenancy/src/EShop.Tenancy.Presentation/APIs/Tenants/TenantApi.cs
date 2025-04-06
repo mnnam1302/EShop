@@ -1,6 +1,7 @@
 ﻿using Carter;
 using EShop.Shared.Contracts.Services.Tenancy.Tenants;
 using EShop.Shared.JsonApi.Abstractions;
+using EShop.Shared.JsonApi.ResourceAccessControl;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -18,7 +19,8 @@ public class TenantApi : ApiEndpointBase, ICarterModule
         var group1 = app
             .NewVersionedApi("Tenants")
             .MapGroup(BaseUrl)
-            .HasApiVersion(1);
+            .HasApiVersion(1)
+            .RequireSupportUserFilter();
 
         group1.MapPost("/", CreateTenantV1Async);
     }

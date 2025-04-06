@@ -10,13 +10,13 @@ public static class RabbitMqBusFactoryConfiguratorExtensions
         IRegistrationContext context,
         string environment,
         string serviceName)
-        where TConsumer : class, IConsumer
+        where TConsumer : class, IConsumer<TEvent>
         where TEvent : class, IEvent
     {
-        string santizedQueueName = $"eshop.{environment.Trim().ToLowerInvariant()}.{serviceName.Trim().ToLowerInvariant()}.{typeof(TEvent).ToKebabCaseString()}";
+        string sanitizedQueueName = $"eshop.{environment.Trim().ToLowerInvariant()}.{serviceName.Trim().ToLowerInvariant()}.{typeof(TEvent).ToKebabCaseString()}";
 
         bus.ReceiveEndpoint(
-            queueName: santizedQueueName,
+            queueName: sanitizedQueueName,
             configureEndpoint: endpoint =>
             {
                 endpoint.ConfigureConsumeTopology = false;
