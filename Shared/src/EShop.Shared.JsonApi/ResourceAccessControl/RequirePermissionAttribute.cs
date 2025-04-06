@@ -56,7 +56,7 @@ public class RequirePermissionAttribute : Attribute, IFilterFactory, IUserPermis
             if (!_userDetailsProvider.IsAuthenticatedUser)
             {
                 context.Result = new StatusCodeResult(StatusCodes.Status401Unauthorized);
-                _logger.LogTrace("Rejecting authorizated user");
+                _logger.LogTrace("Rejecting authorized user");
                 return;
             }
 

@@ -54,7 +54,7 @@ public class RequireOneOfPermissionsAttribute : Attribute, IUserPermissionFilter
             if (!_userDetailsProvider.IsAuthenticatedUser)
             {
                 context.Result = new StatusCodeResult(StatusCodes.Status401Unauthorized);
-                _logger.LogTrace("Rejecting authorizated user");
+                _logger.LogTrace("Rejecting authorized user");
             }
 
             if (!await _permissionValidator.HasAtLeastOneOfSpecificPermissionAsync(_requirePermissions))
