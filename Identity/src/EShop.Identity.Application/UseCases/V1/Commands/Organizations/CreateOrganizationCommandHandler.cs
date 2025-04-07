@@ -5,6 +5,7 @@ using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.Contracts.Services.Identity.Organizations;
 using EShop.Shared.DomainTools.UnitOfWorks;
 using EShop.Shared.Scoping.Exceptions;
+using Microsoft.Extensions.Logging;
 
 namespace EShop.Identity.Application.UseCases.V1.Commands.Organizations;
 
@@ -12,13 +13,16 @@ public class CreateOrganizationCommandHandler : ICommandHandler<Command.CreateOr
 {
     private readonly IOrganizationRepository _organizationRepository;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly ILogger _logger;
 
     public CreateOrganizationCommandHandler(
         IOrganizationRepository organizationRepository,
-        IUnitOfWork unitOfWork)
+        IUnitOfWork unitOfWork,
+        ILogger<CreateOrganizationCommandHandler> logger)
     {
         _organizationRepository = organizationRepository;
         _unitOfWork = unitOfWork;
+        _logger = logger;
     }
 
     /// <summary>
@@ -30,6 +34,8 @@ public class CreateOrganizationCommandHandler : ICommandHandler<Command.CreateOr
     /// <returns></returns>
     public async Task<Result> Handle(Command.CreateOrganizationCommand request, CancellationToken cancellationToken)
     {
+        _logger.LogInformation("Creating organization with name: {Name}", request.Name);
+
         var parentOrganization = await GetParentOrganization(request.ParentOrganizationId);
 
         await ValidateRequest(request, parentOrganization.TenantId!);

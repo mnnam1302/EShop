@@ -1,6 +1,5 @@
 ﻿using EShop.Identity.Tests.Setups;
 using EShop.Shared.Contracts.Services.Identity.Organizations;
-using EShop.Shared.Scoping;
 using Reqnroll;
 
 namespace EShop.Identity.Tests.Organizations.Create;

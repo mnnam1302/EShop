@@ -560,7 +560,7 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
             .Enrich.WithThreadId()
             .Enrich.WithThreadName()
             .ReadFrom.Configuration(serviceProvider.GetRequiredService<IConfiguration>())
-            .WriteTo.Debug(levelSwitch: new Serilog.Core.LoggingLevelSwitch(Serilog.Events.LogEventLevel.Warning))
+            .WriteTo.Debug(outputTemplate: "[{Timestamp:HH:mm:ss.fff} {Level:u3}] (T={ThreadId}) {Message:lj} {Properties}{NewLine}{Exception}{NewLine}")
             .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss.fff} {Level:u3}] (T={ThreadId}) {Message:lj} {Properties}{NewLine}{Exception}{NewLine}");
     }
 
