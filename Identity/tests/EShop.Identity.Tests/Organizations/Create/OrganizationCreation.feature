@@ -10,27 +10,10 @@ Background:
 		| tenant-2 | Tenant2    | tenantOwner2  | Tenant Owner2    | owner@tenant2.com |
 	And Admin user with all permissions
 
-Scenario: Creating a new organzaition
-	#When User 'tenantOwner1' creates a new organization under the root organization with the following details
-	#| Id        | Name                       | OrganizationNumber | Email | Description | ParentOrganizationId |
-	#| child-org | Organization child of root | 50000              | 
-		#| Field              | Value                                    |
-		#| Name               | test-organization                        |
-		#| OrganizationNumber | 22000                                    |
-		#| PhoneNumber        | +477311593200                            |
-		#| Email              | organization@test.com                    |
-		#| Address            | Oslo                                     |
-		#| City               | Oslo                                     |
-		#| Postcode           | 0105                                     |
-		#| Description        | Marine services provider based in Norway |
+Scenario: Successfully create a new organization under the root organization
+	When User 'tenantOwner1' creates a new organization under the root organization with the following details
+		| Id        | Name                       | OrganizationNumber | Email                     | Description        | ParentOrganizationId |
+		| child-org | Organization child of root | 50000              | child-org@eshop.ecommerce | Child organization | tenant-1             |
 	Then there are following organization
-		| Field              | Value                                    |
-		| Name               | test-organization                        |
-		| OrganizationNumber | 22000                                    |
-		| PhoneNumber        | +477311593200                            |
-		| Email              | organization@test.com                    |
-		| Address            | Oslo                                     |
-		| City               | Oslo                                     |
-		| Postcode           | 0105                                     |
-		| Description        | Marine services provider based in Norway |
-
+		| Id        | Name                       | OrganizationNumber | Email                     | Description        | ParentOrganizationId |
+		| child-org | Organization child of root | 50000              | child-org@eshop.ecommerce | Child organization | tenant-1             |

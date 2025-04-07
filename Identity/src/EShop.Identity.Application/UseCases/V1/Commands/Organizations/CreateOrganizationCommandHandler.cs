@@ -4,17 +4,16 @@ using EShop.Shared.Contracts.Abstractions.Requests;
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.Contracts.Services.Identity.Organizations;
 using EShop.Shared.DomainTools.UnitOfWorks;
-using EShop.Shared.Scoping;
 using EShop.Shared.Scoping.Exceptions;
 
 namespace EShop.Identity.Application.UseCases.V1.Commands.Organizations;
 
-public class CreateOrganizationHandler : ICommandHandler<Command.CreateOrganizationCommand>
+public class CreateOrganizationCommandHandler : ICommandHandler<Command.CreateOrganizationCommand>
 {
     private readonly IOrganizationRepository _organizationRepository;
     private readonly IUnitOfWork _unitOfWork;
 
-    public CreateOrganizationHandler(
+    public CreateOrganizationCommandHandler(
         IOrganizationRepository organizationRepository,
         IUnitOfWork unitOfWork)
     {
@@ -32,7 +31,7 @@ public class CreateOrganizationHandler : ICommandHandler<Command.CreateOrganizat
     public async Task<Result> Handle(Command.CreateOrganizationCommand request, CancellationToken cancellationToken)
     {
         var parentOrganization = await GetParentOrganization(request.ParentOrganizationId);
-     
+
         await ValidateRequest(request, parentOrganization.TenantId!);
 
         await ValidateOrganizationHierarchy(parentOrganization);
@@ -53,7 +52,7 @@ public class CreateOrganizationHandler : ICommandHandler<Command.CreateOrganizat
         }
 
         await AssertNameIsUnique(tenantId, request.Name);
-        
+
         if (!string.IsNullOrEmpty(request.OrganizationNumber))
         {
             await AssertOrganizationNumberIsUnique(tenantId, request.ParentOrganizationId, request.OrganizationNumber);

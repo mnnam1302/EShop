@@ -1,6 +1,6 @@
-﻿
-using EShop.Identity.Tests.Setups;
+﻿using EShop.Identity.Tests.Setups;
 using EShop.Shared.Contracts.Services.Identity.Organizations;
+using EShop.Shared.Scoping;
 using Reqnroll;
 
 namespace EShop.Identity.Tests.Organizations.Create;
@@ -32,11 +32,27 @@ public sealed class StepContext
     {
         try
         {
-            var result = await _apiContext.PostAsync<Command.CreateOrganizationCommand>(BaseUrl, request);
+            var operationUserData = GetUserPerformingAction(operationUsername, request.ParentOrganizationId);
+            var result = await _apiContext.PostAsync<Command.CreateOrganizationCommand>(BaseUrl, request, operationUserData);
         }
         catch (Exception ex)
         {
             _apiContext.LastApiError = ex;
         }
+    }
+
+    private UserData GetUserPerformingAction(string? opertionalUsername, string? tenantId = null)
+    {
+        if (string.IsNullOrEmpty(opertionalUsername))
+        {
+            return _apiContext.GetUserByUsername(opertionalUsername);
+        }
+
+        var user = UserData.IsSystemUser(opertionalUsername)
+            ? UserData.GetSystemUser(tenantId)
+            : new UserData(opertionalUsername, opertionalUsername, tenantId ?? string.Empty);
+
+        _apiContext.AddUser(user);
+        return user;
     }
 }

@@ -124,14 +124,14 @@ namespace EShop.Identity.Tests.Organizations.Create
             await this.TestTearDownAsync();
         }
         
-        [Xunit.SkippableFactAttribute(DisplayName="Creating a new organzaition")]
+        [Xunit.SkippableFactAttribute(DisplayName="Successfully create a new organization under the root organization")]
         [Xunit.TraitAttribute("FeatureTitle", "OrganizationCreation")]
-        [Xunit.TraitAttribute("Description", "Creating a new organzaition")]
-        public async System.Threading.Tasks.Task CreatingANewOrganzaition()
+        [Xunit.TraitAttribute("Description", "Successfully create a new organization under the root organization")]
+        public async System.Threading.Tasks.Task SuccessfullyCreateANewOrganizationUnderTheRootOrganization()
         {
             string[] tagsOfScenario = ((string[])(null));
             System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Creating a new organzaition", null, tagsOfScenario, argumentsOfScenario, featureTags);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Successfully create a new organization under the root organization", null, tagsOfScenario, argumentsOfScenario, featureTags);
 #line 13
 this.ScenarioInitialize(scenarioInfo);
 #line hidden
@@ -146,34 +146,39 @@ this.ScenarioInitialize(scenarioInfo);
 await this.FeatureBackgroundAsync();
 #line hidden
                 global::Reqnroll.Table table2 = new global::Reqnroll.Table(new string[] {
-                            "Field",
-                            "Value"});
-                table2.AddRow(new string[] {
+                            "Id",
                             "Name",
-                            "test-organization"});
-                table2.AddRow(new string[] {
                             "OrganizationNumber",
-                            "22000"});
-                table2.AddRow(new string[] {
-                            "PhoneNumber",
-                            "+477311593200"});
-                table2.AddRow(new string[] {
                             "Email",
-                            "organization@test.com"});
-                table2.AddRow(new string[] {
-                            "Address",
-                            "Oslo"});
-                table2.AddRow(new string[] {
-                            "City",
-                            "Oslo"});
-                table2.AddRow(new string[] {
-                            "Postcode",
-                            "0105"});
-                table2.AddRow(new string[] {
                             "Description",
-                            "Marine services provider based in Norway"});
-#line 26
- await testRunner.ThenAsync("there are following organization", ((string)(null)), table2, "Then ");
+                            "ParentOrganizationId"});
+                table2.AddRow(new string[] {
+                            "child-org",
+                            "Organization child of root",
+                            "50000",
+                            "child-org@eshop.ecommerce",
+                            "Child organization",
+                            "tenant-1"});
+#line 14
+ await testRunner.WhenAsync("User \'tenantOwner1\' creates a new organization under the root organization with t" +
+                        "he following details", ((string)(null)), table2, "When ");
+#line hidden
+                global::Reqnroll.Table table3 = new global::Reqnroll.Table(new string[] {
+                            "Id",
+                            "Name",
+                            "OrganizationNumber",
+                            "Email",
+                            "Description",
+                            "ParentOrganizationId"});
+                table3.AddRow(new string[] {
+                            "child-org",
+                            "Organization child of root",
+                            "50000",
+                            "child-org@eshop.ecommerce",
+                            "Child organization",
+                            "tenant-1"});
+#line 17
+ await testRunner.ThenAsync("there are following organization", ((string)(null)), table3, "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();

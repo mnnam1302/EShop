@@ -27,6 +27,8 @@ public sealed class ScenarioHooks
     {
         PostgreSqlContainer = new PostgreSqlBuilder()
                 .WithPortBinding(36200, 5432)
+                .WithUsername("postgres")
+                .WithPassword("postgres")
                 .WithImage("postgres:17.0")
                 .Build();
 
@@ -75,6 +77,7 @@ public sealed class ScenarioHooks
         if (scenarioContext.StepContext.StepInfo.StepDefinitionType == StepDefinitionType.Given)
         {
             apiContext.LastApiError.Should().BeNull();
+            apiContext.EventTracker.ClearPublishedEvents();
         }
     }
 

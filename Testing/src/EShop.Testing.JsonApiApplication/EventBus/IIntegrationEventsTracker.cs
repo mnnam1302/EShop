@@ -6,6 +6,8 @@ namespace EShop.Testing.JsonApiApplication.EventBus;
 public interface IIntegrationEventsTracker
 {
     void Track(object eventMessage);
+
+    void ClearPublishedEvents();
 }
 
 public class IntegrationEventsTracker : IIntegrationEventsTracker
@@ -25,5 +27,11 @@ public class IntegrationEventsTracker : IIntegrationEventsTracker
                 "Tracking Integration events - '{eventTypeName}' (hashcode={eventHashCode})",
                 eventMessage.GetType().Name,
                 eventMessage.GetHashCode());
+    }
+
+    public void ClearPublishedEvents()
+    {
+        publishedEvents.Clear();
+        _logger.LogDebug("Clearing Integration events - cleared items");
     }
 }

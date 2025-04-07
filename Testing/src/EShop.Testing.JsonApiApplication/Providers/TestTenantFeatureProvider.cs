@@ -1,6 +1,6 @@
 ﻿using EShop.Shared.Scoping.ResourceAccessControl.Providers.TenantFeaturesProvider;
 
-namespace EShop.Testing.JsonApiApplication;
+namespace EShop.Testing.JsonApiApplication.Providers;
 
 public class TestTenantFeatureProvider : ITenantFeaturesProvider
 {

@@ -2,7 +2,7 @@
 using EShop.Shared.Contracts.Services.Identity.Auth;
 using Microsoft.Extensions.Caching.Distributed;
 
-namespace EShop.Testing.JsonApiApplication;
+namespace EShop.Testing.JsonApiApplication.Providers;
 
 public class TestUserTokenProvider : IRedisCachingAsyncProvider<Response.AuthenticatedResponse>
 {
@@ -12,7 +12,7 @@ public class TestUserTokenProvider : IRedisCachingAsyncProvider<Response.Authent
     {
         if (userTokens.ContainsKey(cacheKey))
         {
-            await this.ClearAsync(cacheKey);
+            await ClearAsync(cacheKey);
         }
 
         userTokens.Add(cacheKey, value);

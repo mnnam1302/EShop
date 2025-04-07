@@ -8,13 +8,11 @@ using EShop.Identity.Persistence.DependencyInjections.Extensions;
 using EShop.Shared.Cache.DependencyInejctions.Extensions;
 using EShop.Shared.Cache.Providers;
 using EShop.Shared.Cache.Services;
-using EShop.Shared.Contracts.Services.Identity.Auth;
 using EShop.Shared.Contracts.Services.Tenancy.Tenants;
 using EShop.Shared.DomainTools.DependencyInjections;
 using EShop.Shared.EventBus.JsonConverters;
 using EShop.Shared.EventBus.Services;
 using EShop.Shared.JsonApi.DependencyInjections;
-using EShop.Shared.JsonApi.Middlewares;
 using EShop.Shared.Scoping.ResourceAccessControl;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers.TenantFeaturesProvider;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserPermissionProvider;
@@ -22,6 +20,7 @@ using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserTokenProvider;
 using EShop.Testing.JsonApiApplication;
 using EShop.Testing.JsonApiApplication.DependencyInjections;
 using EShop.Testing.JsonApiApplication.EventBus;
+using EShop.Testing.JsonApiApplication.Providers;
 using MassTransit;
 using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
@@ -71,7 +70,7 @@ internal static class ServiceCollectionExtensions
     private static IServiceCollection AddTestIdentityApi(this IServiceCollection services)
     {
         services.AddCors();
-        services.AddTransient<ExceptionHandlingMiddleware>();
+        //services.AddTransient<ExceptionHandlingMiddleware>();
 
         services.AddControllers()
             .AddApplicationPart(Identity.Presentation.AssemblyReference.Assembly);

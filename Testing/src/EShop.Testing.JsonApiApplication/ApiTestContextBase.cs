@@ -6,6 +6,7 @@ using EShop.Shared.Scoping.ResourceAccessControl;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers.TenantFeaturesProvider;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserPermissionProvider;
 using EShop.Testing.JsonApiApplication.EventBus;
+using EShop.Testing.JsonApiApplication.Providers;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.TestHost;
@@ -63,10 +64,10 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
     private readonly TestServer _server;
     private readonly IServiceScope _serviceScope;
     private readonly Microsoft.Extensions.Logging.ILogger _logger;
-    private readonly Dictionary<string, UserData> _users = new Dictionary<string, UserData>();
     private readonly TestUserPermissionProvider _testUserPermissionProvider;
     private readonly TestTenantFeatureProvider _testTenantFeatureProvider;
 
+    private readonly Dictionary<string, UserData> _users = new();
     private UserData _defaultUser
         = new UserData("TEST_ADMIN", "TEST_ADMIN", DefaultTenantId, isSupportUser: true);
 
@@ -137,7 +138,7 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
 
     #region Manage User Management
 
-    public void AddUser(UserData user, bool setAsDefault)
+    public void AddUser(UserData user, bool setAsDefault = false)
     {
         _users.Add(user.Username, user);
         if (setAsDefault)
@@ -147,7 +148,7 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
         }
     }
 
-    public void AddOrUpdateUser(UserData user, bool setAsDefault)
+    public void AddOrUpdateUser(UserData user, bool setAsDefault = false)
     {
         if (_users.ContainsKey(user.Username))
         {

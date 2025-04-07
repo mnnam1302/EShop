@@ -8,7 +8,7 @@ namespace EShop.Testing.JsonApiApplication
     {
         private readonly ConcurrentDictionary<string, string> tenantSpecificConnectionStrings = new();
 
-        public PostgreSqlContainer PostgreSqlContainer { get; set; }
+        public required PostgreSqlContainer PostgreSqlContainer { get; set; }
 
         public string SharedConnectionString { get; private set; }
 
@@ -42,8 +42,8 @@ namespace EShop.Testing.JsonApiApplication
         /// <returns>The connection string to the tenant-specific database.</returns>
         public async Task<string> CreateForTenantAsync(
             string tenantId,
-            string databaseName = null,
-            PostgreSqlTestDatabaseCreated onDatabaseCreated = null)
+            string? databaseName = null,
+            PostgreSqlTestDatabaseCreated? onDatabaseCreated = null)
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(tenantId);
             if (databaseName is not null && string.IsNullOrWhiteSpace(databaseName))
@@ -61,6 +61,33 @@ namespace EShop.Testing.JsonApiApplication
             }
 
             return connectionString;
+        }
+
+        private async Task<string> CreateDatabaseAsync(string databaseName, PostgreSqlTestDatabaseCreated? onDatabaseCreated)
+        {
+            var masterConnectionString = PostgreSqlContainer.GetConnectionString();
+            var username = new NpgsqlConnectionStringBuilder(masterConnectionString).Username;
+
+            var createDatabaseScript =
+                $"""
+                CREATE DATABASE "{databaseName}";
+                GRANT ALL PRIVILEGES ON DATABASE "{databaseName}" TO {username};
+                """;
+
+            await PostgreSqlContainer.ExecScriptAsync(createDatabaseScript);
+
+            var databaseConnectionString = new NpgsqlConnectionStringBuilder(masterConnectionString)
+            {
+                Database = databaseName,
+                IncludeErrorDetail = true
+            }.ConnectionString;
+
+            if (onDatabaseCreated is not null)
+            {
+                await onDatabaseCreated.Invoke(databaseName, databaseConnectionString, PostgreSqlContainer);
+            }
+
+            return databaseConnectionString;
         }
 
         /// <summary>
@@ -109,33 +136,6 @@ namespace EShop.Testing.JsonApiApplication
 
                 await this.PostgreSqlContainer.ExecScriptAsync(sqlScript);
             }
-        }
-
-        private async Task<string> CreateDatabaseAsync(string databaseName, PostgreSqlTestDatabaseCreated? onDatabaseCreated)
-        {
-            var masterConnectionString = PostgreSqlContainer.GetConnectionString();
-            var username = new NpgsqlConnectionStringBuilder(masterConnectionString).Username;
-
-            var createDatabaseScript =
-                $"""
-                CREATE DATABASE "{databaseName}";
-                GRANT ALL PRIVILEGES ON DATABASE "{databaseName}" TO {username};
-                """;
-
-            await PostgreSqlContainer.ExecScriptAsync(createDatabaseScript);
-
-            var databaseConnectionString = new NpgsqlConnectionStringBuilder(masterConnectionString)
-            {
-                Database = databaseName,
-                IncludeErrorDetail = true
-            }.ConnectionString;
-
-            if (onDatabaseCreated is not null)
-            {
-                await onDatabaseCreated.Invoke(databaseName, databaseConnectionString, PostgreSqlContainer);
-            }
-
-            return databaseConnectionString;
         }
     }
 }

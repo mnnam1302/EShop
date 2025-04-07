@@ -28,11 +28,10 @@ public class Steps
         }
     }
 
-    [Given("Admin user creates a new organization with the following")]
-    [When("Admin user creates a new organization with the following")]
-    public async Task WhenAdminUserCreatesANewOrganizationWithTheFollowing(DataTable dataTable)
+    [When("User (.*) creates a new organization under the root organization with the following details")]
+    public async Task WhenUserCreatesANewOrganizationUnderTheRootOrganizationWithTheFollowingDetails(string creatorUsername, DataTable dataTable)
     {
-        var request = dataTable.CreateInstance<Command.CreateOrganizationCommand>();
-        await _stepContext.CreateOrganizationAsync(request);
+        var command = dataTable.CreateInstance<Command.CreateOrganizationCommand>();
+        await _stepContext.CreateOrganizationAsync(command, creatorUsername);
     }
 }

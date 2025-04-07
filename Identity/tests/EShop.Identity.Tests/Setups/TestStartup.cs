@@ -1,5 +1,4 @@
 ﻿using EShop.Identity.API.DependencyInjections.Extensions;
-using EShop.Shared.JsonApi.Middlewares;
 using EShop.Testing.JsonApiApplication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -34,7 +33,8 @@ public class TestStartup : Identity.API.Startup
         IHostApplicationLifetime applicationLifetime,
         ILoggerFactory loggerFactory)
     {
-        app.UseMiddleware<ExceptionHandlingMiddleware>();
+        // I think that shouldn't add exception handling middleware in test project because we can take system and application error to investigate
+        //app.UseMiddleware<ExceptionHandlingMiddleware>();
 
         if (Environment.IsDevelopment())
         {
