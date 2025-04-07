@@ -1,4 +1,5 @@
-﻿using EShop.Shared.Cache.DependencyInejctions.Extensions;
+﻿using Carter;
+using EShop.Shared.Cache.DependencyInejctions.Extensions;
 using EShop.Shared.Cache.Providers;
 using EShop.Shared.Cache.Services;
 using EShop.Shared.DomainTools.DependencyInjections;
@@ -11,7 +12,6 @@ using EShop.Tenancy.Application.Services;
 using EShop.Tenancy.Infrastructure.DependencyInjections.Extensions;
 using EShop.Tenancy.Persistence;
 using EShop.Tenancy.Persistence.DependencyInjections.Extensions;
-using EShop.Tenancy.Presentation.DependencyInjections.Extensions;
 using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
 
 namespace EShop.Tenancy.API.DependencyInjections.Extensions;
@@ -35,7 +35,6 @@ public static class ServiceCollectionExtensions
 
     public static IServiceCollection AddBoostrapping(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment)
     {
-        services.AddTenancyPresentation(); // Must before API project, because contain DI Carter
         services.AddTenancyAPI();
         services.AddTenancyApplication();
         services.AddTenancyPersistence();
@@ -51,6 +50,8 @@ public static class ServiceCollectionExtensions
     {
         services.AddCors();
         services.AddSingleton<ExceptionHandlingMiddleware>();
+
+        services.AddCarter();
 
         services
             .AddSwaggerGenNewtonsoftSupport()
