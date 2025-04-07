@@ -4,9 +4,9 @@ namespace EShop.Testing.JsonApiApplication.Providers;
 
 public class TestTenantFeatureProvider : ITenantFeaturesProvider
 {
-    private readonly Dictionary<string, List<string>> tenantFeatures = new Dictionary<string, List<string>>();
+    private readonly Dictionary<string, List<string>> tenantFeatures = new();
 
-    public void AddTenantFeatures(string tenantId, string featureId)
+    public void AddTenantFeature(string tenantId, string featureId)
     {
         if (!tenantFeatures.ContainsKey(tenantId))
         {

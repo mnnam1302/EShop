@@ -28,7 +28,7 @@ public class Steps
         }
     }
 
-    [When("User (.*) creates a new organization under the root organization with the following details")]
+    [When("User '(.*)' creates a new organization under the root organization with the following details")]
     public async Task WhenUserCreatesANewOrganizationUnderTheRootOrganizationWithTheFollowingDetails(string creatorUsername, DataTable dataTable)
     {
         var command = dataTable.CreateInstance<Command.CreateOrganizationCommand>();

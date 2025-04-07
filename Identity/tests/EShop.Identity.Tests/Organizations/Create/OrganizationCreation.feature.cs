@@ -97,20 +97,38 @@ namespace EShop.Identity.Tests.Organizations.Create
             table1.AddRow(new string[] {
                         "tenant-1",
                         "Tenant1",
-                        "tenantOwner1",
+                        "tenantOwner1@tenant-1",
                         "Tenant Owner1",
                         "owner@tenant1.com"});
             table1.AddRow(new string[] {
                         "tenant-2",
                         "Tenant2",
-                        "tenantOwner2",
+                        "tenantOwner2@tenant-2",
                         "Tenant Owner2",
                         "owner@tenant2.com"});
 #line 7
  await testRunner.GivenAsync("following tenants added to the system", ((string)(null)), table1, "Given ");
 #line hidden
 #line 11
- await testRunner.AndAsync("Admin user with all permissions", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+ await testRunner.AndAsync("all standard features were turned on for \'tenant-1\'", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+            global::Reqnroll.Table table2 = new global::Reqnroll.Table(new string[] {
+                        "Username",
+                        "TenantId"});
+            table2.AddRow(new string[] {
+                        "tenantOwner1@tenant-1",
+                        "tenant-1"});
+#line 12
+ await testRunner.AndAsync("the following users are set up", ((string)(null)), table2, "And ");
+#line hidden
+            global::Reqnroll.Table table3 = new global::Reqnroll.Table(new string[] {
+                        "PermissionId"});
+            table3.AddRow(new string[] {
+                        "Identity_ViewOrganizations"});
+            table3.AddRow(new string[] {
+                        "Identity_ManageOrganizations"});
+#line 15
+ await testRunner.AndAsync("user \'tenantOwner1@tenant-1\' has the following permissions", ((string)(null)), table3, "And ");
 #line hidden
         }
         
@@ -132,7 +150,7 @@ namespace EShop.Identity.Tests.Organizations.Create
             string[] tagsOfScenario = ((string[])(null));
             System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
             global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Successfully create a new organization under the root organization", null, tagsOfScenario, argumentsOfScenario, featureTags);
-#line 13
+#line 20
 this.ScenarioInitialize(scenarioInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
@@ -145,40 +163,40 @@ this.ScenarioInitialize(scenarioInfo);
 #line 6
 await this.FeatureBackgroundAsync();
 #line hidden
-                global::Reqnroll.Table table2 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table4 = new global::Reqnroll.Table(new string[] {
                             "Id",
                             "Name",
                             "OrganizationNumber",
                             "Email",
                             "Description",
                             "ParentOrganizationId"});
-                table2.AddRow(new string[] {
+                table4.AddRow(new string[] {
                             "child-org",
                             "Organization child of root",
                             "50000",
                             "child-org@eshop.ecommerce",
                             "Child organization",
                             "tenant-1"});
-#line 14
- await testRunner.WhenAsync("User \'tenantOwner1\' creates a new organization under the root organization with t" +
-                        "he following details", ((string)(null)), table2, "When ");
+#line 21
+ await testRunner.WhenAsync("User \'tenantOwner1@tenant-1\' creates a new organization under the root organizati" +
+                        "on with the following details", ((string)(null)), table4, "When ");
 #line hidden
-                global::Reqnroll.Table table3 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table5 = new global::Reqnroll.Table(new string[] {
                             "Id",
                             "Name",
                             "OrganizationNumber",
                             "Email",
                             "Description",
                             "ParentOrganizationId"});
-                table3.AddRow(new string[] {
+                table5.AddRow(new string[] {
                             "child-org",
                             "Organization child of root",
                             "50000",
                             "child-org@eshop.ecommerce",
                             "Child organization",
                             "tenant-1"});
-#line 17
- await testRunner.ThenAsync("there are following organization", ((string)(null)), table3, "Then ");
+#line 24
+ await testRunner.ThenAsync("there are following organization", ((string)(null)), table5, "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();

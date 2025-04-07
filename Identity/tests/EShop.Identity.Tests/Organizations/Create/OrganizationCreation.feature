@@ -5,13 +5,20 @@
 
 Background:
 	Given following tenants added to the system
-		| TenantId | TenantName | OwnerUsername | OwnerDisplayName | OwnerEmail        |
-		| tenant-1 | Tenant1    | tenantOwner1  | Tenant Owner1    | owner@tenant1.com |
-		| tenant-2 | Tenant2    | tenantOwner2  | Tenant Owner2    | owner@tenant2.com |
-	And Admin user with all permissions
+		| TenantId | TenantName | OwnerUsername         | OwnerDisplayName | OwnerEmail        |
+		| tenant-1 | Tenant1    | tenantOwner1@tenant-1 | Tenant Owner1    | owner@tenant1.com |
+		| tenant-2 | Tenant2    | tenantOwner2@tenant-2 | Tenant Owner2    | owner@tenant2.com |
+	And all standard features were turned on for 'tenant-1'
+	And the following users are set up
+        | Username              | TenantId |
+        | tenantOwner1@tenant-1 | tenant-1 |
+	And user 'tenantOwner1@tenant-1' has the following permissions
+		| PermissionId                 |
+		| Identity_ViewOrganizations   |
+		| Identity_ManageOrganizations |
 
 Scenario: Successfully create a new organization under the root organization
-	When User 'tenantOwner1' creates a new organization under the root organization with the following details
+	When User 'tenantOwner1@tenant-1' creates a new organization under the root organization with the following details
 		| Id        | Name                       | OrganizationNumber | Email                     | Description        | ParentOrganizationId |
 		| child-org | Organization child of root | 50000              | child-org@eshop.ecommerce | Child organization | tenant-1             |
 	Then there are following organization

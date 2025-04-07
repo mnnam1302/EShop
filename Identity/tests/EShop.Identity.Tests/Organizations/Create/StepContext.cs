@@ -32,27 +32,12 @@ public sealed class StepContext
     {
         try
         {
-            var operationUserData = GetUserPerformingAction(operationUsername, request.ParentOrganizationId);
+            var operationUserData = _apiContext.GetUserByUsername(operationUsername);
             var result = await _apiContext.PostAsync<Command.CreateOrganizationCommand>(BaseUrl, request, operationUserData);
         }
         catch (Exception ex)
         {
             _apiContext.LastApiError = ex;
         }
-    }
-
-    private UserData GetUserPerformingAction(string? opertionalUsername, string? tenantId = null)
-    {
-        if (string.IsNullOrEmpty(opertionalUsername))
-        {
-            return _apiContext.GetUserByUsername(opertionalUsername);
-        }
-
-        var user = UserData.IsSystemUser(opertionalUsername)
-            ? UserData.GetSystemUser(tenantId)
-            : new UserData(opertionalUsername, opertionalUsername, tenantId ?? string.Empty);
-
-        _apiContext.AddUser(user);
-        return user;
     }
 }

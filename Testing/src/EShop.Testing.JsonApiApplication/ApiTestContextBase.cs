@@ -68,6 +68,7 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
     private readonly TestTenantFeatureProvider _testTenantFeatureProvider;
 
     private readonly Dictionary<string, UserData> _users = new();
+
     private UserData _defaultUser
         = new UserData("TEST_ADMIN", "TEST_ADMIN", DefaultTenantId, isSupportUser: true);
 
@@ -110,10 +111,10 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
 
         _serviceScope = _server.Host.Services.CreateScope();
         _logger = ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger<ApiTestContextBase<TStartup>>();
-        
+
         _testUserPermissionProvider = ServiceProvider.GetRequiredService<IUserPermissionsProvider>() as TestUserPermissionProvider
                                      ?? throw new InvalidOperationException("Service provider did not return a TestUserPermissionProvider instance.");
-        
+
         _testTenantFeatureProvider = ServiceProvider.GetRequiredService<ITenantFeaturesProvider>() as TestTenantFeatureProvider
                                      ?? throw new InvalidOperationException("Service provider did not return a TestTenantFeatureProvider instance.");
 
@@ -121,26 +122,26 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
     }
 
     public Microsoft.Extensions.Logging.ILogger Logger => _logger;
-    
+
     public ILoggerFactory LoggerFactory => ServiceProvider.GetRequiredService<ILoggerFactory>();
-    
+
     public IServiceProvider ServiceProvider => _serviceScope.ServiceProvider;
 
     public IIntegrationEventsTracker EventTracker { get; private set; }
-    
+
     public Exception LastApiError { get; set; }
-    
+
     public HttpClient Client => GetAuthorizedClient(_defaultUser);
-    
+
     public string LoggedInUser { get; set; }
-    
+
     public HttpStatusCode LastStatusCode { get; set; }
 
     #region Manage User Management
 
     public void AddUser(UserData user, bool setAsDefault = false)
     {
-        _users.Add(user.Username, user);
+        _users.Add(user.Username.ToLower(), user);
         if (setAsDefault)
         {
             _defaultUser = user;
@@ -156,7 +157,7 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
         }
         else
         {
-            _users.Add(user.Username, user);
+            _users.Add(user.Username.ToLower(), user);
         }
         if (setAsDefault)
         {
@@ -236,11 +237,16 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
         SetupFeaturesForTenant(_defaultUser.TenantId, StandardFeatureIds);
     }
 
+    public void SetupStandardFeaturesForTenant(string tenantId)
+    {
+        SetupFeaturesForTenant(tenantId, StandardFeatureIds);
+    }
+
     public void SetupFeaturesForTenant(string tenantId, string[] featureIds)
     {
-        var user = GetUserByUsername();
         foreach (var featureId in featureIds)
         {
+            _testTenantFeatureProvider.AddTenantFeature(tenantId, featureId);
         }
     }
 
@@ -530,7 +536,7 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
         await eventBusGateway.PublishAsync<TEvent>(eventData);
     }
 
-    #endregion
+    #endregion Integration Event
 
     #region Logging
 

@@ -55,14 +55,15 @@ internal static class ServiceCollectionExtensions
             .AddIdentityPersistence()
             .AddTestIdentityInfrastructure();
 
-        services.AddTransient<IPermissionValidator, CurrentUserPermissionsValidator>();
+        services.AddScoped<IPermissionValidator, CurrentUserPermissionsValidator>();
         services.AddSingleton<IUserPermissionsProvider, TestUserPermissionProvider>();
 
         services.AddScoped<IUserTokenCachingService, TokenRedisCachingService>();
-        services.AddTransient<IRedisCachingAsyncProvider<EShop.Shared.Contracts.Services.Identity.Auth.Response.AuthenticatedResponse>, TestUserTokenProvider>();
+        services.AddSingleton<
+            IRedisCachingAsyncProvider<EShop.Shared.Contracts.Services.Identity.Auth.Response.AuthenticatedResponse>, TestUserTokenProvider>();
 
         services.AddScoped<IFeatureValidator, CurrentUserFeaturesValidator>();
-        services.AddScoped<ITenantFeaturesProvider, TestTenantFeatureProvider>();
+        services.AddSingleton<ITenantFeaturesProvider, TestTenantFeatureProvider>();
 
         return services;
     }
