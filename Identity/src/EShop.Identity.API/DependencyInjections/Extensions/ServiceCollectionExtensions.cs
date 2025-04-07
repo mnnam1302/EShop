@@ -21,10 +21,12 @@ public static class ServiceCollectionExtensions
     {
         services.AddResiliencePolicy();
 
+        // DbContext
         services
             .AddPostgreSqlHealthCheck(configuration)
             .AddDbContextWithScoping<UsersDbContext>(configuration);
 
+        // Redis Cache
         services
             .AddRedisHealthCheck(configuration)
             .AddRedisInfrastructure(configuration)
@@ -34,14 +36,16 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    public static IServiceCollection AddBoostrapping(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment)
+    public static IServiceCollection AddBootstrapping(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment)
     {
+        // Clean architecture
         services
             .AddIdentityApi()
             .AddIdentityApplication()
             .AddIdentityPersistence()
             .AddIdentityInfrastructure(configuration, environment, Program.ApplicationName);
 
+        // Owner service
         services.AddUserPermissionForOwnerService();
 
         return services;

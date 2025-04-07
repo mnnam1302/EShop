@@ -1,6 +1,6 @@
 ﻿using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserPermissionProvider;
 
-namespace EShop.Testing.JsonApiApplication;
+namespace EShop.Testing.JsonApiApplication.Providers;
 
 public class TestUserPermissionProvider : IUserPermissionsProvider
 {

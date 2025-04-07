@@ -36,8 +36,8 @@ public class CreateTenantCommandHandler : ICommandHandler<Command.CreateTenantCo
 
     public async Task<Result> Handle(Command.CreateTenantCommand request, CancellationToken cancellationToken)
     {
-        var existsingTenant = await _tenantRepository.FindSingleAsync(x => x.Name == request.Name);
-        if (existsingTenant is not null)
+        var existingTenant = await _tenantRepository.FindSingleAsync(x => x.Name == request.Name);
+        if (existingTenant is not null)
         {
             throw new UnprocessableEntityException("Tenant with the same name already exists.");
         }
@@ -45,7 +45,7 @@ public class CreateTenantCommandHandler : ICommandHandler<Command.CreateTenantCo
         var operationalUser = _userDetailsProvider.AuthenticatedUser;
 
         var tenant = Tenant.Create(request);
-        await EnsureTenantAvaibleFeatures(tenant, operationalUser.ActionUserId);
+        await EnsureTenantAvailableFeatures(tenant, operationalUser.ActionUserId);
 
         await _eventBusGateway.PublishAsync<TenantCreated>(new
         {
@@ -61,7 +61,7 @@ public class CreateTenantCommandHandler : ICommandHandler<Command.CreateTenantCo
         return Result.Success();
     }
 
-    private async Task EnsureTenantAvaibleFeatures(Tenant tenant, string operationalUsername)
+    private async Task EnsureTenantAvailableFeatures(Tenant tenant, string operationalUsername)
     {
         try
         {

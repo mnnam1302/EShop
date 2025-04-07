@@ -1,4 +1,5 @@
 ﻿using EShop.Shared.Contracts.Services.Identity.Permissions;
+using EShop.Shared.EventBus.Services;
 using EShop.Shared.Scoping.ResourceAccessControl;
 using MassTransit;
 
@@ -8,7 +9,7 @@ public class UserPermissionRegistration : IPermissionRegistrationService
 {
     private const string ApplicationName = "Identity";
     private const string ModuleName = "Reports";
-    private readonly IPublishEndpoint _publishEndpoint;
+    private readonly IEventBusGateway _eventBusGateway;
 
     private static readonly ReportPermission[] Permissions = 
     [
@@ -21,14 +22,14 @@ public class UserPermissionRegistration : IPermissionRegistrationService
         }
     ];
 
-    public UserPermissionRegistration(IPublishEndpoint publishEndpoint)
+    public UserPermissionRegistration(IEventBusGateway eventBusGateway)
     {
-        _publishEndpoint = publishEndpoint;
+        _eventBusGateway = eventBusGateway;
     }
 
     public async Task RegisterPermissions()
     {
-        await _publishEndpoint.Publish<SupportedPermissionsUpdated>(new
+        await _eventBusGateway.PublishAsync<SupportedPermissionsUpdated>(new
         {
             SourceSystemReference = ApplicationName,
             Permissions = Permissions,

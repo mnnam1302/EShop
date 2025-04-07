@@ -27,7 +27,7 @@ public class Steps
         dataTable.CompareToInstance(actualOrganization.Value);
     }
 
-    [Then("organization {string} has the following details")]
+    [Then("organization '(.*)' has the following details")]
     public async Task ThenOrganizationHasTheFollowingDetails(string organizationName, DataTable dataTable)
     {
         var request = new Query.GetOrganizationById(organizationName);

@@ -125,95 +125,95 @@ this.ScenarioInitialize(scenarioInfo);
 #line 5
 await this.FeatureBackgroundAsync();
 #line hidden
-                global::Reqnroll.Table table3 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table6 = new global::Reqnroll.Table(new string[] {
                             "Field",
                             "Value"});
-                table3.AddRow(new string[] {
+                table6.AddRow(new string[] {
                             "Name",
                             "test-organization"});
-                table3.AddRow(new string[] {
+                table6.AddRow(new string[] {
                             "OrganizationNumber",
                             "22000"});
-                table3.AddRow(new string[] {
+                table6.AddRow(new string[] {
                             "PhoneNumber",
                             "+477311593200"});
-                table3.AddRow(new string[] {
+                table6.AddRow(new string[] {
                             "Email",
                             "organization@test.com"});
-                table3.AddRow(new string[] {
+                table6.AddRow(new string[] {
                             "Address",
                             "Oslo"});
-                table3.AddRow(new string[] {
+                table6.AddRow(new string[] {
                             "City",
                             "Oslo"});
-                table3.AddRow(new string[] {
+                table6.AddRow(new string[] {
                             "Postcode",
                             "0105"});
-                table3.AddRow(new string[] {
+                table6.AddRow(new string[] {
                             "Description",
                             "Marine services provider based in Norway"});
 #line 10
- await testRunner.GivenAsync("Admin user creates a new organization with the following", ((string)(null)), table3, "Given ");
+ await testRunner.GivenAsync("Admin user creates a new organization with the following", ((string)(null)), table6, "Given ");
 #line hidden
-                global::Reqnroll.Table table4 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table7 = new global::Reqnroll.Table(new string[] {
                             "Field",
                             "Value"});
-                table4.AddRow(new string[] {
+                table7.AddRow(new string[] {
                             "Name",
                             "test-organization"});
-                table4.AddRow(new string[] {
+                table7.AddRow(new string[] {
                             "OrganizationNumber",
                             "20000"});
-                table4.AddRow(new string[] {
+                table7.AddRow(new string[] {
                             "PhoneNumber",
                             "+477311593222"});
-                table4.AddRow(new string[] {
+                table7.AddRow(new string[] {
                             "Email",
                             "organization@test.com"});
-                table4.AddRow(new string[] {
+                table7.AddRow(new string[] {
                             "Address",
                             "Oslo"});
-                table4.AddRow(new string[] {
+                table7.AddRow(new string[] {
                             "City",
                             "Oslo"});
-                table4.AddRow(new string[] {
+                table7.AddRow(new string[] {
                             "Postcode",
                             "0105"});
-                table4.AddRow(new string[] {
+                table7.AddRow(new string[] {
                             "Description",
                             "Marine services provider based in Norway"});
 #line 20
- await testRunner.WhenAsync("Admin user updates the organization \'test-organization\' with the following", ((string)(null)), table4, "When ");
+ await testRunner.WhenAsync("Admin user updates the organization \'test-organization\' with the following", ((string)(null)), table7, "When ");
 #line hidden
-                global::Reqnroll.Table table5 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table8 = new global::Reqnroll.Table(new string[] {
                             "Field",
                             "Value"});
-                table5.AddRow(new string[] {
+                table8.AddRow(new string[] {
                             "Name",
                             "test-organization"});
-                table5.AddRow(new string[] {
+                table8.AddRow(new string[] {
                             "OrganizationNumber",
                             "20000"});
-                table5.AddRow(new string[] {
+                table8.AddRow(new string[] {
                             "PhoneNumber",
                             "+477311593222"});
-                table5.AddRow(new string[] {
+                table8.AddRow(new string[] {
                             "Email",
                             "organization@test.com"});
-                table5.AddRow(new string[] {
+                table8.AddRow(new string[] {
                             "Address",
                             "Oslo"});
-                table5.AddRow(new string[] {
+                table8.AddRow(new string[] {
                             "City",
                             "Oslo"});
-                table5.AddRow(new string[] {
+                table8.AddRow(new string[] {
                             "Postcode",
                             "0105"});
-                table5.AddRow(new string[] {
+                table8.AddRow(new string[] {
                             "Description",
                             "Marine services provider based in Norway"});
 #line 30
- await testRunner.ThenAsync("organization \'test-organization\' has the following details", ((string)(null)), table5, "Then ");
+ await testRunner.ThenAsync("organization \'test-organization\' has the following details", ((string)(null)), table8, "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();

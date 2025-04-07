@@ -1,6 +1,4 @@
-﻿using EShop.Identity.Domain.Entities;
-using EShop.Shared.Contracts.Services.Identity.Organizations;
-using FluentAssertions;
+﻿using EShop.Shared.Contracts.Services.Identity.Organizations;
 using Reqnroll;
 
 namespace EShop.Identity.Tests.Organizations.Create;
@@ -15,11 +13,25 @@ public class Steps
         _stepContext = stepContext;
     }
 
-    [Given("Admin user creates a new organization with the following")]
-    [When("Admin user creates a new organization with the following")]
-    public async Task WhenAdminUserCreatesANewOrganizationWithTheFollowing(DataTable dataTable)
+    [Given("following tenants added to the system")]
+    public async Task GivenFollowingTenantsAddedToTheSystem(DataTable dataTable)
     {
-        var request = dataTable.CreateInstance<Command.CreateOrganizationCommand>();
-        await _stepContext.CreateOrganizationAsync(request);
+        var tenants = dataTable.CreateSet<Command.CreateTenantCommandInternal>();
+        foreach (var tenant in tenants)
+        {
+            await _stepContext.SimulateTenantCreationAsync(
+                tenant.TenantId,
+                tenant.TenantName,
+                tenant.OwnerUsername,
+                tenant.OwnerDisplayName,
+                tenant.OwnerEmail);
+        }
+    }
+
+    [When("User '(.*)' creates a new organization under the root organization with the following details")]
+    public async Task WhenUserCreatesANewOrganizationUnderTheRootOrganizationWithTheFollowingDetails(string creatorUsername, DataTable dataTable)
+    {
+        var command = dataTable.CreateInstance<Command.CreateOrganizationCommand>();
+        await _stepContext.CreateOrganizationAsync(command, creatorUsername);
     }
 }

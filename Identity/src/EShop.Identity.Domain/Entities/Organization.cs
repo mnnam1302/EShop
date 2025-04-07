@@ -74,7 +74,7 @@ public class Organization : AggregateRoot<string>, IExcludedFromScoping
             throw new BadRequestException("Parent organization ID is required.");
         }
 
-        var childOrganization = new Organization(command.Name, command.Name, command.OrganizationNumber)
+        var childOrganization = new Organization(command.Id, command.Name, command.OrganizationNumber)
         {
             PhoneNumber = command.PhoneNumber,
             Email = command.Email,

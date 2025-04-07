@@ -26,8 +26,9 @@ namespace EShop.Identity.Tests.Organizations.Create
         
         private static string[] featureTags = ((string[])(null));
         
-        private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new System.Globalization.CultureInfo("en-US"), "Organizations/Create", "Organization Creation", "\tAs a Support or Admin user of the system\r\n\tI want to create an organization for " +
-                "specific tenant requirement", global::Reqnroll.ProgrammingLanguage.CSharp, featureTags);
+        private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new System.Globalization.CultureInfo("en-US"), "Organizations/Create", "OrganizationCreation", "    As an Admin user of the system\r\n    I want to group users\r\n    So that I can " +
+                "reflect real world organization structure these employees belong to and correspo" +
+                "nding access level", global::Reqnroll.ProgrammingLanguage.CSharp, featureTags);
         
         private Xunit.Abstractions.ITestOutputHelper _testOutputHelper;
         
@@ -85,13 +86,52 @@ namespace EShop.Identity.Tests.Organizations.Create
         
         public virtual async System.Threading.Tasks.Task FeatureBackgroundAsync()
         {
-#line 5
-#line hidden
 #line 6
- await testRunner.GivenAsync("Admin user with all permissions", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
+            global::Reqnroll.Table table1 = new global::Reqnroll.Table(new string[] {
+                        "TenantId",
+                        "TenantName",
+                        "OwnerUsername",
+                        "OwnerDisplayName",
+                        "OwnerEmail"});
+            table1.AddRow(new string[] {
+                        "tenant-1",
+                        "Tenant1",
+                        "tenantOwner1@tenant-1",
+                        "Tenant Owner1",
+                        "owner@tenant1.com"});
+            table1.AddRow(new string[] {
+                        "tenant-2",
+                        "Tenant2",
+                        "tenantOwner2@tenant-2",
+                        "Tenant Owner2",
+                        "owner@tenant2.com"});
 #line 7
- await testRunner.AndAsync("all standard features were turned on for test tenant", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+ await testRunner.GivenAsync("following tenants added to the system", ((string)(null)), table1, "Given ");
+#line hidden
+#line 11
+ await testRunner.AndAsync("all standard features were turned on for \'tenant-1\'", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+            global::Reqnroll.Table table2 = new global::Reqnroll.Table(new string[] {
+                        "Username",
+                        "TenantId"});
+            table2.AddRow(new string[] {
+                        "tenantOwner1@tenant-1",
+                        "tenant-1"});
+#line 12
+ await testRunner.AndAsync("the following users are set up", ((string)(null)), table2, "And ");
+#line hidden
+            global::Reqnroll.Table table3 = new global::Reqnroll.Table(new string[] {
+                        "PermissionId"});
+            table3.AddRow(new string[] {
+                        "Identity_ViewOrganizations"});
+            table3.AddRow(new string[] {
+                        "Identity_ManageOrganizations"});
+#line 15
+ await testRunner.AndAsync("user \'tenantOwner1@tenant-1\' has the following permissions", ((string)(null)), table3, "And ");
+#line hidden
+#line 19
+ await testRunner.AndAsync("user \'tenantOwner1@tenant-1\' logs in to the system", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
         }
         
@@ -105,15 +145,15 @@ namespace EShop.Identity.Tests.Organizations.Create
             await this.TestTearDownAsync();
         }
         
-        [Xunit.SkippableFactAttribute(DisplayName="Creating a new organzaition")]
-        [Xunit.TraitAttribute("FeatureTitle", "Organization Creation")]
-        [Xunit.TraitAttribute("Description", "Creating a new organzaition")]
-        public async System.Threading.Tasks.Task CreatingANewOrganzaition()
+        [Xunit.SkippableFactAttribute(DisplayName="Successfully create a new organization under the root organization")]
+        [Xunit.TraitAttribute("FeatureTitle", "OrganizationCreation")]
+        [Xunit.TraitAttribute("Description", "Successfully create a new organization under the root organization")]
+        public async System.Threading.Tasks.Task SuccessfullyCreateANewOrganizationUnderTheRootOrganization()
         {
             string[] tagsOfScenario = ((string[])(null));
             System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Creating a new organzaition", null, tagsOfScenario, argumentsOfScenario, featureTags);
-#line 9
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Successfully create a new organization under the root organization", null, tagsOfScenario, argumentsOfScenario, featureTags);
+#line 21
 this.ScenarioInitialize(scenarioInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
@@ -123,68 +163,43 @@ this.ScenarioInitialize(scenarioInfo);
             else
             {
                 await this.ScenarioStartAsync();
-#line 5
+#line 6
 await this.FeatureBackgroundAsync();
 #line hidden
-                global::Reqnroll.Table table1 = new global::Reqnroll.Table(new string[] {
-                            "Field",
-                            "Value"});
-                table1.AddRow(new string[] {
+                global::Reqnroll.Table table4 = new global::Reqnroll.Table(new string[] {
+                            "Id",
                             "Name",
-                            "test-organization"});
-                table1.AddRow(new string[] {
                             "OrganizationNumber",
-                            "22000"});
-                table1.AddRow(new string[] {
-                            "PhoneNumber",
-                            "+477311593200"});
-                table1.AddRow(new string[] {
                             "Email",
-                            "organization@test.com"});
-                table1.AddRow(new string[] {
-                            "Address",
-                            "Oslo"});
-                table1.AddRow(new string[] {
-                            "City",
-                            "Oslo"});
-                table1.AddRow(new string[] {
-                            "Postcode",
-                            "0105"});
-                table1.AddRow(new string[] {
                             "Description",
-                            "Marine services provider based in Norway"});
-#line 10
- await testRunner.WhenAsync("Admin user creates a new organization with the following", ((string)(null)), table1, "When ");
+                            "ParentOrganizationId"});
+                table4.AddRow(new string[] {
+                            "child-org",
+                            "Organization child of root",
+                            "50000",
+                            "child-org@eshop.ecommerce",
+                            "Child organization",
+                            "tenant-1"});
+#line 22
+ await testRunner.WhenAsync("User \'tenantOwner1\' creates a new organization under the root organization with t" +
+                        "he following details", ((string)(null)), table4, "When ");
 #line hidden
-                global::Reqnroll.Table table2 = new global::Reqnroll.Table(new string[] {
-                            "Field",
-                            "Value"});
-                table2.AddRow(new string[] {
+                global::Reqnroll.Table table5 = new global::Reqnroll.Table(new string[] {
+                            "Id",
                             "Name",
-                            "test-organization"});
-                table2.AddRow(new string[] {
                             "OrganizationNumber",
-                            "22000"});
-                table2.AddRow(new string[] {
-                            "PhoneNumber",
-                            "+477311593200"});
-                table2.AddRow(new string[] {
                             "Email",
-                            "organization@test.com"});
-                table2.AddRow(new string[] {
-                            "Address",
-                            "Oslo"});
-                table2.AddRow(new string[] {
-                            "City",
-                            "Oslo"});
-                table2.AddRow(new string[] {
-                            "Postcode",
-                            "0105"});
-                table2.AddRow(new string[] {
                             "Description",
-                            "Marine services provider based in Norway"});
-#line 20
- await testRunner.ThenAsync("there are following organization", ((string)(null)), table2, "Then ");
+                            "ParentOrganizationId"});
+                table5.AddRow(new string[] {
+                            "child-org",
+                            "Organization child of root",
+                            "50000",
+                            "child-org@eshop.ecommerce",
+                            "Child organization",
+                            "tenant-1"});
+#line 25
+ await testRunner.ThenAsync("organization \'child-org\' has the following details", ((string)(null)), table5, "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();

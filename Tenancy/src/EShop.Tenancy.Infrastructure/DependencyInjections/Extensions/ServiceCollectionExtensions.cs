@@ -20,7 +20,7 @@ public static class ServiceCollectionExtensions
         IWebHostEnvironment environment,
         string serviceName = "tenancy")
     {
-        services.AddMasstransitRabbitMQ(configuration, environment, serviceName);
+        services.AddMassTransitRabbitMQ(configuration, environment, serviceName);
         services.AddEventBusGateway();
         return services;
     }
@@ -31,7 +31,7 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    private static IServiceCollection AddMasstransitRabbitMQ(
+    private static IServiceCollection AddMassTransitRabbitMQ(
         this IServiceCollection services,
         IConfiguration configuration,
         IWebHostEnvironment environment,

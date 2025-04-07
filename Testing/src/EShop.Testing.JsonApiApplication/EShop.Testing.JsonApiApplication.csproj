@@ -10,11 +10,12 @@
     <PackageReference Include="FluentAssertions" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" />
-    <PackageReference Include="NetArchTest.Rules"  />
+    <PackageReference Include="NetArchTest.Rules" />
     <PackageReference Include="Testcontainers.PostgreSql" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\Shared\src\EShop.Shared.EventBus\EShop.Shared.EventBus.csproj" />
     <ProjectReference Include="..\..\..\Shared\src\EShop.Shared.JsonApi\EShop.Shared.JsonApi.csproj" />
     <ProjectReference Include="..\..\..\Shared\src\EShop.Shared.Scoping\EShop.Shared.Scoping.csproj" />
   </ItemGroup>

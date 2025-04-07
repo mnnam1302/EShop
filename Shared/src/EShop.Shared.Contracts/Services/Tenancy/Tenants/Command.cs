@@ -18,13 +18,11 @@ public static class Command
         public required string OwnerUsername { get; set; }
 
         [MaxLength(ModelConstants.MediumLongText)]
-        public required string Email { get; set; }
+        public required string OwnerEmail { get; set; }
 
         public string? PhoneNumber { get; set; }
 
         [MaxLength(ModelConstants.LongText)]
         public string? Description { get; set; }
     }
-
-    public record CreateTenantCommandInternal(string TenantId, string TenantName, string OwnerUsername, string OwnerDisplayName, string OwnerEmail) : ICommand;
 }

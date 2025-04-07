@@ -14,13 +14,12 @@ public class StepContext
         _apiContext = apiContext;
     }
 
-    public async Task<Result<Response.OrganizationResponse>> GetOrganizationByIdAsync(
-        Query.GetOrganizationById request, 
-        string? operationUsername = null)
+    public async Task<Result<Response.OrganizationResponse>> GetOrganizationByIdAsync(Query.GetOrganizationById request, string? operationUsername = null)
     {
         try
         {
-            var result = await _apiContext.GetAsync<Response.OrganizationResponse>($"{BaseUrl}/{request.Id}");
+            var operationUserData = _apiContext.GetUserByUsername(operationUsername);
+            var result = await _apiContext.GetAsync<Response.OrganizationResponse>($"{BaseUrl}/{request.Id}", operationUserData);
             return result;
         }
         catch (Exception ex)

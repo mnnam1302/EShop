@@ -7,16 +7,18 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="APIs\TenantFeatures\**" />
+    <EmbeddedResource Remove="APIs\TenantFeatures\**" />
+    <None Remove="APIs\TenantFeatures\**" />
+  </ItemGroup>
+
+  <ItemGroup>
   	<PackageReference Include="Asp.Versioning.Mvc.ApiExplorer" />
   	<PackageReference Include="Carter" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\Shared\src\EShop.Shared.JsonApi\EShop.Shared.JsonApi.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="APIs\TenantFeatures\" />
   </ItemGroup>
 
 </Project>

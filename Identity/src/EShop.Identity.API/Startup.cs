@@ -21,10 +21,10 @@ public class Startup
     {
         services
             .AddShared(Configuration, Environment)
-            .AddBoostrapping(Configuration, Environment);
+            .AddBootstrapping(Configuration, Environment);
     }
 
-    public virtual void Configure(WebApplication app, IHostApplicationLifetime applicationLifetime, ILoggerFactory loggerFactory)
+    internal void Configure(WebApplication app, IHostApplicationLifetime applicationLifetime, ILoggerFactory loggerFactory)
     {
         var logger = loggerFactory.CreateLogger<Startup>();
 
@@ -42,6 +42,7 @@ public class Startup
             {
                 ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
             });
+
         app.UseAuthentication();
         app.UseAuthorization();
         app.MapControllers();

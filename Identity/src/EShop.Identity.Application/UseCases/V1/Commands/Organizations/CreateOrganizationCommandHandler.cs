@@ -4,22 +4,25 @@ using EShop.Shared.Contracts.Abstractions.Requests;
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.Contracts.Services.Identity.Organizations;
 using EShop.Shared.DomainTools.UnitOfWorks;
-using EShop.Shared.Scoping;
 using EShop.Shared.Scoping.Exceptions;
+using Microsoft.Extensions.Logging;
 
 namespace EShop.Identity.Application.UseCases.V1.Commands.Organizations;
 
-public class CreateOrganizationHandler : ICommandHandler<Command.CreateOrganizationCommand>
+public class CreateOrganizationCommandHandler : ICommandHandler<Command.CreateOrganizationCommand>
 {
     private readonly IOrganizationRepository _organizationRepository;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly ILogger _logger;
 
-    public CreateOrganizationHandler(
+    public CreateOrganizationCommandHandler(
         IOrganizationRepository organizationRepository,
-        IUnitOfWork unitOfWork)
+        IUnitOfWork unitOfWork,
+        ILogger<CreateOrganizationCommandHandler> logger)
     {
         _organizationRepository = organizationRepository;
         _unitOfWork = unitOfWork;
+        _logger = logger;
     }
 
     /// <summary>
@@ -31,8 +34,10 @@ public class CreateOrganizationHandler : ICommandHandler<Command.CreateOrganizat
     /// <returns></returns>
     public async Task<Result> Handle(Command.CreateOrganizationCommand request, CancellationToken cancellationToken)
     {
+        _logger.LogInformation("Creating organization with name: {Name}", request.Name);
+
         var parentOrganization = await GetParentOrganization(request.ParentOrganizationId);
-     
+
         await ValidateRequest(request, parentOrganization.TenantId!);
 
         await ValidateOrganizationHierarchy(parentOrganization);
@@ -53,7 +58,7 @@ public class CreateOrganizationHandler : ICommandHandler<Command.CreateOrganizat
         }
 
         await AssertNameIsUnique(tenantId, request.Name);
-        
+
         if (!string.IsNullOrEmpty(request.OrganizationNumber))
         {
             await AssertOrganizationNumberIsUnique(tenantId, request.ParentOrganizationId, request.OrganizationNumber);

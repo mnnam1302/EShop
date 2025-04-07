@@ -1,9 +1,12 @@
 ﻿using EShop.Shared.Contracts.Abstractions.Requests;
 using EShop.Shared.Contracts.Abstractions.Shared;
+using EShop.Shared.EventBus.Services;
 using EShop.Shared.Scoping;
 using EShop.Shared.Scoping.ResourceAccessControl;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers.TenantFeaturesProvider;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserPermissionProvider;
+using EShop.Testing.JsonApiApplication.EventBus;
+using EShop.Testing.JsonApiApplication.Providers;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.TestHost;
@@ -37,7 +40,6 @@ public abstract class ApiTestContextBase
     public const string DefaultUserEmail = "test_admin@test.com";
     public const string SourceSystem = "BddTest";
 
-    // FeatureContants handle later in service Tenancy
     protected static readonly string[] AllFeatureIds = typeof(FeatureConstants)
         .GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy)
         .Where(fi => fi.IsLiteral && !fi.IsInitOnly && fi.Name != nameof(FeatureConstants.InitialState))
@@ -45,8 +47,7 @@ public abstract class ApiTestContextBase
         .Where(featureId => featureId is not null)
         .ToArray()!;
 
-    protected static readonly string[] StandardFeatureIds = AllFeatureIds
-            .ToArray();
+    protected static readonly string[] StandardFeatureIds = AllFeatureIds.ToArray();
 
     protected static readonly string[] AllPermissionIds = typeof(PermissionConstants)
         .GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy)
@@ -63,12 +64,15 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
     private readonly TestServer _server;
     private readonly IServiceScope _serviceScope;
     private readonly Microsoft.Extensions.Logging.ILogger _logger;
-    private readonly Dictionary<string, UserData> _users = new Dictionary<string, UserData>();
     private readonly TestUserPermissionProvider _testUserPermissionProvider;
     private readonly TestTenantFeatureProvider _testTenantFeatureProvider;
 
+    private readonly Dictionary<string, UserData> _users = new();
+
     private UserData _defaultUser
         = new UserData("TEST_ADMIN", "TEST_ADMIN", DefaultTenantId, isSupportUser: true);
+
+    private string LoggedInUser;
 
     protected ApiTestContextBase() : this(startupFactory: null)
     {
@@ -87,6 +91,7 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
             .ConfigureServices(services =>
             {
                 services.AddTransient<HttpClient>(sp => this.GetClientWithHeaderPropagation());
+                services.AddSingleton<IIntegrationEventsTracker, IntegrationEventsTracker>();
                 services.AddSingleton(mutableMemoryConfigurationProvider);
                 services.AddSerilog(SetupLogging);
             })
@@ -109,23 +114,34 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
         _serviceScope = _server.Host.Services.CreateScope();
         _logger = ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger<ApiTestContextBase<TStartup>>();
 
-        _testUserPermissionProvider = ServiceProvider.GetRequiredService<IUserPermissionsProvider>() as TestUserPermissionProvider;
-        _testTenantFeatureProvider = ServiceProvider.GetRequiredService<ITenantFeaturesProvider>() as TestTenantFeatureProvider;
+        _testUserPermissionProvider = ServiceProvider.GetRequiredService<IUserPermissionsProvider>() as TestUserPermissionProvider
+                                     ?? throw new InvalidOperationException("Service provider did not return a TestUserPermissionProvider instance.");
+
+        _testTenantFeatureProvider = ServiceProvider.GetRequiredService<ITenantFeaturesProvider>() as TestTenantFeatureProvider
+                                     ?? throw new InvalidOperationException("Service provider did not return a TestTenantFeatureProvider instance.");
+
+        EventTracker = ServiceProvider.GetRequiredService<IIntegrationEventsTracker>();
     }
 
     public Microsoft.Extensions.Logging.ILogger Logger => _logger;
+
     public ILoggerFactory LoggerFactory => ServiceProvider.GetRequiredService<ILoggerFactory>();
+
     public IServiceProvider ServiceProvider => _serviceScope.ServiceProvider;
+
+    public IIntegrationEventsTracker EventTracker { get; private set; }
+
     public Exception LastApiError { get; set; }
+
     public HttpClient Client => GetAuthorizedClient(_defaultUser);
-    public string LoggedInUser { get; set; }
+
     public HttpStatusCode LastStatusCode { get; set; }
 
     #region Manage User Management
 
-    public void AddUser(UserData user, bool setAsDefault)
+    public void AddUser(UserData user, bool setAsDefault = false)
     {
-        _users.Add(user.Username, user);
+        _users.Add(user.Username.ToLower(), user);
         if (setAsDefault)
         {
             _defaultUser = user;
@@ -133,7 +149,7 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
         }
     }
 
-    public void AddOrUpdateUser(UserData user, bool setAsDefault)
+    public void AddOrUpdateUser(UserData user, bool setAsDefault = false)
     {
         if (_users.ContainsKey(user.Username))
         {
@@ -141,7 +157,7 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
         }
         else
         {
-            _users.Add(user.Username, user);
+            _users.Add(user.Username.ToLower(), user);
         }
         if (setAsDefault)
         {
@@ -221,12 +237,29 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
         SetupFeaturesForTenant(_defaultUser.TenantId, StandardFeatureIds);
     }
 
+    public void SetupStandardFeaturesForTenant(string tenantId)
+    {
+        SetupFeaturesForTenant(tenantId, StandardFeatureIds);
+    }
+
     public void SetupFeaturesForTenant(string tenantId, string[] featureIds)
     {
-        var user = GetUserByUsername();
         foreach (var featureId in featureIds)
         {
+            _testTenantFeatureProvider.AddTenantFeature(tenantId, featureId);
         }
+    }
+
+    public void UserLogsIn(string username)
+    {
+        var user = GetUserByUsername(username);
+        if (user == null)
+        {
+            throw new ArgumentException($"User '{username}' not found.");
+        }
+
+        LoggedInUser = user.Username;
+        _logger.LogInformation("User '{username}' logged in", LoggedInUser);
     }
 
     #endregion Manage User Management
@@ -506,6 +539,17 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
 
     #endregion Http Action Method
 
+    #region Integration Event
+
+    public async Task PublishIntegrationEvent<TEvent>(object eventData)
+        where TEvent : class, Shared.Contracts.Abstractions.MessageBus.IIntegrationEvent
+    {
+        var eventBusGateway = ServiceProvider.GetRequiredService<IEventBusGateway>();
+        await eventBusGateway.PublishAsync<TEvent>(eventData);
+    }
+
+    #endregion Integration Event
+
     #region Logging
 
     private static void SetupLogging(IServiceProvider serviceProvider, LoggerConfiguration loggerConfig)
@@ -516,7 +560,7 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
             .Enrich.WithThreadId()
             .Enrich.WithThreadName()
             .ReadFrom.Configuration(serviceProvider.GetRequiredService<IConfiguration>())
-            .WriteTo.Debug(levelSwitch: new Serilog.Core.LoggingLevelSwitch(Serilog.Events.LogEventLevel.Warning))
+            .WriteTo.Debug(outputTemplate: "[{Timestamp:HH:mm:ss.fff} {Level:u3}] (T={ThreadId}) {Message:lj} {Properties}{NewLine}{Exception}{NewLine}")
             .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss.fff} {Level:u3}] (T={ThreadId}) {Message:lj} {Properties}{NewLine}{Exception}{NewLine}");
     }
 
