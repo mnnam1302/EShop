@@ -11,6 +11,9 @@ public static class Command
 
     public sealed record CreateOrganizationCommand : ICommand
     {
+        [MaxLength(ModelConstants.ShortText)]
+        public required string Id { get; init; }
+
         [MaxLength(ModelConstants.MediumText)]
         public required string Name { get; init; }
 

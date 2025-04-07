@@ -38,17 +38,10 @@ public class AuthorizationStepDefinition
         _apiContext.SetupStandardFeaturesForTenant(tenantId);
     }
 
-    [Given("user '(.*)' has the following permissions")]
-    public void GivenUserHasTheFollowingPermissions(string username, Table dataTable)
-    {
-        var permissions = dataTable.Rows.Select(row => row["PermissionId"]).ToArray();
-        _apiContext.SetupPermissionsForUser(username, permissions);
-    }
-
     [Given("the following users are set up")]
-    public void GivenTheFollowingUsersAreSetUp(Table userTable)
+    public void GivenTheFollowingUsersAreSetUp(DataTable dataTable)
     {
-        foreach (var row in userTable.Rows)
+        foreach (var row in dataTable.Rows)
         {
             string username = row["Username"];
             string tenantId = row["TenantId"];
@@ -59,5 +52,18 @@ public class AuthorizationStepDefinition
 
             _apiContext.AddUser(user);
         }
+    }
+
+    [Given("user '(.*)' logs in to the system")]
+    public void GivenUserLogsInToTheSystem(string username)
+    {
+        _apiContext.UserLogsIn(username);
+    }
+
+    [Given("user '(.*)' has the following permissions")]
+    public void GivenUserHasTheFollowingPermissions(string username, DataTable dataTable)
+    {
+        var permissions = dataTable.Rows.Select(row => row["PermissionId"]).ToArray();
+        _apiContext.SetupPermissionsForUser(username, permissions);
     }
 }

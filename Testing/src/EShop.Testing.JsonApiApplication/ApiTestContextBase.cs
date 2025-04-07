@@ -72,6 +72,8 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
     private UserData _defaultUser
         = new UserData("TEST_ADMIN", "TEST_ADMIN", DefaultTenantId, isSupportUser: true);
 
+    private string LoggedInUser;
+
     protected ApiTestContextBase() : this(startupFactory: null)
     {
     }
@@ -132,8 +134,6 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
     public Exception LastApiError { get; set; }
 
     public HttpClient Client => GetAuthorizedClient(_defaultUser);
-
-    public string LoggedInUser { get; set; }
 
     public HttpStatusCode LastStatusCode { get; set; }
 
@@ -248,6 +248,18 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
         {
             _testTenantFeatureProvider.AddTenantFeature(tenantId, featureId);
         }
+    }
+
+    public void UserLogsIn(string username)
+    {
+        var user = GetUserByUsername(username);
+        if (user == null)
+        {
+            throw new ArgumentException($"User '{username}' not found.");
+        }
+
+        LoggedInUser = user.Username;
+        _logger.LogInformation("User '{username}' logged in", LoggedInUser);
     }
 
     #endregion Manage User Management

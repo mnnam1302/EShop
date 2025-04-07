@@ -130,6 +130,9 @@ namespace EShop.Identity.Tests.Organizations.Create
 #line 15
  await testRunner.AndAsync("user \'tenantOwner1@tenant-1\' has the following permissions", ((string)(null)), table3, "And ");
 #line hidden
+#line 19
+ await testRunner.AndAsync("user \'tenantOwner1@tenant-1\' logs in to the system", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
         }
         
         async System.Threading.Tasks.Task Xunit.IAsyncLifetime.InitializeAsync()
@@ -150,7 +153,7 @@ namespace EShop.Identity.Tests.Organizations.Create
             string[] tagsOfScenario = ((string[])(null));
             System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
             global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Successfully create a new organization under the root organization", null, tagsOfScenario, argumentsOfScenario, featureTags);
-#line 20
+#line 21
 this.ScenarioInitialize(scenarioInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
@@ -177,9 +180,9 @@ await this.FeatureBackgroundAsync();
                             "child-org@eshop.ecommerce",
                             "Child organization",
                             "tenant-1"});
-#line 21
- await testRunner.WhenAsync("User \'tenantOwner1@tenant-1\' creates a new organization under the root organizati" +
-                        "on with the following details", ((string)(null)), table4, "When ");
+#line 22
+ await testRunner.WhenAsync("User \'tenantOwner1\' creates a new organization under the root organization with t" +
+                        "he following details", ((string)(null)), table4, "When ");
 #line hidden
                 global::Reqnroll.Table table5 = new global::Reqnroll.Table(new string[] {
                             "Id",
@@ -195,8 +198,8 @@ await this.FeatureBackgroundAsync();
                             "child-org@eshop.ecommerce",
                             "Child organization",
                             "tenant-1"});
-#line 24
- await testRunner.ThenAsync("there are following organization", ((string)(null)), table5, "Then ");
+#line 25
+ await testRunner.ThenAsync("organization \'child-org\' has the following details", ((string)(null)), table5, "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
