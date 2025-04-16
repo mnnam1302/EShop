@@ -2,7 +2,6 @@
 
 public record OrganizationContext
 {
-    public string? OrganizationContextPath { get; init; }
     public string? OrganizationId { get; init; }
     public string? OrganizationName { get; init; }
     public string? OrganizationNumber { get; init; }
@@ -10,4 +9,5 @@ public record OrganizationContext
     public string? OrganizationAddress { get; init; }
     public string? OrganizationCity { get; init; }
     public string? OrganizationPostcode { get; init; }
+    public string? OrganizationContextPath { get; init; }
 }

@@ -4,7 +4,7 @@ namespace EShop.Identity.Application.Services;
 
 public class OwnerCacheUserOrganizationContextService : IUserOrganizationContextProvider
 {
-    // DI: Caching & Calculator
+    // DI: Caching & Calculator & IUserDetailsProvider
     
     public Task<OrganizationContext> GetOrganizationContextByPathAsync(string organizationContextPath)
     {
