@@ -19,7 +19,6 @@ public class OrganizationContextCachingService : IOrganizationContextCachingServ
         _cachedRemoteConfiguration = cachedRemoteConfiguration;
     }
 
-
     public Task AddValue(string organizationId, OrganizationContext organizationContext)
     {
         var cacheKey = OrganizationContextCacheKeyProvider.GetOrganizationContextCacheKey(organizationId);
