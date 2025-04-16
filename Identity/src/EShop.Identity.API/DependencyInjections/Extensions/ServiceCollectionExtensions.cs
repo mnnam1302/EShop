@@ -10,6 +10,7 @@ using EShop.Shared.DomainTools.DependencyInjections;
 using EShop.Shared.JsonApi.DependencyInjections;
 using EShop.Shared.JsonApi.Middlewares;
 using EShop.Shared.Scoping.ResourceAccessControl;
+using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserOrganizationContextProvider;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserPermissionProvider;
 using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
 
@@ -19,6 +20,7 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddShared(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment)
     {
+        services.AddUserScoping();
         services.AddResiliencePolicy();
 
         // DbContext
@@ -47,6 +49,7 @@ public static class ServiceCollectionExtensions
 
         // Owner service
         services.AddUserPermissionForOwnerService();
+        services.AddUserOrganizationContextForOwnerService();
 
         return services;
     }
@@ -93,5 +96,19 @@ public static class ServiceCollectionExtensions
         services.AddTransient<IPermissionCachingService, PermissionRedisCachingService>();
         services.AddTransient<IPermissionCalculator, PermissionCalculator>();
         services.AddTransient<IUserPermissionsProvider, OwnerCacheUserPermissionService>();
+    }
+
+    public static IServiceCollection AddUserOrganizationContextForOwnerService(this IServiceCollection services)
+    {
+        services.AddScoped<IUserOrganizationContextCachingService, UserOrganizationContextCachingService>();
+        services.AddScoped<IRedisCachingAsyncProvider<UserOrganizationContext>, RedisCachingAsyncProvider<UserOrganizationContext>>();
+
+        services.AddScoped<IOrganizationContextCachingService, OrganizationContextCachingService>();
+        services.AddScoped<IRedisCachingAsyncProvider<OrganizationContext>, RedisCachingAsyncProvider<OrganizationContext>>();
+        
+        services.AddScoped<IUserOrganizationContextCalculator, UserOrganizationContextCalculator>();
+        services.AddScoped<IUserOrganizationContextProvider, OwnerCacheUserOrganizationContextService>();
+
+        return services;
     }
 }

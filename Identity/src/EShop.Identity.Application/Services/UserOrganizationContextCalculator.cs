@@ -20,7 +20,7 @@ public interface IUserOrganizationContextCalculator
     Task<OrganizationContext> GetOrganizationContextByPathAsync(string organizationContextPath);
 }
 
-public class UserOrganizationContextCalculator : IUserOrganizationContextCalculator, IUserOrganizationContextProvider
+public class UserOrganizationContextCalculator : IUserOrganizationContextCalculator
 {
     private readonly IUserDetailsProvider _userDetailsProvider;
     private readonly IIdentityRepositoryBase<User, string> _userRepository;
