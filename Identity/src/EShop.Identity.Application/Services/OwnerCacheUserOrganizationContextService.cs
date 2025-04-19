@@ -1,6 +1,7 @@
-﻿using EShop.Identity.Domain.Entities;
-using EShop.Shared.Scoping;
+﻿using EShop.Shared.Scoping;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserOrganizationContextProvider;
+using static EShop.Shared.Contracts.Services.Identity.Organizations.Response;
+using static EShop.Shared.Contracts.Services.Identity.Users.Response;
 
 namespace EShop.Identity.Application.Services;
 
@@ -72,7 +73,7 @@ public class OwnerCacheUserOrganizationContextService : IUserOrganizationContext
         }
         var userOrganizationContext = await _userOrganizationContextCalculator.GetUserOrganizationContextForSpecificUserAsync(userId, typeUser);
         await _userOrganizationContextCachingService.AddValue(userId, typeUser, userOrganizationContext);
-        
+
         return userOrganizationContext;
     }
 
@@ -94,6 +95,7 @@ public class OwnerCacheUserOrganizationContextService : IUserOrganizationContext
 
         return organizationContext;
     }
+
     public async Task<OrganizationContext> GetOrganizationContextByPathAsync(string organizationContextPath)
     {
         if (string.IsNullOrEmpty(organizationContextPath))

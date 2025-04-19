@@ -2,10 +2,11 @@
 using EShop.Identity.Domain.Repositories;
 using EShop.Shared.Scoping;
 using EShop.Shared.Scoping.Exceptions;
-using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserOrganizationContextProvider;
 using MassTransit.Initializers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using static EShop.Shared.Contracts.Services.Identity.Organizations.Response;
+using static EShop.Shared.Contracts.Services.Identity.Users.Response;
 
 namespace EShop.Identity.Application.Services;
 

@@ -3,6 +3,7 @@ using EShop.Shared.Cache.Providers;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserOrganizationContextProvider;
 using Microsoft.Extensions.Caching.Distributed;
+using static EShop.Shared.Contracts.Services.Identity.Organizations.Response;
 
 namespace EShop.Shared.Cache.Services;
 

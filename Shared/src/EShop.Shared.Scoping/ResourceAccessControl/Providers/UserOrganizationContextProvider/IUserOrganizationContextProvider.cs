@@ -1,4 +1,7 @@
-﻿namespace EShop.Shared.Scoping.ResourceAccessControl.Providers.UserOrganizationContextProvider;
+﻿using static EShop.Shared.Contracts.Services.Identity.Organizations.Response;
+using static EShop.Shared.Contracts.Services.Identity.Users.Response;
+
+namespace EShop.Shared.Scoping.ResourceAccessControl.Providers.UserOrganizationContextProvider;
 
 public interface IUserOrganizationContextProvider
 {
@@ -9,22 +12,4 @@ public interface IUserOrganizationContextProvider
     Task<OrganizationContext> GetOrganizationContextForSpecificOrganizationAsync(string organizationId);
 
     Task<OrganizationContext> GetOrganizationContextByPathAsync(string organizationContextPath);
-}
-
-public record UserOrganizationContext
-{
-    public string? OrganizationId { get; init; }
-    public string? OrganizationName { get; init; }
-    public string? OrganizationNumber { get; init; }
-    public string? OrganizationPhoneNumber { get; init; }
-    public string? OrganizationEmail { get; init; }
-    public string? OrganizationAddress { get; init; }
-    public string? OrganizationCity { get; init; }
-    public string? OrganizationPostcode { get; init; }
-    public string? OrganizationContextPath { get; init; }
-
-    public string? UserId { get; init; }
-    public string? UserDisplayName { get; init; }
-    public string? UserEmail { get; init; }
-    public string? UserPhoneNumber { get; init; }
 }

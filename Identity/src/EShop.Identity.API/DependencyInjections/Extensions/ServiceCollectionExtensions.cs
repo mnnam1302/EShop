@@ -13,6 +13,8 @@ using EShop.Shared.Scoping.ResourceAccessControl;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserOrganizationContextProvider;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserPermissionProvider;
 using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
+using static EShop.Shared.Contracts.Services.Identity.Organizations.Response;
+using static EShop.Shared.Contracts.Services.Identity.Users.Response;
 
 namespace EShop.Identity.API.DependencyInjections.Extensions;
 

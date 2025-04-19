@@ -1,4 +1,6 @@
-﻿namespace EShop.Shared.Scoping.ResourceAccessControl.Providers.UserOrganizationContextProvider;
+﻿using static EShop.Shared.Contracts.Services.Identity.Users.Response;
+
+namespace EShop.Shared.Scoping.ResourceAccessControl.Providers.UserOrganizationContextProvider;
 
 public interface IUserOrganizationContextCachingService
 {
