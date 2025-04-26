@@ -13,14 +13,14 @@ public class RequireSupportUserAttribute : Attribute, IFilterFactory, IUserPermi
 
     public IFilterMetadata CreateInstance(IServiceProvider serviceProvider)
     {
-        return new InternalRequirePermissionFilter(serviceProvider.GetRequiredService<IPermissionValidator>());
+        return new InternaSupportUserFilter(serviceProvider.GetRequiredService<IPermissionValidator>());
     }
 
-    private sealed class InternalRequirePermissionFilter : IAsyncAuthorizationFilter
+    private sealed class InternaSupportUserFilter : IAsyncAuthorizationFilter
     {
         private readonly IPermissionValidator _permissionValidator;
 
-        public InternalRequirePermissionFilter(IPermissionValidator permissionValidator)
+        public InternaSupportUserFilter(IPermissionValidator permissionValidator)
         {
             _permissionValidator = permissionValidator;
         }
