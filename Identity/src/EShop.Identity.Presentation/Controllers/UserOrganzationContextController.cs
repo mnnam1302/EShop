@@ -10,7 +10,7 @@ namespace EShop.Identity.Presentation.Controllers;
 
 [ApiController]
 [ApiVersion("1.0")]
-[Route("api/v:{api:apiVersion}/[controller]")]
+[Route("api/v{api:apiVersion}/[controller]")]
 public class UserOrganzationContextController : ApiEndpointBase
 {
     private readonly ISender _sender;

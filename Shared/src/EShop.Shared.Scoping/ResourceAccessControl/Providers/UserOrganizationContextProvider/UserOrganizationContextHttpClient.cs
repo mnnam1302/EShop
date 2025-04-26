@@ -25,7 +25,7 @@ public class UserOrganizationContextHttpClient
 
         var authenticatedClient = SystemInternalJwtTokenFactory.AddUserContext(_httpClient, _userDetailsProvider.AuthenticatedUser);
 
-        var response = await authenticatedClient.GetStringAsync($"api/v1/users/{_userDetailsProvider.AuthenticatedUser.Id}");
+        var response = await authenticatedClient.GetStringAsync($"api/v1/userOrganizationContext");
         var result = JsonConvert.DeserializeObject<Result<UserOrganizationContext>>(response);
 
         return result?.Value ?? throw new UserOrganizationContextNotFoundException();
@@ -39,7 +39,7 @@ public class UserOrganizationContextHttpClient
 
         var authenticatedClient = SystemInternalJwtTokenFactory.AddUserContext(_httpClient, userData);
 
-        var response = await authenticatedClient.GetStringAsync($"api/v1/users/{userId}");
+        var response = await authenticatedClient.GetStringAsync($"api/v1/userOrganizationContext");
         var result = JsonConvert.DeserializeObject<Result<UserOrganizationContext>>(response);
 
         return result?.Value ?? throw new UserOrganizationContextNotFoundException();
