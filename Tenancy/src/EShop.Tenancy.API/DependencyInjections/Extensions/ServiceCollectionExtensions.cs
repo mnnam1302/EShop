@@ -20,27 +20,36 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddShared(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment)
     {
+        services.AddUserScoping();
         services.AddResiliencePolicy();
 
+        // PostgreSQL
         services
             .AddPostgreSqlHealthCheck(configuration)
             .AddDbContextWithScoping<TenancyDbContext>(configuration);
 
+        // Redis infrastructure
         services
             .AddRedisHealthCheck(configuration)
             .AddRedisInfrastructure(configuration);
+
+        // Providers
+        services
+            .AddUserOrganizationContextProvider()
+            .AddUserOrganizationContextProvider();
 
         return services;
     }
 
     public static IServiceCollection AddBoostrapping(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment)
     {
+        // Clean architecture
         services.AddTenancyAPI();
         services.AddTenancyApplication();
         services.AddTenancyPersistence();
         services.AddTenancyInfrastructure(configuration, environment, Program.ApplicationName);
 
-        services.AddUserPermissionsProvider(configuration);
+        // Owner services
         services.AddTenantFeaturesProviderForOwnerService(configuration);
 
         return services;
@@ -71,11 +80,6 @@ public static class ServiceCollectionExtensions
     private static void AddTenantFeaturesProviderForOwnerService(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddScoped<IFeatureValidator, CurrentUserFeaturesValidator>();
-        AddTenantFeatureCachingService(services);
-    }
-
-    private static void AddTenantFeatureCachingService(IServiceCollection services)
-    {
         services.AddScoped<ITenantFeaturesProvider, OwnerTenantFeaturesProvider>();
         services.AddScoped<ITenantFeaturesCachingService, TenantFeaturesRedisCachingService>();
         services.AddScoped<IRedisCachingAsyncProvider<string[]>, RedisCachingAsyncProvider<string[]>>();

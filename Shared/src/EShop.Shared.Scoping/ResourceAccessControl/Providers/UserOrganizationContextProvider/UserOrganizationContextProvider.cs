@@ -7,20 +7,17 @@ public class UserOrganizationContextProvider : IUserOrganizationContextProvider
 {
     private readonly UserOrganizationContextHttpClient _userOrganizationContextHttpClient;
     private readonly IUserOrganizationContextCachingService _userOrganizationContextCachingService;
-    private readonly OrganizationContextHttpClient _organizationContextHttpClient;
     private readonly IOrganizationContextCachingService _organizationContextCachingService;
     private readonly IUserDetailsProvider _userDetailsProvider;
 
     public UserOrganizationContextProvider(
         UserOrganizationContextHttpClient userOrganizationContextHttpClient,
         IUserOrganizationContextCachingService userOrganizationContextCachingService,
-        OrganizationContextHttpClient organizationContextHttpClient,
         IOrganizationContextCachingService organizationContextCachingService,
         IUserDetailsProvider userDetailsProvider)
     {
         _userOrganizationContextHttpClient = userOrganizationContextHttpClient;
         _userOrganizationContextCachingService = userOrganizationContextCachingService;
-        _organizationContextHttpClient = organizationContextHttpClient;
         _organizationContextCachingService = organizationContextCachingService;
         _userDetailsProvider = userDetailsProvider;
     }
@@ -55,11 +52,11 @@ public class UserOrganizationContextProvider : IUserOrganizationContextProvider
             return cachedUserOrganizationContext;
         }
 
-        return await _userOrganizationContextHttpClient.GetUserOrganizationContextAsync();
+        return await _userOrganizationContextHttpClient.GetUserOrganizationContextAsync(userId, typeUser);
     }
 
     private UserOrganizationContext GetUserOrganizationContextForSystemUser() =>
-        new UserOrganizationContext
+        new()
         {
             UserId = UserData.SystemUsername,
             UserDisplayName = UserData.SystemUsername,
@@ -76,7 +73,7 @@ public class UserOrganizationContextProvider : IUserOrganizationContextProvider
             return cachedOrganizationContext;
         }
 
-        return await _organizationContextHttpClient.GetOrganizationContextAsync();
+        return await _userOrganizationContextHttpClient.GetOrganizationContextForSpecificOrganizationAsync(organizationId);
     }
 
     public async Task<OrganizationContext> GetOrganizationContextByPathAsync(string organizationContextPath)
@@ -87,6 +84,6 @@ public class UserOrganizationContextProvider : IUserOrganizationContextProvider
             return cachedOrganizationContext;
         }
 
-        return await _organizationContextHttpClient.GetOrganizationContextAsync();
+        return await _userOrganizationContextHttpClient.GetOrganizationContextByPathAsync(organizationContextPath);
     }
 }

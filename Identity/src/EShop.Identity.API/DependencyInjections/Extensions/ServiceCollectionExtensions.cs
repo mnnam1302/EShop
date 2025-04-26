@@ -30,10 +30,13 @@ public static class ServiceCollectionExtensions
             .AddPostgreSqlHealthCheck(configuration)
             .AddDbContextWithScoping<UsersDbContext>(configuration);
 
-        // Redis Cache
+        // Redis
         services
             .AddRedisHealthCheck(configuration)
-            .AddRedisInfrastructure(configuration)
+            .AddRedisInfrastructure(configuration);
+        
+        // Providers
+        services
             .AddUserTokensProvider(configuration)
             .AddTenantFeaturesProvider(configuration);
 
@@ -49,7 +52,7 @@ public static class ServiceCollectionExtensions
             .AddIdentityPersistence()
             .AddIdentityInfrastructure(configuration, environment, Program.ApplicationName);
 
-        // Owner service
+        // Owner services
         services.AddUserPermissionForOwnerService();
         services.AddUserOrganizationContextForOwnerService();
 
@@ -84,24 +87,20 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    public static IServiceCollection AddUserPermissionForOwnerService(
-        this IServiceCollection services)
+    public static void AddUserPermissionForOwnerService(this IServiceCollection services)
     {
         services.AddTransient<IPermissionValidator, CurrentUserPermissionsValidator>();
-        AddPermissionCachingServiceForOwnService(services);
-        return services;
-    }
 
-    private static void AddPermissionCachingServiceForOwnService(IServiceCollection services)
-    {
+        services.AddTransient<IUserPermissionsProvider, OwnerCacheUserPermissionService>();
         services.AddTransient<IRedisCachingAsyncProvider<string[]>, RedisCachingAsyncProvider<string[]>>();
         services.AddTransient<IPermissionCachingService, PermissionRedisCachingService>();
         services.AddTransient<IPermissionCalculator, PermissionCalculator>();
-        services.AddTransient<IUserPermissionsProvider, OwnerCacheUserPermissionService>();
     }
 
-    public static IServiceCollection AddUserOrganizationContextForOwnerService(this IServiceCollection services)
+    public static void AddUserOrganizationContextForOwnerService(this IServiceCollection services)
     {
+        services.AddScoped<IUserOrganizationContextProvider, OwnerCacheUserOrganizationContextService>();
+
         services.AddScoped<IUserOrganizationContextCachingService, UserOrganizationContextCachingService>();
         services.AddScoped<IRedisCachingAsyncProvider<UserOrganizationContext>, RedisCachingAsyncProvider<UserOrganizationContext>>();
 
@@ -109,8 +108,5 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IRedisCachingAsyncProvider<OrganizationContext>, RedisCachingAsyncProvider<OrganizationContext>>();
         
         services.AddScoped<IUserOrganizationContextCalculator, UserOrganizationContextCalculator>();
-        services.AddScoped<IUserOrganizationContextProvider, OwnerCacheUserOrganizationContextService>();
-
-        return services;
     }
 }

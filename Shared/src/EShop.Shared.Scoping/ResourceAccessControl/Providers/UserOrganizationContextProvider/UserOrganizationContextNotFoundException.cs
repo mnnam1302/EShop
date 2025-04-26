@@ -5,7 +5,7 @@ namespace EShop.Shared.Scoping.ResourceAccessControl.Providers.UserOrganizationC
 public class UserOrganizationContextNotFoundException : NotFoundException
 {
     public UserOrganizationContextNotFoundException()
-        : base("User organization context not found.")
+        : base("User organization context is not found.")
     {
     }
 }
