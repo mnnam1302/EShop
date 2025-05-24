@@ -32,7 +32,7 @@ public class RolesController : ApiEndpointBase
         int pageSize = 10,
         CancellationToken cancellationToken = default)
     {
-        var query = new Query.GetRoles(name, Paging.Create(pageIndex, pageSize));
+        var query = new Query.GetRoles(name, PaginationRequest.Create(pageIndex, pageSize));
         var result = await _sender.Send(query, cancellationToken);
 
         if (result.IsFailure)

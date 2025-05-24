@@ -10,7 +10,7 @@ public class ProfileService : Profile
     public ProfileService()
     {
         CreateMap<Domain.Entities.Role, roleContract.Response.RolesResponse>();
-        CreateMap<PagedResult<Domain.Entities.Role>, PagedResult<roleContract.Response.RolesResponse>>();
+        CreateMap<PaginationResult<Domain.Entities.Role>, PaginationResult<roleContract.Response.RolesResponse>>();
 
         CreateMap<Domain.Entities.Organization, organizationContract.Response.OrganizationResponse>();
     }

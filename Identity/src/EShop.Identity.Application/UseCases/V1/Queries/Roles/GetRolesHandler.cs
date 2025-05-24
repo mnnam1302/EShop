@@ -8,7 +8,7 @@ using EShop.Shared.Contracts.Services.Identity.Roles;
 
 namespace EShop.Identity.Application.UseCases.V1.Queries.Roles;
 
-public class GetRolesHandler : IQueryHandler<Query.GetRoles, PagedResult<Response.RolesResponse>>
+public class GetRolesHandler : IQueryHandler<Query.GetRoles, PaginationResult<Response.RolesResponse>>
 {
     private readonly IIdentityRepositoryBase<Role, string> _roleRepository;
     private readonly IMapper _mapper;
@@ -19,19 +19,19 @@ public class GetRolesHandler : IQueryHandler<Query.GetRoles, PagedResult<Respons
         _mapper = mapper;
     }
 
-    public async Task<Result<PagedResult<Response.RolesResponse>>> Handle(Query.GetRoles request, CancellationToken cancellationToken)
+    public async Task<Result<PaginationResult<Response.RolesResponse>>> Handle(Query.GetRoles request, CancellationToken cancellationToken)
     {
         var rolesQuery = string.IsNullOrWhiteSpace(request.Name)
             ? _roleRepository.FindAll()
             : _roleRepository.FindByCondition(x => x.Name!.Contains(request.Name));
 
-        var pagedResult = await PagedResult<Role>.CreateAsync(
+        var pagedResult = await PaginationResult<Role>.CreateAsync(
             rolesQuery,
             request.Paging.PageIndex,
             request.Paging.PageSize,
             cancellationToken);
 
-        var response = _mapper.Map<PagedResult<Response.RolesResponse>>(pagedResult);
+        var response = _mapper.Map<PaginationResult<Response.RolesResponse>>(pagedResult);
         return Result.Success(response);
     }
 }
