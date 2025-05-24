@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
-namespace EShop.Shared.Contracts.Abstractions.Paging;
+namespace EShop.Shared.Contracts.Abstractions.Pagination;
 
 public class PagedResult<T>
 {

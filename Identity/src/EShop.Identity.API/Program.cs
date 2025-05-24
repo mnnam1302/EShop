@@ -48,11 +48,9 @@ public class Program
         var startup = new Startup(builder.Configuration, builder.Environment);
         startup.ConfigureServices(builder.Services);
 
-        builder.Host
-            .UseSerilog();
+        builder.Host.UseSerilog();
 
-        builder.WebHost
-            .UseShutdownTimeout(TimeSpan.FromSeconds(ShutdownTimeoutInSeconds));
+        builder.WebHost.UseShutdownTimeout(TimeSpan.FromSeconds(ShutdownTimeoutInSeconds));
 
         var app = builder.Build();
 

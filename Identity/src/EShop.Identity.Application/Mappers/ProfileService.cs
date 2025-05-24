@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using EShop.Shared.Contracts.Abstractions.Paging;
+using EShop.Shared.Contracts.Abstractions.Pagination;
 using organizationContract = EShop.Shared.Contracts.Services.Identity.Organizations;
 using roleContract = EShop.Shared.Contracts.Services.Identity.Roles;
 

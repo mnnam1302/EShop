@@ -1,4 +1,4 @@
-﻿namespace EShop.Shared.Contracts.Abstractions.Paging;
+﻿namespace EShop.Shared.Contracts.Abstractions.Pagination;
 
 public record Paging
 {

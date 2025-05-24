@@ -1,4 +1,4 @@
-﻿using EShop.Shared.Contracts.Abstractions.Paging;
+﻿using EShop.Shared.Contracts.Abstractions.Pagination;
 using EShop.Shared.Contracts.Abstractions.Requests;
 
 namespace EShop.Shared.Contracts.Services.Identity.Roles;
