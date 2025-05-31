@@ -47,7 +47,7 @@ public abstract class ApiTestContextBase
         .Where(featureId => featureId is not null)
         .ToArray()!;
 
-    protected static readonly string[] StandardFeatureIds = AllFeatureIds.ToArray();
+    protected static readonly string[] StandardFeatureIds = [.. AllFeatureIds];
 
     protected static readonly string[] AllPermissionIds = typeof(PermissionConstants)
         .GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy)

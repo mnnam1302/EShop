@@ -18,7 +18,7 @@ Background:
         | Identity_ManageOrganizations |
     And user 'tenantOwner1@tenant-1' logs in to the system
 
-Scenario: Successfully create a new organization under the root organization
+Scenario: Creating a new organization under the root organization
     When User 'tenantOwner1' creates a new organization under the root organization with the following details
         | Id        | Name                       | OrganizationNumber | Email                     | Description        | ParentOrganizationId |
         | child-org | Organization child of root | 50000              | child-org@eshop.ecommerce | Child organization | tenant-1             |
