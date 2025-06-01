@@ -35,7 +35,7 @@ public static class ServiceCollectionExtensions
 
         // Providers
         services
-            .AddUserOrganizationContextProvider()
+            .AddUserPermissionsProvider()
             .AddUserOrganizationContextProvider();
 
         return services;

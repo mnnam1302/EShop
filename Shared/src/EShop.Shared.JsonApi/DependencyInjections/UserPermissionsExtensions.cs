@@ -35,15 +35,15 @@ public static class UserPermissionsExtensions
         });
     }
 
-    public static IServiceCollection AddUserPermissionsProvider(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddUserPermissionsProvider(this IServiceCollection services)
     {
         services.AddScoped<IPermissionValidator, CurrentUserPermissionsValidator>();
-        AddPermissionCachingService(services, configuration);
+        AddPermissionCachingService(services);
 
         return services;
     }
 
-    private static void AddPermissionCachingService(IServiceCollection services, IConfiguration configuration)
+    private static void AddPermissionCachingService(IServiceCollection services)
     {
         services.ConfigureHttpClientDefaults(options =>
         {
