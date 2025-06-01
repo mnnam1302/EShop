@@ -52,7 +52,6 @@ public class User : EntityBase<string>, IDateTracking, IExcludedFromScoping
 
     public DateTimeOffset? LastModifiedOnUtc { get; set; }
 
-    // Empty constructor for ORMs
     public User() { }
 
     public User(string username, string password, string email, string? displayName)
@@ -67,7 +66,7 @@ public class User : EntityBase<string>, IDateTracking, IExcludedFromScoping
 
     public static User Create(Command.RegisterUser command)
     {
-        var user = CreateInternal(command.Username, command.Password, command.Email, command.DisplayName, command.OrganizationId);
+        var user = Create(command.Username, command.Password, command.Email, command.DisplayName, command.OrganizationId);
         
         user.PhoneNumber = command.PhoneNumber;
         user.DateOfBirth = command.DateOfBirth;
@@ -75,7 +74,7 @@ public class User : EntityBase<string>, IDateTracking, IExcludedFromScoping
         return user;
     }
 
-    public static User CreateInternal(string username, string password, string email, string displayName, string? organizationId = null, string? createdBy = null)
+    public static User Create(string username, string password, string email, string displayName, string? organizationId = null, string? createdBy = null)
     {
         AssertUsername(username);
 
@@ -92,12 +91,12 @@ public class User : EntityBase<string>, IDateTracking, IExcludedFromScoping
 
     public Claim[] GenerateClaims()
     {
-        return new Claim[]
-        {
+        return
+        [
             new Claim("sub", Id),
             new Claim("username", Username),
             new Claim("tenant:groups", OrganizationId ?? string.Empty)
-        };
+        ];
     }
 
     public void GrantRoles(string[] roleIds)
@@ -129,7 +128,12 @@ public class User : EntityBase<string>, IDateTracking, IExcludedFromScoping
         var invalidCharactersPattern = @"[<>;&/\\\s]";
         if (System.Text.RegularExpressions.Regex.IsMatch(username, invalidCharactersPattern))
         {
-            throw new UnprocessableEntityException("Username cannot contain special characters");
+            throw new ArgumentException("Username cannot contain special characters");
+        }
+
+        if (UserData.IsSystemUser(username) || username.Equals(UserData.EShopSupportGroup, StringComparison.OrdinalIgnoreCase))
+        {
+            throw new ArgumentException("Invalid username");
         }
     }
 }

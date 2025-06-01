@@ -38,36 +38,58 @@ public class CreateUserCommandHandler : ICommandHandler<Command.CreateUserComman
 
     public async Task<Result> Handle(Command.CreateUserCommand request, CancellationToken cancellationToken)
     {
-        var organization = await _organizationRepository.FindSingleAsync(o => o.Id == request.OrganizationId);
-        if (organization is null)
-        {
-            throw new NotFoundException($"Organization {request.OrganizationId} was not found");
-        }
+        await AssertOrganizationExistingAsync(request.OrganizationId, cancellationToken);
+        await AssertDuplicatedUserAsync(request.OrganizationId, request.Username, cancellationToken);
 
-        var existingUser = await _userRepository
-            .FindSingleAsync(x =>
-                (x.OrganizationId == request.OrganizationId) &&
-                (x.Id == request.Username || x.Username == request.Username));
-
-        if (existingUser is not null)
-        {
-            throw new ConflictException($"User {request.Username} already exists in organization {request.OrganizationId}");
-        }
+        var roles = await AssertRolesExistingAsync(request.RoleIds, cancellationToken);
 
         var defaultPassword = _passwordHasher.Hash(Organization.DefaultOwnerPassword);
-        var user = organization.AddUser(request.Username, defaultPassword, request.DisplayName, request.Email, _userDetailsProvider.AuthenticatedUser.ActionUserId);
-
-        var roles = await _roleRepository.FindByConditionAsync(x => request.RoleIds.Contains(x.Id));
-        if (roles.Count != request.RoleIds.Length)
-        {
-            throw new NotFoundException("One or more roles were not found");
-        }
-
-        user.GrantRoles(roles.Select(r => r.Id).ToArray());
+        var user = User.Create(request.Username, defaultPassword, request.DisplayName, request.Email, _userDetailsProvider.AuthenticatedUser.ActionUserId);
+        user.GrantRoles([.. roles.Select(r => r.Id)]);
 
         _userRepository.Add(user);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Result.Success();
+    }
+
+    private async Task AssertOrganizationExistingAsync(string organizationId, CancellationToken cancellationToken)
+    {
+        var organization = await _organizationRepository.FindSingleAsync(
+            o => o.Id == organizationId,
+            cancellationToken: cancellationToken);
+
+        if (organization is not null)
+        {
+            throw new NotFoundException($"Organization {organizationId} was not found");
+        }
+    }
+
+    private async Task AssertDuplicatedUserAsync(string organizationId, string username, CancellationToken cancellationToken)
+    {
+        var existingUser = await _userRepository.FindSingleAsync(
+            x => (x.OrganizationId == organizationId) &&
+                 (x.Id == username || x.Username == username),
+            cancellationToken: cancellationToken);
+
+        if (existingUser is not null)
+        {
+            throw new ConflictException($"User {username} already exists in organization {organizationId}");
+        }
+    }
+
+    private async Task<ICollection<Role>> AssertRolesExistingAsync(string[] roleIds, CancellationToken cancellationToken)
+    {
+        var roles = await _roleRepository.FindByConditionAsync(
+            x => roleIds.Contains(x.Id),
+            cancellationToken: cancellationToken);
+
+        if (roles.Count != roleIds.Length)
+        {
+            var missingRoleIds = roleIds.Except(roles.Select(r => r.Id)).ToArray();
+            throw new NotFoundException($"The following roles were not found: {string.Join(", ", missingRoleIds)}");
+        }
+
+        return roles;
     }
 }

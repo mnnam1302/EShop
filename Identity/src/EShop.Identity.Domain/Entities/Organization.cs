@@ -130,7 +130,7 @@ public class Organization : AggregateRoot<string>, IExcludedFromScoping
             throw new BadRequestException("Invalid username");
         }
 
-        var user = User.CreateInternal(username, password, email, displayName, Id, createdBy);
+        var user = User.Create(username, password, email, displayName, Id, createdBy);
         _users.Add(user);
 
         return user;
