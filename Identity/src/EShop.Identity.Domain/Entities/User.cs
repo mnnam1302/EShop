@@ -1,7 +1,6 @@
 ﻿using EShop.Shared.Contracts.Services.Identity.Users;
 using EShop.Shared.DomainTools.Entities;
 using EShop.Shared.Scoping;
-using EShop.Shared.Scoping.Exceptions;
 using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 
@@ -41,16 +40,16 @@ public class User : EntityBase<string>, IDateTracking, IExcludedFromScoping
 
     public bool IsActive { get; set; } = true;
 
-    public virtual List<Role> Roles { get; set; } = new();
-    public virtual List<UserRole> UserRoles { get; set; } = new();
-
-
     [MaxLength(ModelConstants.ShortText)]
     public string? CreatedBy { get; set; }
 
     public DateTimeOffset CreatedOnUtc { get; set; }
 
     public DateTimeOffset? LastModifiedOnUtc { get; set; }
+
+    public virtual ICollection<Role> Roles { get; set; } = [];
+
+    public virtual ICollection<UserRole> UserRoles { get; set; } = [];
 
     public User() { }
 
@@ -89,6 +88,25 @@ public class User : EntityBase<string>, IDateTracking, IExcludedFromScoping
         return user;
     }
 
+    private static void AssertUsername(string username)
+    {
+        if (string.IsNullOrWhiteSpace(username))
+        {
+            throw new ArgumentException("Username cannot be null or whitespace");
+        }
+
+        var invalidCharactersPattern = @"[<>;&/\\\s]";
+        if (System.Text.RegularExpressions.Regex.IsMatch(username, invalidCharactersPattern))
+        {
+            throw new ArgumentException("Username cannot contain special characters");
+        }
+
+        if (UserData.IsSystemUser(username) || username.Equals(UserData.EShopSupportGroup, StringComparison.OrdinalIgnoreCase))
+        {
+            throw new ArgumentException("Invalid username");
+        }
+    }
+
     public Claim[] GenerateClaims()
     {
         return
@@ -116,24 +134,5 @@ public class User : EntityBase<string>, IDateTracking, IExcludedFromScoping
         };
 
         UserRoles.Add(userRole);
-    }
-
-    private static void AssertUsername(string username)
-    {
-        if (string.IsNullOrWhiteSpace(username))
-        {
-            throw new ArgumentException("Username cannot be null or whitespace");
-        }
-
-        var invalidCharactersPattern = @"[<>;&/\\\s]";
-        if (System.Text.RegularExpressions.Regex.IsMatch(username, invalidCharactersPattern))
-        {
-            throw new ArgumentException("Username cannot contain special characters");
-        }
-
-        if (UserData.IsSystemUser(username) || username.Equals(UserData.EShopSupportGroup, StringComparison.OrdinalIgnoreCase))
-        {
-            throw new ArgumentException("Invalid username");
-        }
     }
 }

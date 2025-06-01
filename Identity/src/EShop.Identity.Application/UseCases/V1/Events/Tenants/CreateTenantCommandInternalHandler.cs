@@ -12,7 +12,7 @@ using Microsoft.Extensions.Logging;
 
 namespace EShop.Identity.Application.UseCases.V1.Events.Tenants;
 
-public class CreateTenantCommandInternalHandler : ICommandHandler<Command.CreateTenantCommandInternal>
+internal sealed class CreateTenantCommandInternalHandler : ICommandHandler<Command.CreateTenantCommandInternal>
 {
     private readonly ILogger _logger;
     private readonly IPasswordHasher _passwordHasher;
@@ -21,6 +21,7 @@ public class CreateTenantCommandInternalHandler : ICommandHandler<Command.Create
     private readonly IIdentityRepositoryBase<Permission, string> _permissionRepository;
     private readonly IIdentityRepositoryBase<Tenant, string> _tenantRepository;
     private readonly IIdentityRepositoryBase<Role, string> _roleRepository;
+    private readonly IIdentityRepositoryBase<User, string> _userRepository;
     private readonly IUnitOfWork _unitOfWork;
 
     public CreateTenantCommandInternalHandler(
@@ -31,7 +32,8 @@ public class CreateTenantCommandInternalHandler : ICommandHandler<Command.Create
         IIdentityRepositoryBase<Permission, string> permissionRepository,
         IIdentityRepositoryBase<Tenant, string> tenantRepository,
         IIdentityRepositoryBase<Role, string> roleRepository,
-        IUnitOfWork unitOfWork)
+        IUnitOfWork unitOfWork,
+        IIdentityRepositoryBase<User, string> userRepository)
     {
         _passwordHasher = passwordHasher;
         _logger = logger;
@@ -41,6 +43,7 @@ public class CreateTenantCommandInternalHandler : ICommandHandler<Command.Create
         _tenantRepository = tenantRepository;
         _roleRepository = roleRepository;
         _unitOfWork = unitOfWork;
+        _userRepository = userRepository;
     }
 
     public async Task<Result> Handle(Command.CreateTenantCommandInternal request, CancellationToken cancellationToken)
@@ -53,34 +56,20 @@ public class CreateTenantCommandInternalHandler : ICommandHandler<Command.Create
         try
         {
             _userDetailsProvider.SetSystemUserContext(request.TenantId);
-            _logger.LogInformation("Creating tenant '{id}' with name '{name}'...", request.TenantId, request.TenantName);
+            _logger.LogInformation("Creating tenant '{Id}' with name '{Name}'...", request.TenantId, request.TenantName);
 
-            var tenant = await CreateTenantInternalAsync(request.TenantId, request.TenantName, cancellationToken);
-
-            var rootOrganization = CreateRootOrganization(request.TenantId, request.TenantName);
-            var ownerRole = await CreateOwnerRoleWithPermissionsAsync(request.TenantId, cancellationToken);
-
-            var ownerUser = CreateAndValidateOwnerUser(rootOrganization, request);
-            ownerUser.GrantRole(ownerRole.Id);
-
-            _logger.LogDebug("Saving tenant entities to database...");
-            _tenantRepository.Add(tenant);
-            _roleRepository.Add(ownerRole);
-            _organizationRepository.Add(rootOrganization);
-
-            await _unitOfWork.SaveChangesAsync(cancellationToken);
-
-            _logger.LogInformation("Successfully created tenant '{id}' with owner user '{username}'", request.TenantId, request.OwnerUsername);
+            await CreateTenantWithTransactionAsync(request, cancellationToken);
+            
             return Result.Success();
         }
         catch (BadRequestException ex)
         {
-            _logger.LogWarning(ex, "Validation error creating tenant '{id}': {message}", request.TenantId, ex.Message);
+            _logger.LogWarning(ex, "Validation error creating tenant '{Id}': {Message}", request.TenantId, ex.Message);
             return Result.Failure(new Error("Validation.Error", ex.Message));
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error creating tenant '{id}' with message: {message}", request.TenantId, ex.Message);
+            _logger.LogError(ex, "Error creating tenant '{Id}' with message: {Message}", request.TenantId, ex.Message);
             return Result.Failure(new Error("Error.CreateTenant", "Failed to create tenant. See logs for details."));
         }
         finally
@@ -89,34 +78,46 @@ public class CreateTenantCommandInternalHandler : ICommandHandler<Command.Create
         }
     }
 
-    private async Task<Tenant> CreateTenantInternalAsync(string tenantId, string tenantName, CancellationToken cancellationToken)
+    private async Task CreateTenantWithTransactionAsync(Command.CreateTenantCommandInternal request, CancellationToken cancellationToken)
     {
-        _logger.LogDebug("Verifying tenant '{id}' does not already exist...", tenantId);
+        // Verify tenant doesn't already exist
+        var tenant = await CreateTenantIfNotExistsAsync(request.TenantId, request.TenantName, cancellationToken);
+
+        // Create core tenant entities
+        var rootOrganization = CreateRootOrganization(request.TenantId, request.TenantName);
+        var ownerRole = await CreateOwnerRoleWithPermissionsAsync(request.TenantId, cancellationToken);
+        var ownerUser = CreateOwnerUser(rootOrganization, request);
+        ownerUser.GrantRole(ownerRole.Id);
+
+        // Persist entities
+        _logger.LogDebug("Saving tenant entities to database...");
+        await PersistTenantEntitiesAsync(tenant, rootOrganization, ownerRole, ownerUser, cancellationToken);
+
+        _logger.LogInformation("Successfully created tenant '{Id}' with owner user '{Username}'", request.TenantId, request.OwnerUsername);
+    }
+
+    private async Task<Tenant> CreateTenantIfNotExistsAsync(string tenantId, string tenantName, CancellationToken cancellationToken)
+    {
+        _logger.LogInformation("Verifying tenant '{Id}' does not already exist...", tenantId);
 
         var existingTenant = await _tenantRepository.FindByIdAsync(tenantId, true, cancellationToken);
-        if (existingTenant is not null)
+        if (existingTenant != null)
         {
             throw new BadRequestException($"Tenant with id '{tenantId}' already exists");
         }
 
-        var tenant = new Tenant
-        {
-            Id = tenantId,
-            Name = tenantName
-        };
-
-        return tenant;
+        return new Tenant(tenantId, tenantName);
     }
 
     private Organization CreateRootOrganization(string tenantId, string tenantName)
     {
-        _logger.LogDebug("Creating root organization for tenant '{id}'...", tenantId);
+        _logger.LogInformation("Creating root organization for tenant '{Id}'...", tenantId);
         return Organization.CreateRootOrganizationInternal(tenantId, tenantName);
     }
 
     private async Task<Role> CreateOwnerRoleWithPermissionsAsync(string tenantId, CancellationToken cancellationToken)
     {
-        _logger.LogDebug("Creating owner role for tenant '{id}'...", tenantId);
+        _logger.LogDebug("Creating owner role for tenant '{Id}'...", tenantId);
 
         var ownerRole = Role.Create(Role.OwnerRoleName, "Owner of the account", tenantId);
 
@@ -124,6 +125,11 @@ public class CreateTenantCommandInternalHandler : ICommandHandler<Command.Create
             .FindAll()
             .Select(p => p.Id)
             .ToListAsync(cancellationToken);
+
+        if (availablePermissionIds.Count == 0)
+        {
+            _logger.LogWarning("No permissions found to assign to owner role");
+        }
 
         foreach (var permissionId in availablePermissionIds)
         {
@@ -133,29 +139,32 @@ public class CreateTenantCommandInternalHandler : ICommandHandler<Command.Create
         return ownerRole;
     }
 
-    private User CreateAndValidateOwnerUser(Organization organization, Command.CreateTenantCommandInternal request)
+    private User CreateOwnerUser(Organization organization, Command.CreateTenantCommandInternal request)
     {
-        _logger.LogDebug("Creating owner user '{username}' for tenant '{id}'...", request.OwnerUsername, request.TenantId);
+        ArgumentNullException.ThrowIfNull(organization);
 
-        if (string.IsNullOrEmpty(request.OwnerEmail))
-        {
-            throw new BadRequestException("Owner email is required");
-        }
+        _logger.LogDebug("Creating owner user '{Username}' for tenant '{Id}'...",
+            request.OwnerUsername, request.TenantId);
 
+        // Security improvement needed: default password should be randomly generated or a password reset flow should be implemented
         var defaultPassword = _passwordHasher.Hash(Organization.DefaultOwnerPassword);
 
-        var ownerUser = organization.AddUser(
+        return User.Create(
             request.OwnerUsername,
             defaultPassword,
-            request.OwnerDisplayName,
             request.OwnerEmail,
+            request.OwnerDisplayName,
+            organization.Id,
             UserData.SystemUsername);
+    }
 
-        if (ownerUser == null)
-        {
-            throw new InvalidOperationException($"Failed to create owner user for tenant '{request.TenantId}'");
-        }
+    private async Task PersistTenantEntitiesAsync(Tenant tenant, Organization rootOrganization, Role ownerRole, User user, CancellationToken cancellationToken)
+    {
+        _tenantRepository.Add(tenant);
+        _organizationRepository.Add(rootOrganization);
+        _roleRepository.Add(ownerRole);
+        _userRepository.Add(user);
 
-        return ownerUser;
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
     }
 }

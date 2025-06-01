@@ -1,18 +1,16 @@
 ﻿using EShop.Shared.Contracts.Services.Identity.Organizations;
-using EShop.Shared.DomainTools.Aggregates;
+using EShop.Shared.DomainTools.Entities;
 using EShop.Shared.Scoping;
 using EShop.Shared.Scoping.Exceptions;
 using System.ComponentModel.DataAnnotations;
 
 namespace EShop.Identity.Domain.Entities;
 
-public class Organization : AggregateRoot<string>, IExcludedFromScoping
+public class Organization : EntityBase<string>, IExcludedFromScoping
 {
     public const string DefaultLanguageCode = "en-gb";
     public const string DefaultOwnerPassword = "P@ssword123";
     public const int MaxSupportedLevel = 5;
-    
-    private readonly List<User> _users = new();
 
     [MaxLength(ModelConstants.MediumText)]
     public string Name { get; set; } = string.Empty;
@@ -49,13 +47,13 @@ public class Organization : AggregateRoot<string>, IExcludedFromScoping
 
     public virtual Organization? ParentOrganization { get; set; }
 
-    public virtual IReadOnlyCollection<User>? Users => _users.AsReadOnly();
+    public virtual ICollection<User> Users { get; set; } = [];
 
     [MaxLength(ModelConstants.ShortText)]
-    public string? TenantId { get; set; }
+    public string TenantId { get; set; } = string.Empty;
 
     [MaxLength(ModelConstants.LongText)]
-    public string? Scope { get; set; }
+    public string Scope { get; set; } = string.Empty;
 
     // Empty constructor for ORMs
     public Organization() { }
@@ -65,6 +63,22 @@ public class Organization : AggregateRoot<string>, IExcludedFromScoping
         Id = id;
         Name = name;
         OrganizationNumber = organizationNumber;
+    }
+
+    public static Organization CreateRootOrganizationInternal(string tenantId, string name, string? description = null)
+    {
+        var organization = new Organization
+        {
+            Id = tenantId,
+            Name = name,
+            Description = description ?? "Root organization",
+            Context = OrganisationContext.NewRoot(tenantId),
+            LanguageCode = DefaultLanguageCode,
+            TenantId = tenantId,
+            Scope = tenantId,
+        };
+
+        return organization;
     }
 
     public Organization CreateChildOrganization(Command.CreateOrganizationCommand command)
@@ -93,22 +107,6 @@ public class Organization : AggregateRoot<string>, IExcludedFromScoping
         return childOrganization;
     }
 
-    public static Organization CreateRootOrganizationInternal(string tenantId, string name, string? description = null)
-    {
-        var organization = new Organization
-        {
-            Id = tenantId,
-            Name = name,
-            Description = description ?? "Root organization",
-            Context = OrganisationContext.NewRoot(tenantId),
-            LanguageCode = DefaultLanguageCode,
-            TenantId = tenantId,
-            Scope = tenantId,
-        };
-
-        return organization;
-    }
-
     public void Update(Command.UpdateOrganizationCommand command)
     {
         Name = command.Name;
@@ -120,19 +118,5 @@ public class Organization : AggregateRoot<string>, IExcludedFromScoping
         Postcode = command.PostCode;
         Description = command.Description;
         ParentOrganizationId = command.ParentOrganizationId;
-    }
-
-    public User AddUser(string username, string password, string displayName, string email, string createdBy)
-    {
-        // Check if the user is a system user or support group
-        if (UserData.IsSystemUser(username) || username.Equals(UserData.EShopSupportGroup, StringComparison.OrdinalIgnoreCase))
-        {
-            throw new BadRequestException("Invalid username");
-        }
-
-        var user = User.Create(username, password, email, displayName, Id, createdBy);
-        _users.Add(user);
-
-        return user;
     }
 }
