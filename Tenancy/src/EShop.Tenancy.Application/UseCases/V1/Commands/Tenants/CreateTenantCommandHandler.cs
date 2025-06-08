@@ -39,21 +39,21 @@ public class CreateTenantCommandHandler : ICommandHandler<Command.CreateTenantCo
         var existingTenant = await _tenantRepository.FindSingleAsync(x => x.Name == request.Name);
         if (existingTenant is not null)
         {
-            throw new UnprocessableEntityException("Tenant with the same name already exists.");
+            throw new BadRequestException($"Tenant {request.Name} has already exists.");
         }
 
         var operationalUser = _userDetailsProvider.AuthenticatedUser;
 
         var tenant = Tenant.Create(request);
-        await EnsureTenantAvailableFeatures(tenant, operationalUser.ActionUserId);
+        await EnsureTenantAvailableFeatures(tenant, operationalUser.ActionUserId, cancellationToken);
 
         await _eventBusGateway.PublishAsync<ITenantCreated>(new
         {
-            TenantId = tenant.Id,
             TenantName = tenant.Name,
             OwnerUsername = tenant.OwnerUsername,
             OwnerDisplayName = tenant.Name ?? Tenant.RemoveDomainSuffix(request.OwnerUsername, tenant.Id),
             OwnerEmail = tenant.Email,
+            TenantId = tenant.Id,
             ActionUserId = operationalUser.ActionUserId,
             ActionUserType = operationalUser.ActionUserType
         }, cancellationToken);
@@ -61,13 +61,13 @@ public class CreateTenantCommandHandler : ICommandHandler<Command.CreateTenantCo
         return Result.Success();
     }
 
-    private async Task EnsureTenantAvailableFeatures(Tenant tenant, string operationalUsername)
+    private async Task EnsureTenantAvailableFeatures(Tenant tenant, string operationalUsername, CancellationToken cancellationToken)
     {
         try
         {
             _userDetailsProvider.SetSystemUserContext(tenant.Id);
 
-            var features = await _featureRepository.FindAll().ToListAsync();
+            var features = await _featureRepository.FindAll().ToListAsync(cancellationToken);
 
             foreach (var feature in features)
             {
@@ -75,7 +75,7 @@ public class CreateTenantCommandHandler : ICommandHandler<Command.CreateTenantCo
             }
 
             _tenantRepository.Add(tenant);
-            await _tenancyUnitOfWork.SaveChangesAsync();
+            await _tenancyUnitOfWork.SaveChangesAsync(cancellationToken);
         }
         catch (Exception ex)
         {

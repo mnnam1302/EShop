@@ -56,7 +56,6 @@ public class DbInitializer
             }
 
             await SeedDataForEShopSystemAsync();
-            await _dbContext.SaveChangesAsync();
         }
         catch (Exception ex)
         {
@@ -71,14 +70,9 @@ public class DbInitializer
     private async Task SeedDataForEShopSystemAsync()
     {
         await SeedSystemWidePermissions();
-
-        // System user should not depend on any group like eshop-support or any tenant
         await SeedSystemUser(UserData.SystemUsername, $"{UserData.SystemUsername}@eshop-development", "System Administrator");
 
-        // Group eshop-support is a tenant. Using api setup tenant
-        //await SeedTenant(UserData.EShopSupportGroup);
-        //await SeedOrganization(UserData.EShopSupportGroup, $"{UserData.EShopSupportGroup.ToLowerInvariant()}@eshop.ecommerce", "Root system organization");
-        //await SeedSupportUser(UserData.EShopSupportGroup, $"{UserData.EShopSupportGroup.ToLowerInvariant()}@eshop.ecommerce", "Support User", UserData.EShopSupportGroup);
+        await _dbContext.SaveChangesAsync();
     }
 
     private async Task SeedSystemWidePermissions()
@@ -104,48 +98,6 @@ public class DbInitializer
     {
         return
         [
-            new Permission
-            {
-                Id = PermissionConstants.ViewSystemSettingsPermissionId,
-                Name = "View system settings",
-                Description = "Allows users to view system settings",
-                RelatedTo = "System Settings",
-            },
-            new Permission
-            {
-                Id = PermissionConstants.ManageSystemSettingsPermissionId,
-                Name = "Manage system settings",
-                Description = "Allows users to view, edit system settings",
-                RelatedTo = "System Settings",
-            },
-            new Permission
-            {
-                Id = PermissionConstants.ViewOrganizationsPermissionId,
-                Name = "View organizations",
-                Description = "Allows users to view organizations",
-                RelatedTo = "Organization Management",
-            },
-            new Permission
-            {
-                Id = PermissionConstants.ManageOrganizationsPermissionId,
-                Name = "Manage organizations",
-                Description = "Allows users to view, edit, delete organizations",
-                RelatedTo = "Organization Management",
-            },
-            new Permission
-            {
-                Id = PermissionConstants.ViewRolesPermissionId,
-                Name = "View roles",
-                Description = "Allows users viewing roles list and their details",
-                RelatedTo = "Role Management",
-            },
-            new Permission
-            {
-                Id = PermissionConstants.ManageRolesPermissionId,
-                Name = "Manage roles",
-                Description = "Allows users to add, create and delete roles",
-                RelatedTo = "Role Management",
-            },
             new Permission
             {
                 Id = PermissionConstants.ViewUsersPermissionId,
@@ -176,18 +128,46 @@ public class DbInitializer
             },
             new Permission
             {
-                Id = PermissionConstants.ViewCustomerUsersPermissionId,
-                Name = "View customer users",
-                Description = "Allow list of customer users in the system",
-                RelatedTo = "User management"
+                Id = PermissionConstants.ViewRolesPermissionId,
+                Name = "View roles",
+                Description = "Allows users viewing roles list and their details",
+                RelatedTo = "Role Management",
             },
             new Permission
             {
-                Id = PermissionConstants.ManageCustomerUsersPermissionId,
-                Name = "Manage customer users",
-                Description = "Allows update common information, active, inactive customer users in the system",
-                RelatedTo = "User management"
-            }
+                Id = PermissionConstants.ManageRolesPermissionId,
+                Name = "Manage roles",
+                Description = "Allows users to add, create and delete roles",
+                RelatedTo = "Role Management",
+            },
+            new Permission
+            {
+                Id = PermissionConstants.ViewSystemSettingsPermissionId,
+                Name = "View system settings",
+                Description = "Allows users to view system settings",
+                RelatedTo = "System Settings",
+            },
+            new Permission
+            {
+                Id = PermissionConstants.ManageSystemSettingsPermissionId,
+                Name = "Manage system settings",
+                Description = "Allows users to view, edit system settings",
+                RelatedTo = "System Settings",
+            },
+            new Permission
+            {
+                Id = PermissionConstants.ViewOrganizationsPermissionId,
+                Name = "View organizations",
+                Description = "Allows users to view organizations",
+                RelatedTo = "Organization Management",
+            },
+            new Permission
+            {
+                Id = PermissionConstants.ManageOrganizationsPermissionId,
+                Name = "Manage organizations",
+                Description = "Allows users to view, edit, delete organizations",
+                RelatedTo = "Organization Management",
+            },
         ];
     }
 

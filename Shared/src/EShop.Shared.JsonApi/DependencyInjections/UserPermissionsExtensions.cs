@@ -4,12 +4,10 @@ using EShop.Shared.HealthChecks;
 using EShop.Shared.Scoping.ResourceAccessControl;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserPermissionProvider;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using MongoDB.Bson.Serialization.Conventions;
 using Nito.AsyncEx;
 
 namespace EShop.Shared.JsonApi.DependencyInjections;
@@ -28,7 +26,7 @@ public static class UserPermissionsExtensions
                 var instances = scope.ServiceProvider.GetServices<IPermissionRegistrationService>();
                 foreach (var instance in instances)
                 {
-                    logger.LogDebug("Running permission registration for {service}", instance.GetType().Name);
+                    logger.LogDebug("Running permission registration for {Service}", instance.GetType().Name);
                     AsyncContext.Run(() => instance.RegisterPermissions());
                 }
             }

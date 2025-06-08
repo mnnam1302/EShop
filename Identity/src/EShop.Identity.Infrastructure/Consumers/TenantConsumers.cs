@@ -1,6 +1,6 @@
 ﻿using EShop.Identity.Persistence;
 using EShop.Shared.Contracts.Abstractions.Shared;
-using EShop.Shared.Contracts.Services.Identity.Organizations;
+using EShop.Shared.Contracts.Services.Tenancy.Tenants;
 using EShop.Shared.EventBus.Consumers;
 using MediatR;
 
@@ -8,7 +8,7 @@ namespace EShop.Identity.Infrastructure.Consumers;
 
 public static class TenantConsumers
 {
-    public class TenantCreatedConsumer : Consumer<Shared.Contracts.Services.Tenancy.Tenants.ITenantCreated, UsersDbContext>
+    public class TenantCreatedConsumer : Consumer<ITenantCreated, UsersDbContext>
     {
         private readonly ISender _sender;
 
@@ -17,16 +17,16 @@ public static class TenantConsumers
             _sender = sender;
         }
 
-        protected override async Task<Result> HandleMessageAsync(
-            Shared.Contracts.Services.Tenancy.Tenants.ITenantCreated message,
-            CancellationToken cancellationToken)
+        protected override async Task<Result> HandleMessageAsync(ITenantCreated message, CancellationToken cancellationToken)
         {
-            var command = new Command.CreateTenantCommandInternal(
-                message.TenantId,
-                message.TenantName,
-                message.OwnerUsername,
-                message.OwnerDisplayName,
-                message.OwnerEmail);
+            var command = new Command.CreateTenantCommandInternal
+            {
+                TenantId = message.TenantId,
+                TenantName = message.TenantName,
+                OwnerUsername = message.OwnerUsername,
+                OwnerDisplayName = message.OwnerDisplayName,
+                OwnerEmail = message.OwnerEmail
+            };
             var result = await _sender.Send(command, cancellationToken);
             return result;
         }

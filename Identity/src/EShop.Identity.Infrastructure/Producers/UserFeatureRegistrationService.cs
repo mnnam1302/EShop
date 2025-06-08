@@ -37,14 +37,14 @@ public class UserFeatureRegistrationService(IEventBusGateway eventBusGateway) : 
 
     public async Task RegisterFeatures()
     {
-        // Read more: new { } is an anonymous objects in C#. Let's see message initialization: https://masstransit.io/documentation/concepts/producers#message-initialization
         await eventBusGateway.PublishAsync<ISupportedFeaturesUpdated>(new
         {
             SourceSystemReference = ApplicationName,
             Features = features,
-            TenantId = string.Empty,
             Action = SupportedFeaturesAction.AddOrUpdate,
-            ActionUserId = string.Empty
+            TenantId = string.Empty,
+            ActionUserId = string.Empty,
+            ActionUserType = string.Empty
         });
     }
 
