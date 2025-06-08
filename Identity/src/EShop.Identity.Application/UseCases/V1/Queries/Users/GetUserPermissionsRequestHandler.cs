@@ -5,25 +5,22 @@ using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserPermissionProvide
 
 namespace EShop.Identity.Application.UseCases.V1.Queries.Users;
 
-public class GetUserPermissionsRequestHandler : IQueryHandler<Query.GetUserPermissionsRequest, Response.UserPermissionsResponse>
+public class GetUserPermissionsRequestHandler(
+    IUserPermissionsProvider userPermissionsProvider) 
+    : IQueryHandler<Query.GetUserPermissionsRequest, Response.UserPermissionsResponse>
 {
-    private readonly IUserPermissionsProvider _userPermissionsProvider;
-
-    public GetUserPermissionsRequestHandler(IUserPermissionsProvider userPermissionsProvider)
-    {
-        _userPermissionsProvider = userPermissionsProvider;
-    }
 
     public async Task<Result<Response.UserPermissionsResponse>> Handle(
         Query.GetUserPermissionsRequest request,
         CancellationToken cancellationToken)
     {
-        var permissions = await _userPermissionsProvider.GetPermissions(request.UserId);
+        var permissions = await userPermissionsProvider.GetPermissions(request.UserId);
 
         var result = new Response.UserPermissionsResponse
         {
             Permissions = permissions
         };
+
         return Result.Success(result);
     }
 }
