@@ -27,7 +27,7 @@ public class SupportedFeaturesUpdatedConsumer : Consumer<ISupportedFeaturesUpdat
             ActionUserId = message.ActionUserId
         };
 
-        var result = await _sender.Send(command);
+        var result = await _sender.Send(command, cancellationToken);
         return result;
     }
 }

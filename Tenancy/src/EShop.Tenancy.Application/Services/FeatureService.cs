@@ -75,7 +75,7 @@ public class FeatureService : IFeatureService
         var entityState = await _featureRepository.GetEntityStateAsync(feature, cancellationToken);
         await _unitOfWork.SaveChangesAsync();
 
-        _logger.LogTrace("Feature '{featureId}' added to system", feature.Id);
+        _logger.LogTrace("Feature '{FeatureId}' added to system", feature.Id);
         return entityState;
     }
 
@@ -98,14 +98,14 @@ public class FeatureService : IFeatureService
                     tenant.AddTenantFeature(feature.Id, state ?? feature.DefaultStateForNewTenant, _userDetailsProvider.AuthenticatedUser.ActionUserId);
 
                     _tenantRepository.Update(tenant);
-                    await _unitOfWork.SaveChangesAsync();
+                    await _unitOfWork.SaveChangesAsync(cancellationToken);
 
                     await PublishTenantFeaturesUpdatedAsync(tenantId);
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Register TenantFeature error - tenant: '{tenantId}', feature: '{featureId}'", tenantId, feature.Id);
+                _logger.LogError(ex, "Register TenantFeature error - tenant: '{TenantId}', feature: '{FeatureId}'", tenantId, feature.Id);
             }
             finally
             {

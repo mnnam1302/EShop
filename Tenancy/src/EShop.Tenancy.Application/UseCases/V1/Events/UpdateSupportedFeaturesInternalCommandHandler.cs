@@ -26,14 +26,14 @@ public class UpdateSupportedFeaturesInternalCommandHandler : ICommandHandler<Upd
 
     public async Task<Result> Handle(UpdateSupportedFeaturesInternalCommand request, CancellationToken cancellationToken)
     {
-        _logger.LogDebug("{action} {count} features of source system: {sourceSystemReference}",
+        _logger.LogDebug("{Action} {Count} features of source system: {SourceSystemReference}",
             request.Action,
             request.Features.Length,
             request.SourceSystemReference);
 
         foreach (var feature in request.Features)
         {
-            _logger.LogDebug("Processing feature '{action}' (ID='{id}')", request.Action, feature.Id);
+            _logger.LogDebug("Processing feature '{Action}' (ID='{Id}')", request.Action, feature.Id);
 
             var dbFeature = new Domain.Entities.Feature
             {

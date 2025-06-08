@@ -19,7 +19,7 @@ public class TenantFeaturesUpdatedConsumer : Consumer<ITenantFeaturesUpdated, Te
     protected override async Task<Result> HandleMessageAsync(ITenantFeaturesUpdated message, CancellationToken cancellationToken)
     {
         var command = new Command.UpdateTenantFeaturesCommand(message.TenantId);
-        var result = await _sender.Send(command);
+        var result = await _sender.Send(command, cancellationToken);
         return result;
     }
 }

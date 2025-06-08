@@ -1,6 +1,0 @@
-@EShop.Tenancy.API_HostAddress = http://localhost:5002
-
-GET {{EShop.Tenancy.API_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###

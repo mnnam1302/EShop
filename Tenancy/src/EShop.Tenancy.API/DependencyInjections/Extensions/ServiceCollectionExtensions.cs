@@ -75,6 +75,8 @@ public static class ServiceCollectionExtensions
                 options.GroupNameFormat = "'v'VVV";
                 options.SubstituteApiVersionInUrl = true;
             });
+
+        services.AddTransient<DbInitializer>();
     }
 
     private static void AddTenantFeaturesProviderForOwnerService(this IServiceCollection services, IConfiguration configuration)

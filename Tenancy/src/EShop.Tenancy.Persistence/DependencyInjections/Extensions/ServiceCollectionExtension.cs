@@ -9,8 +9,6 @@ public static class ServiceCollectionExtension
 {
     public static IServiceCollection AddTenancyPersistence(this IServiceCollection services)
     {
-        services.AddTransient<DbInitializer>();
-
         services.AddScoped<ITenantRepository, TenantRepository>();
         services.AddScoped<IFeatureRepository, FeatureRepository>();
 

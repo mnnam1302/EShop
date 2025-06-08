@@ -17,10 +17,10 @@ public class Feature : EntityBase<string>, IExcludedFromScoping
     public string Module { get; set; }
 
     [MaxLength(ModelConstants.MediumText)]
-    public string State { get; set; } = StateFeature.Enabled;
+    public string State { get; set; } = nameof(StateFeature.Enabled);
 
     [MaxLength(ModelConstants.MediumText)]
-    public string DefaultStateForNewTenant { get; set; } = StateFeature.Disabled;
+    public string DefaultStateForNewTenant { get; set; } = nameof(StateFeature.Disabled);
 
     [MaxLength(ModelConstants.MediumText)]
     public string? Category { get; set; }
