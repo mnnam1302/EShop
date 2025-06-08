@@ -7,7 +7,6 @@ public enum UserActions
     EditUser,
     DeleteUser,
     AssignRoles,
-    SetPassword,
 }
 
 public enum UserRolesActions
@@ -16,7 +15,7 @@ public enum UserRolesActions
     ManageRoles,
 }
 
-public enum  UserOrganizationActions
+public enum UserOrganizationActions
 {
     ViewOrganizations,
     ManageOrganizations,
