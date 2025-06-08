@@ -1,4 +1,6 @@
-﻿using FluentAssertions;
+﻿using EShop.Shared.Contracts.Abstractions.MessageBus;
+using EShop.Shared.Contracts.Abstractions.Requests;
+using FluentAssertions;
 using NetArchTest.Rules;
 
 namespace EShop.Identity.Tests.Architecture;
@@ -11,6 +13,7 @@ public class ArchitectureTests
     private const string InfrastructureNamespace = "EShop.Identity.Infrastructure";
     private const string PresentationNamespace = "EShop.Identity.Presentation";
     private const string ApiNamespace = "EShop.Identity.Api";
+
 
     [Fact]
     public void Domain_Should_Not_HaveDependencyOtherProjects()
@@ -110,6 +113,34 @@ public class ArchitectureTests
             .HaveDependencyOnAny(otherProjects)
             .GetResult();
 
+        result.IsSuccessful.Should().BeTrue();
+    }
+
+    [Fact]
+    public void DomainEvents_Should_BeSealed()
+    {
+        var domain = Domain.AssemblyReference.Assembly;
+        var result = Types.InAssembly(domain)
+            .That()
+            .ImplementInterface(typeof(IDomainEvent))
+            .Should()
+            .BeSealed()
+            .GetResult();
+        result.IsSuccessful.Should().BeTrue();
+    }
+
+    [Fact]
+    public void CommandHandler_ShouldHave_NameEndingWith_CommandHandler()
+    {
+        var application = Application.AssemblyReference.Assembly;
+        var result = Types.InAssembly(application)
+            .That()
+            .ImplementInterface(typeof(ICommandHandler<>))
+            .Or()
+            .ImplementInterface(typeof(ICommandHandler<,>))
+            .Should()
+            .HaveNameEndingWith("CommandHandler")
+            .GetResult();
         result.IsSuccessful.Should().BeTrue();
     }
 }

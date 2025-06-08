@@ -1,8 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
-namespace EShop.Shared.Contracts.Abstractions.Paging;
+namespace EShop.Shared.Contracts.Abstractions.Pagination;
 
-public class PagedResult<T>
+public class PaginationResult<T>
 {
     public List<T> Items { get; }
     public int PageIndex { get; }
@@ -12,7 +12,7 @@ public class PagedResult<T>
     public bool HasPreviousPage => PageIndex > 1;
     public bool HasNextPage => PageIndex * PageSize < TotalCount;
 
-    public PagedResult(List<T> items, int pageIndex, int pageSize, int totalCount)
+    public PaginationResult(List<T> items, int pageIndex, int pageSize, int totalCount)
     {
         Items = items;
         PageIndex = pageIndex;
@@ -20,7 +20,7 @@ public class PagedResult<T>
         TotalCount = totalCount;
     }
 
-    public static PagedResult<T> Create(List<T> items,
+    public static PaginationResult<T> Create(List<T> items,
         int pageIndex, 
         int pageSize, 
         int totalCount)
@@ -28,7 +28,7 @@ public class PagedResult<T>
         return new (items, pageIndex, pageSize, totalCount);
     }
 
-    public static async Task<PagedResult<T>> CreateAsync(IQueryable<T> query,
+    public static async Task<PaginationResult<T>> CreateAsync(IQueryable<T> query,
         int pageIndex,
         int pageSize,
         CancellationToken cancellationToken)

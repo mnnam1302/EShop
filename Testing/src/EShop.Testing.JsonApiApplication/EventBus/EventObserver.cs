@@ -1,5 +1,4 @@
-﻿using EShop.Shared.Contracts.Abstractions.MessageBus;
-using MassTransit;
+﻿using MassTransit;
 
 namespace EShop.Testing.JsonApiApplication.EventBus;
 

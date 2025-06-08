@@ -201,7 +201,7 @@ public class DbInitializer
     private async Task SeedSystemUser(string username, string email, string displayName)
     {
         var defaultPassword = _passwordHasher.Hash(Organization.DefaultOwnerPassword);
-        var user = User.CreateInternal(username, defaultPassword, email, displayName);
+        var user = User.Create(username, defaultPassword, email, displayName);
 
         if (await _dbContext.Users.AnyAsync(u => u.Id == username))
         {
@@ -249,7 +249,7 @@ public class DbInitializer
     private async Task SeedSupportUser(string username, string email, string displayName, string tenantName)
     {
         var defaultPassword = _passwordHasher.Hash(Organization.DefaultOwnerPassword);
-        var user = User.CreateInternal(username, defaultPassword, email, displayName, tenantName, UserData.SystemUsername);
+        var user = User.Create(username, defaultPassword, email, displayName, tenantName, UserData.SystemUsername);
 
         if (await _dbContext.Users.AnyAsync(u => u.Id == username))
         {

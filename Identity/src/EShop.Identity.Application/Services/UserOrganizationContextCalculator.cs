@@ -2,9 +2,11 @@
 using EShop.Identity.Domain.Repositories;
 using EShop.Shared.Scoping;
 using EShop.Shared.Scoping.Exceptions;
-using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserOrganizationContextProvider;
 using MassTransit.Initializers;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using static EShop.Shared.Contracts.Services.Identity.Organizations.Response;
+using static EShop.Shared.Contracts.Services.Identity.Users.Response;
 
 namespace EShop.Identity.Application.Services;
 
@@ -19,32 +21,47 @@ public interface IUserOrganizationContextCalculator
     Task<OrganizationContext> GetOrganizationContextByPathAsync(string organizationContextPath);
 }
 
-public class UserOrganizationContextCalculator : IUserOrganizationContextCalculator, IUserOrganizationContextProvider
+public class UserOrganizationContextCalculator : IUserOrganizationContextCalculator
 {
     private readonly IUserDetailsProvider _userDetailsProvider;
     private readonly IIdentityRepositoryBase<User, string> _userRepository;
+    private readonly IOrganizationRepository _organizationRepository;
+    private readonly ILogger<UserOrganizationContextCalculator> _logger;
 
     public UserOrganizationContextCalculator(
-        IUserDetailsProvider userDetailsProvider, IIdentityRepositoryBase<User, string> userRepository)
+        IUserDetailsProvider userDetailsProvider,
+        IIdentityRepositoryBase<User, string> userRepository,
+        IOrganizationRepository organizationRepository,
+        ILogger<UserOrganizationContextCalculator> logger)
     {
         _userDetailsProvider = userDetailsProvider;
         _userRepository = userRepository;
+        _organizationRepository = organizationRepository;
+        _logger = logger;
     }
 
     public async Task<UserOrganizationContext> GetUserOrganizationContextAsync()
     {
-        var authenticatedUser = _userDetailsProvider.AuthenticatedUser;
+        try
+        {
+            var authenticatedUser = _userDetailsProvider.AuthenticatedUser;
+            _userDetailsProvider.SetSystemUserContext(authenticatedUser.TenantId);
 
-        var userOrganizationContext = await CalculateUserOrganizationContextInternal(
-            authenticatedUser.Id,
-            authenticatedUser.UserType,
-            authenticatedUser.TenantId)
-            ?? throw new UserOrganizationContextNotFound("User organization is not found");
+            var userOrganizationContext = await CalculateUserOrganizationContextInternal(
+                authenticatedUser.Id,
+                authenticatedUser.UserType,
+                authenticatedUser.TenantId)
+                ?? throw new UserOrganizationContextNotFound("User organization is not found");
 
-        return userOrganizationContext;
+            return userOrganizationContext;
+        }
+        finally
+        {
+            _userDetailsProvider.ClearSystemUserContext();
+        }
     }
 
-    private async Task<UserOrganizationContext> CalculateUserOrganizationContextInternal(string userId, string userType, string tenantId)
+    private async Task<UserOrganizationContext?> CalculateUserOrganizationContextInternal(string userId, string userType, string tenantId)
     {
         return userType switch
         {
@@ -53,9 +70,9 @@ public class UserOrganizationContextCalculator : IUserOrganizationContextCalcula
         };
     }
 
-    private async Task<UserOrganizationContext> GetTenantUserOrganizationContextAsync(string userId)
+    private async Task<UserOrganizationContext?> GetTenantUserOrganizationContextAsync(string userId)
     {
-        var userOrganizationContext = await _userRepository
+        var userOrganization = await _userRepository
             .FindByCondition(
                 predicate: u => u.Id == userId && u.Organization != null,
                 trackChanges: false,
@@ -63,7 +80,7 @@ public class UserOrganizationContextCalculator : IUserOrganizationContextCalcula
             .Select(u => new UserOrganizationContext
             {
                 OrganizationId = u.Organization!.Id,
-                OrganizationContextPath = u.Organization.OrganizationNumber, // important
+                OrganizationContextPath = u.Organization!.Context.Path, // important Ring-fencing
                 OrganizationName = u.Organization.Name,
                 OrganizationNumber = u.Organization.OrganizationNumber,
                 OrganizationPhoneNumber = u.Organization.PhoneNumber,
@@ -76,23 +93,136 @@ public class UserOrganizationContextCalculator : IUserOrganizationContextCalcula
                 UserEmail = u.Email,
                 UserPhoneNumber = u.PhoneNumber,
             })
-            .SingleOrDefaultAsync() ?? throw new UserOrganizationContextNotFound("User organization is not found");
+            .SingleOrDefaultAsync();
 
-        return userOrganizationContext;
+        if (userOrganization == null)
+        {
+            _logger.LogInformation("The tenant user with id '{userId}' was not found", userId);
+            return null;
+        }
+
+        _logger.LogDebug(
+                "The tenant user organization context path '{orgContextPath}' was retrieved for userId '{id}', userType '{userType}'",
+                userOrganization.OrganizationContextPath,
+                userId,
+                UserTypes.TenantUsers);
+
+        return userOrganization;
     }
 
-    public Task<UserOrganizationContext> GetUserOrganizationContextForSpecificUserAsync(string userId, string typeUser = UserTypes.TenantUsers)
+    public async Task<UserOrganizationContext> GetUserOrganizationContextForSpecificUserAsync(string userId, string typeUser = UserTypes.TenantUsers)
     {
-        throw new NotImplementedException();
+        try
+        {
+            var authenticatedUser = _userDetailsProvider.AuthenticatedUser;
+            _userDetailsProvider.SetSystemUserContext(authenticatedUser.TenantId);
+
+            var userOrganizationContext = await CalculateUserOrganizationContextInternal(
+                userId,
+                typeUser,
+                authenticatedUser.TenantId)
+                ?? throw new UserOrganizationContextNotFound($"User organization context with Id {userId} is not found");
+
+            return userOrganizationContext;
+        }
+        finally
+        {
+            _userDetailsProvider.ClearSystemUserContext();
+        }
     }
 
-    public Task<OrganizationContext> GetOrganizationContextByPathAsync(string organizationContextPath)
+    public async Task<OrganizationContext> GetOrganizationContextForSpecificOrganizationAsync(string organizationId)
     {
-        throw new NotImplementedException();
+        try
+        {
+            var authenticatedUser = _userDetailsProvider.AuthenticatedUser;
+            _userDetailsProvider.SetSystemUserContext(authenticatedUser.TenantId);
+
+            var organizationContext = await CalculateOrganizationContextInternal(organizationId)
+                ?? throw new NotFoundException($"Organization context with ID {organizationId} is not found");
+
+            return organizationContext;
+        }
+        finally
+        {
+            _userDetailsProvider.ClearSystemUserContext();
+        }
     }
 
-    public Task<OrganizationContext> GetOrganizationContextForSpecificOrganizationAsync(string organizationId)
+    private async Task<OrganizationContext?> CalculateOrganizationContextInternal(string organizationId)
     {
-        throw new NotImplementedException();
+        var organizationContext = await _organizationRepository
+            .FindByCondition(o => o.Id == organizationId)
+            .Select(o => new OrganizationContext
+            {
+                OrganizationId = o.Id,
+                OrganizationName = o.Name,
+                OrganizationContextPath = o.Context.Path,
+                OrganizationNumber = o.OrganizationNumber,
+                OrganizationPhoneNumber = o.PhoneNumber,
+                OrganizationEmail = o.Email,
+                OrganizationAddress = o.Address,
+                OrganizationCity = o.City,
+                OrganizationPostcode = o.Postcode
+            })
+            .SingleOrDefaultAsync();
+
+        _logger.LogDebug(
+            "The context '{context}' was retrieved for organization '{organizationId}'",
+            organizationContext?.OrganizationContextPath,
+            organizationId);
+
+        return organizationContext;
+    }
+
+    public async Task<OrganizationContext> GetOrganizationContextByPathAsync(string organizationContextPath)
+    {
+        try
+        {
+            var authenticatedUser = _userDetailsProvider.AuthenticatedUser;
+            _userDetailsProvider.SetSystemUserContext(authenticatedUser.TenantId);
+
+            var organizationContext = await CalculateOrganizationContextByPathInternal(organizationContextPath)
+                ?? throw new NotFoundException($"Organization context with context path {organizationContextPath} is not found");
+
+            return organizationContext;
+        }
+        finally
+        {
+            _userDetailsProvider.ClearSystemUserContext();
+        }
+    }
+
+    private async Task<OrganizationContext?> CalculateOrganizationContextByPathInternal(string organizationContextPath)
+    {
+        var organizationContext = await _organizationRepository
+            .FindByCondition(o => o.Context.Path == organizationContextPath)
+            .Select(o => new OrganizationContext
+            {
+                OrganizationId = o.Id,
+                OrganizationName = o.Name,
+                OrganizationContextPath = o.Context.Path,
+                OrganizationNumber = o.OrganizationNumber,
+                OrganizationPhoneNumber = o.PhoneNumber,
+                OrganizationEmail = o.Email,
+                OrganizationAddress = o.Address,
+                OrganizationCity = o.City,
+                OrganizationPostcode = o.Postcode
+            })
+            .SingleOrDefaultAsync();
+
+        if (organizationContext == null)
+        {
+            _logger.LogDebug("The organization with path '{OrganizationContextPath}' was not found", organizationContextPath);
+        }
+        else
+        {
+            _logger.LogDebug(
+                "The context '{OrganizationContextPath}' was retrieved for organization '{OrganizationId}'",
+                organizationContextPath,
+                organizationContext.OrganizationId);
+        }
+
+        return organizationContext;
     }
 }

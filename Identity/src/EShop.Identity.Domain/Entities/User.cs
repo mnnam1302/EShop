@@ -1,7 +1,6 @@
 ﻿using EShop.Shared.Contracts.Services.Identity.Users;
 using EShop.Shared.DomainTools.Entities;
 using EShop.Shared.Scoping;
-using EShop.Shared.Scoping.Exceptions;
 using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 
@@ -41,10 +40,6 @@ public class User : EntityBase<string>, IDateTracking, IExcludedFromScoping
 
     public bool IsActive { get; set; } = true;
 
-    public virtual List<Role> Roles { get; set; } = new();
-    public virtual List<UserRole> UserRoles { get; set; } = new();
-
-
     [MaxLength(ModelConstants.ShortText)]
     public string? CreatedBy { get; set; }
 
@@ -52,7 +47,10 @@ public class User : EntityBase<string>, IDateTracking, IExcludedFromScoping
 
     public DateTimeOffset? LastModifiedOnUtc { get; set; }
 
-    // Empty constructor for ORMs
+    public virtual ICollection<Role> Roles { get; set; } = [];
+
+    public virtual ICollection<UserRole> UserRoles { get; set; } = [];
+
     public User() { }
 
     public User(string username, string password, string email, string? displayName)
@@ -67,7 +65,7 @@ public class User : EntityBase<string>, IDateTracking, IExcludedFromScoping
 
     public static User Create(Command.RegisterUser command)
     {
-        var user = CreateInternal(command.Username, command.Password, command.Email, command.DisplayName, command.OrganizationId);
+        var user = Create(command.Username, command.Password, command.Email, command.DisplayName, command.OrganizationId);
         
         user.PhoneNumber = command.PhoneNumber;
         user.DateOfBirth = command.DateOfBirth;
@@ -75,7 +73,7 @@ public class User : EntityBase<string>, IDateTracking, IExcludedFromScoping
         return user;
     }
 
-    public static User CreateInternal(string username, string password, string email, string displayName, string? organizationId = null, string? createdBy = null)
+    public static User Create(string username, string password, string email, string displayName, string? organizationId = null, string? createdBy = null)
     {
         AssertUsername(username);
 
@@ -90,14 +88,33 @@ public class User : EntityBase<string>, IDateTracking, IExcludedFromScoping
         return user;
     }
 
+    private static void AssertUsername(string username)
+    {
+        if (string.IsNullOrWhiteSpace(username))
+        {
+            throw new ArgumentException("Username cannot be null or whitespace");
+        }
+
+        var invalidCharactersPattern = @"[<>;&/\\\s]";
+        if (System.Text.RegularExpressions.Regex.IsMatch(username, invalidCharactersPattern))
+        {
+            throw new ArgumentException("Username cannot contain special characters");
+        }
+
+        if (UserData.IsSystemUser(username) || username.Equals(UserData.EShopSupportGroup, StringComparison.OrdinalIgnoreCase))
+        {
+            throw new ArgumentException("Invalid username");
+        }
+    }
+
     public Claim[] GenerateClaims()
     {
-        return new Claim[]
-        {
+        return
+        [
             new Claim("sub", Id),
             new Claim("username", Username),
             new Claim("tenant:groups", OrganizationId ?? string.Empty)
-        };
+        ];
     }
 
     public void GrantRoles(string[] roleIds)
@@ -117,19 +134,5 @@ public class User : EntityBase<string>, IDateTracking, IExcludedFromScoping
         };
 
         UserRoles.Add(userRole);
-    }
-
-    private static void AssertUsername(string username)
-    {
-        if (string.IsNullOrWhiteSpace(username))
-        {
-            throw new ArgumentException("Username cannot be null or whitespace");
-        }
-
-        var invalidCharactersPattern = @"[<>;&/\\\s]";
-        if (System.Text.RegularExpressions.Regex.IsMatch(username, invalidCharactersPattern))
-        {
-            throw new UnprocessableEntityException("Username cannot contain special characters");
-        }
     }
 }

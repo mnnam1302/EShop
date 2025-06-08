@@ -5,7 +5,7 @@ namespace EShop.Shared.Scoping.ResourceAccessControl.Providers.UserPermissionPro
 
 public class UserPermissionHttpClient
 {
-    private const string userPermissionsEndpoint = "/api/v1/userPermissions";
+    private const string userPermissionsEndpoint = "api/v1/users";
     private readonly HttpClient _httpClient;
     private readonly IUserDetailsProvider _userDetailsProvider;
 
@@ -17,9 +17,10 @@ public class UserPermissionHttpClient
 
     public async Task<string[]> GetPermissionsForCurrentUser()
     {
-        var authenticatedClient = SystemInternalJwtTokenFactory.AddUserContext(_httpClient, _userDetailsProvider.AuthenticatedUser);
+        var userData = _userDetailsProvider.AuthenticatedUser;
+        var authenticatedClient = SystemInternalJwtTokenFactory.AddUserContext(_httpClient, userData);
 
-        var response = await authenticatedClient.GetStringAsync("/api/v1/userPermissions");
+        var response = await authenticatedClient.GetStringAsync($"{userPermissionsEndpoint}/{userData.Id}/permissions");
 
         var permissions = JsonConvert.DeserializeObject<string[]>(response);
         return permissions ?? Array.Empty<string>();

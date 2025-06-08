@@ -107,10 +107,10 @@ namespace EShop.Identity.Tests.Organizations.Create
                         "Tenant Owner2",
                         "owner@tenant2.com"});
 #line 7
- await testRunner.GivenAsync("following tenants added to the system", ((string)(null)), table1, "Given ");
+    await testRunner.GivenAsync("following tenants added to the system", ((string)(null)), table1, "Given ");
 #line hidden
 #line 11
- await testRunner.AndAsync("all standard features were turned on for \'tenant-1\'", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+    await testRunner.AndAsync("all standard features were turned on for \'tenant-1\'", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
             global::Reqnroll.Table table2 = new global::Reqnroll.Table(new string[] {
                         "Username",
@@ -119,7 +119,7 @@ namespace EShop.Identity.Tests.Organizations.Create
                         "tenantOwner1@tenant-1",
                         "tenant-1"});
 #line 12
- await testRunner.AndAsync("the following users are set up", ((string)(null)), table2, "And ");
+    await testRunner.AndAsync("the following users are set up", ((string)(null)), table2, "And ");
 #line hidden
             global::Reqnroll.Table table3 = new global::Reqnroll.Table(new string[] {
                         "PermissionId"});
@@ -128,10 +128,10 @@ namespace EShop.Identity.Tests.Organizations.Create
             table3.AddRow(new string[] {
                         "Identity_ManageOrganizations"});
 #line 15
- await testRunner.AndAsync("user \'tenantOwner1@tenant-1\' has the following permissions", ((string)(null)), table3, "And ");
+    await testRunner.AndAsync("user \'tenantOwner1@tenant-1\' has the following permissions", ((string)(null)), table3, "And ");
 #line hidden
 #line 19
- await testRunner.AndAsync("user \'tenantOwner1@tenant-1\' logs in to the system", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+    await testRunner.AndAsync("user \'tenantOwner1@tenant-1\' logs in to the system", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
         }
         
@@ -145,14 +145,14 @@ namespace EShop.Identity.Tests.Organizations.Create
             await this.TestTearDownAsync();
         }
         
-        [Xunit.SkippableFactAttribute(DisplayName="Successfully create a new organization under the root organization")]
+        [Xunit.SkippableFactAttribute(DisplayName="Creating a new organization under the root organization")]
         [Xunit.TraitAttribute("FeatureTitle", "OrganizationCreation")]
-        [Xunit.TraitAttribute("Description", "Successfully create a new organization under the root organization")]
-        public async System.Threading.Tasks.Task SuccessfullyCreateANewOrganizationUnderTheRootOrganization()
+        [Xunit.TraitAttribute("Description", "Creating a new organization under the root organization")]
+        public async System.Threading.Tasks.Task CreatingANewOrganizationUnderTheRootOrganization()
         {
             string[] tagsOfScenario = ((string[])(null));
             System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Successfully create a new organization under the root organization", null, tagsOfScenario, argumentsOfScenario, featureTags);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Creating a new organization under the root organization", null, tagsOfScenario, argumentsOfScenario, featureTags);
 #line 21
 this.ScenarioInitialize(scenarioInfo);
 #line hidden
@@ -181,7 +181,7 @@ await this.FeatureBackgroundAsync();
                             "Child organization",
                             "tenant-1"});
 #line 22
- await testRunner.WhenAsync("User \'tenantOwner1\' creates a new organization under the root organization with t" +
+    await testRunner.WhenAsync("User \'tenantOwner1\' creates a new organization under the root organization with t" +
                         "he following details", ((string)(null)), table4, "When ");
 #line hidden
                 global::Reqnroll.Table table5 = new global::Reqnroll.Table(new string[] {
@@ -199,7 +199,7 @@ await this.FeatureBackgroundAsync();
                             "Child organization",
                             "tenant-1"});
 #line 25
- await testRunner.ThenAsync("organization \'child-org\' has the following details", ((string)(null)), table5, "Then ");
+    await testRunner.ThenAsync("organization \'child-org\' has the following details", ((string)(null)), table5, "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();

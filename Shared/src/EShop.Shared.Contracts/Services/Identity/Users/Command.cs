@@ -7,7 +7,7 @@ namespace EShop.Shared.Contracts.Services.Identity.Users;
 
 public static class Command
 {
-    public record RegisterUser(
+    public sealed record RegisterUser(
         string Username,
         string Password,
         string Email,
@@ -16,7 +16,7 @@ public static class Command
         DateTime? DateOfBirth = null,
         string? OrganizationId = null) : ICommand;
 
-    public record CreateUserCommand : ICommand
+    public sealed record CreateUserCommand : ICommand
     {
         [MaxLength(ModelConstants.MediumText)]
         public required string Username { get; init; }

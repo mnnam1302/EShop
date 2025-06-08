@@ -1,5 +1,5 @@
 ﻿using Asp.Versioning;
-using EShop.Shared.Contracts.Abstractions.Paging;
+using EShop.Shared.Contracts.Abstractions.Pagination;
 using EShop.Shared.Contracts.Services.Identity.Roles;
 using EShop.Shared.JsonApi.Abstractions;
 using EShop.Shared.JsonApi.ResourceAccessControl;
@@ -32,7 +32,7 @@ public class RolesController : ApiEndpointBase
         int pageSize = 10,
         CancellationToken cancellationToken = default)
     {
-        var query = new Query.GetRoles(name, Paging.Create(pageIndex, pageSize));
+        var query = new Query.GetRoles(name, PaginationRequest.Create(pageIndex, pageSize));
         var result = await _sender.Send(query, cancellationToken);
 
         if (result.IsFailure)

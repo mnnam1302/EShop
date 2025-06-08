@@ -9,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using MongoDB.Bson.Serialization.Conventions;
 using Nito.AsyncEx;
 
 namespace EShop.Shared.JsonApi.DependencyInjections;
@@ -34,15 +35,15 @@ public static class UserPermissionsExtensions
         });
     }
 
-    public static IServiceCollection AddUserPermissionsProvider(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddUserPermissionsProvider(this IServiceCollection services)
     {
         services.AddScoped<IPermissionValidator, CurrentUserPermissionsValidator>();
-        AddPermissionCachingService(services, configuration);
+        AddPermissionCachingService(services);
 
         return services;
     }
 
-    private static void AddPermissionCachingService(IServiceCollection services, IConfiguration configuration)
+    private static void AddPermissionCachingService(IServiceCollection services)
     {
         services.ConfigureHttpClientDefaults(options =>
         {

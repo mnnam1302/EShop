@@ -1,18 +1,18 @@
-﻿namespace EShop.Shared.Contracts.Abstractions.Paging;
+﻿namespace EShop.Shared.Contracts.Abstractions.Pagination;
 
-public record Paging
+public record PaginationRequest
 {
     public const int UpperPageSize = 100;
     public const int DefaultPageSize = 10;
     public const int DefaultPageIndex = 1;
 
-    private Paging(int pageIndex, int pageSize)
+    private PaginationRequest(int pageIndex, int pageSize)
     {
         PageIndex = pageIndex;
         PageSize = pageSize;
     }
 
-    public static Paging Create(int pageIndex, int pageSize)
+    public static PaginationRequest Create(int pageIndex, int pageSize)
     {
         pageIndex = pageIndex <= 0 ? DefaultPageIndex : pageIndex;
         pageSize = pageSize <= 0

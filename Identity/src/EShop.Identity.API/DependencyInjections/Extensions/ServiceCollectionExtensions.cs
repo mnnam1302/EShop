@@ -10,8 +10,11 @@ using EShop.Shared.DomainTools.DependencyInjections;
 using EShop.Shared.JsonApi.DependencyInjections;
 using EShop.Shared.JsonApi.Middlewares;
 using EShop.Shared.Scoping.ResourceAccessControl;
+using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserOrganizationContextProvider;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserPermissionProvider;
 using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
+using static EShop.Shared.Contracts.Services.Identity.Organizations.Response;
+using static EShop.Shared.Contracts.Services.Identity.Users.Response;
 
 namespace EShop.Identity.API.DependencyInjections.Extensions;
 
@@ -19,6 +22,7 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddShared(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment)
     {
+        services.AddUserScoping();
         services.AddResiliencePolicy();
 
         // DbContext
@@ -26,10 +30,13 @@ public static class ServiceCollectionExtensions
             .AddPostgreSqlHealthCheck(configuration)
             .AddDbContextWithScoping<UsersDbContext>(configuration);
 
-        // Redis Cache
+        // Redis
         services
             .AddRedisHealthCheck(configuration)
-            .AddRedisInfrastructure(configuration)
+            .AddRedisInfrastructure(configuration);
+        
+        // Providers
+        services
             .AddUserTokensProvider(configuration)
             .AddTenantFeaturesProvider(configuration);
 
@@ -45,8 +52,9 @@ public static class ServiceCollectionExtensions
             .AddIdentityPersistence()
             .AddIdentityInfrastructure(configuration, environment, Program.ApplicationName);
 
-        // Owner service
+        // Owner services
         services.AddUserPermissionForOwnerService();
+        services.AddUserOrganizationContextForOwnerService();
 
         return services;
     }
@@ -79,19 +87,26 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    public static IServiceCollection AddUserPermissionForOwnerService(
-        this IServiceCollection services)
+    public static void AddUserPermissionForOwnerService(this IServiceCollection services)
     {
         services.AddTransient<IPermissionValidator, CurrentUserPermissionsValidator>();
-        AddPermissionCachingServiceForOwnService(services);
-        return services;
-    }
 
-    private static void AddPermissionCachingServiceForOwnService(IServiceCollection services)
-    {
+        services.AddTransient<IUserPermissionsProvider, OwnerCacheUserPermissionService>();
         services.AddTransient<IRedisCachingAsyncProvider<string[]>, RedisCachingAsyncProvider<string[]>>();
         services.AddTransient<IPermissionCachingService, PermissionRedisCachingService>();
         services.AddTransient<IPermissionCalculator, PermissionCalculator>();
-        services.AddTransient<IUserPermissionsProvider, OwnerCacheUserPermissionService>();
+    }
+
+    public static void AddUserOrganizationContextForOwnerService(this IServiceCollection services)
+    {
+        services.AddScoped<IUserOrganizationContextProvider, OwnerCacheUserOrganizationContextService>();
+
+        services.AddScoped<IUserOrganizationContextCachingService, UserOrganizationContextCachingService>();
+        services.AddScoped<IRedisCachingAsyncProvider<UserOrganizationContext>, RedisCachingAsyncProvider<UserOrganizationContext>>();
+
+        services.AddScoped<IOrganizationContextCachingService, OrganizationContextCachingService>();
+        services.AddScoped<IRedisCachingAsyncProvider<OrganizationContext>, RedisCachingAsyncProvider<OrganizationContext>>();
+        
+        services.AddScoped<IUserOrganizationContextCalculator, UserOrganizationContextCalculator>();
     }
 }
