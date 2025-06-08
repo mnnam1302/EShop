@@ -20,7 +20,7 @@ public class TenantFeature : EntityBase<string>, IScoped, IUserTracking, IDateTr
     [MaxLength(ModelConstants.TinyText)]
     public string State { get; private set; } = nameof(StateFeature.Enabled);
 
-    public string CreatedBy { get; set; }
+    public string CreatedBy { get; set; } = string.Empty;
 
     public DateTimeOffset CreatedOnUtc { get; set; }
 

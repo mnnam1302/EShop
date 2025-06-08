@@ -14,8 +14,8 @@ public interface IFeature
     string Id { get; }
     string Name { get; }
     string Description { get; }
-    string Module { get; }
     string State { get; }
+    string Module { get; }
 }
 
 public enum SupportedFeaturesAction

@@ -73,7 +73,7 @@ public class FeatureService : IFeatureService
         }
 
         var entityState = await _featureRepository.GetEntityStateAsync(feature, cancellationToken);
-        await _unitOfWork.SaveChangesAsync();
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         _logger.LogTrace("Feature '{FeatureId}' added to system", feature.Id);
         return entityState;
@@ -81,7 +81,10 @@ public class FeatureService : IFeatureService
 
     private async Task RegisterTenantFeature(Feature feature, string? state, CancellationToken cancellationToken)
     {
-        var tenantIds = await _tenantRepository.FindAll().Select(t => t.Id).ToListAsync(cancellationToken);
+        var tenantIds = await _tenantRepository
+            .FindAll()
+            .Select(t => t.Id)
+            .ToListAsync(cancellationToken);
 
         foreach (var tenantId in tenantIds)
         {
