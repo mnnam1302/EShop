@@ -79,11 +79,11 @@ public class HttpRequestUserDataProvider : IUserDetailsProvider
 
     public void SetSystemUserContextWithEmptyScope()
     {
-        _logger.LogDebug("Setting user context to System with no tenant scope [{providerHash}]", this.GetHashCode());
+        _logger.LogDebug("Setting user context to System with no tenant scope [{ProviderHash}]", this.GetHashCode());
         this.currentUser = new Lazy<UserData>(() => UserData.GetSystemUser(null), System.Threading.LazyThreadSafetyMode.PublicationOnly);
 
         var updatedToUser = this.currentUser.Value ?? throw new InvalidOperationException("User should have been set");
-        _logger.LogTrace("User context set to '{userId}'('{tenantId}').", updatedToUser.Id, updatedToUser.TenantId);
+        _logger.LogTrace("User context set to '{UserId}'('{TenantId}').", updatedToUser.Id, updatedToUser.TenantId);
     }
 
     public void SetSystemUserContext(string onBehalfOfTenantId, string? onBehalfOfUserId = null, string? onBehalfOfUserType = null)
@@ -93,19 +93,19 @@ public class HttpRequestUserDataProvider : IUserDetailsProvider
             throw new ArgumentException($"'{nameof(onBehalfOfTenantId)}' cannot be null or whitespace", nameof(onBehalfOfTenantId));
         }
 
-        _logger.LogDebug("Setting user context to System (Tenant ID='{tenantId}', User Id='{userId}') [{providerHash}].", onBehalfOfTenantId, onBehalfOfUserId, this.GetHashCode());
+        _logger.LogDebug("Setting user context to System (Tenant ID='{TenantId}', User Id='{UserId}') [{ProviderHash}].", onBehalfOfTenantId, onBehalfOfUserId, this.GetHashCode());
         this.currentUser =
             string.IsNullOrWhiteSpace(onBehalfOfUserId)
             ? new Lazy<UserData>(() => UserData.GetSystemUser(onBehalfOfTenantId), System.Threading.LazyThreadSafetyMode.PublicationOnly)
             : new Lazy<UserData>(() => UserData.GetSystemUser(onBehalfOfTenantId, onBehalfOfUserId, onBehalfOfUserType), System.Threading.LazyThreadSafetyMode.PublicationOnly);
 
         var updatedToUser = this.currentUser.Value ?? throw new InvalidOperationException("User should have been set");
-        _logger.LogTrace("User context set to '{userId}'('{tenantId}').", updatedToUser.Id, updatedToUser.TenantId);
+        _logger.LogTrace("User context set to '{UserId}'('{TenantId}').", updatedToUser.Id, updatedToUser.TenantId);
     }
 
     public void ClearSystemUserContext()
     {
-        _logger.LogDebug("Resetting user context [{providerHash}].", this.GetHashCode());
+        _logger.LogDebug("Resetting user context [{ProviderHash}].", this.GetHashCode());
         this.currentUser = new Lazy<UserData>(() => CreateUserFromRequest(), System.Threading.LazyThreadSafetyMode.PublicationOnly);
 
         this.userLogContext?.Dispose();

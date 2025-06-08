@@ -9,8 +9,8 @@ using System.Security.Claims;
 
 namespace EShop.Identity.Domain.Entities;
 
-public class User 
-    : EntityBase<string>, 
+public class User
+    : EntityBase<string>,
     IDateTracking,
     IExcludedFromScoping,
     IAccessControlled,
@@ -89,7 +89,7 @@ public class User
     public static User Create(Command.RegisterUser command)
     {
         var user = Create(command.Username, command.Password, command.Email, command.DisplayName, command.OrganizationId);
-        
+
         user.PhoneNumber = command.PhoneNumber;
         user.DateOfBirth = command.DateOfBirth;
 
@@ -100,14 +100,16 @@ public class User
     {
         AssertUsername(username);
 
-        var user = new User(username, password, email, displayName);
-        user.CreatedBy = createdBy;
-        
+        var user = new User(username, password, email, displayName)
+        {
+            CreatedBy = createdBy
+        };
+
         if (!string.IsNullOrWhiteSpace(organizationId))
         {
             user.OrganizationId = organizationId;
         }
-        
+
         return user;
     }
 
@@ -150,7 +152,7 @@ public class User
 
     public void GrantRole(string roleId)
     {
-        var userRole = new UserRole()
+        var userRole = new UserRole
         {
             RoleId = roleId,
             UserId = Id

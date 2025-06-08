@@ -47,7 +47,7 @@ public class CreateTenantCommandHandler : ICommandHandler<Command.CreateTenantCo
         var tenant = Tenant.Create(request);
         await EnsureTenantAvailableFeatures(tenant, operationalUser.ActionUserId);
 
-        await _eventBusGateway.PublishAsync<TenantCreated>(new
+        await _eventBusGateway.PublishAsync<ITenantCreated>(new
         {
             TenantId = tenant.Id,
             TenantName = tenant.Name,

@@ -25,12 +25,6 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    private static IServiceCollection AddEventBusGateway(this IServiceCollection services)
-    {
-        services.AddScoped<IEventBusGateway, EventBusGateway>();
-        return services;
-    }
-
     private static IServiceCollection AddMassTransitRabbitMQ(
         this IServiceCollection services,
         IConfiguration configuration,
@@ -98,14 +92,20 @@ public static class ServiceCollectionExtensions
         IWebHostEnvironment environment,
         string serviceName)
     {
-        bus.ConfigureEventReceiveEndpoint<SupportedFeaturesUpdatedConsumer, SupportedFeaturesUpdated>(
+        bus.ConfigureEventReceiveEndpoint<SupportedFeaturesUpdatedConsumer, ISupportedFeaturesUpdated>(
             context,
             environment.EnvironmentName,
             serviceName);
 
-        bus.ConfigureEventReceiveEndpoint<TenantFeaturesUpdatedConsumer, TenantFeaturesUpdated>(
+        bus.ConfigureEventReceiveEndpoint<TenantFeaturesUpdatedConsumer, ITenantFeaturesUpdated>(
             context,
             environment.EnvironmentName,
             serviceName);
+    }
+
+    private static IServiceCollection AddEventBusGateway(this IServiceCollection services)
+    {
+        services.AddScoped<IEventBusGateway, EventBusGateway>();
+        return services;
     }
 }

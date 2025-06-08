@@ -2,7 +2,7 @@
 
 namespace EShop.Shared.Contracts.Services.Tenancy.Tenants;
 
-public interface TenantCreated : IIntegrationEvent
+public interface ITenantCreated : IIntegrationEvent
 {
     string TenantName { get; }
 

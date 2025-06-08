@@ -46,7 +46,7 @@ public static class Command
     {
         [JsonIgnore]
         public string? Id { get; init; }
-        public string Name { get; init; }
+        public required string Name { get; init; }
         public string? OrganizationNumber { get; init; }
         public string? PhoneNumber { get; init; }
         public string? Email { get; init; }

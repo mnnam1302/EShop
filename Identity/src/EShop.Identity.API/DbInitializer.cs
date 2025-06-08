@@ -73,19 +73,12 @@ public class DbInitializer
         await SeedSystemWidePermissions();
 
         // System user should not depend on any group like eshop-support or any tenant
-        await SeedSystemUser(UserData.SystemUsername, $"{UserData.SystemUsername}@eshop.ecommerce", "System user");
+        await SeedSystemUser(UserData.SystemUsername, $"{UserData.SystemUsername}@eshop-development", "System Administrator");
 
-        // Group eshop-support is a tenant, so users can support system and tenant
-        await SeedTenant(UserData.EShopSupportGroup);
-        await SeedOrganization(
-            UserData.EShopSupportGroup,
-            $"{UserData.EShopSupportGroup.ToLowerInvariant()}@eshop.ecommerce",
-            "Root system organization");
-        await SeedSupportUser(
-            UserData.EShopSupportGroup,
-            $"{UserData.EShopSupportGroup.ToLowerInvariant()}@eshop.ecommerce",
-            "Support User",
-            UserData.EShopSupportGroup);
+        // Group eshop-support is a tenant. Using api setup tenant
+        //await SeedTenant(UserData.EShopSupportGroup);
+        //await SeedOrganization(UserData.EShopSupportGroup, $"{UserData.EShopSupportGroup.ToLowerInvariant()}@eshop.ecommerce", "Root system organization");
+        //await SeedSupportUser(UserData.EShopSupportGroup, $"{UserData.EShopSupportGroup.ToLowerInvariant()}@eshop.ecommerce", "Support User", UserData.EShopSupportGroup);
     }
 
     private async Task SeedSystemWidePermissions()
@@ -107,10 +100,10 @@ public class DbInitializer
         await _dbContext.SaveChangesAsync();
     }
 
-    private Permission[] GetWidePermissions()
+    private static Permission[] GetWidePermissions()
     {
-        return new Permission[]
-        {
+        return
+        [
             new Permission
             {
                 Id = PermissionConstants.ViewSystemSettingsPermissionId,
@@ -195,7 +188,7 @@ public class DbInitializer
                 Description = "Allows update common information, active, inactive customer users in the system",
                 RelatedTo = "User management"
             }
-        };
+        ];
     }
 
     private async Task SeedSystemUser(string username, string email, string displayName)
@@ -215,11 +208,7 @@ public class DbInitializer
 
     private async Task SeedTenant(string tenantName)
     {
-        var tenant = new Tenant()
-        {
-            Id = tenantName,
-            Name = tenantName,
-        };
+        var tenant = new Tenant(tenantName, tenantName);
 
         if (await _dbContext.Tenants.AnyAsync(t => t.Id == tenantName || t.Name == tenantName))
         {

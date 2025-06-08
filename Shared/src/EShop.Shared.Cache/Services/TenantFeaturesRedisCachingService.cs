@@ -19,10 +19,10 @@ public class TenantFeaturesRedisCachingService : ITenantFeaturesCachingService
 
     public async Task<string[]> GetTenantFeatures(string tenantId, CancellationToken cancellationToken = default)
     {
-        var cacheTenantFeatures = await _redisCachingService.GetAsync(TenantFeaturesCacheKeyProvider.GetCacheKey(tenantId));
+        var cacheTenantFeatures = await _redisCachingService.GetAsync(TenantFeaturesCacheKeyProvider.GetCacheKey(tenantId), cancellationToken);
         if (cacheTenantFeatures is null)
         {
-            return Array.Empty<string>();
+            return [];
         }
         return cacheTenantFeatures;
     }
@@ -32,11 +32,15 @@ public class TenantFeaturesRedisCachingService : ITenantFeaturesCachingService
         await _redisCachingService.AddAsync(
             TenantFeaturesCacheKeyProvider.GetCacheKey(tenantId),
             features,
-            new DistributedCacheEntryOptions { SlidingExpiration = _cachedRemoteConfiguration.GetSlidingTokenExpiration() });
+            new DistributedCacheEntryOptions
+            {
+                SlidingExpiration = _cachedRemoteConfiguration.GetSlidingTokenExpiration()
+            },
+            cancellationToken);
     }
 
     public async Task RemoveTenantFeatures(string tenantId, CancellationToken cancellationToken = default)
     {
-        await _redisCachingService.ClearAsync(TenantFeaturesCacheKeyProvider.GetCacheKey(tenantId));
+        await _redisCachingService.ClearAsync(TenantFeaturesCacheKeyProvider.GetCacheKey(tenantId), cancellationToken);
     }
 }

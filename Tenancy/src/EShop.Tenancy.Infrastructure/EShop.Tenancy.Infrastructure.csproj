@@ -7,12 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Producers\**" />
-    <EmbeddedResource Remove="Producers\**" />
-    <None Remove="Producers\**" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\EShop.Tenancy.Application\EShop.Tenancy.Application.csproj" />
     <ProjectReference Include="..\EShop.Tenancy.Persistence\EShop.Tenancy.Persistence.csproj" />
   </ItemGroup>

@@ -8,7 +8,7 @@ namespace EShop.Identity.Infrastructure.Consumers;
 
 public static class TenantConsumers
 {
-    public class TenantCreatedConsumer : Consumer<Shared.Contracts.Services.Tenancy.Tenants.TenantCreated, UsersDbContext>
+    public class TenantCreatedConsumer : Consumer<Shared.Contracts.Services.Tenancy.Tenants.ITenantCreated, UsersDbContext>
     {
         private readonly ISender _sender;
 
@@ -18,7 +18,7 @@ public static class TenantConsumers
         }
 
         protected override async Task<Result> HandleMessageAsync(
-            Shared.Contracts.Services.Tenancy.Tenants.TenantCreated message,
+            Shared.Contracts.Services.Tenancy.Tenants.ITenantCreated message,
             CancellationToken cancellationToken)
         {
             var command = new Command.CreateTenantCommandInternal(

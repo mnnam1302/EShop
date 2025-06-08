@@ -116,7 +116,7 @@ public class FeatureService : IFeatureService
 
     private async Task PublishTenantFeaturesUpdatedAsync(string tenantId)
     {
-        await _eventBusGateway.PublishAsync<TenantFeaturesUpdated>(new
+        await _eventBusGateway.PublishAsync<ITenantFeaturesUpdated>(new
         {
             EventId = Guid.NewGuid(),
             TenantId = tenantId,
@@ -237,7 +237,7 @@ public class FeatureService : IFeatureService
                 .AsNoTracking()
                 .ToListAsync(cancellationToken);
 
-            _logger.LogDebug("Get features for tenant '{id}' stored in the database. Result: {count} features available", tenantId, tenantFeatures.Count);
+            _logger.LogDebug("Get features for tenant '{Id}' stored in the database. Result: {Count} features available", tenantId, tenantFeatures.Count);
 
             return tenantFeatures;
         }

@@ -1,12 +1,12 @@
 ﻿using EShop.Shared.Contracts.Services.Identity.Organizations;
-using EShop.Shared.DomainTools.Entities;
+using EShop.Shared.DomainTools.Aggregates;
 using EShop.Shared.Scoping;
 using EShop.Shared.Scoping.Exceptions;
 using System.ComponentModel.DataAnnotations;
 
 namespace EShop.Identity.Domain.Entities;
 
-public class Organization : EntityBase<string>, IExcludedFromScoping
+public class Organization : AggregateRoot<string>, IExcludedFromScoping
 {
     public const string DefaultLanguageCode = "en-gb";
     public const string DefaultOwnerPassword = "P@ssword123";
@@ -50,10 +50,10 @@ public class Organization : EntityBase<string>, IExcludedFromScoping
     public virtual ICollection<User> Users { get; set; } = [];
 
     [MaxLength(ModelConstants.ShortText)]
-    public string TenantId { get; set; } = string.Empty;
+    public string TenantId { get; private set; } = string.Empty;
 
     [MaxLength(ModelConstants.LongText)]
-    public string Scope { get; set; } = string.Empty;
+    public string Scope { get; private set; } = string.Empty;
 
     // Empty constructor for ORMs
     public Organization() { }

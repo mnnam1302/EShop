@@ -17,7 +17,7 @@ public sealed class StepContext
 
     public async Task SimulateTenantCreationAsync(string tenantId, string tenantName, string ownerUsername, string ownerDisplayName, string ownerEmail)
     {
-        await _apiContext.PublishIntegrationEvent<Shared.Contracts.Services.Tenancy.Tenants.TenantCreated>(new
+        await _apiContext.PublishIntegrationEvent<Shared.Contracts.Services.Tenancy.Tenants.ITenantCreated>(new
         {
             TenantId = tenantId,
             TenantName = tenantName,

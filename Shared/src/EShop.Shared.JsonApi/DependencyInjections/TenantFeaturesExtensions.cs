@@ -1,11 +1,8 @@
-﻿using EShop.Shared.Cache.DependencyInejctions.Extensions;
-using EShop.Shared.Cache.Providers;
+﻿using EShop.Shared.Cache.Providers;
 using EShop.Shared.Cache.Services;
 using EShop.Shared.HealthChecks;
-using EShop.Shared.Scoping;
 using EShop.Shared.Scoping.ResourceAccessControl;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers.TenantFeaturesProvider;
-using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserPermissionProvider;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -31,7 +28,7 @@ public static class TenantFeaturesExtensions
 
                 foreach (var instance in instances)
                 {
-                    logger.LogInformation("Running feature registration for {service}", instance.GetType().Name);
+                    logger.LogInformation("Running feature registration for {Service}", instance.GetType().Name);
                     AsyncContext.Run(instance.RegisterFeatures);
                 }
             }
