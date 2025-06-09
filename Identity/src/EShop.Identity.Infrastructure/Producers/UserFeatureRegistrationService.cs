@@ -11,15 +11,15 @@ public class UserFeatureRegistrationService(IEventBusGateway eventBusGateway) : 
     [
         new()
         {
-            Id = FeatureConstants.Identity_UserInvites_FeatureId,
-            Name = "User Invites",
-            Description = "User Invites"
-        },
-        new()
-        {
             Id = FeatureConstants.Identity_OrganisationRingFencing_FeatureId,
             Name = "Organisation Ring Fencing",
             Description = "Organisation Ring Fencing"
+        },
+        new()
+        {
+            Id = FeatureConstants.Identity_ExternalApplicationIntegration_FeatureId,
+            Name = "External Application Integration",
+            Description = "External Application Integration"
         },
         new()
         {
@@ -29,10 +29,10 @@ public class UserFeatureRegistrationService(IEventBusGateway eventBusGateway) : 
         },
         new()
         {
-            Id = FeatureConstants.Identity_ExternalApplicationIntegration_FeatureId,
-            Name = "External Application Integration",
-            Description = "External Application Integration"
-        }
+            Id = FeatureConstants.Identity_UserInvites_FeatureId,
+            Name = "User Invites",
+            Description = "User Invites"
+        },
     ];
 
     public async Task RegisterFeatures()

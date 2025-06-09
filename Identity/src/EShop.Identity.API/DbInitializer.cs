@@ -55,7 +55,7 @@ public class DbInitializer
                 _tenantIsolationStrategy.AddTenantIsolation(_dbContext);
             }
 
-            await SeedDataForEShopSystemAsync();
+            await SeedDataSystemAsync();
         }
         catch (Exception ex)
         {
@@ -67,7 +67,7 @@ public class DbInitializer
         }
     }
 
-    private async Task SeedDataForEShopSystemAsync()
+    private async Task SeedDataSystemAsync()
     {
         await SeedSystemWidePermissions();
         await SeedSystemUser(UserData.SystemUsername, $"{UserData.SystemUsername}@eshop-development", "System Administrator");
@@ -100,48 +100,6 @@ public class DbInitializer
         [
             new Permission
             {
-                Id = PermissionConstants.ViewUsersPermissionId,
-                Name = "View users",
-                Description = "Allows listing of users and organizations currently registered in the system",
-                RelatedTo = "User Management",
-            },
-            new Permission
-            {
-                Id = PermissionConstants.ManageUsersPermissionId,
-                Name = "Manage users",
-                Description = "Allows inviting new users, adding new organizations to the system and changing their details",
-                RelatedTo = "User Management",
-            },
-            new Permission
-            {
-                Id = PermissionConstants.ViewPortalUserAccountsPermissionId,
-                Name = "View portal user accounts",
-                Description = "Allows viewing portal user accounts.",
-                RelatedTo = "User Management"
-            },
-            new Permission
-            {
-                Id = PermissionConstants.ManagePortalUserAccountsPermissionId,
-                Name = "Manage portal user accounts",
-                Description = "Allows viewing, inviting, updating, and deleting portal user accounts.",
-                RelatedTo = "User Management"
-            },
-            new Permission
-            {
-                Id = PermissionConstants.ViewRolesPermissionId,
-                Name = "View roles",
-                Description = "Allows users viewing roles list and their details",
-                RelatedTo = "Role Management",
-            },
-            new Permission
-            {
-                Id = PermissionConstants.ManageRolesPermissionId,
-                Name = "Manage roles",
-                Description = "Allows users to add, create and delete roles",
-                RelatedTo = "Role Management",
-            },
-            new Permission
-            {
                 Id = PermissionConstants.ViewSystemSettingsPermissionId,
                 Name = "View system settings",
                 Description = "Allows users to view system settings",
@@ -167,6 +125,48 @@ public class DbInitializer
                 Name = "Manage organizations",
                 Description = "Allows users to view, edit, delete organizations",
                 RelatedTo = "Organization Management",
+            },
+            new Permission
+            {
+                Id = PermissionConstants.ViewRolesPermissionId,
+                Name = "View roles",
+                Description = "Allows users viewing roles list and their details",
+                RelatedTo = "Role Management",
+            },
+            new Permission
+            {
+                Id = PermissionConstants.ManageRolesPermissionId,
+                Name = "Manage roles",
+                Description = "Allows users to add, create and delete roles",
+                RelatedTo = "Role Management",
+            },
+            new Permission
+            {
+                Id = PermissionConstants.ViewUsersPermissionId,
+                Name = "View users",
+                Description = "Allows listing of users and organizations currently registered in the system",
+                RelatedTo = "User Management",
+            },
+            new Permission
+            {
+                Id = PermissionConstants.ManageUsersPermissionId,
+                Name = "Manage users",
+                Description = "Allows inviting new users, adding new organizations to the system and changing their details",
+                RelatedTo = "User Management",
+            },
+            new Permission
+            {
+                Id = PermissionConstants.ViewPortalUserAccountsPermissionId,
+                Name = "View portal user accounts",
+                Description = "Allows viewing portal user accounts.",
+                RelatedTo = "User Management"
+            },
+            new Permission
+            {
+                Id = PermissionConstants.ManagePortalUserAccountsPermissionId,
+                Name = "Manage portal user accounts",
+                Description = "Allows viewing, inviting, updating, and deleting portal user accounts.",
+                RelatedTo = "User Management"
             },
         ];
     }
