@@ -174,51 +174,7 @@ public class DbInitializer
     private async Task SeedSystemUser(string username, string email, string displayName)
     {
         var defaultPassword = _passwordHasher.Hash(Organization.DefaultOwnerPassword);
-        var user = User.Create(username, defaultPassword, email, displayName);
-
-        if (await _dbContext.Users.AnyAsync(u => u.Id == username))
-        {
-            _dbContext.Update(user);
-        }
-        else
-        {
-            _dbContext.Add(user);
-        }
-    }
-
-    private async Task SeedTenant(string tenantName)
-    {
-        var tenant = new Tenant(tenantName, tenantName);
-
-        if (await _dbContext.Tenants.AnyAsync(t => t.Id == tenantName || t.Name == tenantName))
-        {
-            _dbContext.Update(tenant);
-        }
-        else
-        {
-            _dbContext.Add(tenant);
-        }
-    }
-
-    private async Task SeedOrganization(string name, string email, string description)
-    {
-        var organization = Organization.CreateRootOrganizationInternal(name, name, description);
-        organization.Email = email;
-
-        if (await _dbContext.Organizations.AnyAsync(org => org.Id == name || org.Name == name))
-        {
-            _dbContext.Update(organization);
-        }
-        else
-        {
-            _dbContext.Add(organization);
-        }
-    }
-
-    private async Task SeedSupportUser(string username, string email, string displayName, string tenantName)
-    {
-        var defaultPassword = _passwordHasher.Hash(Organization.DefaultOwnerPassword);
-        var user = User.Create(username, defaultPassword, email, displayName, tenantName, UserData.SystemUsername);
+        var user = new User(username, defaultPassword, email, displayName);
 
         if (await _dbContext.Users.AnyAsync(u => u.Id == username))
         {
