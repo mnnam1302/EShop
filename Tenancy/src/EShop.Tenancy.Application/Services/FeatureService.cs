@@ -159,7 +159,7 @@ public class FeatureService : IFeatureService
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Delete TenantFeature error - tenant: '{tenantId}', feature: '{featureId}'", tenantId, featureId);
+                    _logger.LogError(ex, "Delete TenantFeature error - tenant: '{TenantId}', feature: '{FeatureId}'", tenantId, featureId);
                 }
                 finally
                 {
@@ -176,7 +176,7 @@ public class FeatureService : IFeatureService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Delete system feature error - feature: '{featureId}'", featureId);
+            _logger.LogError(ex, "Delete system feature error - feature: '{FeatureId}'", featureId);
         }
         finally
         {
@@ -228,16 +228,16 @@ public class FeatureService : IFeatureService
             tenantId = tenantId.ToLower();
             _userDetailsProvider.SetSystemUserContext(tenantId);
 
-            var queryTenant = _tenantRepository.FindAll(false, t => t.TenantFeatures);
+            var query = _tenantRepository.FindAll(false, t => t.TenantFeatures)
+                .Where(t => t.Id == tenantId)
+                .SelectMany(t => t.TenantFeatures);
 
             if (!string.IsNullOrEmpty(state))
             {
-                queryTenant = queryTenant.Where(t => t.TenantFeatures.Any(tf => tf.State == state));
+                query = query.Where(tf => tf.State == state);
             }
 
-            var tenantFeatures = await queryTenant
-                .SelectMany(t => t.TenantFeatures)
-                .AsNoTracking()
+            var tenantFeatures = await query
                 .ToListAsync(cancellationToken);
 
             _logger.LogDebug("Get features for tenant '{Id}' stored in the database. Result: {Count} features available", tenantId, tenantFeatures.Count);

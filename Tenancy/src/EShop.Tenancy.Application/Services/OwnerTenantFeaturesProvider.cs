@@ -22,7 +22,7 @@ public class OwnerTenantFeaturesProvider : ITenantFeaturesProvider
         }
 
         var tenantFeaturesCache = await _tenantFeaturesCachingService.GetTenantFeatures(tenantId);
-        if (tenantFeaturesCache.Any())
+        if (tenantFeaturesCache.Length != 0)
         {
             return tenantFeaturesCache;
         }

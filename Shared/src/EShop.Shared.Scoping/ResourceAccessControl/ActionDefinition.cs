@@ -17,7 +17,7 @@ public class ActionDefinition
     {
         bool isAllowed = stateTransition.IsAllowed(actionName);
         bool isPermitted = await permissionValidator.HasAtLeastOneOfSpecificPermissionAsync(permissionIds);
-        
+
         return new ActionDefinition(isAllowed && isPermitted);
     }
 }
