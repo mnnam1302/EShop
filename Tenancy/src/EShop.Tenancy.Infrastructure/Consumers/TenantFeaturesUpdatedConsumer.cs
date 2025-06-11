@@ -6,7 +6,7 @@ using MediatR;
 
 namespace EShop.Tenancy.Infrastructure.Consumers;
 
-public class TenantFeaturesUpdatedConsumer : Consumer<TenantFeaturesUpdated, TenancyDbContext>
+public class TenantFeaturesUpdatedConsumer : Consumer<ITenantFeaturesUpdated, TenancyDbContext>
 {
     private readonly ISender _sender;
 
@@ -16,10 +16,10 @@ public class TenantFeaturesUpdatedConsumer : Consumer<TenantFeaturesUpdated, Ten
         _sender = sender;
     }
 
-    protected override async Task<Result> HandleMessageAsync(TenantFeaturesUpdated message, CancellationToken cancellationToken)
+    protected override async Task<Result> HandleMessageAsync(ITenantFeaturesUpdated message, CancellationToken cancellationToken)
     {
         var command = new Command.UpdateTenantFeaturesCommand(message.TenantId);
-        var result = await _sender.Send(command);
+        var result = await _sender.Send(command, cancellationToken);
         return result;
     }
 }

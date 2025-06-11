@@ -1,35 +1,9 @@
-﻿using EShop.Shared.DomainTools.Aggregates;
-using EShop.Shared.DomainTools.Repositories;
-using EShop.Shared.DomainTools.UnitOfWorks;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 
 namespace EShop.Shared.DomainTools.DependencyInjections;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddRepositoryBase(this IServiceCollection services)
-    {
-        services.AddScoped(typeof(IRepositoryBase<,>), typeof(RepositoryBaseDbContext<,,>));
-        return services;
-    }
-
-    public static IServiceCollection AddRepositoryForAggregate<TDbContext, TEntity, TKey>(this IServiceCollection services)
-       where TDbContext : DbContext
-       where TEntity : class, IAggregateRoot<TKey>
-    {
-        services.AddScoped(
-            typeof(IRepositoryBase<TEntity, TKey>),
-            typeof(AggregateRepository<TDbContext, TEntity, TKey>));
-        return services;
-    }
-
-    public static IServiceCollection AddUnitOfWork(this IServiceCollection services)
-    {
-        services.AddScoped(typeof(IUnitOfWork), typeof(UnitOfWorkDbContext<>));
-        return services;
-    }
-
     public static IServiceCollection AddResiliencePolicy(this IServiceCollection services)
     {
         services.AddSingleton<IResiliencePolicyFactory, ResiliencePolicyFactory>();

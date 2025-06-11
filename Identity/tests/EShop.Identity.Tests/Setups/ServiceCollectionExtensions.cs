@@ -123,7 +123,7 @@ internal static class ServiceCollectionExtensions
                 bus.ReceiveEndpoint("test_queue", configureEndpoint =>
                 {
                     configureEndpoint.ConfigureConsumers(context);
-                    configureEndpoint.Observer(new EventObserver<TenantCreated>(context.GetRequiredService<IIntegrationEventsTracker>()));
+                    configureEndpoint.Observer(new EventObserver<ITenantCreated>(context.GetRequiredService<IIntegrationEventsTracker>()));
                 });
             });
         });

@@ -37,6 +37,24 @@ public class UsersController : ApiEndpointBase
         return Results.Ok(result);
     }
 
+    [HttpGet("{id}")]
+    [RequireOneOfPermissions(
+        PermissionConstants.ViewUsersPermissionId,
+        PermissionConstants.ManageUsersPermissionId)]
+    public async Task<IResult> GetUser([FromRoute] string id)
+    {
+        var request = new Query.GetUserQuery(id);
+
+        var result = await _sender.Send(request);
+        if (result.IsFailure)
+        {
+            return HandlerFailure(result);
+        }
+
+        return Results.Ok(result);
+    }
+
+
     [HttpGet("{id}/permissions")]
     [RequireAuthenticatedUser]
     public async Task<IResult> GetCurrentUserPermissions([FromRoute] string id)

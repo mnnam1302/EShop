@@ -3,7 +3,7 @@ using EShop.Identity.Domain.Entities;
 using EShop.Identity.Domain.Repositories;
 using EShop.Shared.Contracts.Abstractions.Requests;
 using EShop.Shared.Contracts.Abstractions.Shared;
-using EShop.Shared.Contracts.Services.Identity.Organizations;
+using EShop.Shared.Contracts.Services.Tenancy.Tenants;
 using EShop.Shared.DomainTools.UnitOfWorks;
 using EShop.Shared.Scoping;
 using EShop.Shared.Scoping.Exceptions;
@@ -25,8 +25,8 @@ internal sealed class CreateTenantCommandInternalHandler : ICommandHandler<Comma
     private readonly IUnitOfWork _unitOfWork;
 
     public CreateTenantCommandInternalHandler(
-        IPasswordHasher passwordHasher,
         ILogger<CreateTenantCommandInternalHandler> logger,
+        IPasswordHasher passwordHasher,
         IUserDetailsProvider userDetailsProvider,
         IOrganizationRepository organizationRepository,
         IIdentityRepositoryBase<Permission, string> permissionRepository,
@@ -48,18 +48,13 @@ internal sealed class CreateTenantCommandInternalHandler : ICommandHandler<Comma
 
     public async Task<Result> Handle(Command.CreateTenantCommandInternal request, CancellationToken cancellationToken)
     {
-        if (string.IsNullOrEmpty(request.TenantId) || string.IsNullOrEmpty(request.TenantName))
-        {
-            return Result.Failure(new Error("Validation.Error", "Tenant ID and Name are required"));
-        }
-
         try
         {
-            _userDetailsProvider.SetSystemUserContext(request.TenantId);
             _logger.LogInformation("Creating tenant '{Id}' with name '{Name}'...", request.TenantId, request.TenantName);
+            _userDetailsProvider.SetSystemUserContext(request.TenantId);
 
-            await CreateTenantWithTransactionAsync(request, cancellationToken);
-            
+            await CreateTenantAsync(request, cancellationToken);
+
             return Result.Success();
         }
         catch (BadRequestException ex)
@@ -78,18 +73,15 @@ internal sealed class CreateTenantCommandInternalHandler : ICommandHandler<Comma
         }
     }
 
-    private async Task CreateTenantWithTransactionAsync(Command.CreateTenantCommandInternal request, CancellationToken cancellationToken)
+    private async Task CreateTenantAsync(Command.CreateTenantCommandInternal request, CancellationToken cancellationToken)
     {
-        // Verify tenant doesn't already exist
         var tenant = await CreateTenantIfNotExistsAsync(request.TenantId, request.TenantName, cancellationToken);
-
-        // Create core tenant entities
         var rootOrganization = CreateRootOrganization(request.TenantId, request.TenantName);
         var ownerRole = await CreateOwnerRoleWithPermissionsAsync(request.TenantId, cancellationToken);
         var ownerUser = CreateOwnerUser(rootOrganization, request);
+
         ownerUser.GrantRole(ownerRole.Id);
 
-        // Persist entities
         _logger.LogDebug("Saving tenant entities to database...");
         await PersistTenantEntitiesAsync(tenant, rootOrganization, ownerRole, ownerUser, cancellationToken);
 
@@ -98,11 +90,12 @@ internal sealed class CreateTenantCommandInternalHandler : ICommandHandler<Comma
 
     private async Task<Tenant> CreateTenantIfNotExistsAsync(string tenantId, string tenantName, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Verifying tenant '{Id}' does not already exist...", tenantId);
+        _logger.LogDebug("Checking if tenant '{Id}' exists...", tenantId);
 
         var existingTenant = await _tenantRepository.FindByIdAsync(tenantId, true, cancellationToken);
         if (existingTenant != null)
         {
+            _logger.LogInformation("Tenant '{Id}' already exists.", tenantId);
             throw new BadRequestException($"Tenant with id '{tenantId}' already exists");
         }
 
@@ -143,15 +136,14 @@ internal sealed class CreateTenantCommandInternalHandler : ICommandHandler<Comma
     {
         ArgumentNullException.ThrowIfNull(organization);
 
-        _logger.LogDebug("Creating owner user '{Username}' for tenant '{Id}'...",
-            request.OwnerUsername, request.TenantId);
+        _logger.LogDebug("Creating owner user '{Username}' for tenant '{Id}'...", request.OwnerUsername, request.TenantId);
 
         // Security improvement needed: default password should be randomly generated or a password reset flow should be implemented
-        var defaultPassword = _passwordHasher.Hash(Organization.DefaultOwnerPassword);
+        var hashedPassword = _passwordHasher.Hash(Organization.DefaultOwnerPassword);
 
         return User.Create(
             request.OwnerUsername,
-            defaultPassword,
+            hashedPassword,
             request.OwnerEmail,
             request.OwnerDisplayName,
             organization.Id,

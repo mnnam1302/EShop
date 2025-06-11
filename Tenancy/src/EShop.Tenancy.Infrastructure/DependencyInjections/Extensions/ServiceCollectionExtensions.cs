@@ -4,7 +4,9 @@ using EShop.Shared.EventBus.DependencyInjections.Options;
 using EShop.Shared.EventBus.JsonConverters;
 using EShop.Shared.EventBus.PipelineObservers;
 using EShop.Shared.EventBus.Services;
+using EShop.Shared.Scoping.ResourceAccessControl;
 using EShop.Tenancy.Infrastructure.Consumers;
+using EShop.Tenancy.Infrastructure.Producers;
 using MassTransit;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -22,12 +24,7 @@ public static class ServiceCollectionExtensions
     {
         services.AddMassTransitRabbitMQ(configuration, environment, serviceName);
         services.AddEventBusGateway();
-        return services;
-    }
-
-    private static IServiceCollection AddEventBusGateway(this IServiceCollection services)
-    {
-        services.AddScoped<IEventBusGateway, EventBusGateway>();
+        services.AddRegistrationFeatures();
         return services;
     }
 
@@ -98,14 +95,26 @@ public static class ServiceCollectionExtensions
         IWebHostEnvironment environment,
         string serviceName)
     {
-        bus.ConfigureEventReceiveEndpoint<SupportedFeaturesUpdatedConsumer, SupportedFeaturesUpdated>(
+        bus.ConfigureEventReceiveEndpoint<SupportedFeaturesUpdatedConsumer, ISupportedFeaturesUpdated>(
             context,
             environment.EnvironmentName,
             serviceName);
 
-        bus.ConfigureEventReceiveEndpoint<TenantFeaturesUpdatedConsumer, TenantFeaturesUpdated>(
+        bus.ConfigureEventReceiveEndpoint<TenantFeaturesUpdatedConsumer, ITenantFeaturesUpdated>(
             context,
             environment.EnvironmentName,
             serviceName);
+    }
+
+    private static IServiceCollection AddEventBusGateway(this IServiceCollection services)
+    {
+        services.AddScoped<IEventBusGateway, EventBusGateway>();
+        return services;
+    }
+
+    private static IServiceCollection AddRegistrationFeatures(this IServiceCollection services)
+    {
+        services.AddScoped<IFeatureRegistrationService, TenantFeatureRegistrationService>();
+        return services;
     }
 }

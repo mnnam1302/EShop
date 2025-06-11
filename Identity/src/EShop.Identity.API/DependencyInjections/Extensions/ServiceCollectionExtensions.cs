@@ -25,17 +25,14 @@ public static class ServiceCollectionExtensions
         services.AddUserScoping();
         services.AddResiliencePolicy();
 
-        // DbContext
         services
             .AddPostgreSqlHealthCheck(configuration)
             .AddDbContextWithScoping<UsersDbContext>(configuration);
 
-        // Redis
         services
             .AddRedisHealthCheck(configuration)
             .AddRedisInfrastructure(configuration);
-        
-        // Providers
+
         services
             .AddUserTokensProvider(configuration)
             .AddTenantFeaturesProvider(configuration);
@@ -45,14 +42,12 @@ public static class ServiceCollectionExtensions
 
     public static IServiceCollection AddBootstrapping(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment)
     {
-        // Clean architecture
         services
             .AddIdentityApi()
             .AddIdentityApplication()
             .AddIdentityPersistence()
             .AddIdentityInfrastructure(configuration, environment, Program.ApplicationName);
 
-        // Owner services
         services.AddUserPermissionForOwnerService();
         services.AddUserOrganizationContextForOwnerService();
 
@@ -106,7 +101,7 @@ public static class ServiceCollectionExtensions
 
         services.AddScoped<IOrganizationContextCachingService, OrganizationContextCachingService>();
         services.AddScoped<IRedisCachingAsyncProvider<OrganizationContext>, RedisCachingAsyncProvider<OrganizationContext>>();
-        
+
         services.AddScoped<IUserOrganizationContextCalculator, UserOrganizationContextCalculator>();
     }
 }

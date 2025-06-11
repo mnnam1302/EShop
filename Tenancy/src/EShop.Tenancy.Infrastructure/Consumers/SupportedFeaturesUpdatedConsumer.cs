@@ -6,7 +6,7 @@ using MediatR;
 
 namespace EShop.Tenancy.Infrastructure.Consumers;
 
-public class SupportedFeaturesUpdatedConsumer : Consumer<SupportedFeaturesUpdated, TenancyDbContext>
+public class SupportedFeaturesUpdatedConsumer : Consumer<ISupportedFeaturesUpdated, TenancyDbContext>
 {
     private readonly ISender _sender;
 
@@ -16,7 +16,7 @@ public class SupportedFeaturesUpdatedConsumer : Consumer<SupportedFeaturesUpdate
         _sender = sender;
     }
 
-    protected override async Task<Result> HandleMessageAsync(SupportedFeaturesUpdated message, CancellationToken cancellationToken)
+    protected override async Task<Result> HandleMessageAsync(ISupportedFeaturesUpdated message, CancellationToken cancellationToken)
     {
         var command = new Command.UpdateSupportedFeaturesInternalCommand
         {
@@ -27,7 +27,7 @@ public class SupportedFeaturesUpdatedConsumer : Consumer<SupportedFeaturesUpdate
             ActionUserId = message.ActionUserId
         };
 
-        var result = await _sender.Send(command);
+        var result = await _sender.Send(command, cancellationToken);
         return result;
     }
 }

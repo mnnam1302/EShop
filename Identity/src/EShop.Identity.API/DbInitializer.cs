@@ -55,8 +55,7 @@ public class DbInitializer
                 _tenantIsolationStrategy.AddTenantIsolation(_dbContext);
             }
 
-            await SeedDataForEShopSystemAsync();
-            await _dbContext.SaveChangesAsync();
+            await SeedDataSystemAsync();
         }
         catch (Exception ex)
         {
@@ -68,24 +67,12 @@ public class DbInitializer
         }
     }
 
-    private async Task SeedDataForEShopSystemAsync()
+    private async Task SeedDataSystemAsync()
     {
         await SeedSystemWidePermissions();
+        await SeedSystemUser(UserData.SystemUsername, $"{UserData.SystemUsername}@eshop-development", "System Administrator");
 
-        // System user should not depend on any group like eshop-support or any tenant
-        await SeedSystemUser(UserData.SystemUsername, $"{UserData.SystemUsername}@eshop.ecommerce", "System user");
-
-        // Group eshop-support is a tenant, so users can support system and tenant
-        await SeedTenant(UserData.EShopSupportGroup);
-        await SeedOrganization(
-            UserData.EShopSupportGroup,
-            $"{UserData.EShopSupportGroup.ToLowerInvariant()}@eshop.ecommerce",
-            "Root system organization");
-        await SeedSupportUser(
-            UserData.EShopSupportGroup,
-            $"{UserData.EShopSupportGroup.ToLowerInvariant()}@eshop.ecommerce",
-            "Support User",
-            UserData.EShopSupportGroup);
+        await _dbContext.SaveChangesAsync();
     }
 
     private async Task SeedSystemWidePermissions()
@@ -107,10 +94,10 @@ public class DbInitializer
         await _dbContext.SaveChangesAsync();
     }
 
-    private Permission[] GetWidePermissions()
+    private static Permission[] GetWidePermissions()
     {
-        return new Permission[]
-        {
+        return
+        [
             new Permission
             {
                 Id = PermissionConstants.ViewSystemSettingsPermissionId,
@@ -181,75 +168,13 @@ public class DbInitializer
                 Description = "Allows viewing, inviting, updating, and deleting portal user accounts.",
                 RelatedTo = "User Management"
             },
-            new Permission
-            {
-                Id = PermissionConstants.ViewCustomerUsersPermissionId,
-                Name = "View customer users",
-                Description = "Allow list of customer users in the system",
-                RelatedTo = "User management"
-            },
-            new Permission
-            {
-                Id = PermissionConstants.ManageCustomerUsersPermissionId,
-                Name = "Manage customer users",
-                Description = "Allows update common information, active, inactive customer users in the system",
-                RelatedTo = "User management"
-            }
-        };
+        ];
     }
 
     private async Task SeedSystemUser(string username, string email, string displayName)
     {
         var defaultPassword = _passwordHasher.Hash(Organization.DefaultOwnerPassword);
-        var user = User.Create(username, defaultPassword, email, displayName);
-
-        if (await _dbContext.Users.AnyAsync(u => u.Id == username))
-        {
-            _dbContext.Update(user);
-        }
-        else
-        {
-            _dbContext.Add(user);
-        }
-    }
-
-    private async Task SeedTenant(string tenantName)
-    {
-        var tenant = new Tenant()
-        {
-            Id = tenantName,
-            Name = tenantName,
-        };
-
-        if (await _dbContext.Tenants.AnyAsync(t => t.Id == tenantName || t.Name == tenantName))
-        {
-            _dbContext.Update(tenant);
-        }
-        else
-        {
-            _dbContext.Add(tenant);
-        }
-    }
-
-    private async Task SeedOrganization(string name, string email, string description)
-    {
-        var organization = Organization.CreateRootOrganizationInternal(name, name, description);
-        organization.Email = email;
-
-        if (await _dbContext.Organizations.AnyAsync(org => org.Id == name || org.Name == name))
-        {
-            _dbContext.Update(organization);
-        }
-        else
-        {
-            _dbContext.Add(organization);
-        }
-    }
-
-    private async Task SeedSupportUser(string username, string email, string displayName, string tenantName)
-    {
-        var defaultPassword = _passwordHasher.Hash(Organization.DefaultOwnerPassword);
-        var user = User.Create(username, defaultPassword, email, displayName, tenantName, UserData.SystemUsername);
+        var user = new User(username, defaultPassword, email, displayName);
 
         if (await _dbContext.Users.AnyAsync(u => u.Id == username))
         {

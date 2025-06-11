@@ -1,6 +1,5 @@
 using EShop.Shared.Diagnostics;
 using EShop.Tenancy.API;
-using EShop.Tenancy.Persistence;
 using Serilog;
 
 public class Program
@@ -22,7 +21,7 @@ public class Program
             {
                 var dbInitializer = ActivatorUtilities.CreateInstance<DbInitializer>(scope.ServiceProvider);
 
-                await dbInitializer.Initialize();                
+                await dbInitializer.Initialize();
             }
 
             Log.Information("Starting up {ApplicationName}...", ApplicationName);

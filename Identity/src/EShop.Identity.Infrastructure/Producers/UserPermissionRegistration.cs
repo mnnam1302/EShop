@@ -1,38 +1,21 @@
 ﻿using EShop.Shared.Contracts.Services.Identity.Permissions;
 using EShop.Shared.EventBus.Services;
 using EShop.Shared.Scoping.ResourceAccessControl;
-using MassTransit;
 
 namespace EShop.Identity.Infrastructure.Producers;
 
-public class UserPermissionRegistration : IPermissionRegistrationService
+public class UserPermissionRegistration(IEventBusGateway eventBusGateway) : IPermissionRegistrationService
 {
     private const string ApplicationName = "Identity";
-    private const string ModuleName = "Reports";
-    private readonly IEventBusGateway _eventBusGateway;
 
-    private static readonly ReportPermission[] Permissions = 
-    [
-        new ReportPermission
-        {
-            Id = PermissionConstants.ManageReportsPermissionId,
-            Name = "Manage Reports",
-            Description = "Allow user to manage reports.",
-            RelatedTo = ModuleName
-        }
-    ];
-
-    public UserPermissionRegistration(IEventBusGateway eventBusGateway)
-    {
-        _eventBusGateway = eventBusGateway;
-    }
+    private static readonly ReportPermission[] Permissions = [];
 
     public async Task RegisterPermissions()
     {
-        await _eventBusGateway.PublishAsync<SupportedPermissionsUpdated>(new
+        await eventBusGateway.PublishAsync<SupportedPermissionsUpdated>(new
         {
             SourceSystemReference = ApplicationName,
-            Permissions = Permissions,
+            Permissions,
             Action = SupportedPermissionAction.Added,
             TenantId = string.Empty,
             ActionUserId = string.Empty,

@@ -1,12 +1,10 @@
 ﻿using EShop.Shared.DbResourceAccessControl;
 using EShop.Shared.Scoping;
-using EShop.Tenancy.Domain.Entities;
+using EShop.Tenancy.Persistence;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 
-namespace EShop.Tenancy.Persistence;
+namespace EShop.Tenancy.API;
 
 public class DbInitializer
 {
@@ -52,7 +50,6 @@ public class DbInitializer
                 _tenantIsolationStrategy.AddTenantIsolation(_tenancyDbContext);
             }
 
-            await SeedTenantAsync(UserData.EShopSupportGroup, $"{UserData.EShopSupportGroup.ToLowerInvariant()}@eshop.ecommerce", "Root system organization");
             await _tenancyDbContext.SaveChangesAsync();
         }
         catch (Exception ex)
@@ -62,20 +59,6 @@ public class DbInitializer
         finally
         {
             _userDetailsProvider.ClearSystemUserContext();
-        }
-    }
-
-    private async Task SeedTenantAsync(string name, string email, string description)
-    {
-        var tenant = new Tenant(name, name, name, email, null, description);
-
-        if (await _tenancyDbContext.Tenants.AnyAsync(org => org.Id == name || org.Name == name))
-        {
-            _tenancyDbContext.Update(tenant);
-        }
-        else
-        {
-            _tenancyDbContext.Add(tenant);
         }
     }
 }

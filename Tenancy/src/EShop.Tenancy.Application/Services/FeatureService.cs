@@ -73,15 +73,18 @@ public class FeatureService : IFeatureService
         }
 
         var entityState = await _featureRepository.GetEntityStateAsync(feature, cancellationToken);
-        await _unitOfWork.SaveChangesAsync();
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        _logger.LogTrace("Feature '{featureId}' added to system", feature.Id);
+        _logger.LogTrace("Feature '{FeatureId}' added to system", feature.Id);
         return entityState;
     }
 
     private async Task RegisterTenantFeature(Feature feature, string? state, CancellationToken cancellationToken)
     {
-        var tenantIds = await _tenantRepository.FindAll().Select(t => t.Id).ToListAsync(cancellationToken);
+        var tenantIds = await _tenantRepository
+            .FindAll()
+            .Select(t => t.Id)
+            .ToListAsync(cancellationToken);
 
         foreach (var tenantId in tenantIds)
         {
@@ -98,14 +101,14 @@ public class FeatureService : IFeatureService
                     tenant.AddTenantFeature(feature.Id, state ?? feature.DefaultStateForNewTenant, _userDetailsProvider.AuthenticatedUser.ActionUserId);
 
                     _tenantRepository.Update(tenant);
-                    await _unitOfWork.SaveChangesAsync();
+                    await _unitOfWork.SaveChangesAsync(cancellationToken);
 
                     await PublishTenantFeaturesUpdatedAsync(tenantId);
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Register TenantFeature error - tenant: '{tenantId}', feature: '{featureId}'", tenantId, feature.Id);
+                _logger.LogError(ex, "Register TenantFeature error - tenant: '{TenantId}', feature: '{FeatureId}'", tenantId, feature.Id);
             }
             finally
             {
@@ -116,7 +119,7 @@ public class FeatureService : IFeatureService
 
     private async Task PublishTenantFeaturesUpdatedAsync(string tenantId)
     {
-        await _eventBusGateway.PublishAsync<TenantFeaturesUpdated>(new
+        await _eventBusGateway.PublishAsync<ITenantFeaturesUpdated>(new
         {
             EventId = Guid.NewGuid(),
             TenantId = tenantId,
@@ -156,7 +159,7 @@ public class FeatureService : IFeatureService
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Delete TenantFeature error - tenant: '{tenantId}', feature: '{featureId}'", tenantId, featureId);
+                    _logger.LogError(ex, "Delete TenantFeature error - tenant: '{TenantId}', feature: '{FeatureId}'", tenantId, featureId);
                 }
                 finally
                 {
@@ -173,7 +176,7 @@ public class FeatureService : IFeatureService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Delete system feature error - feature: '{featureId}'", featureId);
+            _logger.LogError(ex, "Delete system feature error - feature: '{FeatureId}'", featureId);
         }
         finally
         {
@@ -225,19 +228,19 @@ public class FeatureService : IFeatureService
             tenantId = tenantId.ToLower();
             _userDetailsProvider.SetSystemUserContext(tenantId);
 
-            var queryTenant = _tenantRepository.FindAll(false, t => t.TenantFeatures);
+            var query = _tenantRepository.FindAll(false, t => t.TenantFeatures)
+                .Where(t => t.Id == tenantId)
+                .SelectMany(t => t.TenantFeatures);
 
             if (!string.IsNullOrEmpty(state))
             {
-                queryTenant = queryTenant.Where(t => t.TenantFeatures.Any(tf => tf.State == state));
+                query = query.Where(tf => tf.State == state);
             }
 
-            var tenantFeatures = await queryTenant
-                .SelectMany(t => t.TenantFeatures)
-                .AsNoTracking()
+            var tenantFeatures = await query
                 .ToListAsync(cancellationToken);
 
-            _logger.LogDebug("Get features for tenant '{id}' stored in the database. Result: {count} features available", tenantId, tenantFeatures.Count);
+            _logger.LogDebug("Get features for tenant '{Id}' stored in the database. Result: {Count} features available", tenantId, tenantFeatures.Count);
 
             return tenantFeatures;
         }

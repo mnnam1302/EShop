@@ -1,12 +1,20 @@
-﻿using EShop.Shared.Contracts.Services.Identity.Users;
+﻿using EShop.Identity.Domain.ActionPopulators;
+using EShop.Shared.Contracts.Services.Identity.Users;
 using EShop.Shared.DomainTools.Entities;
 using EShop.Shared.Scoping;
+using EShop.Shared.Scoping.ResourceAccessControl;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Security.Claims;
 
 namespace EShop.Identity.Domain.Entities;
 
-public class User : EntityBase<string>, IDateTracking, IExcludedFromScoping
+public class User
+    : EntityBase<string>,
+    IDateTracking,
+    IExcludedFromScoping,
+    IAccessControlled,
+    IStateTransitionController
 {
     [MaxLength(ModelConstants.MediumText)]
     public string Username { get; set; } = string.Empty;
@@ -51,6 +59,21 @@ public class User : EntityBase<string>, IDateTracking, IExcludedFromScoping
 
     public virtual ICollection<UserRole> UserRoles { get; set; } = [];
 
+    public bool IsAllowed(string targetTransition) => true;
+
+    [NotMapped]
+    public Dictionary<string, ActionDefinition> Actions { get; private set; } = [];
+
+    public async Task PopulateActions(IPermissionValidator permissionValidator, IStateTransitionController stateTransition, IFeatureValidator featureValidator)
+    {
+        Actions.Clear();
+        foreach (var populator in actionPopulators.Value)
+        {
+            var actions = await populator.PopulateActions(permissionValidator, stateTransition, featureValidator);
+            AddActions(actions);
+        }
+    }
+
     public User() { }
 
     public User(string username, string password, string email, string? displayName)
@@ -66,7 +89,7 @@ public class User : EntityBase<string>, IDateTracking, IExcludedFromScoping
     public static User Create(Command.RegisterUser command)
     {
         var user = Create(command.Username, command.Password, command.Email, command.DisplayName, command.OrganizationId);
-        
+
         user.PhoneNumber = command.PhoneNumber;
         user.DateOfBirth = command.DateOfBirth;
 
@@ -77,14 +100,16 @@ public class User : EntityBase<string>, IDateTracking, IExcludedFromScoping
     {
         AssertUsername(username);
 
-        var user = new User(username, password, email, displayName);
-        user.CreatedBy = createdBy;
-        
+        var user = new User(username, password, email, displayName)
+        {
+            CreatedBy = createdBy
+        };
+
         if (!string.IsNullOrWhiteSpace(organizationId))
         {
             user.OrganizationId = organizationId;
         }
-        
+
         return user;
     }
 
@@ -127,12 +152,35 @@ public class User : EntityBase<string>, IDateTracking, IExcludedFromScoping
 
     public void GrantRole(string roleId)
     {
-        var userRole = new UserRole()
+        var userRole = new UserRole
         {
             RoleId = roleId,
             UserId = Id
         };
 
         UserRoles.Add(userRole);
+    }
+
+    private static readonly Lazy<IEnumerable<IActionPopulator>> actionPopulators = new Lazy<IEnumerable<IActionPopulator>>(GetActionPopulators);
+
+    private static IEnumerable<IActionPopulator> GetActionPopulators()
+    {
+        return [.. AssemblyReference.Assembly
+            .GetTypes()
+            .Where(t => t.GetInterfaces().Contains(typeof(IActionPopulator)))
+            .Select(Activator.CreateInstance)
+            .Where(instance => instance != null)
+            .Cast<IActionPopulator>()];
+    }
+
+    private void AddActions(Dictionary<string, ActionDefinition> actions)
+    {
+        foreach (var action in actions)
+        {
+            if (!Actions.ContainsKey(action.Key))
+            {
+                this.Actions.Add(action.Key, action.Value);
+            }
+        }
     }
 }

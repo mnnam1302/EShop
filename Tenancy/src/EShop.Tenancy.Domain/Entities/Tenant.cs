@@ -27,7 +27,7 @@ public class Tenant : TenantAggregate, IExcludedFromScoping
     [MaxLength(ModelConstants.MediumText)]
     public string? PhoneNumber { get; private set; }
 
-    private readonly List<TenantFeature> _tenantFeatures = new();
+    private readonly List<TenantFeature> _tenantFeatures = [];
 
     public virtual IReadOnlyCollection<TenantFeature> TenantFeatures => _tenantFeatures.AsReadOnly();
 
@@ -152,7 +152,7 @@ public class Tenant : TenantAggregate, IExcludedFromScoping
     public bool HasFeatureEnabled(string featureId)
     {
         var feature = _tenantFeatures?.FirstOrDefault(f => f.FeatureId == featureId);
-        return feature != null && feature.State == StateFeature.Enabled;
+        return feature != null && feature.State == nameof(StateFeature.Enabled);
     }
 
     public TenantFeature? GetFeatureConfiguration(string featureId)

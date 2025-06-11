@@ -18,11 +18,11 @@ public class OwnerTenantFeaturesProvider : ITenantFeaturesProvider
     {
         if (string.IsNullOrWhiteSpace(tenantId))
         {
-            throw new ArgumentNullException("TenantId is required", nameof(tenantId));
+            throw new ArgumentNullException(nameof(tenantId), "TenantId is required");
         }
 
         var tenantFeaturesCache = await _tenantFeaturesCachingService.GetTenantFeatures(tenantId);
-        if (tenantFeaturesCache.Any())
+        if (tenantFeaturesCache.Length != 0)
         {
             return tenantFeaturesCache;
         }

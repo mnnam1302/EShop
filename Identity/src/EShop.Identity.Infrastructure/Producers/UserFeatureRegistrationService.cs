@@ -1,33 +1,25 @@
 ﻿using EShop.Shared.Contracts.Services.Tenancy.Features;
 using EShop.Shared.EventBus.Services;
 using EShop.Shared.Scoping.ResourceAccessControl;
-using MassTransit;
 
 namespace EShop.Identity.Infrastructure.Producers;
 
-public class UserFeatureRegistrationService : IFeatureRegistrationService
+public class UserFeatureRegistrationService(IEventBusGateway eventBusGateway) : IFeatureRegistrationService
 {
     private readonly string ApplicationName = "Identity";
-    private readonly IEventBusGateway _eventBusGateway;
-
-    public UserFeatureRegistrationService(IEventBusGateway eventBusGateway)
-    {
-        _eventBusGateway = eventBusGateway;
-    }
-
     private static readonly IdentityFeature[] features =
     [
-        new()
-        {
-            Id = FeatureConstants.Identity_UserInvites_FeatureId,
-            Name = "User Invites",
-            Description = "User Invites"
-        },
         new()
         {
             Id = FeatureConstants.Identity_OrganisationRingFencing_FeatureId,
             Name = "Organisation Ring Fencing",
             Description = "Organisation Ring Fencing"
+        },
+        new()
+        {
+            Id = FeatureConstants.Identity_ExternalApplicationIntegration_FeatureId,
+            Name = "External Application Integration",
+            Description = "External Application Integration"
         },
         new()
         {
@@ -37,22 +29,22 @@ public class UserFeatureRegistrationService : IFeatureRegistrationService
         },
         new()
         {
-            Id = FeatureConstants.Identity_ExternalApplicationIntegration_FeatureId,
-            Name = "External Application Integration",
-            Description = "External Application Integration"
-        }
+            Id = FeatureConstants.Identity_UserInvites_FeatureId,
+            Name = "User Invites",
+            Description = "User Invites"
+        },
     ];
 
     public async Task RegisterFeatures()
     {
-        // Read more: new { } is an anonymous objects in C#. Let's see message initialization: https://masstransit.io/documentation/concepts/producers#message-initialization
-        await _eventBusGateway.PublishAsync<SupportedFeaturesUpdated>(new
+        await eventBusGateway.PublishAsync<ISupportedFeaturesUpdated>(new
         {
             SourceSystemReference = ApplicationName,
             Features = features,
-            TenantId = string.Empty,
             Action = SupportedFeaturesAction.AddOrUpdate,
-            ActionUserId = string.Empty
+            TenantId = string.Empty,
+            ActionUserId = string.Empty,
+            ActionUserType = string.Empty
         });
     }
 

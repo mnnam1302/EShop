@@ -7,8 +7,6 @@ namespace EShop.Shared.Contracts.Services.Identity.Organizations;
 
 public static class Command
 {
-    public record CreateTenantCommandInternal(string TenantId, string TenantName, string OwnerUsername, string OwnerDisplayName, string OwnerEmail) : ICommand;
-
     public sealed record CreateOrganizationCommand : ICommand
     {
         [MaxLength(ModelConstants.ShortText)]
@@ -46,7 +44,7 @@ public static class Command
     {
         [JsonIgnore]
         public string? Id { get; init; }
-        public string Name { get; init; }
+        public required string Name { get; init; }
         public string? OrganizationNumber { get; init; }
         public string? PhoneNumber { get; init; }
         public string? Email { get; init; }
