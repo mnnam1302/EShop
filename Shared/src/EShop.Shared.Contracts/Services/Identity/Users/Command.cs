@@ -1,6 +1,5 @@
 ﻿using EShop.Shared.Contracts.Abstractions.Requests;
 using EShop.Shared.Contracts.Shared;
-using Newtonsoft.Json;
 using System.ComponentModel.DataAnnotations;
 
 namespace EShop.Shared.Contracts.Services.Identity.Users;
@@ -28,7 +27,7 @@ public static class Command
         [MaxLength(ModelConstants.MediumText)]
         public required string DisplayName { get; init; }
 
-        [MaxLength(ModelConstants.StandardText)]
+        [MaxLength(ModelConstants.LongText)]
         public string? PhoneNumber { get; init; }
 
         [MaxLength(ModelConstants.ShortText)]
