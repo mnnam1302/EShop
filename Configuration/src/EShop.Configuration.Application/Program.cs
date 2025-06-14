@@ -1,6 +1,7 @@
-using EShop.Configuration.Application;
 using EShop.Shared.Diagnostics;
 using Serilog;
+
+namespace EShop.Configuration.Application;
 
 public class Program
 {
@@ -19,8 +20,8 @@ public class Program
 
             await using (var scope = app.Services.CreateAsyncScope())
             {
-                //var dbInitializer = ActivatorUtilities.CreateInstance<DbInitializer>(scope.ServiceProvider);
-                //await dbInitializer.Initialize();
+                var dbInitializer = ActivatorUtilities.CreateInstance<DbInitializer>(scope.ServiceProvider);
+                await dbInitializer.Initialize();
             }
 
             Log.Information("Starting up {ApplicationName}...", ApplicationName);

@@ -13,6 +13,8 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddShared(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddDatabaseOptions(configuration);
+        services.AddUserScopingV2();
+        services.AddMultiTenantScopingV2();
         services.AddDatabaseContext(configuration);
 
         return services;
@@ -80,8 +82,7 @@ public static class ServiceCollectionExtensions
                     configuration.GetConnectionString("DefaultConnection"),
                     ConfigureNpgsqlOptionsWithRetry(ngsqlVersionOptions.CurrentValue, ngsqlRetryOptions.CurrentValue))
                 .AddInterceptors(multiTenantConnectionInterceptor);
-        })
-        .AddMultiTenantScopingV2();
+        });
     }
 
     private static Action<NpgsqlDbContextOptionsBuilder> ConfigureNpgsqlOptions(NgSqlVersionOptions versionOptions)

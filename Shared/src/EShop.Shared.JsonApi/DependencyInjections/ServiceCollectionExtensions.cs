@@ -26,12 +26,19 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
+    public static IServiceCollection AddUserScopingV2(this IServiceCollection services)
+    {
+        services.AddHttpContextAccessor();
+        services.AddTransient<IUserDetailsProvider, HttpRequestUserDataProvider>();
+        return services;
+    }
+
     public static IServiceCollection AddMultiTenantScopingV2(this IServiceCollection services)
     {
         services.AddHttpContextAccessor();
-        services.AddScoped<IUserDetailsProvider, HttpRequestUserDataProvider>();
-        services.AddScoped<IMultiTenantIsolationStrategy, PostgresMultiTenantConnectionInterceptor>();
-        services.AddScoped<ITenantIsolationStrategy, PostgresRowLevelSecurityPolicyIsolation>();
+        services.AddTransient<IUserDetailsProvider, HttpRequestUserDataProvider>();
+        services.AddTransient<IMultiTenantIsolationStrategy, PostgresMultiTenantConnectionInterceptor>();
+        services.AddTransient<ITenantIsolationStrategy, PostgresRowLevelSecurityPolicyIsolation>();
 
         return services;
     }
