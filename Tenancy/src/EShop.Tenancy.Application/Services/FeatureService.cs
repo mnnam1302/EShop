@@ -152,7 +152,7 @@ public class FeatureService : IFeatureService
                         tenant.RemoveTenantFeature(featureId);
 
                         _tenantRepository.Update(tenant);
-                        await _unitOfWork.SaveChangesAsync();
+                        await _unitOfWork.SaveChangesAsync(cancellationToken);
 
                         await PublishTenantFeaturesUpdatedAsync(tenantId);
                     }

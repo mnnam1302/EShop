@@ -45,6 +45,7 @@ public class CreateTenantCommandHandler : ICommandHandler<Command.CreateTenantCo
         var operationalUser = _userDetailsProvider.AuthenticatedUser;
 
         var tenant = Tenant.Create(request);
+        var tenantSetting = tenant.AddDefaultTenantSetting();
         await EnsureTenantAvailableFeatures(tenant, operationalUser.ActionUserId, cancellationToken);
 
         await _eventBusGateway.PublishAsync<ITenantCreated>(new
@@ -53,6 +54,19 @@ public class CreateTenantCommandHandler : ICommandHandler<Command.CreateTenantCo
             OwnerUsername = tenant.OwnerUsername,
             OwnerDisplayName = tenant.Name ?? Tenant.RemoveDomainSuffix(request.OwnerUsername, tenant.Id),
             OwnerEmail = tenant.Email,
+            TenantId = tenant.Id,
+            ActionUserId = operationalUser.ActionUserId,
+            ActionUserType = operationalUser.ActionUserType
+        }, cancellationToken);
+
+        await _eventBusGateway.PublishAsync<ITenantSettingCreated>(new
+        {
+            TenantName = tenant.Name,
+            DisplayDateFormat = tenantSetting.DisplayDateFormat,
+            DisplayTimeFormat = tenantSetting.DisplayTimeFormat,
+            Currency = tenantSetting.DefaultCurrency,
+            CurrencyDisplayFormat = tenantSetting.CurrencyDisplayFormat,
+            DefaultSystemLanguage = tenantSetting.DefaultSystemLanguage,
             TenantId = tenant.Id,
             ActionUserId = operationalUser.ActionUserId,
             ActionUserType = operationalUser.ActionUserType

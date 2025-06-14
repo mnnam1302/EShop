@@ -22,8 +22,11 @@ public class TenantSetting : EntityBase<Guid>, IScoped
     public string? CurrencyDisplayFormat { get; set; }
 
     [MaxLength(ModelConstants.ShortText)]
-    public string TenantId { get; private set; } = string.Empty;
+    public string DefaultSystemLanguage { get; set; } = string.Empty;
+
+    [MaxLength(ModelConstants.ShortText)]
+    public string TenantId { get; set; } = string.Empty;
 
     [MaxLength(ModelConstants.VeryLongText)]
-    public string Scope { get; private set; } = string.Empty;
+    public string Scope { get; set; } = string.Empty;
 }
