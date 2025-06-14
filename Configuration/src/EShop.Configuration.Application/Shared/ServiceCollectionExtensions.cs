@@ -1,6 +1,7 @@
 ﻿using EShop.Shared.DbResourceAccessControl.Interceptors;
 using EShop.Shared.DbResourceAccessControl.Options;
 using EShop.Shared.JsonApi.DependencyInjections;
+using EShop.Shared.JsonApi.Middlewares;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Npgsql.EntityFrameworkCore.PostgreSQL;
@@ -16,6 +17,8 @@ public static class ServiceCollectionExtensions
         services.AddUserScopingV2();
         services.AddMultiTenantScopingV2();
         services.AddDatabaseContext(configuration);
+
+        services.AddSingleton<ExceptionHandlingMiddleware>();
 
         return services;
     }
