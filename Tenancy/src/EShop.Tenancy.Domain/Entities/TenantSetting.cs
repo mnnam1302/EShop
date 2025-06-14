@@ -7,19 +7,19 @@ namespace EShop.Tenancy.Domain.Entities;
 public class TenantSetting : EntityBase<Guid>, IScoped
 {
     [MaxLength(ModelConstants.ShortText)]
-    public string? DisplayDateFormat { get; set; }
+    public string DisplayDateFormat { get; set; } = string.Empty;
 
     [MaxLength(ModelConstants.ShortText)]
-    public string? DisplayTimeFormat { get; set; }
+    public string DisplayTimeFormat { get; set; } = string.Empty;
 
     [MaxLength(ModelConstants.ShortMediumText)]
-    public string? TimeZone { get; set; }
+    public string TimeZone { get; set; } = string.Empty;
 
     [MaxLength(ModelConstants.TinyText)]
-    public string? DefaultCurrency { get; set; }
+    public string DefaultCurrency { get; set; } = string.Empty;
 
     [MaxLength(ModelConstants.ShortText)]
-    public string? CurrencyDisplayFormat { get; set; }
+    public string CurrencyDisplayFormat { get; set; } = string.Empty;
 
     [MaxLength(ModelConstants.ShortText)]
     public string DefaultSystemLanguage { get; set; } = string.Empty;
