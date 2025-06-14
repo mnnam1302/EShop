@@ -10,7 +10,7 @@ internal class TenantConfiguration : IEntityTypeConfiguration<Tenant>
     public void Configure(EntityTypeBuilder<Tenant> builder)
     {
         builder.ToTable(TableNames.Tenants);
-        
+
         builder.HasKey(x => x.Id);
         builder.HasIndex(x => x.Name).IsUnique();
 
@@ -19,5 +19,11 @@ internal class TenantConfiguration : IEntityTypeConfiguration<Tenant>
         builder.Property(x => x.OwnerUsername);
         builder.Property(x => x.Email);
         builder.Property(x => x.PhoneNumber);
+
+        builder
+            .HasMany(t => t.TenantSettings)
+            .WithOne()
+            .HasForeignKey(ts => ts.TenantId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

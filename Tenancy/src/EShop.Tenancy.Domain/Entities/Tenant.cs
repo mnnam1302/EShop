@@ -12,7 +12,7 @@ public class Tenant : TenantAggregate, IExcludedFromScoping
     [Required]
     public string Name { get; private set; } = string.Empty;
 
-    [MaxLength(ModelConstants.LongText)]
+    [MaxLength(ModelConstants.VeryLongText)]
     public string? Description { get; private set; }
 
     [MaxLength(ModelConstants.MediumText)]
@@ -30,6 +30,9 @@ public class Tenant : TenantAggregate, IExcludedFromScoping
     private readonly List<TenantFeature> _tenantFeatures = [];
 
     public virtual IReadOnlyCollection<TenantFeature> TenantFeatures => _tenantFeatures.AsReadOnly();
+
+    public readonly List<TenantSetting> tenantSettings = [];
+    public virtual IReadOnlyCollection<TenantSetting> TenantSettings => tenantSettings.AsReadOnly();
 
     // EF Core
     public Tenant() { }
