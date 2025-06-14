@@ -184,51 +184,6 @@ namespace EShop.Tenancy.Persistence.Migrations
                     b.ToTable("TenantFeatures", (string)null);
                 });
 
-            modelBuilder.Entity("EShop.Tenancy.Domain.Entities.TenantSetting", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("CurrencyDisplayFormat")
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
-                    b.Property<string>("DefaultCurrency")
-                        .HasMaxLength(10)
-                        .HasColumnType("character varying(10)");
-
-                    b.Property<string>("DisplayDateFormat")
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
-                    b.Property<string>("DisplayTimeFormat")
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
-                    b.Property<string>("Scope")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
-
-                    b.Property<string>("TenantId")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
-                    b.Property<string>("TimeZone")
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Scope");
-
-                    b.HasIndex("TenantId");
-
-                    b.ToTable("TenantSettings", (string)null);
-                });
-
             modelBuilder.Entity("EShop.Tenancy.Domain.Entities.TenantFeature", b =>
                 {
                     b.HasOne("EShop.Tenancy.Domain.Entities.Feature", "Feature")
@@ -248,20 +203,9 @@ namespace EShop.Tenancy.Persistence.Migrations
                     b.Navigation("Tenant");
                 });
 
-            modelBuilder.Entity("EShop.Tenancy.Domain.Entities.TenantSetting", b =>
-                {
-                    b.HasOne("EShop.Tenancy.Domain.Entities.Tenant", null)
-                        .WithMany("TenantSettings")
-                        .HasForeignKey("TenantId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("EShop.Tenancy.Domain.Entities.Tenant", b =>
                 {
                     b.Navigation("TenantFeatures");
-
-                    b.Navigation("TenantSettings");
                 });
 #pragma warning restore 612, 618
         }
