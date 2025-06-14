@@ -3,13 +3,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EShop.Configuration.Application.Shared;
 
-public class AgencyDbContext : DbContext
+public class ConfigurationDbContext : DbContext
 {
     public DbSet<Agency> Agencies { get; set; }
 
     public DbSet<SalesChannel> SaleChannels { get; set; }
 
-    public AgencyDbContext(DbContextOptions<AgencyDbContext> options) : base(options) { }
+    public ConfigurationDbContext(DbContextOptions<ConfigurationDbContext> options) : base(options) { }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

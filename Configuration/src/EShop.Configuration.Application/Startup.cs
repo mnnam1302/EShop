@@ -1,4 +1,6 @@
-﻿using EShop.Shared.JsonApi.Middlewares;
+﻿using EShop.Configuration.Application.Boostrapping;
+using EShop.Configuration.Application.Shared;
+using EShop.Shared.JsonApi.Middlewares;
 
 namespace EShop.Configuration.Application;
 
@@ -15,9 +17,9 @@ public class Startup
 
     public virtual void ConfigureServices(IServiceCollection services)
     {
-        //services
-        //    .AddShared(Configuration, Environment)
-        //    .AddBoostrapping(Configuration, Environment);
+        services
+            .AddShared(Configuration)
+            .AddBoostrapping(Configuration);
     }
 
     public virtual void Configure(WebApplication app, IHostApplicationLifetime applicationLifetime, ILoggerFactory loggerFactory)
@@ -28,11 +30,8 @@ public class Startup
         if (Environment.IsDevelopment() || Environment.IsStaging())
         {
             app.UseCors(x => x.AllowAnyMethod());
-            //app.UseSwaggerAPI();
         }
 
         app.UseRouting();
-
-        //app.RegisterFeatures(applicationLifetime, logger);
     }
 }

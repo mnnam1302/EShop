@@ -20,7 +20,6 @@ public class Program
             await using (var scope = app.Services.CreateAsyncScope())
             {
                 //var dbInitializer = ActivatorUtilities.CreateInstance<DbInitializer>(scope.ServiceProvider);
-
                 //await dbInitializer.Initialize();
             }
 
