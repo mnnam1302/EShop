@@ -1,4 +1,6 @@
-﻿using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
+﻿using EShop.Configuration.Application.Boostrapping;
+using EShop.Configuration.Application.Shared;
+using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
 
 namespace EShop.Configuration.Application.Boostrapping;
 

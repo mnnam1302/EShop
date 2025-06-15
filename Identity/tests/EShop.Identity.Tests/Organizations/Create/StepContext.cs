@@ -32,7 +32,7 @@ public sealed class StepContext
         try
         {
             var operationUserData = _apiContext.GetUserByUsername(operationUsername);
-            var result = await _apiContext.PostAsync<Command.CreateOrganizationCommand>(BaseUrl, request, operationUserData);
+            await _apiContext.PostAsync<Command.CreateOrganizationCommand>(BaseUrl, request, operationUserData);
         }
         catch (Exception ex)
         {

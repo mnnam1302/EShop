@@ -3,7 +3,7 @@ using EShop.Shared.DbResourceAccessControl;
 using EShop.Shared.Scoping;
 using Microsoft.EntityFrameworkCore;
 
-namespace EShop.Configuration.Application;
+namespace EShop.Configuration.Application.Boostrapping;
 
 public class DbInitializer
 {
@@ -44,7 +44,7 @@ public class DbInitializer
                 await _dbContext.Database.EnsureCreatedAsync();
             }
 
-            if (applyTenantIsolation && _configuration.GetValue<bool>("AllowTenantIsolation", true))
+            if (applyTenantIsolation && _configuration.GetValue("AllowTenantIsolation", true))
             {
                 _tenantIsolationStrategy.AddTenantIsolation(_dbContext);
             }

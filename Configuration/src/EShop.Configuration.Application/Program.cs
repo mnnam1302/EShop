@@ -1,3 +1,4 @@
+using EShop.Configuration.Application.Boostrapping;
 using EShop.Shared.Diagnostics;
 using Serilog;
 

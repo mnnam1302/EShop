@@ -35,4 +35,12 @@ public class Steps
         var command = dataTable.CreateInstance<Command.CreateOrganizationCommand>();
         await _stepContext.CreateOrganizationAsync(command, creatorUsername);
     }
+
+    [Given("Admin user has created a new organization with the following")]
+    public async Task GivenAdminUserHasCreatedANewOrganizationWithTheFollowing(DataTable dataTable)
+    {
+        var command = dataTable.CreateInstance<Command.CreateOrganizationCommand>();
+        await _stepContext.CreateOrganizationAsync(command);
+    }
+
 }
