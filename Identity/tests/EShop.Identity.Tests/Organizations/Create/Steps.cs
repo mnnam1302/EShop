@@ -1,5 +1,6 @@
 ﻿using EShop.Shared.Contracts.Services.Identity.Organizations;
 using Reqnroll;
+using static EShop.Shared.Contracts.Services.Tenancy.Tenants.Command;
 
 namespace EShop.Identity.Tests.Organizations.Create;
 
@@ -16,7 +17,7 @@ public class Steps
     [Given("following tenants added to the system")]
     public async Task GivenFollowingTenantsAddedToTheSystem(DataTable dataTable)
     {
-        var tenants = dataTable.CreateSet<Command.CreateTenantCommandInternal>();
+        var tenants = dataTable.CreateSet<CreateTenantCommandInternal>();
         foreach (var tenant in tenants)
         {
             await _stepContext.SimulateTenantCreationAsync(
@@ -34,4 +35,12 @@ public class Steps
         var command = dataTable.CreateInstance<Command.CreateOrganizationCommand>();
         await _stepContext.CreateOrganizationAsync(command, creatorUsername);
     }
+
+    [Given("Admin user has created a new organization with the following")]
+    public async Task GivenAdminUserHasCreatedANewOrganizationWithTheFollowing(DataTable dataTable)
+    {
+        var command = dataTable.CreateInstance<Command.CreateOrganizationCommand>();
+        await _stepContext.CreateOrganizationAsync(command);
+    }
+
 }

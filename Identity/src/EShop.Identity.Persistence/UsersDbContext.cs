@@ -7,7 +7,7 @@ namespace EShop.Identity.Persistence;
 public class UsersDbContext : DbContext, IInboxDbContext
 {
     public UsersDbContext(DbContextOptions<UsersDbContext> options)
-    : base(options)
+        : base(options)
     {
     }
 

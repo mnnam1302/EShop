@@ -1,7 +1,6 @@
 ﻿using EShop.Shared.Contracts.Services.Tenancy.Tenants;
 using EShop.Shared.Scoping;
 using EShop.Tenancy.Domain.Aggregates;
-using EShop.Tenancy.Domain.Enumerations;
 using System.ComponentModel.DataAnnotations;
 
 namespace EShop.Tenancy.Domain.Entities;
@@ -9,19 +8,16 @@ namespace EShop.Tenancy.Domain.Entities;
 public class Tenant : TenantAggregate, IExcludedFromScoping
 {
     [MaxLength(ModelConstants.ShortMediumText)]
-    [Required]
     public string Name { get; private set; } = string.Empty;
 
-    [MaxLength(ModelConstants.LongText)]
+    [MaxLength(ModelConstants.VeryLongText)]
     public string? Description { get; private set; }
 
     [MaxLength(ModelConstants.MediumText)]
-    [Required]
     public string? OwnerUsername { get; private set; }
 
-    [MaxLength(ModelConstants.MediumLongText)]
     [EmailAddress]
-    [Required]
+    [MaxLength(ModelConstants.MediumLongText)]
     public string? Email { get; private set; }
 
     [MaxLength(ModelConstants.MediumText)]
@@ -30,6 +26,9 @@ public class Tenant : TenantAggregate, IExcludedFromScoping
     private readonly List<TenantFeature> _tenantFeatures = [];
 
     public virtual IReadOnlyCollection<TenantFeature> TenantFeatures => _tenantFeatures.AsReadOnly();
+
+    public readonly List<TenantSetting> tenantSettings = [];
+    public virtual IReadOnlyCollection<TenantSetting> TenantSettings => tenantSettings.AsReadOnly();
 
     // EF Core
     public Tenant() { }
@@ -139,24 +138,21 @@ public class Tenant : TenantAggregate, IExcludedFromScoping
         }
     }
 
-    public bool DisableFeature(string featureId)
+    public TenantSetting AddDefaultTenantSetting()
     {
-        if (string.IsNullOrEmpty(featureId)) throw new ArgumentNullException(nameof(featureId));
+        var tenantSetting = new TenantSetting
+        {
+            Id = Guid.NewGuid(),
+            DisplayDateFormat = SupportedDateTimeFormats.DefaultDateFormat,
+            DisplayTimeFormat = SupportedDateTimeFormats.DefaultTimeFormat,
+            DefaultCurrency = SupportedCurrencies.DefaultCurrencyCode,
+            CurrencyDisplayFormat = SupportedCurrencies.DefaultCurrencyDisplayFormat,
+            DefaultSystemLanguage = SupportedLanguages.DefaultLanguageCode,
+            TenantId = this.Id,
+            Scope = this.Id
+        };
 
-        var feature = _tenantFeatures?.FirstOrDefault(f => f.FeatureId == featureId);
-        if (feature == null) return false;
-
-        return _tenantFeatures.Remove(feature);
-    }
-
-    public bool HasFeatureEnabled(string featureId)
-    {
-        var feature = _tenantFeatures?.FirstOrDefault(f => f.FeatureId == featureId);
-        return feature != null && feature.State == nameof(StateFeature.Enabled);
-    }
-
-    public TenantFeature? GetFeatureConfiguration(string featureId)
-    {
-        return _tenantFeatures?.FirstOrDefault(f => f.FeatureId == featureId);
+        tenantSettings.Add(tenantSetting);
+        return tenantSetting;
     }
 }

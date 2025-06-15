@@ -112,7 +112,6 @@ namespace EShop.Tenancy.Persistence.Migrations
                         .HasColumnType("character varying(500)");
 
                     b.Property<string>("Email")
-                        .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
 
@@ -122,7 +121,6 @@ namespace EShop.Tenancy.Persistence.Migrations
                         .HasColumnType("character varying(100)");
 
                     b.Property<string>("OwnerUsername")
-                        .IsRequired()
                         .HasMaxLength(150)
                         .HasColumnType("character varying(150)");
 
@@ -184,6 +182,61 @@ namespace EShop.Tenancy.Persistence.Migrations
                     b.ToTable("TenantFeatures", (string)null);
                 });
 
+            modelBuilder.Entity("EShop.Tenancy.Domain.Entities.TenantSetting", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("CurrencyDisplayFormat")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("DefaultCurrency")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
+
+                    b.Property<string>("DefaultSystemLanguage")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("DisplayDateFormat")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("DisplayTimeFormat")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("Scope")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("TenantId")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("TimeZone")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Scope");
+
+                    b.HasIndex("TenantId");
+
+                    b.ToTable("TenantSettings", (string)null);
+                });
+
             modelBuilder.Entity("EShop.Tenancy.Domain.Entities.TenantFeature", b =>
                 {
                     b.HasOne("EShop.Tenancy.Domain.Entities.Feature", "Feature")
@@ -203,9 +256,20 @@ namespace EShop.Tenancy.Persistence.Migrations
                     b.Navigation("Tenant");
                 });
 
+            modelBuilder.Entity("EShop.Tenancy.Domain.Entities.TenantSetting", b =>
+                {
+                    b.HasOne("EShop.Tenancy.Domain.Entities.Tenant", null)
+                        .WithMany("TenantSettings")
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("EShop.Tenancy.Domain.Entities.Tenant", b =>
                 {
                     b.Navigation("TenantFeatures");
+
+                    b.Navigation("TenantSettings");
                 });
 #pragma warning restore 612, 618
         }

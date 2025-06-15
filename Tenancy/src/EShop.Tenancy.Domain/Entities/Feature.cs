@@ -10,7 +10,7 @@ public class Feature : EntityBase<string>, IExcludedFromScoping
     [MaxLength(ModelConstants.ShortMediumText)]
     public string Name { get; set; }
 
-    [MaxLength(ModelConstants.LongText)]
+    [MaxLength(ModelConstants.VeryLongText)]
     public string? Description { get; set; }
 
     [MaxLength(ModelConstants.MediumText)]

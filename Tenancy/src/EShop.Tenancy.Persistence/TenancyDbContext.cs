@@ -18,5 +18,6 @@ public class TenancyDbContext : DbContext, IInboxDbContext
     public DbSet<Tenant> Tenants { get; set; }
     public DbSet<Feature> Features { get; set; }
     public DbSet<TenantFeature> TenantFeatures { get; set; }
+    public DbSet<TenantSetting> TenantSettings { get; set; }
     public DbSet<InboxMessage> InboxMessages { get; set; }
 }

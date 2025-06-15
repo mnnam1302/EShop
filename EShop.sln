@@ -92,6 +92,16 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EShop.Shared.HealthChecks",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EShop.Shared.EventBus", "Shared\src\EShop.Shared.EventBus\EShop.Shared.EventBus.csproj", "{AE4051D3-07A5-4A8B-A1F5-16D4DAE6AB64}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Configuration", "Configuration", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{643EF2B4-B456-4FDF-BAED-6EECDC8DBB68}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{681CE21C-D1F6-4C64-A943-6299EBE4A4AB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EShop.Configuration.Application", "Configuration\src\EShop.Configuration.Application\EShop.Configuration.Application.csproj", "{7BC9939C-4FC5-4004-B71C-F01B0061585E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EShop.Configuration.IntegrationEvent", "Configuration\src\EShop.Configuration.IntegrationEvent\EShop.Configuration.IntegrationEvent.csproj", "{EAEB468B-776B-4646-9AA7-696F8F29B410}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -198,6 +208,14 @@ Global
 		{AE4051D3-07A5-4A8B-A1F5-16D4DAE6AB64}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AE4051D3-07A5-4A8B-A1F5-16D4DAE6AB64}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AE4051D3-07A5-4A8B-A1F5-16D4DAE6AB64}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7BC9939C-4FC5-4004-B71C-F01B0061585E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7BC9939C-4FC5-4004-B71C-F01B0061585E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7BC9939C-4FC5-4004-B71C-F01B0061585E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7BC9939C-4FC5-4004-B71C-F01B0061585E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EAEB468B-776B-4646-9AA7-696F8F29B410}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EAEB468B-776B-4646-9AA7-696F8F29B410}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EAEB468B-776B-4646-9AA7-696F8F29B410}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EAEB468B-776B-4646-9AA7-696F8F29B410}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -237,6 +255,10 @@ Global
 		{C8E744F6-2CF3-41A2-AAA6-8649362A64DC} = {EC3BE313-F5F4-48E6-B4E7-A01F33861EED}
 		{47254B1A-F2BC-4CCE-8502-EA4B59270598} = {DF247757-C88D-4BD6-9946-FDEAC84BF886}
 		{AE4051D3-07A5-4A8B-A1F5-16D4DAE6AB64} = {DF247757-C88D-4BD6-9946-FDEAC84BF886}
+		{643EF2B4-B456-4FDF-BAED-6EECDC8DBB68} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{681CE21C-D1F6-4C64-A943-6299EBE4A4AB} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{7BC9939C-4FC5-4004-B71C-F01B0061585E} = {643EF2B4-B456-4FDF-BAED-6EECDC8DBB68}
+		{EAEB468B-776B-4646-9AA7-696F8F29B410} = {643EF2B4-B456-4FDF-BAED-6EECDC8DBB68}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {BB890EFB-EE36-4A0E-A948-F28A53D375E6}

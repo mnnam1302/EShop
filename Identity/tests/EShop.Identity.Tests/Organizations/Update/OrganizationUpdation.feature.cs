@@ -153,7 +153,7 @@ await this.FeatureBackgroundAsync();
                             "Description",
                             "Marine services provider based in Norway"});
 #line 10
- await testRunner.GivenAsync("Admin user creates a new organization with the following", ((string)(null)), table6, "Given ");
+ await testRunner.GivenAsync("Admin user has created a new organization with the following", ((string)(null)), table6, "Given ");
 #line hidden
                 global::Reqnroll.Table table7 = new global::Reqnroll.Table(new string[] {
                             "Field",

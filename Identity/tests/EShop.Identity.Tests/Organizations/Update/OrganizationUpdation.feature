@@ -7,7 +7,7 @@ Background:
 	And all standard features were turned on for test tenant
 
 Scenario: Update an existing organization
-	Given Admin user creates a new organization with the following
+	Given Admin user has created a new organization with the following
 		| Field              | Value                                    |
 		| Name               | test-organization                        |
 		| OrganizationNumber | 22000                                    |

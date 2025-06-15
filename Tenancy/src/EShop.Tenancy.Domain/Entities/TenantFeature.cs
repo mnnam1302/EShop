@@ -28,7 +28,7 @@ public class TenantFeature : EntityBase<string>, IScoped, IUserTracking, IDateTr
 
     public DateTimeOffset? LastModifiedOnUtc { get; set; }
 
-    [MaxLength(ModelConstants.LongText)]
+    [MaxLength(ModelConstants.VeryLongText)]
     public string? Scope { get; private set; }
 
     // Using EF Core

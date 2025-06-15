@@ -16,7 +16,7 @@ public class InboxMessage : IExcludedFromScoping
 
     public string State { get; set; } = InboxMessageStatus.New.ToString();
 
-    [MaxLength(ModelConstants.LongText)]
+    [MaxLength(ModelConstants.VeryLongText)]
     public string ReasonFailed { get; set; } = string.Empty;
 
     public DateTimeOffset CreatedOnUtc { get; set; }
