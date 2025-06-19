@@ -1,4 +1,5 @@
-﻿using EShop.Shared.JsonApi.DependencyInjections;
+﻿using EShop.Shared.Cache.DependencyInejctions.Extensions;
+using EShop.Shared.JsonApi.DependencyInjections;
 using EShop.Shared.JsonApi.Middlewares;
 
 namespace EShop.Configuration.Application.Shared;
@@ -12,6 +13,15 @@ public static class ServiceCollectionExtensions
         services
             .AddPostgreSqlHealthCheck(configuration)
             .AddDbContextPoolWithScoping<ConfigurationDbContext>(configuration);
+
+        services
+            .AddRedisHealthCheck(configuration)
+            .AddRedisInfrastructure(configuration);
+
+        services
+            .AddUserPermissionsProvider()
+            .AddUserOrganizationContextProvider()
+            .AddTenantFeaturesProvider(configuration);
 
         return services;
     }

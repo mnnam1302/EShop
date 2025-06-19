@@ -1,17 +1,14 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 
 namespace EShop.Shared.Sequences;
 
 public class EntityFrameworkSequenceStore<TDbContext> : ISequenceStore
     where TDbContext : DbContext, ISequenceDbContextStore
 {
-    private readonly ILogger _logger;
     private readonly TDbContext _dbContext;
 
-    public EntityFrameworkSequenceStore(ILogger logger, TDbContext dbContext)
+    public EntityFrameworkSequenceStore(TDbContext dbContext)
     {
-        _logger = logger;
         _dbContext = dbContext;
     }
 
@@ -26,7 +23,6 @@ public class EntityFrameworkSequenceStore<TDbContext> : ISequenceStore
             };
 
             await _dbContext.Sequences.AddAsync(sequence);
-            _logger.LogInformation("Registered sequence '{SequenceId}' with a seed value of '{SeedValue}'", sequenceId, seedValue);
         }
     }
 
