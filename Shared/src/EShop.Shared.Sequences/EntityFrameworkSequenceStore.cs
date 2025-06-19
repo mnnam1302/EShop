@@ -23,6 +23,7 @@ public class EntityFrameworkSequenceStore<TDbContext> : ISequenceStore
             };
 
             await _dbContext.Sequences.AddAsync(sequence);
+            await _dbContext.SaveChangesAsync();
         }
     }
 

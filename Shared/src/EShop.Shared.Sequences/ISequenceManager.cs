@@ -42,7 +42,6 @@ internal sealed class SequenceManager : ISequenceManager
             var calculatedSequenceId = sequenceId;
             if (await _featureValidator.HasFeatureAsync(FeatureConstants.Identity_EnableTenantSpecificSequences_FeatureId))
             {
-                // sequenceType_tenantId
                 calculatedSequenceId = TenantSequence.GetTenantSequenceId(sequenceId, _userDetailsProvider.AuthenticatedUser.TenantId);
             }
 
@@ -57,9 +56,8 @@ internal sealed class SequenceManager : ISequenceManager
 
     private async Task<int> GetNextValue(string sequenceId)
     {
-        // Retrieve or create with ConcurrentDictionary
         var sequenceRange = _sequenceRangeInMemoryCache.GetOrAdd(sequenceId, _sequenceRangeFactory);
-        int nextValue = await sequenceRange.GetNextValue(_sequenceStore); // range with semaphoreslim ensures thread safety
+        int nextValue = await sequenceRange.GetNextValue(_sequenceStore);
 
         return nextValue;
     }
