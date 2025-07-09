@@ -1,5 +1,6 @@
 ﻿using EShop.Configuration.Application.Boostrapping;
 using EShop.Configuration.Application.Shared;
+using EShop.Shared.Sequences.DependencyInjections;
 using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
 
 namespace EShop.Configuration.Application.Boostrapping;
@@ -43,6 +44,11 @@ public static class ServiceCollectionExtensions
     private static IServiceCollection AddServiceBootstrapping(this IServiceCollection services)
     {
         services.AddTransient<DbInitializer>();
+
+        services.AddSequenceManagement<SequenceRepository>();
+        services.AddOptions<ConfigurationSequenceOptions>()
+            .BindConfiguration(ConfigurationSequenceOptions.SectionName);
+
         return services;
     }
 }
