@@ -1,4 +1,5 @@
 ﻿using EShop.Configuration.Application.Agencies;
+using EShop.Configuration.Application.SalesChannels;
 using EShop.Shared.EventBus;
 using Microsoft.EntityFrameworkCore;
 
