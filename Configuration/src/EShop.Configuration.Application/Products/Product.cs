@@ -13,10 +13,6 @@ public class Product : EntityBase<Guid>, IScoped
 
     public virtual Agency? Agency { get; set; }
 
-    //public string? VersionIdForSales { get; set; }
-
-    //public virtual ProductVersion? ActiveVersion { get; set; }
-
     public bool IsActive { get; set; }
 
     public bool IsArchived { get; set; }
