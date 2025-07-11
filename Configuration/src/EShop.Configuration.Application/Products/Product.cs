@@ -9,7 +9,7 @@ public class Product : EntityBase<Guid>, IScoped
 {
     public string Name { get; set; } = string.Empty;
 
-    public string? AgencyId { get; set; }
+    public Guid? AgencyId { get; set; }
 
     public virtual Agency? Agency { get; set; }
 
