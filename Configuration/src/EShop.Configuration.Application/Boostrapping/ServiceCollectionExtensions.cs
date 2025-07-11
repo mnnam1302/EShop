@@ -24,6 +24,7 @@ public static class ServiceCollectionExtensions
             .AddFluentValidationRulesToSwagger()
             .AddEndpointsApiExplorer()
             .AddSwaggerAPI();
+
         return services;
     }
 

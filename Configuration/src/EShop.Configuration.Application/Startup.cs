@@ -24,7 +24,6 @@ public class Startup
 
     public virtual void Configure(WebApplication app, IHostApplicationLifetime applicationLifetime, ILoggerFactory loggerFactory)
     {
-        var logger = loggerFactory.CreateLogger<Startup>();
         app.UseMiddleware<ExceptionHandlingMiddleware>();
 
         if (Environment.IsDevelopment() || Environment.IsStaging())
@@ -34,5 +33,6 @@ public class Startup
         }
 
         app.UseRouting();
+        app.MapConfigurationEndpoints();
     }
 }

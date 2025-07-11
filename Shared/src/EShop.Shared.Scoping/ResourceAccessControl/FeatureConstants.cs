@@ -12,6 +12,9 @@ public static class FeatureConstants
     public const string Identity_UserInvites_FeatureId = "Identity_UserInvites";
     public const string Identity_OrganisationRingFencing_FeatureId = "Identity_OrganisationRingFencing";
     public const string Identity_CustomRoles_FeatureId = "Identity_CustomRoles";
+
+    // Configuration
+    public const string Configration_ProductBuilder_FeatureId = "Configration_ProductBuilder";
 }
 
 

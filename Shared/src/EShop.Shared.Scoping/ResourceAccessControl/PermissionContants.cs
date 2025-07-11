@@ -21,4 +21,8 @@ public static class PermissionConstants
 
     public const string ViewPortalUserAccountsPermissionId = "Identity_ViewPortalUserAccounts";
     public const string ManagePortalUserAccountsPermissionId = "Identity_ManagePortalUserAccounts";
+
+    // Configuration
+    public const string ViewProductsPermissionId = "Configuration_ViewProducts";
+    public const string ManageProductsPermissionId = "Configuration_ManageProducts";
 }
