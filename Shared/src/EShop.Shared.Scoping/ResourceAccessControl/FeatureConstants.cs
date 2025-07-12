@@ -22,6 +22,7 @@ public enum FeatureModules
 {
     EShop_Identity,
     EShop_Tenancy,
+    EShop_Configuration,
 }
 
 public enum FeatureState

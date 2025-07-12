@@ -6,7 +6,8 @@ namespace EShop.Identity.Infrastructure.Producers;
 
 public class UserPermissionRegistration(IEventBusGateway eventBusGateway) : IPermissionRegistrationService
 {
-    private const string ApplicationName = "Identity";
+    // module name different from application name, which mean within application name can have many modules
+    private const string ModuleName = "Identity";
 
     private static readonly ReportPermission[] Permissions = [];
 
@@ -14,7 +15,7 @@ public class UserPermissionRegistration(IEventBusGateway eventBusGateway) : IPer
     {
         await eventBusGateway.PublishAsync<SupportedPermissionsUpdated>(new
         {
-            SourceSystemReference = ApplicationName,
+            SourceSystemReference = ModuleName,
             Permissions,
             Action = SupportedPermissionAction.Added,
             TenantId = string.Empty,

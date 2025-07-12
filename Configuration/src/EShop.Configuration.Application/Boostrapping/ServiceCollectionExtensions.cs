@@ -1,5 +1,6 @@
 ﻿using EShop.Configuration.Application.Boostrapping;
 using EShop.Configuration.Application.Shared;
+using EShop.Shared.Scoping.ResourceAccessControl;
 using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
 
 namespace EShop.Configuration.Application.Boostrapping;
@@ -44,6 +45,8 @@ public static class ServiceCollectionExtensions
     private static IServiceCollection AddServiceBootstrapping(this IServiceCollection services)
     {
         services.AddTransient<DbInitializer>();
+        services.AddTransient<IFeatureRegistrationService, ConfigurationFeatureRegistrationService>();
+        services.AddTransient<IPermissionRegistrationService, ConfigurationPermissionRegistrationService>();
         return services;
     }
 }
