@@ -1,5 +1,4 @@
-﻿
-using EShop.Shared.JsonApi.ResourceAccessControl;
+﻿using EShop.Shared.JsonApi.ResourceAccessControl;
 using EShop.Shared.Scoping.ResourceAccessControl;
 
 namespace EShop.Configuration.Application.Products.Create;

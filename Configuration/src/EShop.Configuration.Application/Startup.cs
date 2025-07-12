@@ -33,6 +33,8 @@ public class Startup
         }
 
         app.UseRouting();
+        //app.MapConfigurationEndpoints();
+        app.MapControllers();
         app.MapConfigurationEndpoints();
     }
 }

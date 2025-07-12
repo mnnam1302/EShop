@@ -1,5 +1,4 @@
 services:
-  # Postgres
   postgres:
     image: postgres:17.0
     container_name: 'eshop-postgres'
@@ -15,22 +14,20 @@ services:
     ports:
       - 5432:5432
     volumes:
-      - postgres_db:/var/lib/postgressql/data
+      - postgres_db:/var/lib/postgresql/data
     networks:
       - eshop
 
-  # Redis
   redis:
     image: redis:latest
     container_name: 'eshop-redis'
     ports:
-      - '6379:6379'
+      - 6379:6379
     volumes:
       - redis:/data
     networks:
       - eshop
     
-  # MongoDB
   mongo:
       image: mongo
       container_name: 'eshop-mongo'
@@ -43,7 +40,6 @@ services:
       networks:
           - eshop
 
-  # RabbitMQ
   rabbitmq:
     image: rabbitmq:3-management-alpine
     container_name: 'eshop-rabbitmq'
@@ -53,8 +49,8 @@ services:
       timeout: 30s
       retries: 3
     ports:
-      - "5672:5672"
-      - "15672:15672"
+      - 5672:5672
+      - 15672:15672
     environment:
       RABBITMQ_DEFAULT_USER: "guest"
       RABBITMQ_DEFAULT_PASS: "guest"
@@ -62,33 +58,26 @@ services:
     networks:
       - eshop
 
-  # Seq log
   seq:
      image: datalust/seq:latest
      container_name: 'eshop-seq'
      ports:
         - 5341:5341
         - 8081:80
+     volumes:
+        - seq_data:/data
      environment:
         ACCEPT_EULA: Y
      networks:
         - eshop
-  
-  # Consul
-  consul:
-    image: hashicorp/consul:latest
-    container_name: 'eshop-consul'
-    ports:
-      - 8500:8500
-    networks:
-      - eshop
 
-# Volumes
+
 volumes:
   postgres_db:
   redis:
     driver: local
-# Networks
+  seq_data:
+
 networks:
   eshop:
     name: eshop
