@@ -20,8 +20,8 @@ public class ConfigurationPermissionRegistrationService(IEventBusGateway eventBu
         new ConfigurationPermission()
         {
             Id = PermissionConstants.ManageProductsPermissionId,
-            Name = "Create Product",
-            Description = "Allows creating products in the configuration service.",
+            Name = "Manage products",
+            Description = "Allows users adding new product, adding/editing/cloning product versions, publishing product, activating published product version",
             RelatedTo = ModuleName
         }
     };

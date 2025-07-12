@@ -35,6 +35,6 @@ public class ConfigurationFeatureRegistrationService(IEventBusGateway eventBusGa
         public required string Name { get; init; }
         public required string Description { get; init; }
         public string Module => nameof(FeatureModules.EShop_Configuration);
-        public string State => nameof(FeatureState.Disabled);
+        public string State => nameof(FeatureState.Enabled);
     }
 }
