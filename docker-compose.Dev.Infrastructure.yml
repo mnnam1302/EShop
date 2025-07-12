@@ -14,6 +14,7 @@ services:
     ports:
       - 5432:5432
     volumes:
+      - ./postgres-init.sql:/docker-entrypoint-initdb.d/1-init.sql
       - postgres_db:/var/lib/postgresql/data
     networks:
       - eshop
@@ -68,6 +69,7 @@ services:
         - seq_data:/data
      environment:
         ACCEPT_EULA: Y
+        SEQ_FIRSTRUN_NOAUTHENTICATION: "true"
      networks:
         - eshop
 
