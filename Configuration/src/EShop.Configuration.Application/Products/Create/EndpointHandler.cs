@@ -1,4 +1,4 @@
-﻿using EShop.Shared.CQRS.Command;
+﻿using EShop.Shared.CQRS;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EShop.Configuration.Application.Products.Create;
@@ -15,11 +15,15 @@ internal static class EndpointHandler
 
     private static async Task<IResult> CreateProductAsync(
         [FromBody] CreateProductRequest request,
-        [FromServices] ICommandHandler<Command> commandHandler,
+        [FromServices] IMediator mediator,
         CancellationToken cancellationToken)
     {
         var command = request.ToCommand();
-        var result = await commandHandler.HandleAsync(command, cancellationToken);
+        var result = await mediator.SendAsync(command, cancellationToken);
+        if (result.IsFailure)
+        {
+            return TypedResults.Problem(result.Error.Message, statusCode: StatusCodes.Status400BadRequest);
+        }
 
         return TypedResults.Created();
     }

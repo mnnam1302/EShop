@@ -1,18 +1,48 @@
 ﻿using EShop.Configuration.Application.Agencies;
+using EShop.Configuration.Application.Products.Create;
 using EShop.Configuration.Application.SalesChannels;
 using EShop.Shared.Contracts.Shared;
 using EShop.Shared.DomainTools.Entities;
 using EShop.Shared.Scoping;
+using EShop.Shared.Scoping.Exceptions;
 using System.ComponentModel.DataAnnotations;
 
 namespace EShop.Configuration.Application.Products;
 
 public class Product : EntityBase<Guid>, IScoped
 {
-    [MaxLength(ModelConstants.MediumText)]
-    public string Name { get; set; } = string.Empty;
+    public static Product Create(Command command, IUserDetailsProvider userDetailsProvider)
+    {
+        var product = new Product
+        {
+            Id = Guid.NewGuid(),
+            Name = command.Name,
+            CreatedAtUtc = DateTimeOffset.UtcNow,
+            CreatedByUserId = userDetailsProvider.AuthenticatedUser.Id,
+            TenantId = userDetailsProvider.AuthenticatedUser.TenantId,
+            Scope = userDetailsProvider.AuthenticatedUser.TenantId,
+            IsActive = true
+        };
 
-    public Guid? AgencyId { get; set; }
+        return product;
+    }
+
+    public void AssignToAgency(Agency agency)
+    {
+        ArgumentNullException.ThrowIfNull(agency);
+
+        if (IsArchived)
+        {
+            throw new BadRequestException("Cannot assign archived products to agencies");
+        }
+
+        AgencyId = agency.Id;
+    }
+
+    [MaxLength(ModelConstants.MediumText)]
+    public required string Name { get; set; }
+
+    public Guid? AgencyId { get; private set; }
 
     public virtual Agency? Agency { get; set; }
 

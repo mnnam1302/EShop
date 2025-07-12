@@ -1,5 +1,6 @@
 ﻿using EShop.Shared.Cache.DependencyInejctions.Extensions;
 using EShop.Shared.CQRS;
+using EShop.Shared.DomainTools.UnitOfWorks;
 using EShop.Shared.JsonApi.DependencyInjections;
 using EShop.Shared.JsonApi.Middlewares;
 
@@ -24,6 +25,8 @@ public static class ServiceCollectionExtensions
             .AddTenantFeaturesProvider();
 
         services.AddCQRS(AssemblyReference.Assembly);
+
+        services.AddScoped<IUnitOfWork, UnitOfWorkDbContext<ConfigurationDbContext>>();
 
         return services;
     }
