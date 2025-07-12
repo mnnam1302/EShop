@@ -4,7 +4,6 @@ using EShop.Shared.HealthChecks;
 using EShop.Shared.Scoping.ResourceAccessControl;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers.TenantFeaturesProvider;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
@@ -35,15 +34,15 @@ public static class TenantFeaturesExtensions
         });
     }
 
-    public static IServiceCollection AddTenantFeaturesProvider(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddTenantFeaturesProvider(this IServiceCollection services)
     {
         services.AddScoped<IFeatureValidator, CurrentUserFeaturesValidator>();
-        AddTenantFeatureCachingService(services, configuration);
+        AddTenantFeatureCachingService(services);
 
         return services;
     }
 
-    private static void AddTenantFeatureCachingService(IServiceCollection services, IConfiguration configuration)
+    private static void AddTenantFeatureCachingService(IServiceCollection services)
     {
         services.AddServiceDiscovery();
         services.ConfigureHttpClientDefaults(options =>

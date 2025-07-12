@@ -15,7 +15,8 @@ internal static class EndpointHandler
         return productEndpointBuilder;
     }
 
-    private static async Task<IResult> CreateProductAsync([FromBody] CreateProductRequest request)
+    private static async Task<IResult> CreateProductAsync(
+        [FromBody] CreateProductRequest request)
     {
         await Task.CompletedTask;
 

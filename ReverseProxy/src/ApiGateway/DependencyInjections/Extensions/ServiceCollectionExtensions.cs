@@ -11,8 +11,10 @@ public static class ServiceCollectionExtensions
         services.AddUserScoping();
 
         services
-            .AddRedisInfrastructure(configuration)
-            .AddUserTokensProvider(configuration);
+            .AddRedisHealthCheck(configuration)
+            .AddRedisInfrastructure(configuration);
+
+        services.AddUserTokensProvider();
 
         return services;
     }
