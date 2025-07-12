@@ -1,5 +1,6 @@
 ﻿using EShop.Configuration.Application.Boostrapping;
 using EShop.Configuration.Application.Shared;
+using EShop.Shared.JsonApi.DependencyInjections;
 using EShop.Shared.JsonApi.Middlewares;
 
 namespace EShop.Configuration.Application;
@@ -19,11 +20,12 @@ public class Startup
     {
         services
             .AddShared(Configuration)
-            .AddBoostrapping(Configuration);
+            .AddBoostrapping(Configuration, Environment);
     }
 
     public virtual void Configure(WebApplication app, IHostApplicationLifetime applicationLifetime, ILoggerFactory loggerFactory)
     {
+        var logger = loggerFactory.CreateLogger<Startup>();
         app.UseMiddleware<ExceptionHandlingMiddleware>();
 
         if (Environment.IsDevelopment() || Environment.IsStaging())
@@ -35,5 +37,8 @@ public class Startup
         app.MapConfigurationEndpoints();
 
         app.UseSwaggerAPI();
+
+        app.RegisterFeatures(applicationLifetime, logger);
+        app.RegisterPermissions(applicationLifetime, logger);
     }
 }
