@@ -11,29 +11,15 @@ namespace EShop.Shared.CQRS;
 public static class ServiceCollectionExtensions
 {
     /// <summary>
-    /// Adds CQRS infrastructure services to the service collection
+    /// Adds CQRS (Command Query Responsibility Segregation) services to the specified <see cref="IServiceCollection"/>.
     /// </summary>
-    public static IServiceCollection AddCQRS(this IServiceCollection services)
-    {
-        // Register interfaces
-        services.AddScoped<ICommandDispatcher, CommandDispatcher>();
-        services.AddScoped<IQueryDispatcher, QueryDispatcher>();
-        services.AddTransient<IMediator, Mediator>();
-
-        // Register concrete implementations (needed for some tests)
-        services.TryAddScoped<CommandDispatcher>();
-        services.TryAddScoped<QueryDispatcher>();
-        services.TryAddTransient<Mediator>();
-
-        // Ensure logging is available (fallback to null logger if not registered)
-        services.TryAddSingleton(typeof(ILogger<>), typeof(NullLogger<>));
-
-        return services;
-    }
-
-    /// <summary>
-    /// Adds CQRS infrastructure services and automatically registers handlers from the specified assembly
-    /// </summary>
+    /// <remarks>This method registers the necessary services for implementing CQRS patterns, including
+    /// command and query handlers. It scans the provided <paramref name="assembly"/> for types implementing <see
+    /// cref="ICommandHandler{TCommand}"/>,  <see cref="ICommandHandler{TCommand, TResult}"/>, and <see
+    /// cref="IQueryHandler{TQuery, TResult}"/> interfaces.</remarks>
+    /// <param name="services">The <see cref="IServiceCollection"/> to which the CQRS services will be added.</param>
+    /// <param name="assembly">The assembly to scan for command and query handler implementations.</param>
+    /// <returns>The updated <see cref="IServiceCollection"/> instance.</returns>
     public static IServiceCollection AddCQRS(this IServiceCollection services, Assembly assembly)
     {
         services.AddCQRS();
@@ -45,12 +31,19 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    /// <summary>
-    /// Legacy method for backward compatibility
-    /// </summary>
-    public static IServiceCollection AddCqrs(this IServiceCollection services, Assembly assembly)
+    public static IServiceCollection AddCQRS(this IServiceCollection services)
     {
-        return services.AddCQRS(assembly);
+        services.AddScoped<ICommandDispatcher, CommandDispatcher>();
+        services.AddScoped<IQueryDispatcher, QueryDispatcher>();
+        services.AddTransient<IMediator, Mediator>();
+
+        services.TryAddScoped<CommandDispatcher>();
+        services.TryAddScoped<QueryDispatcher>();
+        services.TryAddTransient<Mediator>();
+
+        services.TryAddSingleton(typeof(ILogger<>), typeof(NullLogger<>));
+
+        return services;
     }
 
     private static void RegisterHandlers(IServiceCollection services, Assembly assembly, Type handlerInterfaceType)

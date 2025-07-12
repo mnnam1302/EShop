@@ -1,6 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Moq;
 
 namespace EShop.Shared.CQRS.Tests.TestHelpers;
 
@@ -33,11 +32,6 @@ public abstract class TestBase : IDisposable
     /// Get a service from the DI container
     /// </summary>
     protected T GetService<T>() where T : notnull => ServiceProvider.GetRequiredService<T>();
-
-    /// <summary>
-    /// Get an optional service from the DI container
-    /// </summary>
-    protected T? GetOptionalService<T>() where T : class => ServiceProvider.GetService<T>();
 
     public virtual void Dispose()
     {
