@@ -1,5 +1,4 @@
 ﻿using EShop.Configuration.Application.Boostrapping;
-using EShop.Configuration.Application.Shared;
 using EShop.Shared.EventBus.DependencyInjections.Extensions;
 using EShop.Shared.EventBus.DependencyInjections.Options;
 using EShop.Shared.EventBus.JsonConverters;

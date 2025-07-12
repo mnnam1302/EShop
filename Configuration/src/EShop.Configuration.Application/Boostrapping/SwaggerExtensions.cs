@@ -1,10 +1,9 @@
 ﻿using Asp.Versioning.ApiExplorer;
-using EShop.Configuration.Application.Boostrapping;
 using Microsoft.Extensions.Options;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using Swashbuckle.AspNetCore.SwaggerUI;
 
-namespace EShop.Configuration.Application.Shared;
+namespace EShop.Configuration.Application.Boostrapping;
 
 public static class SwaggerExtensions
 {
