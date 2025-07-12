@@ -6,7 +6,7 @@ using MediatR;
 
 namespace EShop.Identity.Infrastructure.Consumers;
 
-public class SupportedPermissionsUpdatedConsumer : Consumer<SupportedPermissionsUpdated, UsersDbContext>
+public class SupportedPermissionsUpdatedConsumer : Consumer<ISupportedPermissionsUpdated, UsersDbContext>
 {
     private readonly ISender _sender;
 
@@ -16,7 +16,7 @@ public class SupportedPermissionsUpdatedConsumer : Consumer<SupportedPermissions
         _sender = sender;
     }
 
-    protected override async Task<Result> HandleMessageAsync(SupportedPermissionsUpdated message, CancellationToken cancellationToken)
+    protected override async Task<Result> HandleMessageAsync(ISupportedPermissionsUpdated message, CancellationToken cancellationToken)
     {
         var command = new Command.UpdateSupportedPermissionsCommandInternal
         {

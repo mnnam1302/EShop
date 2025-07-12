@@ -28,7 +28,7 @@ public class ConfigurationPermissionRegistrationService(IEventBusGateway eventBu
 
     public async Task RegisterPermissions()
     {
-        await eventBusGateway.PublishAsync<SupportedPermissionsUpdated>(new
+        await eventBusGateway.PublishAsync<ISupportedPermissionsUpdated>(new
         {
             SourceSystemReference = Program.ApplicationName,
             Permissions = Permissions,
@@ -39,7 +39,7 @@ public class ConfigurationPermissionRegistrationService(IEventBusGateway eventBu
         });
     }
 
-    private sealed class ConfigurationPermission : Permission
+    private sealed class ConfigurationPermission : IPermission
     {
         public required string Id { get; init; }
         public required string Name { get; init; }

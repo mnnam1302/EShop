@@ -128,6 +128,6 @@ public static class ServiceCollectionExtensions
         string serviceName)
     {
         bus.ConfigureEventReceiveEndpoint<TenantConsumers.TenantCreatedConsumer, ITenantCreated>(context, environment.EnvironmentName, serviceName);
-        bus.ConfigureEventReceiveEndpoint<SupportedPermissionsUpdatedConsumer, SupportedPermissionsUpdated>(context, environment.EnvironmentName, serviceName);
+        bus.ConfigureEventReceiveEndpoint<SupportedPermissionsUpdatedConsumer, ISupportedPermissionsUpdated>(context, environment.EnvironmentName, serviceName);
     }
 }

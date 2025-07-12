@@ -13,7 +13,7 @@ public class UserPermissionRegistration(IEventBusGateway eventBusGateway) : IPer
 
     public async Task RegisterPermissions()
     {
-        await eventBusGateway.PublishAsync<SupportedPermissionsUpdated>(new
+        await eventBusGateway.PublishAsync<ISupportedPermissionsUpdated>(new
         {
             SourceSystemReference = ModuleName,
             Permissions,
@@ -24,7 +24,7 @@ public class UserPermissionRegistration(IEventBusGateway eventBusGateway) : IPer
         });
     }
 
-    private sealed class ReportPermission : Permission
+    private sealed class ReportPermission : IPermission
     {
         public required string Id { get; init; }
         public required string Name { get; init; }

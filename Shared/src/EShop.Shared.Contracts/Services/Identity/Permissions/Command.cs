@@ -8,7 +8,7 @@ public static class Command
     {
         public required string SourceSystemReference { get; init; }
 
-        public Permission[] Permissions { get; init; }
+        public IPermission[] Permissions { get; init; }
 
         public SupportedPermissionAction Action { get; init; }
     }
