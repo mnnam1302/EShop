@@ -77,168 +77,7 @@ namespace EShop.Configuration.Application.Migrations
                     b.ToTable("Agencies", (string)null);
                 });
 
-            modelBuilder.Entity("EShop.Configuration.Application.Products.Lookup", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<byte[]>("Data")
-                        .HasColumnType("bytea");
-
-                    b.Property<string>("DataUrl")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
-
-                    b.Property<string>("FileName")
-                        .IsRequired()
-                        .HasMaxLength(150)
-                        .HasColumnType("character varying(150)");
-
-                    b.Property<string>("Scope")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
-
-                    b.Property<string>("TenantId")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Scope");
-
-                    b.HasIndex("TenantId");
-
-                    b.ToTable("Lookups", (string)null);
-                });
-
-            modelBuilder.Entity("EShop.Configuration.Application.Products.Product", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid?>("AgencyId")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTimeOffset?>("ArchivedDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTimeOffset>("CreatedAtUtc")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("CreatedByUserId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool>("IsArchived")
-                        .HasColumnType("boolean");
-
-                    b.Property<DateTimeOffset?>("LastModifiedAtUtc")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("LastModifiedByUserId")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Scope")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("TenantId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTimeOffset?>("UnarchivedDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AgencyId");
-
-                    b.HasIndex("Scope");
-
-                    b.HasIndex("TenantId");
-
-                    b.ToTable("Products", (string)null);
-                });
-
-            modelBuilder.Entity("EShop.Configuration.Application.Products.ProductVersion", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
-
-                    b.Property<bool>("IsPublished")
-                        .HasColumnType("boolean");
-
-                    b.Property<DateTimeOffset?>("LastModifiedAtUtc")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("LastModifiedByUserId")
-                        .HasMaxLength(150)
-                        .HasColumnType("character varying(150)");
-
-                    b.Property<Guid>("ProductId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid?>("ProductLookupId")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTimeOffset?>("PublishedAtUtc")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("PublishedByUserId")
-                        .HasMaxLength(150)
-                        .HasColumnType("character varying(150)");
-
-                    b.Property<string>("Reference")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<string>("Scope")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
-
-                    b.Property<string>("TenantId")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
-                    b.Property<int>("Version")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ProductId");
-
-                    b.HasIndex("ProductLookupId");
-
-                    b.HasIndex("Scope");
-
-                    b.HasIndex("TenantId");
-
-                    b.ToTable("ProductVersions", (string)null);
-                });
-
-            modelBuilder.Entity("EShop.Configuration.Application.SalesChannels.SalesChannel", b =>
+            modelBuilder.Entity("EShop.Configuration.Application.Agencies.SalesChannel", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -278,21 +117,6 @@ namespace EShop.Configuration.Application.Migrations
                     b.ToTable("SaleChannels", (string)null);
                 });
 
-            modelBuilder.Entity("EShop.Configuration.Application.SalesChannels.SalesChannelProduct", b =>
-                {
-                    b.Property<Guid>("SalesChannelId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("ProductId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("SalesChannelId", "ProductId");
-
-                    b.HasIndex("ProductId");
-
-                    b.ToTable("SalesChannelProducts", (string)null);
-                });
-
             modelBuilder.Entity("EShop.Shared.EventBus.InboxMessage", b =>
                 {
                     b.Property<Guid>("MessageId")
@@ -329,58 +153,7 @@ namespace EShop.Configuration.Application.Migrations
                     b.ToTable("InboxMessages", (string)null);
                 });
 
-            modelBuilder.Entity("EShop.Configuration.Application.Products.Product", b =>
-                {
-                    b.HasOne("EShop.Configuration.Application.Agencies.Agency", "Agency")
-                        .WithMany()
-                        .HasForeignKey("AgencyId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.Navigation("Agency");
-                });
-
-            modelBuilder.Entity("EShop.Configuration.Application.Products.ProductVersion", b =>
-                {
-                    b.HasOne("EShop.Configuration.Application.Products.Product", "Product")
-                        .WithMany("Versions")
-                        .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("EShop.Configuration.Application.Products.Lookup", "ProductLookup")
-                        .WithMany()
-                        .HasForeignKey("ProductLookupId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.OwnsOne("EShop.Configuration.Application.Products.ProductDefinition", "ProductDefinition", b1 =>
-                        {
-                            b1.Property<Guid>("ProductVersionId")
-                                .HasColumnType("uuid");
-
-                            b1.Property<string>("CompilationErrorsJson")
-                                .HasColumnType("text");
-
-                            b1.Property<string>("ProductJson")
-                                .IsRequired()
-                                .HasColumnType("text");
-
-                            b1.HasKey("ProductVersionId");
-
-                            b1.ToTable("ProductVersions");
-
-                            b1.WithOwner()
-                                .HasForeignKey("ProductVersionId");
-                        });
-
-                    b.Navigation("Product");
-
-                    b.Navigation("ProductDefinition")
-                        .IsRequired();
-
-                    b.Navigation("ProductLookup");
-                });
-
-            modelBuilder.Entity("EShop.Configuration.Application.SalesChannels.SalesChannel", b =>
+            modelBuilder.Entity("EShop.Configuration.Application.Agencies.SalesChannel", b =>
                 {
                     b.HasOne("EShop.Configuration.Application.Agencies.Agency", "Agency")
                         .WithMany("SalesChannels")
@@ -391,40 +164,9 @@ namespace EShop.Configuration.Application.Migrations
                     b.Navigation("Agency");
                 });
 
-            modelBuilder.Entity("EShop.Configuration.Application.SalesChannels.SalesChannelProduct", b =>
-                {
-                    b.HasOne("EShop.Configuration.Application.Products.Product", "Product")
-                        .WithMany("SalesChannelProducts")
-                        .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("EShop.Configuration.Application.SalesChannels.SalesChannel", "SalesChannel")
-                        .WithMany("SalesChannelProducts")
-                        .HasForeignKey("SalesChannelId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Product");
-
-                    b.Navigation("SalesChannel");
-                });
-
             modelBuilder.Entity("EShop.Configuration.Application.Agencies.Agency", b =>
                 {
                     b.Navigation("SalesChannels");
-                });
-
-            modelBuilder.Entity("EShop.Configuration.Application.Products.Product", b =>
-                {
-                    b.Navigation("SalesChannelProducts");
-
-                    b.Navigation("Versions");
-                });
-
-            modelBuilder.Entity("EShop.Configuration.Application.SalesChannels.SalesChannel", b =>
-                {
-                    b.Navigation("SalesChannelProducts");
                 });
 #pragma warning restore 612, 618
         }

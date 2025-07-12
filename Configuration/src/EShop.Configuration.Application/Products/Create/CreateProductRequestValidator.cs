@@ -1,5 +1,14 @@
-﻿namespace EShop.Configuration.Application.Products.Create;
+﻿using EShop.Shared.Contracts.Shared;
+using FluentValidation;
 
-public class CreateProductRequestValidator
+namespace EShop.Configuration.Application.Products.Create;
+
+public class CreateProductRequestValidator : AbstractValidator<CreateProductRequest>
 {
+    public CreateProductRequestValidator()
+    {
+        RuleFor(x => x.Name)
+            .NotEmpty()
+            .MaximumLength(ModelConstants.MediumText);
+    }
 }
