@@ -47,7 +47,6 @@ public static class ServiceCollectionExtensions
 
         return services;
     }
-
     private static IServiceCollection AddMassTransitRabbitMQ(
         this IServiceCollection services,
         IConfiguration configuration,
