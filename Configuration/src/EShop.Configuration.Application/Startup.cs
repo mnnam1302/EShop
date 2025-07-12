@@ -31,12 +31,11 @@ public class Startup
         if (Environment.IsDevelopment() || Environment.IsStaging())
         {
             app.UseCors(x => x.AllowAnyMethod());
+            app.UseSwaggerAPI();
         }
 
         app.UseRouting();
         app.MapConfigurationEndpoints();
-
-        app.UseSwaggerAPI();
 
         app.RegisterFeatures(applicationLifetime, logger);
         app.RegisterPermissions(applicationLifetime, logger);
