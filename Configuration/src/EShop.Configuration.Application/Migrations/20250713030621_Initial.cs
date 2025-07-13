@@ -6,31 +6,46 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace EShop.Configuration.Application.Migrations
 {
     /// <inheritdoc />
-    public partial class AddProduct : Migration
+    public partial class Initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "AgencyId",
-                table: "Agencies");
+            migrationBuilder.CreateTable(
+                name: "Agencies",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    Name = table.Column<string>(type: "character varying(150)", maxLength: 150, nullable: false),
+                    OrganizationNumber = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true),
+                    PhoneNumber = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true),
+                    Address = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
+                    City = table.Column<string>(type: "character varying(150)", maxLength: 150, nullable: true),
+                    Postcode = table.Column<string>(type: "character varying(10)", maxLength: 10, nullable: true),
+                    TenantId = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    Scope = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Agencies", x => x.Id);
+                });
 
-            migrationBuilder.AlterColumn<string>(
-                name: "AgencyId",
-                table: "SaleChannels",
-                type: "character varying(50)",
-                nullable: false,
-                oldClrType: typeof(Guid),
-                oldType: "uuid");
-
-            migrationBuilder.AlterColumn<string>(
-                name: "Id",
-                table: "Agencies",
-                type: "character varying(50)",
-                maxLength: 50,
-                nullable: false,
-                oldClrType: typeof(Guid),
-                oldType: "uuid");
+            migrationBuilder.CreateTable(
+                name: "InboxMessages",
+                columns: table => new
+                {
+                    MessageId = table.Column<Guid>(type: "uuid", nullable: false),
+                    MessageType = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    ConsumerId = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    State = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    ReasonFailed = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
+                    CreatedOnUtc = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    UpdatedOnUtc = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_InboxMessages", x => x.MessageId);
+                });
 
             migrationBuilder.CreateTable(
                 name: "Lookups",
@@ -72,6 +87,28 @@ namespace EShop.Configuration.Application.Migrations
                     table.PrimaryKey("PK_Products", x => x.Id);
                     table.ForeignKey(
                         name: "FK_Products_Agencies_AgencyId",
+                        column: x => x.AgencyId,
+                        principalTable: "Agencies",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "SaleChannels",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Name = table.Column<string>(type: "character varying(150)", maxLength: 150, nullable: false),
+                    Reference = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    AgencyId = table.Column<string>(type: "character varying(50)", nullable: false),
+                    TenantId = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    Scope = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_SaleChannels", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_SaleChannels_Agencies_AgencyId",
                         column: x => x.AgencyId,
                         principalTable: "Agencies",
                         principalColumn: "Id",
@@ -140,6 +177,16 @@ namespace EShop.Configuration.Application.Migrations
                 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_Agencies_Scope",
+                table: "Agencies",
+                column: "Scope");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Agencies_TenantId",
+                table: "Agencies",
+                column: "TenantId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Lookups_Scope",
                 table: "Lookups",
                 column: "Scope");
@@ -185,6 +232,21 @@ namespace EShop.Configuration.Application.Migrations
                 column: "TenantId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_SaleChannels_AgencyId",
+                table: "SaleChannels",
+                column: "AgencyId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SaleChannels_Scope",
+                table: "SaleChannels",
+                column: "Scope");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SaleChannels_TenantId",
+                table: "SaleChannels",
+                column: "TenantId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_SalesChannelProducts_ProductId",
                 table: "SalesChannelProducts",
                 column: "ProductId");
@@ -193,6 +255,9 @@ namespace EShop.Configuration.Application.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "InboxMessages");
+
             migrationBuilder.DropTable(
                 name: "ProductVersions");
 
@@ -205,30 +270,11 @@ namespace EShop.Configuration.Application.Migrations
             migrationBuilder.DropTable(
                 name: "Products");
 
-            migrationBuilder.AlterColumn<Guid>(
-                name: "AgencyId",
-                table: "SaleChannels",
-                type: "uuid",
-                nullable: false,
-                oldClrType: typeof(string),
-                oldType: "character varying(50)");
+            migrationBuilder.DropTable(
+                name: "SaleChannels");
 
-            migrationBuilder.AlterColumn<Guid>(
-                name: "Id",
-                table: "Agencies",
-                type: "uuid",
-                nullable: false,
-                oldClrType: typeof(string),
-                oldType: "character varying(50)",
-                oldMaxLength: 50);
-
-            migrationBuilder.AddColumn<string>(
-                name: "AgencyId",
-                table: "Agencies",
-                type: "character varying(50)",
-                maxLength: 50,
-                nullable: false,
-                defaultValue: "");
+            migrationBuilder.DropTable(
+                name: "Agencies");
         }
     }
 }

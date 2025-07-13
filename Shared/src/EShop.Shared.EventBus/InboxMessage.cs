@@ -14,6 +14,7 @@ public class InboxMessage : IExcludedFromScoping
     [MaxLength(ModelConstants.ShortMediumText)]
     public string ConsumerId { get; set; } = string.Empty;
 
+    [MaxLength(ModelConstants.ShortText)]
     public string State { get; set; } = InboxMessageStatus.New.ToString();
 
     [MaxLength(ModelConstants.VeryLongText)]
