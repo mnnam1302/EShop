@@ -16,20 +16,20 @@ public sealed class Command : ICommand
 public sealed class CommandHandler : ICommandHandler<Command>
 {
     private readonly IProductRepository productRepository;
+    private readonly IAgencyRepository agencyRepository;
     private readonly IUnitOfWork unitOfWork;
     private readonly IUserDetailsProvider userDetailsProvider;
-    private readonly IAgencyRepository agencyRepository;
 
     public CommandHandler(
         IProductRepository productRepository,
+        IAgencyRepository agencyRepository,
         IUnitOfWork unitOfWork,
-        IUserDetailsProvider userDetailsProvider,
-        IAgencyRepository agencyRepository)
+        IUserDetailsProvider userDetailsProvider)
     {
         this.productRepository = productRepository;
+        this.agencyRepository = agencyRepository;
         this.unitOfWork = unitOfWork;
         this.userDetailsProvider = userDetailsProvider;
-        this.agencyRepository = agencyRepository;
     }
 
     public async Task<Result> HandleAsync(Command command, CancellationToken cancellationToken)
