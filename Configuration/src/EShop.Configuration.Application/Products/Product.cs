@@ -42,7 +42,8 @@ public class Product : EntityBase<Guid>, IScoped
     [MaxLength(ModelConstants.MediumText)]
     public required string Name { get; set; }
 
-    public Guid? AgencyId { get; private set; }
+    [MaxLength(ModelConstants.ShortText)]
+    public string? AgencyId { get; private set; }
 
     public virtual Agency? Agency { get; set; }
 

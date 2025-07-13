@@ -38,7 +38,7 @@ public sealed class CommandHandler : ICommandHandler<Command>
 
         if (!string.IsNullOrEmpty(command.AgencyId))
         {
-            var agency = await agencyRepository.FindSingleAsync(a => a.AgencyId == command.AgencyId, false, cancellationToken);
+            var agency = await agencyRepository.FindSingleAsync(a => a.Id == command.AgencyId, false, cancellationToken);
             if (agency is null)
             {
                 throw new NotFoundException($"Agency with ID '{command.AgencyId}' not found.");

@@ -6,10 +6,10 @@ using System.ComponentModel.DataAnnotations;
 
 namespace EShop.Configuration.Application.Agencies;
 
-public class Agency : EntityBase<Guid>, IScoped
+public class Agency : IEntityBase<string>, IScoped
 {
     [MaxLength(ModelConstants.ShortText)]
-    public string AgencyId { get; set; } = string.Empty;
+    public string Id { get; set; } = string.Empty;
 
     [MaxLength(ModelConstants.MediumText)]
     public string Name { get; set; } = string.Empty;

@@ -15,7 +15,7 @@ public class SalesChannel : EntityBase<Guid>, IScoped
     [MaxLength(ModelConstants.ShortMediumText)]
     public string Reference { get; set; } = string.Empty;
 
-    public Guid AgencyId { get; set; }
+    public string AgencyId { get; set; } = string.Empty;
 
     [MaxLength(ModelConstants.ShortText)]
     public string TenantId { get; set; } = string.Empty;
