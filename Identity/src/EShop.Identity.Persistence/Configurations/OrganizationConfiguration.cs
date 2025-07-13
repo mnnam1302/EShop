@@ -1,4 +1,5 @@
-﻿using EShop.Identity.Domain.Entities;
+﻿using EShop.Identity.Domain;
+using EShop.Identity.Domain.Entities;
 using EShop.Identity.Persistence.Constants;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -12,11 +13,12 @@ internal class OrganizaitionConfiguration : IEntityTypeConfiguration<Organizatio
         builder.ToTable(TableNames.Organizations);
 
         builder.HasKey(o => o.Id);
-
         builder.HasIndex(o => new { o.TenantId, o.Name }).IsUnique();
 
-        builder
-            .OwnsOne(o => o.Context);
+        builder.Property(o => o.Id)
+            .HasMaxLength(ModelConstants.ShortText)
+            .IsRequired();
+        builder.OwnsOne(o => o.Context);
 
         builder
             .HasOne(o => o.ParentOrganization)

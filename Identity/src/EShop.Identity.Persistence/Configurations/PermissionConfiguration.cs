@@ -1,4 +1,5 @@
-﻿using EShop.Identity.Domain.Entities;
+﻿using EShop.Identity.Domain;
+using EShop.Identity.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -11,7 +12,10 @@ internal class PermissionConfiguration : IEntityTypeConfiguration<Permission>
         builder.ToTable("Permissions");
 
         builder.HasKey(x => x.Id);
-
         builder.HasIndex(x => x.Name).IsUnique();
+
+        builder.Property(x => x.Id)
+            .HasMaxLength(ModelConstants.ShortText)
+            .IsRequired();
     }
 }

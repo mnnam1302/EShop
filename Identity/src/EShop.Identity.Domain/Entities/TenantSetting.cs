@@ -4,17 +4,17 @@ using System.ComponentModel.DataAnnotations;
 
 namespace EShop.Identity.Domain.Entities;
 
-public class TenantSetting : EntityBase<string>, IScoped
+public class TenantSetting : EntityBase<Guid>, IScoped
 {
-    [MaxLength(ModelConstants.ShortText)]
-    public string? TenantId { get; set; }
-
     [MaxLength(ModelConstants.LongText)]
-    public string? Scope { get; set; }
-
-    [MaxLength(ModelConstants.StandardText)]
     public bool CustomerPortalEnabled { get; set; }
 
-    [MaxLength(ModelConstants.StandardText)]
+    [MaxLength(ModelConstants.LongText)]
     public string? CustomerPortalUrl { get; set; }
+
+    [MaxLength(ModelConstants.ShortText)]
+    public string TenantId { get; set; } = string.Empty;
+
+    [MaxLength(ModelConstants.VeryLongText)]
+    public string Scope { get; set; } = string.Empty;
 }

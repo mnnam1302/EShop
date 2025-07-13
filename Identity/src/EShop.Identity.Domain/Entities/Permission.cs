@@ -7,13 +7,13 @@ namespace EShop.Identity.Domain.Entities;
 public class Permission : EntityBase<string>, IExcludedFromScoping
 {
     [MaxLength(ModelConstants.ShortMediumText)]
-    public string? Name { get; set; }
+    public string Name { get; set; } = string.Empty;
 
-    [MaxLength(ModelConstants.LongText)]
+    [MaxLength(ModelConstants.VeryLongText)]
     public string? Description { get; set; }
 
     [MaxLength(ModelConstants.MediumText)]
-    public string? RelatedTo { get; set; }
+    public string RelatedTo { get; set; } = string.Empty;
 
-    public virtual List<Role> Roles { get; set; } = new();
+    public virtual List<Role> Roles { get; set; } = [];
 }

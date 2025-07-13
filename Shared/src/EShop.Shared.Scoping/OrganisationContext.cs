@@ -1,4 +1,6 @@
-﻿using EventFlow.ValueObjects;
+﻿using EShop.Shared.Contracts.Shared;
+using EventFlow.ValueObjects;
+using System.ComponentModel.DataAnnotations;
 
 namespace EShop.Shared.Scoping;
 
@@ -15,6 +17,7 @@ public class OrganisationContext : ValueObject
         Path = path ?? throw new ArgumentNullException(nameof(path));
     }
 
+    [MaxLength(ModelConstants.VeryLongText)]
     public string Path { get; private set; } = string.Empty;
 
     public static OrganisationContext NewRoot(string rootPath) => new OrganisationContext(SanitizePath(rootPath));
@@ -64,7 +67,7 @@ public class OrganisationContext : ValueObject
         }
 
         var pathSegmentToCheck = this.Path.Contains(PathSeparator, StringComparison.Ordinal)
-            ? $"{PathSeparator}{identifier}" 
+            ? $"{PathSeparator}{identifier}"
             : identifier;
 
         return this.Path.EndsWith(pathSegmentToCheck, StringComparison.Ordinal);

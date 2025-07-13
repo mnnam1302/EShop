@@ -25,7 +25,7 @@ public class Organization : AggregateRoot<string>, IExcludedFromScoping
     [EmailAddress]
     public string? Email { get; set; }
 
-    [MaxLength(ModelConstants.LongText)]
+    [MaxLength(ModelConstants.VeryLongText)]
     public string? Address { get; set; }
 
     [MaxLength(ModelConstants.MediumText)]
@@ -34,7 +34,7 @@ public class Organization : AggregateRoot<string>, IExcludedFromScoping
     [MaxLength(ModelConstants.TinyText)]
     public string? Postcode { get; set; }
 
-    [MaxLength(ModelConstants.LongText)]
+    [MaxLength(ModelConstants.VeryLongText)]
     public string? Description { get; set; }
 
     [MaxLength(ModelConstants.TinyText)]
@@ -52,7 +52,7 @@ public class Organization : AggregateRoot<string>, IExcludedFromScoping
     [MaxLength(ModelConstants.ShortText)]
     public string TenantId { get; private set; } = string.Empty;
 
-    [MaxLength(ModelConstants.LongText)]
+    [MaxLength(ModelConstants.VeryLongText)]
     public string Scope { get; private set; } = string.Empty;
 
     // Empty constructor for ORMs

@@ -6,6 +6,12 @@ namespace EShop.Identity.Domain.Entities;
 
 public class Tenant : EntityBase<string>, IExcludedFromScoping
 {
+    public Tenant(string id, string name)
+    {
+        Id = id;
+        Name = name;
+    }
+
     [MaxLength(ModelConstants.MediumText)]
     public string Name { get; set; }
 
@@ -13,10 +19,4 @@ public class Tenant : EntityBase<string>, IExcludedFromScoping
     public string? ExternalUsersUserPoolId { get; set; }
 
     public virtual ICollection<TenantSetting>? TenantSettings { get; set; } = [];
-
-    public Tenant(string id, string name)
-    {
-        Id = id;
-        Name = name;
-    }
 }
