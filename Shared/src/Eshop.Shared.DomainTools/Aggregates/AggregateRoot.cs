@@ -3,8 +3,10 @@ using EShop.Shared.DomainTools.Entities;
 
 namespace EShop.Shared.DomainTools.Aggregates;
 
-public abstract class AggregateRoot<TKey> : EntityBase<TKey>, IAggregateRoot<TKey>
+public abstract class AggregateRoot<TKey> : IEntityBase<TKey>, IAggregateRoot<TKey>
 {
+    public abstract TKey Id { get; set; }
+
     private readonly List<IDomainEvent> _uncommittedDomainEvents = new();
 
     public IReadOnlyCollection<IDomainEvent> GetDomainEvents() => _uncommittedDomainEvents.ToList();
