@@ -1,16 +1,32 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
 namespace EShop.Identity.Persistence.Migrations
 {
     /// <inheritdoc />
-    public partial class Initial_Migration : Migration
+    public partial class Initital : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "InboxMessages",
+                columns: table => new
+                {
+                    MessageId = table.Column<Guid>(type: "uuid", nullable: false),
+                    MessageType = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    ConsumerId = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    State = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    ReasonFailed = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
+                    CreatedOnUtc = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    UpdatedOnUtc = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_InboxMessages", x => x.MessageId);
+                });
+
             migrationBuilder.CreateTable(
                 name: "Organizations",
                 columns: table => new
@@ -24,9 +40,11 @@ namespace EShop.Identity.Persistence.Migrations
                     City = table.Column<string>(type: "character varying(150)", maxLength: 150, nullable: true),
                     Postcode = table.Column<string>(type: "character varying(10)", maxLength: 10, nullable: true),
                     Description = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
+                    LanguageCode = table.Column<string>(type: "character varying(10)", maxLength: 10, nullable: false),
+                    Context_Path = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
                     ParentOrganizationId = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true),
-                    TenantId = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true),
-                    Scope = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true)
+                    TenantId = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    Scope = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -35,7 +53,8 @@ namespace EShop.Identity.Persistence.Migrations
                         name: "FK_Organizations_Organizations_ParentOrganizationId",
                         column: x => x.ParentOrganizationId,
                         principalTable: "Organizations",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -43,9 +62,9 @@ namespace EShop.Identity.Persistence.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
-                    Name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
+                    Name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     Description = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
-                    RelatedTo = table.Column<string>(type: "character varying(150)", maxLength: 150, nullable: true)
+                    RelatedTo = table.Column<string>(type: "character varying(150)", maxLength: 150, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -56,12 +75,11 @@ namespace EShop.Identity.Persistence.Migrations
                 name: "Roles",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Name = table.Column<string>(type: "character varying(150)", maxLength: 150, nullable: false),
                     Description = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
-                    PhoneNumber = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true),
-                    TenantId = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true),
-                    Scope = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true)
+                    TenantId = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    Scope = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -73,7 +91,7 @@ namespace EShop.Identity.Persistence.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
-                    Name = table.Column<string>(type: "character varying(150)", maxLength: 150, nullable: true),
+                    Name = table.Column<string>(type: "character varying(150)", maxLength: 150, nullable: false),
                     ExternalUsersUserPoolId = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true)
                 },
                 constraints: table =>
@@ -85,7 +103,7 @@ namespace EShop.Identity.Persistence.Migrations
                 name: "Users",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    Id = table.Column<string>(type: "character varying(150)", maxLength: 150, nullable: false),
                     Username = table.Column<string>(type: "character varying(150)", maxLength: 150, nullable: false),
                     DisplayName = table.Column<string>(type: "character varying(150)", maxLength: 150, nullable: true),
                     Email = table.Column<string>(type: "character varying(150)", maxLength: 150, nullable: false),
@@ -97,9 +115,9 @@ namespace EShop.Identity.Persistence.Migrations
                     ManagerId = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true),
                     OrganizationId = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true),
                     IsActive = table.Column<bool>(type: "boolean", nullable: false),
-                    CreatedBy = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true),
-                    CreatedOnUtc = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    LastModifiedOnUtc = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true)
+                    CreatedByUserId = table.Column<string>(type: "character varying(150)", maxLength: 150, nullable: true),
+                    CreatedAtUtc = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    LastModifiedAtUtc = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -108,15 +126,16 @@ namespace EShop.Identity.Persistence.Migrations
                         name: "FK_Users_Organizations_OrganizationId",
                         column: x => x.OrganizationId,
                         principalTable: "Organizations",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
                 name: "RolePermissions",
                 columns: table => new
                 {
-                    RoleId = table.Column<string>(type: "character varying(50)", nullable: false),
-                    PermissionId = table.Column<string>(type: "character varying(50)", nullable: false)
+                    RoleId = table.Column<Guid>(type: "uuid", nullable: false),
+                    PermissionId = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -139,11 +158,11 @@ namespace EShop.Identity.Persistence.Migrations
                 name: "TenantSettings",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
-                    TenantId = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true),
-                    Scope = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
                     CustomerPortalEnabled = table.Column<bool>(type: "boolean", maxLength: 255, nullable: false),
-                    CustomerPortalUrl = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true)
+                    CustomerPortalUrl = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
+                    TenantId = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    Scope = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -160,8 +179,8 @@ namespace EShop.Identity.Persistence.Migrations
                 name: "UserRoles",
                 columns: table => new
                 {
-                    UserId = table.Column<string>(type: "character varying(50)", nullable: false),
-                    RoleId = table.Column<string>(type: "character varying(50)", nullable: false)
+                    UserId = table.Column<string>(type: "character varying(150)", maxLength: 150, nullable: false),
+                    RoleId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -181,15 +200,15 @@ namespace EShop.Identity.Persistence.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Organizations_Name",
-                table: "Organizations",
-                column: "Name",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Organizations_ParentOrganizationId",
                 table: "Organizations",
                 column: "ParentOrganizationId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Organizations_TenantId_Name",
+                table: "Organizations",
+                columns: new[] { "TenantId", "Name" },
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Permissions_Name",
@@ -222,17 +241,14 @@ namespace EShop.Identity.Persistence.Migrations
                 name: "IX_Users_OrganizationId",
                 table: "Users",
                 column: "OrganizationId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Users_Username",
-                table: "Users",
-                column: "Username",
-                unique: true);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "InboxMessages");
+
             migrationBuilder.DropTable(
                 name: "RolePermissions");
 
