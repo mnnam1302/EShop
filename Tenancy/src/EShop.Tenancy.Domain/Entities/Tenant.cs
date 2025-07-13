@@ -125,7 +125,7 @@ public class Tenant : TenantAggregate, IExcludedFromScoping
             throw new ArgumentNullException(nameof(featureId));
         }
 
-        var newTenantFeature = new TenantFeature(Guid.NewGuid().ToString(), Id, featureId, state, Id, createdBy);
+        var newTenantFeature = new TenantFeature(Guid.NewGuid(), Id, featureId, state, Id, createdBy);
         _tenantFeatures.Add(newTenantFeature);
     }
 

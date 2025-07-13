@@ -51,9 +51,9 @@ public class User
     [MaxLength(ModelConstants.ShortText)]
     public string? CreatedBy { get; set; }
 
-    public DateTimeOffset CreatedOnUtc { get; set; }
+    public DateTimeOffset CreatedAtUtc { get; set; }
 
-    public DateTimeOffset? LastModifiedOnUtc { get; set; }
+    public DateTimeOffset? LastModifiedAtUtc { get; set; }
 
     public virtual ICollection<Role> Roles { get; set; } = [];
 
@@ -83,7 +83,7 @@ public class User
         PasswordHash = password;
         Email = email;
         DisplayName = displayName;
-        CreatedOnUtc = DateTimeOffset.UtcNow;
+        CreatedAtUtc = DateTimeOffset.UtcNow;
     }
 
     public static User Create(Command.RegisterUser command)

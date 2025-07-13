@@ -1,4 +1,5 @@
-﻿using EShop.Tenancy.Domain.Entities;
+﻿using EShop.Shared.Contracts.Shared;
+using EShop.Tenancy.Domain.Entities;
 using EShop.Tenancy.Persistence.Constants;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -14,6 +15,9 @@ internal class TenantConfiguration : IEntityTypeConfiguration<Tenant>
         builder.HasKey(x => x.Id);
         builder.HasIndex(x => x.Name).IsUnique();
 
+        builder.Property(x => x.Id)
+            .HasMaxLength(ModelConstants.ShortText)
+            .IsRequired();
         builder.Property(x => x.Name).IsRequired();
         builder.Property(x => x.Description);
         builder.Property(x => x.OwnerUsername);

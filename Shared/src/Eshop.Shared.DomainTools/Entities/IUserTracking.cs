@@ -2,6 +2,6 @@
 
 public interface IUserTracking
 {
-    string CreatedBy { get; set; }
-    string? LastModifiedBy { get; set; }
+    string CreatedByUserId { get; set; }
+    string? LastModifiedByUserId { get; set; }
 }

@@ -5,20 +5,20 @@ using System.ComponentModel.DataAnnotations;
 
 namespace EShop.Tenancy.Domain.Entities;
 
-public class TenantFeature : EntityBase<string>, IScoped, IUserTracking, IDateTracking
+public class TenantFeature : EntityBase<Guid>, IScoped, IUserTracking, IDateTracking
 {
     // Using EF Core
     public TenantFeature() { }
 
-    internal TenantFeature(string id, string tenantId, string featureId, string state, string scope, string createdBy)
+    internal TenantFeature(Guid id, string tenantId, string featureId, string state, string scope, string createdBy)
     {
         Id = id;
         TenantId = tenantId;
         FeatureId = featureId;
         State = state;
         Scope = scope;
-        CreatedBy = createdBy;
-        CreatedOnUtc = DateTime.UtcNow;
+        CreatedByUserId = createdBy;
+        CreatedAtUtc = DateTime.UtcNow;
     }
 
     [MaxLength(ModelConstants.ShortText)]
@@ -29,13 +29,15 @@ public class TenantFeature : EntityBase<string>, IScoped, IUserTracking, IDateTr
     [MaxLength(ModelConstants.TinyText)]
     public string State { get; private set; } = nameof(StateFeature.Enabled);
 
-    public string CreatedBy { get; set; } = string.Empty;
+    [MaxLength(ModelConstants.MediumText)]
+    public string CreatedByUserId { get; set; } = string.Empty;
 
-    public DateTimeOffset CreatedOnUtc { get; set; }
+    public DateTimeOffset CreatedAtUtc { get; set; }
 
-    public string? LastModifiedBy { get; set; }
+    [MaxLength(ModelConstants.MediumText)]
+    public string? LastModifiedByUserId { get; set; }
 
-    public DateTimeOffset? LastModifiedOnUtc { get; set; }
+    public DateTimeOffset? LastModifiedAtUtc { get; set; }
 
     [MaxLength(ModelConstants.ShortText)]
     public string TenantId { get; private set; } = string.Empty;
