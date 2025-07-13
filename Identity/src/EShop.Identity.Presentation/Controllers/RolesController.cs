@@ -49,7 +49,7 @@ public class RolesController : ApiEndpointBase
         PermissionConstants.ViewRolesPermissionId,
         PermissionConstants.ManageRolesPermissionId
     })]
-    public async Task<IResult> GetRole(string id, CancellationToken cancellationToken)
+    public async Task<IResult> GetRole(Guid id, CancellationToken cancellationToken)
     {
         var query = new Query.GetRoleById(id);
         var result = await _sender.Send(query, cancellationToken);
@@ -78,7 +78,7 @@ public class RolesController : ApiEndpointBase
 
     [HttpPatch("{id}")]
     [RequirePermission(Permission = PermissionConstants.ManageRolesPermissionId)]
-    public async Task<IResult> UpdateRole(string id, [FromBody] Command.UpdateRole request, CancellationToken cancellationToken)
+    public async Task<IResult> UpdateRole(Guid id, [FromBody] Command.UpdateRole request, CancellationToken cancellationToken)
     {
         var command = request with { Id = id };
         var result = await _sender.Send(command, cancellationToken);
@@ -93,7 +93,7 @@ public class RolesController : ApiEndpointBase
 
     [HttpDelete("{id}")]
     [RequirePermission(Permission = PermissionConstants.ManageRolesPermissionId)]
-    public async Task<IResult> DeleteRole(string id, CancellationToken cancellationToken)
+    public async Task<IResult> DeleteRole(Guid id, CancellationToken cancellationToken)
     {
         var command = new Command.DeleteRole(id);
         var result = await _sender.Send(command, cancellationToken);
