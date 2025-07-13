@@ -33,6 +33,6 @@ public static class Command
         [MaxLength(ModelConstants.ShortText)]
         public required string OrganizationId { get; init; }
 
-        public required string[] RoleIds { get; init; }
+        public required Guid[] RoleIds { get; init; } = [];
     }
 }

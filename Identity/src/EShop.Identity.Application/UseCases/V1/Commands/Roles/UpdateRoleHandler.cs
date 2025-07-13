@@ -10,10 +10,10 @@ namespace EShop.Identity.Application.UseCases.V1.Commands.Roles;
 
 public class UpdateRoleHandler : ICommandHandler<Command.UpdateRole>
 {
-    private readonly IIdentityRepositoryBase<Role, string> _roleRepository;
+    private readonly IIdentityRepositoryBase<Role, Guid> _roleRepository;
     private readonly IUnitOfWork _unitOfWork;
 
-    public UpdateRoleHandler(IIdentityRepositoryBase<Role, string> roleRepository, IUnitOfWork unitOfWork)
+    public UpdateRoleHandler(IIdentityRepositoryBase<Role, Guid> roleRepository, IUnitOfWork unitOfWork)
     {
         _roleRepository = roleRepository;
         _unitOfWork = unitOfWork;

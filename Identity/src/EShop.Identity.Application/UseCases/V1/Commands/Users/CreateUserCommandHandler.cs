@@ -14,7 +14,7 @@ namespace EShop.Identity.Application.UseCases.V1.Commands.Users;
 public class CreateUserCommandHandler : ICommandHandler<Command.CreateUserCommand>
 {
     private readonly IOrganizationRepository _organizationRepository;
-    private readonly IIdentityRepositoryBase<Role, string> _roleRepository;
+    private readonly IIdentityRepositoryBase<Role, Guid> _roleRepository;
     private readonly IIdentityRepositoryBase<User, string> _userRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IPasswordHasher _passwordHasher;
@@ -22,7 +22,7 @@ public class CreateUserCommandHandler : ICommandHandler<Command.CreateUserComman
 
     public CreateUserCommandHandler(
         IOrganizationRepository organizationRepository,
-        IIdentityRepositoryBase<Role, string> roleRepository,
+        IIdentityRepositoryBase<Role, Guid> roleRepository,
         IIdentityRepositoryBase<User, string> userRepository,
         IUnitOfWork unitOfWork,
         IPasswordHasher passwordHasher,
@@ -78,7 +78,7 @@ public class CreateUserCommandHandler : ICommandHandler<Command.CreateUserComman
         }
     }
 
-    private async Task<ICollection<Role>> AssertRolesExistingAsync(string[] roleIds, CancellationToken cancellationToken)
+    private async Task<IEnumerable<Role>> AssertRolesExistingAsync(Guid[] roleIds, CancellationToken cancellationToken)
     {
         var roles = await _roleRepository.FindByConditionAsync(
             x => roleIds.Contains(x.Id),

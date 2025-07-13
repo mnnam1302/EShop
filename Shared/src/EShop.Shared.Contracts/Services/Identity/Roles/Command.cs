@@ -9,11 +9,11 @@ public static class Command
     public record UpdateRole : ICommand
     {
         [JsonIgnore]
-        public string? Id { get; init; }
+        public Guid Id { get; init; }
         public string Name { get; init; }
         public string? Description { get; init; }
         public string? PhoneNumer { get; init; }
     }
 
-    public record DeleteRole(string Id) : ICommand;
+    public record DeleteRole(Guid Id) : ICommand;
 }
