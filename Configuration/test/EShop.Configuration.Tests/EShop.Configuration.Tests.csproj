@@ -20,12 +20,4 @@
     <Using Include="Xunit" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Authorization\" />
-    <Folder Include="Architecture\" />
-    <Folder Include="Shared\" />
-    <Folder Include="Products\Create\" />
-    <Folder Include="Setups\" />
-  </ItemGroup>
-
 </Project>

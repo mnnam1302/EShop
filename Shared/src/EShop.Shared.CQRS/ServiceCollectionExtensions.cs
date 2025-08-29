@@ -37,9 +37,9 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IQueryDispatcher, QueryDispatcher>();
         services.AddTransient<IMediator, Mediator>();
 
-        services.TryAddScoped<CommandDispatcher>();
-        services.TryAddScoped<QueryDispatcher>();
-        services.TryAddTransient<Mediator>();
+        //services.TryAddScoped<CommandDispatcher>();
+        //services.TryAddScoped<QueryDispatcher>();
+        //services.TryAddTransient<Mediator>();
 
         services.TryAddSingleton(typeof(ILogger<>), typeof(NullLogger<>));
 

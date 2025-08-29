@@ -9,7 +9,7 @@ using System.Text;
 
 namespace EShop.Identity.Infrastructure.Authentication;
 
-public class TokenService : ITokenService
+public sealed class TokenService : ITokenService
 {
     private readonly JwtOptions _jwtOptions = new JwtOptions();
 

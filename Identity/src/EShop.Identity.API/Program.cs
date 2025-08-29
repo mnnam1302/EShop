@@ -28,6 +28,7 @@ public static class Program
             Log.Information("Starting up {ApplicationName}...", ApplicationName);
             await app.RunAsync();
             Log.Information("Stop {ApplicationName}...", ApplicationName);
+
             return 0;
         }
         catch (Exception ex)
