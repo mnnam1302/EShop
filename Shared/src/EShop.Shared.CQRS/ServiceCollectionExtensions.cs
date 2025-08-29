@@ -1,9 +1,8 @@
 ﻿using EShop.Shared.CQRS.Command;
 using EShop.Shared.CQRS.Query;
+using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
 using System.Reflection;
 
 namespace EShop.Shared.CQRS;
@@ -36,12 +35,6 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ICommandDispatcher, CommandDispatcher>();
         services.AddScoped<IQueryDispatcher, QueryDispatcher>();
         services.AddTransient<IMediator, Mediator>();
-
-        //services.TryAddScoped<CommandDispatcher>();
-        //services.TryAddScoped<QueryDispatcher>();
-        //services.TryAddTransient<Mediator>();
-
-        services.TryAddSingleton(typeof(ILogger<>), typeof(NullLogger<>));
 
         return services;
     }
