@@ -9,10 +9,10 @@ public sealed class CommandDispatcher : ICommandDispatcher
 
     public CommandDispatcher(IServiceProvider serviceProvider)
     {
-        _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+        _serviceProvider = serviceProvider;
     }
 
-    public async Task<Result> DispatchAsync<TCommand>(TCommand command, CancellationToken cancellationToken = default)
+    public async Task<Result> DispatchAsync<TCommand>(TCommand command, CancellationToken cancellationToken)
         where TCommand : ICommand
     {
         ArgumentNullException.ThrowIfNull(command);
@@ -23,7 +23,7 @@ public sealed class CommandDispatcher : ICommandDispatcher
         return result;
     }
 
-    public async Task<Result<TResult>> DispatchAsync<TCommand, TResult>(TCommand command, CancellationToken cancellationToken = default)
+    public async Task<Result<TResult>> DispatchAsync<TCommand, TResult>(TCommand command, CancellationToken cancellationToken)
         where TCommand : ICommand<TResult>
     {
         ArgumentNullException.ThrowIfNull(command);

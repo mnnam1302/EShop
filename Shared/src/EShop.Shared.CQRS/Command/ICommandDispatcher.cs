@@ -4,9 +4,9 @@ namespace EShop.Shared.CQRS.Command;
 
 public interface ICommandDispatcher
 {
-    Task<Result> DispatchAsync<TCommand>(TCommand command, CancellationToken cancellationToken = default)
+    Task<Result> DispatchAsync<TCommand>(TCommand command, CancellationToken cancellationToken)
         where TCommand : ICommand;
 
-    Task<Result<TResult>> DispatchAsync<TCommand, TResult>(TCommand command, CancellationToken cancellationToken = default)
+    Task<Result<TResult>> DispatchAsync<TCommand, TResult>(TCommand command, CancellationToken cancellationToken)
         where TCommand : ICommand<TResult>;
 }

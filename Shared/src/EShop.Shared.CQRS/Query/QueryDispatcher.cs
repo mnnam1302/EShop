@@ -9,10 +9,10 @@ public sealed class QueryDispatcher : IQueryDispatcher
 
     public QueryDispatcher(IServiceProvider serviceProvider)
     {
-        _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+        _serviceProvider = serviceProvider;
     }
 
-    public async Task<Result<TResult>> DispatchAsync<TQuery, TResult>(TQuery query, CancellationToken cancellationToken = default)
+    public async Task<Result<TResult>> DispatchAsync<TQuery, TResult>(TQuery query, CancellationToken cancellationToken)
         where TQuery : IQuery<TResult>
     {
         ArgumentNullException.ThrowIfNull(query);

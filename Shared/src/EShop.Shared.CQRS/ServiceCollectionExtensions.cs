@@ -9,16 +9,6 @@ namespace EShop.Shared.CQRS;
 
 public static class ServiceCollectionExtensions
 {
-    /// <summary>
-    /// Adds CQRS (Command Query Responsibility Segregation) services to the specified <see cref="IServiceCollection"/>.
-    /// </summary>
-    /// <remarks>This method registers the necessary services for implementing CQRS patterns, including
-    /// command and query handlers. It scans the provided <paramref name="assembly"/> for types implementing <see
-    /// cref="ICommandHandler{TCommand}"/>,  <see cref="ICommandHandler{TCommand, TResult}"/>, and <see
-    /// cref="IQueryHandler{TQuery, TResult}"/> interfaces.</remarks>
-    /// <param name="services">The <see cref="IServiceCollection"/> to which the CQRS services will be added.</param>
-    /// <param name="assembly">The assembly to scan for command and query handler implementations.</param>
-    /// <returns>The updated <see cref="IServiceCollection"/> instance.</returns>
     public static IServiceCollection AddCQRS(this IServiceCollection services, Assembly assembly)
     {
         services.AddCQRS();
