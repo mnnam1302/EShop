@@ -11,25 +11,26 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddCQRS(this IServiceCollection services, Assembly assembly)
     {
-        services.AddCQRS();
-
-        RegisterHandlers(services, assembly, typeof(ICommandHandler<>));
-        RegisterHandlers(services, assembly, typeof(ICommandHandler<,>));
-        RegisterHandlers(services, assembly, typeof(IQueryHandler<,>));
-
-        return services;
-    }
-
-    public static IServiceCollection AddCQRS(this IServiceCollection services)
-    {
         services.AddScoped<ICommandDispatcher, CommandDispatcher>();
         services.AddScoped<IQueryDispatcher, QueryDispatcher>();
-        services.AddTransient<IMediator, Mediator>();
+        services.AddScoped<IMediator, Mediator>();
+
+        var handlerInterfaceTypes = new[]
+         {
+            typeof(ICommandHandler<>),
+            typeof(ICommandHandler<,>),
+            typeof(IQueryHandler<,>)
+        };
+
+        foreach (var handlerInterfaceType in handlerInterfaceTypes)
+        {
+            RegisterGenericHandlers(services, assembly, handlerInterfaceType);
+        }
 
         return services;
     }
 
-    private static void RegisterHandlers(IServiceCollection services, Assembly assembly, Type handlerInterfaceType)
+    private static void RegisterGenericHandlers(IServiceCollection services, Assembly assembly, Type handlerInterfaceType)
     {
         var handlerTypes = assembly.GetTypes()
             .Where(t => t.IsClass && !t.IsAbstract)
@@ -38,10 +39,10 @@ public static class ServiceCollectionExtensions
 
         foreach (var handlerType in handlerTypes)
         {
-            var interfaces = handlerType.GetInterfaces()
+            var implementedInterfaces = handlerType.GetInterfaces()
                 .Where(i => i.IsGenericType && i.GetGenericTypeDefinition() == handlerInterfaceType);
 
-            foreach (var @interface in interfaces)
+            foreach (var @interface in implementedInterfaces)
             {
                 services.TryAddScoped(@interface, handlerType);
             }
