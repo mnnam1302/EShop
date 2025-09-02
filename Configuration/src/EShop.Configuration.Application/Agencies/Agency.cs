@@ -1,5 +1,4 @@
-﻿using EShop.Configuration.Application.SalesChannels;
-using EShop.Shared.Contracts.Shared;
+﻿using EShop.Shared.Contracts.Shared;
 using EShop.Shared.DomainTools.Entities;
 using EShop.Shared.Scoping;
 using System.ComponentModel.DataAnnotations;
@@ -34,6 +33,4 @@ public class Agency : IEntityBase<string>, IScoped
 
     [MaxLength(ModelConstants.VeryLongText)]
     public string Scope { get; set; } = string.Empty;
-
-    public virtual ICollection<SalesChannel> SalesChannels { get; set; } = [];
 }

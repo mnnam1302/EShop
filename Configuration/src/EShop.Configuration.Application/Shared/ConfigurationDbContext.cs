@@ -1,6 +1,4 @@
 ﻿using EShop.Configuration.Application.Agencies;
-using EShop.Configuration.Application.Products;
-using EShop.Configuration.Application.SalesChannels;
 using EShop.Shared.EventBus;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,11 +7,7 @@ namespace EShop.Configuration.Application.Shared;
 public class ConfigurationDbContext : DbContext, IInboxDbContext
 {
     public DbSet<Agency> Agencies { get; set; }
-    public DbSet<SalesChannel> SaleChannels { get; set; }
     public DbSet<InboxMessage> InboxMessages { get; set; }
-    public DbSet<Product> Products { get; set; }
-    public DbSet<ProductVersion> ProductVersions { get; set; }
-    public DbSet<Lookup> Lookups { get; set; }
 
     public ConfigurationDbContext(DbContextOptions<ConfigurationDbContext> options) : base(options) { }
 

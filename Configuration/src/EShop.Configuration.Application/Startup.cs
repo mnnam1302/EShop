@@ -1,6 +1,5 @@
 ﻿using EShop.Configuration.Application.Agencies;
 using EShop.Configuration.Application.Boostrapping;
-using EShop.Configuration.Application.Products;
 using EShop.Configuration.Application.Shared;
 using EShop.Shared.JsonApi.DependencyInjections;
 using EShop.Shared.JsonApi.Middlewares;
@@ -23,8 +22,7 @@ public class Startup
         services
             .AddShared(Configuration)
             .AddBoostrapping(Configuration, Environment)
-            .AddAgencies()
-            .AddProducts();
+            .AddAgencies();
     }
 
     public virtual void Configure(WebApplication app, IHostApplicationLifetime applicationLifetime, ILoggerFactory loggerFactory)
