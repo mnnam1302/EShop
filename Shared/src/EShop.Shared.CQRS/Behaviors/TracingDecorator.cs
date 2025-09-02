@@ -6,9 +6,9 @@ using System.Diagnostics;
 
 namespace EShop.Shared.CQRS.Behaviors;
 
-public static class RequestTraicingBehavior
+public static class TracingDecorator
 {
-    public sealed class QueryHandler<TQuery, TResponse> : IQueryHandler<TQuery, TResponse>
+    internal sealed class QueryHandler<TQuery, TResponse> : IQueryHandler<TQuery, TResponse>
         where TQuery : IQuery<TResponse>
     {
         private readonly Stopwatch _timer;
@@ -38,7 +38,7 @@ public static class RequestTraicingBehavior
         }
     }
 
-    public sealed class CommandHandler<TCommand> : ICommandHandler<TCommand>
+    internal sealed class CommandHandler<TCommand> : ICommandHandler<TCommand>
         where TCommand : ICommand
     {
         private readonly Stopwatch _timer;
@@ -68,7 +68,7 @@ public static class RequestTraicingBehavior
         }
     }
 
-    public sealed class CommandHandler<TCommand, TResponse> : ICommandHandler<TCommand, TResponse>
+    internal sealed class CommandHandler<TCommand, TResponse> : ICommandHandler<TCommand, TResponse>
         where TCommand : ICommand<TResponse>
     {
         private readonly Stopwatch _timer;

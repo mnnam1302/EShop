@@ -24,9 +24,13 @@ public static class ServiceCollectionExtensions
                 .AsImplementedInterfaces()
                 .WithScopedLifetime());
 
-        services.TryDecorate(typeof(IQueryHandler<,>), typeof(Behaviors.RequestTraicingBehavior.QueryHandler<,>));
-        services.TryDecorate(typeof(ICommandHandler<>), typeof(Behaviors.RequestTraicingBehavior.CommandHandler<>));
-        services.TryDecorate(typeof(ICommandHandler<,>), typeof(Behaviors.RequestTraicingBehavior.CommandHandler<,>));
+        // Decorator & Chain of Responsibility design pattern
+        services.TryDecorate(typeof(ICommandHandler<>), typeof(Behaviors.ValidationDecorator.CommandHandler<>));
+        services.TryDecorate(typeof(ICommandHandler<,>), typeof(Behaviors.ValidationDecorator.CommandHandler<,>));
+
+        services.TryDecorate(typeof(IQueryHandler<,>), typeof(Behaviors.TracingDecorator.QueryHandler<,>));
+        services.TryDecorate(typeof(ICommandHandler<>), typeof(Behaviors.TracingDecorator.CommandHandler<>));
+        services.TryDecorate(typeof(ICommandHandler<,>), typeof(Behaviors.TracingDecorator.CommandHandler<,>));
 
         return services;
     }
