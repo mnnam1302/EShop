@@ -32,9 +32,9 @@ public static class ServiceCollectionExtensions
         services.TryDecorate(typeof(ICommandHandler<>), typeof(Behaviors.ValidationDecorator.CommandHandler<>));
         services.TryDecorate(typeof(ICommandHandler<,>), typeof(Behaviors.ValidationDecorator.CommandHandler<,>));
 
-        services.TryDecorate(typeof(IQueryHandler<,>), typeof(Behaviors.TracingDecorator.QueryHandler<,>));
-        services.TryDecorate(typeof(ICommandHandler<>), typeof(Behaviors.TracingDecorator.CommandHandler<>));
-        services.TryDecorate(typeof(ICommandHandler<,>), typeof(Behaviors.TracingDecorator.CommandHandler<,>));
+        services.TryDecorate(typeof(IQueryHandler<,>), typeof(Behaviors.LoggingDecorator.QueryHandler<,>));
+        services.TryDecorate(typeof(ICommandHandler<>), typeof(Behaviors.LoggingDecorator.CommandHandler<>));
+        services.TryDecorate(typeof(ICommandHandler<,>), typeof(Behaviors.LoggingDecorator.CommandHandler<,>));
 
         return services;
     }

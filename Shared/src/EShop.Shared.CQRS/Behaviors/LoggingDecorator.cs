@@ -2,16 +2,14 @@
 using EShop.Shared.CQRS.Command;
 using EShop.Shared.CQRS.Query;
 using Microsoft.Extensions.Logging;
-using System.Diagnostics;
 
 namespace EShop.Shared.CQRS.Behaviors;
 
-public static class TracingDecorator
+public static class LoggingDecorator
 {
     internal sealed class QueryHandler<TQuery, TResponse> : IQueryHandler<TQuery, TResponse>
         where TQuery : IQuery<TResponse>
     {
-        private readonly Stopwatch _timer;
         private readonly ILogger<QueryHandler<TQuery, TResponse>> _logger;
         private readonly IQueryHandler<TQuery, TResponse> _innerHandler;
 
@@ -20,19 +18,25 @@ public static class TracingDecorator
             IQueryHandler<TQuery, TResponse> innerHandler)
         {
             _logger = logger;
-            _timer = new Stopwatch();
             _innerHandler = innerHandler;
         }
 
         public async Task<Result<TResponse>> HandleAsync(TQuery query, CancellationToken cancellationToken = default)
         {
-            _timer.Start();
-            var result = await _innerHandler.HandleAsync(query, cancellationToken);
-            _timer.Stop();
-
             var requestName = typeof(TQuery).Name;
-            var elapsedMilliseconds = _timer.ElapsedMilliseconds;
-            _logger.LogInformation("Request Details: {RequestName} ({ElapsedMilliseconds} milliseconds)", requestName, elapsedMilliseconds);
+
+            _logger.LogInformation("Processing request {RequestName}", requestName);
+
+            var result = await _innerHandler.HandleAsync(query, cancellationToken);
+
+            if (result.IsSuccess)
+            {
+                _logger.LogInformation("Completed request {RequestName}", requestName);
+            }
+            else
+            {
+                _logger.LogWarning("Completed request  {RequestName} with error: {Error}", requestName, result.Error);
+            }
 
             return result;
         }
@@ -41,7 +45,6 @@ public static class TracingDecorator
     internal sealed class CommandHandler<TCommand> : ICommandHandler<TCommand>
         where TCommand : ICommand
     {
-        private readonly Stopwatch _timer;
         private readonly ILogger<CommandHandler<TCommand>> _logger;
         private readonly ICommandHandler<TCommand> _innerHandler;
 
@@ -50,19 +53,25 @@ public static class TracingDecorator
             ICommandHandler<TCommand> innerHandler)
         {
             _logger = logger;
-            _timer = new Stopwatch();
             _innerHandler = innerHandler;
         }
 
         public async Task<Result> HandleAsync(TCommand command, CancellationToken cancellationToken)
         {
-            _timer.Start();
-            var result = await _innerHandler.HandleAsync(command, cancellationToken);
-            _timer.Stop();
-
             var requestName = typeof(TCommand).Name;
-            var elapsedMilliseconds = _timer.ElapsedMilliseconds;
-            _logger.LogInformation("Request Details: {RequestName} ({ElapsedMilliseconds} milliseconds)", requestName, elapsedMilliseconds);
+
+            _logger.LogInformation("Processing request {RequestName}", requestName);
+
+            var result = await _innerHandler.HandleAsync(command, cancellationToken);
+
+            if (result.IsSuccess)
+            {
+                _logger.LogInformation("Completed request {RequestName}", requestName);
+            }
+            else
+            {
+                _logger.LogWarning("Completed request  {RequestName} with error: {Error}", requestName, result.Error);
+            }
 
             return result;
         }
@@ -71,7 +80,6 @@ public static class TracingDecorator
     internal sealed class CommandHandler<TCommand, TResponse> : ICommandHandler<TCommand, TResponse>
         where TCommand : ICommand<TResponse>
     {
-        private readonly Stopwatch _timer;
         private readonly ILogger<CommandHandler<TCommand, TResponse>> _logger;
         private readonly ICommandHandler<TCommand, TResponse> _innerHandler;
 
@@ -80,20 +88,25 @@ public static class TracingDecorator
             ICommandHandler<TCommand, TResponse> innerHandler)
         {
             _logger = logger;
-            _timer = new Stopwatch();
             _innerHandler = innerHandler;
         }
 
-
         public async Task<Result<TResponse>> HandleAsync(TCommand command, CancellationToken cancellationToken)
         {
-            _timer.Start();
-            var result = await _innerHandler.HandleAsync(command, cancellationToken);
-            _timer.Stop();
-
             var requestName = typeof(TCommand).Name;
-            var elapsedMilliseconds = _timer.ElapsedMilliseconds;
-            _logger.LogInformation("Request Details: {RequestName} ({ElapsedMilliseconds} milliseconds)", requestName, elapsedMilliseconds);
+
+            _logger.LogInformation("Processing request {RequestName}", requestName);
+
+            var result = await _innerHandler.HandleAsync(command, cancellationToken);
+
+            if (result.IsSuccess)
+            {
+                _logger.LogInformation("Completed request {RequestName}", requestName);
+            }
+            else
+            {
+                _logger.LogWarning("Completed request  {RequestName} with error: {Error}", requestName, result.Error);
+            }
 
             return result;
         }
