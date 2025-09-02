@@ -14,6 +14,6 @@ public static class EndpointHandler
 
     private static async Task GetAgenciesAsync()
     {
-        throw new NotImplementedException();
+        var query = new GetAgenciesQuery();
     }
 }

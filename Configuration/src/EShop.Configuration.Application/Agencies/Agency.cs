@@ -5,7 +5,8 @@ using System.ComponentModel.DataAnnotations;
 
 namespace EShop.Configuration.Application.Agencies;
 
-public class Agency : IEntityBase<Guid>, IScoped
+//public class Agency : IEntityBase<Guid>, IScoped
+public class Agency : IEntityBase<Guid>, IExcludedFromScoping
 {
     public Agency(string name, string tenantId)
     {

@@ -1,6 +1,8 @@
-﻿namespace EShop.Configuration.Application.Agencies.GetAgencies
+﻿using EShop.Shared.CQRS.Query;
+
+namespace EShop.Configuration.Application.Agencies.GetAgencies
 {
-    public class GetAgenciesQuery
+    public class GetAgenciesQuery : IQuery<>
     {
     }
 }
