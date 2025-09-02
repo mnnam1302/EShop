@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
+using System.Reflection;
 
 namespace EShop.Shared.CQRS.Tests.Configuration;
 
@@ -12,7 +13,7 @@ public class ServiceCollectionExtensionsTests : TestBase
         services.AddLogging();
 
         // Act
-        services.AddCQRS();
+        services.AddCQRS(Assembly.GetExecutingAssembly());
 
         // Assert
         using var serviceProvider = services.BuildServiceProvider();
@@ -21,9 +22,10 @@ public class ServiceCollectionExtensionsTests : TestBase
         serviceProvider.GetService<IQueryDispatcher>().Should().NotBeNull();
         serviceProvider.GetService<IMediator>().Should().NotBeNull();
 
-        serviceProvider.GetService<CommandDispatcher>().Should().NotBeNull();
-        serviceProvider.GetService<QueryDispatcher>().Should().NotBeNull();
-        serviceProvider.GetService<Mediator>().Should().NotBeNull();
+        // Verify the concrete implementations are used
+        serviceProvider.GetService<ICommandDispatcher>().Should().BeOfType<CommandDispatcher>();
+        serviceProvider.GetService<IQueryDispatcher>().Should().BeOfType<QueryDispatcher>();
+        serviceProvider.GetService<IMediator>().Should().BeOfType<Mediator>();
     }
 
     [Fact]
@@ -34,7 +36,7 @@ public class ServiceCollectionExtensionsTests : TestBase
         services.AddLogging();
 
         // Act
-        services.AddCQRS();
+        services.AddCQRS(Assembly.GetExecutingAssembly());
 
         // Assert
         using var serviceProvider = services.BuildServiceProvider();
@@ -61,7 +63,7 @@ public class ServiceCollectionExtensionsTests : TestBase
         // Arrange
         var services = new ServiceCollection();
         services.AddLogging();
-        services.AddCQRS();
+        services.AddCQRS(Assembly.GetExecutingAssembly());
 
         services.AddScoped<ICommandHandler<TestCommand>, TestCommandHandler>();
         services.AddScoped<IQueryHandler<TestQuery, TestResult>, TestQueryHandler>();
@@ -86,7 +88,7 @@ public class ServiceCollectionExtensionsTests : TestBase
         // Arrange
         var services = new ServiceCollection();
         services.AddLogging();
-        services.AddCQRS();
+        services.AddCQRS(Assembly.GetExecutingAssembly());
         services.AddScoped<ICommandHandler<TestCommand>, TestCommandHandler>();
         services.AddScoped<ICommandHandler<TestCommandWithResult, TestResult>, TestCommandWithResultHandler>();
         services.AddScoped<IQueryHandler<TestQuery, TestResult>, TestQueryHandler>();
@@ -120,8 +122,8 @@ public class ServiceCollectionExtensionsTests : TestBase
         services.AddLogging();
 
         // Act
-        services.AddCQRS();
-        services.AddCQRS();
+        services.AddCQRS(Assembly.GetExecutingAssembly());
+        services.AddCQRS(Assembly.GetExecutingAssembly());
 
         // Assert
         using var serviceProvider = services.BuildServiceProvider();
@@ -140,7 +142,7 @@ public class ServiceCollectionExtensionsTests : TestBase
         var services = new ServiceCollection();
 
         // Act
-        services.AddCQRS();
+        services.AddCQRS(Assembly.GetExecutingAssembly());
 
         // Assert
         using var serviceProvider = services.BuildServiceProvider();

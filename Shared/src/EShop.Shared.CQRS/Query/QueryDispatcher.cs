@@ -12,7 +12,7 @@ public sealed class QueryDispatcher : IQueryDispatcher
         _serviceProvider = serviceProvider;
     }
 
-    public async Task<Result<TResult>> DispatchAsync<TQuery, TResult>(TQuery query, CancellationToken cancellationToken)
+    public async Task<Result<TResult>> DispatchAsync<TQuery, TResult>(TQuery query, CancellationToken cancellationToken = default)
         where TQuery : IQuery<TResult>
     {
         ArgumentNullException.ThrowIfNull(query);

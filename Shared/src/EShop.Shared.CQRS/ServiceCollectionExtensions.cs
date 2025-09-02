@@ -1,8 +1,6 @@
 ﻿using EShop.Shared.CQRS.Command;
 using EShop.Shared.CQRS.Query;
-using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using System.Reflection;
 
 namespace EShop.Shared.CQRS;
@@ -13,39 +11,23 @@ public static class ServiceCollectionExtensions
     {
         services.AddScoped<ICommandDispatcher, CommandDispatcher>();
         services.AddScoped<IQueryDispatcher, QueryDispatcher>();
-        services.AddScoped<IMediator, Mediator>();
+        services.AddTransient<IMediator, Mediator>();
 
-        var handlerInterfaceTypes = new[]
-         {
-            typeof(ICommandHandler<>),
-            typeof(ICommandHandler<,>),
-            typeof(IQueryHandler<,>)
-        };
+        services.Scan(scan => scan.FromAssemblies(assembly)
+            .AddClasses(classes => classes.AssignableTo(typeof(ICommandHandler<>)), publicOnly: false)
+                .AsImplementedInterfaces()
+                .WithScopedLifetime()
+            .AddClasses(classes => classes.AssignableTo(typeof(ICommandHandler<,>)), publicOnly: false)
+                .AsImplementedInterfaces()
+                .WithScopedLifetime()
+            .AddClasses(classes => classes.AssignableTo(typeof(IQueryHandler<,>)), publicOnly: false)
+                .AsImplementedInterfaces()
+                .WithScopedLifetime());
 
-        foreach (var handlerInterfaceType in handlerInterfaceTypes)
-        {
-            RegisterGenericHandlers(services, assembly, handlerInterfaceType);
-        }
+        services.TryDecorate(typeof(IQueryHandler<,>), typeof(Behaviors.RequestTraicingBehavior.QueryHandler<,>));
+        services.TryDecorate(typeof(ICommandHandler<>), typeof(Behaviors.RequestTraicingBehavior.CommandHandler<>));
+        services.TryDecorate(typeof(ICommandHandler<,>), typeof(Behaviors.RequestTraicingBehavior.CommandHandler<,>));
 
         return services;
-    }
-
-    private static void RegisterGenericHandlers(IServiceCollection services, Assembly assembly, Type handlerInterfaceType)
-    {
-        var handlerTypes = assembly.GetTypes()
-            .Where(t => t.IsClass && !t.IsAbstract)
-            .Where(t => t.GetInterfaces()
-                .Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == handlerInterfaceType));
-
-        foreach (var handlerType in handlerTypes)
-        {
-            var implementedInterfaces = handlerType.GetInterfaces()
-                .Where(i => i.IsGenericType && i.GetGenericTypeDefinition() == handlerInterfaceType);
-
-            foreach (var @interface in implementedInterfaces)
-            {
-                services.TryAddScoped(@interface, handlerType);
-            }
-        }
     }
 }

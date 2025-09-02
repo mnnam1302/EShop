@@ -65,6 +65,7 @@
     <PackageVersion Include="Polly" Version="8.5.2" />
     <PackageVersion Include="Reqnroll.Tools.MsBuild.Generation" Version="2.2.1" />
     <PackageVersion Include="Reqnroll.xUnit" Version="2.2.1" />
+    <PackageVersion Include="Scrutor" Version="6.1.0" />
     <PackageVersion Include="Serilog" Version="4.2.0" />
     <PackageVersion Include="Serilog.AspNetCore" Version="8.0.3" />
     <PackageVersion Include="Serilog.Enrichers.Environment" Version="3.0.1" />

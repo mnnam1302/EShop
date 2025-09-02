@@ -12,7 +12,7 @@ public sealed class CommandDispatcher : ICommandDispatcher
         _serviceProvider = serviceProvider;
     }
 
-    public async Task<Result> DispatchAsync<TCommand>(TCommand command, CancellationToken cancellationToken)
+    public async Task<Result> DispatchAsync<TCommand>(TCommand command, CancellationToken cancellationToken = default)
         where TCommand : ICommand
     {
         ArgumentNullException.ThrowIfNull(command);
@@ -23,7 +23,7 @@ public sealed class CommandDispatcher : ICommandDispatcher
         return result;
     }
 
-    public async Task<Result<TResult>> DispatchAsync<TCommand, TResult>(TCommand command, CancellationToken cancellationToken)
+    public async Task<Result<TResult>> DispatchAsync<TCommand, TResult>(TCommand command, CancellationToken cancellationToken = default)
         where TCommand : ICommand<TResult>
     {
         ArgumentNullException.ThrowIfNull(command);

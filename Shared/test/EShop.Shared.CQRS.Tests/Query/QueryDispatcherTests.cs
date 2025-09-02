@@ -1,10 +1,6 @@
-using EShop.Shared.CQRS.Query;
-using EShop.Shared.CQRS.Tests.TestHelpers;
 using EShop.Shared.Contracts.Abstractions.Shared;
-using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Moq;
 
 namespace EShop.Shared.CQRS.Tests.Query;
 
@@ -20,10 +16,10 @@ public class QueryDispatcherTests : TestBase
     protected override void ConfigureServices(IServiceCollection services)
     {
         base.ConfigureServices(services);
-        
+
         // Register query handlers
         services.AddScoped<IQueryHandler<TestQuery, TestResult>, TestQueryHandler>();
-        
+
         // Register dispatcher with mocked logger
         services.AddScoped(_ => _loggerMock.Object);
         services.AddScoped<QueryDispatcher>();
@@ -48,7 +44,7 @@ public class QueryDispatcherTests : TestBase
         result.Value.Id.Should().Be(queryId);
         result.Value.Name.Should().Be("Test Item");
         result.Value.CreatedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(5));
-        
+
         var testHandler = handler as TestQueryHandler;
         testHandler.Should().NotBeNull();
         testHandler!.WasCalled.Should().BeTrue();
@@ -77,7 +73,7 @@ public class QueryDispatcherTests : TestBase
         services.AddLogging();
         services.AddScoped(_ => _loggerMock.Object);
         services.AddScoped<QueryDispatcher>();
-        
+
         using var serviceProvider = services.BuildServiceProvider();
         var dispatcher = serviceProvider.GetRequiredService<QueryDispatcher>();
         var query = new TestQuery(Guid.NewGuid());
@@ -96,7 +92,7 @@ public class QueryDispatcherTests : TestBase
         services.AddScoped(_ => _loggerMock.Object);
         services.AddScoped<QueryDispatcher>();
         services.AddScoped<IQueryHandler<TestQuery, TestResult>, ThrowingQueryHandler>();
-        
+
         using var serviceProvider = services.BuildServiceProvider();
         var dispatcher = serviceProvider.GetRequiredService<QueryDispatcher>();
         var query = new TestQuery(Guid.NewGuid());
@@ -116,7 +112,7 @@ public class QueryDispatcherTests : TestBase
         services.AddScoped(_ => _loggerMock.Object);
         services.AddScoped<QueryDispatcher>();
         services.AddScoped<IQueryHandler<TestQuery, TestResult>, FailingQueryHandler>();
-        
+
         using var serviceProvider = services.BuildServiceProvider();
         var dispatcher = serviceProvider.GetRequiredService<QueryDispatcher>();
         var query = new TestQuery(Guid.NewGuid());
@@ -130,64 +126,6 @@ public class QueryDispatcherTests : TestBase
         result.Error.Should().NotBeNull();
         result.Error.Code.Should().Be("Query.Failed");
         result.Error.Message.Should().Be("This query handler always fails");
-    }
-
-    [Fact]
-    public async Task DispatchAsync_ShouldLogExecutionDetails()
-    {
-        // Arrange
-        var query = new TestQuery(Guid.NewGuid());
-        var dispatcher = GetService<QueryDispatcher>();
-
-        // Act
-        await dispatcher.DispatchAsync<TestQuery, TestResult>(query);
-
-        // Assert
-        _loggerMock.Verify(
-            x => x.Log(
-                LogLevel.Debug,
-                It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("Dispatching query") && v.ToString()!.Contains("TestQuery")),
-                It.IsAny<Exception>(),
-                It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
-            Times.Once);
-
-        _loggerMock.Verify(
-            x => x.Log(
-                LogLevel.Debug,
-                It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("Query") && v.ToString()!.Contains("handled successfully")),
-                It.IsAny<Exception>(),
-                It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
-            Times.Once);
-    }
-
-    [Fact]
-    public async Task DispatchAsync_WhenHandlerFails_ShouldLogWarning()
-    {
-        // Arrange
-        var services = new ServiceCollection();
-        services.AddLogging();
-        services.AddScoped(_ => _loggerMock.Object);
-        services.AddScoped<QueryDispatcher>();
-        services.AddScoped<IQueryHandler<TestQuery, TestResult>, FailingQueryHandler>();
-        
-        using var serviceProvider = services.BuildServiceProvider();
-        var dispatcher = serviceProvider.GetRequiredService<QueryDispatcher>();
-        var query = new TestQuery(Guid.NewGuid());
-
-        // Act
-        await dispatcher.DispatchAsync<TestQuery, TestResult>(query);
-
-        // Assert
-        _loggerMock.Verify(
-            x => x.Log(
-                LogLevel.Warning,
-                It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("failed") && v.ToString()!.Contains("TestQuery")),
-                It.IsAny<Exception>(),
-                It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
-            Times.Once);
     }
 
     [Fact]

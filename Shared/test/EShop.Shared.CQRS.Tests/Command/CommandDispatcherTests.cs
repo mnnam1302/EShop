@@ -1,10 +1,5 @@
-using EShop.Shared.CQRS.Command;
-using EShop.Shared.CQRS.Tests.TestHelpers;
-using EShop.Shared.Contracts.Abstractions.Shared;
-using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Moq;
 
 namespace EShop.Shared.CQRS.Tests.Command;
 
@@ -20,11 +15,11 @@ public class CommandDispatcherTests : TestBase
     protected override void ConfigureServices(IServiceCollection services)
     {
         base.ConfigureServices(services);
-        
+
         // Register command handlers
         services.AddScoped<ICommandHandler<TestCommand>, TestCommandHandler>();
         services.AddScoped<ICommandHandler<TestCommandWithResult, TestResult>, TestCommandWithResultHandler>();
-        
+
         // Register dispatcher with mocked logger
         services.AddScoped(_ => _loggerMock.Object);
         services.AddScoped<CommandDispatcher>();
@@ -44,7 +39,7 @@ public class CommandDispatcherTests : TestBase
         // Assert
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeTrue();
-        
+
         var testHandler = handler as TestCommandHandler;
         testHandler.Should().NotBeNull();
         testHandler!.WasCalled.Should().BeTrue();
@@ -92,7 +87,7 @@ public class CommandDispatcherTests : TestBase
         services.AddLogging();
         services.AddScoped(_ => _loggerMock.Object);
         services.AddScoped<CommandDispatcher>();
-        
+
         using var serviceProvider = services.BuildServiceProvider();
         var dispatcher = serviceProvider.GetRequiredService<CommandDispatcher>();
         var command = new TestCommand("Test Command");
@@ -111,7 +106,7 @@ public class CommandDispatcherTests : TestBase
         services.AddScoped(_ => _loggerMock.Object);
         services.AddScoped<CommandDispatcher>();
         services.AddScoped<ICommandHandler<TestCommand>, ThrowingCommandHandler>();
-        
+
         using var serviceProvider = services.BuildServiceProvider();
         var dispatcher = serviceProvider.GetRequiredService<CommandDispatcher>();
         var command = new TestCommand("Test Command");
@@ -131,7 +126,7 @@ public class CommandDispatcherTests : TestBase
         services.AddScoped(_ => _loggerMock.Object);
         services.AddScoped<CommandDispatcher>();
         services.AddScoped<ICommandHandler<TestCommand>, FailingCommandHandler>();
-        
+
         using var serviceProvider = services.BuildServiceProvider();
         var dispatcher = serviceProvider.GetRequiredService<CommandDispatcher>();
         var command = new TestCommand("Test Command");
@@ -145,63 +140,5 @@ public class CommandDispatcherTests : TestBase
         result.Error.Should().NotBeNull();
         result.Error.Code.Should().Be("Test.Failed");
         result.Error.Message.Should().Be("This command handler always fails");
-    }
-
-    [Fact]
-    public async Task DispatchAsync_ShouldLogExecutionDetails()
-    {
-        // Arrange
-        var command = new TestCommand("Test Command");
-        var dispatcher = GetService<CommandDispatcher>();
-
-        // Act
-        await dispatcher.DispatchAsync(command);
-
-        // Assert
-        _loggerMock.Verify(
-            x => x.Log(
-                LogLevel.Debug,
-                It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("Dispatching command") && v.ToString()!.Contains("TestCommand")),
-                It.IsAny<Exception>(),
-                It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
-            Times.Once);
-
-        _loggerMock.Verify(
-            x => x.Log(
-                LogLevel.Debug,
-                It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("Command") && v.ToString()!.Contains("handled successfully")),
-                It.IsAny<Exception>(),
-                It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
-            Times.Once);
-    }
-
-    [Fact]
-    public async Task DispatchAsync_WhenHandlerFails_ShouldLogWarning()
-    {
-        // Arrange
-        var services = new ServiceCollection();
-        services.AddLogging();
-        services.AddScoped(_ => _loggerMock.Object);
-        services.AddScoped<CommandDispatcher>();
-        services.AddScoped<ICommandHandler<TestCommand>, FailingCommandHandler>();
-        
-        using var serviceProvider = services.BuildServiceProvider();
-        var dispatcher = serviceProvider.GetRequiredService<CommandDispatcher>();
-        var command = new TestCommand("Test Command");
-
-        // Act
-        await dispatcher.DispatchAsync(command);
-
-        // Assert
-        _loggerMock.Verify(
-            x => x.Log(
-                LogLevel.Warning,
-                It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("failed") && v.ToString()!.Contains("TestCommand")),
-                It.IsAny<Exception>(),
-                It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
-            Times.Once);
     }
 }

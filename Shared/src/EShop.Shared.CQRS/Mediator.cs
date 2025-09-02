@@ -11,8 +11,8 @@ public sealed class Mediator : IMediator
 
     public Mediator(ICommandDispatcher commandDispatcher, IQueryDispatcher queryDispatcher)
     {
-        _commandDispatcher = commandDispatcher;
-        _queryDispatcher = queryDispatcher;
+        _commandDispatcher = commandDispatcher ?? throw new ArgumentNullException(nameof(commandDispatcher));
+        _queryDispatcher = queryDispatcher ?? throw new ArgumentNullException(nameof(queryDispatcher));
     }
 
     public async Task<Result> SendAsync<TCommand>(TCommand command, CancellationToken cancellationToken = default)

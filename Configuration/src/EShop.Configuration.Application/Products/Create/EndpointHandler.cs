@@ -1,4 +1,5 @@
 ﻿using EShop.Shared.CQRS;
+using EShop.Shared.CQRS.Command;
 using EShop.Shared.JsonApi.ResourceAccessControl;
 using EShop.Shared.Scoping.ResourceAccessControl;
 using Microsoft.AspNetCore.Mvc;
@@ -19,6 +20,7 @@ internal static class EndpointHandler
     private static async Task<IResult> CreateProductAsync(
         [FromBody] CreateProductRequest request,
         [FromServices] IMediator mediator,
+        ICommandHandler<Command> commandHandler,
         CancellationToken cancellationToken)
     {
         var command = request.ToCommand();

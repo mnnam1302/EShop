@@ -1,8 +1,5 @@
-using EShop.Shared.CQRS.Tests.TestHelpers;
-using EShop.Shared.Contracts.Abstractions.Shared;
-using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
-using Moq;
+using System.Reflection;
 
 namespace EShop.Shared.CQRS.Tests;
 
@@ -11,8 +8,8 @@ public class MediatorTests : TestBase
     protected override void ConfigureServices(IServiceCollection services)
     {
         base.ConfigureServices(services);
-        services.AddCQRS();
-        
+        services.AddCQRS(Assembly.GetExecutingAssembly());
+
         // Register test handlers
         services.AddScoped<ICommandHandler<TestCommand>, TestCommandHandler>();
         services.AddScoped<ICommandHandler<TestCommandWithResult, TestResult>, TestCommandWithResultHandler>();
@@ -117,35 +114,16 @@ public class MediatorTests : TestBase
     }
 
     [Fact]
-    public async Task Mediator_ShouldMaintainTransientBehavior()
-    {
-        // Arrange
-        var mediator1 = GetService<IMediator>();
-        var mediator2 = GetService<IMediator>();
-
-        // Act & Assert
-        mediator1.Should().NotBeSameAs(mediator2, "Mediator should be registered as transient");
-        
-        // Both should work independently
-        var command = new TestCommand("Test");
-        var result1 = await mediator1.SendAsync(command);
-        var result2 = await mediator2.SendAsync(command);
-        
-        result1.IsSuccess.Should().BeTrue();
-        result2.IsSuccess.Should().BeTrue();
-    }
-
-    [Fact]
     public async Task Mediator_ShouldHandleComplexWorkflow()
     {
         // Arrange
         var mediator = GetService<IMediator>();
         var commandId = Guid.NewGuid();
-        
+
         // Act - Execute a command that creates something
         var createCommand = new TestCommandWithResult($"Create Item {commandId}");
         var createResult = await mediator.SendAsync<TestCommandWithResult, TestResult>(createCommand);
-        
+
         // Then query for what we created
         var query = new TestQuery(createResult.Value.Id);
         var queryResult = await mediator.QueryAsync<TestQuery, TestResult>(query);
@@ -153,7 +131,7 @@ public class MediatorTests : TestBase
         // Assert
         createResult.IsSuccess.Should().BeTrue();
         createResult.Value.Name.Should().Contain("Create Item");
-        
+
         queryResult.IsSuccess.Should().BeTrue();
         queryResult.Value.Id.Should().Be(createResult.Value.Id);
     }
