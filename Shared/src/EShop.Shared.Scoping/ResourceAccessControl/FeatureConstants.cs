@@ -9,19 +9,13 @@ public static class FeatureConstants
         public const string SystemFormatConfiguration_FeatureId = "Tenancy_SystemFormatConfiguration";
     }
 
-    // Identity
-    public const string Identity_ExternalApplicationIntegration_FeatureId = "Identity_ExternalApplicationIntegration";
-    public const string Identity_UserInvites_FeatureId = "Identity_UserInvites";
-    public const string Identity_OrganisationRingFencing_FeatureId = "Identity_OrganisationRingFencing";
-    public const string Identity_CustomRoles_FeatureId = "Identity_CustomRoles";
-    public const string Identity_EnableTenantSpecificSequences_FeatureId = "Identity_EnableTenantSpecificSequences";
-}
     public static class IdentityFeatures
     {
         public const string ExternalApplicationIntegration_FeatureId = "Identity_ExternalApplicationIntegration";
         public const string UserInvites_FeatureId = "Identity_UserInvites";
         public const string OrganisationRingFencing_FeatureId = "Identity_OrganisationRingFencing";
         public const string CustomRoles_FeatureId = "Identity_CustomRoles";
+        public const string EnableTenantSpecificSequences_FeatureId = "Identity_EnableTenantSpecificSequences";
     }
 
     public static class ConfigurationFeatures
