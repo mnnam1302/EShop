@@ -7,8 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="DependencyInjections\Extensions\" />
-    <Folder Include="DependencyInjections\Options\" />
+    <Compile Remove="DependencyInjections\**" />
+    <EmbeddedResource Remove="DependencyInjections\**" />
+    <None Remove="DependencyInjections\**" />
   </ItemGroup>
 
 </Project>
