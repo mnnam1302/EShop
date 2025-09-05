@@ -1,4 +1,6 @@
 ﻿using EShop.Shared.Scoping.ResourceAccessControl;
+using static EShop.Shared.Scoping.ResourceAccessControl.FeatureConstants;
+using static EShop.Shared.Scoping.ResourceAccessControl.PermissionConstants;
 
 namespace EShop.Identity.Domain.ActionPopulators;
 
@@ -14,16 +16,16 @@ internal class OrganizationActionPopulator : IActionPopulator
             {
                 nameof(UserOrganizationActions.ViewOrganizations),
                 new ActionDefinition(
-                    await featureValidator.HasFeatureAsync(FeatureConstants.Identity_OrganisationRingFencing_FeatureId)
-                    && await permissionValidator.HasAtLeastOneOfSpecificPermissionAsync(
-                        PermissionConstants.ViewOrganizationsPermissionId,
-                        PermissionConstants.ManageOrganizationsPermissionId))
+                    await featureValidator.HasFeatureAsync(IdentityFeatures.OrganisationRingFencing_FeatureId) &&
+                    await permissionValidator.HasAtLeastOneOfSpecificPermissionAsync(
+                        IdentityPermissions.ViewOrganizationsPermissionId,
+                        IdentityPermissions.ManageOrganizationsPermissionId))
             },
             {
                 UserOrganizationActions.ManageOrganizations.ToString(),
                 new ActionDefinition(
-                    await featureValidator.HasFeatureAsync(FeatureConstants.Identity_OrganisationRingFencing_FeatureId)
-                    && await permissionValidator.HasPermissionAsync(PermissionConstants.ManageOrganizationsPermissionId))
+                    await featureValidator.HasFeatureAsync(IdentityFeatures.OrganisationRingFencing_FeatureId) &&
+                    await permissionValidator.HasPermissionAsync(IdentityPermissions.ManageOrganizationsPermissionId))
             }
         };
     }

@@ -70,7 +70,7 @@ public class ExceptionHandlingMiddleware : IMiddleware
 
     private static IReadOnlyCollection<Error> GetErrors(Exception exception)
     {
-        IReadOnlyCollection<Error>? errors = null;
+        IReadOnlyCollection<Error> errors = [];
 
         if (exception is ValidationException validationException)
         {

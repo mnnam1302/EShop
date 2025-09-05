@@ -1,4 +1,5 @@
-﻿using EShop.Identity.Domain.Entities;
+﻿using EShop.Identity.Domain;
+using EShop.Identity.Domain.Entities;
 using EShop.Identity.Persistence.Constants;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -13,7 +14,9 @@ internal class UserConfiguration : IEntityTypeConfiguration<User>
 
         builder.HasKey(x => x.Id);
 
-        builder.HasIndex(x => x.Username).IsUnique();
+        builder.Property(x => x.Id)
+            .HasMaxLength(ModelConstants.MediumText)
+            .IsRequired();
 
         builder.Property(x => x.IsDirector)
             .IsRequired()

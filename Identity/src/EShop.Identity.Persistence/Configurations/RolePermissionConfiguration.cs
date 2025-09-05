@@ -10,6 +10,6 @@ internal class RolePermissionConfiguration : IEntityTypeConfiguration<RolePermis
     {
         builder.ToTable("RolePermissions");
 
-        builder.HasKey(x => new { x.RoleId, x.PermissionId });
+        builder.HasKey(ur => new { ur.RoleId, ur.PermissionId });
     }
 }

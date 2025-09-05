@@ -1,6 +1,6 @@
 ﻿namespace EShop.Tenancy.Domain;
 
-public class ModelConstants
+public static class ModelConstants
 {
     public const int TinyText = 10;
     public const int ShortText = 50;

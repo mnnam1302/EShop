@@ -4,10 +4,12 @@ using System.Linq.Expressions;
 namespace EShop.Shared.DomainTools.Repositories;
 
 /// <summary>
-/// This interface is used to define a repository for an entity.
+/// Defines a generic repository interface for performing CRUD operations and querying entities.
 /// </summary>
-/// <typeparam name="TEntity"></typeparam>
-/// <typeparam name="TKey"></typeparam>
+/// <remarks>This interface provides methods for retrieving, adding, updating, and deleting entities, as well as
+/// querying entities with optional filtering, tracking, and inclusion of related properties.</remarks>
+/// <typeparam name="TEntity">The type of the entity managed by the repository. Must be a class implementing <see cref="IEntityBase{TKey}"/>.</typeparam>
+/// <typeparam name="TKey">The type of the unique identifier for the entity.</typeparam>
 public interface IRepositoryBase<TEntity, in TKey>
     where TEntity : class, IEntityBase<TKey>
 {
@@ -22,7 +24,7 @@ public interface IRepositoryBase<TEntity, in TKey>
         bool trackChanges = false,
         CancellationToken cancellationToken = default,
         params Expression<Func<TEntity, object>>[] includeProperties);
-    
+
     Task<ICollection<TEntity>> FindByConditionAsync(
         Expression<Func<TEntity, bool>>? predicate = null,
         bool trackChanges = false,

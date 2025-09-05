@@ -1,16 +1,16 @@
 ﻿using EShop.Shared.Scoping;
+using System.ComponentModel.DataAnnotations;
 
 namespace EShop.Identity.Domain.Entities;
 
 public class RolePermission : IExcludedFromScoping
 {
-    public RolePermission() { }
+    public Guid RoleId { get; set; }
 
-    public string? RoleId { get; set; }
+    [MaxLength(ModelConstants.ShortText)]
+    public string PermissionId { get; set; } = string.Empty;
 
-    public virtual Role? Role { get; set; }
+    public virtual Role Role { get; set; } = null!;
 
-    public string? PermissionId { get; set; }
-
-    public virtual Permission? Permission { get; set; }
+    public virtual Permission Permission { get; set; } = null!;
 }

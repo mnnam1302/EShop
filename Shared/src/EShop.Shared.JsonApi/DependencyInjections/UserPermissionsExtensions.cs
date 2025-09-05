@@ -16,7 +16,7 @@ public static class UserPermissionsExtensions
 {
     public static void RegisterPermissions(this IApplicationBuilder app, IHostApplicationLifetime applicationLifetime, ILogger logger)
     {
-        applicationLifetime.ApplicationStarted.Register(async () =>
+        applicationLifetime.ApplicationStarted.Register(() =>
         {
             using (var scope = app.ApplicationServices.CreateScope())
             {

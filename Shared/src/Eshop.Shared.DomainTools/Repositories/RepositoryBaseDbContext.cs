@@ -4,14 +4,14 @@ using System.Linq.Expressions;
 
 namespace EShop.Shared.DomainTools.Repositories;
 
-public class RepositoryBaseDbContext<TDbContext, TEntity, TKey>
+public abstract class RepositoryBaseDbContext<TDbContext, TEntity, TKey>
     : IRepositoryBase<TEntity, TKey>, IDisposable
     where TDbContext : DbContext
     where TEntity : class, IEntityBase<TKey>
 {
     private readonly TDbContext _dbContext;
 
-    public RepositoryBaseDbContext(TDbContext dbContext)
+    protected RepositoryBaseDbContext(TDbContext dbContext)
     {
         _dbContext = dbContext;
     }

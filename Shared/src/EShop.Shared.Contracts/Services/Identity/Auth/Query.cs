@@ -5,13 +5,13 @@ namespace EShop.Shared.Contracts.Services.Identity.Auth;
 
 public static class Query
 {
-    public record Login : IQuery<Response.AuthenticatedResponse>
+    public sealed class Login : IQuery<Response.AuthenticatedResponse>
     {
         public required string Username { get; init; }
         public required string Password { get; init; }
     }
 
-    public record Refresh : IQuery<Response.AuthenticatedResponse>
+    public sealed class Refresh : IQuery<Response.AuthenticatedResponse>
     {
         [JsonIgnore]
         public string? AccessToken { get; set; }

@@ -20,7 +20,7 @@ internal sealed class CreateTenantCommandInternalHandler : ICommandHandler<Comma
     private readonly IOrganizationRepository _organizationRepository;
     private readonly IIdentityRepositoryBase<Permission, string> _permissionRepository;
     private readonly IIdentityRepositoryBase<Tenant, string> _tenantRepository;
-    private readonly IIdentityRepositoryBase<Role, string> _roleRepository;
+    private readonly IIdentityRepositoryBase<Role, Guid> _roleRepository;
     private readonly IIdentityRepositoryBase<User, string> _userRepository;
     private readonly IUnitOfWork _unitOfWork;
 
@@ -31,9 +31,9 @@ internal sealed class CreateTenantCommandInternalHandler : ICommandHandler<Comma
         IOrganizationRepository organizationRepository,
         IIdentityRepositoryBase<Permission, string> permissionRepository,
         IIdentityRepositoryBase<Tenant, string> tenantRepository,
-        IIdentityRepositoryBase<Role, string> roleRepository,
-        IUnitOfWork unitOfWork,
-        IIdentityRepositoryBase<User, string> userRepository)
+        IIdentityRepositoryBase<Role, Guid> roleRepository,
+        IIdentityRepositoryBase<User, string> userRepository,
+        IUnitOfWork unitOfWork)
     {
         _passwordHasher = passwordHasher;
         _logger = logger;
@@ -42,8 +42,8 @@ internal sealed class CreateTenantCommandInternalHandler : ICommandHandler<Comma
         _permissionRepository = permissionRepository;
         _tenantRepository = tenantRepository;
         _roleRepository = roleRepository;
-        _unitOfWork = unitOfWork;
         _userRepository = userRepository;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task<Result> Handle(Command.CreateTenantCommandInternal request, CancellationToken cancellationToken)
@@ -75,9 +75,9 @@ internal sealed class CreateTenantCommandInternalHandler : ICommandHandler<Comma
 
     private async Task CreateTenantAsync(Command.CreateTenantCommandInternal request, CancellationToken cancellationToken)
     {
-        var tenant = await CreateTenantIfNotExistsAsync(request.TenantId, request.TenantName, cancellationToken);
+        var tenant = await CreateTenantIfNotExists(request.TenantId, request.TenantName, cancellationToken);
         var rootOrganization = CreateRootOrganization(request.TenantId, request.TenantName);
-        var ownerRole = await CreateOwnerRoleWithPermissionsAsync(request.TenantId, cancellationToken);
+        var ownerRole = await CreateOwnerRoleWithPermissions(request.TenantId, cancellationToken);
         var ownerUser = CreateOwnerUser(rootOrganization, request);
 
         ownerUser.GrantRole(ownerRole.Id);
@@ -88,7 +88,7 @@ internal sealed class CreateTenantCommandInternalHandler : ICommandHandler<Comma
         _logger.LogInformation("Successfully created tenant '{Id}' with owner user '{Username}'", request.TenantId, request.OwnerUsername);
     }
 
-    private async Task<Tenant> CreateTenantIfNotExistsAsync(string tenantId, string tenantName, CancellationToken cancellationToken)
+    private async Task<Tenant> CreateTenantIfNotExists(string tenantId, string tenantName, CancellationToken cancellationToken)
     {
         _logger.LogDebug("Checking if tenant '{Id}' exists...", tenantId);
 
@@ -108,7 +108,7 @@ internal sealed class CreateTenantCommandInternalHandler : ICommandHandler<Comma
         return Organization.CreateRootOrganizationInternal(tenantId, tenantName);
     }
 
-    private async Task<Role> CreateOwnerRoleWithPermissionsAsync(string tenantId, CancellationToken cancellationToken)
+    private async Task<Role> CreateOwnerRoleWithPermissions(string tenantId, CancellationToken cancellationToken)
     {
         _logger.LogDebug("Creating owner role for tenant '{Id}'...", tenantId);
 

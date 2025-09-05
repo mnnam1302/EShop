@@ -7,5 +7,5 @@ public static class Query
 {
     public record GetRoles(string? Name, PaginationRequest Paging) : IQuery<PaginationResult<Response.RolesResponse>>;
 
-    public record GetRoleById(string Id) : IQuery<Response.RolesResponse>;
+    public record GetRoleById(Guid Id) : IQuery<Response.RolesResponse>;
 }

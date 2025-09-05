@@ -1,7 +1,7 @@
 ﻿using EShop.Identity.Tests.Setups;
 using EShop.Shared.Scoping;
-using EShop.Shared.Scoping.ResourceAccessControl;
 using Reqnroll;
+using static EShop.Shared.Scoping.ResourceAccessControl.PermissionConstants;
 
 namespace EShop.Identity.Tests.Authorization;
 
@@ -9,8 +9,8 @@ namespace EShop.Identity.Tests.Authorization;
 public class AuthorizationStepDefinition
 {
     private static readonly string[] allPermissionIds = [
-        PermissionConstants.ViewOrganizationsPermissionId,
-        PermissionConstants.ManageOrganizationsPermissionId
+        IdentityPermissions.ViewOrganizationsPermissionId,
+        IdentityPermissions.ManageOrganizationsPermissionId
     ];
 
     private readonly ApiContext _apiContext;

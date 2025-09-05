@@ -9,12 +9,7 @@ using System.Security.Claims;
 
 namespace EShop.Identity.Domain.Entities;
 
-public class User
-    : EntityBase<string>,
-    IDateTracking,
-    IExcludedFromScoping,
-    IAccessControlled,
-    IStateTransitionController
+public class User : EntityBase<string>, IDateTracking, IExcludedFromScoping, IAccessControlled, IStateTransitionController
 {
     [MaxLength(ModelConstants.MediumText)]
     public string Username { get; set; } = string.Empty;
@@ -26,7 +21,7 @@ public class User
     [EmailAddress]
     public string Email { get; set; } = string.Empty;
 
-    [MaxLength(ModelConstants.StandardText)]
+    [MaxLength(ModelConstants.LongText)]
     public string PasswordHash { get; set; } = string.Empty;
 
     [MaxLength(ModelConstants.ShortText)]
@@ -48,12 +43,12 @@ public class User
 
     public bool IsActive { get; set; } = true;
 
-    [MaxLength(ModelConstants.ShortText)]
-    public string? CreatedBy { get; set; }
+    [MaxLength(ModelConstants.MediumText)]
+    public string? CreatedByUserId { get; set; }
 
-    public DateTimeOffset CreatedOnUtc { get; set; }
+    public DateTimeOffset CreatedAtUtc { get; set; }
 
-    public DateTimeOffset? LastModifiedOnUtc { get; set; }
+    public DateTimeOffset? LastModifiedAtUtc { get; set; }
 
     public virtual ICollection<Role> Roles { get; set; } = [];
 
@@ -83,7 +78,8 @@ public class User
         PasswordHash = password;
         Email = email;
         DisplayName = displayName;
-        CreatedOnUtc = DateTimeOffset.UtcNow;
+        IsActive = true;
+        CreatedAtUtc = DateTimeOffset.UtcNow;
     }
 
     public static User Create(Command.RegisterUser command)
@@ -96,13 +92,13 @@ public class User
         return user;
     }
 
-    public static User Create(string username, string password, string email, string displayName, string? organizationId = null, string? createdBy = null)
+    public static User Create(string username, string password, string email, string displayName, string? organizationId = null, string? createdByUserId = null)
     {
         AssertUsername(username);
 
         var user = new User(username, password, email, displayName)
         {
-            CreatedBy = createdBy
+            CreatedByUserId = createdByUserId
         };
 
         if (!string.IsNullOrWhiteSpace(organizationId))
@@ -142,7 +138,7 @@ public class User
         ];
     }
 
-    public void GrantRoles(string[] roleIds)
+    public void GrantRoles(Guid[] roleIds)
     {
         foreach (var roleId in roleIds)
         {
@@ -150,7 +146,7 @@ public class User
         }
     }
 
-    public void GrantRole(string roleId)
+    public void GrantRole(Guid roleId)
     {
         var userRole = new UserRole
         {

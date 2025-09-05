@@ -118,11 +118,11 @@ public static class EndpointFilterExtensions
 
                 if (permissions.Length == 1)
                 {
-                    logger.LogTrace("Rejecting user without {requiredPermission} permission", permissions[0]);
+                    logger.LogTrace("Rejecting user without {RequiredPermission} permission", permissions[0]);
                 }
                 else
                 {
-                    logger.LogTrace("Rejecting user without any of these permissions: {requiredPermissions}", permissions.ToCommaSeparatedString());
+                    logger.LogTrace("Rejecting user without any of these permissions: {RequiredPermissions}", permissions.ToCommaSeparatedString());
                 }
 
                 return TypedResults.Forbid();
@@ -163,11 +163,11 @@ public static class EndpointFilterExtensions
 
                 if (features.Length == 1)
                 {
-                    logger.LogTrace("Request is blocked because feature {requiredFeature} is not enabled", features[0]);
+                    logger.LogTrace("Request is blocked because feature {RequiredFeature} is not enabled", features[0]);
                 }
                 else
                 {
-                    logger.LogTrace("Request is blocked because none of these features are enabled: {requiredFeatures}", features.ToCommaSeparatedString());
+                    logger.LogTrace("Request is blocked because none of these features are enabled: {RequiredFeatures}", features.ToCommaSeparatedString());
                 }
 
                 return TypedResults.Forbid();

@@ -26,37 +26,13 @@ namespace EShop.Configuration.Application.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Address")
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
-
-                    b.Property<string>("AgencyId")
-                        .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
-                    b.Property<string>("City")
-                        .HasMaxLength(150)
-                        .HasColumnType("character varying(150)");
+                        .HasColumnType("uuid");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(150)
                         .HasColumnType("character varying(150)");
-
-                    b.Property<string>("OrganizationNumber")
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
-                    b.Property<string>("PhoneNumber")
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
-                    b.Property<string>("Postcode")
-                        .HasMaxLength(10)
-                        .HasColumnType("character varying(10)");
 
                     b.Property<string>("Scope")
                         .IsRequired()
@@ -75,46 +51,6 @@ namespace EShop.Configuration.Application.Migrations
                     b.HasIndex("TenantId");
 
                     b.ToTable("Agencies", (string)null);
-                });
-
-            modelBuilder.Entity("EShop.Configuration.Application.Agencies.SalesChannel", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("AgencyId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(150)
-                        .HasColumnType("character varying(150)");
-
-                    b.Property<string>("Reference")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<string>("Scope")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
-
-                    b.Property<string>("TenantId")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AgencyId");
-
-                    b.HasIndex("Scope");
-
-                    b.HasIndex("TenantId");
-
-                    b.ToTable("SaleChannels", (string)null);
                 });
 
             modelBuilder.Entity("EShop.Shared.EventBus.InboxMessage", b =>
@@ -143,7 +79,8 @@ namespace EShop.Configuration.Application.Migrations
 
                     b.Property<string>("State")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
                     b.Property<DateTimeOffset>("UpdatedOnUtc")
                         .HasColumnType("timestamp with time zone");
@@ -151,39 +88,6 @@ namespace EShop.Configuration.Application.Migrations
                     b.HasKey("MessageId");
 
                     b.ToTable("InboxMessages", (string)null);
-                });
-
-            modelBuilder.Entity("EShop.Shared.Sequences.Sequence", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("text");
-
-                    b.Property<string>("ConcurrencyToken")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int>("NextAvailableValue")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Sequences");
-                });
-
-            modelBuilder.Entity("EShop.Configuration.Application.Agencies.SalesChannel", b =>
-                {
-                    b.HasOne("EShop.Configuration.Application.Agencies.Agency", "Agency")
-                        .WithMany("SalesChannels")
-                        .HasForeignKey("AgencyId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Agency");
-                });
-
-            modelBuilder.Entity("EShop.Configuration.Application.Agencies.Agency", b =>
-                {
-                    b.Navigation("SalesChannels");
                 });
 #pragma warning restore 612, 618
         }

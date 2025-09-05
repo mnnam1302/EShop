@@ -2,10 +2,11 @@
 using EShop.Shared.Contracts.Services.Identity.Organizations;
 using EShop.Shared.JsonApi.Abstractions;
 using EShop.Shared.JsonApi.ResourceAccessControl;
-using EShop.Shared.Scoping.ResourceAccessControl;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using static EShop.Shared.Scoping.ResourceAccessControl.FeatureConstants;
+using static EShop.Shared.Scoping.ResourceAccessControl.PermissionConstants;
 
 namespace EShop.Identity.Presentation.Controllers;
 
@@ -22,8 +23,8 @@ public class OrganizationsController : ApiEndpointBase
     }
 
     [HttpPost]
-    [RequireFeature(FeatureConstants.Identity_OrganisationRingFencing_FeatureId)]
-    [RequirePermission(PermissionConstants.ManageOrganizationsPermissionId)]
+    [RequireFeature(IdentityFeatures.OrganisationRingFencing_FeatureId)]
+    [RequirePermission(IdentityPermissions.ManageOrganizationsPermissionId)]
     public async Task<IResult> CreateOrganization([FromBody] Command.CreateOrganizationCommand request)
     {
         var result = await _sender.Send(request);
@@ -37,8 +38,8 @@ public class OrganizationsController : ApiEndpointBase
     }
 
     [HttpPut("{id}")]
-    [RequireFeature(FeatureConstants.Identity_OrganisationRingFencing_FeatureId)]
-    [RequireOneOfPermissions(PermissionConstants.ManageOrganizationsPermissionId)]
+    [RequireFeature(IdentityFeatures.OrganisationRingFencing_FeatureId)]
+    [RequireOneOfPermissions(IdentityPermissions.ManageOrganizationsPermissionId)]
     public async Task<IResult> UpdateOrganization([FromRoute] string id, [FromBody] Command.UpdateOrganizationCommand request)
     {
         var command = request with { Id = id };
@@ -53,10 +54,10 @@ public class OrganizationsController : ApiEndpointBase
     }
 
     [HttpGet("{id}")]
-    [RequireFeature(FeatureConstants.Identity_OrganisationRingFencing_FeatureId)]
+    [RequireFeature(IdentityFeatures.OrganisationRingFencing_FeatureId)]
     [RequireOneOfPermissions(
-        PermissionConstants.ViewOrganizationsPermissionId,
-        PermissionConstants.ManageOrganizationsPermissionId)]
+        IdentityPermissions.ViewOrganizationsPermissionId,
+        IdentityPermissions.ManageOrganizationsPermissionId)]
     public async Task<IResult> GetOrganizationById([FromRoute] string id)
     {
         var result = await _sender.Send(new Query.GetOrganizationById(id));

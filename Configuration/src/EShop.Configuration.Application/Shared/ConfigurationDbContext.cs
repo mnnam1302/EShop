@@ -8,7 +8,6 @@ namespace EShop.Configuration.Application.Shared;
 public class ConfigurationDbContext : DbContext, IInboxDbContext, ISequenceDbContextStore
 {
     public DbSet<Agency> Agencies { get; set; }
-    public DbSet<SalesChannel> SaleChannels { get; set; }
     public DbSet<InboxMessage> InboxMessages { get; set; }
     public DbSet<Sequence> Sequences { get; set; }
 

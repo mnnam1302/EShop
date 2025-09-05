@@ -3,8 +3,8 @@ using EShop.Identity.Domain.Entities;
 using EShop.Identity.Persistence;
 using EShop.Shared.DbResourceAccessControl;
 using EShop.Shared.Scoping;
-using EShop.Shared.Scoping.ResourceAccessControl;
 using Microsoft.EntityFrameworkCore;
+using static EShop.Shared.Scoping.ResourceAccessControl.PermissionConstants;
 
 namespace EShop.Identity.API;
 
@@ -100,70 +100,70 @@ public class DbInitializer
         [
             new Permission
             {
-                Id = PermissionConstants.ViewSystemSettingsPermissionId,
+                Id = TenancyPermissions.ViewSystemSettingsPermissionId,
                 Name = "View system settings",
                 Description = "Allows users to view system settings",
                 RelatedTo = "System Settings",
             },
             new Permission
             {
-                Id = PermissionConstants.ManageSystemSettingsPermissionId,
+                Id = TenancyPermissions.ManageSystemSettingsPermissionId,
                 Name = "Manage system settings",
                 Description = "Allows users to view, edit system settings",
                 RelatedTo = "System Settings",
             },
             new Permission
             {
-                Id = PermissionConstants.ViewOrganizationsPermissionId,
+                Id = IdentityPermissions.ViewOrganizationsPermissionId,
                 Name = "View organizations",
                 Description = "Allows users to view organizations",
                 RelatedTo = "Organization Management",
             },
             new Permission
             {
-                Id = PermissionConstants.ManageOrganizationsPermissionId,
+                Id = IdentityPermissions.ManageOrganizationsPermissionId,
                 Name = "Manage organizations",
                 Description = "Allows users to view, edit, delete organizations",
                 RelatedTo = "Organization Management",
             },
             new Permission
             {
-                Id = PermissionConstants.ViewRolesPermissionId,
+                Id = IdentityPermissions.ViewRolesPermissionId,
                 Name = "View roles",
                 Description = "Allows users viewing roles list and their details",
                 RelatedTo = "Role Management",
             },
             new Permission
             {
-                Id = PermissionConstants.ManageRolesPermissionId,
+                Id = IdentityPermissions.ManageRolesPermissionId,
                 Name = "Manage roles",
                 Description = "Allows users to add, create and delete roles",
                 RelatedTo = "Role Management",
             },
             new Permission
             {
-                Id = PermissionConstants.ViewUsersPermissionId,
+                Id = IdentityPermissions.ViewUsersPermissionId,
                 Name = "View users",
                 Description = "Allows listing of users and organizations currently registered in the system",
                 RelatedTo = "User Management",
             },
             new Permission
             {
-                Id = PermissionConstants.ManageUsersPermissionId,
+                Id = IdentityPermissions.ManageUsersPermissionId,
                 Name = "Manage users",
                 Description = "Allows inviting new users, adding new organizations to the system and changing their details",
                 RelatedTo = "User Management",
             },
             new Permission
             {
-                Id = PermissionConstants.ViewPortalUserAccountsPermissionId,
+                Id = IdentityPermissions.ViewPortalUserAccountsPermissionId,
                 Name = "View portal user accounts",
                 Description = "Allows viewing portal user accounts.",
                 RelatedTo = "User Management"
             },
             new Permission
             {
-                Id = PermissionConstants.ManagePortalUserAccountsPermissionId,
+                Id = IdentityPermissions.ManagePortalUserAccountsPermissionId,
                 Name = "Manage portal user accounts",
                 Description = "Allows viewing, inviting, updating, and deleting portal user accounts.",
                 RelatedTo = "User Management"

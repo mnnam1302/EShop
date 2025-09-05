@@ -1,4 +1,6 @@
 ﻿using EShop.Shared.Scoping.ResourceAccessControl;
+using static EShop.Shared.Scoping.ResourceAccessControl.FeatureConstants;
+using static EShop.Shared.Scoping.ResourceAccessControl.PermissionConstants;
 
 namespace EShop.Identity.Domain.ActionPopulators;
 
@@ -14,16 +16,16 @@ internal class TenantActionPopulator : IActionPopulator
             {
                 nameof(UserTenantActions.ViewSystemSettings),
                 new ActionDefinition(
-                    await featureValidator.HasFeatureAsync(FeatureConstants.Tenancy_SystemFormatConfiguration_FeatureId) &&
+                    await featureValidator.HasFeatureAsync(TenancyFeatures.SystemFormatConfiguration_FeatureId) &&
                     await permissionValidator.HasAtLeastOneOfSpecificPermissionAsync(
-                        PermissionConstants.ViewSystemSettingsPermissionId,
-                        PermissionConstants.ManageSystemSettingsPermissionId))
+                        TenancyPermissions.ViewSystemSettingsPermissionId,
+                        TenancyPermissions.ManageSystemSettingsPermissionId))
             },
             {
                 nameof(UserTenantActions.ManageSystemSettings),
                 new ActionDefinition(
-                    await featureValidator.HasFeatureAsync(FeatureConstants.Tenancy_SystemFormatConfiguration_FeatureId) &&
-                    await permissionValidator.HasPermissionAsync(PermissionConstants.ManageSystemSettingsPermissionId))
+                    await featureValidator.HasFeatureAsync(TenancyFeatures.SystemFormatConfiguration_FeatureId) &&
+                    await permissionValidator.HasPermissionAsync(TenancyPermissions.ManageSystemSettingsPermissionId))
             }
         };
     }

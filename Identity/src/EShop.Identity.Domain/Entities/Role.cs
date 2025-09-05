@@ -4,33 +4,35 @@ using System.ComponentModel.DataAnnotations;
 
 namespace EShop.Identity.Domain.Entities;
 
-public class Role : EntityBase<string>, IScoped
+public class Role : EntityBase<Guid>, IScoped
 {
     public const string OwnerRoleName = "Owner";
 
     [MaxLength(ModelConstants.MediumText)]
-    public string Name { get; private set; }
+    public string Name { get; private set; } = string.Empty;
 
-    [MaxLength(ModelConstants.LongText)]
+    [MaxLength(ModelConstants.VeryLongText)]
     public string? Description { get; private set; }
 
-    public virtual List<User> Users { get; set; } = new();
-    public virtual List<UserRole> UserRoles { get; set; } = new();
+    public virtual List<User> Users { get; set; } = [];
 
-    public virtual List<Permission> Permissions { get; set; } = new();
-    public virtual List<RolePermission> RolePermissions { get; set; } = new();
+    public virtual List<UserRole> UserRoles { get; set; } = [];
+
+    public virtual List<Permission> Permissions { get; set; } = [];
+
+    public virtual List<RolePermission> RolePermissions { get; set; } = [];
 
     [MaxLength(ModelConstants.ShortText)]
-    public string? TenantId { get; private set; }
+    public string TenantId { get; private set; } = string.Empty;
 
-    [MaxLength(ModelConstants.LongText)]
-    public string? Scope { get; private set; }
+    [MaxLength(ModelConstants.VeryLongText)]
+    public string Scope { get; private set; } = string.Empty;
 
     public Role() { }
 
     private Role(Guid id, string name, string tenantId)
     {
-        Id = $"role-{id}";
+        Id = id;
         Name = name;
         TenantId = tenantId;
         Scope = tenantId;

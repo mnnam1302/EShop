@@ -6,15 +6,16 @@ namespace EShop.Identity.Infrastructure.Producers;
 
 public class UserPermissionRegistration(IEventBusGateway eventBusGateway) : IPermissionRegistrationService
 {
-    private const string ApplicationName = "Identity";
+    // module name different from application name, which mean within application name can have many modules
+    private const string ModuleName = "Identity";
 
     private static readonly ReportPermission[] Permissions = [];
 
     public async Task RegisterPermissions()
     {
-        await eventBusGateway.PublishAsync<SupportedPermissionsUpdated>(new
+        await eventBusGateway.PublishAsync<ISupportedPermissionsUpdated>(new
         {
-            SourceSystemReference = ApplicationName,
+            SourceSystemReference = ModuleName,
             Permissions,
             Action = SupportedPermissionAction.Added,
             TenantId = string.Empty,
@@ -23,7 +24,7 @@ public class UserPermissionRegistration(IEventBusGateway eventBusGateway) : IPer
         });
     }
 
-    private sealed class ReportPermission : Permission
+    private sealed class ReportPermission : IPermission
     {
         public required string Id { get; init; }
         public required string Name { get; init; }

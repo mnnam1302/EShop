@@ -41,11 +41,11 @@ public class AuditableInterceptor : SaveChangesInterceptor
         {
             if (entityEntry.State == EntityState.Added)
             {
-                entityEntry.Property(x => x.CreatedOnUtc).CurrentValue = DateTime.UtcNow;
+                entityEntry.Property(x => x.CreatedAtUtc).CurrentValue = DateTime.UtcNow;
             }
             else if (entityEntry.State == EntityState.Modified)
             {
-                entityEntry.Property(x => x.LastModifiedOnUtc).CurrentValue = DateTime.UtcNow;
+                entityEntry.Property(x => x.LastModifiedAtUtc).CurrentValue = DateTime.UtcNow;
             }
         }
     }
@@ -58,11 +58,11 @@ public class AuditableInterceptor : SaveChangesInterceptor
         {
             if (entityEntry.State == EntityState.Added)
             {
-                entityEntry.Property(x => x.CreatedBy).CurrentValue = _userDetailsProvider.AuthenticatedUser.ActionUserId;
+                entityEntry.Property(x => x.CreatedByUserId).CurrentValue = _userDetailsProvider.AuthenticatedUser.ActionUserId;
             }
             else if (entityEntry.State == EntityState.Modified)
             {
-                entityEntry.Property(x => x.LastModifiedBy).CurrentValue = _userDetailsProvider.AuthenticatedUser.ActionUserId;
+                entityEntry.Property(x => x.LastModifiedByUserId).CurrentValue = _userDetailsProvider.AuthenticatedUser.ActionUserId;
             }
         }
     }

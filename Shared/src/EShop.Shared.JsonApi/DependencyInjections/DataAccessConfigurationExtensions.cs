@@ -15,7 +15,7 @@ public static class DataAccessConfigurationExtensions
         services
             .AddHealthChecks()
             .AddNpgSql(
-                connectionString: configuration.GetConnectionString("DefaultConnection"),
+                connectionString: configuration.GetConnectionString("DefaultConnection") ?? string.Empty,
                 name: "postgresql",
                 failureStatus: Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus.Degraded,
                 tags: new[] { "db", "postgresql", "sql" });

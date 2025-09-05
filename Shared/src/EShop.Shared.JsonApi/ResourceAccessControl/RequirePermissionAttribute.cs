@@ -11,10 +11,6 @@ namespace EShop.Shared.JsonApi.ResourceAccessControl;
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
 public class RequirePermissionAttribute : Attribute, IFilterFactory, IUserPermissionFilter
 {
-    public RequirePermissionAttribute()
-    {
-    }
-
     public RequirePermissionAttribute(string permissionId)
     {
         this.Permission = permissionId;

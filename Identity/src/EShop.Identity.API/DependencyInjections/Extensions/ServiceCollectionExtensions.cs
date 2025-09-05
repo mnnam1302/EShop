@@ -34,8 +34,8 @@ public static class ServiceCollectionExtensions
             .AddRedisInfrastructure(configuration);
 
         services
-            .AddUserTokensProvider(configuration)
-            .AddTenantFeaturesProvider(configuration);
+            .AddUserTokensProvider()
+            .AddTenantFeaturesProvider();
 
         return services;
     }
