@@ -23,7 +23,7 @@ public static class ServiceCollectionExtensions
         services
             .AddUserPermissionsProvider()
             .AddUserOrganizationContextProvider()
-            .AddTenantFeaturesProvider(configuration);
+            .AddTenantFeaturesProvider();
 
         services.AddCQRS(AssemblyReference.Assembly);
 

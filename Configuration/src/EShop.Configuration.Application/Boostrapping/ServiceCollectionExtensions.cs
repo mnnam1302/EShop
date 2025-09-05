@@ -5,6 +5,7 @@ using EShop.Shared.EventBus.JsonConverters;
 using EShop.Shared.EventBus.PipelineObservers;
 using EShop.Shared.EventBus.Services;
 using EShop.Shared.Scoping.ResourceAccessControl;
+using EShop.Shared.Sequences.DependencyInjections;
 using MassTransit;
 using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
 
