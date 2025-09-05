@@ -110,6 +110,11 @@ public static class ServiceCollectionExtensions
     private static IServiceCollection AddServiceBootstrapping(this IServiceCollection services)
     {
         services.AddTransient<DbInitializer>();
+
+        services.AddSequenceManagement<SequenceRepository>();
+        services.AddOptions<ConfigurationSequenceOptions>()
+            .BindConfiguration(ConfigurationSequenceOptions.SectionName);
+
         services.AddScoped<IEventBusGateway, EventBusGateway>();
         services.AddScoped<IFeatureRegistrationService, ConfigurationFeatureRegistrationService>();
         services.AddScoped<IPermissionRegistrationService, ConfigurationPermissionRegistrationService>();

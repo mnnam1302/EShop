@@ -103,6 +103,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EShop.Configuration.Applica
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EShop.Configuration.IntegrationEvent", "Configuration\src\EShop.Configuration.IntegrationEvent\EShop.Configuration.IntegrationEvent.csproj", "{EAEB468B-776B-4646-9AA7-696F8F29B410}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EShop.Shared.Sequences", "Shared\src\EShop.Shared.Sequences\EShop.Shared.Sequences.csproj", "{69A3524F-E95A-43FD-ABEA-3BA8753B7C63}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EShop.Shared.ProductGenerator", "Shared\src\EShop.Shared.ProductGenerator\EShop.Shared.ProductGenerator.csproj", "{D91BF331-15E9-440B-8642-59358200D8CF}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EShop.Shared.CQRS", "Shared\src\EShop.Shared.CQRS\EShop.Shared.CQRS.csproj", "{9122D131-B234-4C13-89AC-F6237C344266}"

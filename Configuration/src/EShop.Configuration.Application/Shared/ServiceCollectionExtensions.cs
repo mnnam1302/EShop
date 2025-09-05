@@ -22,9 +22,9 @@ public static class ServiceCollectionExtensions
 
         services
             .AddUserPermissionsProvider()
-            .AddTenantFeaturesProvider();
+            .AddUserOrganizationContextProvider()
+            .AddTenantFeaturesProvider(configuration);
 
-        //services.AddCQRS(AssemblyReference.Assembly);
         services.AddCQRS(AssemblyReference.Assembly);
 
         services.AddScoped<IUnitOfWork, UnitOfWorkDbContext<ConfigurationDbContext>>();
