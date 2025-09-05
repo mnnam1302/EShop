@@ -11,8 +11,6 @@ namespace EShop.Shared.JsonApi.ResourceAccessControl;
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
 public class RequireOneOfPermissionsAttribute : Attribute, IUserPermissionFilter
 {
-    public RequireOneOfPermissionsAttribute() { }
-
     public RequireOneOfPermissionsAttribute(params string[] permissions)
     {
         Permissions = permissions;

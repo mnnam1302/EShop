@@ -1,6 +1,7 @@
 ﻿using EShop.Shared.Contracts.Services.Identity.Permissions;
 using EShop.Shared.EventBus.Services;
 using EShop.Shared.Scoping.ResourceAccessControl;
+using static EShop.Shared.Scoping.ResourceAccessControl.PermissionConstants;
 
 namespace EShop.Configuration.Application.Boostrapping;
 
@@ -12,14 +13,14 @@ public class ConfigurationPermissionRegistrationService(IEventBusGateway eventBu
     {
         new ConfigurationPermission()
         {
-            Id = PermissionConstants.ViewProductsPermissionId,
+            Id = ConfigurationPermissions.ViewProductsPermissionId,
             Name = "View products",
             Description = "Allows users viewing list products, all product versions, and product version details in read-only mode.",
             RelatedTo = ModuleName
         },
         new ConfigurationPermission()
         {
-            Id = PermissionConstants.ManageProductsPermissionId,
+            Id = ConfigurationPermissions.ManageProductsPermissionId,
             Name = "Manage products",
             Description = "Allows users adding new product, adding/editing/cloning product versions, publishing product, activating published product version",
             RelatedTo = ModuleName

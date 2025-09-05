@@ -3,10 +3,10 @@ using EShop.Shared.Contracts.Services.Identity.Users;
 using EShop.Shared.JsonApi.Abstractions;
 using EShop.Shared.JsonApi.ResourceAccessControl;
 using EShop.Shared.Scoping;
-using EShop.Shared.Scoping.ResourceAccessControl;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using static EShop.Shared.Scoping.ResourceAccessControl.PermissionConstants;
 
 namespace EShop.Identity.Presentation.Controllers;
 
@@ -25,7 +25,7 @@ public class UsersController : ApiEndpointBase
     }
 
     [HttpPost]
-    [RequirePermission(PermissionConstants.ManageUsersPermissionId)]
+    [RequirePermission(IdentityPermissions.ManageUsersPermissionId)]
     public async Task<IResult> CreateUser([FromBody] Command.CreateUserCommand request)
     {
         var result = await _sender.Send(request);
@@ -39,8 +39,8 @@ public class UsersController : ApiEndpointBase
 
     [HttpGet("{id}")]
     [RequireOneOfPermissions(
-        PermissionConstants.ViewUsersPermissionId,
-        PermissionConstants.ManageUsersPermissionId)]
+        IdentityPermissions.ViewUsersPermissionId,
+        IdentityPermissions.ManageUsersPermissionId)]
     public async Task<IResult> GetUser([FromRoute] string id)
     {
         var request = new Query.GetUserQuery(id);

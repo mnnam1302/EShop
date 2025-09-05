@@ -21,7 +21,6 @@ public sealed class CreateAgencyCommandHandler : ICommandHandler<CreateAgencyCom
         _unitOfWork = unitOfWork;
     }
 
-
     public async Task<Result> HandleAsync(CreateAgencyCommand command, CancellationToken cancellationToken)
     {
         var agency = new Agency(command.Name, command.TenantId);

@@ -3,8 +3,8 @@ $do$
 DECLARE
    userpassword varchar[];
    users varchar[] := array[['users','users-password-dev'], 
-							['tenancy','tenancy-password-dev'],
-							['configuration','configuration-password-dev']];
+                            ['tenancy','tenancy-password-dev'],
+                            ['configuration','configuration-password-dev']];
 BEGIN
    FOREACH userpassword SLICE 1 IN ARRAY users
    LOOP
@@ -50,12 +50,3 @@ GRANT ALL PRIVILEGES ON SCHEMA public TO configuration;
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO configuration;
 GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO configuration;
 GRANT ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA public TO configuration;
-
-
-DROP POLICY tenant_isolation ON public."Agencies";
-
-select *
-from "Agencies";
-
-
-

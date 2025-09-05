@@ -1,4 +1,6 @@
 ﻿using EShop.Shared.Scoping.ResourceAccessControl;
+using static EShop.Shared.Scoping.ResourceAccessControl.FeatureConstants;
+using static EShop.Shared.Scoping.ResourceAccessControl.PermissionConstants;
 
 namespace EShop.Identity.Domain.ActionPopulators;
 
@@ -14,34 +16,34 @@ internal class UserActionPopulator : IActionPopulator
             {
                 nameof(UserActions.ViewUsers),
                 new ActionDefinition(
-                    await featureValidator.HasFeatureAsync(FeatureConstants.Identity_UserInvites_FeatureId)
-                    && await permissionValidator.HasAtLeastOneOfSpecificPermissionAsync(
-                        PermissionConstants.ViewUsersPermissionId,
-                        PermissionConstants.ManageUsersPermissionId))
+                    await featureValidator.HasFeatureAsync(IdentityFeatures.UserInvites_FeatureId) &&
+                    await permissionValidator.HasAtLeastOneOfSpecificPermissionAsync(
+                        IdentityPermissions.ViewUsersPermissionId,
+                        IdentityPermissions.ManageUsersPermissionId))
             },
             {
                 nameof(UserActions.InviteUser),
                 new ActionDefinition(
-                    await featureValidator.HasFeatureAsync(FeatureConstants.Identity_UserInvites_FeatureId)
-                    && await permissionValidator.HasPermissionAsync(PermissionConstants.ManageUsersPermissionId))
+                    await featureValidator.HasFeatureAsync(IdentityFeatures.UserInvites_FeatureId) &&
+                    await permissionValidator.HasPermissionAsync(IdentityPermissions.ManageUsersPermissionId))
             },
             {
                 UserActions.EditUser.ToString(),
                 new ActionDefinition(
-                    await featureValidator.HasFeatureAsync(FeatureConstants.Identity_UserInvites_FeatureId)
-                    && await permissionValidator.HasPermissionAsync(PermissionConstants.ManageUsersPermissionId))
+                    await featureValidator.HasFeatureAsync(IdentityFeatures.UserInvites_FeatureId) &&
+                    await permissionValidator.HasPermissionAsync(IdentityPermissions.ManageUsersPermissionId))
             },
             {
                 UserActions.DeleteUser.ToString(),
                 new ActionDefinition(
-                    await featureValidator.HasFeatureAsync(FeatureConstants.Identity_UserInvites_FeatureId)
-                    && await permissionValidator.HasPermissionAsync(PermissionConstants.ManageUsersPermissionId))
+                    await featureValidator.HasFeatureAsync(IdentityFeatures.UserInvites_FeatureId) &&
+                    await permissionValidator.HasPermissionAsync(IdentityPermissions.ManageUsersPermissionId))
             },
             {
                 UserActions.AssignRoles.ToString(),
                 new ActionDefinition(
-                    await featureValidator.HasFeatureAsync(FeatureConstants.Identity_UserInvites_FeatureId)
-                    && await permissionValidator.HasPermissionAsync(PermissionConstants.ManageUsersPermissionId))
+                    await featureValidator.HasFeatureAsync(IdentityFeatures.UserInvites_FeatureId) &&
+                    await permissionValidator.HasPermissionAsync(IdentityPermissions.ManageUsersPermissionId))
             },
         };
     }

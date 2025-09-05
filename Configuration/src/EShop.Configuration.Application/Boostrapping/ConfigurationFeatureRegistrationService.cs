@@ -1,6 +1,7 @@
 ﻿using EShop.Shared.Contracts.Services.Tenancy.Features;
 using EShop.Shared.EventBus.Services;
 using EShop.Shared.Scoping.ResourceAccessControl;
+using static EShop.Shared.Scoping.ResourceAccessControl.FeatureConstants;
 
 namespace EShop.Configuration.Application.Boostrapping;
 
@@ -10,7 +11,7 @@ public class ConfigurationFeatureRegistrationService(IEventBusGateway eventBusGa
     [
         new ConfigurationFeature()
         {
-            Id = FeatureConstants.Configration_ProductBuilder_FeatureId,
+            Id = ConfigurationFeatures.ProductBuilder_FeatureId,
             Name = "Product Builder",
             Description =  "Product Builder"
         }
