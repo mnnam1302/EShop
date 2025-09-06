@@ -1,11 +1,12 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
 namespace EShop.Identity.Persistence.Migrations
 {
     /// <inheritdoc />
-    public partial class Initital : Migration
+    public partial class Initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -14,7 +15,7 @@ namespace EShop.Identity.Persistence.Migrations
                 name: "InboxMessages",
                 columns: table => new
                 {
-                    MessageId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
                     MessageType = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     ConsumerId = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     State = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
@@ -24,7 +25,7 @@ namespace EShop.Identity.Persistence.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_InboxMessages", x => x.MessageId);
+                    table.PrimaryKey("PK_InboxMessages", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(

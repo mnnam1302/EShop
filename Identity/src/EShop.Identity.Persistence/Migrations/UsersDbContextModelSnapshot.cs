@@ -309,7 +309,7 @@ namespace EShop.Identity.Persistence.Migrations
 
             modelBuilder.Entity("EShop.Shared.EventBus.InboxMessage", b =>
                 {
-                    b.Property<Guid>("MessageId")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
@@ -339,7 +339,7 @@ namespace EShop.Identity.Persistence.Migrations
                     b.Property<DateTimeOffset>("UpdatedOnUtc")
                         .HasColumnType("timestamp with time zone");
 
-                    b.HasKey("MessageId");
+                    b.HasKey("Id");
 
                     b.ToTable("InboxMessages", (string)null);
                 });
