@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace EShop.Tenancy.Persistence.Migrations
 {
     [DbContext(typeof(TenancyDbContext))]
-    [Migration("20250713034200_Initial")]
+    [Migration("20250906164633_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -30,7 +30,7 @@ namespace EShop.Tenancy.Persistence.Migrations
 
             modelBuilder.Entity("EShop.Shared.EventBus.InboxMessage", b =>
                 {
-                    b.Property<Guid>("MessageId")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
@@ -60,9 +60,9 @@ namespace EShop.Tenancy.Persistence.Migrations
                     b.Property<DateTimeOffset>("UpdatedOnUtc")
                         .HasColumnType("timestamp with time zone");
 
-                    b.HasKey("MessageId");
+                    b.HasKey("Id");
 
-                    b.ToTable("InboxMessages", (string)null);
+                    b.ToTable("InboxMessages");
                 });
 
             modelBuilder.Entity("EShop.Tenancy.Domain.Entities.Feature", b =>
