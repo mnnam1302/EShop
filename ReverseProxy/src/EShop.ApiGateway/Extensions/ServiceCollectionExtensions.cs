@@ -2,7 +2,7 @@
 using EShop.Shared.JsonApi.DependencyInjections;
 using EShop.Shared.JsonApi.Middlewares;
 
-namespace ApiGateway.DependencyInjections.Extensions;
+namespace EShop.ApiGateway.Extensions;
 
 public static class ServiceCollectionExtensions
 {
@@ -55,33 +55,4 @@ public static class ServiceCollectionExtensions
 
         return services;
     }
-
-    // dont't remove, can reference later
-    //public static OptionsBuilder<IdentityHttpClientOptions> AddIdentityHttpClientOptions(this IServiceCollection services, IConfiguration section)
-    //{
-    //    return services
-    //        .AddOptions<IdentityHttpClientOptions>()
-    //        .Bind(section)
-    //        .ValidateDataAnnotations()
-    //        .ValidateOnStart();
-    //}
-
-    //public static void AddUserApiHttpClient(this IServiceCollection services)
-    //{
-    //    services.ConfigureHttpClientDefaults(options =>
-    //    {
-    //        options.AddServiceDiscovery();
-    //    });
-
-    //    services
-    //        .AddHttpClient("UserService", (provider, client) =>
-    //        {
-    //            var options = provider.GetRequiredService<IOptionsMonitor<IdentityHttpClientOptions>>().CurrentValue as dynamic;
-    //            client.BaseAddress = new Uri(options.BaseAddress);
-    //            client.Timeout = TimeSpan.FromSeconds(options.ScoringApiTimeout ?? DefaultExternalServiceTimeoutInSeconds);
-    //        })
-    //        .AddServiceDiscovery()
-    //        .AddPolicyHandler(ResilientClientPolicies.GetRetryOnErrorAndNotFoundPolicy())
-    //        .AddPolicyHandler(ResilientClientPolicies.GetCircuitBreakerPolicy());
-    //}
 }

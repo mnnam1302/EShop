@@ -1,4 +1,4 @@
-using ApiGateway.DependencyInjections.Extensions;
+using EShop.ApiGateway.Extensions;
 using EShop.Shared.Diagnostics;
 using EShop.Shared.JsonApi.Middlewares;
 using Serilog;
@@ -24,7 +24,9 @@ if (app.Environment.IsDevelopment())
     app.UseCors("CorsPolicy");
 }
 
+// Production
 //app.UseHttpsRedirection();
+
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapReverseProxy();

@@ -3,7 +3,7 @@ using EShop.Shared.Scoping.ResourceAccessControl;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserTokenProvider;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 
-namespace ApiGateway.Attributes;
+namespace EShop.ApiGateway.Attributes;
 
 public class CustomJwtBearEvents : JwtBearerEvents
 {
@@ -16,12 +16,6 @@ public class CustomJwtBearEvents : JwtBearerEvents
         _cacheService = cacheService;
     }
 
-    /// <summary>
-    /// Validates the request's token against the cached token in Redis to ensure it is still valid and has not been revoked.
-    /// If the token is not found in the cache or does not match the cached token, the request is marked as failed and a header indicating token revocation is added to the response.
-    /// </summary>
-    /// <param name="context"></param>
-    /// <returns></returns>
     public override async Task TokenValidated(TokenValidatedContext context)
     {
         var userId = _userDetailsProvider.AuthenticatedUser.Id;
@@ -31,9 +25,7 @@ public class CustomJwtBearEvents : JwtBearerEvents
 
         var tokenCached = await _cacheService.TryGetTokenAsync(userId);
 
-        if (tokenCached is null ||
-            tokenCached.AccessToken is null ||
-            tokenCached.AccessToken != requestToken)
+        if (tokenCached is null || tokenCached.AccessToken is null || tokenCached.AccessToken != requestToken)
         {
             context.HttpContext.Response.Headers.TryAdd("IS-TOKEN-REVOKED", "true");
             context.Fail("Authentication fail. Token has been revoked!");

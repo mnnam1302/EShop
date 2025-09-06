@@ -1,10 +1,10 @@
-﻿using ApiGateway.Attributes;
+﻿using EShop.ApiGateway.Attributes;
 using EShop.Shared.Scoping.DependencyInjections.Options;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
-namespace ApiGateway.DependencyInjections.Extensions;
+namespace EShop.ApiGateway.Extensions;
 
 public static class JwtExtensions
 {
