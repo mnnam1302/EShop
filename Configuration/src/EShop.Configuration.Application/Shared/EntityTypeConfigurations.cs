@@ -10,6 +10,6 @@ public class InboxMessageEntityTypeConfigurations : IEntityTypeConfiguration<Inb
     {
         builder.ToTable("InboxMessages");
 
-        builder.HasKey(x => x.MessageId);
+        builder.HasKey(x => x.Id);
     }
 }

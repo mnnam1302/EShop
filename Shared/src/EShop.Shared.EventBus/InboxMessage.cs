@@ -6,7 +6,7 @@ namespace EShop.Shared.EventBus;
 
 public class InboxMessage : IExcludedFromScoping
 {
-    public Guid MessageId { get; set; }
+    public Guid Id { get; set; }
 
     [MaxLength(ModelConstants.ShortMediumText)]
     public string MessageType { get; set; } = string.Empty;
@@ -21,6 +21,7 @@ public class InboxMessage : IExcludedFromScoping
     public string ReasonFailed { get; set; } = string.Empty;
 
     public DateTimeOffset CreatedOnUtc { get; set; }
+
     public DateTimeOffset UpdatedOnUtc { get; set; }
 }
 

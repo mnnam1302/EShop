@@ -11,7 +11,7 @@ internal class InboxMessageConfiguration : IEntityTypeConfiguration<InboxMessage
     {
         builder.ToTable(TableNames.InboxMessages);
 
-        builder.HasKey(x => x.MessageId);
+        builder.HasKey(x => x.Id);
 
         builder.Property(x => x.MessageType)
             .IsRequired();

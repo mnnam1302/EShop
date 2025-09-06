@@ -29,7 +29,7 @@ public abstract class Consumer<TMessage, TDbContext> : IConsumer<TMessage>
         var messageId = context.Headers.Get<Guid>("OutboxMessageId") ?? context.MessageId;
 
         var existingInbox = await _dbContext.InboxMessages
-            .AnyAsync(x => x.MessageId == messageId, cancellationToken);
+            .AnyAsync(x => x.Id == messageId, cancellationToken);
 
         if (!existingInbox)
         {
@@ -38,7 +38,7 @@ public abstract class Consumer<TMessage, TDbContext> : IConsumer<TMessage>
             var consumerId = $"{GetType().Name}:{message.GetType().Name}";
             var inboxMessage = new InboxMessage
             {
-                MessageId = messageId!.Value,
+                Id = messageId!.Value,
                 MessageType = message.GetType().Name,
                 ConsumerId = consumerId,
                 State = InboxMessageStatus.New,

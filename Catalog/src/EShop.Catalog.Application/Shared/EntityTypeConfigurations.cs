@@ -1,15 +1,11 @@
-﻿using EShop.Shared.EventBus;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
+﻿namespace EShop.Catalog.Application.Shared;
 
-namespace EShop.Catalog.Application.Shared;
+//public class InboxMessageEntityTypeConfigurations : IEntityTypeConfiguration<InboxMessage>
+//{
+//    public void Configure(EntityTypeBuilder<InboxMessage> builder)
+//    {
+//        builder.ToTable("InboxMessages");
 
-public class InboxMessageEntityTypeConfigurations : IEntityTypeConfiguration<InboxMessage>
-{
-    public void Configure(EntityTypeBuilder<InboxMessage> builder)
-    {
-        builder.ToTable("InboxMessages");
-
-        builder.HasKey(x => x.MessageId);
-    }
-}
+//        builder.HasKey(x => x.Id);
+//    }
+//}
