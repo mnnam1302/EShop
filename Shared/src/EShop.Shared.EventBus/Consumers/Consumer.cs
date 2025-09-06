@@ -21,6 +21,8 @@ public abstract class Consumer<TMessage, TDbContext> : IConsumer<TMessage>
         await HandleInboxMessage(context, context.CancellationToken);
     }
 
+    protected abstract Task<Result> HandleMessageAsync(TMessage message, CancellationToken cancellationToken);
+
     private async Task HandleInboxMessage(ConsumeContext<TMessage> context, CancellationToken cancellationToken)
     {
         var message = context.Message;
@@ -39,25 +41,24 @@ public abstract class Consumer<TMessage, TDbContext> : IConsumer<TMessage>
                 MessageId = messageId!.Value,
                 MessageType = message.GetType().Name,
                 ConsumerId = consumerId,
-                State = InboxMessageStatus.New.ToString(),
+                State = InboxMessageStatus.New,
                 CreatedOnUtc = DateTime.UtcNow
             };
 
             if (result.IsSuccess)
             {
-                inboxMessage.State = InboxMessageStatus.Done.ToString();
+                inboxMessage.State = InboxMessageStatus.Done;
             }
             else
             {
-                inboxMessage.State = InboxMessageStatus.Failed.ToString();
+                inboxMessage.State = InboxMessageStatus.Failed;
                 inboxMessage.ReasonFailed = result.Error.Message;
             }
 
             inboxMessage.UpdatedOnUtc = DateTime.UtcNow;
+
             _dbContext.InboxMessages.Add(inboxMessage);
             await _dbContext.SaveChangesAsync(cancellationToken);
         }
     }
-
-    protected abstract Task<Result> HandleMessageAsync(TMessage message, CancellationToken cancellationToken);
 }
