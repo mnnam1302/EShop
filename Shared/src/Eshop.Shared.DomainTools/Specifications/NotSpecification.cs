@@ -8,6 +8,7 @@ public class NotSpecification<T> : CompositeSpecification<T>
     {
         this.specification = specification;
     }
+
     public override bool IsSatisfiedBy(T o)
     {
         return !specification.IsSatisfiedBy(o);

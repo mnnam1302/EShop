@@ -10,6 +10,7 @@ public class OrSpecification<T> : CompositeSpecification<T>
         this.leftSpecification = leftSpecification;
         this.rightSpecification = rightSpecification;
     }
+
     public override bool IsSatisfiedBy(T o)
     {
         return leftSpecification.IsSatisfiedBy(o) || rightSpecification.IsSatisfiedBy(o);
