@@ -6,7 +6,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace EShop.Catalog.Application.Products;
 
-public class Product : AggregateRoot<Guid>, IAuditable, IScoped
+public class Product : AggregateRoot<Guid>, IAuditable, IScoped, IRingFenced
 {
     [MaxLength(ModelConstants.MediumText)]
     public string Name { get; set; } = string.Empty;

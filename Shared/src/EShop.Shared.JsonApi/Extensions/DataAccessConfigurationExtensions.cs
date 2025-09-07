@@ -6,7 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Npgsql.EntityFrameworkCore.PostgreSQL;
 
-namespace EShop.Shared.JsonApi.DependencyInjections;
+namespace EShop.Shared.JsonApi.Extensions;
 
 public static class DataAccessConfigurationExtensions
 {
@@ -95,7 +95,7 @@ public static class DataAccessConfigurationExtensions
     {
         services
             .AddDatabaseOptions(configuration)
-            .AddMultiTenantScopingV2();
+            .AddMultiTenantScoping();
 
         if (IsDesignTime())
         {

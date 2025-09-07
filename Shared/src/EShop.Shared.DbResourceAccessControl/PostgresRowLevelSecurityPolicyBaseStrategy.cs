@@ -1,5 +1,6 @@
 ﻿using EShop.Shared.DbResourceAccessControl.Extensions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.Extensions.Logging;
 using NpgsqlTypes;
 using System.Data.Common;
@@ -22,10 +23,7 @@ public abstract class PostgresRowLevelSecurityPolicyBaseStrategy
     /// </summary>
     protected abstract bool AdjustRlsPolicyOnStartUp { get; }
 
-    protected void AddIsolationStrategy(
-        DbContext dbContext,
-        string[] tableNames,
-        string rlsUsingExpression)
+    protected void AddIsolationStrategy(DbContext dbContext, string[] tableNames, string rlsUsingExpression)
     {
         dbContext.Database.OpenConnection();
 
@@ -82,10 +80,10 @@ public abstract class PostgresRowLevelSecurityPolicyBaseStrategy
         else
         {
             cmd = dbConnection.CreateCommand()
-                    .WithPostgreSqlCommandText("SELECT count(*) FROM pg_policies WHERE schemaname = $1 AND tablename = $2 AND policyname = $3 LIMIT 1;")
-                    .WithPostgreSqlPositionalParameter(schemaName, NpgsqlDbType.Varchar)
-                    .WithPostgreSqlPositionalParameter(table, NpgsqlDbType.Varchar)
-                    .WithPostgreSqlPositionalParameter(policyName, NpgsqlDbType.Varchar);
+                .WithPostgreSqlCommandText("SELECT count(*) FROM pg_policies WHERE schemaname = $1 AND tablename = $2 AND policyname = $3 LIMIT 1;")
+                .WithPostgreSqlPositionalParameter(schemaName, NpgsqlDbType.Varchar)
+                .WithPostgreSqlPositionalParameter(table, NpgsqlDbType.Varchar)
+                .WithPostgreSqlPositionalParameter(policyName, NpgsqlDbType.Varchar);
         }
 
         // See https://www.npgsql.org/doc/prepare.html
@@ -98,8 +96,8 @@ public abstract class PostgresRowLevelSecurityPolicyBaseStrategy
     private void AddRlsPolicy(DbContext dbContext, string schemaPrefix, string table, string rlsUsingExpression)
     {
         logger.LogDebug(
-                "Setting up RLS Policy '{policy}' for table '{schemaPrefix}{table}' using expression {rlsUsingExpression}",
-                policyName, schemaPrefix, table, rlsUsingExpression);
+            "Setting up RLS Policy '{policy}' for table '{schemaPrefix}{table}' using expression {rlsUsingExpression}",
+            policyName, schemaPrefix, table, rlsUsingExpression);
 
         var enableRlsSql = $"ALTER TABLE {schemaPrefix}\"{table}\" ENABLE ROW LEVEL SECURITY;";
         dbContext.Database.ExecuteSqlRaw(enableRlsSql);
@@ -114,8 +112,8 @@ public abstract class PostgresRowLevelSecurityPolicyBaseStrategy
     private void AlterRlsPolicy(DbContext dbContext, string schemaPrefix, string table, string rlsUsingExpression)
     {
         logger.LogDebug(
-                "Altering existing RLS Policy '{policy}' for table '{schemaPrefix}{table}' using expression {rlsUsingExpression}",
-                policyName, schemaPrefix, table, rlsUsingExpression);
+            "Altering existing RLS Policy '{policy}' for table '{schemaPrefix}{table}' using expression {rlsUsingExpression}",
+            policyName, schemaPrefix, table, rlsUsingExpression);
 
         var alterPolicySql =
             $"""
@@ -123,5 +121,15 @@ public abstract class PostgresRowLevelSecurityPolicyBaseStrategy
                      USING ({rlsUsingExpression});
                  """;
         dbContext.Database.ExecuteSqlRaw(alterPolicySql);
+    }
+
+    protected static string[] GetTableNamesForEntitiesFoundIn(DbContext dbContext, Func<IEntityType, bool> filter)
+    {
+        return dbContext.Model.GetEntityTypes()
+            .Where(filter)
+            .Select(entityType => entityType.GetTableName())
+            .Where(tableName => tableName is not null)
+            .Select(tableName => tableName!)
+            .ToArray();
     }
 }

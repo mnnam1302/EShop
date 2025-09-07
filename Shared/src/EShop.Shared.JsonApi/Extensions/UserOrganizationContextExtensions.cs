@@ -5,7 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using static EShop.Shared.Contracts.Services.Identity.Organizations.Response;
 using static EShop.Shared.Contracts.Services.Identity.Users.Response;
 
-namespace EShop.Shared.JsonApi.DependencyInjections;
+namespace EShop.Shared.JsonApi.Extensions;
 
 public static class UserOrganizationContextExtensions
 {

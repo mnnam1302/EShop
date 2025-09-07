@@ -1,5 +1,5 @@
 ﻿using EShop.Shared.Cache.DependencyInejctions.Extensions;
-using EShop.Shared.JsonApi.DependencyInjections;
+using EShop.Shared.JsonApi.Extensions;
 using EShop.Shared.JsonApi.Middlewares;
 
 namespace EShop.ApiGateway.Extensions;
@@ -8,8 +8,6 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddShared(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddUserScoping();
-
         services
             .AddRedisHealthCheck(configuration)
             .AddRedisInfrastructure(configuration);

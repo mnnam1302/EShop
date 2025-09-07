@@ -3,7 +3,7 @@ using EShop.Shared.Cache.DependencyInejctions.Extensions;
 using EShop.Shared.Cache.Providers;
 using EShop.Shared.Cache.Services;
 using EShop.Shared.DomainTools.DependencyInjections;
-using EShop.Shared.JsonApi.DependencyInjections;
+using EShop.Shared.JsonApi.Extensions;
 using EShop.Shared.JsonApi.Middlewares;
 using EShop.Shared.Scoping.ResourceAccessControl;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers.TenantFeaturesProvider;
@@ -20,7 +20,6 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddShared(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment)
     {
-        services.AddUserScoping();
         services.AddResiliencePolicy();
 
         // PostgreSQL

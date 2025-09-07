@@ -10,7 +10,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Nito.AsyncEx;
 
-namespace EShop.Shared.JsonApi.DependencyInjections;
+namespace EShop.Shared.JsonApi.Extensions;
 
 public static class UserPermissionsExtensions
 {

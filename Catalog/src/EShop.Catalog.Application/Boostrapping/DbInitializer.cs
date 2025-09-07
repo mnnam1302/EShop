@@ -9,30 +9,30 @@ namespace EShop.Catalog.Application.Boostrapping;
 
 public sealed class DbInitializer
 {
+    private readonly ILogger<DbInitializer> _logger;
+    private readonly IOptions<CatalogSequenceOptions> _referenceOptions;
     private readonly CatalogDbContext _dbContext;
+    private readonly ISequenceRegistry _sequenceRegistry;
     private readonly IUserDetailsProvider _userDetailsProvider;
     private readonly ITenantIsolationStrategy _tenantIsolationStrategy;
-    private readonly IConfiguration _configuration;
-    private readonly ILogger _logger;
-    private readonly ISequenceRegistry _sequenceRegistry;
-    private readonly IOptions<CatalogSequenceOptions> _referenceOptions;
+    private readonly IRingFencingIsolationStrategy _ringFencingIsolationStrategy;
 
     public DbInitializer(
+        ILogger<DbInitializer> logger,
+        IOptions<CatalogSequenceOptions> options,
         CatalogDbContext dbContext,
+        ISequenceRegistry sequenceRegistry,
         IUserDetailsProvider userDetailsProvider,
         ITenantIsolationStrategy tenantIsolationStrategy,
-        IConfiguration configuration,
-        ILogger<DbInitializer> logger,
-        ISequenceRegistry sequenceRegistry,
-        IOptions<CatalogSequenceOptions> options)
+        IRingFencingIsolationStrategy ringFencingIsolationStrategy)
     {
+        _logger = logger;
+        _referenceOptions = options;
         _dbContext = dbContext;
+        _sequenceRegistry = sequenceRegistry;
         _userDetailsProvider = userDetailsProvider;
         _tenantIsolationStrategy = tenantIsolationStrategy;
-        _configuration = configuration;
-        _logger = logger;
-        _sequenceRegistry = sequenceRegistry;
-        _referenceOptions = options;
+        _ringFencingIsolationStrategy = ringFencingIsolationStrategy;
     }
 
     public async Task Initialize(bool applyMigrations = true, bool applyTenantIsolation = true)
@@ -52,10 +52,9 @@ public sealed class DbInitializer
                 await _dbContext.Database.EnsureCreatedAsync();
             }
 
-            if (applyTenantIsolation && _configuration.GetValue("AllowTenantIsolation", true))
-            {
-                _tenantIsolationStrategy.AddTenantIsolation(_dbContext);
-            }
+            _ringFencingIsolationStrategy.AddRingFencingIsolation(_dbContext);
+
+            _tenantIsolationStrategy.AddTenantIsolation(_dbContext, appliedRingFencing: true);
 
             await _sequenceRegistry.RegisterSequences(
                 Program.ApplicationName,

@@ -1,6 +1,6 @@
 ﻿using EShop.Shared.Cache.DependencyInejctions.Extensions;
 using EShop.Shared.CQRS;
-using EShop.Shared.JsonApi.DependencyInjections;
+using EShop.Shared.JsonApi.Extensions;
 using EShop.Shared.JsonApi.Middlewares;
 
 namespace EShop.Catalog.Application.Shared;

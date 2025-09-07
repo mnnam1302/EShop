@@ -4,7 +4,7 @@ using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserTokenProvider;
 using Microsoft.Extensions.DependencyInjection;
 using static EShop.Shared.Contracts.Services.Identity.Auth.Response;
 
-namespace EShop.Shared.JsonApi.DependencyInjections;
+namespace EShop.Shared.JsonApi.Extensions;
 
 public static class UserTokensExtensions
 {

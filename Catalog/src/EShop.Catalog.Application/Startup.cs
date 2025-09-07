@@ -1,7 +1,7 @@
 ﻿using EShop.Catalog.Application.Agencies;
 using EShop.Catalog.Application.Boostrapping;
 using EShop.Catalog.Application.Shared;
-using EShop.Shared.JsonApi.DependencyInjections;
+using EShop.Shared.JsonApi.Extensions;
 using EShop.Shared.JsonApi.Middlewares;
 
 namespace EShop.Catalog.Application;

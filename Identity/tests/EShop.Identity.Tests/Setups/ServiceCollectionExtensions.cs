@@ -12,7 +12,7 @@ using EShop.Shared.Contracts.Services.Tenancy.Tenants;
 using EShop.Shared.DomainTools.DependencyInjections;
 using EShop.Shared.EventBus.JsonConverters;
 using EShop.Shared.EventBus.Services;
-using EShop.Shared.JsonApi.DependencyInjections;
+using EShop.Shared.JsonApi.Extensions;
 using EShop.Shared.Scoping.ResourceAccessControl;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers.TenantFeaturesProvider;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserPermissionProvider;

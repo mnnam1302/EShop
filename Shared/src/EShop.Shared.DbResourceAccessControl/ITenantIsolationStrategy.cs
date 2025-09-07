@@ -4,5 +4,5 @@ namespace EShop.Shared.DbResourceAccessControl;
 
 public interface ITenantIsolationStrategy
 {
-    void AddTenantIsolation(DbContext dbContext);
+    void AddTenantIsolation(DbContext dbContext, bool appliedRingFencing = false);
 }
