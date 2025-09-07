@@ -5,17 +5,17 @@ namespace EShop.Shared.DomainTools.Aggregates;
 
 public abstract class AggregateRoot<TKey> : EntityBase<TKey>, IAggregateRoot<TKey>
 {
-    private readonly List<IDomainEvent> _uncommittedDomainEvents = new();
+    private readonly List<IDomainEvent> _domainEvents = new();
 
-    public IReadOnlyCollection<IDomainEvent> GetDomainEvents() => _uncommittedDomainEvents.ToList();
+    public IReadOnlyCollection<IDomainEvent> GetDomainEvents() => _domainEvents.ToList();
 
-    public void RaiseDomainEvent(IDomainEvent domainEvent)
+    public void Raise(IDomainEvent domainEvent)
     {
-        _uncommittedDomainEvents.Add(domainEvent);
+        _domainEvents.Add(domainEvent);
     }
 
     public void ClearDomainEvents()
     {
-        _uncommittedDomainEvents.Clear();
+        _domainEvents.Clear();
     }
 }
