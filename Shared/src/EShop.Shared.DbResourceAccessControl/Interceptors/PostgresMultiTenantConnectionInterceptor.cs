@@ -10,7 +10,7 @@ namespace EShop.Shared.DbResourceAccessControl.Interceptors;
 public class PostgresMultiTenantConnectionInterceptor : DbConnectionInterceptor, IMultiTenantIsolationStrategy
 {
     private readonly IUserDetailsProvider _userDetailsProvider;
-    private readonly ILogger _logger;
+    private readonly ILogger<PostgresMultiTenantConnectionInterceptor> _logger;
 
     public PostgresMultiTenantConnectionInterceptor(
         IUserDetailsProvider userDetailsProvider,
