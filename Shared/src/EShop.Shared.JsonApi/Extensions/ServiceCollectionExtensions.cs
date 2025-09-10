@@ -26,6 +26,7 @@ public static class ServiceCollectionExtensions
 
     public static IServiceCollection AddRingFencedScoping(this IServiceCollection services)
     {
+        services.AddTransient<IRingFencingConnectionInterceptor, PostgresRingFencingConnectionInterceptor>();
         services.TryAddScoped<IRingFencingIsolationStrategy, PostgresRowLevelSecurityPolicyRingFencing>();
 
         return services;
