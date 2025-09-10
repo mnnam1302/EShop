@@ -1,4 +1,5 @@
 ﻿using EShop.Shared.CQRS.Command;
+using EShop.Shared.CQRS.DomainEvent;
 using EShop.Shared.CQRS.Query;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
@@ -9,9 +10,11 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddCQRS(this IServiceCollection services, Assembly assembly)
     {
-        services.AddScoped<ICommandDispatcher, CommandDispatcher>();
-        services.AddScoped<IQueryDispatcher, QueryDispatcher>();
+        services.AddTransient<ICommandDispatcher, CommandDispatcher>();
+        services.AddTransient<IQueryDispatcher, QueryDispatcher>();
+        services.AddTransient<IDomainEventsDispatcher, DomainEventsDispatcher>();
         services.AddTransient<IMediator, Mediator>();
+
 
         services.Scan(scan => scan.FromAssemblies(assembly)
             .AddClasses(classes => classes.AssignableTo(typeof(ICommandHandler<>)), publicOnly: false)
@@ -21,6 +24,9 @@ public static class ServiceCollectionExtensions
                 .AsImplementedInterfaces()
                 .WithScopedLifetime()
             .AddClasses(classes => classes.AssignableTo(typeof(IQueryHandler<,>)), publicOnly: false)
+                .AsImplementedInterfaces()
+                .WithScopedLifetime()
+            .AddClasses(classes => classes.AssignableTo(typeof(IDomainEventHandler<>)), publicOnly: false)
                 .AsImplementedInterfaces()
                 .WithScopedLifetime());
 

@@ -2,6 +2,4 @@
 
 namespace EShop.Shared.DbResourceAccessControl.Interceptors;
 
-public interface IMultiTenantIsolationStrategy : IDbConnectionInterceptor
-{
-}
+public interface IMultiTenantIsolationStrategy : IDbConnectionInterceptor;

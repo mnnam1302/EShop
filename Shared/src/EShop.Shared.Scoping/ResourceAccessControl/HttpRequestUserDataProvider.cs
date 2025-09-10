@@ -5,7 +5,7 @@ using Microsoft.IdentityModel.JsonWebTokens;
 
 namespace EShop.Shared.Scoping.ResourceAccessControl;
 
-public class HttpRequestUserDataProvider : IUserDetailsProvider
+public sealed class HttpRequestUserDataProvider : IUserDetailsProvider
 {
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly ILogger<HttpRequestUserDataProvider> _logger;

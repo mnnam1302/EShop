@@ -8,8 +8,7 @@ public class AggregateRepository<TDbContext, TAggregateRoot, TKey>
     where TDbContext : DbContext
     where TAggregateRoot : class, IAggregateRoot<TKey>
 {
-    public AggregateRepository(TDbContext dbContext)
-        : base(dbContext)
+    public AggregateRepository(TDbContext dbContext) : base(dbContext)
     {
     }
 }

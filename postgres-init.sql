@@ -4,7 +4,8 @@ DECLARE
    userpassword varchar[];
    users varchar[] := array[['users','users-password-dev'], 
                             ['tenancy','tenancy-password-dev'],
-                            ['configuration','configuration-password-dev']];
+                            ['configuration','configuration-password-dev']]
+							['catalog','catalog-password-dev']];
 BEGIN
    FOREACH userpassword SLICE 1 IN ARRAY users
    LOOP
@@ -50,3 +51,15 @@ GRANT ALL PRIVILEGES ON SCHEMA public TO configuration;
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO configuration;
 GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO configuration;
 GRANT ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA public TO configuration;
+
+
+CREATE DATABASE eshop_catalog;
+
+GRANT ALL PRIVILEGES ON DATABASE eshop_catalog TO catalog;
+\c eshop_catalog
+CREATE EXTENSION IF NOT EXISTS citext;
+\c eshop_catalog
+GRANT ALL PRIVILEGES ON SCHEMA public TO catalog;
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO catalog;
+GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO catalog;
+GRANT ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA public TO catalog;

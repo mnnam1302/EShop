@@ -4,8 +4,7 @@ using System.Linq.Expressions;
 
 namespace EShop.Shared.DomainTools.Repositories;
 
-public abstract class RepositoryBaseDbContext<TDbContext, TEntity, TKey>
-    : IRepositoryBase<TEntity, TKey>, IDisposable
+public abstract class RepositoryBaseDbContext<TDbContext, TEntity, TKey> : IRepositoryBase<TEntity, TKey>, IDisposable
     where TDbContext : DbContext
     where TEntity : class, IEntityBase<TKey>
 {
@@ -16,9 +15,19 @@ public abstract class RepositoryBaseDbContext<TDbContext, TEntity, TKey>
         _dbContext = dbContext;
     }
 
+
     public void Dispose()
     {
-        _dbContext.Dispose();
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            _dbContext.Dispose();
+        }
     }
 
     public async Task<TEntity?> FindByIdAsync(
@@ -27,10 +36,7 @@ public abstract class RepositoryBaseDbContext<TDbContext, TEntity, TKey>
         CancellationToken cancellationToken = default,
         params Expression<Func<TEntity, object>>[] includeProperties)
     {
-        var entity = await FindByCondition(
-                x => x.Id!.Equals(id),
-                trackChanges,
-                includeProperties)
+        var entity = await FindByCondition(x => x.Id!.Equals(id), trackChanges, includeProperties)
             .FirstOrDefaultAsync(cancellationToken);
 
         return entity;
@@ -42,11 +48,8 @@ public abstract class RepositoryBaseDbContext<TDbContext, TEntity, TKey>
         CancellationToken cancellationToken = default,
         params Expression<Func<TEntity, object>>[] includeProperties)
     {
-        return await FindByCondition(
-                predicate,
-                trackChanges,
-                includeProperties)
-            .SingleOrDefaultAsync(cancellationToken);
+        return await FindByCondition(predicate, trackChanges, includeProperties)
+            .FirstOrDefaultAsync(cancellationToken);
     }
 
     public async Task<ICollection<TEntity>> FindByConditionAsync(
@@ -55,10 +58,7 @@ public abstract class RepositoryBaseDbContext<TDbContext, TEntity, TKey>
         CancellationToken cancellationToken = default,
         params Expression<Func<TEntity, object>>[] includeProperties)
     {
-        return await FindByCondition(
-                predicate,
-                trackChanges,
-                includeProperties)
+        return await FindByCondition(predicate, trackChanges, includeProperties)
             .ToListAsync(cancellationToken);
     }
 
@@ -85,9 +85,7 @@ public abstract class RepositoryBaseDbContext<TDbContext, TEntity, TKey>
         return items;
     }
 
-    public IQueryable<TEntity> FindAll(
-        bool trackChanges = false,
-        params Expression<Func<TEntity, object>>[] includeProperties)
+    public IQueryable<TEntity> FindAll(bool trackChanges = false, params Expression<Func<TEntity, object>>[] includeProperties)
     {
         // Important to use AsNoTracking to improve performance - Always include AsNoTracking for Query Side
         IQueryable<TEntity> items = !trackChanges

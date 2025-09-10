@@ -31,4 +31,10 @@ public static class PermissionConstants
         public const string ViewProductsPermissionId = "Configuration_ViewProducts";
         public const string ManageProductsPermissionId = "Configuration_ManageProducts";
     }
+
+    public static class CatalogPermissions
+    {
+        public const string ViewProductsPermissionId = "Catalog_ViewProducts";
+        public const string ManageProductsPermissionId = "Catalog_ManageProducts";
+    }
 }

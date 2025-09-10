@@ -9,5 +9,5 @@ public interface IAggregateRoot<TKey> : IEntityBase<TKey>
 
     public void ClearDomainEvents();
 
-    public void RaiseDomainEvent(IDomainEvent domainEvent);
+    public void Raise(IDomainEvent domainEvent);
 }

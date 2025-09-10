@@ -1,4 +1,4 @@
-﻿using EShop.Shared.JsonApi.DependencyInjections;
+﻿using EShop.Shared.JsonApi.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 

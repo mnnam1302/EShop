@@ -17,26 +17,31 @@ public sealed class PostgresRowLevelSecurityPolicyIsolation : PostgresRowLevelSe
 
     protected override bool AdjustRlsPolicyOnStartUp => false;
 
-    public void AddTenantIsolation(DbContext dbContext)
+    public void AddTenantIsolation(DbContext dbContext, bool appliedRingFencing = false)
     {
         IEnumerable<PropertyInfo> resourceProperties = dbContext.GetType().GetProperties()
-            .Where(p => p.PropertyType.IsGenericType
-            && p.PropertyType.GetGenericTypeDefinition() == typeof(DbSet<>));
+            .Where(p => p.PropertyType.IsGenericType &&
+                        p.PropertyType.GetGenericTypeDefinition() == typeof(DbSet<>));
 
         var undeclaredProperties = resourceProperties
-            .Where(p => !typeof(IScoped).IsAssignableFrom(p.PropertyType.GetGenericArguments()[0])
-                        && !typeof(IExcludedFromScoping).IsAssignableFrom(p.PropertyType.GetGenericArguments()[0]));
+            .Where(p => !typeof(IScoped).IsAssignableFrom(p.PropertyType.GetGenericArguments()[0]) &&
+                        !typeof(IExcludedFromScoping).IsAssignableFrom(p.PropertyType.GetGenericArguments()[0]));
 
         if (undeclaredProperties.Any())
         {
             var invalidResources = undeclaredProperties.Select(p => p.Name).ToCommaSeparatedString();
-            throw new InvalidOperationException($"Please make sure to declare scoping behaviour on following properties of '{dbContext.GetType().Name}': {invalidResources}.");
+            throw new InvalidOperationException(
+                $"Please make sure to declare scoping behaviour on following properties of '{dbContext.GetType().Name}': {invalidResources}.");
         }
 
         resourceProperties = resourceProperties
             .Where(x => typeof(IScoped).IsAssignableFrom(x.PropertyType.GetGenericArguments()[0]));
 
-        // Ring fencing is applied later
+        if (appliedRingFencing)
+        {
+            resourceProperties = resourceProperties
+                .Where(x => !typeof(IRingFenced).IsAssignableFrom(x.PropertyType.GetGenericArguments()[0]));
+        }
 
         var tableNames = resourceProperties
             .Select(p => p.Name)

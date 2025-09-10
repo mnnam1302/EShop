@@ -22,6 +22,11 @@ public static class FeatureConstants
     {
         public const string ProductBuilder_FeatureId = "Configration_ProductBuilder";
     }
+
+    public static class CatalogFeatures
+    {
+        public const string ProductBuilder_FeatureId = "Catalog_ProductBuilder";
+    }
 }
 
 public enum FeatureModules
