@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EShop.Tenancy.Domain.Repositories;
 
-public interface IFeatureRepository : IRepositoryBase<Feature, string>
+public interface IFeatureRepository : IRepository<Feature, string>
 {
     Task<EntityState> GetEntityStateAsync(Feature feature, CancellationToken cancellationToken = default);
 }

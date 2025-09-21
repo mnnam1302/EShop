@@ -10,7 +10,7 @@ namespace EShop.Identity.Domain.Repositories;
 /// </summary>
 /// <typeparam name="TEntity">The entity type.</typeparam>
 /// <typeparam name="TKey">The type of the entity's identifier.</typeparam>
-public interface IIdentityRepositoryBase<TEntity, in TKey> : IRepositoryBase<TEntity, TKey>
+public interface IIdentityRepositoryBase<TEntity, in TKey> : IRepository<TEntity, TKey>
     where TEntity : class, IEntityBase<TKey>
 {
 }

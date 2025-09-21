@@ -1,5 +1,8 @@
-﻿namespace EShop.Authorization.Domain.Repositories;
+﻿using EShop.Authorization.Domain.Entities;
+using EShop.Shared.DomainTools.Repositories;
 
-public interface IPermissionRepository
+namespace EShop.Authorization.Domain.Repositories;
+
+public interface IPermissionRepository : IRepository<Permission, string>
 {
 }

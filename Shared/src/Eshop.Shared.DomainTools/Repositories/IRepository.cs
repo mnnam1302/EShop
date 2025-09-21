@@ -10,7 +10,7 @@ namespace EShop.Shared.DomainTools.Repositories;
 /// querying entities with optional filtering, tracking, and inclusion of related properties.</remarks>
 /// <typeparam name="TEntity">The type of the entity managed by the repository. Must be a class implementing <see cref="IEntityBase{TKey}"/>.</typeparam>
 /// <typeparam name="TKey">The type of the unique identifier for the entity.</typeparam>
-public interface IRepositoryBase<TEntity, in TKey> where TEntity : class, IEntityBase<TKey>
+public interface IRepository<TEntity, in TKey> where TEntity : class, IEntityBase<TKey>
 {
     Task<TEntity?> FindByIdAsync(
         TKey id,

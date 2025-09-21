@@ -20,4 +20,19 @@ public class Organization : AggregateRoot<string>
 
     [MaxLength(ModelConstants.VeryLongText)]
     public string Scope { get; private set; } = string.Empty;
+
+    public static Organization CreateRootOrganization(string tenantId, string tenantName)
+    {
+        var organization = new Organization
+        {
+            Id = tenantId,
+            Name = tenantName,
+            Description = "Root Organization",
+            ParentOrganizationId = null,
+            TenantId = tenantId,
+            Scope = tenantId
+        };
+
+        return organization;
+    }
 }

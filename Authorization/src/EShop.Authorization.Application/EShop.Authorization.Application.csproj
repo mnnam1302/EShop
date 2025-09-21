@@ -11,4 +11,16 @@
     <PackageReference Include="Swashbuckle.AspNetCore" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Shared\src\EShop.Shared.DomainTools\EShop.Shared.DomainTools.csproj" />
+    <ProjectReference Include="..\EShop.Authorization.Domain\EShop.Authorization.Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Producers\" />
+    <Folder Include="UseCases\Permissions\" />
+    <Folder Include="UseCases\Roles\" />
+    <Folder Include="UseCases\Users\" />
+  </ItemGroup>
+
 </Project>

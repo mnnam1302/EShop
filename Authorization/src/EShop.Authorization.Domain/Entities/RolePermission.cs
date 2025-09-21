@@ -2,7 +2,7 @@
 
 namespace EShop.Authorization.Domain.Entities;
 
-internal class RolePermission
+public class RolePermission
 {
     public Guid RolerId { get; set; }
     public virtual Role Role { get; set; } = null!;

@@ -2,7 +2,7 @@
 
 namespace EShop.Authorization.Domain.Entities;
 
-internal class UserRoles
+public class UserRole
 {
     [MaxLength(ModelConstants.ShortText)]
     public string UserId { get; set; } = string.Empty;

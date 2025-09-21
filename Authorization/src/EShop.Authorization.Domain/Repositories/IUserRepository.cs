@@ -1,5 +1,8 @@
-﻿namespace EShop.Authorization.Domain.Repositories;
+﻿using EShop.Authorization.Domain.Entities;
+using EShop.Shared.DomainTools.Repositories;
 
-public interface IUserRepository
+namespace EShop.Authorization.Domain.Repositories;
+
+public interface IUserRepository : IRepository<User, string>
 {
 }

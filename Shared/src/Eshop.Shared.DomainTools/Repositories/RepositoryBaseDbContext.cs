@@ -4,7 +4,7 @@ using System.Linq.Expressions;
 
 namespace EShop.Shared.DomainTools.Repositories;
 
-public abstract class RepositoryBaseDbContext<TDbContext, TEntity, TKey> : IRepositoryBase<TEntity, TKey>, IDisposable
+public abstract class RepositoryBaseDbContext<TDbContext, TEntity, TKey> : IRepository<TEntity, TKey>, IDisposable
     where TDbContext : DbContext
     where TEntity : class, IEntityBase<TKey>
 {
