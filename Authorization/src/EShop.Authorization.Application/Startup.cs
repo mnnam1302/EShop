@@ -1,5 +1,7 @@
-﻿using EShop.Authorization.Application.Boostrapping;
+﻿using EShop.Authorization.Application.APIs;
+using EShop.Authorization.Application.Boostrapping;
 using EShop.Authorization.Application.Shared;
+using EShop.Shared.JsonApi.Extensions;
 using EShop.Shared.JsonApi.Middlewares;
 
 namespace EShop.Authorization.Application;
@@ -26,16 +28,16 @@ public class Startup
         var logger = loggerFactory.CreateLogger<Startup>();
         app.UseMiddleware<ExceptionHandlingMiddleware>();
 
-        //if (Environment.IsDevelopment() || Environment.IsStaging())
-        //{
-        //    app.UseCors(x => x.AllowAnyMethod());
-        //    app.UseSwaggerAPI();
-        //}
+        if (Environment.IsDevelopment() || Environment.IsStaging())
+        {
+            app.UseCors(x => x.AllowAnyMethod());
+            app.UseSwaggerAPI();
+        }
 
-        //app.UseRouting();
-        //app.MapConfigurationEndpoints();
+        app.UseRouting();
+        app.MapAuthorizationEndpoints();
 
-        //app.RegisterFeatures(applicationLifetime, logger);
-        //app.RegisterPermissions(applicationLifetime, logger);
+        app.RegisterFeatures(applicationLifetime, logger);
+        app.RegisterPermissions(applicationLifetime, logger);
     }
 }

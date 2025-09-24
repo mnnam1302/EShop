@@ -6,6 +6,7 @@ using EShop.Shared.EventBus.DependencyInjections.Options;
 using EShop.Shared.EventBus.JsonConverters;
 using EShop.Shared.EventBus.PipelineObservers;
 using EShop.Shared.EventBus.Services;
+using EShop.Shared.JsonApi.Middlewares;
 using MassTransit;
 using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
 
@@ -28,6 +29,7 @@ public static class ServiceCollectionExtensions
     private static IServiceCollection AddApiServices(this IServiceCollection services)
     {
         services.AddCors();
+        services.AddSingleton<ExceptionHandlingMiddleware>();
 
         services.AddSwaggerGenNewtonsoftSupport()
             .AddFluentValidationRulesToSwagger()
