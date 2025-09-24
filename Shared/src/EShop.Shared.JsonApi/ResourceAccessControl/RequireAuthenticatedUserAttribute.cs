@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace EShop.Shared.JsonApi.ResourceAccessControl;
 
+[AttributeUsage(AttributeTargets.Class | | AttributeTargets.Method)]
 public class RequireAuthenticatedUserAttribute : Attribute, IFilterFactory
 {
     public bool IsReusable => false;

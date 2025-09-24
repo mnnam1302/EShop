@@ -86,7 +86,7 @@ public static class SystemInternalJwtTokenFactory
         }
     }
 
-    private static IDictionary<string, string> GetCustomHeadersForUser(UserData user)
+    private static Dictionary<string, string> GetCustomHeadersForUser(UserData user)
     {
         return new Dictionary<string, string>
         {

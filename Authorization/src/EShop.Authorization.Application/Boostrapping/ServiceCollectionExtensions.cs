@@ -1,5 +1,7 @@
-﻿using EShop.Authorization.Application.Services;
+﻿using EShop.Authorization.Application.Repositories;
+using EShop.Authorization.Application.Services;
 using EShop.Authorization.Application.Shared;
+using EShop.Authorization.Domain.Repositories;
 using EShop.Shared.DomainTools.UnitOfWorks;
 using EShop.Shared.EventBus.DependencyInjections.Extensions;
 using EShop.Shared.EventBus.DependencyInjections.Options;
@@ -120,6 +122,11 @@ public static class ServiceCollectionExtensions
     {
         services.AddTransient<DbInitializer>();
         services.AddScoped<IUnitOfWork, EFUnitOfWork<AuthorizationDbContext>>();
+
+        services.AddScoped<IOrganizationRepository, OrganizationRepository>();
+        services.AddScoped<IRoleRepository, RoleRepository>();
+        services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IPermissionRepository, PermissionRepository>();
 
         return services;
     }
