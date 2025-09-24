@@ -1,33 +1,65 @@
+using EShop.Authorization.Application.Boostrapping;
+using EShop.Shared.Diagnostics;
+using Serilog;
 
-namespace EShop.Authorization.Application
+namespace EShop.Authorization.Application;
+
+public class Program
 {
-    public class Program
+    private const int ShutdownTimeoutInSeconds = 90;
+    internal const string ApplicationName = "Authorization";
+
+    public static async Task<int> Main(string[] args)
     {
-        public static void Main(string[] args)
+        Logging.SetSerilog(ApplicationName);
+
+        Log.Information("Initilizing {ApplicationName} ....", ApplicationName);
+
+        try
         {
-            var builder = WebApplication.CreateBuilder(args);
+            var app = BuidlWebApp(args);
 
-            // Add services to the container.
-            builder.Services.AddAuthorization();
-
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-            builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
-
-            var app = builder.Build();
-
-            // Configure the HTTP request pipeline.
-            if (app.Environment.IsDevelopment())
+            await using (var scope = app.Services.CreateAsyncScope())
             {
-                app.UseSwagger();
-                app.UseSwaggerUI();
+                var dbInitializer = ActivatorUtilities.CreateInstance<DbInitializer>(scope.ServiceProvider);
+                await dbInitializer.Initialize();
             }
 
-            app.UseHttpsRedirection();
+            Log.Information("Starting up {ApplicationName}...", ApplicationName);
+            await app.RunAsync();
+            Log.Information("Stop {ApplicationName}...", ApplicationName);
 
-            app.UseAuthorization();
-
-            app.Run();
+            return 0;
         }
+        catch (Exception ex)
+        {
+            Log.Fatal(ex, "Host terminated unexpectedly");
+            return 1;
+        }
+        finally
+        {
+            await Log.CloseAndFlushAsync();
+        }
+    }
+
+    private static WebApplication BuidlWebApp(string[] args)
+    {
+        var builder = WebApplication.CreateBuilder(args);
+
+        var startup = new Startup(builder.Configuration, builder.Environment);
+        startup.ConfigureServices(builder.Services);
+
+        builder.Host
+            .UseSerilog();
+
+        builder.WebHost
+            .UseShutdownTimeout(TimeSpan.FromSeconds(ShutdownTimeoutInSeconds));
+
+        var app = builder.Build();
+
+        var loggerFactory = app.Services.GetRequiredService<ILoggerFactory>();
+        startup.Configure(app, app.Lifetime, loggerFactory);
+
+        return app;
     }
 }
