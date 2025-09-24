@@ -58,11 +58,11 @@ public sealed class CreateRootOrganizationCommandHandler : ICommandHandler<Creat
             // 2. Create owner role & grant all permissions to owner role
             var ownerRole = Role.CreateOwnerRole(command.TenantId);
 
-            var allPermissions = await _permissionRepository
+            var availablePermissions = await _permissionRepository
                 .FindAll()
                 .ToArrayAsync(cancellationToken);
 
-            ownerRole.GrantPermissions(allPermissions.Select(p => p.Id));
+            ownerRole.GrantPermissions(availablePermissions.Select(p => p.Id));
 
             // 3. Create owner user & assign owner role to owner user
             //var randomPassword = _passwordHasher.GenerateRandomPassword();

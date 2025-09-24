@@ -85,7 +85,7 @@ public class CreateTenantCommandHandler : ICommandHandler<Command.CreateTenantCo
 
             foreach (var feature in features)
             {
-                tenant.AddTenantFeature(feature.Id, feature.DefaultStateForNewTenant ?? FeatureConstants.InitialState, operationalUsername);
+                tenant.AddTenantFeature(feature.Id, feature.DefaultStateForNewTenant ?? FeatureIds.InitialState, operationalUsername);
             }
 
             _tenantRepository.Add(tenant);

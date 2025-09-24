@@ -18,12 +18,12 @@
   <ItemGroup>
     <ProjectReference Include="..\..\..\Shared\src\EShop.Shared.Diagnostics\EShop.Shared.Diagnostics.csproj" />
     <ProjectReference Include="..\..\..\Shared\src\EShop.Shared.DomainTools\EShop.Shared.DomainTools.csproj" />
+    <ProjectReference Include="..\..\..\Shared\src\EShop.Shared.EventBus\EShop.Shared.EventBus.csproj" />
     <ProjectReference Include="..\..\..\Shared\src\EShop.Shared.JsonApi\EShop.Shared.JsonApi.csproj" />
     <ProjectReference Include="..\EShop.Authorization.Domain\EShop.Authorization.Domain.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Producers\" />
     <Folder Include="UseCases\Permissions\" />
     <Folder Include="UseCases\Roles\" />
     <Folder Include="UseCases\Users\" />

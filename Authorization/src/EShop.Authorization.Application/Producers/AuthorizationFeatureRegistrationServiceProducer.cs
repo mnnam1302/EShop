@@ -1,46 +1,52 @@
 ﻿using EShop.Shared.Contracts.Services.Tenancy.Features;
 using EShop.Shared.EventBus.Services;
 using EShop.Shared.Scoping.ResourceAccessControl;
-using static EShop.Shared.Scoping.ResourceAccessControl.FeatureIds;
 
-namespace EShop.Identity.Infrastructure.Producers;
+namespace EShop.Authorization.Application.Producers;
 
-public class UserFeatureRegistrationService(IEventBusGateway eventBusGateway) : IFeatureRegistrationService
+public sealed class AuthorizationFeatureRegistrationServiceProducer
 {
-    private readonly string ApplicationName = "Identity";
-    private static readonly IdentityFeature[] features =
+    private readonly string ApplicationName = "Authorization";
+    private static readonly AuthorizationFeature[] features =
     [
         new()
         {
-            Id = Authorization.OrganisationRingFencing_FeatureId,
+            Id = FeatureIds.Authorization.OrganisationRingFencing_FeatureId,
             Name = "Organisation Ring Fencing",
             Description = "Organisation Ring Fencing"
         },
         new()
         {
-            Id = Authorization.ExternalApplicationIntegration_FeatureId,
+            Id = FeatureIds.Authorization.ExternalApplicationIntegration_FeatureId,
             Name = "External Application Integration",
             Description = "External Application Integration"
         },
         new()
         {
-            Id = Authorization.CustomRoles_FeatureId,
+            Id = FeatureIds.Authorization.CustomRoles_FeatureId,
             Name = "Custom Roles",
             Description = "Custom Roles"
         },
         new()
         {
-            Id = Authorization.UserInvites_FeatureId,
+            Id = FeatureIds.Authorization.UserInvites_FeatureId,
             Name = "User Invites",
             Description = "User Invites"
         },
     ];
 
+    private readonly IEventBusGateway eventBusGateway;
+
+    public AuthorizationFeatureRegistrationServiceProducer(IEventBusGateway eventBusGateway)
+    {
+        this.eventBusGateway = eventBusGateway;
+    }
+
     public async Task RegisterFeatures()
     {
         await eventBusGateway.PublishAsync<ISupportedFeaturesUpdated>(new
         {
-            SourceSystemReference = ApplicationName,
+            SourceSystemReference = Program.ApplicationName,
             Features = features,
             Action = SupportedFeaturesAction.AddOrUpdate,
             TenantId = string.Empty,
@@ -49,12 +55,12 @@ public class UserFeatureRegistrationService(IEventBusGateway eventBusGateway) : 
         });
     }
 
-    private sealed class IdentityFeature : IFeature
+    private sealed class AuthorizationFeature : IFeature
     {
         public required string Id { get; init; }
         public required string Name { get; init; }
         public required string Description { get; init; }
-        public string Module => nameof(FeatureModules.EShop_Identity);
+        public string Module => nameof(FeatureModules.EShop_Authorization);
         public string State => nameof(FeatureState.Disabled);
     }
 }

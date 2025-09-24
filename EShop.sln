@@ -118,9 +118,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{9EA3DC81-E26A-677F-6A25-3A91573DF4FE}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{D11E9DF2-61F9-E609-E1CF-D3A636A82075}"
-	ProjectSection(SolutionItems) = preProject
-		Authorization\src\EShop.Authorization.Domain\ModelConstants.cs = Authorization\src\EShop.Authorization.Domain\ModelConstants.cs
-	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EShop.Authorization.Domain", "Authorization\src\EShop.Authorization.Domain\EShop.Authorization.Domain.csproj", "{13BCB4E9-47E7-4ABB-A03A-0496202BF78F}"
 EndProject

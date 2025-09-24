@@ -5,7 +5,7 @@ using EShop.Shared.JsonApi.ResourceAccessControl;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using static EShop.Shared.Scoping.ResourceAccessControl.FeatureConstants;
+using static EShop.Shared.Scoping.ResourceAccessControl.FeatureIds;
 using static EShop.Shared.Scoping.ResourceAccessControl.PermissionConstants;
 
 namespace EShop.Identity.Presentation.Controllers;
@@ -23,7 +23,7 @@ public class OrganizationsController : ApiEndpointBase
     }
 
     [HttpPost]
-    [RequireFeature(IdentityFeatures.OrganisationRingFencing_FeatureId)]
+    [RequireFeature(Authorization.OrganisationRingFencing_FeatureId)]
     [RequirePermission(IdentityPermissions.ManageOrganizationsPermissionId)]
     public async Task<IResult> CreateOrganization([FromBody] Command.CreateOrganizationCommand request)
     {
@@ -38,7 +38,7 @@ public class OrganizationsController : ApiEndpointBase
     }
 
     [HttpPut("{id}")]
-    [RequireFeature(IdentityFeatures.OrganisationRingFencing_FeatureId)]
+    [RequireFeature(Authorization.OrganisationRingFencing_FeatureId)]
     [RequireOneOfPermissions(IdentityPermissions.ManageOrganizationsPermissionId)]
     public async Task<IResult> UpdateOrganization([FromRoute] string id, [FromBody] Command.UpdateOrganizationCommand request)
     {
@@ -54,7 +54,7 @@ public class OrganizationsController : ApiEndpointBase
     }
 
     [HttpGet("{id}")]
-    [RequireFeature(IdentityFeatures.OrganisationRingFencing_FeatureId)]
+    [RequireFeature(Authorization.OrganisationRingFencing_FeatureId)]
     [RequireOneOfPermissions(
         IdentityPermissions.ViewOrganizationsPermissionId,
         IdentityPermissions.ManageOrganizationsPermissionId)]
