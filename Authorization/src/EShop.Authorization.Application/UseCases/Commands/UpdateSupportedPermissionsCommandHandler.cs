@@ -14,7 +14,7 @@ public sealed class UpdateSupportedPermissionsCommand : ICommand
     public SupportedPermissionAction Action { get; init; }
 }
 
-public class UpdateSupportedPermissionsCommandHandler : ICommandHandler<UpdateSupportedPermissionsCommand>
+internal sealed class UpdateSupportedPermissionsCommandHandler : ICommandHandler<UpdateSupportedPermissionsCommand>
 {
     private readonly ILogger<UpdateSupportedPermissionsCommand> _logger;
     private readonly IPermissionRepository _permissionRepository;

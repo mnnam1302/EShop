@@ -1,4 +1,5 @@
-﻿using EShop.Authorization.Application.Shared;
+﻿using EShop.Authorization.Application.Services;
+using EShop.Authorization.Application.Shared;
 using EShop.Shared.DomainTools.UnitOfWorks;
 using EShop.Shared.EventBus.DependencyInjections.Extensions;
 using EShop.Shared.EventBus.DependencyInjections.Options;
@@ -108,6 +109,7 @@ public static class ServiceCollectionExtensions
 
     private static IServiceCollection AddApplicationServices(this IServiceCollection services)
     {
+        services.AddScoped<IPasswordHasher, PasswordHasher>();
 
         return services;
     }

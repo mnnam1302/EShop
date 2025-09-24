@@ -18,7 +18,7 @@ public sealed class CreateRootOrganizationCommand : ICommand
     public required string OwnerEmail { get; init; }
 }
 
-public sealed class CreateRootOrganizationCommandHandler : ICommandHandler<CreateRootOrganizationCommand>
+internal sealed class CreateRootOrganizationCommandHandler : ICommandHandler<CreateRootOrganizationCommand>
 {
     private readonly IUserDetailsProvider _userDetailsProvider;
     private readonly IOrganizationRepository _organizationRepository;
@@ -67,7 +67,7 @@ public sealed class CreateRootOrganizationCommandHandler : ICommandHandler<Creat
             // 3. Create owner user & assign owner role to owner user
             //var randomPassword = _passwordHasher.GenerateRandomPassword();
             var randomPassword = $"{command.TenantId}-password123";
-            var hashedPassword = _passwordHasher.HashPassword(randomPassword);
+            var hashedPassword = _passwordHasher.Hash(randomPassword);
             var ownerUser = User.Create(
                 command.OwnerUsername,
                 randomPassword,
