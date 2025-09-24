@@ -2,12 +2,12 @@
 
 namespace EShop.Shared.DomainTools.UnitOfWorks;
 
-public class UnitOfWorkDbContext<TDbContext> : IUnitOfWork
+public class EFUnitOfWork<TDbContext> : IUnitOfWork
     where TDbContext : DbContext
 {
     private readonly TDbContext _dbContext;
 
-    public UnitOfWorkDbContext(TDbContext dbContext)
+    public EFUnitOfWork(TDbContext dbContext)
     {
         _dbContext = dbContext;
     }

@@ -25,6 +25,7 @@
 
   <ItemGroup>
     <Folder Include="UseCases\Events\" />
+    <Folder Include="UseCases\Queries\" />
   </ItemGroup>
 
 </Project>

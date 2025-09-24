@@ -119,7 +119,7 @@ public static class ServiceCollectionExtensions
     private static IServiceCollection AddPersistence(this IServiceCollection services)
     {
         services.AddTransient<DbInitializer>();
-        services.AddScoped<IUnitOfWork, UnitOfWorkDbContext<AuthorizationDbContext>>();
+        services.AddScoped<IUnitOfWork, EFUnitOfWork<AuthorizationDbContext>>();
 
         return services;
     }

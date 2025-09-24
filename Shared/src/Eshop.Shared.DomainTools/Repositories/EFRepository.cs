@@ -4,17 +4,16 @@ using System.Linq.Expressions;
 
 namespace EShop.Shared.DomainTools.Repositories;
 
-public abstract class RepositoryBaseDbContext<TDbContext, TEntity, TKey> : IRepository<TEntity, TKey>, IDisposable
+public abstract class EFRepository<TDbContext, TEntity, TKey> : IRepository<TEntity, TKey>, IDisposable
     where TDbContext : DbContext
     where TEntity : class, IEntityBase<TKey>
 {
     private readonly TDbContext _dbContext;
 
-    protected RepositoryBaseDbContext(TDbContext dbContext)
+    protected EFRepository(TDbContext dbContext)
     {
         _dbContext = dbContext;
     }
-
 
     public void Dispose()
     {

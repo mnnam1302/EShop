@@ -25,7 +25,7 @@ public static class ServiceCollectionExtensions
 
     private static IServiceCollection AddUnitOfWorks(this IServiceCollection services)
     {
-        services.AddScoped<IUnitOfWork, UnitOfWorkDbContext<UsersDbContext>>();
+        services.AddScoped<IUnitOfWork, EFUnitOfWork<UsersDbContext>>();
         return services;
     }
 }

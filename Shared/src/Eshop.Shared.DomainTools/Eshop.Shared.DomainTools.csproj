@@ -9,7 +9,6 @@
   <ItemGroup>
     <Folder Include="Aggregates\" />
     <Folder Include="Entities\" />
-    <Folder Include="UnitOfWorks\" />
   </ItemGroup>
 
   <ItemGroup>
