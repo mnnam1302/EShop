@@ -1,4 +1,4 @@
-﻿using EShop.Authorization.Application.UseCases.Organizations.CreateRootOrganization;
+﻿using EShop.Authorization.Application.UseCases.Commands;
 using EShop.Shared.Contracts.Services.Tenancy.Tenants;
 using EShop.Shared.CQRS;
 using MassTransit;

@@ -24,9 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="UseCases\Permissions\" />
-    <Folder Include="UseCases\Roles\" />
-    <Folder Include="UseCases\Users\" />
+    <Folder Include="UseCases\Events\" />
   </ItemGroup>
 
 </Project>

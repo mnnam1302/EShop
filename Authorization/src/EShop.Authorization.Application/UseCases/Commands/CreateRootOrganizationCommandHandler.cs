@@ -7,7 +7,7 @@ using EShop.Shared.DomainTools.UnitOfWorks;
 using EShop.Shared.Scoping;
 using Microsoft.EntityFrameworkCore;
 
-namespace EShop.Authorization.Application.UseCases.Organizations.CreateRootOrganization;
+namespace EShop.Authorization.Application.UseCases.Commands;
 
 public sealed class CreateRootOrganizationCommand : ICommand
 {
