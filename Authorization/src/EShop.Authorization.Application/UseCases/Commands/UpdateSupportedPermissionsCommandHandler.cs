@@ -1,4 +1,5 @@
-﻿using EShop.Authorization.Domain.Entities;
+﻿using EShop.Authorization.Domain.Commands;
+using EShop.Authorization.Domain.Entities;
 using EShop.Authorization.Domain.Repositories;
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.Contracts.Services.Identity.Permissions;
@@ -7,21 +8,14 @@ using EShop.Shared.DomainTools.UnitOfWorks;
 
 namespace EShop.Authorization.Application.UseCases.Commands;
 
-public sealed class UpdateSupportedPermissionsCommand : ICommand
-{
-    public required string SourceSystemReference { get; init; }
-    public IPermission[] Permissions { get; init; } = [];
-    public SupportedPermissionAction Action { get; init; }
-}
-
 internal sealed class UpdateSupportedPermissionsCommandHandler : ICommandHandler<UpdateSupportedPermissionsCommand>
 {
-    private readonly ILogger<UpdateSupportedPermissionsCommand> _logger;
+    private readonly ILogger<UpdateSupportedPermissionsCommandHandler> _logger;
     private readonly IPermissionRepository _permissionRepository;
     private readonly IUnitOfWork _unitOfWork;
 
     public UpdateSupportedPermissionsCommandHandler(
-        ILogger<UpdateSupportedPermissionsCommand> logger,
+        ILogger<UpdateSupportedPermissionsCommandHandler> logger,
         IPermissionRepository permissionRepository,
         IUnitOfWork unitOfWork)
     {

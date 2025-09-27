@@ -1,6 +1,5 @@
 ﻿using EShop.Authorization.Application.APIs;
 using EShop.Authorization.Application.Boostrapping;
-using EShop.Authorization.Application.Shared;
 using EShop.Shared.JsonApi.Extensions;
 using EShop.Shared.JsonApi.Middlewares;
 

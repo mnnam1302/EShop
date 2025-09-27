@@ -1,7 +1,7 @@
 ﻿using EShop.Authorization.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
-namespace EShop.Authorization.Application.Shared;
+namespace EShop.Authorization.Infrastructure;
 
 public class AuthorizationDbContext : DbContext
 {

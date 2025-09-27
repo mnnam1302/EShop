@@ -1,4 +1,4 @@
-using EShop.Authorization.Application.Boostrapping;
+using EShop.Authorization.Infrastructure;
 using EShop.Shared.Diagnostics;
 using Serilog;
 

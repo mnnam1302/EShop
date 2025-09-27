@@ -1,13 +1,12 @@
 ﻿using EShop.Authorization.Application.Repositories;
 using EShop.Authorization.Application.Services;
-using EShop.Authorization.Application.Shared;
 using EShop.Authorization.Domain.Repositories;
+using EShop.Authorization.Infrastructure;
+using EShop.Shared.Cache.DependencyInejctions.Extensions;
+using EShop.Shared.CQRS;
+using EShop.Shared.DomainTools.DependencyInjections;
 using EShop.Shared.DomainTools.UnitOfWorks;
-using EShop.Shared.EventBus.DependencyInjections.Extensions;
-using EShop.Shared.EventBus.DependencyInjections.Options;
-using EShop.Shared.EventBus.JsonConverters;
-using EShop.Shared.EventBus.PipelineObservers;
-using EShop.Shared.EventBus.Services;
+using EShop.Shared.JsonApi.Extensions;
 using EShop.Shared.JsonApi.Middlewares;
 using MassTransit;
 using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
@@ -16,6 +15,30 @@ namespace EShop.Authorization.Application.Boostrapping;
 
 public static class ServiceCollectionExtensions
 {
+    public static IServiceCollection AddShared(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddResiliencePolicy();
+
+        // database
+        services
+            .AddPostgreSqlHealthCheck(configuration)
+            .AddDbContextPoolWithScoping<AuthorizationDbContext>(configuration);
+
+        // caching
+        services
+            .AddRedisHealthCheck(configuration)
+            .AddRedisInfrastructure(configuration);
+
+        // providers
+        services
+            .AddUserTokensProvider()
+            .AddTenantFeaturesProvider();
+
+        services.AddMediator(AssemblyReference.Assembly);
+
+        return services;
+    }
+
     public static IServiceCollection AddBoostrapping(this IServiceCollection services, IConfiguration configuration)
     {
         services
