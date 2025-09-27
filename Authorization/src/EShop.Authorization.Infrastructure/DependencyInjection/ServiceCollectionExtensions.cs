@@ -2,6 +2,7 @@
 using EShop.Authorization.Infrastructure.Consumers;
 using EShop.Authorization.Infrastructure.Producers;
 using EShop.Authorization.Infrastructure.Repositories;
+using EShop.Shared.Cache.DependencyInejctions.Extensions;
 using EShop.Shared.Contracts.Services.Identity.Permissions;
 using EShop.Shared.Contracts.Services.Tenancy.Tenants;
 using EShop.Shared.DomainTools.UnitOfWorks;
@@ -24,12 +25,12 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment)
     {
         services
+            .AddProducers()
+            .AddRedis(configuration)
             .AddPersistence()
-            .AddPostgreSQL(configuration)
+            .AddPostgreSQLPersistence(configuration)
             .AddEventBus()
             .AddMasstransitRabbitMQ(configuration, environment);
-
-        services.AddProducers();
 
         return services;
     }
@@ -38,6 +39,16 @@ public static class ServiceCollectionExtensions
     {
         services.AddTransient<IFeatureRegistrationService, AuthorizationFeatureRegistrationProducer>();
         services.AddTransient<IPermissionRegistrationService, AuthorizationPermissionRegistrationProducer>();
+
+        return services;
+    }
+
+    public static IServiceCollection AddRedis(this IServiceCollection services, IConfiguration configuration)
+    {
+
+        services
+            .AddRedisHealthCheck(configuration)
+            .AddRedisInfrastructure(configuration);
 
         return services;
     }
@@ -55,7 +66,7 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    public static IServiceCollection AddPostgreSQL(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddPostgreSQLPersistence(this IServiceCollection services, IConfiguration configuration)
     {
         services
             .AddPostgreSqlHealthCheck(configuration)

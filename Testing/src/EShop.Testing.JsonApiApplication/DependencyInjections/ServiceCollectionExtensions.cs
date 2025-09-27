@@ -34,8 +34,6 @@ public static class ServiceCollectionExtensions
         var testDatabaseConnectionInterceptor = sp.GetRequiredService<ITestDatabaseConnectionInterceptor>();
         builder.AddInterceptors(testDatabaseConnectionInterceptor);
 
-        //DbLoggingExtensions.ConfigureEntityFrameworkLogs(builder);
-
         additionalDbContextConfig?.Invoke(sp, builder);
     }
 

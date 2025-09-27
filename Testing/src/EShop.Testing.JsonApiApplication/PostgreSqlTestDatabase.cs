@@ -10,7 +10,7 @@ namespace EShop.Testing.JsonApiApplication
 
         public required PostgreSqlContainer PostgreSqlContainer { get; set; }
 
-        public string SharedConnectionString { get; private set; }
+        public string SharedConnectionString { get; private set; } = string.Empty;
 
         /// <summary>
         /// Call this method in Specflow's [BeforeScenario] hook to create and maintain a single

@@ -20,4 +20,9 @@
     <Using Include="Xunit" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Testing\src\EShop.Testing.JsonApiApplication\EShop.Testing.JsonApiApplication.csproj" />
+    <ProjectReference Include="..\..\src\EShop.Authorization.Application\EShop.Authorization.Application.csproj" />
+  </ItemGroup>
+
 </Project>

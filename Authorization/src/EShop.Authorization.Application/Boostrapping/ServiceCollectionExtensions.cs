@@ -1,7 +1,6 @@
 ﻿using EShop.Authorization.Application.Services;
 using EShop.Authorization.Domain.Services;
 using EShop.Authorization.Infrastructure.DependencyInjection;
-using EShop.Shared.Cache.DependencyInejctions.Extensions;
 using EShop.Shared.CQRS;
 using EShop.Shared.DomainTools.DependencyInjections;
 using EShop.Shared.JsonApi.Extensions;
@@ -16,16 +15,11 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddShared(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddResiliencePolicy();
-
-        services
-            .AddRedisHealthCheck(configuration)
-            .AddRedisInfrastructure(configuration);
+        services.AddMediator(AssemblyReference.Assembly);
 
         services
             .AddUserTokensProvider()
             .AddTenantFeaturesProvider();
-
-        services.AddMediator(AssemblyReference.Assembly);
 
         return services;
     }
@@ -34,13 +28,13 @@ public static class ServiceCollectionExtensions
     {
         services
             .AddApiServices()
-            .AddCoreServices()
+            .AddApplicationServices()
             .AddInfrastructure(configuration, environment);
 
         return services;
     }
 
-    private static IServiceCollection AddApiServices(this IServiceCollection services)
+    public static IServiceCollection AddApiServices(this IServiceCollection services)
     {
         services.AddCors();
         services.AddSingleton<ExceptionHandlingMiddleware>();
@@ -61,7 +55,7 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    private static IServiceCollection AddCoreServices(this IServiceCollection services)
+    public static IServiceCollection AddApplicationServices(this IServiceCollection services)
     {
         services.AddScoped<IPasswordHasher, PasswordHasher>();
         services.AddScoped<IRootOrganizationService, RootOrganizationService>();
