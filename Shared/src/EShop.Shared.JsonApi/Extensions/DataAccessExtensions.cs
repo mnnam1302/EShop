@@ -60,49 +60,16 @@ public static class DataAccessExtensions
         return services;
     }
 
-    public static IServiceCollection AddDbContextPoolWithScoping<TContext>(
+    public static IServiceCollection AddDbContextPoolWithScoping<TDbContext>(
         this IServiceCollection services,
         IConfiguration configuration,
         bool useRingFencedScoping = false)
-        where TContext : DbContext
+        where TDbContext : DbContext
     {
         services
             .AddDatabaseOptions(configuration)
             .AddMultiTenantScoping();
 
-        if (IsDesignTime())
-        {
-            services.AddDesignTimeDbContext<TContext>(configuration);
-        }
-        else
-        {
-            services.AddRuntimeDbContext<TContext>(configuration);
-        }
-
-        return services;
-    }
-
-    private static void AddDesignTimeDbContext<TDbContext>(this IServiceCollection services, IConfiguration configuration)
-        where TDbContext : DbContext
-    {
-        services.AddDbContext<TDbContext>((provider, builder) =>
-        {
-            var ngsqlVersionOptions = provider.GetRequiredService<IOptionsMonitor<NgSqlVersionOptions>>();
-
-            builder
-                .EnableDetailedErrors(true)
-                .EnableSensitiveDataLogging(true)
-                .UseNpgsql(
-                    configuration.GetConnectionString("DefaultConnection"),
-                    npgsqlOptionsAction: optionsBuilder => optionsBuilder
-                        .SetPostgresVersion(ngsqlVersionOptions.CurrentValue.Major, ngsqlVersionOptions.CurrentValue.Minor)
-                        .MigrationsAssembly(typeof(TDbContext).Assembly.GetName().Name));
-        });
-    }
-
-    private static void AddRuntimeDbContext<TDbContext>(this IServiceCollection services, IConfiguration configuration)
-        where TDbContext : DbContext
-    {
         services.AddDbContextPool<TDbContext>((provider, builder) =>
         {
             var ngsqlRetryOptions = provider.GetRequiredService<IOptionsMonitor<NgSqlRetryOptions>>();
@@ -125,6 +92,8 @@ public static class DataAccessExtensions
                         .MigrationsAssembly(typeof(TDbContext).Assembly.GetName().Name))
                 .AddInterceptors(multiTenantConnectionInterceptor);
         });
+
+        return services;
     }
 
     private static IServiceCollection AddDatabaseOptions(this IServiceCollection services, IConfiguration configuration)
@@ -142,11 +111,5 @@ public static class DataAccessExtensions
             .ValidateOnStart();
 
         return services;
-    }
-
-    private static bool IsDesignTime()
-    {
-        return AppDomain.CurrentDomain.GetAssemblies()
-            .Any(assembly => assembly.FullName?.StartsWith("Microsoft.EntityFrameworkCore.Design") == true);
     }
 }

@@ -41,7 +41,6 @@ public static class ServiceCollectionExtensions
 
     public static IServiceCollection AddPostgreSQL(this IServiceCollection services, IConfiguration configuration)
     {
-        // Persistence PostgreSQL
         services
             .AddPostgreSqlHealthCheck(configuration)
             .AddDbContextPoolWithScoping<AuthorizationDbContext>(configuration);
