@@ -1,6 +1,9 @@
 ﻿using EShop.Authorization.Domain.Repositories;
+using EShop.Authorization.Infrastructure.Consumers;
 using EShop.Authorization.Infrastructure.Producers;
 using EShop.Authorization.Infrastructure.Repositories;
+using EShop.Shared.Contracts.Services.Identity.Permissions;
+using EShop.Shared.Contracts.Services.Tenancy.Tenants;
 using EShop.Shared.DomainTools.UnitOfWorks;
 using EShop.Shared.EventBus.DependencyInjections.Extensions;
 using EShop.Shared.EventBus.DependencyInjections.Options;
@@ -10,6 +13,7 @@ using EShop.Shared.EventBus.Services;
 using EShop.Shared.JsonApi.Extensions;
 using EShop.Shared.Scoping.ResourceAccessControl;
 using MassTransit;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -17,13 +21,13 @@ namespace EShop.Authorization.Infrastructure.DependencyInjection;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment)
     {
         services
             .AddPersistence()
             .AddPostgreSQL(configuration)
             .AddEventBus()
-            .AddMasstransitRabbitMQ(configuration);
+            .AddMasstransitRabbitMQ(configuration, environment);
 
         services.AddProducers();
 
@@ -66,7 +70,10 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    public static IServiceCollection AddMasstransitRabbitMQ(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddMasstransitRabbitMQ(
+        this IServiceCollection services,
+        IConfiguration configuration,
+        IWebHostEnvironment environment)
     {
         var massTransitConfiguration = new MasstransitConfiguration();
         configuration.GetSection(nameof(MasstransitConfiguration)).Bind(massTransitConfiguration);
@@ -115,10 +122,27 @@ public static class ServiceCollectionExtensions
 
                 bus.MessageTopology.SetEntityNameFormatter(new KebabCaseEntityNameFormatter());
 
+                bus.ConfigureReceiveEndpoints(context, environment, "Authorization");
                 bus.ConfigureEndpoints(context);
             });
         });
 
         return services;
+    }
+
+    public static void ConfigureReceiveEndpoints(
+        this IRabbitMqBusFactoryConfigurator bus,
+        IRegistrationContext context,
+        IWebHostEnvironment environment,
+        string serviceName)
+    {
+        bus.ConfigureEventReceiveEndpoint<TenantCreatedConsumer, ITenantCreated>(
+            context,
+            environment.EnvironmentName,
+            serviceName);
+        bus.ConfigureEventReceiveEndpoint<SupportedPermissionsUpdatedConsumer, ISupportedPermissionsUpdated>(
+            context,
+            environment.EnvironmentName,
+            serviceName);
     }
 }

@@ -19,7 +19,7 @@ public class Startup
     public virtual void ConfigureServices(IServiceCollection services)
     {
         services.AddShared(Configuration);
-        services.AddBoostrapping(Configuration);
+        services.AddBoostrapping(Configuration, Environment);
     }
 
     public virtual void Configure(WebApplication app, IHostApplicationLifetime applicationLifetime, ILoggerFactory loggerFactory)

@@ -29,12 +29,12 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    public static IServiceCollection AddBoostrapping(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddBoostrapping(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment)
     {
         services
             .AddApiServices()
             .AddApplicationServices()
-            .AddInfrastructure(configuration);
+            .AddInfrastructure(configuration, environment);
 
         return services;
     }
