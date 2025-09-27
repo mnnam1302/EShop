@@ -31,13 +31,14 @@ public static class DataAccessExtensions
         bool useRingFencedScoping = false)
         where TContext : DbContext
     {
-        services.AddDatabaseOptions(configuration);
+        services
+            .AddDatabaseOptions(configuration)
+            .AddMultiTenantScoping();
 
         services.AddDbContext<DbContext, TContext>((provider, builder) =>
         {
             var ngsqlRetryOptions = provider.GetRequiredService<IOptionsMonitor<NgSqlRetryOptions>>();
             var ngsqlVersionOptions = provider.GetRequiredService<IOptionsMonitor<NgSqlVersionOptions>>();
-            var multiTenantConnectionInterceptor = provider.GetRequiredService<IMultiTenantIsolationStrategy>();
 
             builder
                 .EnableDetailedErrors(true)
@@ -54,10 +55,9 @@ public static class DataAccessExtensions
                                 maxRetryDelay: ngsqlRetryOptions.CurrentValue.MaxRetryDelay,
                                 errorCodesToAdd: ngsqlRetryOptions.CurrentValue.ErrorNumbersoAdd))
                             .MigrationsAssembly(typeof(TContext).Assembly.GetName().Name))
-                .AddInterceptors(multiTenantConnectionInterceptor);
-        })
-            .AddMultiTenantScoping()
-            .AddAuditableInterceptor();
+                .AddInterceptors(
+                    provider.GetRequiredService<IMultiTenantIsolationStrategy>());
+        });
 
         return services;
     }

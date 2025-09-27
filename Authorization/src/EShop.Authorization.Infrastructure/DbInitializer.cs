@@ -32,10 +32,10 @@ public sealed class DbInitializer(
                 await dbContext.Database.EnsureCreatedAsync();
             }
 
-            if (applyTenantIsolation && configuration.GetValue<bool>("AllowTenantIsolation", true))
-            {
-                tenantIsolationStrategy.AddTenantIsolation(dbContext);
-            }
+            //if (applyTenantIsolation && configuration.GetValue<bool>("AllowTenantIsolation", true))
+            //{
+            //    tenantIsolationStrategy.AddTenantIsolation(dbContext);
+            //}
 
             await SeedSystemWidePermissions();
         }

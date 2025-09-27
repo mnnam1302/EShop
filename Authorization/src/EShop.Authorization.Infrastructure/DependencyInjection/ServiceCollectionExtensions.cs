@@ -43,7 +43,7 @@ public static class ServiceCollectionExtensions
     {
         services
             .AddPostgreSqlHealthCheck(configuration)
-            .AddDbContextPoolWithScoping<AuthorizationDbContext>(configuration);
+            .AddDbContextWithScoping<AuthorizationDbContext>(configuration);
 
         return services;
     }
