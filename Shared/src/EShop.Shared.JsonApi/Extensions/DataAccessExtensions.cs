@@ -23,17 +23,6 @@ public static class DataAccessExtensions
         return services;
     }
 
-    /// <summary>
-    /// Registers the specified <see cref="TContext"/> type with standard configuration. Also registers necessary
-    /// services for tenant isolation and optional ring-fenced scoping.
-    /// </summary>
-    /// <param name="services">The <see cref="IServiceCollection"/> to add services to.</param>
-    /// <param name="configuration">The application configuration.</param>
-    /// <param name="useRingFencedScoping">Indicates whether ring-fencing is enabled for the created
-    /// <see cref="TContext"/> instances.</param>
-    /// <param name="additionalDbContextConfig">Additional configuration for the <see cref="TContext"/>.</param>
-    /// <typeparam name="TContext">The type of context to be registered.</typeparam>
-    /// <returns>The same service collection so that multiple calls can be chained.</returns>
     public static IServiceCollection AddDbContextWithScoping<TContext>(
         this IServiceCollection services,
         IConfiguration configuration,
@@ -71,21 +60,6 @@ public static class DataAccessExtensions
         return services;
     }
 
-    /// <summary>
-    /// Adds a pooled <see cref="DbContext"/> of type <typeparamref name="TContext"/> to the service collection,  with
-    /// optional support for ring-fenced scoping and multi-tenant configurations.
-    /// </summary>
-    /// <remarks>This method configures the <see cref="DbContext"/> differently depending on whether the
-    /// application is running  in design-time or runtime mode. Design-time mode adds support for tools like migrations,
-    /// while runtime mode  configures the <see cref="DbContext"/> for normal application usage.</remarks>
-    /// <typeparam name="TContext">The type of the <see cref="DbContext"/> to be added.</typeparam>
-    /// <param name="services">The <see cref="IServiceCollection"/> to which the <see cref="DbContext"/> is added.</param>
-    /// <param name="configuration">The <see cref="IConfiguration"/> instance used to configure the <see cref="DbContext"/>.</param>
-    /// <param name="useRingFencedScoping">A boolean value indicating whether to enable ring-fenced scoping for the <see cref="DbContext"/>.  If <see
-    /// langword="true"/>, the <see cref="DbContext"/> will be scoped to specific tenants; otherwise,  it will use the
-    /// default scoping behavior.</param>
-    /// <returns>The updated <see cref="IServiceCollection"/> instance with the <see cref="DbContext"/> and related
-    /// configurations added.</returns>
     public static IServiceCollection AddDbContextPoolWithScoping<TContext>(
         this IServiceCollection services,
         IConfiguration configuration,
