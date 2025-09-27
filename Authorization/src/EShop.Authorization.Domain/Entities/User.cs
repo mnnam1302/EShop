@@ -27,7 +27,7 @@ public class User : AggregateRoot<string>
     public string? OrganizationId { get; set; }
     public virtual Organization? Organization { get; set; }
 
-    // Roles relationship
+    // Roles relationship: https://learn.microsoft.com/en-us/ef/core/modeling/relationships/many-to-many#many-to-many-with-navigations-to-join-entity
     public virtual IReadOnlyCollection<Role> Roles { get; set; } = [];
 
     private readonly List<UserRole> _userRoles = [];
