@@ -10,6 +10,8 @@ namespace EShop.Shared.JsonApi.Extensions;
 
 public static class DataAccessExtensions
 {
+    private static readonly string[] tags = new[] { "db", "postgresql", "sql" };
+
     public static IServiceCollection AddPostgreSqlHealthCheck(this IServiceCollection services, IConfiguration configuration)
     {
         services
@@ -18,7 +20,7 @@ public static class DataAccessExtensions
                 connectionString: configuration.GetConnectionString("DefaultConnection") ?? string.Empty,
                 name: "postgresql",
                 failureStatus: Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus.Degraded,
-                tags: new[] { "db", "postgresql", "sql" });
+                tags: tags);
 
         return services;
     }
@@ -70,6 +72,66 @@ public static class DataAccessExtensions
             .AddDatabaseOptions(configuration)
             .AddMultiTenantScoping();
 
+        services
+            .AddDatabaseOptions(configuration)
+            .AddMultiTenantScoping();
+
+        if (IsDesignTime())
+        {
+            services.AddDesignTimeDbContext<TDbContext>(configuration);
+        }
+        else
+        {
+            services.AddRuntimeDbContext<TDbContext>(configuration);
+        }
+
+        return services;
+    }
+
+    private static IServiceCollection AddDatabaseOptions(this IServiceCollection services, IConfiguration configuration)
+    {
+        services
+            .AddOptions<NgSqlRetryOptions>()
+            .Bind(configuration.GetSection(nameof(NgSqlRetryOptions)))
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
+        services
+            .AddOptions<NgSqlVersionOptions>()
+            .Bind(configuration.GetSection(nameof(NgSqlVersionOptions)))
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
+        return services;
+    }
+
+    private static bool IsDesignTime()
+    {
+        return AppDomain.CurrentDomain.GetAssemblies()
+            .Any(assembly => assembly.FullName?.StartsWith("Microsoft.EntityFrameworkCore.Design") == true);
+    }
+
+    private static void AddDesignTimeDbContext<TDbContext>(this IServiceCollection services, IConfiguration configuration)
+        where TDbContext : DbContext
+    {
+        services.AddDbContext<TDbContext>((provider, builder) =>
+        {
+            var ngsqlVersionOptions = provider.GetRequiredService<IOptionsMonitor<NgSqlVersionOptions>>();
+
+            builder
+                .EnableDetailedErrors(true)
+                .EnableSensitiveDataLogging(true)
+                .UseNpgsql(
+                    configuration.GetConnectionString("DefaultConnection"),
+                    npgsqlOptionsAction: optionsBuilder => optionsBuilder
+                        .SetPostgresVersion(ngsqlVersionOptions.CurrentValue.Major, ngsqlVersionOptions.CurrentValue.Minor)
+                        .MigrationsAssembly(typeof(TDbContext).Assembly.GetName().Name));
+        });
+    }
+
+    private static void AddRuntimeDbContext<TDbContext>(this IServiceCollection services, IConfiguration configuration)
+        where TDbContext : DbContext
+    {
         services.AddDbContextPool<TDbContext>((provider, builder) =>
         {
             var ngsqlRetryOptions = provider.GetRequiredService<IOptionsMonitor<NgSqlRetryOptions>>();
@@ -92,24 +154,5 @@ public static class DataAccessExtensions
                         .MigrationsAssembly(typeof(TDbContext).Assembly.GetName().Name))
                 .AddInterceptors(multiTenantConnectionInterceptor);
         });
-
-        return services;
-    }
-
-    private static IServiceCollection AddDatabaseOptions(this IServiceCollection services, IConfiguration configuration)
-    {
-        services
-            .AddOptions<NgSqlRetryOptions>()
-            .Bind(configuration.GetSection(nameof(NgSqlRetryOptions)))
-            .ValidateDataAnnotations()
-            .ValidateOnStart();
-
-        services
-            .AddOptions<NgSqlVersionOptions>()
-            .Bind(configuration.GetSection(nameof(NgSqlVersionOptions)))
-            .ValidateDataAnnotations()
-            .ValidateOnStart();
-
-        return services;
     }
 }
