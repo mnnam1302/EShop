@@ -1,5 +1,7 @@
 ﻿using EShop.Authorization.Domain.Entities;
+using EShop.Shared.Contracts.Services.Tenancy.Tenants;
 using EShop.Shared.DbResourceAccessControl;
+using EShop.Shared.EventBus.Services;
 using EShop.Shared.Scoping;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -13,7 +15,8 @@ public sealed class DbInitializer(
     IUserDetailsProvider userDetailsProvider,
     ITenantIsolationStrategy tenantIsolationStrategy,
     IConfiguration configuration,
-    ILogger<DbInitializer> logger)
+    ILogger<DbInitializer> logger,
+    IEventBusGateway eventBus)
 {
     public async Task Initialize(bool applyMigrations = true, bool applyTenantIsolation = true)
     {
@@ -37,7 +40,7 @@ public sealed class DbInitializer(
                 tenantIsolationStrategy.AddTenantIsolation(dbContext);
             }
 
-            await SeedSystemWidePermissions();
+            await SeedSystemInitialization();
         }
         catch (Exception ex)
         {
@@ -48,6 +51,12 @@ public sealed class DbInitializer(
         {
             userDetailsProvider.ClearSystemUserContext();
         }
+    }
+
+    private async Task SeedSystemInitialization()
+    {
+        await SeedSystemWidePermissions();
+        await SeedSystemUser();
     }
 
     private async Task SeedSystemWidePermissions()
@@ -144,5 +153,17 @@ public sealed class DbInitializer(
             RelatedTo = "User Management"
         },
     ];
+    }
+
+    private async Task SeedSystemUser()
+    {
+        await eventBus.PublishAsync<ITenantCreated>(new
+        {
+            TenantId = UserData.SystemUsername,
+            TenantName = UserData.SystemUsername,
+            OwnerUsername = UserData.SystemUsername,
+            OwnerDisplayName = "System eShop",
+            OwnerEmail = "system@eshop.ecommerce"
+        });
     }
 }

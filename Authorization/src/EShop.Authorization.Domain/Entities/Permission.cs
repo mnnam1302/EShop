@@ -15,8 +15,8 @@ public class Permission : EntityBase<string>, IExcludedFromScoping
     [MaxLength(ModelConstants.MediumText)]
     public string RelatedTo { get; set; } = string.Empty;
 
-    public virtual IReadOnlyCollection<Role> Roles { get; set; } = [];
-    public virtual IReadOnlyCollection<RolePermission> RolePermissions { get; set; } = [];
+    public virtual ICollection<Role> Roles { get; set; } = new List<Role>();
+    public virtual ICollection<RolePermission> RolePermissions { get; set; } = new List<RolePermission>();
 
     public static Permission Create(string id, string name, string relatedTo, string? description = null)
     {

@@ -1,4 +1,6 @@
-﻿using EShop.Shared.DomainTools.Aggregates;
+﻿using EShop.Authorization.Domain.DomainEvents;
+using EShop.Shared.Contracts.Abstractions.MessageBus;
+using EShop.Shared.DomainTools.Aggregates;
 using EShop.Shared.Scoping;
 using System.ComponentModel.DataAnnotations;
 
@@ -33,6 +35,16 @@ public class Organization : AggregateRoot<string>, IExcludedFromScoping
             TenantId = tenantId,
             Scope = tenantId
         };
+
+        // Raise domain event
+        organization.Raise(new OrganizationEvents.RootOrganizationCreated
+        {
+            EventId = Guid.NewGuid(),
+            TimeStamp = DateTimeOffset.UtcNow,
+            OrganizationId = organization.Id,
+            Name = organization.Name,
+            TenantId = tenantId
+        });
 
         return organization;
     }

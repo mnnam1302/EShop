@@ -19,11 +19,11 @@ public class Role : EntityBase<Guid>, IScoped
     public string Scope { get; private set; } = string.Empty;
 
     // Users relationship
-    public virtual IReadOnlyCollection<User> Users { get; private set; } = [];
-    public virtual IReadOnlyCollection<UserRole> UserRoles { get; private set; } = [];
+    public virtual ICollection<User> Users { get; private set; } = new List<User>();
+    public virtual ICollection<UserRole> UserRoles { get; private set; } = new List<UserRole>();
 
     // Permissions relationship
-    public virtual IReadOnlyCollection<Permission> Permissions { get; private set; } = [];
+    public virtual ICollection<Permission> Permissions { get; private set; } = new List<Permission>();
 
     private readonly List<RolePermission> _rolePermissions = [];
     public virtual IReadOnlyCollection<RolePermission> RolePermissions => _rolePermissions.AsReadOnly();
@@ -33,8 +33,10 @@ public class Role : EntityBase<Guid>, IScoped
         var role = new Role
         {
             Id = Guid.NewGuid(),
-            Name = $"{tenantId} Owner",
-            Description = "Owner role with all permissions"
+            Name = $"Role Owner",
+            Description = "Owner role with all permissions",
+            TenantId = tenantId,
+            Scope = tenantId
         };
 
         return role;

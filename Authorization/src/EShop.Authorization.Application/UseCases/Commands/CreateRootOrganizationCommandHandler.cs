@@ -1,88 +1,63 @@
-﻿using EShop.Authorization.Application.Services;
-using EShop.Authorization.Domain.Commands;
-using EShop.Authorization.Domain.Entities;
+﻿using EShop.Authorization.Domain.Commands;
 using EShop.Authorization.Domain.Repositories;
+using EShop.Authorization.Domain.Services;
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.CQRS.Command;
 using EShop.Shared.DomainTools.UnitOfWorks;
-using EShop.Shared.Scoping;
-using Microsoft.EntityFrameworkCore;
 
 namespace EShop.Authorization.Application.UseCases.Commands;
 
 internal sealed class CreateRootOrganizationCommandHandler : ICommandHandler<CreateRootOrganizationCommand>
 {
-    private readonly IUserDetailsProvider _userDetailsProvider;
     private readonly IOrganizationRepository _organizationRepository;
     private readonly IUserRepository _userRepository;
     private readonly IRoleRepository _roleRepository;
-    private readonly IPermissionRepository _permissionRepository;
-    private readonly IPasswordHasher _passwordHasher;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly ILogger<CreateRootOrganizationCommandHandler> _logger;
+    private readonly IRootOrganizationService _rootOrganizationService;
 
     public CreateRootOrganizationCommandHandler(
-        IUserDetailsProvider userDetailsProvider,
         IOrganizationRepository organizationRepository,
         IUserRepository userRepository,
         IRoleRepository roleRepository,
-        IPermissionRepository permissionRepository,
-        IPasswordHasher passwordHasher,
-        IUnitOfWork unitOfWork)
+        IUnitOfWork unitOfWork,
+        ILogger<CreateRootOrganizationCommandHandler> logger,
+        IRootOrganizationService rootOrganizationService)
     {
         _organizationRepository = organizationRepository;
         _userRepository = userRepository;
         _roleRepository = roleRepository;
-        _userDetailsProvider = userDetailsProvider;
-        _permissionRepository = permissionRepository;
-        _passwordHasher = passwordHasher;
         _unitOfWork = unitOfWork;
+        _logger = logger;
+        _rootOrganizationService = rootOrganizationService;
     }
 
     public async Task<Result> HandleAsync(CreateRootOrganizationCommand command, CancellationToken cancellationToken)
     {
-        _userDetailsProvider.SetSystemUserContext(command.TenantId);
+        _logger.LogInformation("Handling CreateRootOrganizationCommand for tenant {TenantId}", command.TenantId);
 
-        try
+        var setupResult = await _rootOrganizationService.SetupRootOrganizationAsync(
+            command.TenantId,
+            command.TenantName,
+            command.OwnerUsername,
+            command.OwnerEmail,
+            command.OwnerDisplayName,
+            cancellationToken);
+
+        if (setupResult.IsFailure)
         {
-            // 1. Create root organization
-            var rootOrganization = Organization.CreateRootOrganization(command.TenantId, command.TenantName);
-
-            // 2. Create owner role & grant all permissions to owner role
-            var ownerRole = Role.CreateOwnerRole(command.TenantId);
-
-            var availablePermissions = await _permissionRepository
-                .FindAll()
-                .ToArrayAsync(cancellationToken);
-
-            ownerRole.GrantPermissions(availablePermissions.Select(p => p.Id));
-
-            // 3. Create owner user & assign owner role to owner user
-            //var randomPassword = _passwordHasher.GenerateRandomPassword();
-            var randomPassword = $"{command.TenantId}-password123";
-            var hashedPassword = _passwordHasher.Hash(randomPassword);
-            var ownerUser = User.Create(
-                command.OwnerUsername,
-                randomPassword,
-                hashedPassword,
-                command.OwnerEmail,
-                command.OwnerDisplayName,
-                rootOrganization.Id,
-                UserData.SystemUsername);
-
-            ownerUser.AssignRole(ownerRole.Id);
-
-            // 4. Save changes
-            _organizationRepository.Add(rootOrganization);
-            _roleRepository.Add(ownerRole);
-            _userRepository.Add(ownerUser);
-
-            await _unitOfWork.SaveChangesAsync(cancellationToken);
-
-            return Result.Success();
+            _logger.LogWarning("Failed to setup root organization: {Error}", setupResult.Error);
+            return Result.Failure(setupResult.Error);
         }
-        finally
-        {
-            _userDetailsProvider.ClearSystemUserContext();
-        }
+
+        var setup = setupResult.Value;
+        _organizationRepository.Add(setup.Organization);
+        _roleRepository.Add(setup.OwnerRole);
+        _userRepository.Add(setup.OwnerUser);
+
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        _logger.LogInformation("Root organization created successfully for tenant {TenantId}", command.TenantId);
+        return Result.Success();
     }
 }

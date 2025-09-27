@@ -29,7 +29,7 @@ public class User : AggregateRoot<string>, IExcludedFromScoping
     public virtual Organization? Organization { get; set; }
 
     // Roles relationship: https://learn.microsoft.com/en-us/ef/core/modeling/relationships/many-to-many#many-to-many-with-navigations-to-join-entity
-    public virtual IReadOnlyCollection<Role> Roles { get; set; } = [];
+    public virtual ICollection<Role> Roles { get; set; } = new List<Role>();
 
     private readonly List<UserRole> _userRoles = [];
     public virtual IReadOnlyCollection<UserRole> UserRoles => _userRoles.AsReadOnly();
@@ -51,12 +51,15 @@ public class User : AggregateRoot<string>, IExcludedFromScoping
     {
         var user = new User
         {
+            Id = ownerUsername,
             Username = ownerUsername,
             HashedPassword = hashedPassword,
             Name = ownerDisplayName,
             Status = nameof(UserStatus.Inactive),
             OrganizationId = organizationId,
-            CreatedByUserId = createdByUserId
+            CreatedByUserId = createdByUserId,
+            TenantId = organizationId,
+            Scope = organizationId
         };
 
         return user;

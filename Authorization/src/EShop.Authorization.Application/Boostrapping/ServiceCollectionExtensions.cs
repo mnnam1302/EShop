@@ -1,4 +1,5 @@
 ﻿using EShop.Authorization.Application.Services;
+using EShop.Authorization.Domain.Services;
 using EShop.Authorization.Infrastructure.DependencyInjection;
 using EShop.Shared.Cache.DependencyInejctions.Extensions;
 using EShop.Shared.CQRS;
@@ -33,7 +34,7 @@ public static class ServiceCollectionExtensions
     {
         services
             .AddApiServices()
-            .AddApplicationServices()
+            .AddCoreServices()
             .AddInfrastructure(configuration, environment);
 
         return services;
@@ -60,9 +61,10 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    private static IServiceCollection AddApplicationServices(this IServiceCollection services)
+    private static IServiceCollection AddCoreServices(this IServiceCollection services)
     {
         services.AddScoped<IPasswordHasher, PasswordHasher>();
+        services.AddScoped<IRootOrganizationService, RootOrganizationService>();
         return services;
     }
 }

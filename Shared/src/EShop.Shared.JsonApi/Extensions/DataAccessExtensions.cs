@@ -39,6 +39,7 @@ public static class DataAccessExtensions
         {
             var ngsqlRetryOptions = provider.GetRequiredService<IOptionsMonitor<NgSqlRetryOptions>>();
             var ngsqlVersionOptions = provider.GetRequiredService<IOptionsMonitor<NgSqlVersionOptions>>();
+            var tenantIsolationStrategy = provider.GetRequiredService<IMultiTenantIsolationStrategy>();
 
             builder
                 .EnableDetailedErrors(true)
@@ -55,8 +56,7 @@ public static class DataAccessExtensions
                                 maxRetryDelay: ngsqlRetryOptions.CurrentValue.MaxRetryDelay,
                                 errorCodesToAdd: ngsqlRetryOptions.CurrentValue.ErrorNumbersoAdd))
                             .MigrationsAssembly(typeof(TContext).Assembly.GetName().Name))
-                .AddInterceptors(
-                    provider.GetRequiredService<IMultiTenantIsolationStrategy>());
+                .AddInterceptors(tenantIsolationStrategy);
         });
 
         return services;
