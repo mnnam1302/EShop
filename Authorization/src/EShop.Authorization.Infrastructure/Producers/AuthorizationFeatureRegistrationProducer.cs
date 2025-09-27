@@ -1,40 +1,45 @@
 ﻿using EShop.Shared.Contracts.Services.Tenancy.Features;
 using EShop.Shared.EventBus.Services;
 using EShop.Shared.Scoping.ResourceAccessControl;
-using static EShop.Shared.Scoping.ResourceAccessControl.FeatureIds;
 
-namespace EShop.Identity.Infrastructure.Producers;
+namespace EShop.Authorization.Infrastructure.Producers;
 
-public class UserFeatureRegistrationService(IEventBusGateway eventBusGateway) : IFeatureRegistrationService
+internal sealed class AuthorizationFeatureRegistrationProducer : IFeatureRegistrationService
 {
-    private readonly string ApplicationName = "Identity";
-    private static readonly IdentityFeature[] features =
+    private readonly string ApplicationName = "Authorization";
+    private static readonly AuthorizationFeature[] features =
     [
         new()
         {
-            Id = Authorization.OrganisationRingFencing,
+            Id = FeatureIds.Authorization.OrganisationRingFencing,
             Name = "Organisation Ring Fencing",
             Description = "Organisation Ring Fencing"
         },
         new()
         {
-            Id = Authorization.ExternalApplicationIntegration,
+            Id = FeatureIds.Authorization.ExternalApplicationIntegration,
             Name = "External Application Integration",
             Description = "External Application Integration"
         },
         new()
         {
-            Id = Authorization.CustomRoles,
+            Id = FeatureIds.Authorization.CustomRoles,
             Name = "Custom Roles",
             Description = "Custom Roles"
         },
         new()
         {
-            Id = Authorization.UserInvites,
+            Id = FeatureIds.Authorization.UserInvites,
             Name = "User Invites",
             Description = "User Invites"
         },
     ];
+
+    private readonly IEventBusGateway eventBusGateway;
+    public AuthorizationFeatureRegistrationProducer(IEventBusGateway eventBusGateway)
+    {
+        this.eventBusGateway = eventBusGateway;
+    }
 
     public async Task RegisterFeatures()
     {
@@ -49,12 +54,12 @@ public class UserFeatureRegistrationService(IEventBusGateway eventBusGateway) : 
         });
     }
 
-    private sealed class IdentityFeature : IFeature
+    private sealed class AuthorizationFeature : IFeature
     {
         public required string Id { get; init; }
         public required string Name { get; init; }
         public required string Description { get; init; }
-        public string Module => nameof(FeatureModules.EShop_Identity);
+        public string Module => nameof(FeatureModules.EShop_Authorization);
         public string State => nameof(FeatureState.Disabled);
     }
 }

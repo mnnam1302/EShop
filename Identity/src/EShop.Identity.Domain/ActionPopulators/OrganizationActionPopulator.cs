@@ -16,7 +16,7 @@ internal class OrganizationActionPopulator : IActionPopulator
             {
                 nameof(UserOrganizationActions.ViewOrganizations),
                 new ActionDefinition(
-                    await featureValidator.HasFeatureAsync(Authorization.OrganisationRingFencing_FeatureId) &&
+                    await featureValidator.HasFeatureAsync(Authorization.OrganisationRingFencing) &&
                     await permissionValidator.HasAtLeastOneOfSpecificPermissionAsync(
                         IdentityPermissions.ViewOrganizationsPermissionId,
                         IdentityPermissions.ManageOrganizationsPermissionId))
@@ -24,7 +24,7 @@ internal class OrganizationActionPopulator : IActionPopulator
             {
                 UserOrganizationActions.ManageOrganizations.ToString(),
                 new ActionDefinition(
-                    await featureValidator.HasFeatureAsync(Authorization.OrganisationRingFencing_FeatureId) &&
+                    await featureValidator.HasFeatureAsync(Authorization.OrganisationRingFencing) &&
                     await permissionValidator.HasPermissionAsync(IdentityPermissions.ManageOrganizationsPermissionId))
             }
         };

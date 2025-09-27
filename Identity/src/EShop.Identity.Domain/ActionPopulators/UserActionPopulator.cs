@@ -16,7 +16,7 @@ internal class UserActionPopulator : IActionPopulator
             {
                 nameof(UserActions.ViewUsers),
                 new ActionDefinition(
-                    await featureValidator.HasFeatureAsync(Authorization.UserInvites_FeatureId) &&
+                    await featureValidator.HasFeatureAsync(Authorization.UserInvites) &&
                     await permissionValidator.HasAtLeastOneOfSpecificPermissionAsync(
                         IdentityPermissions.ViewUsersPermissionId,
                         IdentityPermissions.ManageUsersPermissionId))
@@ -24,25 +24,25 @@ internal class UserActionPopulator : IActionPopulator
             {
                 nameof(UserActions.InviteUser),
                 new ActionDefinition(
-                    await featureValidator.HasFeatureAsync(Authorization.UserInvites_FeatureId) &&
+                    await featureValidator.HasFeatureAsync(Authorization.UserInvites) &&
                     await permissionValidator.HasPermissionAsync(IdentityPermissions.ManageUsersPermissionId))
             },
             {
                 UserActions.EditUser.ToString(),
                 new ActionDefinition(
-                    await featureValidator.HasFeatureAsync(Authorization.UserInvites_FeatureId) &&
+                    await featureValidator.HasFeatureAsync(Authorization.UserInvites) &&
                     await permissionValidator.HasPermissionAsync(IdentityPermissions.ManageUsersPermissionId))
             },
             {
                 UserActions.DeleteUser.ToString(),
                 new ActionDefinition(
-                    await featureValidator.HasFeatureAsync(Authorization.UserInvites_FeatureId) &&
+                    await featureValidator.HasFeatureAsync(Authorization.UserInvites) &&
                     await permissionValidator.HasPermissionAsync(IdentityPermissions.ManageUsersPermissionId))
             },
             {
                 UserActions.AssignRoles.ToString(),
                 new ActionDefinition(
-                    await featureValidator.HasFeatureAsync(Authorization.UserInvites_FeatureId) &&
+                    await featureValidator.HasFeatureAsync(Authorization.UserInvites) &&
                     await permissionValidator.HasPermissionAsync(IdentityPermissions.ManageUsersPermissionId))
             },
         };

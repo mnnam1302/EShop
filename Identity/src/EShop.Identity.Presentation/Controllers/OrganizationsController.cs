@@ -23,7 +23,7 @@ public class OrganizationsController : ApiEndpointBase
     }
 
     [HttpPost]
-    [RequireFeature(Authorization.OrganisationRingFencing_FeatureId)]
+    [RequireFeature(Authorization.OrganisationRingFencing)]
     [RequirePermission(IdentityPermissions.ManageOrganizationsPermissionId)]
     public async Task<IResult> CreateOrganization([FromBody] Command.CreateOrganizationCommand request)
     {
@@ -38,7 +38,7 @@ public class OrganizationsController : ApiEndpointBase
     }
 
     [HttpPut("{id}")]
-    [RequireFeature(Authorization.OrganisationRingFencing_FeatureId)]
+    [RequireFeature(Authorization.OrganisationRingFencing)]
     [RequireOneOfPermissions(IdentityPermissions.ManageOrganizationsPermissionId)]
     public async Task<IResult> UpdateOrganization([FromRoute] string id, [FromBody] Command.UpdateOrganizationCommand request)
     {
@@ -54,7 +54,7 @@ public class OrganizationsController : ApiEndpointBase
     }
 
     [HttpGet("{id}")]
-    [RequireFeature(Authorization.OrganisationRingFencing_FeatureId)]
+    [RequireFeature(Authorization.OrganisationRingFencing)]
     [RequireOneOfPermissions(
         IdentityPermissions.ViewOrganizationsPermissionId,
         IdentityPermissions.ManageOrganizationsPermissionId)]

@@ -1,4 +1,5 @@
 ﻿using EShop.Authorization.Domain.Repositories;
+using EShop.Authorization.Infrastructure.Producers;
 using EShop.Authorization.Infrastructure.Repositories;
 using EShop.Shared.DomainTools.UnitOfWorks;
 using EShop.Shared.EventBus.DependencyInjections.Extensions;
@@ -7,6 +8,7 @@ using EShop.Shared.EventBus.JsonConverters;
 using EShop.Shared.EventBus.PipelineObservers;
 using EShop.Shared.EventBus.Services;
 using EShop.Shared.JsonApi.Extensions;
+using EShop.Shared.Scoping.ResourceAccessControl;
 using MassTransit;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -18,10 +20,20 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
         services
-            .AddEventBus()
-            .AddMasstransitRabbitMQ(configuration)
             .AddPersistence()
-            .AddPostgreSQL(configuration);
+            .AddPostgreSQL(configuration)
+            .AddEventBus()
+            .AddMasstransitRabbitMQ(configuration);
+
+        services.AddProducers();
+
+        return services;
+    }
+
+    public static IServiceCollection AddProducers(this IServiceCollection services)
+    {
+        services.AddTransient<IFeatureRegistrationService, AuthorizationFeatureRegistrationProducer>();
+        services.AddTransient<IPermissionRegistrationService, AuthorizationPermissionRegistrationProducer>();
 
         return services;
     }

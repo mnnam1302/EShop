@@ -11,11 +11,11 @@ public static class FeatureIds
 
     public static class Authorization
     {
-        public const string ExternalApplicationIntegration_FeatureId = "Authorization_ExternalApplicationIntegration";
-        public const string UserInvites_FeatureId = "Authorization_UserInvites";
-        public const string OrganisationRingFencing_FeatureId = "Authorization_OrganisationRingFencing";
-        public const string CustomRoles_FeatureId = "Authorization_CustomRoles";
-        public const string EnableTenantSpecificSequences_FeatureId = "Authorization_EnableTenantSpecificSequences";
+        public const string ExternalApplicationIntegration = "Authorization_ExternalApplicationIntegration";
+        public const string UserInvites = "Authorization_UserInvites";
+        public const string OrganisationRingFencing = "Authorization_OrganisationRingFencing";
+        public const string CustomRoles = "Authorization_CustomRoles";
+        public const string EnableTenantSpecificSequences = "Authorization_EnableTenantSpecificSequences";
     }
 
     public static class Catalog
