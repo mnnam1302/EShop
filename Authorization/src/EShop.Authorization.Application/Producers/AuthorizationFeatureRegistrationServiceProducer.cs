@@ -6,7 +6,6 @@ namespace EShop.Authorization.Application.Producers;
 
 public sealed class AuthorizationFeatureRegistrationServiceProducer
 {
-    private readonly string ApplicationName = "Authorization";
     private static readonly AuthorizationFeature[] features =
     [
         new()

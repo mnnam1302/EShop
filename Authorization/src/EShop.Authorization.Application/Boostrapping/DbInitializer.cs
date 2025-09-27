@@ -13,7 +13,7 @@ public sealed class DbInitializer(
     IUserDetailsProvider userDetailsProvider,
     ITenantIsolationStrategy tenantIsolationStrategy,
     IConfiguration configuration,
-    ILogger logger)
+    ILogger<DbInitializer> logger)
 {
     public async Task Initialize(bool applyMigrations = true, bool applyTenantIsolation = true)
     {

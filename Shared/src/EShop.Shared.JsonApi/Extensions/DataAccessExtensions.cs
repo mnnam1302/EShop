@@ -8,7 +8,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL;
 
 namespace EShop.Shared.JsonApi.Extensions;
 
-public static class DataAccessConfigurationExtensions
+public static class DataAccessExtensions
 {
     public static IServiceCollection AddPostgreSqlHealthCheck(this IServiceCollection services, IConfiguration configuration)
     {
@@ -42,7 +42,6 @@ public static class DataAccessConfigurationExtensions
     {
         services.AddDatabaseOptions(configuration);
 
-        // Consider DI carefully, I'd like to use AddDbContextPool, but it's scope lifetime
         services.AddDbContext<DbContext, TContext>((provider, builder) =>
         {
             var ngsqlRetryOptions = provider.GetRequiredService<IOptionsMonitor<NgSqlRetryOptions>>();

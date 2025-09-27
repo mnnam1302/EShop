@@ -1,4 +1,5 @@
 ﻿using EShop.Shared.Cache.DependencyInejctions.Extensions;
+using EShop.Shared.CQRS;
 using EShop.Shared.DomainTools.DependencyInjections;
 using EShop.Shared.JsonApi.Extensions;
 
@@ -24,6 +25,8 @@ public static class ServiceCollectionExtensions
         services
             .AddUserTokensProvider()
             .AddTenantFeaturesProvider();
+
+        services.AddCQRS(AssemblyReference.Assembly);
 
         return services;
     }
