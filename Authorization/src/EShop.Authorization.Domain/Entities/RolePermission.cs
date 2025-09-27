@@ -2,6 +2,6 @@
 
 public class RolePermission
 {
-    public Guid RolerId { get; set; }
+    public Guid RoleId { get; set; }
     public string PermissionId { get; set; } = string.Empty;
 }

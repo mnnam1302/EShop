@@ -49,7 +49,7 @@ public class Role : EntityBase<Guid>, IScoped
 
             _rolePermissions.Add(new RolePermission
             {
-                RolerId = Id,
+                RoleId = Id,  // Fixed: Was RolerId
                 PermissionId = permissionId
             });
         }
