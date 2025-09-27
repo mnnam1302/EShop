@@ -24,21 +24,14 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment)
     {
-        services
+        services.AddRedis(configuration);
+
+        services.AddPersistence()
+            .AddPostgreSQLPersistence(configuration);
+
+        services.AddEventBus()
             .AddProducers()
-            .AddRedis(configuration)
-            .AddPersistence()
-            .AddPostgreSQLPersistence(configuration)
-            .AddEventBus()
             .AddMasstransitRabbitMQ(configuration, environment);
-
-        return services;
-    }
-
-    public static IServiceCollection AddProducers(this IServiceCollection services)
-    {
-        services.AddTransient<IFeatureRegistrationService, AuthorizationFeatureRegistrationProducer>();
-        services.AddTransient<IPermissionRegistrationService, AuthorizationPermissionRegistrationProducer>();
 
         return services;
     }
@@ -55,9 +48,22 @@ public static class ServiceCollectionExtensions
 
     public static IServiceCollection AddPersistence(this IServiceCollection services)
     {
-        services.AddTransient<DbInitializer>();
-        services.AddScoped<IUnitOfWork, EFUnitOfWork<AuthorizationDbContext>>();
+        services
+            .AddTransient<DbInitializer>()
+            .AddUnitOfWork()
+            .AddRepositories();
 
+        return services;
+    }
+
+    private static IServiceCollection AddUnitOfWork(this IServiceCollection services)
+    {
+        services.AddScoped<IUnitOfWork, EFUnitOfWork<AuthorizationDbContext>>();
+        return services;
+    }
+
+    private static IServiceCollection AddRepositories(this IServiceCollection services)
+    {
         services.AddScoped<IOrganizationRepository, OrganizationRepository>();
         services.AddScoped<IRoleRepository, RoleRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
@@ -78,6 +84,14 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddEventBus(this IServiceCollection services)
     {
         services.AddScoped<IEventBusGateway, EventBusGateway>();
+        return services;
+    }
+
+    private static IServiceCollection AddProducers(this IServiceCollection services)
+    {
+        services.AddTransient<IFeatureRegistrationService, AuthorizationFeatureRegistrationProducer>();
+        services.AddTransient<IPermissionRegistrationService, AuthorizationPermissionRegistrationProducer>();
+
         return services;
     }
 
@@ -141,7 +155,7 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    public static void ConfigureReceiveEndpoints(
+    private static void ConfigureReceiveEndpoints(
         this IRabbitMqBusFactoryConfigurator bus,
         IRegistrationContext context,
         IWebHostEnvironment environment,
@@ -156,4 +170,5 @@ public static class ServiceCollectionExtensions
             environment.EnvironmentName,
             serviceName);
     }
+
 }

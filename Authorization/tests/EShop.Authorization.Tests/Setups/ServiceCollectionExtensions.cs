@@ -6,8 +6,6 @@ using EShop.Shared.Contracts.Services.Tenancy.Tenants;
 using EShop.Shared.CQRS;
 using EShop.Shared.DomainTools.DependencyInjections;
 using EShop.Shared.EventBus.JsonConverters;
-using EShop.Shared.EventBus.Services;
-using EShop.Shared.JsonApi.Extensions;
 using EShop.Testing.JsonApiApplication;
 using EShop.Testing.JsonApiApplication.DependencyInjections;
 using EShop.Testing.JsonApiApplication.EventBus;
@@ -31,36 +29,26 @@ public static class ServiceCollectionExtensions
         services
             .AddApiServices()
             .AddApplicationServices()
-            .AddTestPersistence(testDatabase)
-            .AddTestInfrastructure();
+            .AddTestInfrastructure(testDatabase);
 
         return services;
     }
 
-    private static IServiceCollection AddTestPersistence(this IServiceCollection services, PostgreSqlTestDatabase testDatabase)
+    private static IServiceCollection AddTestInfrastructure(this IServiceCollection services, PostgreSqlTestDatabase testDatabase)
     {
-        return services
-            .AddMultiTenantScoping()
-            .AddPostgreSqlTestDbContext<AuthorizationDbContext>(testDatabase)
-            .AddPersistence();
+        services.AddMemoryInfrastructure();
+
+        services.AddPersistence()
+            .AddPostgreSqlTestDbContext<AuthorizationDbContext>(testDatabase);
+
+        services.AddEventBus()
+            .AddTestMasstransitMemmory();
+
+        return services;
     }
 
-    private static IServiceCollection AddTestInfrastructure(this IServiceCollection services)
+    private static IServiceCollection AddTestMasstransitMemmory(this IServiceCollection services)
     {
-        return services
-            .AddEventBus()
-            .AddTestMemoryCaching();
-    }
-
-    private static IServiceCollection AddTestMemoryCaching(this IServiceCollection services)
-    {
-        return services.AddMemoryInfrastructure();
-    }
-
-    private static IServiceCollection AddEventBus(this IServiceCollection services)
-    {
-        services.AddScoped<IEventBusGateway, EventBusGateway>();
-
         services.AddMassTransit(cfg =>
         {
             cfg.SetKebabCaseEndpointNameFormatter();

@@ -3,7 +3,6 @@ using EShop.Authorization.Domain.Services;
 using EShop.Authorization.Infrastructure.DependencyInjection;
 using EShop.Shared.CQRS;
 using EShop.Shared.DomainTools.DependencyInjections;
-using EShop.Shared.JsonApi.Extensions;
 using EShop.Shared.JsonApi.Middlewares;
 using MassTransit;
 using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
@@ -16,10 +15,6 @@ public static class ServiceCollectionExtensions
     {
         services.AddResiliencePolicy();
         services.AddMediator(AssemblyReference.Assembly);
-
-        services
-            .AddUserTokensProvider()
-            .AddTenantFeaturesProvider();
 
         return services;
     }
