@@ -1,11 +1,11 @@
 ﻿using EShop.Shared.Contracts.Services.Tenancy.Tenants;
+using EShop.Shared.DomainTools.Aggregates;
 using EShop.Shared.Scoping;
-using EShop.Tenancy.Domain.Aggregates;
 using System.ComponentModel.DataAnnotations;
 
 namespace EShop.Tenancy.Domain.Entities;
 
-public class Tenant : TenantAggregate, IExcludedFromScoping
+public class Tenant : AggregateRoot<string>, IExcludedFromScoping
 {
     [MaxLength(ModelConstants.ShortMediumText)]
     public string Name { get; private set; } = string.Empty;

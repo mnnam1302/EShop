@@ -14,6 +14,9 @@ public class Permission : EntityBase<string>
     [MaxLength(ModelConstants.MediumText)]
     public string RelatedTo { get; set; } = string.Empty;
 
+    public virtual IReadOnlyCollection<Role> Roles { get; set; } = [];
+    public virtual IReadOnlyCollection<RolePermission> RolePermissions { get; set; } = [];
+
     public static Permission Create(string id, string name, string relatedTo, string? description = null)
     {
         return new Permission

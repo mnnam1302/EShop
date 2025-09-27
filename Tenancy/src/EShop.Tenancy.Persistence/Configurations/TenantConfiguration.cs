@@ -18,6 +18,7 @@ internal class TenantConfiguration : IEntityTypeConfiguration<Tenant>
         builder.Property(x => x.Id)
             .HasMaxLength(ModelConstants.ShortText)
             .IsRequired();
+
         builder.Property(x => x.Name).IsRequired();
         builder.Property(x => x.Description);
         builder.Property(x => x.OwnerUsername);

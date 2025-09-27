@@ -5,6 +5,7 @@ namespace EShop.Authorization.Domain.Entities;
 
 public class User : AggregateRoot<string>
 {
+
     [MaxLength(ModelConstants.ShortText)]
     public string Username { get; set; } = string.Empty;
 
@@ -17,16 +18,26 @@ public class User : AggregateRoot<string>
     [MaxLength(ModelConstants.ShortText)]
     public string Status { get; set; } = nameof(UserStatus.Inactive);
 
-    [MaxLength(ModelConstants.ShortText)]
-    public string? OrganizationId { get; set; }
-
-    public virtual Organization? Organization { get; set; }
 
     [MaxLength(ModelConstants.ShortText)]
     public string CreatedByUserId { get; set; } = string.Empty;
 
-    private readonly List<UserRole> _userRoles = new();
+    // Organization relationship
+    [MaxLength(ModelConstants.ShortText)]
+    public string? OrganizationId { get; set; }
+    public virtual Organization? Organization { get; set; }
+
+    // Roles relationship
+    public virtual IReadOnlyCollection<Role> Roles { get; set; } = [];
+
+    private readonly List<UserRole> _userRoles = [];
     public virtual IReadOnlyCollection<UserRole> UserRoles => _userRoles.AsReadOnly();
+
+    [MaxLength(ModelConstants.ShortText)]
+    public string TenantId { get; private set; } = string.Empty;
+
+    [MaxLength(ModelConstants.VeryLongText)]
+    public string Scope { get; private set; } = string.Empty;
 
     public static User Create(
         string ownerUsername,
