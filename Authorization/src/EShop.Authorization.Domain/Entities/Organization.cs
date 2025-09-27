@@ -1,9 +1,10 @@
 ﻿using EShop.Shared.DomainTools.Aggregates;
+using EShop.Shared.Scoping;
 using System.ComponentModel.DataAnnotations;
 
 namespace EShop.Authorization.Domain.Entities;
 
-public class Organization : AggregateRoot<string>
+public class Organization : AggregateRoot<string>, IExcludedFromScoping
 {
     [MaxLength(ModelConstants.MediumText)]
     public string Name { get; set; } = string.Empty;

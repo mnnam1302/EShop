@@ -1,6 +1,8 @@
-﻿namespace EShop.Authorization.Domain.Entities;
+﻿using EShop.Shared.Scoping;
 
-public class RolePermission
+namespace EShop.Authorization.Domain.Entities;
+
+public class RolePermission : IExcludedFromScoping
 {
     public Guid RoleId { get; set; }
     public string PermissionId { get; set; } = string.Empty;
