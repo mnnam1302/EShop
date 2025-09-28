@@ -1,4 +1,4 @@
-﻿using EShop.Authorization.Domain.Commands;
+﻿using EShop.Authorization.Application.UseCases.Commands;
 using EShop.Shared.Contracts.Services.Tenancy.Tenants;
 using EShop.Shared.CQRS;
 using EShop.Shared.Scoping;
@@ -40,14 +40,14 @@ public sealed class TenantCreatedConsumer : IConsumer<ITenantCreated>
             if (result.IsFailure)
             {
                 _logger.LogWarning(
-                    "Failed to create root organization for tenant {tenantId}. Errors: {errors}",
+                    "Failed to create root organization for tenant {TenantId}. Errors: {Errors}",
                     context.Message.TenantId,
                     result.Error.Message);
             }
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Exception occurred while creating root organization for tenant {tenantId}", context.Message.TenantId);
+            _logger.LogError(ex, "Exception occurred while creating root organization for tenant {TenantId}", context.Message.TenantId);
             throw;
         }
         finally

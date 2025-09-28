@@ -1,5 +1,4 @@
-﻿using EShop.Authorization.Domain.Commands;
-using EShop.Authorization.Domain.Repositories;
+﻿using EShop.Authorization.Domain.Repositories;
 using EShop.Authorization.Domain.Services;
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.CQRS.Command;
@@ -7,6 +6,15 @@ using EShop.Shared.DomainTools.UnitOfWorks;
 using Microsoft.Extensions.Logging;
 
 namespace EShop.Authorization.Application.UseCases.Commands;
+
+public sealed class CreateRootOrganizationCommand : ICommand
+{
+    public required string TenantId { get; init; }
+    public required string TenantName { get; init; }
+    public required string OwnerUsername { get; init; }
+    public required string OwnerDisplayName { get; init; }
+    public required string OwnerEmail { get; init; }
+}
 
 internal sealed class CreateRootOrganizationCommandHandler : ICommandHandler<CreateRootOrganizationCommand>
 {
