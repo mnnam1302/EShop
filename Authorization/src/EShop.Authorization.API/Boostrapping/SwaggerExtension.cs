@@ -4,7 +4,7 @@ using Microsoft.OpenApi.Any;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using Swashbuckle.AspNetCore.SwaggerUI;
 
-namespace EShop.Authorization.Application.Boostrapping;
+namespace EShop.Authorization.API.Boostrapping;
 
 public static class SwaggerExtensions
 {
@@ -61,3 +61,4 @@ public class AuthorizationSwaggerOptions : IConfigureOptions<SwaggerGenOptions>
         options.CustomSchemaIds(type => type.ToString().Replace("+", "."));
     }
 }
+

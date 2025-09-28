@@ -1,6 +1,6 @@
-﻿namespace EShop.Authorization.Application.APIs;
+﻿namespace EShop.Authorization.API.APIs;
 
-public static class EndpointHandlers
+public static class EndpointHandler
 {
     public static IEndpointRouteBuilder MapAuthorizationEndpoints(this IEndpointRouteBuilder endpoints)
     {

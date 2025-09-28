@@ -1,4 +1,4 @@
-﻿namespace EShop.Authorization.Application.APIs;
+﻿namespace EShop.Authorization.API.APIs;
 
 public static class AuthenticationEndpointHandler
 {

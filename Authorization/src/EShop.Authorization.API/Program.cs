@@ -2,7 +2,7 @@ using EShop.Authorization.Infrastructure;
 using EShop.Shared.Diagnostics;
 using Serilog;
 
-namespace EShop.Authorization.Application;
+namespace EShop.Authorization.API;
 
 public static class Program
 {

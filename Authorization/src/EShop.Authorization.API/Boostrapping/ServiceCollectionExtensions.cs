@@ -1,13 +1,7 @@
-﻿using EShop.Authorization.Application.Services;
-using EShop.Authorization.Domain.Services;
-using EShop.Authorization.Infrastructure.DependencyInjection;
-using EShop.Shared.CQRS;
-using EShop.Shared.DomainTools.DependencyInjections;
-using EShop.Shared.JsonApi.Middlewares;
-using MassTransit;
+﻿using EShop.Shared.JsonApi.Middlewares;
 using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
 
-namespace EShop.Authorization.Application.Boostrapping;
+namespace EShop.Authorization.API.Boostrapping;
 
 public static class ServiceCollectionExtensions
 {

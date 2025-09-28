@@ -1,9 +1,9 @@
-﻿using EShop.Authorization.Application.APIs;
-using EShop.Authorization.Application.Boostrapping;
+﻿using EShop.Authorization.API.APIs;
+using EShop.Authorization.API.Boostrapping;
 using EShop.Shared.JsonApi.Extensions;
 using EShop.Shared.JsonApi.Middlewares;
 
-namespace EShop.Authorization.Application;
+namespace EShop.Authorization.API;
 
 public class Startup
 {
