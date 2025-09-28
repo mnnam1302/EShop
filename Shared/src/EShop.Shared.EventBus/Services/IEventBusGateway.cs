@@ -5,4 +5,6 @@ namespace EShop.Shared.EventBus.Services;
 public interface IEventBusGateway
 {
     Task PublishAsync<TEvent>(object @event, CancellationToken cancellationToken = default) where TEvent : class, IIntegrationEvent;
+
+    Task PublishAsync(IIntegrationEvent @event, CancellationToken cancellationToken = default);
 }
