@@ -1,4 +1,4 @@
-﻿using EShop.Authorization.Application.APIs;
+﻿using EShop.Authorization.API.APIs;
 using EShop.Testing.JsonApiApplication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -9,7 +9,7 @@ using Microsoft.Extensions.Logging;
 
 namespace EShop.Authorization.Tests.Setups;
 
-public class TestStartup : Authorization.Application.Startup
+public class TestStartup : Authorization.API.Startup
 {
     private readonly PostgreSqlTestDatabase testDatabase;
 

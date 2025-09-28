@@ -1,4 +1,8 @@
-﻿using EShop.Shared.JsonApi.Middlewares;
+﻿using EShop.Authorization.Application.DependencyInjections;
+using EShop.Authorization.Infrastructure.DependencyInjection;
+using EShop.Shared.CQRS;
+using EShop.Shared.DomainTools.DependencyInjections;
+using EShop.Shared.JsonApi.Middlewares;
 using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
 
 namespace EShop.Authorization.API.Boostrapping;
@@ -8,7 +12,7 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddShared(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddResiliencePolicy();
-        services.AddMediator(AssemblyReference.Assembly);
+        services.AddMediator(Application.AssemblyReference.Assembly);
 
         return services;
     }
@@ -16,14 +20,14 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddBoostrapping(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment)
     {
         services
-            .AddApiServices()
-            .AddApplicationServices()
-            .AddInfrastructure(configuration, environment);
+            .AddAuthorizationAPI()
+            .AddAuthorizationApplication()
+            .AddAuthorizationInfrastructure(configuration, environment);
 
         return services;
     }
 
-    public static IServiceCollection AddApiServices(this IServiceCollection services)
+    public static IServiceCollection AddAuthorizationAPI(this IServiceCollection services)
     {
         services.AddCors();
         services.AddSingleton<ExceptionHandlingMiddleware>();
@@ -41,13 +45,6 @@ public static class ServiceCollectionExtensions
                 options.SubstituteApiVersionInUrl = true;
             });
 
-        return services;
-    }
-
-    public static IServiceCollection AddApplicationServices(this IServiceCollection services)
-    {
-        services.AddScoped<IPasswordHasher, PasswordHasher>();
-        services.AddScoped<IRootOrganizationService, RootOrganizationService>();
         return services;
     }
 }

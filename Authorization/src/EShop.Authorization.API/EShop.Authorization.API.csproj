@@ -21,6 +21,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\Shared\src\EShop.Shared.JsonApi\EShop.Shared.JsonApi.csproj" />
+    <ProjectReference Include="..\EShop.Authorization.Application\EShop.Authorization.Application.csproj" />
     <ProjectReference Include="..\EShop.Authorization.Domain\EShop.Authorization.Domain.csproj" />
     <ProjectReference Include="..\EShop.Authorization.Infrastructure\EShop.Authorization.Infrastructure.csproj" />
   </ItemGroup>
