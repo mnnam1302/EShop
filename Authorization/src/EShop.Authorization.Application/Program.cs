@@ -4,7 +4,7 @@ using Serilog;
 
 namespace EShop.Authorization.Application;
 
-public class Program
+public static class Program
 {
     private const int ShutdownTimeoutInSeconds = 90;
     internal const string ApplicationName = "Authorization";

@@ -63,8 +63,8 @@
     <PackageVersion Include="Nito.AsyncEx" Version="5.1.2" />
     <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.10" />
     <PackageVersion Include="Polly" Version="8.5.2" />
-    <PackageVersion Include="Reqnroll.Tools.MsBuild.Generation" Version="2.2.1" />
-    <PackageVersion Include="Reqnroll.xUnit" Version="2.2.1" />
+    <PackageVersion Include="Reqnroll.Tools.MsBuild.Generation" Version="3.1.0" />
+    <PackageVersion Include="Reqnroll.xUnit" Version="3.1.0" />
     <PackageVersion Include="Scrutor" Version="6.1.0" />
     <PackageVersion Include="Serilog" Version="4.2.0" />
     <PackageVersion Include="Serilog.AspNetCore" Version="8.0.3" />
@@ -76,8 +76,8 @@
     <PackageVersion Include="Swashbuckle.AspNetCore" Version="6.4.0" />
     <PackageVersion Include="Swashbuckle.AspNetCore.Newtonsoft" Version="6.9.0" />
     <PackageVersion Include="Testcontainers.PostgreSql" Version="4.1.0" />
-    <PackageVersion Include="xunit" Version="2.4.2" />
-    <PackageVersion Include="xunit.runner.visualstudio" Version="2.4.5" />
+    <PackageVersion Include="xunit" Version="2.9.3" />
+    <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.5" />
     <PackageVersion Include="Yarp.ReverseProxy" Version="2.2.0" />
   </ItemGroup>
 </Project>
