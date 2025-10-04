@@ -22,10 +22,10 @@ public static class UserOrganizationContextExtensions
     private static void AddUserOrganizationContextCachingService(this IServiceCollection services)
     {
         services.AddScoped<IUserOrganizationContextCachingService, UserOrganizationContextCachingService>();
-        services.AddScoped<IRedisCachingAsyncProvider<UserOrganizationContext>, RedisCachingAsyncProvider<UserOrganizationContext>>();
+        services.AddScoped<IRedisCachingProvider<UserOrganizationContext>, RedisCachingProvider<UserOrganizationContext>>();
 
         services.AddScoped<IOrganizationContextCachingService, OrganizationContextCachingService>();
-        services.AddScoped<IRedisCachingAsyncProvider<OrganizationContext>, RedisCachingAsyncProvider<OrganizationContext>>();
+        services.AddScoped<IRedisCachingProvider<OrganizationContext>, RedisCachingProvider<OrganizationContext>>();
     }
 
     private static void AddUserOrganizationContextHttpClient(this IServiceCollection services)

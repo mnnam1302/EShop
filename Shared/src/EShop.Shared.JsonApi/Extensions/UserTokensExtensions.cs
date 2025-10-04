@@ -10,7 +10,7 @@ public static class UserTokensExtensions
 {
     public static IServiceCollection AddUserTokensProvider(this IServiceCollection services)
     {
-        services.AddTransient<IRedisCachingAsyncProvider<AuthenticatedResponse>, RedisCachingAsyncProvider<AuthenticatedResponse>>();
+        services.AddTransient<IRedisCachingProvider<AuthenticatedResponse>, RedisCachingProvider<AuthenticatedResponse>>();
         services.AddTransient<IUserTokenCachingService, TokenRedisCachingService>();
 
         return services;

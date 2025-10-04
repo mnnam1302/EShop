@@ -83,7 +83,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IFeatureValidator, CurrentUserFeaturesValidator>();
         services.AddScoped<ITenantFeaturesProvider, OwnerTenantFeaturesProvider>();
         services.AddScoped<ITenantFeaturesCachingService, TenantFeaturesRedisCachingService>();
-        services.AddScoped<IRedisCachingAsyncProvider<string[]>, RedisCachingAsyncProvider<string[]>>();
+        services.AddScoped<IRedisCachingProvider<string[]>, RedisCachingProvider<string[]>>();
         services.AddScoped<IFeatureService, FeatureService>();
     }
 }

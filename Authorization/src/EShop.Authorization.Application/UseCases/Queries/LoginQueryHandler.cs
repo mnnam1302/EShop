@@ -4,6 +4,7 @@ using EShop.Authorization.Domain.Entities;
 using EShop.Authorization.Domain.Repositories;
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.CQRS.Query;
+using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserTokenProvider;
 using System.Security.Claims;
 
 namespace EShop.Authorization.Application.UseCases.Queries;
@@ -15,18 +16,23 @@ public sealed record AuthenticationResult
     public required string UserId { get; init; }
     public required string AccessToken { get; init; }
     public required string RefreshToken { get; init; }
-    public DateTimeOffset RefreshTokenExpirationTime { get; init; }
+    public DateTimeOffset RefreshTokenExpiryTime { get; init; }
 }
 
 public sealed class LoginQueryHandler : IQueryHandler<LoginQuery, AuthenticationResult>
 {
     private readonly IUserRepository _userRepository;
     private readonly IJwtTokenManager _jwtTokenManager;
+    private readonly IUserTokenCachingService _tokenCachingService;
 
-    public LoginQueryHandler(IJwtTokenManager jwtTokenManager, IUserRepository userRepository)
+    public LoginQueryHandler(
+        IJwtTokenManager jwtTokenManager,
+        IUserRepository userRepository,
+        IUserTokenCachingService tokenCachingService)
     {
         _jwtTokenManager = jwtTokenManager;
         _userRepository = userRepository;
+        _tokenCachingService = tokenCachingService;
     }
 
     public async Task<Result<AuthenticationResult>> HandleAsync(LoginQuery query, CancellationToken cancellationToken = default)
@@ -50,23 +56,21 @@ public sealed class LoginQueryHandler : IQueryHandler<LoginQuery, Authentication
         var accessToken = _jwtTokenManager.GenerateAccessToken(userClaims);
         var refreshToken = _jwtTokenManager.GenerateRefreshToken();
 
-        var refreshTokenExpiration = DateTimeOffset.UtcNow.AddDays(7); // 7 days default
-
         // Store refresh token in your data store for validation
         var result = new AuthenticationResult
         {
             UserId = user.Id,
             AccessToken = accessToken,
             RefreshToken = refreshToken,
-            RefreshTokenExpirationTime = refreshTokenExpiration
+            RefreshTokenExpiryTime = DateTimeOffset.UtcNow.AddDays(7),
         };
 
-        await StoreAuthenticationResultAsync(result);
+        await StoreAuthenticatedResultAsync(result);
 
         return Result.Success(result);
     }
 
-    private IEnumerable<Claim> BuildUserClaimsAsync(User user)
+    private static List<Claim> BuildUserClaimsAsync(User user)
     {
         var claims = new List<Claim>
         {
@@ -79,8 +83,17 @@ public sealed class LoginQueryHandler : IQueryHandler<LoginQuery, Authentication
         return claims;
     }
 
-    private async Task StoreAuthenticationResultAsync(AuthenticationResult result)
+    private async Task StoreAuthenticatedResultAsync(AuthenticationResult result)
     {
+        var authenticationCachedValue = new AuthenticatedResult
+        {
+            UserId = result.UserId,
+            UserName = result.UserId,
+            AccessToken = result.AccessToken,
+            RefreshToken = result.RefreshToken,
+            RefreshTokenExpiryTime = result.RefreshTokenExpiryTime
+        };
 
+        await _tokenCachingService.AddTokenAsync(result.UserId, authenticationCachedValue);
     }
 }

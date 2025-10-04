@@ -8,7 +8,7 @@ public interface IRedisResiliencePolicyProvider
     Policy RedisCircuitBreakerPolicy { get; }
 }
 
-public class RedisResiliencePolicyProvider : IRedisResiliencePolicyProvider
+public sealed class RedisResiliencePolicyProvider : IRedisResiliencePolicyProvider
 {
     public Policy RedisRetryPolicy => PollyPolicies.RedisRetryPolicy;
 

@@ -25,7 +25,7 @@ public static class AuthenticationEndpointHandler
         var result = await mediator.QueryAsync<LoginQuery, AuthenticationResult>(query);
         if (result.IsFailure)
         {
-            return Results.BadRequest(new { Errors = result.Error });
+            return Results.Unauthorized();
         }
 
         return Results.Ok(result.Value);

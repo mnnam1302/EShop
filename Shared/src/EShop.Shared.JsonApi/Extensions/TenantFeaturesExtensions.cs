@@ -59,6 +59,6 @@ public static class TenantFeaturesExtensions
 
         services.AddScoped<ITenantFeaturesProvider, TenantFeaturesProvider>();
         services.AddScoped<ITenantFeaturesCachingService, TenantFeaturesRedisCachingService>();
-        services.AddScoped<IRedisCachingAsyncProvider<string[]>, RedisCachingAsyncProvider<string[]>>();
+        services.AddScoped<IRedisCachingProvider<string[]>, RedisCachingProvider<string[]>>();
     }
 }

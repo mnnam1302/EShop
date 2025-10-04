@@ -9,11 +9,11 @@ namespace EShop.Shared.Cache.Services;
 
 public class OrganizationContextCachingService : IOrganizationContextCachingService
 {
-    private readonly IRedisCachingAsyncProvider<OrganizationContext> _redisCachingAsyncProvider;
+    private readonly IRedisCachingProvider<OrganizationContext> _redisCachingAsyncProvider;
     private readonly CachedRemoteConfiguration _cachedRemoteConfiguration;
 
     public OrganizationContextCachingService(
-        IRedisCachingAsyncProvider<OrganizationContext> redisCachingAsyncProvider,
+        IRedisCachingProvider<OrganizationContext> redisCachingAsyncProvider,
         CachedRemoteConfiguration cachedRemoteConfiguration)
     {
         _redisCachingAsyncProvider = redisCachingAsyncProvider;

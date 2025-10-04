@@ -60,6 +60,6 @@ public static class UserPermissionsExtensions
 
         services.AddScoped<IUserPermissionsProvider, UserPermissionProvider>();
         services.AddScoped<IPermissionCachingService, PermissionRedisCachingService>();
-        services.AddScoped<IRedisCachingAsyncProvider<string[]>, RedisCachingAsyncProvider<string[]>>();
+        services.AddScoped<IRedisCachingProvider<string[]>, RedisCachingProvider<string[]>>();
     }
 }

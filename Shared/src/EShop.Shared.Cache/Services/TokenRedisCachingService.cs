@@ -1,6 +1,5 @@
 ﻿using EShop.Shared.Cache.CacheKeys;
 using EShop.Shared.Cache.Providers;
-using EShop.Shared.Contracts.Services.Identity.Auth;
 using EShop.Shared.Scoping.Exceptions;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserTokenProvider;
@@ -8,20 +7,20 @@ using Microsoft.Extensions.Caching.Distributed;
 
 namespace EShop.Shared.Cache.Services;
 
-public class TokenRedisCachingService : IUserTokenCachingService
+public sealed class TokenRedisCachingService : IUserTokenCachingService
 {
-    private readonly IRedisCachingAsyncProvider<Response.AuthenticatedResponse> _redisCachingService;
+    private readonly IRedisCachingProvider<AuthenticatedResult> _redisCachingService;
     private readonly CachedRemoteConfiguration _cachedRemoteConfiguration;
 
     public TokenRedisCachingService(
-        IRedisCachingAsyncProvider<Response.AuthenticatedResponse> redisCachingService,
+        IRedisCachingProvider<AuthenticatedResult> redisCachingService,
         CachedRemoteConfiguration cachedRemoteConfiguration)
     {
         _redisCachingService = redisCachingService;
         _cachedRemoteConfiguration = cachedRemoteConfiguration;
     }
 
-    public async Task<Response.AuthenticatedResponse?> TryGetTokenAsync(string userId)
+    public async Task<AuthenticatedResult?> TryGetTokenAsync(string userId)
     {
         var cachedToken = await _redisCachingService.GetAsync(UserTokenCacheKeyProvider.GetCacheKey(userId));
 
@@ -33,12 +32,13 @@ public class TokenRedisCachingService : IUserTokenCachingService
         return cachedToken;
     }
 
-    public async Task AddTokenAsync(string userId, Response.AuthenticatedResponse token)
+    public async Task AddTokenAsync(string userId, AuthenticatedResult token)
     {
-        await _redisCachingService.AddAsync(
-            UserTokenCacheKeyProvider.GetCacheKey(userId),
-            token,
-            new DistributedCacheEntryOptions { SlidingExpiration = _cachedRemoteConfiguration.GetSlidingTokenExpiration() });
+        var key = UserTokenCacheKeyProvider.GetCacheKey(userId);
+        await _redisCachingService.AddAsync(key, token, new DistributedCacheEntryOptions
+        {
+            SlidingExpiration = _cachedRemoteConfiguration.GetSlidingTokenExpiration()
+        });
     }
 
     public async Task RemoveCacheAsync(string userId)
