@@ -40,14 +40,24 @@ public class RefreshHandler : IQueryHandler<Query.Refresh, Response.Authenticate
             UserName = authenticatedCaching.UserName,
             AccessToken = accessToken,
             RefreshToken = refreshToken,
-            RefreshTokenExpiryTime = authenticatedCaching.RefreshTokenExpiryTime
+            RefreshTokenExpiryTime = authenticatedCaching.RefreshTokenExpiryTime.DateTime
         };
 
-        await _tokenCacheService.AddTokenAsync(userId, newToken);
+        // Convert to AuthenticationCaching for caching
+        var authenticationCaching = new TokenAuthenticationCaching
+        {
+            UserId = newToken.UserId,
+            UserName = newToken.UserName,
+            AccessToken = newToken.AccessToken,
+            RefreshToken = newToken.RefreshToken,
+            RefreshTokenExpiryTime = new DateTimeOffset(newToken.RefreshTokenExpiryTime)
+        };
+
+        await _tokenCacheService.AddTokenAsync(userId, authenticationCaching);
         return Result.Success(newToken);
     }
 
-    private async Task<Response.AuthenticatedResponse> ValidateAndRetrieveTokenAsync(string userId, Query.Refresh request)
+    private async Task<TokenAuthenticationCaching> ValidateAndRetrieveTokenAsync(string userId, Query.Refresh request)
     {
         var tokenCached = await _tokenCacheService.TryGetTokenAsync(userId);
 
@@ -56,7 +66,7 @@ public class RefreshHandler : IQueryHandler<Query.Refresh, Response.Authenticate
             throw new UnauthorizedException("Invalid token");
         }
 
-        if (tokenCached?.RefreshToken != request.RefreshToken || tokenCached.RefreshTokenExpiryTime < DateTime.Now)
+        if (tokenCached?.RefreshToken != request.RefreshToken || tokenCached.RefreshTokenExpiryTime < DateTimeOffset.Now)
         {
             throw new UnauthorizedException("Invalid token");
         }

@@ -9,18 +9,18 @@ namespace EShop.Shared.Cache.Services;
 
 public sealed class TokenRedisCachingService : IUserTokenCachingService
 {
-    private readonly IRedisCachingProvider<AuthenticationCaching> _redisCachingService;
+    private readonly IRedisCachingProvider<TokenAuthenticationCaching> _redisCachingService;
     private readonly CachedRemoteConfiguration _cachedRemoteConfiguration;
 
     public TokenRedisCachingService(
-        IRedisCachingProvider<AuthenticationCaching> redisCachingService,
+        IRedisCachingProvider<TokenAuthenticationCaching> redisCachingService,
         CachedRemoteConfiguration cachedRemoteConfiguration)
     {
         _redisCachingService = redisCachingService;
         _cachedRemoteConfiguration = cachedRemoteConfiguration;
     }
 
-    public async Task<AuthenticationCaching?> TryGetTokenAsync(string userId)
+    public async Task<TokenAuthenticationCaching?> TryGetTokenAsync(string userId)
     {
         var cachedToken = await _redisCachingService.GetAsync(UserTokenCacheKeyProvider.GetCacheKey(userId));
 
@@ -32,7 +32,7 @@ public sealed class TokenRedisCachingService : IUserTokenCachingService
         return cachedToken;
     }
 
-    public async Task AddTokenAsync(string userId, AuthenticationCaching token)
+    public async Task AddTokenAsync(string userId, TokenAuthenticationCaching token)
     {
         var key = UserTokenCacheKeyProvider.GetCacheKey(userId);
         await _redisCachingService.AddAsync(key, token, new DistributedCacheEntryOptions

@@ -1,6 +1,6 @@
 ﻿namespace EShop.Shared.Scoping.ResourceAccessControl.Providers.UserTokenProvider;
 
-public sealed class AuthenticationCaching
+public sealed class TokenAuthenticationCaching
 {
     public required string UserId { get; init; }
     public required string UserName { get; init; }

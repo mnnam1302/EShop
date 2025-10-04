@@ -2,7 +2,6 @@
 using EShop.Shared.Cache.Services;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserTokenProvider;
 using Microsoft.Extensions.DependencyInjection;
-using static EShop.Shared.Contracts.Services.Identity.Auth.Response;
 
 namespace EShop.Shared.JsonApi.Extensions;
 
@@ -10,7 +9,7 @@ public static class UserTokensExtensions
 {
     public static IServiceCollection AddUserTokensProvider(this IServiceCollection services)
     {
-        services.AddTransient<IRedisCachingProvider<AuthenticatedResponse>, RedisCachingProvider<AuthenticatedResponse>>();
+        services.AddTransient<IRedisCachingProvider<TokenAuthenticationCaching>, RedisCachingProvider<TokenAuthenticationCaching>>();
         services.AddTransient<IUserTokenCachingService, TokenRedisCachingService>();
 
         return services;

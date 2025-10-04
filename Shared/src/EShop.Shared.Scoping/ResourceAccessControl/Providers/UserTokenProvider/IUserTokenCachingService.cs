@@ -2,7 +2,7 @@
 
 public interface IUserTokenCachingService
 {
-    Task<AuthenticationCaching?> TryGetTokenAsync(string userId);
-    Task AddTokenAsync(string userId, AuthenticationCaching token);
+    Task<TokenAuthenticationCaching?> TryGetTokenAsync(string userId);
+    Task AddTokenAsync(string userId, TokenAuthenticationCaching token);
     Task RemoveCacheAsync(string userId);
 }
