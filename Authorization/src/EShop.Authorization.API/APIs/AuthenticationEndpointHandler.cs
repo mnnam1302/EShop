@@ -6,13 +6,11 @@ namespace EShop.Authorization.API.APIs;
 
 public static class AuthenticationEndpointHandler
 {
-    private static string BaseUrl = "auth/";
-
     public static IEndpointRouteBuilder MapAuthenticationEndpoints(this IEndpointRouteBuilder endpoints)
     {
         var group = endpoints
             .NewVersionedApi("Authentication")
-            .MapGroup(BaseUrl)
+            .MapGroup("auth/")
             .HasApiVersion(1);
 
         group.MapPost("login", LoginV1Async);

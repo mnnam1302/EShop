@@ -9,7 +9,7 @@ using Microsoft.Extensions.Logging;
 
 namespace EShop.Authorization.Tests.Setups;
 
-public class TestStartup : Authorization.API.Startup
+public sealed class TestStartup : Authorization.API.Startup
 {
     private readonly PostgreSqlTestDatabase testDatabase;
 
@@ -22,8 +22,8 @@ public class TestStartup : Authorization.API.Startup
     public override void ConfigureServices(IServiceCollection services)
     {
         services
-            .AddTestShared()
-            .AddTestBoostrapping(this.testDatabase);
+            .AddTestShared(this.testDatabase)
+            .AddTestBoostrapping();
     }
 
     public override void Configure(WebApplication app, IHostApplicationLifetime applicationLifetime, ILoggerFactory loggerFactory)

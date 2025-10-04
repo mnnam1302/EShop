@@ -19,7 +19,7 @@ public sealed record AuthenticationResponse
     public DateTimeOffset RefreshTokenExpiryTime { get; init; }
 }
 
-public sealed class LoginQueryHandler : IQueryHandler<LoginQuery, AuthenticationResponse>
+internal sealed class LoginQueryHandler : IQueryHandler<LoginQuery, AuthenticationResponse>
 {
     private readonly IUserRepository _userRepository;
     private readonly IJwtTokenManager _jwtTokenManager;

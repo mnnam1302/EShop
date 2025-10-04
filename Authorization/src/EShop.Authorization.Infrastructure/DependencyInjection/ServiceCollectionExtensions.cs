@@ -1,8 +1,9 @@
-﻿using EShop.Authorization.Domain.Repositories;
+﻿using EShop.Authorization.Application.Abstractions;
+using EShop.Authorization.Domain.Repositories;
+using EShop.Authorization.Infrastructure.Authentication;
 using EShop.Authorization.Infrastructure.Consumers;
 using EShop.Authorization.Infrastructure.Producers;
 using EShop.Authorization.Infrastructure.Repositories;
-using EShop.Shared.Cache.DependencyInejctions.Extensions;
 using EShop.Shared.Contracts.Services.Identity.Permissions;
 using EShop.Shared.Contracts.Services.Tenancy.Tenants;
 using EShop.Shared.DomainTools.UnitOfWorks;
@@ -11,7 +12,6 @@ using EShop.Shared.EventBus.DependencyInjections.Options;
 using EShop.Shared.EventBus.JsonConverters;
 using EShop.Shared.EventBus.PipelineObservers;
 using EShop.Shared.EventBus.Services;
-using EShop.Shared.JsonApi.Extensions;
 using EShop.Shared.Scoping.ResourceAccessControl;
 using MassTransit;
 using Microsoft.AspNetCore.Hosting;
@@ -22,38 +22,11 @@ namespace EShop.Authorization.Infrastructure.DependencyInjection;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddAuthorizationInfrastructure(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment)
+    public static IServiceCollection AddAuthorizationPersistence(this IServiceCollection services)
     {
-        services.AddRedis(configuration);
-
-        services.AddPersistence()
-            .AddPostgreSQLPersistence(configuration);
-
-        services.AddEventBus()
-            .AddProducers()
-            .AddMasstransitRabbitMQ(configuration, environment);
-
-        return services;
-    }
-
-    public static IServiceCollection AddRedis(this IServiceCollection services, IConfiguration configuration)
-    {
-
-        services
-            .AddRedisHealthCheck(configuration)
-            .AddRedisInfrastructure(configuration);
-
-        return services;
-    }
-
-    public static IServiceCollection AddPersistence(this IServiceCollection services)
-    {
-        services
-            .AddTransient<DbInitializer>()
+        return services.AddTransient<DbInitializer>()
             .AddUnitOfWork()
             .AddRepositories();
-
-        return services;
     }
 
     private static IServiceCollection AddUnitOfWork(this IServiceCollection services)
@@ -72,11 +45,18 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    public static IServiceCollection AddPostgreSQLPersistence(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddJwtTokenAuthentication(this IServiceCollection services)
     {
+        services.AddScoped<IJwtTokenManager, JwtTokenManager>();
+        return services;
+    }
+
+    public static IServiceCollection AddAuthorizationEventBus(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment)
+    {
+        services.AddScoped<IEventBusGateway, EventBusGateway>();
         services
-            .AddPostgreSqlHealthCheck(configuration)
-            .AddDbContextWithScoping<AuthorizationDbContext>(configuration);
+            .AddProducers()
+            .AddMasstransitRabbitMQ(configuration, environment);
 
         return services;
     }
@@ -170,5 +150,4 @@ public static class ServiceCollectionExtensions
             environment.EnvironmentName,
             serviceName);
     }
-
 }

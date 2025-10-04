@@ -1,7 +1,10 @@
 ﻿using EShop.Authorization.Application.DependencyInjections;
+using EShop.Authorization.Infrastructure;
 using EShop.Authorization.Infrastructure.DependencyInjection;
+using EShop.Shared.Cache.DependencyInejctions.Extensions;
 using EShop.Shared.CQRS;
 using EShop.Shared.DomainTools.DependencyInjections;
+using EShop.Shared.JsonApi.Extensions;
 using EShop.Shared.JsonApi.Middlewares;
 using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
 
@@ -14,6 +17,12 @@ public static class ServiceCollectionExtensions
         services.AddResiliencePolicy();
         services.AddMediator(Application.AssemblyReference.Assembly);
 
+        services.AddPostgreSqlHealthCheck(configuration)
+            .AddDbContextWithScoping<AuthorizationDbContext>(configuration);
+
+        services.AddRedisHealthCheck(configuration)
+            .AddRedisInfrastructure(configuration);
+
         return services;
     }
 
@@ -22,7 +31,9 @@ public static class ServiceCollectionExtensions
         services
             .AddAuthorizationAPI()
             .AddAuthorizationApplication()
-            .AddAuthorizationInfrastructure(configuration, environment);
+            .AddAuthorizationPersistence()
+            .AddAuthorizationEventBus(configuration, environment)
+            .AddJwtTokenAuthentication();
 
         return services;
     }

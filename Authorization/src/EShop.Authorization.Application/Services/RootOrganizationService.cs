@@ -92,7 +92,9 @@ internal sealed class RootOrganizationService : IRootOrganizationService
         string organizationId,
         Guid roleId)
     {
-        var temporaryPassword = _passwordHasher.GenerateRandomPassword(12);
+        // TODO: Kodi - hard password until implement email service for this first login
+        //var temporaryPassword = _passwordHasher.GenerateRandomPassword(12);
+        var temporaryPassword = "Password123!";
         var hashedPassword = _passwordHasher.Hash(temporaryPassword);
 
         var ownerUser = User.Create(

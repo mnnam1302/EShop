@@ -1,4 +1,5 @@
-﻿using EShop.Authorization.Application.Boostrapping;
+﻿using EShop.Authorization.API.Boostrapping;
+using EShop.Authorization.Application.DependencyInjections;
 using EShop.Authorization.Infrastructure;
 using EShop.Authorization.Infrastructure.DependencyInjection;
 using EShop.Shared.Cache.DependencyInejctions.Extensions;
@@ -16,35 +17,33 @@ namespace EShop.Authorization.Tests.Setups;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddTestShared(this IServiceCollection services)
+    public static IServiceCollection AddTestShared(this IServiceCollection services, PostgreSqlTestDatabase testDatabase)
     {
         services.AddResiliencePolicy();
         services.AddMediator(Authorization.Application.AssemblyReference.Assembly);
 
-        return services;
-    }
-
-    public static IServiceCollection AddTestBoostrapping(this IServiceCollection services, PostgreSqlTestDatabase testDatabase)
-    {
-        services
-            .AddApiServices()
-            .AddApplicationServices()
-            .AddTestInfrastructure(testDatabase);
-
-        return services;
-    }
-
-    private static IServiceCollection AddTestInfrastructure(this IServiceCollection services, PostgreSqlTestDatabase testDatabase)
-    {
         services.AddMemoryInfrastructure();
 
-        services.AddPersistence()
-            .AddPostgreSqlTestDbContext<AuthorizationDbContext>(testDatabase);
-
-        services.AddEventBus()
-            .AddTestMasstransitMemmory();
+        services.AddPostgreSqlTestDbContext<AuthorizationDbContext>(testDatabase);
 
         return services;
+    }
+
+    public static IServiceCollection AddTestBoostrapping(this IServiceCollection services)
+    {
+        services
+            .AddAuthorizationAPI()
+            .AddAuthorizationApplication()
+            .AddAuthorizationPersistence()
+            .AddTestAuthorizationInfrastructure();
+
+        return services;
+    }
+
+    private static IServiceCollection AddTestAuthorizationInfrastructure(this IServiceCollection services)
+    {
+        return services.AddEventBus()
+            .AddTestMasstransitMemmory();
     }
 
     private static IServiceCollection AddTestMasstransitMemmory(this IServiceCollection services)

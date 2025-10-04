@@ -5,7 +5,7 @@ using System.Security.Cryptography;
 
 namespace EShop.Authorization.Infrastructure.Authentication;
 
-public sealed class JwtTokenManager : IJwtTokenManager
+internal sealed class JwtTokenManager : IJwtTokenManager
 {
     private readonly JwtOptions _jwtOptions;
 
