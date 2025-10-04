@@ -22,7 +22,7 @@ public static class AuthenticationEndpointHandler
 
     private static async Task<IResult> LoginV1Async([FromBody] LoginQuery query, [FromServices] IMediator mediator)
     {
-        var result = await mediator.QueryAsync<LoginQuery, AuthenticationResult>(query);
+        var result = await mediator.QueryAsync<LoginQuery, AuthenticationResponse>(query);
         if (result.IsFailure)
         {
             return Results.Unauthorized();

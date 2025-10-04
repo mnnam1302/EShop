@@ -9,9 +9,9 @@ using System.Security.Claims;
 
 namespace EShop.Authorization.Application.UseCases.Queries;
 
-public sealed record LoginQuery(string Username, string Password) : IQuery<AuthenticationResult>;
+public sealed record LoginQuery(string Username, string Password) : IQuery<AuthenticationResponse>;
 
-public sealed record AuthenticationResult
+public sealed record AuthenticationResponse
 {
     public required string UserId { get; init; }
     public required string AccessToken { get; init; }
@@ -19,7 +19,7 @@ public sealed record AuthenticationResult
     public DateTimeOffset RefreshTokenExpiryTime { get; init; }
 }
 
-public sealed class LoginQueryHandler : IQueryHandler<LoginQuery, AuthenticationResult>
+public sealed class LoginQueryHandler : IQueryHandler<LoginQuery, AuthenticationResponse>
 {
     private readonly IUserRepository _userRepository;
     private readonly IJwtTokenManager _jwtTokenManager;
@@ -35,29 +35,28 @@ public sealed class LoginQueryHandler : IQueryHandler<LoginQuery, Authentication
         _tokenCachingService = tokenCachingService;
     }
 
-    public async Task<Result<AuthenticationResult>> HandleAsync(LoginQuery query, CancellationToken cancellationToken = default)
+    public async Task<Result<AuthenticationResponse>> HandleAsync(LoginQuery query, CancellationToken cancellationToken = default)
     {
-        // Validate input
+        // 1. Validate input
         if (string.IsNullOrWhiteSpace(query.Username) || string.IsNullOrWhiteSpace(query.Password))
         {
-            return Result.Failure<AuthenticationResult>(ErrorContants.Authentication.InvalidCredentials);
+            return Result.Failure<AuthenticationResponse>(ErrorContants.Authentication.InvalidCredentials);
         }
 
-        // Get user information from your user store
+        // 2. Get user information from your user store
         var user = await _userRepository.FindSingleAsync(u => u.Id == query.Username || u.Username == query.Username, cancellationToken: cancellationToken);
         if (user is null)
         {
-            return Result.Failure<AuthenticationResult>(ErrorContants.Authentication.UserNotFound);
+            return Result.Failure<AuthenticationResponse>(ErrorContants.Authentication.UserNotFound);
         }
 
+        // 3. Generate tokens using RSA asymmetric encryption
         var userClaims = BuildUserClaimsAsync(user);
-
-        // Generate tokens using RSA asymmetric encryption
         var accessToken = _jwtTokenManager.GenerateAccessToken(userClaims);
         var refreshToken = _jwtTokenManager.GenerateRefreshToken();
 
-        // Store refresh token in your data store for validation
-        var result = new AuthenticationResult
+        // 4. Store refresh token in your data store for validation
+        var result = new AuthenticationResponse
         {
             UserId = user.Id,
             AccessToken = accessToken,
@@ -83,9 +82,9 @@ public sealed class LoginQueryHandler : IQueryHandler<LoginQuery, Authentication
         return claims;
     }
 
-    private async Task StoreAuthenticatedResultAsync(AuthenticationResult result)
+    private async Task StoreAuthenticatedResultAsync(AuthenticationResponse result)
     {
-        var authenticationCachedValue = new AuthenticatedResult
+        var authenticationCachedValue = new AuthenticationCaching
         {
             UserId = result.UserId,
             UserName = result.UserId,
