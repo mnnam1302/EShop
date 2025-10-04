@@ -43,7 +43,7 @@ internal sealed class RootOrganizationService : IRootOrganizationService
         if (existingOrganization is not null)
         {
             _logger.LogWarning("Organization with ID {TenantId} already exists", tenantId);
-            return Result.Failure<RootOrganizationSetup>(ErrorCodes.Organization.AlreadyExists);
+            return Result.Failure<RootOrganizationSetup>(ErrorContants.Organization.AlreadyExists);
         }
 
         // 2. Create root organization
