@@ -23,7 +23,6 @@ internal sealed class JwtTokenManager : IJwtTokenManager
     {
         // Get the active RSA key pair for the tenant
         var keyPair = await _rsaKeyManager.GetActiveKeyPairAsync(tenantId);
-
         if (keyPair == null)
         {
             throw new InvalidOperationException($"No RSA key pair found for tenant {tenantId}");

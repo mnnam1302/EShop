@@ -1,4 +1,5 @@
-﻿using EShop.Authorization.Application.UseCases.Queries;
+﻿using EShop.Authorization.API.Models;
+using EShop.Authorization.Application.UseCases.Queries;
 using EShop.Shared.CQRS;
 using Microsoft.AspNetCore.Mvc;
 
@@ -23,8 +24,10 @@ public static class AuthenticationEndpointHandler
         return endpoints;
     }
 
-    private static async Task<IResult> LoginAsync([FromBody] LoginQuery query, [FromServices] IMediator mediator)
+    private static async Task<IResult> LoginAsync([FromBody] LoginRequest request, [FromServices] IMediator mediator)
     {
+        var query = new LoginQuery(request.Username, request.Password);
+
         var result = await mediator.QueryAsync<LoginQuery, AuthenticationResponse>(query);
         if (result.IsFailure)
         {
@@ -38,7 +41,7 @@ public static class AuthenticationEndpointHandler
     {
         var query = new GetPublicKeyQuery(tenantId);
         var result = await mediator.QueryAsync<GetPublicKeyQuery, PublicKeyResponse>(query);
-        
+
         if (result.IsFailure)
         {
             return Results.NotFound(result.Error);
@@ -51,7 +54,7 @@ public static class AuthenticationEndpointHandler
     {
         var query = new GetPublicKeyQuery(tenantId, keyId);
         var result = await mediator.QueryAsync<GetPublicKeyQuery, PublicKeyResponse>(query);
-        
+
         if (result.IsFailure)
         {
             return Results.NotFound(result.Error);
@@ -64,7 +67,7 @@ public static class AuthenticationEndpointHandler
     {
         var query = new GetJwksQuery(tenantId);
         var result = await mediator.QueryAsync<GetJwksQuery, JwksResponse>(query);
-        
+
         if (result.IsFailure)
         {
             return Results.NotFound(result.Error);
