@@ -26,17 +26,20 @@ internal sealed class LoginQueryHandler : IQueryHandler<LoginQuery, Authenticati
     private readonly IJwtTokenManager _jwtTokenManager;
     private readonly IUserTokenCachingService _tokenCachingService;
     private readonly IPasswordHasher _passwordHasher;
+    private readonly IRsaKeyManager _rsaKeyManager;
 
     public LoginQueryHandler(
         IJwtTokenManager jwtTokenManager,
         IUserRepository userRepository,
         IUserTokenCachingService tokenCachingService,
-        IPasswordHasher passwordHasher)
+        IPasswordHasher passwordHasher,
+        IRsaKeyManager rsaKeyManager)
     {
         _jwtTokenManager = jwtTokenManager;
         _userRepository = userRepository;
         _tokenCachingService = tokenCachingService;
         _passwordHasher = passwordHasher;
+        _rsaKeyManager = rsaKeyManager;
     }
 
     public async Task<Result<AuthenticationResponse>> HandleAsync(LoginQuery query, CancellationToken cancellationToken = default)
@@ -47,40 +50,85 @@ internal sealed class LoginQueryHandler : IQueryHandler<LoginQuery, Authenticati
             return Result.Failure<AuthenticationResponse>(ErrorContants.Authentication.InvalidCredentials);
         }
 
-        // 2. Get user information from your user store
-        var user = await _userRepository.FindSingleAsync(u => u.Id == query.Username || u.Username == query.Username, cancellationToken: cancellationToken);
-        if (user is null)
+        // 2. Authenticate user credentials
+        var userResult = await AuthenticateUserAsync(query, cancellationToken);
+        if (userResult.IsFailure)
         {
-            return Result.Failure<AuthenticationResponse>(ErrorContants.Authentication.UserNotFound);
+            return Result.Failure<AuthenticationResponse>(userResult.Error);
         }
 
-        // 3. Validate password
-        bool isPasswordValid = _passwordHasher.VerifyHashedPassword(user.HashedPassword, query.Password);
-        if (!isPasswordValid)
+        var user = userResult.Value;
+
+        // 3. Ensure RSA key pair exists for tenant (auto-generated if needed)
+        await EnsureRsaKeyPairExistsAsync(user.TenantId);
+
+        // 4. Generate RSA-signed JWT tokens
+        var tokenResult = await GenerateAuthenticationTokensAsync(user);
+        if (tokenResult.IsFailure)
         {
-            return Result.Failure<AuthenticationResponse>(ErrorContants.Authentication.InvalidPassword);
+            return Result.Failure<AuthenticationResponse>(tokenResult.Error);
         }
 
-        // 4. Generate tokens using RSA asymmetric encryption
-        var userClaims = BuildUserClaimsAsync(user);
-        var accessToken = _jwtTokenManager.GenerateAccessToken(userClaims);
-        var refreshToken = _jwtTokenManager.GenerateRefreshToken();
+        // 5. Cache authentication tokens for session management
+        await StoreAuthenticatedResultAsync(tokenResult.Value);
 
-        // 5. Store refresh token in your data store for validation
-        var result = new AuthenticationResponse
-        {
-            UserId = user.Id,
-            AccessToken = accessToken,
-            RefreshToken = refreshToken,
-            RefreshTokenExpiryTime = DateTimeOffset.UtcNow.AddDays(7),
-        };
-
-        await StoreAuthenticatedResultAsync(result);
-
-        return Result.Success(result);
+        return Result.Success(tokenResult.Value);
     }
 
-    private static List<Claim> BuildUserClaimsAsync(User user)
+    private async Task<Result<User>> AuthenticateUserAsync(LoginQuery query, CancellationToken cancellationToken)
+    {
+        var user = await _userRepository.FindSingleAsync(
+            u => u.Id == query.Username || u.Username == query.Username,
+            cancellationToken: cancellationToken);
+
+        if (user is null)
+        {
+            return Result.Failure<User>(ErrorContants.Authentication.UserNotFound);
+        }
+
+        var isPasswordValid = _passwordHasher.VerifyHashedPassword(user.HashedPassword, query.Password);
+        if (!isPasswordValid)
+        {
+            return Result.Failure<User>(ErrorContants.Authentication.InvalidPassword);
+        }
+
+        return Result.Success(user);
+    }
+
+    private async Task EnsureRsaKeyPairExistsAsync(string tenantId)
+    {
+        var existingKeyPair = await _rsaKeyManager.GetActiveKeyPairAsync(tenantId);
+        if (existingKeyPair is null || existingKeyPair.ExpiresAt <= DateTimeOffset.UtcNow.AddDays(7))
+        {
+            await _rsaKeyManager.GenerateKeyPairAsync(tenantId);
+        }
+    }
+
+    private async Task<Result<AuthenticationResponse>> GenerateAuthenticationTokensAsync(User user)
+    {
+        try
+        {
+            var userClaims = BuildUserClaims(user);
+            var accessToken = await _jwtTokenManager.GenerateAccessTokenAsync(userClaims, user.TenantId);
+            var refreshToken = _jwtTokenManager.GenerateRefreshToken();
+
+            var result = new AuthenticationResponse
+            {
+                UserId = user.Id,
+                AccessToken = accessToken,
+                RefreshToken = refreshToken,
+                RefreshTokenExpiryTime = DateTimeOffset.UtcNow.AddDays(7)
+            };
+
+            return Result.Success(result);
+        }
+        catch (Exception ex)
+        {
+            return Result.Failure<AuthenticationResponse>(new Error("TokenGeneration.Failed", ex.Message));
+        }
+    }
+
+    private static List<Claim> BuildUserClaims(User user)
     {
         var claims = new List<Claim>
         {

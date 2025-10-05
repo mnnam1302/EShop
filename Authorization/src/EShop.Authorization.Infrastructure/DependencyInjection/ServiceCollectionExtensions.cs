@@ -48,6 +48,7 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddJwtTokenAuthentication(this IServiceCollection services)
     {
         services.AddScoped<IJwtTokenManager, JwtTokenManager>();
+        services.AddScoped<IRsaKeyManager, RsaKeyManager>();
         return services;
     }
 

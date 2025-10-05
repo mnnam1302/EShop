@@ -4,6 +4,6 @@ namespace EShop.Authorization.Application.Abstractions;
 
 public interface IJwtTokenManager
 {
-    string GenerateAccessToken(IEnumerable<Claim> claims);
+    Task<string> GenerateAccessTokenAsync(IEnumerable<Claim> claims, string tenantId);
     string GenerateRefreshToken();
 }
