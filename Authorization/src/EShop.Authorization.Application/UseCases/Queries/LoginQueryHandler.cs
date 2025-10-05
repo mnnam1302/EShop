@@ -1,4 +1,5 @@
 ﻿using EShop.Authorization.Application.Abstractions;
+using EShop.Authorization.Application.Services;
 using EShop.Authorization.Domain.Constants;
 using EShop.Authorization.Domain.Entities;
 using EShop.Authorization.Domain.Repositories;
@@ -24,15 +25,18 @@ internal sealed class LoginQueryHandler : IQueryHandler<LoginQuery, Authenticati
     private readonly IUserRepository _userRepository;
     private readonly IJwtTokenManager _jwtTokenManager;
     private readonly IUserTokenCachingService _tokenCachingService;
+    private readonly IPasswordHasher _passwordHasher;
 
     public LoginQueryHandler(
         IJwtTokenManager jwtTokenManager,
         IUserRepository userRepository,
-        IUserTokenCachingService tokenCachingService)
+        IUserTokenCachingService tokenCachingService,
+        IPasswordHasher passwordHasher)
     {
         _jwtTokenManager = jwtTokenManager;
         _userRepository = userRepository;
         _tokenCachingService = tokenCachingService;
+        _passwordHasher = passwordHasher;
     }
 
     public async Task<Result<AuthenticationResponse>> HandleAsync(LoginQuery query, CancellationToken cancellationToken = default)
@@ -50,12 +54,19 @@ internal sealed class LoginQueryHandler : IQueryHandler<LoginQuery, Authenticati
             return Result.Failure<AuthenticationResponse>(ErrorContants.Authentication.UserNotFound);
         }
 
-        // 3. Generate tokens using RSA asymmetric encryption
+        // 3. Validate password
+        bool isPasswordValid = _passwordHasher.VerifyHashedPassword(user.HashedPassword, query.Password);
+        if (!isPasswordValid)
+        {
+            return Result.Failure<AuthenticationResponse>(ErrorContants.Authentication.InvalidPassword);
+        }
+
+        // 4. Generate tokens using RSA asymmetric encryption
         var userClaims = BuildUserClaimsAsync(user);
         var accessToken = _jwtTokenManager.GenerateAccessToken(userClaims);
         var refreshToken = _jwtTokenManager.GenerateRefreshToken();
 
-        // 4. Store refresh token in your data store for validation
+        // 5. Store refresh token in your data store for validation
         var result = new AuthenticationResponse
         {
             UserId = user.Id,
