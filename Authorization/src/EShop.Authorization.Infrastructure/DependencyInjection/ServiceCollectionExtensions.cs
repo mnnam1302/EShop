@@ -12,6 +12,7 @@ using EShop.Shared.EventBus.DependencyInjections.Options;
 using EShop.Shared.EventBus.JsonConverters;
 using EShop.Shared.EventBus.PipelineObservers;
 using EShop.Shared.EventBus.Services;
+using EShop.Shared.Scoping.DependencyInjections.Options;
 using EShop.Shared.Scoping.ResourceAccessControl;
 using MassTransit;
 using Microsoft.AspNetCore.Hosting;
@@ -47,8 +48,14 @@ public static class ServiceCollectionExtensions
 
     public static IServiceCollection AddJwtTokenAuthentication(this IServiceCollection services)
     {
+        services.AddOptions<JwtOptions>()
+            .BindConfiguration(JwtOptions.ConfigurationSection)
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
         services.AddScoped<IRsaKeyManager, RsaKeyManager>();
         services.AddScoped<IJwtTokenManager, JwtTokenManager>();
+
         return services;
     }
 

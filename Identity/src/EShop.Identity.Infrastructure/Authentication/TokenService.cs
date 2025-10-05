@@ -27,7 +27,7 @@ public sealed class TokenService : ITokenService
             issuer: _jwtOptions.Issuer,
             audience: _jwtOptions.Audience,
             claims: claims,
-            expires: DateTime.Now.AddHours(_jwtOptions.AccessTokenExpiryHours),
+            expires: DateTime.Now.AddHours(_jwtOptions.AccessTokenExpiryMinutes),
             signingCredentials: signatureCredentials
         );
 

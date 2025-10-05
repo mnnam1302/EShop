@@ -31,7 +31,7 @@ public class CachedRemoteConfiguration
         var jwtOptions = new JwtOptions();
         _configuration.GetSection(nameof(JwtOptions)).Bind(jwtOptions);
 
-        var slidingTokenExpirationSetting = jwtOptions.AccessTokenExpiryHours.ToString();
+        var slidingTokenExpirationSetting = jwtOptions.AccessTokenExpiryMinutes.ToString();
 
         if (!TimeSpan.TryParse(slidingTokenExpirationSetting, CultureInfo.InvariantCulture, out TimeSpan slidingExpiration))
         {

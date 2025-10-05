@@ -47,7 +47,7 @@ internal sealed class JwtTokenManager : IJwtTokenManager
         var tokenDescriptor = new SecurityTokenDescriptor
         {
             Subject = new ClaimsIdentity(allClaims),
-            Expires = DateTime.UtcNow.AddHours(_jwtOptions.AccessTokenExpiryHours),
+            Expires = DateTime.UtcNow.AddHours(_jwtOptions.AccessTokenExpiryMinutes),
             Issuer = _jwtOptions.Issuer,
             Audience = _jwtOptions.Audience,
             SigningCredentials = signingCredentials
