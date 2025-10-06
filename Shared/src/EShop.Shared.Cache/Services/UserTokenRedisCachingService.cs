@@ -20,29 +20,29 @@ public sealed class UserTokenRedisCachingService : IUserTokenCachingService
         _cachedRemoteConfiguration = cachedRemoteConfiguration;
     }
 
-    public async Task<TokenAuthenticationCaching?> TryGetTokenAsync(string userId)
+    public async Task<TokenAuthenticationCaching?> TryGetTokenAsync(string userId, CancellationToken cancellationToken = default)
     {
-        var cacheValue = await _redisCachingService.GetAsync(UserTokenCacheKeyProvider.GetCacheKey(userId));
+        var cachedToken = await _redisCachingService.GetAsync(UserTokenCacheKeyProvider.GetCacheKey(userId), cancellationToken);
 
-        if (cacheValue is null)
+        if (cachedToken is null)
         {
             throw new BadRequestException($"Invalid cached token for user '{userId}'");
         }
 
-        return cacheValue;
+        return cachedToken;
     }
 
-    public async Task AddTokenAsync(string userId, TokenAuthenticationCaching token)
+    public async Task AddTokenAsync(string userId, TokenAuthenticationCaching token, CancellationToken cancellationToken = default)
     {
-        var cacheKey = UserTokenCacheKeyProvider.GetCacheKey(userId);
-        await _redisCachingService.AddAsync(cacheKey, token, new DistributedCacheEntryOptions
+        var key = UserTokenCacheKeyProvider.GetCacheKey(userId);
+        await _redisCachingService.AddAsync(key, token, new DistributedCacheEntryOptions
         {
             SlidingExpiration = _cachedRemoteConfiguration.GetSlidingTokenExpiration()
-        });
+        }, cancellationToken);
     }
 
-    public async Task RemoveCacheAsync(string userId)
+    public async Task RemoveCacheAsync(string userId, CancellationToken cancellationToken = default)
     {
-        await _redisCachingService.ClearAsync(UserTokenCacheKeyProvider.GetCacheKey(userId));
+        await _redisCachingService.ClearAsync(UserTokenCacheKeyProvider.GetCacheKey(userId), cancellationToken);
     }
 }

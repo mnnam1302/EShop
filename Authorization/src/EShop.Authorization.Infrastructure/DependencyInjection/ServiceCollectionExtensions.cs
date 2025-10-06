@@ -1,11 +1,7 @@
-﻿using EShop.Authorization.Application.Abstractions;
-using EShop.Authorization.Domain.Repositories;
-using EShop.Authorization.Infrastructure.Authentication;
+﻿using EShop.Authorization.Domain.Repositories;
 using EShop.Authorization.Infrastructure.Consumers;
 using EShop.Authorization.Infrastructure.Producers;
 using EShop.Authorization.Infrastructure.Repositories;
-using EShop.Shared.Cache.KeyEncryption;
-using EShop.Shared.Cache.Providers;
 using EShop.Shared.Contracts.Services.Identity.Permissions;
 using EShop.Shared.Contracts.Services.Tenancy.Tenants;
 using EShop.Shared.DomainTools.UnitOfWorks;
@@ -14,13 +10,11 @@ using EShop.Shared.EventBus.DependencyInjections.Options;
 using EShop.Shared.EventBus.JsonConverters;
 using EShop.Shared.EventBus.PipelineObservers;
 using EShop.Shared.EventBus.Services;
-using EShop.Shared.Scoping.DependencyInjections.Options;
 using EShop.Shared.Scoping.ResourceAccessControl;
 using MassTransit;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace EShop.Authorization.Infrastructure.DependencyInjection;
 
@@ -45,22 +39,6 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IRoleRepository, RoleRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IPermissionRepository, PermissionRepository>();
-
-        return services;
-    }
-
-    public static IServiceCollection AddJwtTokenAuthentication(this IServiceCollection services)
-    {
-        services.AddOptions<JwtOptions>()
-            .BindConfiguration(JwtOptions.ConfigurationSection)
-            .ValidateDataAnnotations()
-            .ValidateOnStart();
-
-        services.TryAddScoped<IRedisCachingProvider<string>, RedisCachingProvider<string>>();
-        services.AddScoped<IRedisCachingProvider<RsaKeyPair>, RedisCachingProvider<RsaKeyPair>>();
-        services.AddScoped<IKeyManagerCachingService, KeyManagerRedisCachingService>();
-        services.AddScoped<IRsaKeyManager, RsaKeyManager>();
-        services.AddScoped<IJwtTokenManager, JwtTokenManager>();
 
         return services;
     }

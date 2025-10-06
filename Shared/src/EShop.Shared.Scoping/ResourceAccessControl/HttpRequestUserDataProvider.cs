@@ -256,23 +256,11 @@ public sealed class HttpRequestUserDataProvider : IUserDetailsProvider
             return null;
         }
 
-        var expirationClaim = token.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Exp);
-        if (expirationClaim != null && long.TryParse(expirationClaim.Value, out var exp))
-        {
-            var expirationTime = DateTimeOffset.FromUnixTimeSeconds(exp).UtcDateTime;
-            if (expirationTime < DateTime.UtcNow)
-            {
-                _logger.LogWarning("Access token has expired");
-                return null;
-            }
-        }
-
         return token;
     }
 
     public string GetRawAccessToken()
     {
-        return _httpContextAccessor.HttpContext?.Request.Headers["Authorization"].FirstOrDefault() ?? string.Empty;
+        return _httpContextAccessor.HttpContext?.Request.Headers.Authorization.FirstOrDefault() ?? string.Empty;
     }
-
 }

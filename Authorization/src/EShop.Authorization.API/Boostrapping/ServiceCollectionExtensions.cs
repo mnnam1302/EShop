@@ -1,12 +1,19 @@
-﻿using EShop.Authorization.Application.DependencyInjections;
+﻿using EShop.Authorization.Application.Abstractions;
+using EShop.Authorization.Application.DependencyInjections;
 using EShop.Authorization.Infrastructure;
+using EShop.Authorization.Infrastructure.Authentication;
 using EShop.Authorization.Infrastructure.DependencyInjection;
 using EShop.Shared.Cache.DependencyInejctions.Extensions;
+using EShop.Shared.Cache.KeyEncryption;
+using EShop.Shared.Cache.Providers;
 using EShop.Shared.CQRS;
 using EShop.Shared.DomainTools.DependencyInjections;
 using EShop.Shared.JsonApi.Extensions;
 using EShop.Shared.JsonApi.Middlewares;
+using EShop.Shared.Scoping.DependencyInjections.Options;
 using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace EShop.Authorization.API.Boostrapping;
 
@@ -56,6 +63,39 @@ public static class ServiceCollectionExtensions
                 options.GroupNameFormat = "'v'VVV";
                 options.SubstituteApiVersionInUrl = true;
             });
+
+        return services;
+    }
+
+    public static IServiceCollection AddJwtTokenAuthentication(this IServiceCollection services)
+    {
+        services.AddOptions<JwtOptions>()
+            .BindConfiguration(JwtOptions.ConfigurationSection)
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
+        services.TryAddScoped<IRedisCachingProvider<string>, RedisCachingProvider<string>>();
+        services.AddScoped<IRedisCachingProvider<RsaKeyPair>, RedisCachingProvider<RsaKeyPair>>();
+        services.AddScoped<IKeyManagerCachingService, KeyManagerRedisCachingService>();
+        services.AddScoped<IRsaKeyManager, RsaKeyManager>();
+        services.AddScoped<IJwtTokenManager, JwtTokenManager>();
+
+        services.AddJwtTokenExtension();
+
+        return services;
+    }
+
+    public static IServiceCollection AddJwtTokenExtension(this IServiceCollection services)
+    {
+        services.AddAuthentication(options =>
+        {
+            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+        }).AddBearerToken(JwtBearerDefaults.AuthenticationScheme, options =>
+        {
+
+        });
 
         return services;
     }

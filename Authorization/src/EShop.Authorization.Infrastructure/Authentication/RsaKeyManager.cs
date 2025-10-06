@@ -6,7 +6,7 @@ using System.Security.Cryptography;
 
 namespace EShop.Authorization.Infrastructure.Authentication;
 
-internal sealed class RsaKeyManager : IRsaKeyManager
+public sealed class RsaKeyManager : IRsaKeyManager
 {
     private const int KeySizeInBits = 2048;
     private const int KeyValidityDays = 30;

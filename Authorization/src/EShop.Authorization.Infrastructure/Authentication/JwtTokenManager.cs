@@ -8,7 +8,7 @@ using System.Security.Cryptography;
 
 namespace EShop.Authorization.Infrastructure.Authentication;
 
-internal sealed class JwtTokenManager : IJwtTokenManager
+public sealed class JwtTokenManager : IJwtTokenManager
 {
     private readonly JwtOptions _jwtOptions;
     private readonly IRsaKeyManager _rsaKeyManager;
@@ -71,5 +71,66 @@ internal sealed class JwtTokenManager : IJwtTokenManager
             .TrimEnd('=');
 
         return refreshToken;
+    }
+
+    public async Task<ClaimsPrincipal> GetPrincipalFromExpiredToken(string token, CancellationToken cancellationToken)
+    {
+        var tokenHandler = new JwtSecurityTokenHandler();
+
+        var jsonToken = tokenHandler.ReadJwtToken(token);
+
+        var tenantId = jsonToken.Claims.FirstOrDefault(x => x.Type == "tenant_id")?.Value;
+        var keyId = jsonToken.Claims.FirstOrDefault(x => x.Type == "key_id")?.Value;
+
+        if (string.IsNullOrEmpty(tenantId))
+        {
+            throw new SecurityTokenException("Token does not contain tenant_id claim");
+        }
+
+        if (string.IsNullOrEmpty(keyId))
+        {
+            throw new SecurityTokenException("Token does not contain key_id claim");
+        }
+
+        var publicKey = await GetPublicKeyForValidation(tenantId, keyId);
+
+        var tokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateAudience = true,
+            ValidateIssuer = true,
+            ValidateLifetime = false, // We explicitly want to allow expired tokens
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = _jwtOptions.Issuer,
+            ValidAudience = _jwtOptions.Audience,
+            IssuerSigningKey = new RsaSecurityKey(publicKey) { KeyId = keyId },
+            ClockSkew = TimeSpan.Zero
+        };
+
+        var principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out SecurityToken securityToken);
+
+        if (securityToken is not JwtSecurityToken jwtSecurityToken ||
+            !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.RsaSha256, StringComparison.InvariantCulture))
+        {
+            throw new SecurityTokenException("Invalid token algorithm");
+        }
+
+        return principal;
+    }
+
+    private async Task<RSA> GetPublicKeyForValidation(string tenantId, string keyId)
+    {
+        try
+        {
+            var publicKey = await _rsaKeyManager.GetPublicKeyAsync(tenantId, keyId);
+            return publicKey;
+        }
+        catch (KeyNotFoundException)
+        {
+            throw new SecurityTokenException($"Public key not found for tenant {tenantId} and keyId {keyId}");
+        }
+        catch (Exception ex)
+        {
+            throw new SecurityTokenException($"Failed to retrieve public key for token validation: {ex.Message}", ex);
+        }
     }
 }

@@ -10,7 +10,7 @@ public static class UserTokensExtensions
     public static IServiceCollection AddUserTokensProvider(this IServiceCollection services)
     {
         services.AddTransient<IRedisCachingProvider<TokenAuthenticationCaching>, RedisCachingProvider<TokenAuthenticationCaching>>();
-        services.AddTransient<IUserTokenCachingService, TokenRedisCachingService>();
+        services.AddTransient<IUserTokenCachingService, UserTokenRedisCachingService>();
 
         return services;
     }
