@@ -1,6 +1,6 @@
 ﻿namespace EShop.Shared.Cache.CacheKeys;
 
-public class TenantFeaturesCacheKeyProvider
+public static class TenantFeaturesCacheKeyProvider
 {
     private const string OwnerService = "tenancy";
 

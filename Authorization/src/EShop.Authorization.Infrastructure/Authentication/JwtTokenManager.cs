@@ -21,29 +21,29 @@ internal sealed class JwtTokenManager : IJwtTokenManager
 
     public async Task<string> GenerateAccessTokenAsync(IEnumerable<Claim> claims, string tenantId)
     {
-        // Get the active RSA key pair for the tenant
+        // 1. Get the active RSA key pair for the tenant
         var keyPair = await _rsaKeyManager.GetActiveKeyPairAsync(tenantId);
         if (keyPair == null)
         {
             throw new InvalidOperationException($"No RSA key pair found for tenant {tenantId}");
         }
 
-        // Create RSA security key
+        // 2. Create RSA security key
         var rsaSecurityKey = new RsaSecurityKey(keyPair.PrivateKey)
         {
             KeyId = keyPair.KeyId
         };
 
-        // Create signing credentials with RSA-SHA256
+        // 3. Create signing credentials with RSA-SHA256
         var signingCredentials = new SigningCredentials(rsaSecurityKey, SecurityAlgorithms.RsaSha256);
 
-        // Add standard claims
+        // 4. Add standard claims
         var allClaims = claims.ToList();
         allClaims.Add(new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()));
         allClaims.Add(new Claim(JwtRegisteredClaimNames.Iat, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64));
         allClaims.Add(new Claim("key_id", keyPair.KeyId));
 
-        // Create JWT token
+        // 5. Create JWT token
         var tokenDescriptor = new SecurityTokenDescriptor
         {
             Subject = new ClaimsIdentity(allClaims),

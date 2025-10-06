@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\Shared\src\EShop.Shared.Cache\EShop.Shared.Cache.csproj" />
     <ProjectReference Include="..\EShop.Authorization.Domain\EShop.Authorization.Domain.csproj" />
   </ItemGroup>
 
