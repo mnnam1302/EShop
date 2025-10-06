@@ -4,6 +4,8 @@ using EShop.Authorization.Infrastructure.Authentication;
 using EShop.Authorization.Infrastructure.Consumers;
 using EShop.Authorization.Infrastructure.Producers;
 using EShop.Authorization.Infrastructure.Repositories;
+using EShop.Shared.Cache.KeyEncryption;
+using EShop.Shared.Cache.Providers;
 using EShop.Shared.Contracts.Services.Identity.Permissions;
 using EShop.Shared.Contracts.Services.Tenancy.Tenants;
 using EShop.Shared.DomainTools.UnitOfWorks;
@@ -18,6 +20,7 @@ using MassTransit;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace EShop.Authorization.Infrastructure.DependencyInjection;
 
@@ -53,6 +56,9 @@ public static class ServiceCollectionExtensions
             .ValidateDataAnnotations()
             .ValidateOnStart();
 
+        services.TryAddScoped<IRedisCachingProvider<string>, RedisCachingProvider<string>>();
+        services.AddScoped<IRedisCachingProvider<RsaKeyPair>, RedisCachingProvider<RsaKeyPair>>();
+        services.AddScoped<IKeyManagerCachingService, KeyManagerRedisCachingService>();
         services.AddScoped<IRsaKeyManager, RsaKeyManager>();
         services.AddScoped<IJwtTokenManager, JwtTokenManager>();
 
