@@ -45,9 +45,10 @@ internal sealed class LoginQueryHandler : IQueryHandler<LoginQuery, Authenticati
     public async Task<Result<AuthenticationResponse>> HandleAsync(LoginQuery query, CancellationToken cancellationToken = default)
     {
         // 1. Validate input
-        if (string.IsNullOrWhiteSpace(query.Username) || string.IsNullOrWhiteSpace(query.Password))
+        var inputValidation = ValidateLoginInput(query);
+        if (inputValidation.IsFailure)
         {
-            return Result.Failure<AuthenticationResponse>(ErrorContants.Authentication.InvalidCredentials);
+            return Result.Failure<AuthenticationResponse>(inputValidation.Error);
         }
 
         // 2. Authenticate user credentials
@@ -60,7 +61,7 @@ internal sealed class LoginQueryHandler : IQueryHandler<LoginQuery, Authenticati
         var user = userResult.Value;
 
         // 3. Ensure RSA key pair exists for tenant (auto-generated if needed)
-        await EnsureRsaKeyPairExistsAsync(user.TenantId);
+        await _rsaKeyManager.EnsureValidKeyPairExistsAsync(user.TenantId);
 
         // 4. Generate RSA-signed JWT tokens
         var tokenResult = await GenerateAuthenticationTokensAsync(user);
@@ -73,6 +74,16 @@ internal sealed class LoginQueryHandler : IQueryHandler<LoginQuery, Authenticati
         await StoreAuthenticatedResultAsync(tokenResult.Value);
 
         return Result.Success(tokenResult.Value);
+    }
+
+    private static Result ValidateLoginInput(LoginQuery query)
+    {
+        if (string.IsNullOrWhiteSpace(query.Username) || string.IsNullOrWhiteSpace(query.Password))
+        {
+            return Result.Failure(ErrorContants.Authentication.InvalidCredentials);
+        }
+
+        return Result.Success();
     }
 
     private async Task<Result<User>> AuthenticateUserAsync(LoginQuery query, CancellationToken cancellationToken)
@@ -93,15 +104,6 @@ internal sealed class LoginQueryHandler : IQueryHandler<LoginQuery, Authenticati
         }
 
         return Result.Success(user);
-    }
-
-    private async Task EnsureRsaKeyPairExistsAsync(string tenantId)
-    {
-        var existingKeyPair = await _rsaKeyManager.GetActiveKeyPairAsync(tenantId);
-        if (existingKeyPair is null || existingKeyPair.ExpiresAt <= DateTimeOffset.UtcNow.AddDays(7))
-        {
-            await _rsaKeyManager.GenerateKeyPairAsync(tenantId);
-        }
     }
 
     private async Task<Result<AuthenticationResponse>> GenerateAuthenticationTokensAsync(User user)

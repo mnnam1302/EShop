@@ -7,6 +7,9 @@ public interface IRsaKeyManager
 {
     Task<RsaKeyPair> GenerateKeyPairAsync(string tenantId);
     Task<RsaKeyPair?> GetActiveKeyPairAsync(string tenantId);
+    Task EnsureValidKeyPairExistsAsync(string tenantId);
+
     Task<RSA> GetPublicKeyAsync(string tenantId, string keyId);
+
     Task RotateKeysAsync(string tenantId);
 }

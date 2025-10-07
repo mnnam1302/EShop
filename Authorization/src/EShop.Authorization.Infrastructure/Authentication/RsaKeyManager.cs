@@ -70,6 +70,15 @@ public sealed class RsaKeyManager : IRsaKeyManager
         return await _keyManagerCaching.TryGetActiveKeyPairAsync(tenantId);
     }
 
+    public async Task EnsureValidKeyPairExistsAsync(string tenantId)
+    {
+        var existingKeyPair = await GetActiveKeyPairAsync(tenantId);
+        if (existingKeyPair is null || existingKeyPair.ExpiresAt <= DateTimeOffset.UtcNow.AddDays(7))
+        {
+            await GenerateKeyPairAsync(tenantId);
+        }
+    }
+
     public async Task<RSA> GetPublicKeyAsync(string tenantId, string keyId)
     {
         var publicKey = await _keyManagerCaching.TryGetPublicKeyAsync(tenantId, keyId);
