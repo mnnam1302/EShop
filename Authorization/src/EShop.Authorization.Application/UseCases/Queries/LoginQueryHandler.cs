@@ -63,7 +63,7 @@ internal sealed class LoginQueryHandler : IQueryHandler<LoginQuery, Authenticati
         await EnsureRsaKeyPairExistsAsync(user.TenantId);
 
         // 4. Generate RSA-signed JWT tokens
-        var tokenResult = await GenerateAuthenticationTokensAsync(user, cancellationToken);
+        var tokenResult = await GenerateAuthenticationTokensAsync(user);
         if (tokenResult.IsFailure)
         {
             return Result.Failure<AuthenticationResponse>(tokenResult.Error);
@@ -104,12 +104,12 @@ internal sealed class LoginQueryHandler : IQueryHandler<LoginQuery, Authenticati
         }
     }
 
-    private async Task<Result<AuthenticationResponse>> GenerateAuthenticationTokensAsync(User user, CancellationToken cancellationToken)
+    private async Task<Result<AuthenticationResponse>> GenerateAuthenticationTokensAsync(User user)
     {
         try
         {
             var userClaims = BuildUserClaims(user);
-            var accessToken = await _jwtTokenManager.GenerateAccessTokenAsync(userClaims, user.TenantId, cancellationToken);
+            var accessToken = await _jwtTokenManager.GenerateAccessTokenAsync(userClaims, user.TenantId);
             var refreshToken = _jwtTokenManager.GenerateRefreshToken();
 
             var result = new AuthenticationResponse

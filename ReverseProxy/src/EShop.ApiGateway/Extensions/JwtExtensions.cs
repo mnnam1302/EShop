@@ -21,7 +21,8 @@ public static class JwtExtensions
             configuration.GetSection(nameof(JwtOptions)).Bind(jwtOptions);
 
             options.SaveToken = true;
-            var key = Encoding.UTF8.GetBytes(jwtOptions.SecretKey);
+            //TODO: Kodi
+            var key = Encoding.UTF8.GetBytes(string.Empty);
             options.TokenValidationParameters = new TokenValidationParameters()
             {
                 ValidateIssuer = true,

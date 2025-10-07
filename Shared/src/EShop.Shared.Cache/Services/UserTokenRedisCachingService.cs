@@ -34,8 +34,8 @@ public sealed class UserTokenRedisCachingService : IUserTokenCachingService
 
     public async Task AddTokenAsync(string userId, TokenAuthenticationCaching token, CancellationToken cancellationToken = default)
     {
-        var key = UserTokenCacheKeyProvider.GetCacheKey(userId);
-        await _redisCachingService.AddAsync(key, token, new DistributedCacheEntryOptions
+        var cacheKey = UserTokenCacheKeyProvider.GetCacheKey(userId);
+        await _redisCachingService.AddAsync(cacheKey, token, new DistributedCacheEntryOptions
         {
             SlidingExpiration = _cachedRemoteConfiguration.GetSlidingTokenExpiration()
         }, cancellationToken);
@@ -43,6 +43,7 @@ public sealed class UserTokenRedisCachingService : IUserTokenCachingService
 
     public async Task RemoveCacheAsync(string userId, CancellationToken cancellationToken = default)
     {
-        await _redisCachingService.ClearAsync(UserTokenCacheKeyProvider.GetCacheKey(userId), cancellationToken);
+        var cacheKey = UserTokenCacheKeyProvider.GetCacheKey(userId);
+        await _redisCachingService.ClearAsync(cacheKey, cancellationToken);
     }
 }

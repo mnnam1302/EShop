@@ -48,9 +48,7 @@ internal sealed class LogoutCommandHandler : ICommandHandler<LogoutCommand>
             // 2. Verify the user ID matches the token
             if (command.UserId != tokenUserId)
             {
-                _logger.LogWarning(
-                    "User ID mismatch - command UserId: {CommandUserId}, token UserId: {TokenUserId}",
-                    command.UserId, tokenUserId);
+                _logger.LogWarning("User ID mismatch - command UserId: {CommandUserId}, token UserId: {TokenUserId}", command.UserId, tokenUserId);
                 return Result.Failure(ErrorContants.Authentication.InvalidToken);
             }
 
@@ -70,7 +68,7 @@ internal sealed class LogoutCommandHandler : ICommandHandler<LogoutCommand>
                 return Result.Failure(ErrorContants.Authentication.TokenInvalidCache);
             }
 
-            // 5. Remove the token from cache (logout)
+            // 5. Remove the token from cache
             await _userTokenCaching.RemoveCacheAsync(command.UserId, cancellationToken);
 
             return Result.Success();

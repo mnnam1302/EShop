@@ -13,7 +13,6 @@ using EShop.Shared.JsonApi.Middlewares;
 using EShop.Shared.Scoping.DependencyInjections.Options;
 using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace EShop.Authorization.API.Boostrapping;
 
@@ -40,8 +39,7 @@ public static class ServiceCollectionExtensions
             .AddAuthorizationAPI()
             .AddAuthorizationApplication()
             .AddAuthorizationPersistence()
-            .AddAuthorizationEventBus(configuration, environment)
-            .AddJwtTokenAuthentication();
+            .AddAuthorizationEventBus(configuration, environment);
 
         return services;
     }
@@ -64,6 +62,8 @@ public static class ServiceCollectionExtensions
                 options.SubstituteApiVersionInUrl = true;
             });
 
+        services.AddJwtTokenAuthentication();
+
         return services;
     }
 
@@ -74,12 +74,16 @@ public static class ServiceCollectionExtensions
             .ValidateDataAnnotations()
             .ValidateOnStart();
 
-        services.TryAddScoped<IRedisCachingProvider<string>, RedisCachingProvider<string>>();
+        // Caching providers for RSA keys
         services.AddScoped<IRedisCachingProvider<RsaKeyPair>, RedisCachingProvider<RsaKeyPair>>();
-        services.AddScoped<IKeyManagerCachingService, KeyManagerRedisCachingService>();
-        services.AddScoped<IRsaKeyManager, RsaKeyManager>();
-        services.AddScoped<IJwtTokenManager, JwtTokenManager>();
+        services.AddScoped<IRedisCachingProvider<RsaPublicKeyCacheEntry>, RedisCachingProvider<RsaPublicKeyCacheEntry>>();
 
+        // RSA Key Management
+        services.AddScoped<IKeyManagerCachingService, RsaKeyManagerRedisCachingService>();
+        services.AddScoped<IRsaKeyManager, RsaKeyManager>();
+
+        // Jwt Token Management
+        services.AddScoped<IJwtTokenManager, JwtTokenManager>();
         services.AddJwtTokenExtension();
 
         return services;

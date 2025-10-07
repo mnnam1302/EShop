@@ -11,13 +11,13 @@ public sealed class RsaKeyManager : IRsaKeyManager
     private const int KeySizeInBits = 2048;
     private const int KeyValidityDays = 30;
 
-    private readonly IKeyManagerCachingService _keyManagerCaching;
     private readonly ILogger<RsaKeyManager> _logger;
+    private readonly IKeyManagerCachingService _keyManagerCaching;
 
-    public RsaKeyManager(IKeyManagerCachingService keyManagerCaching, ILogger<RsaKeyManager> logger)
+    public RsaKeyManager(ILogger<RsaKeyManager> logger, IKeyManagerCachingService keyManagerCaching)
     {
-        _keyManagerCaching = keyManagerCaching;
         _logger = logger;
+        _keyManagerCaching = keyManagerCaching;
     }
 
     public async Task<RsaKeyPair> GenerateKeyPairAsync(string tenantId)
@@ -38,18 +38,16 @@ public sealed class RsaKeyManager : IRsaKeyManager
         var createdAt = DateTimeOffset.UtcNow;
         var expiresAt = createdAt.AddDays(KeyValidityDays);
 
-        var privateKey = RSA.Create();
-        var publicKey = RSA.Create();
-
-        privateKey.ImportParameters(rsa.ExportParameters(includePrivateParameters: true));
-        publicKey.ImportParameters(rsa.ExportParameters(includePrivateParameters: false));
+        // Export as PEM strings instead of RSA instances
+        var privateKeyPem = rsa.ExportRSAPrivateKeyPem();
+        var publicKeyPem = rsa.ExportRSAPublicKeyPem();
 
         return new RsaKeyPair
         {
             KeyId = keyId,
             TenantId = tenantId,
-            PrivateKey = privateKey,
-            PublicKey = publicKey,
+            PrivateKeyPem = privateKeyPem,
+            PublicKeyPem = publicKeyPem,
             CreatedAt = createdAt,
             ExpiresAt = expiresAt
         };
@@ -58,7 +56,13 @@ public sealed class RsaKeyManager : IRsaKeyManager
     private async Task StoreKeyPairAsync(RsaKeyPair keyPair)
     {
         await _keyManagerCaching.AddActiveKeyPairAsync(keyPair.TenantId, keyPair);
-        await _keyManagerCaching.AddPublicKeyAsync(keyPair.TenantId, keyPair.KeyId, keyPair.PublicKey, keyPair.ExpiresAt);
+
+        // Store public key separately using the GetPublicKey() method
+        var publicKey = keyPair.GetPublicKey();
+        await _keyManagerCaching.AddPublicKeyAsync(keyPair.TenantId, keyPair.KeyId, publicKey, keyPair.ExpiresAt);
+
+        // Dispose the temporary RSA instance
+        publicKey.Dispose();
     }
 
     public async Task<RsaKeyPair?> GetActiveKeyPairAsync(string tenantId)

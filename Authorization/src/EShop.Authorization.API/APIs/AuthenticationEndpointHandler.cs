@@ -41,7 +41,7 @@ public static class AuthenticationEndpointHandler
             return Results.Unauthorized();
         }
 
-        return Results.Ok(result.Value);
+        return Results.Ok(result);
     }
 
     private static async Task<IResult> LogoutAsync(

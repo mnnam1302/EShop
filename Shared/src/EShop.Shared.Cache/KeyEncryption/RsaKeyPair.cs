@@ -1,14 +1,32 @@
 using System.Security.Cryptography;
+using System.Text.Json.Serialization;
 
 namespace EShop.Shared.Cache.KeyEncryption;
 
-public sealed record RsaKeyPair
+public sealed class RsaKeyPair
 {
     public required string KeyId { get; init; }
     public required string TenantId { get; init; }
-    public required RSA PrivateKey { get; init; }
-    public required RSA PublicKey { get; init; }
+
+    [JsonIgnore]
+    public RSA PrivateKey => CreateRsaFromPem(PrivateKeyPem);
+
+    public required string PrivateKeyPem { get; init; }
+    public required string PublicKeyPem { get; init; }
     public required DateTimeOffset CreatedAt { get; init; }
     public required DateTimeOffset ExpiresAt { get; init; }
-    public bool IsActive { get; init; } = true;
+
+    private static RSA CreateRsaFromPem(string privateKeyPem)
+    {
+        var rsa = RSA.Create();
+        rsa.ImportFromPem(privateKeyPem);
+        return rsa;
+    }
+
+    public RSA GetPublicKey()
+    {
+        var rsa = RSA.Create();
+        rsa.ImportFromPem(PublicKeyPem);
+        return rsa;
+    }
 }
