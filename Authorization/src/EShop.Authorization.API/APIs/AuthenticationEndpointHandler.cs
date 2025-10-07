@@ -3,7 +3,6 @@ using EShop.Authorization.Application.UseCases.Commands;
 using EShop.Authorization.Application.UseCases.Queries;
 using EShop.Shared.CQRS;
 using EShop.Shared.Scoping;
-using EShop.Shared.Scoping.ResourceAccessControl;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EShop.Authorization.API.APIs;
@@ -54,7 +53,7 @@ public static class AuthenticationEndpointHandler
         var command = new LogoutCommand
         {
             UserId = request.UserId,
-            AccessToken = JwtEncodedStringHelper.GetJwtEncodedString(userDetailsProvider.GetRawAccessToken())
+            AccessToken = userDetailsProvider.GetRawAccessToken()
         };
 
         var result = await mediator.SendAsync(command, cancellationToken);
