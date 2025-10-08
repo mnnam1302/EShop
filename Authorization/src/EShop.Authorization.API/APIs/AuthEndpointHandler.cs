@@ -7,14 +7,14 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace EShop.Authorization.API.APIs;
 
-public static class AuthenticationEndpointHandler
+public static class AuthEndpointHandler
 {
     private const string BaseUrl = "api/v{version:apiVersion}/auth";
 
     public static IEndpointRouteBuilder MapAuthenticationEndpoints(this IEndpointRouteBuilder endpoints)
     {
         var group = endpoints
-            .NewVersionedApi("Authentication")
+            .NewVersionedApi("Auth")
             .MapGroup(BaseUrl)
             .HasApiVersion(1);
 
@@ -23,6 +23,8 @@ public static class AuthenticationEndpointHandler
 
         group.MapPost("logout", LogoutAsync);
         //.RequireAuthorization();
+
+        group.MapPost("refresh-token", RefreshTokenAsync);
 
         return endpoints;
     }
@@ -64,5 +66,27 @@ public static class AuthenticationEndpointHandler
         }
 
         return Results.Ok();
+    }
+
+    private static async Task RefreshTokenAsync(
+        [FromBody] RefreshTokenRequest request,
+        [FromServices] IUserDetailsProvider userDetailsProvider,
+        [FromServices] IMediator mediator,
+        CancellationToken cancellationToken)
+    {
+        var query = new RefreshTokenQuery
+        {
+            AccessToken = userDetailsProvider.GetRawAccessToken(),
+            RefreshToken = request.RefreshToken
+        };
+
+        var result = await mediator.QueryAsync<RefreshTokenQuery, AuthenticationResponse>(query, cancellationToken);
+
+        if (result.IsFailure)
+        {
+            throw new InvalidOperationException($"Token refresh failed: {result.Error}");
+        }
+
+        Results.Ok(result);
     }
 }
