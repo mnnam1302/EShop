@@ -87,15 +87,7 @@ public sealed class JwtTokenManager : IJwtTokenManager
         var tokenHandler = new JwtSecurityTokenHandler();
         var jsonToken = tokenHandler.ReadJwtToken(token);
 
-        var tenantId = jsonToken.Claims.FirstOrDefault(x => x.Type == "tenant_id")?.Value;
-        var keyId = jsonToken.Claims.FirstOrDefault(x => x.Type == "key_id")?.Value;
-
-        if (string.IsNullOrEmpty(tenantId))
-            throw new SecurityTokenException("Token does not contain tenant_id claim");
-
-        if (string.IsNullOrEmpty(keyId))
-            throw new SecurityTokenException("Token does not contain key_id claim");
-
+        var (tenantId, keyId) = ExtractTokenMetadata(jsonToken);
         var publicKey = await GetPublicKeyForValidation(tenantId, keyId);
 
         var tokenValidationParameters = new TokenValidationParameters
@@ -121,7 +113,7 @@ public sealed class JwtTokenManager : IJwtTokenManager
         return principal;
     }
 
-    private (string tenantId, string keyId) ExtractTokenMetadata(JwtSecurityToken jsonToken)
+    private static (string tenantId, string keyId) ExtractTokenMetadata(JwtSecurityToken jsonToken)
     {
         var tenantId = jsonToken.Claims.FirstOrDefault(x => x.Type == "tenant_id")?.Value;
         var keyId = jsonToken.Claims.FirstOrDefault(x => x.Type == "key_id")?.Value;
