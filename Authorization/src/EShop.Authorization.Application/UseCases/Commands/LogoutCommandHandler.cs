@@ -141,9 +141,6 @@ internal sealed class LogoutCommandHandler : ICommandHandler<LogoutCommand>
 
         var sanitizedToken = JwtEncodedStringHelper.GetJwtEncodedString(command.AccessToken);
 
-        // TODO: Kodi bug
-        // cachedToken.AccessToken = "eyJhbGciOiJSUzI1NiIsImtpZCI6IjJiNTJlMjMxLWE1NDItNGFhMy05YjA5LTdiZTkxNTc3MDc2YyIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiJzeXN0ZW0iLCJ1bmlxdWVfbmFtZSI6IlN5c3RlbSBlU2hvcCIsInRlbmFudF9pZCI6InN5c3RlbSIsInVzZXJfdHlwZSI6InVzZXIiLCJqdGkiOiJmNjcyNTQ4Yy0wNjFlLTQxNGMtYWE1OC0...
-        // sanitizedToken = "eyJhbGciOiJSUzI1NiIsImtpZCI6IjJiNTJlMjMxLWE1NDItNGFhMy05YjA5LTdiZTkxNTc3MDc2YyIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiJzeXN0ZW0iLCJ1bmlxdWVfbmFtZSI6IlN5c3RlbSBlU2hvcCIsInRlbmFudF9pZCI6InN5c3RlbSIsInVzZXJfdHlwZSI6InVzZXIiLCJqdGkiOiIwMmI2YWFlZi00MDUzLTQ2MzItOWU5Yi1...
         if (cachedToken.AccessToken != sanitizedToken)
         {
             _logger.LogWarning("Access token mismatch for user {UserId}", command.UserId);
