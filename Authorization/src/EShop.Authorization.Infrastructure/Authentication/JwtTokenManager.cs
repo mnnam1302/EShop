@@ -21,33 +21,21 @@ public sealed class JwtTokenManager : IJwtTokenManager
 
     public async Task<string> GenerateAccessTokenAsync(IEnumerable<Claim> claims, string tenantId)
     {
-        // 1. Get the active RSA key pair for the tenant
         var keyPair = await _rsaKeyManager.GetActiveKeyPairAsync(tenantId);
         if (keyPair == null)
         {
             throw new InvalidOperationException($"No RSA key pair found for tenant {tenantId}");
         }
 
-        // 2. Create RSA security key
-        var rsaSecurityKey = new RsaSecurityKey(keyPair.PrivateKey)
-        {
-            KeyId = keyPair.KeyId
-        };
-
-        // 3. Create signing credentials with RSA-SHA256
+        var rsaSecurityKey = new RsaSecurityKey(keyPair.PrivateKey) { KeyId = keyPair.KeyId };
         var signingCredentials = new SigningCredentials(rsaSecurityKey, SecurityAlgorithms.RsaSha256);
 
-        // 4. Add standard claims
-        var allClaims = claims.ToList();
-        allClaims.Add(new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()));
-        allClaims.Add(new Claim(JwtRegisteredClaimNames.Iat, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64));
-        allClaims.Add(new Claim("key_id", keyPair.KeyId));
+        var allClaims = EnrichClaimsWithStandardValues(claims, keyPair.KeyId, tenantId);
 
-        // 5. Create JWT token
         var tokenDescriptor = new SecurityTokenDescriptor
         {
             Subject = new ClaimsIdentity(allClaims),
-            Expires = DateTime.UtcNow.AddHours(_jwtOptions.AccessTokenExpiryMinutes),
+            Expires = DateTime.UtcNow.AddMinutes(_jwtOptions.AccessTokenExpiryMinutes),
             Issuer = _jwtOptions.Issuer,
             Audience = _jwtOptions.Audience,
             SigningCredentials = signingCredentials
@@ -57,6 +45,27 @@ public sealed class JwtTokenManager : IJwtTokenManager
         var token = tokenHandler.CreateToken(tokenDescriptor);
 
         return tokenHandler.WriteToken(token);
+    }
+
+    private static List<Claim> EnrichClaimsWithStandardValues(IEnumerable<Claim> claims, string keyId, string tenantId)
+    {
+        var allClaims = claims.ToList();
+
+        // Add JWT standard claims
+        allClaims.Add(new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()));
+        allClaims.Add(new Claim(JwtRegisteredClaimNames.Iat, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64));
+
+        // Add custom claims for validation
+        allClaims.Add(new Claim("key_id", keyId));
+        allClaims.Add(new Claim("token_version", "1.0")); // For future token format versioning
+
+        // Ensure tenant_id is present
+        if (!allClaims.Any(c => c.Type == "tenant_id"))
+        {
+            allClaims.Add(new Claim("tenant_id", tenantId));
+        }
+
+        return allClaims;
     }
 
     public string GenerateRefreshToken()
@@ -76,29 +85,16 @@ public sealed class JwtTokenManager : IJwtTokenManager
     public async Task<ClaimsPrincipal> GetPrincipalFromExpiredToken(string token, CancellationToken cancellationToken)
     {
         var tokenHandler = new JwtSecurityTokenHandler();
-
         var jsonToken = tokenHandler.ReadJwtToken(token);
 
-        var tenantId = jsonToken.Claims.FirstOrDefault(x => x.Type == "tenant_id")?.Value;
-        var keyId = jsonToken.Claims.FirstOrDefault(x => x.Type == "key_id")?.Value;
-
-        if (string.IsNullOrEmpty(tenantId))
-        {
-            throw new SecurityTokenException("Token does not contain tenant_id claim");
-        }
-
-        if (string.IsNullOrEmpty(keyId))
-        {
-            throw new SecurityTokenException("Token does not contain key_id claim");
-        }
-
+        var (tenantId, keyId) = ExtractTokenMetadata(jsonToken);
         var publicKey = await GetPublicKeyForValidation(tenantId, keyId);
 
         var tokenValidationParameters = new TokenValidationParameters
         {
             ValidateAudience = true,
             ValidateIssuer = true,
-            ValidateLifetime = false, // We explicitly want to allow expired tokens
+            ValidateLifetime = false, // Allow expired tokens for logout validation
             ValidateIssuerSigningKey = true,
             ValidIssuer = _jwtOptions.Issuer,
             ValidAudience = _jwtOptions.Audience,
@@ -106,7 +102,7 @@ public sealed class JwtTokenManager : IJwtTokenManager
             ClockSkew = TimeSpan.Zero
         };
 
-        var principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out SecurityToken securityToken);
+        var principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out var securityToken);
 
         if (securityToken is not JwtSecurityToken jwtSecurityToken ||
             !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.RsaSha256, StringComparison.InvariantCulture))
@@ -115,6 +111,20 @@ public sealed class JwtTokenManager : IJwtTokenManager
         }
 
         return principal;
+    }
+
+    private static (string tenantId, string keyId) ExtractTokenMetadata(JwtSecurityToken jsonToken)
+    {
+        var tenantId = jsonToken.Claims.FirstOrDefault(x => x.Type == "tenant_id")?.Value;
+        var keyId = jsonToken.Claims.FirstOrDefault(x => x.Type == "key_id")?.Value;
+
+        if (string.IsNullOrEmpty(tenantId))
+            throw new SecurityTokenException("Token does not contain tenant_id claim");
+
+        if (string.IsNullOrEmpty(keyId))
+            throw new SecurityTokenException("Token does not contain key_id claim");
+
+        return (tenantId, keyId);
     }
 
     private async Task<RSA> GetPublicKeyForValidation(string tenantId, string keyId)
