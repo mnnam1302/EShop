@@ -1,6 +1,5 @@
 ﻿using EShop.Authorization.Application.Abstractions;
 using EShop.Authorization.Domain.Constants;
-using EShop.Authorization.Domain.Repositories;
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.CQRS.Query;
 using EShop.Shared.Scoping.ResourceAccessControl;
@@ -19,120 +18,152 @@ internal sealed class RefreshTokenQueryHandler : IQueryHandler<RefreshTokenQuery
 {
     private readonly IJwtTokenManager _jwtTokenManager;
     private readonly IUserTokenCachingService _tokenCachingService;
-    private readonly IUserRepository _userRepository;
 
-    public RefreshTokenQueryHandler(IJwtTokenManager jwtTokenManager, IUserTokenCachingService tokenCachingService, IUserRepository userRepository)
+    public RefreshTokenQueryHandler(IJwtTokenManager jwtTokenManager, IUserTokenCachingService tokenCachingService)
     {
         _jwtTokenManager = jwtTokenManager;
         _tokenCachingService = tokenCachingService;
-        _userRepository = userRepository;
     }
 
     public async Task<Result<AuthenticationResponse>> HandleAsync(RefreshTokenQuery query, CancellationToken cancellationToken = default)
     {
-        // 1. Validate input
-        if (string.IsNullOrWhiteSpace(query.AccessToken) || string.IsNullOrWhiteSpace(query.RefreshToken))
+        var validationResult = ValidateTokenInputs(query);
+        if (validationResult.IsFailure)
         {
-            return Result.Failure<AuthenticationResponse>(ErrorContants.Authentication.InvalidToken);
+            return Result.Failure<AuthenticationResponse>(validationResult.Error);
         }
 
-        // 2. Extract and validate token claims
-        var claimsResult = await ExtractTokenClaimsAsync(query.AccessToken, cancellationToken);
-        if (claimsResult.IsFailure)
+        var tokenClaimsResult = await ParseAndValidateAccessTokenAsync(query.AccessToken, cancellationToken);
+        if (tokenClaimsResult.IsFailure)
         {
-            return Result.Failure<AuthenticationResponse>(claimsResult.Error);
+            return Result.Failure<AuthenticationResponse>(tokenClaimsResult.Error);
         }
 
-        var (userId, tenantId, claims) = claimsResult.Value;
+        var tokenClaims = tokenClaimsResult.Value;
 
-        // 3. Validate cached tokens
-        var cacheValidation = await ValidateTokenCacheAsync(userId, query, cancellationToken);
-        if (cacheValidation.IsFailure)
+        var cachedTokenResult = await ValidateCachedTokensAsync(tokenClaims.UserId!, query, cancellationToken);
+        if (cachedTokenResult.IsFailure)
         {
-            return Result.Failure<AuthenticationResponse>(cacheValidation.Error);
+            return Result.Failure<AuthenticationResponse>(cachedTokenResult.Error);
         }
 
-        var cachedToken = cacheValidation.Value;
+        var cachedToken = cachedTokenResult.Value;
+        var newTokens = await IssueNewTokensAsync(tokenClaims, cachedToken.RefreshTokenExpiryTime);
 
-        // 4. Generate new tokens
-        var newTokens = await GenerateNewTokensAsync(claims, tenantId, cachedToken.RefreshTokenExpiryTime);
-
-        // 5. Update cache
-        await UpdateTokenCacheAsync(userId, newTokens, cancellationToken);
+        await StoreCachedTokensAsync(tokenClaims.UserId, newTokens, cancellationToken);
 
         return Result.Success(newTokens);
     }
 
-    private async Task<Result<(string UserId, string TenantId, IEnumerable<Claim> Claims)>> ExtractTokenClaimsAsync(
-        string accessToken, CancellationToken cancellationToken)
+    private static Result ValidateTokenInputs(RefreshTokenQuery query)
+    {
+        if (string.IsNullOrEmpty(query.AccessToken) || string.IsNullOrEmpty(query.RefreshToken))
+        {
+            return Result.Failure(ErrorContants.Authentication.InvalidToken);
+        }
+
+        return Result.Success();
+    }
+
+    private async Task<Result<TokenClaims>> ParseAndValidateAccessTokenAsync(string accessToken, CancellationToken cancellationToken)
     {
         try
         {
             var sanitizedToken = JwtEncodedStringHelper.GetJwtEncodedString(accessToken);
             var principal = await _jwtTokenManager.GetPrincipalFromExpiredToken(sanitizedToken, cancellationToken);
 
-            var userId = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var tenantId = principal.FindFirst("tenant_id")?.Value;
-
-            if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(tenantId))
+            var tokenClaims = ExtractTokenClaims(principal);
+            if (!tokenClaims.IsValid)
             {
-                return Result.Failure<(string, string, IEnumerable<Claim>)>(ErrorContants.Authentication.InvalidToken);
+                return Result.Failure<TokenClaims>(ErrorContants.Authentication.InvalidToken);
             }
 
-            return Result.Success((userId, tenantId, principal.Claims));
+            return Result.Success(tokenClaims);
         }
-        catch
+        catch (Exception)
         {
-            return Result.Failure<(string, string, IEnumerable<Claim>)>(ErrorContants.Authentication.InvalidToken);
+            return Result.Failure<TokenClaims>(ErrorContants.Authentication.InvalidToken);
         }
     }
 
-    private async Task<Result<TokenAuthenticationCaching>> ValidateTokenCacheAsync(string userId, RefreshTokenQuery query, CancellationToken cancellationToken)
+    private static TokenClaims ExtractTokenClaims(ClaimsPrincipal principal)
     {
-        var tokenCached = await _tokenCachingService.TryGetTokenAsync(userId, cancellationToken);
+        var userId = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        var tenantId = principal.FindFirst("tenant_id")?.Value;
 
-        if (tokenCached is null)
+        return new TokenClaims(userId, tenantId, principal.Claims);
+    }
+
+    private async Task<Result<TokenAuthenticationCaching>> ValidateCachedTokensAsync(string userId, RefreshTokenQuery query, CancellationToken cancellationToken)
+    {
+        var cachedToken = await _tokenCachingService.TryGetTokenAsync(userId, cancellationToken);
+        if (cachedToken is null)
         {
             return Result.Failure<TokenAuthenticationCaching>(ErrorContants.Authentication.TokenInvalidCache);
         }
 
-        var sanitizedAccessToken = JwtEncodedStringHelper.GetJwtEncodedString(query.AccessToken);
-
-        if (tokenCached.AccessToken != sanitizedAccessToken ||
-            tokenCached.RefreshToken != query.RefreshToken ||
-            tokenCached.RefreshTokenExpiryTime <= DateTimeOffset.UtcNow)
+        var tokenValidationResult = ValidateTokensMatch(cachedToken, query);
+        if (tokenValidationResult.IsFailure)
         {
-            return Result.Failure<TokenAuthenticationCaching>(ErrorContants.Authentication.InvalidToken);
+            return Result.Failure<TokenAuthenticationCaching>(tokenValidationResult.Error);
         }
 
-        return Result.Success(tokenCached);
+        return Result.Success(cachedToken);
     }
 
-    private async Task<AuthenticationResponse> GenerateNewTokensAsync(IEnumerable<Claim> claims, string tenantId, DateTimeOffset refreshTokenExpiryTime)
+    private static Result ValidateTokensMatch(TokenAuthenticationCaching cachedToken, RefreshTokenQuery query)
     {
-        var accessToken = await _jwtTokenManager.GenerateAccessTokenAsync(claims, tenantId);
-        var refreshToken = _jwtTokenManager.GenerateRefreshToken();
+        var sanitizedAccessToken = JwtEncodedStringHelper.GetJwtEncodedString(query.AccessToken);
+
+        if (!AreTokensMatching(cachedToken, sanitizedAccessToken, query.RefreshToken))
+        {
+            return Result.Failure(ErrorContants.Authentication.InvalidToken);
+        }
+
+        if (IsRefreshTokenExpired(cachedToken.RefreshTokenExpiryTime))
+        {
+            return Result.Failure(ErrorContants.Authentication.InvalidToken);
+        }
+
+        return Result.Success();
+    }
+
+    private static bool AreTokensMatching(TokenAuthenticationCaching cachedToken, string accessToken, string refreshToken) =>
+        cachedToken.AccessToken == accessToken && cachedToken.RefreshToken == refreshToken;
+
+    private static bool IsRefreshTokenExpired(DateTimeOffset expiryTime) =>
+        expiryTime <= DateTimeOffset.UtcNow;
+
+    private async Task<AuthenticationResponse> IssueNewTokensAsync(TokenClaims tokenClaims, DateTimeOffset refreshTokenExpiryTime)
+    {
+        var newAccessToken = await _jwtTokenManager.GenerateAccessTokenAsync(tokenClaims.Claims, tokenClaims.TenantId);
+        var newRefreshToken = _jwtTokenManager.GenerateRefreshToken();
 
         return new AuthenticationResponse
         {
-            UserId = claims.First(c => c.Type == ClaimTypes.NameIdentifier).Value,
-            AccessToken = accessToken,
-            RefreshToken = refreshToken,
+            UserId = tokenClaims.UserId!,
+            AccessToken = newAccessToken,
+            RefreshToken = newRefreshToken,
             RefreshTokenExpiryTime = refreshTokenExpiryTime
         };
     }
 
-    private async Task UpdateTokenCacheAsync(string userId, AuthenticationResponse response, CancellationToken cancellationToken)
+    private async Task StoreCachedTokensAsync(string userId, AuthenticationResponse response, CancellationToken cancellationToken)
     {
-        var authenticationCaching = new TokenAuthenticationCaching
+        var tokenCache = new TokenAuthenticationCaching
         {
             UserId = response.UserId,
-            UserName = response.UserId, // Using UserId as UserName to match pattern
+            UserName = response.UserId, // Following established pattern
             AccessToken = response.AccessToken,
             RefreshToken = response.RefreshToken,
             RefreshTokenExpiryTime = response.RefreshTokenExpiryTime
         };
 
-        await _tokenCachingService.AddTokenAsync(userId, authenticationCaching, cancellationToken);
+        await _tokenCachingService.AddTokenAsync(userId, tokenCache, cancellationToken);
+    }
+
+    private readonly record struct TokenClaims(string? UserId, string? TenantId, IEnumerable<Claim> Claims)
+    {
+        public readonly bool IsValid => !string.IsNullOrEmpty(UserId) && !string.IsNullOrEmpty(TenantId);
     }
 }
