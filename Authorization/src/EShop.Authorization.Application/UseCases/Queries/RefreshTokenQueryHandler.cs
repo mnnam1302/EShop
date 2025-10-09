@@ -41,7 +41,7 @@ internal sealed class RefreshTokenQueryHandler : IQueryHandler<RefreshTokenQuery
 
         var tokenClaims = tokenClaimsResult.Value;
 
-        var cachedTokenResult = await ValidateCachedTokensAsync(tokenClaims.UserId!, query, cancellationToken);
+        var cachedTokenResult = await ValidateCachedTokensAsync(tokenClaims.UserId, query, cancellationToken);
         if (cachedTokenResult.IsFailure)
         {
             return Result.Failure<AuthenticationResponse>(cachedTokenResult.Error);
@@ -90,6 +90,11 @@ internal sealed class RefreshTokenQueryHandler : IQueryHandler<RefreshTokenQuery
     {
         var userId = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         var tenantId = principal.FindFirst("tenant_id")?.Value;
+
+        if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(tenantId))
+        {
+            return new TokenClaims(string.Empty, string.Empty, Array.Empty<Claim>());
+        }
 
         return new TokenClaims(userId, tenantId, principal.Claims);
     }
@@ -162,7 +167,7 @@ internal sealed class RefreshTokenQueryHandler : IQueryHandler<RefreshTokenQuery
         await _tokenCachingService.AddTokenAsync(userId, tokenCache, cancellationToken);
     }
 
-    private readonly record struct TokenClaims(string? UserId, string? TenantId, IEnumerable<Claim> Claims)
+    private readonly record struct TokenClaims(string UserId, string TenantId, IEnumerable<Claim> Claims)
     {
         public readonly bool IsValid => !string.IsNullOrEmpty(UserId) && !string.IsNullOrEmpty(TenantId);
     }
