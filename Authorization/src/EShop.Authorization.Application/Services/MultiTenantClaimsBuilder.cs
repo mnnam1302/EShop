@@ -20,7 +20,7 @@ public interface IMultiTenantClaimsBuilder
     /// <param name="tenantId">Target tenant context</param>
     /// <param name="actionUserId">Optional user being acted on behalf of</param>
     /// <returns>List of claims for system JWT token</returns>
-    List<Claim> BuildSystemUserClaims(string tenantId, string? actionUserId = null);
+    List<Claim> BuildSystemUserClaims(string tenantId);
 }
 
 public sealed class MultiTenantClaimsBuilder : IMultiTenantClaimsBuilder
@@ -56,7 +56,7 @@ public sealed class MultiTenantClaimsBuilder : IMultiTenantClaimsBuilder
         return claims;
     }
 
-    public List<Claim> BuildSystemUserClaims(string tenantId, string? actionUserId = null)
+    public List<Claim> BuildSystemUserClaims(string tenantId)
     {
         var claims = new List<Claim>
         {
@@ -67,11 +67,6 @@ public sealed class MultiTenantClaimsBuilder : IMultiTenantClaimsBuilder
             new(EShopClaimTypes.UserType, UserTypes.SystemUsers),
             new(EShopClaimTypes.TenantGroups, tenantId), // System user has access to specified tenant
         };
-
-        if (!string.IsNullOrEmpty(actionUserId))
-        {
-            claims.Add(new Claim(EShopClaimTypes.ActionUserId, actionUserId));
-        }
 
         return claims;
     }
