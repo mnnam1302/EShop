@@ -1,5 +1,6 @@
 ﻿using EShop.Authorization.Application.Abstractions;
 using EShop.Shared.Scoping.DependencyInjections.Options;
+using EShop.Shared.Scoping.ResourceAccessControl;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -51,16 +52,15 @@ public sealed class JwtTokenManager : IJwtTokenManager
     {
         var enrichedClaims = claims.ToList();
 
-
         enrichedClaims.Add(new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()));
         enrichedClaims.Add(new Claim(JwtRegisteredClaimNames.Iat, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64));
-        enrichedClaims.Add(new Claim("key_id", keyId));
-        enrichedClaims.Add(new Claim("token_version", "1.0")); // For future token format versioning
+        enrichedClaims.Add(new Claim(EShopClaimTypes.KeyId, keyId));
+        enrichedClaims.Add(new Claim(EShopClaimTypes.TokenVersion, "1.0")); // For future token format versioning
 
         // Ensure tenant_id is present
-        if (!enrichedClaims.Any(c => c.Type == "tenant_id"))
+        if (!enrichedClaims.Any(c => c.Type == EShopClaimTypes.TenantId))
         {
-            enrichedClaims.Add(new Claim("tenant_id", tenantId));
+            enrichedClaims.Add(new Claim(EShopClaimTypes.TenantId, tenantId));
         }
 
         return enrichedClaims;
@@ -144,8 +144,8 @@ public sealed class JwtTokenManager : IJwtTokenManager
 
     private static (string tenantId, string keyId) ExtractTokenMetadata(JwtSecurityToken jsonToken)
     {
-        var tenantId = jsonToken.Claims.FirstOrDefault(x => x.Type == "tenant_id")?.Value;
-        var keyId = jsonToken.Claims.FirstOrDefault(x => x.Type == "key_id")?.Value;
+        var tenantId = jsonToken.Claims.FirstOrDefault(x => x.Type == EShopClaimTypes.TenantId)?.Value;
+        var keyId = jsonToken.Claims.FirstOrDefault(x => x.Type == EShopClaimTypes.KeyId)?.Value;
 
         if (string.IsNullOrEmpty(tenantId))
             throw new SecurityTokenException("Token does not contain tenant_id claim");

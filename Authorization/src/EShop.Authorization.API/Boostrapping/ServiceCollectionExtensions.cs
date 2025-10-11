@@ -103,6 +103,7 @@ public static class ServiceCollectionExtensions
             })
             .AddScheme<JwtBearerOptions, MultiTenantJwtBearerHandler>(JwtBearerDefaults.AuthenticationScheme, options => { });
 
+        services.AddAuthorization();
 
         return services;
     }

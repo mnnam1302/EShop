@@ -214,8 +214,8 @@ public sealed class HttpRequestUserDataProvider : IUserDetailsProvider
         try
         {
             // We are using username as id for users stored in our local database (as it is unique across tenants anyway)
-            var username = accessToken.Claims.First(x => x.Type == "username").Value;
-            var tenantGroups = accessToken.Claims.Where(x => x.Type == "tenant:groups").Select(x => x.Value).ToList();
+            var username = accessToken.Claims.First(x => x.Type == EShopClaimTypes.UserId).Value;
+            var tenantGroups = accessToken.Claims.Where(x => x.Type == EShopClaimTypes.TenantGroups).Select(x => x.Value).ToList();
 
             var defaultTenantGroup = tenantGroups.Count > 1
                 ? tenantGroups.First(x => !x.Equals(UserData.EShopSupportGroup, StringComparison.OrdinalIgnoreCase))

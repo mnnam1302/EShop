@@ -2,6 +2,7 @@
 using EShop.Authorization.Application.UseCases.Commands;
 using EShop.Authorization.Application.UseCases.Queries;
 using EShop.Shared.CQRS;
+using EShop.Shared.JsonApi.ResourceAccessControl;
 using EShop.Shared.Scoping;
 using Microsoft.AspNetCore.Mvc;
 
@@ -19,7 +20,8 @@ public static class AuthEndpointHandler
             .HasApiVersion(1);
 
         group.MapPost("login", LoginAsync).AllowAnonymous();
-        group.MapPost("logout", LogoutAsync).RequireAuthorization();
+        group.MapPost("logout", LogoutAsync).RequireAuthenticatedUser();
+
         group.MapPost("refresh-token", RefreshTokenAsync).AllowAnonymous();
 
         return endpoints;

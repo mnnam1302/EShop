@@ -126,7 +126,7 @@ internal sealed class LogoutCommandHandler : ICommandHandler<LogoutCommand>
 
     private static string? ExtractUserIdFromClaims(ClaimsPrincipal principal)
     {
-        return principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        return principal.FindFirst(EShopClaimTypes.UserId)?.Value;
     }
 
     private async Task<Result> ValidateTokenInCacheAsync(LogoutCommand command, CancellationToken cancellationToken)

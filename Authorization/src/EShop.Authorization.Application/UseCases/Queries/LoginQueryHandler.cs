@@ -5,6 +5,8 @@ using EShop.Authorization.Domain.Entities;
 using EShop.Authorization.Domain.Repositories;
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.CQRS.Query;
+using EShop.Shared.Scoping;
+using EShop.Shared.Scoping.ResourceAccessControl;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserTokenProvider;
 using System.Security.Claims;
 
@@ -19,6 +21,7 @@ public sealed record AuthenticationResponse
     public required string RefreshToken { get; init; }
     public DateTimeOffset RefreshTokenExpiryTime { get; init; }
 }
+
 
 internal sealed class LoginQueryHandler : IQueryHandler<LoginQuery, AuthenticationResponse>
 {
@@ -134,10 +137,10 @@ internal sealed class LoginQueryHandler : IQueryHandler<LoginQuery, Authenticati
     {
         var claims = new List<Claim>
         {
-            new(ClaimTypes.NameIdentifier, user.Id),
-            new(ClaimTypes.Name, user.Name),
-            new("tenant_id", user.TenantId),
-            new("user_type", "user"),
+            new(EShopClaimTypes.UserId, user.Id),
+            new(EShopClaimTypes.DisplayName, user.Name),
+            new(EShopClaimTypes.TenantId, user.TenantId),
+            new(EShopClaimTypes.UserType, UserTypes.TenantUsers),
         };
 
         return claims;

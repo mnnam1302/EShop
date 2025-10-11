@@ -61,7 +61,7 @@ public sealed class MultiTenantJwtBearerHandler(
 
     private async Task<Result> ValidateTokenInCacheAsync(ClaimsPrincipal principal, string accessToken)
     {
-        var userId = GetClaimValue(principal, ClaimTypes.NameIdentifier);
+        var userId = GetClaimValue(principal, EShopClaimTypes.UserId);
         if (string.IsNullOrEmpty(userId))
         {
             return Result.Failure(ErrorContants.Authentication.InvalidToken);

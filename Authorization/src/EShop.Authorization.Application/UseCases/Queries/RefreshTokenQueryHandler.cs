@@ -88,8 +88,8 @@ internal sealed class RefreshTokenQueryHandler : IQueryHandler<RefreshTokenQuery
 
     private static TokenClaims ExtractTokenClaims(ClaimsPrincipal principal)
     {
-        var userId = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        var tenantId = principal.FindFirst("tenant_id")?.Value;
+        var userId = principal.FindFirst(EShopClaimTypes.UserId)?.Value;
+        var tenantId = principal.FindFirst(EShopClaimTypes.TenantId)?.Value;
 
         if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(tenantId))
         {
