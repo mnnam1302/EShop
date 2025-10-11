@@ -34,6 +34,9 @@ public class Startup
             app.UseSwaggerAPI();
         }
 
+        app.UseAuthentication();
+        app.UseAuthorization();
+
         app.UseRouting();
         app.MapAuthorizationEndpoints();
 
