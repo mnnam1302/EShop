@@ -213,42 +213,32 @@ public sealed class HttpRequestUserDataProvider : IUserDetailsProvider
 
         try
         {
-            // Extract user identity claims
-            var username = accessToken.Claims.First(x => x.Type == EShopClaimTypes.Username).Value;
-            
-            // Extract primary tenant (home tenant)
-            var primaryTenantId = accessToken.Claims.FirstOrDefault(x => x.Type == EShopClaimTypes.TenantId)?.Value;
-            
-            // Extract all accessible tenants (including primary tenant)
-            var tenantGroups = accessToken.Claims
-                .Where(x => x.Type == EShopClaimTypes.TenantGroups)
-                .Select(x => x.Value)
-                .ToList();
+            // We are using username as id for users stored in our local database (as it is unique across tenants anyway)
+            var userIdClaim = accessToken.Claims.FirstOrDefault(x => x.Type == EShopClaimTypes.UserId);
 
-            // Fallback: if no tenant:groups claim, use primary tenant
-            if (tenantGroups.Count == 0 && !string.IsNullOrEmpty(primaryTenantId))
+            if (userIdClaim == null)
             {
-                tenantGroups.Add(primaryTenantId);
+                _logger.LogWarning("No user ID claim found in access token. Available claims: {Claims}",
+                    string.Join(", ", accessToken.Claims.Select(c => $"{c.Type}={c.Value}")));
+                user = null;
+                return false;
             }
 
-            // Determine the effective tenant for this request
-            // Priority: primary tenant (tenant_id) > first tenant group
-            var effectiveTenantId = !string.IsNullOrEmpty(primaryTenantId) 
-                ? primaryTenantId 
-                : tenantGroups.FirstOrDefault() ?? string.Empty;
+            var username = userIdClaim.Value;
+            var tenantGroups = accessToken.Claims.Where(x => x.Type == EShopClaimTypes.TenantGroups).Select(x => x.Value).ToList();
 
-            // Check if user has support privileges
+            var primaryTenantId = tenantGroups.Count > 1
+                ? tenantGroups.First(x => !x.Equals(UserData.EShopSupportGroup, StringComparison.OrdinalIgnoreCase))
+                : tenantGroups.FirstOrDefault();
+
             var isSupportUser = tenantGroups.Contains(UserData.EShopSupportGroup);
 
             user = new UserData(
                 username,
                 username,
-                effectiveTenantId,
+                primaryTenantId ?? string.Empty,
                 isSupportUser,
                 username);
-
-            _logger.LogDebug("Parsed user from token: UserId={UserId}, PrimaryTenant={PrimaryTenant}, AccessibleTenants=[{AccessibleTenants}], IsSupport={IsSupport}",
-                username, effectiveTenantId, string.Join(",", tenantGroups), isSupportUser);
 
             return true;
         }
@@ -270,8 +260,8 @@ public sealed class HttpRequestUserDataProvider : IUserDetailsProvider
             return null;
         }
 
-        var tokenHandler = new JsonWebTokenHandler();
-        var token = tokenHandler.ReadJsonWebToken(accessTokenEncoded); // Read JsonWebToken: not validation
+        var handler = new JsonWebTokenHandler();
+        var token = handler.ReadJsonWebToken(accessTokenEncoded); // Read JsonWebToken: not validation
 
         if (token == null)
         {

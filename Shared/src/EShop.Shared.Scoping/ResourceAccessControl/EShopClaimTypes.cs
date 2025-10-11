@@ -9,9 +9,10 @@ namespace EShop.Shared.Scoping.ResourceAccessControl;
 public static class EShopClaimTypes
 {
     /// <summary>
-    /// Standard user identifier claim. Maps to ClaimTypes.NameIdentifier.
+    /// Standard JWT subject claim. 
+    /// Use this instead of ClaimTypes.NameIdentifier to avoid JWT serialization conversion issues.
     /// </summary>
-    public const string UserId = ClaimTypes.NameIdentifier;
+    public const string UserId = "sub";
 
     /// <summary>
     /// Username claim for authentication purposes.

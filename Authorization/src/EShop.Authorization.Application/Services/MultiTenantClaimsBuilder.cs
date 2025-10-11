@@ -34,7 +34,6 @@ public sealed class MultiTenantClaimsBuilder : IMultiTenantClaimsBuilder
     {
         var claims = new List<Claim>
         {
-            // Standard identity claims
             new(EShopClaimTypes.UserId, user.Id),
             new(EShopClaimTypes.Username, user.Username),
             new(EShopClaimTypes.DisplayName, user.Name),
