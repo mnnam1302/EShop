@@ -20,7 +20,6 @@ public sealed class MultiTenantJwtBearerHandler(
 {
     protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
     {
-        // 1. Extract token from Authorization header
         var tokenExtractionResult = ExtractTokenFromHeader();
         if (tokenExtractionResult.IsFailure)
         {
@@ -28,18 +27,14 @@ public sealed class MultiTenantJwtBearerHandler(
         }
 
         var accessToken = tokenExtractionResult.Value;
-
-        // 2. Validate token WITH lifetime validation
         var principal = await jwtTokenManager.ValidateActiveTokenAsync(accessToken, Context.RequestAborted);
 
-        // 3. Validate token in cache (session management)
         var cacheValidationResult = await ValidateTokenInCacheAsync(principal, accessToken);
         if (cacheValidationResult.IsFailure)
         {
             return AuthenticateResult.Fail(cacheValidationResult.Error.Message);
         }
 
-        // 4. Create authentication ticket
         var ticket = CreateAuthenticationTicket(principal);
 
         return AuthenticateResult.Success(ticket);
