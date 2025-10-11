@@ -213,20 +213,42 @@ public sealed class HttpRequestUserDataProvider : IUserDetailsProvider
 
         try
         {
-            // We are using username as id for users stored in our local database (as it is unique across tenants anyway)
-            var username = accessToken.Claims.First(x => x.Type == EShopClaimTypes.UserId).Value;
-            var tenantGroups = accessToken.Claims.Where(x => x.Type == EShopClaimTypes.TenantGroups).Select(x => x.Value).ToList();
+            // Extract user identity claims
+            var username = accessToken.Claims.First(x => x.Type == EShopClaimTypes.Username).Value;
+            
+            // Extract primary tenant (home tenant)
+            var primaryTenantId = accessToken.Claims.FirstOrDefault(x => x.Type == EShopClaimTypes.TenantId)?.Value;
+            
+            // Extract all accessible tenants (including primary tenant)
+            var tenantGroups = accessToken.Claims
+                .Where(x => x.Type == EShopClaimTypes.TenantGroups)
+                .Select(x => x.Value)
+                .ToList();
 
-            var defaultTenantGroup = tenantGroups.Count > 1
-                ? tenantGroups.First(x => !x.Equals(UserData.EShopSupportGroup, StringComparison.OrdinalIgnoreCase))
-                : tenantGroups.FirstOrDefault();
+            // Fallback: if no tenant:groups claim, use primary tenant
+            if (tenantGroups.Count == 0 && !string.IsNullOrEmpty(primaryTenantId))
+            {
+                tenantGroups.Add(primaryTenantId);
+            }
+
+            // Determine the effective tenant for this request
+            // Priority: primary tenant (tenant_id) > first tenant group
+            var effectiveTenantId = !string.IsNullOrEmpty(primaryTenantId) 
+                ? primaryTenantId 
+                : tenantGroups.FirstOrDefault() ?? string.Empty;
+
+            // Check if user has support privileges
+            var isSupportUser = tenantGroups.Contains(UserData.EShopSupportGroup);
 
             user = new UserData(
                 username,
                 username,
-                defaultTenantGroup ?? string.Empty,
-                tenantGroups.Contains(UserData.EShopSupportGroup),
+                effectiveTenantId,
+                isSupportUser,
                 username);
+
+            _logger.LogDebug("Parsed user from token: UserId={UserId}, PrimaryTenant={PrimaryTenant}, AccessibleTenants=[{AccessibleTenants}], IsSupport={IsSupport}",
+                username, effectiveTenantId, string.Join(",", tenantGroups), isSupportUser);
 
             return true;
         }

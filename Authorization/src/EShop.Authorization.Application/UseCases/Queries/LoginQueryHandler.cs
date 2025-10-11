@@ -138,8 +138,9 @@ internal sealed class LoginQueryHandler : IQueryHandler<LoginQuery, Authenticati
         var claims = new List<Claim>
         {
             new(EShopClaimTypes.UserId, user.Id),
-            new(EShopClaimTypes.DisplayName, user.Name),
+            new(EShopClaimTypes.Username, user.Username),
             new(EShopClaimTypes.TenantId, user.TenantId),
+            new(EShopClaimTypes.TenantGroups, user.TenantId),
             new(EShopClaimTypes.UserType, UserTypes.TenantUsers),
         };
 
