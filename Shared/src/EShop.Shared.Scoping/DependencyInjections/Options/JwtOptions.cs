@@ -15,4 +15,11 @@ public sealed class JwtOptions
 
     [Range(1, 12)]
     public int RefreshTokenExpiryHours { get; init; }
+
+    /// <summary>
+    /// Clock skew tolerance in minutes for token validation.
+    /// Recommended: 1-5 minutes for production, 0-10 for development.
+    /// </summary>
+    [Range(0, 15)]
+    public int ClockSkewMinutes { get; init; } = 1;
 }

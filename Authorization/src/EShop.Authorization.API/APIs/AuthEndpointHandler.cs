@@ -64,7 +64,7 @@ public static class AuthEndpointHandler
         return Results.Ok();
     }
 
-    private static async Task RefreshTokenAsync(
+    private static async Task<IResult> RefreshTokenAsync(
         [FromBody] RefreshTokenRequest request,
         [FromServices] IUserDetailsProvider userDetailsProvider,
         [FromServices] IMediator mediator,
@@ -83,6 +83,6 @@ public static class AuthEndpointHandler
             throw new InvalidOperationException($"Token refresh failed: {result.Error}");
         }
 
-        Results.Ok(result);
+        return Results.Ok(result);
     }
 }
