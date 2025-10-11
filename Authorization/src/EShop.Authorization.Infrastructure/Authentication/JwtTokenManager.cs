@@ -82,6 +82,37 @@ public sealed class JwtTokenManager : IJwtTokenManager
         return refreshToken;
     }
 
+    public async Task<ClaimsPrincipal> ValidateActiveTokenAsync(string token, CancellationToken cancellationToken)
+    {
+        var tokenHandler = new JwtSecurityTokenHandler();
+        var jsonToken = tokenHandler.ReadJwtToken(token);
+
+        var (tenantId, keyId) = ExtractTokenMetadata(jsonToken);
+        var publicKey = await GetPublicKeyForValidation(tenantId, keyId);
+
+        var tokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateAudience = true,
+            ValidateIssuer = true,
+            ValidateLifetime = true, // CRITICAL: Validate token expiration
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = _jwtOptions.Issuer,
+            ValidAudience = _jwtOptions.Audience,
+            IssuerSigningKey = new RsaSecurityKey(publicKey) { KeyId = keyId },
+            ClockSkew = TimeSpan.FromMinutes(5) // Allow 5 minutes clock skew
+        };
+
+        var principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out var securityToken);
+
+        if (securityToken is not JwtSecurityToken jwtSecurityToken ||
+            !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.RsaSha256, StringComparison.InvariantCulture))
+        {
+            throw new SecurityTokenException("Invalid token algorithm");
+        }
+
+        return principal;
+    }
+
     public async Task<ClaimsPrincipal> GetPrincipalFromExpiredToken(string token, CancellationToken cancellationToken)
     {
         var tokenHandler = new JwtSecurityTokenHandler();

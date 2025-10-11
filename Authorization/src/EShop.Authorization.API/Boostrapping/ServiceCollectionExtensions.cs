@@ -1,4 +1,5 @@
-﻿using EShop.Authorization.Application.Abstractions;
+﻿using EShop.Authorization.API.Middlewares;
+using EShop.Authorization.Application.Abstractions;
 using EShop.Authorization.Application.DependencyInjections;
 using EShop.Authorization.Infrastructure;
 using EShop.Authorization.Infrastructure.Authentication;
@@ -35,6 +36,8 @@ public static class ServiceCollectionExtensions
 
     public static IServiceCollection AddBoostrapping(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment)
     {
+        services.AddMultiTenantAuthentication();
+
         services
             .AddAuthorizationAPI()
             .AddAuthorizationApplication()
@@ -62,6 +65,28 @@ public static class ServiceCollectionExtensions
                 options.SubstituteApiVersionInUrl = true;
             });
 
+        return services;
+    }
+
+    public static IServiceCollection AddMultiTenantAuthentication(this IServiceCollection services)
+    {
+        // Configure options with validation
+        services.AddOptions<JwtOptions>()
+            .BindConfiguration(JwtOptions.ConfigurationSection)
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
+        // Register RSA key management services
+        services.AddScoped<IRedisCachingProvider<RsaKeyPair>, RedisCachingProvider<RsaKeyPair>>();
+        services.AddScoped<IRedisCachingProvider<RsaPublicKeyCacheEntry>, RedisCachingProvider<RsaPublicKeyCacheEntry>>();
+        services.AddScoped<IKeyManagerCachingService, RsaKeyManagerRedisCachingService>();
+        services.AddScoped<IRsaKeyManager, RsaKeyManager>();
+
+        // Register background services
+        //services.AddHostedService<RsaKeyRotationBackgroundService>();
+
+        // Register JWT token management
+        services.AddScoped<IJwtTokenManager, JwtTokenManager>();
         services.AddJwtTokenAuthentication();
 
         return services;
@@ -69,37 +94,15 @@ public static class ServiceCollectionExtensions
 
     public static IServiceCollection AddJwtTokenAuthentication(this IServiceCollection services)
     {
-        services.AddOptions<JwtOptions>()
-            .BindConfiguration(JwtOptions.ConfigurationSection)
-            .ValidateDataAnnotations()
-            .ValidateOnStart();
+        services
+            .AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddScheme<JwtBearerOptions, MultiTenantJwtBearerHandler>(JwtBearerDefaults.AuthenticationScheme, options => { });
 
-        // Caching providers for RSA keys
-        services.AddScoped<IRedisCachingProvider<RsaKeyPair>, RedisCachingProvider<RsaKeyPair>>();
-        services.AddScoped<IRedisCachingProvider<RsaPublicKeyCacheEntry>, RedisCachingProvider<RsaPublicKeyCacheEntry>>();
-
-        // RSA Key Management
-        services.AddScoped<IKeyManagerCachingService, RsaKeyManagerRedisCachingService>();
-        services.AddScoped<IRsaKeyManager, RsaKeyManager>();
-
-        // Jwt Token Management
-        services.AddScoped<IJwtTokenManager, JwtTokenManager>();
-        services.AddJwtTokenExtension();
-
-        return services;
-    }
-
-    public static IServiceCollection AddJwtTokenExtension(this IServiceCollection services)
-    {
-        services.AddAuthentication(options =>
-        {
-            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-        }).AddBearerToken(JwtBearerDefaults.AuthenticationScheme, options =>
-        {
-
-        });
 
         return services;
     }

@@ -18,13 +18,9 @@ public static class AuthEndpointHandler
             .MapGroup(BaseUrl)
             .HasApiVersion(1);
 
-        group.MapPost("login", LoginAsync)
-            .AllowAnonymous();
-
-        group.MapPost("logout", LogoutAsync);
-        //.RequireAuthorization();
-
-        group.MapPost("refresh-token", RefreshTokenAsync);
+        group.MapPost("login", LoginAsync).AllowAnonymous();
+        group.MapPost("logout", LogoutAsync).RequireAuthorization();
+        group.MapPost("refresh-token", RefreshTokenAsync).AllowAnonymous();
 
         return endpoints;
     }
