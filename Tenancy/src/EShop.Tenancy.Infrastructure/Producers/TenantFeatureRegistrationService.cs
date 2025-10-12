@@ -1,7 +1,7 @@
 ﻿using EShop.Shared.Contracts.Services.Tenancy.Features;
 using EShop.Shared.EventBus.Services;
 using EShop.Shared.Scoping.ResourceAccessControl;
-using static EShop.Shared.Scoping.ResourceAccessControl.FeatureConstants;
+using static EShop.Shared.Scoping.ResourceAccessControl.FeatureIds;
 
 namespace EShop.Tenancy.Infrastructure.Producers;
 
@@ -12,7 +12,7 @@ public class TenantFeatureRegistrationService(IEventBusGateway eventBusGateway) 
     private static readonly IEnumerable<IFeature> features = new List<TenancyFeature>
     {
          new TenancyFeature(
-             TenancyFeatures.SystemFormatConfiguration_FeatureId,
+             FeatureIds.Tenancy.SystemFormatConfiguration_FeatureId,
              "System Format Configuration",
              "System Format Configuration",
              FeatureState.Enabled),

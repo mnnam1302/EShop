@@ -15,9 +15,10 @@ public static class ServiceCollectionExtensions
         services.AddSingleton(testDatabase);
         services.AddTransient<ITestDatabaseConnectionInterceptor, PostgreSqlTestDatabaseConnectionInterceptor>();
 
-        services.AddDbContext<TContext>(
-                (provider, builder) => ConfigurePostgreSqlTestDbContext(provider, builder, additionalDbContextConfig))
-            .AddMultiTenantScoping();
+        services.AddMultiTenantScoping();
+
+        services.AddDbContext<TContext>((provider, builder) =>
+            ConfigurePostgreSqlTestDbContext(provider, builder, additionalDbContextConfig));
 
         return services;
     }
@@ -33,8 +34,6 @@ public static class ServiceCollectionExtensions
 
         var testDatabaseConnectionInterceptor = sp.GetRequiredService<ITestDatabaseConnectionInterceptor>();
         builder.AddInterceptors(testDatabaseConnectionInterceptor);
-
-        //DbLoggingExtensions.ConfigureEntityFrameworkLogs(builder);
 
         additionalDbContextConfig?.Invoke(sp, builder);
     }

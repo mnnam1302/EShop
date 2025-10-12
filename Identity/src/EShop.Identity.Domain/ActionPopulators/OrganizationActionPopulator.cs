@@ -1,5 +1,5 @@
 ﻿using EShop.Shared.Scoping.ResourceAccessControl;
-using static EShop.Shared.Scoping.ResourceAccessControl.FeatureConstants;
+using static EShop.Shared.Scoping.ResourceAccessControl.FeatureIds;
 using static EShop.Shared.Scoping.ResourceAccessControl.PermissionConstants;
 
 namespace EShop.Identity.Domain.ActionPopulators;
@@ -16,7 +16,7 @@ internal class OrganizationActionPopulator : IActionPopulator
             {
                 nameof(UserOrganizationActions.ViewOrganizations),
                 new ActionDefinition(
-                    await featureValidator.HasFeatureAsync(IdentityFeatures.OrganisationRingFencing_FeatureId) &&
+                    await featureValidator.HasFeatureAsync(Authorization.OrganisationRingFencing) &&
                     await permissionValidator.HasAtLeastOneOfSpecificPermissionAsync(
                         IdentityPermissions.ViewOrganizationsPermissionId,
                         IdentityPermissions.ManageOrganizationsPermissionId))
@@ -24,7 +24,7 @@ internal class OrganizationActionPopulator : IActionPopulator
             {
                 UserOrganizationActions.ManageOrganizations.ToString(),
                 new ActionDefinition(
-                    await featureValidator.HasFeatureAsync(IdentityFeatures.OrganisationRingFencing_FeatureId) &&
+                    await featureValidator.HasFeatureAsync(Authorization.OrganisationRingFencing) &&
                     await permissionValidator.HasPermissionAsync(IdentityPermissions.ManageOrganizationsPermissionId))
             }
         };

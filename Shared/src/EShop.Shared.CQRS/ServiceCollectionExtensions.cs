@@ -8,7 +8,7 @@ namespace EShop.Shared.CQRS;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddCQRS(this IServiceCollection services, Assembly assembly)
+    public static IServiceCollection AddMediator(this IServiceCollection services, Assembly assembly)
     {
         services.AddTransient<ICommandDispatcher, CommandDispatcher>();
         services.AddTransient<IQueryDispatcher, QueryDispatcher>();

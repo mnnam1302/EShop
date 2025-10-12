@@ -24,7 +24,7 @@ public static class ServiceCollectionExtensions
             .AddUserOrganizationContextProvider()
             .AddTenantFeaturesProvider();
 
-        services.AddCQRS(AssemblyReference.Assembly);
+        services.AddMediator(AssemblyReference.Assembly);
 
         return services;
     }

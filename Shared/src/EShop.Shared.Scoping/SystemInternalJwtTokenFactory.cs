@@ -51,9 +51,9 @@ public static class SystemInternalJwtTokenFactory
         var claims = new Dictionary<string, object>
         {
             ["jti"] = Guid.NewGuid().ToString(),
-            ["sub"] = userId,
-            ["username"] = username,
-            ["tenant:groups"] = tenantGroups
+            [EShopClaimTypes.UserId] = userId,
+            [EShopClaimTypes.Username] = username,
+            [EShopClaimTypes.TenantGroups] = tenantGroups
         };
 
         if (additionalClaims != null)
@@ -86,7 +86,7 @@ public static class SystemInternalJwtTokenFactory
         }
     }
 
-    private static IDictionary<string, string> GetCustomHeadersForUser(UserData user)
+    private static Dictionary<string, string> GetCustomHeadersForUser(UserData user)
     {
         return new Dictionary<string, string>
         {

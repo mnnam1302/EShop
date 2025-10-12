@@ -10,12 +10,12 @@ namespace EShop.Shared.Cache.Services;
 
 public class PermissionRedisCachingService : IPermissionCachingService
 {
-    private readonly IRedisCachingAsyncProvider<string[]> _redisCachingAsyncProvider;
+    private readonly IRedisCachingProvider<string[]> _redisCachingAsyncProvider;
     private readonly ILogger _logger;
     private readonly CachedRemoteConfiguration _cachedRemoteConfiguration;
 
     public PermissionRedisCachingService(
-        IRedisCachingAsyncProvider<string[]> redisCachingAsyncProvider,
+        IRedisCachingProvider<string[]> redisCachingAsyncProvider,
         ILogger<PermissionRedisCachingService> logger,
         CachedRemoteConfiguration cachedRemoteConfiguration)
     {

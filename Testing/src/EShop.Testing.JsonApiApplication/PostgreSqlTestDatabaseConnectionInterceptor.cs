@@ -5,8 +5,7 @@ using System.Data.Common;
 
 namespace EShop.Testing.JsonApiApplication;
 
-public sealed class PostgreSqlTestDatabaseConnectionInterceptor
-    : DbConnectionInterceptor, ITestDatabaseConnectionInterceptor
+public sealed class PostgreSqlTestDatabaseConnectionInterceptor : DbConnectionInterceptor, ITestDatabaseConnectionInterceptor
 {
     private readonly PostgreSqlTestDatabase _postgreSqlTestDatabase;
 
@@ -37,8 +36,6 @@ public sealed class PostgreSqlTestDatabaseConnectionInterceptor
     {
         if (eventData.Connection.State == ConnectionState.Open)
             return ValueTask.FromResult(result);
-
-        //_postgreSqlTestDatabase.SharedConnectionString.Require("PostgreSQL test database connection string should be set at this point.");
 
         eventData.Context?.Database.SetConnectionString(_postgreSqlTestDatabase.SharedConnectionString);
         return ValueTask.FromResult(result);

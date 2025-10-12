@@ -58,9 +58,9 @@ internal static class ServiceCollectionExtensions
         services.AddScoped<IPermissionValidator, CurrentUserPermissionsValidator>();
         services.AddSingleton<IUserPermissionsProvider, TestUserPermissionProvider>();
 
-        services.AddScoped<IUserTokenCachingService, TokenRedisCachingService>();
+        services.AddScoped<IUserTokenCachingService, UserTokenRedisCachingService>();
         services.AddSingleton<
-            IRedisCachingAsyncProvider<EShop.Shared.Contracts.Services.Identity.Auth.Response.AuthenticatedResponse>, TestUserTokenProvider>();
+            IRedisCachingProvider<EShop.Shared.Contracts.Services.Identity.Auth.Response.AuthenticatedResponse>, TestUserTokenProvider>();
 
         services.AddScoped<IFeatureValidator, CurrentUserFeaturesValidator>();
         services.AddSingleton<ITenantFeaturesProvider, TestTenantFeatureProvider>();

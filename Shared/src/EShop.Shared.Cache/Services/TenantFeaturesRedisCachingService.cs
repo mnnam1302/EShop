@@ -8,10 +8,10 @@ namespace EShop.Shared.Cache.Services;
 
 public class TenantFeaturesRedisCachingService : ITenantFeaturesCachingService
 {
-    private readonly IRedisCachingAsyncProvider<string[]> _redisCachingService;
+    private readonly IRedisCachingProvider<string[]> _redisCachingService;
     private readonly CachedRemoteConfiguration _cachedRemoteConfiguration;
 
-    public TenantFeaturesRedisCachingService(IRedisCachingAsyncProvider<string[]> redisCachingService, CachedRemoteConfiguration cachedRemoteConfiguration)
+    public TenantFeaturesRedisCachingService(IRedisCachingProvider<string[]> redisCachingService, CachedRemoteConfiguration cachedRemoteConfiguration)
     {
         _redisCachingService = redisCachingService;
         _cachedRemoteConfiguration = cachedRemoteConfiguration;

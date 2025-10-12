@@ -1,147 +1,100 @@
-﻿using EShop.Shared.Scoping.ResourceAccessControl.Providers;
-using Microsoft.Extensions.Caching.Distributed;
+﻿using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
-using Polly.CircuitBreaker;
 using System.Text;
+using System.Text.Json;
 
-namespace EShop.Shared.Cache.Providers
+namespace EShop.Shared.Cache.Providers;
+
+public interface IRedisCachingProvider<TValue> where TValue : class
 {
-    public interface IRedisCachingProvider<TValue> where TValue : class
+    Task AddAsync(string cacheKey, TValue value, DistributedCacheEntryOptions options, CancellationToken cancellationToken = default);
+
+    Task ClearAsync(string cacheKey, CancellationToken cancellationToken = default);
+
+    Task<TValue?> GetAsync(string cacheKey, CancellationToken cancellationToken = default);
+}
+
+public class RedisCachingProvider<TValue> : IRedisCachingProvider<TValue> where TValue : class
+{
+    private readonly ILogger _logger;
+    private readonly IDistributedCache _distributedCache;
+    private readonly IRedisResiliencePolicyProvider _resiliencePolicyProvider;
+    private static readonly JsonSerializerOptions jsonSerializerOptions = new(JsonSerializerDefaults.Web);
+
+    public RedisCachingProvider(
+        ILogger<RedisCachingProvider<TValue>> logger,
+        IDistributedCache distributedCache,
+        IRedisResiliencePolicyProvider resiliencePolicyProvider)
     {
-        void AddValue(string cacheKey, TValue value);
-
-        void ClearCache(string cacheKey);
-
-        TValue? GetValue(string cacheKey);
+        _logger = logger;
+        _distributedCache = distributedCache;
+        _resiliencePolicyProvider = resiliencePolicyProvider;
     }
 
-    public class RedisCachingProvider<TValue> : IRedisCachingProvider<TValue>
-        where TValue : class
+    public async Task AddAsync(string cacheKey, TValue value, DistributedCacheEntryOptions options, CancellationToken cancellationToken = default)
     {
-        private readonly CachedRemoteConfiguration cachedRemoteConfiguration;
-        private readonly IDistributedCache distributedCache;
-        private readonly IRedisResiliencePolicyProvider resiliencePolicyProvider;
-        private readonly ILogger<RedisCachingProvider<TValue>> logger;
+        var cacheValue = SerializeValueForCaching(value);
+        var contextData = CreatePollyContextData();
 
-        public RedisCachingProvider(
-            CachedRemoteConfiguration cachedRemoteConfiguration,
-            IDistributedCache distributedCache,
-            IRedisResiliencePolicyProvider resiliencePolicyProvider,
-            ILogger<RedisCachingProvider<TValue>> logger)
-        {
-            this.cachedRemoteConfiguration = cachedRemoteConfiguration;
-            this.distributedCache = distributedCache;
-            this.resiliencePolicyProvider = resiliencePolicyProvider;
-            this.logger = logger;
-        }
-
-        public void AddValue(string cacheKey, TValue value)
-        {
-            var slidingExpiration = cachedRemoteConfiguration.GetSlidingExpiration();
-
-            try
+        await _resiliencePolicyProvider
+            .RedisRetryPolicy
+            .Wrap(_resiliencePolicyProvider.RedisCircuitBreakerPolicy)
+            .Execute(async (_, pollyCancellationToken) =>
             {
-                var cacheValue = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(value));
+                // Best practice: Remove before add to avoid WRONGTYPE issue
+                await _distributedCache.RemoveAsync(cacheKey, pollyCancellationToken);
+                await _distributedCache.SetAsync(cacheKey, cacheValue, options, pollyCancellationToken);
+            },
+            contextData,
+            cancellationToken);
+    }
 
-                var contextData = new Dictionary<string, object>
-                {
-                    [PolicyContextItems.Logger] = logger
-                };
+    public async Task ClearAsync(string cacheKey, CancellationToken cancellationToken = default)
+    {
+        var contextData = CreatePollyContextData();
 
-                resiliencePolicyProvider
-                    .RedisRetryPolicy
-                    .Wrap(resiliencePolicyProvider.RedisCircuitBreakerPolicy)
-                    .Execute(_ =>
-                    {
-                        // Best practise: Remove before add to avoid WRONGTYPE issue
-                        distributedCache.Remove(cacheKey);
-                        distributedCache.Set(
-                            cacheKey,
-                            cacheValue,
-                            new DistributedCacheEntryOptions { SlidingExpiration = slidingExpiration });
-                    },
-                    contextData);
-            }
-            catch (StackExchange.Redis.RedisConnectionException ex)
+        await _resiliencePolicyProvider
+            .RedisRetryPolicy
+            .Wrap(_resiliencePolicyProvider.RedisCircuitBreakerPolicy)
+            .Execute(async (_, pollyCancellationToken) =>
             {
-                logger.LogWarning(ex, "RedisConnectionException while setting cache value after maximum retry attempted");
-            }
-            catch (StackExchange.Redis.RedisTimeoutException ex)
-            {
-                logger.LogWarning(ex, "RedisTimeoutException while setting cache value after maximum retry attempted");
-            }
-            catch (BrokenCircuitException)
-            {
-                logger.LogWarning("Bypassing cache, circuit broken");
-            }
-            catch (StackExchange.Redis.RedisCommandException ex)
-                when (ex.Message.Contains("Command cannot be issued to a slave", StringComparison.InvariantCultureIgnoreCase)
-                    || ex.Message.Contains("Command cannot be issued to a replica", StringComparison.InvariantCultureIgnoreCase))
-            {
-                logger.LogWarning(ex, "RedisCommandException - assuming endpoints not refreshed yet");
-            }
-            catch (Exception ex)
-            {
-                logger.LogError(ex, "Exception while accessing Redis cache");
-            }
-        }
+                await _distributedCache.RemoveAsync(cacheKey, pollyCancellationToken);
+                _logger.LogDebug("Cleared distributed cache '{CacheKey}'", cacheKey);
+            },
+            contextData,
+            cancellationToken);
+    }
 
-        public void ClearCache(string cacheKey)
-        {
-            logger.LogDebug("Clear distributed cache '{cacheKey}'", cacheKey);
+    public async Task<TValue?> GetAsync(string cacheKey, CancellationToken cancellationToken = default)
+    {
+        byte[]? valueFromCache = null;
+        var contextData = CreatePollyContextData();
 
-            distributedCache.Remove(cacheKey);
-        }
-
-        public TValue? GetValue(string cacheKey)
-        {
-            try
+        await _resiliencePolicyProvider
+            .RedisRetryPolicy
+            .Wrap(_resiliencePolicyProvider.RedisCircuitBreakerPolicy)
+            .Execute(async (_, pollyCancellationToken) =>
             {
-                byte[]? encodedCache = null;
+                valueFromCache = await _distributedCache.GetAsync(cacheKey, pollyCancellationToken);
+            },
+            contextData,
+            cancellationToken);
 
-                var contextData = new Dictionary<string, object>
-                {
-                    [PolicyContextItems.Logger] = logger
-                };
+        return DeserializeCachedValue(valueFromCache);
+    }
 
-                resiliencePolicyProvider
-                    .RedisRetryPolicy
-                    .Wrap(resiliencePolicyProvider.RedisCircuitBreakerPolicy)
-                    .Execute(_ =>
-                    {
-                        encodedCache = distributedCache.Get(cacheKey);
-                    },
-                    contextData);
+    private static byte[] SerializeValueForCaching(TValue value)
+    {
+        return Encoding.UTF8.GetBytes(JsonSerializer.Serialize(value, jsonSerializerOptions));
+    }
 
-                if (encodedCache != null)
-                {
-                    return JsonConvert.DeserializeObject<TValue>(Encoding.UTF8.GetString(encodedCache));
-                }
-                return default;
-            }
-            catch (StackExchange.Redis.RedisConnectionException ex)
-            {
-                logger.LogWarning(ex, "RedisConnectionException while getting cache value after maximum retry attempted");
+    private static TValue? DeserializeCachedValue(byte[]? value)
+    {
+        return value is null ? default : JsonSerializer.Deserialize<TValue>(Encoding.UTF8.GetString(value), jsonSerializerOptions);
+    }
 
-                return default;
-            }
-            catch (StackExchange.Redis.RedisTimeoutException ex)
-            {
-                logger.LogWarning(ex, "RedisTimeoutException while getting cache value after maximum retry attempted");
-
-                return default;
-            }
-            catch (BrokenCircuitException)
-            {
-                logger.LogWarning("Bypassing cache, circuit broken");
-                return default;
-            }
-            catch (Exception ex)
-            {
-                logger.LogError(ex, "Exception while accessing Redis cache");
-                return default;
-            }
-        }
+    private Dictionary<string, object> CreatePollyContextData()
+    {
+        return new() { [PolicyContextItems.Logger] = _logger };
     }
 }

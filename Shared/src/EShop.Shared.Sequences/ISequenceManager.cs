@@ -1,6 +1,6 @@
 ﻿using EShop.Shared.Scoping;
 using EShop.Shared.Scoping.ResourceAccessControl;
-using static EShop.Shared.Scoping.ResourceAccessControl.FeatureConstants;
+using static EShop.Shared.Scoping.ResourceAccessControl.FeatureIds;
 
 namespace EShop.Shared.Sequences;
 
@@ -41,7 +41,7 @@ internal sealed class SequenceManager : ISequenceManager
         try
         {
             var calculatedSequenceId = sequenceId;
-            if (await _featureValidator.HasFeatureAsync(IdentityFeatures.EnableTenantSpecificSequences_FeatureId))
+            if (await _featureValidator.HasFeatureAsync(Authorization.EnableTenantSpecificSequences))
             {
                 calculatedSequenceId = TenantSequence.GetTenantSequenceId(sequenceId, _userDetailsProvider.AuthenticatedUser.TenantId);
             }

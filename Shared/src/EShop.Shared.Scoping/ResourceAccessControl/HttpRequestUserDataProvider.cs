@@ -214,18 +214,30 @@ public sealed class HttpRequestUserDataProvider : IUserDetailsProvider
         try
         {
             // We are using username as id for users stored in our local database (as it is unique across tenants anyway)
-            var username = accessToken.Claims.First(x => x.Type == "username").Value;
-            var tenantGroups = accessToken.Claims.Where(x => x.Type == "tenant:groups").Select(x => x.Value).ToList();
+            var userIdClaim = accessToken.Claims.FirstOrDefault(x => x.Type == EShopClaimTypes.UserId);
 
-            var defaultTenantGroup = tenantGroups.Count > 1
+            if (userIdClaim == null)
+            {
+                _logger.LogWarning("No user ID claim found in access token. Available claims: {Claims}",
+                    string.Join(", ", accessToken.Claims.Select(c => $"{c.Type}={c.Value}")));
+                user = null;
+                return false;
+            }
+
+            var username = userIdClaim.Value;
+            var tenantGroups = accessToken.Claims.Where(x => x.Type == EShopClaimTypes.TenantGroups).Select(x => x.Value).ToList();
+
+            var primaryTenantId = tenantGroups.Count > 1
                 ? tenantGroups.First(x => !x.Equals(UserData.EShopSupportGroup, StringComparison.OrdinalIgnoreCase))
                 : tenantGroups.FirstOrDefault();
+
+            var isSupportUser = tenantGroups.Contains(UserData.EShopSupportGroup);
 
             user = new UserData(
                 username,
                 username,
-                defaultTenantGroup ?? string.Empty,
-                tenantGroups.Contains(UserData.EShopSupportGroup),
+                primaryTenantId ?? string.Empty,
+                isSupportUser,
                 username);
 
             return true;
@@ -248,23 +260,12 @@ public sealed class HttpRequestUserDataProvider : IUserDetailsProvider
             return null;
         }
 
-        var tokenHandler = new JsonWebTokenHandler();
-        var token = tokenHandler.ReadJsonWebToken(accessTokenEncoded); // Read JsonWebToken: not validation
+        var handler = new JsonWebTokenHandler();
+        var token = handler.ReadJsonWebToken(accessTokenEncoded); // Read JsonWebToken: not validation
 
         if (token == null)
         {
             return null;
-        }
-
-        var expirationClaim = token.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Exp);
-        if (expirationClaim != null && long.TryParse(expirationClaim.Value, out var exp))
-        {
-            var expirationTime = DateTimeOffset.FromUnixTimeSeconds(exp).UtcDateTime;
-            if (expirationTime < DateTime.UtcNow)
-            {
-                _logger.LogWarning("Access token has expired");
-                return null;
-            }
         }
 
         return token;
@@ -272,7 +273,6 @@ public sealed class HttpRequestUserDataProvider : IUserDetailsProvider
 
     public string GetRawAccessToken()
     {
-        return _httpContextAccessor.HttpContext?.Request.Headers["Authorization"].FirstOrDefault() ?? string.Empty;
+        return _httpContextAccessor.HttpContext?.Request.Headers.Authorization.FirstOrDefault() ?? string.Empty;
     }
-
 }

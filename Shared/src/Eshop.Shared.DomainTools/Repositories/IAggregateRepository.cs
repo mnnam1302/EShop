@@ -7,7 +7,7 @@ namespace EShop.Shared.DomainTools.Repositories;
 /// </summary>
 /// <typeparam name="TAggregateRoot">The type of the aggregate root entity.</typeparam>
 /// <typeparam name="TKey">The type of the aggregate root entity's identifier.</typeparam>
-public interface IAggregateRepository<TAggregateRoot, in TKey> : IRepositoryBase<TAggregateRoot, TKey>
+public interface IAggregateRepository<TAggregateRoot, in TKey> : IRepository<TAggregateRoot, TKey>
     where TAggregateRoot : class, IAggregateRoot<TKey>
 {
 }

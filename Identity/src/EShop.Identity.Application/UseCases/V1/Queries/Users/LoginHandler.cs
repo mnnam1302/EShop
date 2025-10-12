@@ -55,9 +55,17 @@ public class LoginHandler : IQueryHandler<Query.Login, Response.AuthenticatedRes
             RefreshTokenExpiryTime = DateTime.Now.AddHours(6)
         };
 
-        await _tokenCachingService.AddTokenAsync(
-            user.Id,
-            result);
+        // Convert to AuthenticationCaching for caching
+        var authenticationCaching = new TokenAuthenticationCaching
+        {
+            UserId = result.UserId,
+            UserName = result.UserName,
+            AccessToken = result.AccessToken,
+            RefreshToken = result.RefreshToken,
+            RefreshTokenExpiryTime = new DateTimeOffset(result.RefreshTokenExpiryTime)
+        };
+
+        await _tokenCachingService.AddTokenAsync(user.Id, authenticationCaching);
 
         return Result.Success(result);
     }

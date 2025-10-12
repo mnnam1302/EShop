@@ -17,4 +17,9 @@ public class EventBusGateway : IEventBusGateway
     {
         await _publishEndpoint.Publish<TEvent>(@event, cancellationToken);
     }
+
+    public async Task PublishAsync(IIntegrationEvent @event, CancellationToken cancellationToken = default)
+    {
+        await _publishEndpoint.Publish(@event, cancellationToken);
+    }
 }

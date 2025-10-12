@@ -1,4 +1,4 @@
-﻿using EShop.Shared.Contracts.Abstractions.Requests;
+﻿using EShop.Shared.Contracts.Abstractions.MessageBus;
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.EventBus.Services;
 using EShop.Shared.Scoping;
@@ -36,13 +36,13 @@ public interface IApiTestContextBase
 public abstract class ApiTestContextBase
 {
     public const string DefaultTenantId = "TEST-TENANT";
-    public const string DefaultOrganizationEmail = "organization_test@test.com";
+    public const string DefaultOrganizationEmail = "test_organization@eshop.ecommerce";
     public const string DefaultUserEmail = "test_admin@test.com";
     public const string SourceSystem = "BddTest";
 
-    protected static readonly string[] AllFeatureIds = typeof(FeatureConstants)
+    protected static readonly string[] AllFeatureIds = typeof(FeatureIds)
         .GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy)
-        .Where(fi => fi.IsLiteral && !fi.IsInitOnly && fi.Name != nameof(FeatureConstants.InitialState))
+        .Where(fi => fi.IsLiteral && !fi.IsInitOnly && fi.Name != nameof(FeatureIds.InitialState))
         .Select(fi => fi.GetValue(null)?.ToString())
         .Where(featureId => featureId is not null)
         .ToArray()!;
@@ -69,18 +69,17 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
 
     private readonly Dictionary<string, UserData> _users = new();
 
-    private UserData _defaultUser
-        = new UserData("TEST_ADMIN", "TEST_ADMIN", DefaultTenantId, isSupportUser: true);
+    private UserData _defaultUser = new UserData(
+        "TEST_ADMIN",
+        "TEST_ADMIN",
+        DefaultTenantId,
+        isSupportUser: true);
 
     private string LoggedInUser;
 
-    protected ApiTestContextBase() : this(startupFactory: null)
-    {
-    }
-
     protected ApiTestContextBase(Func<WebHostBuilderContext, TStartup> startupFactory)
     {
-        MutableMemoryConfigurationProvider mutableMemoryConfigurationProvider = new(new Dictionary<string, string>());
+        var mutableMemoryConfigurationProvider = new MutableMemoryConfigurationProvider(new Dictionary<string, string>());
 
         var webHostBuilder = new WebHostBuilder()
             .UseDefaultServiceProvider((context, options) =>
@@ -124,17 +123,11 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
     }
 
     public Microsoft.Extensions.Logging.ILogger Logger => _logger;
-
     public ILoggerFactory LoggerFactory => ServiceProvider.GetRequiredService<ILoggerFactory>();
-
     public IServiceProvider ServiceProvider => _serviceScope.ServiceProvider;
-
     public IIntegrationEventsTracker EventTracker { get; private set; }
-
     public Exception LastApiError { get; set; }
-
     public HttpClient Client => GetAuthorizedClient(_defaultUser);
-
     public HttpStatusCode LastStatusCode { get; set; }
 
     #region Manage User Management
@@ -271,7 +264,6 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
         var client = _server.CreateClient();
         client.DefaultRequestHeaders.Accept.Clear();
 
-        // Simulate Header Propagation middleware which doesn't work on the test client
         var httpContext = _server.Services.GetService<IHttpContextAccessor>()?.HttpContext;
         if (httpContext != null &&
             httpContext.Request.Headers.TryGetValue("Authorization", out var values) &&
@@ -285,10 +277,10 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
 
     public HttpClient GetAuthorizedClient(UserData? user, string acceptHeader = "application/json")
     {
-        return GetAuthorisedClientCore(user, acceptHeader);
+        return GetAuthorizedClientCore(user, acceptHeader);
     }
 
-    private HttpClient GetAuthorisedClientCore(UserData? user, string acceptHeader)
+    private HttpClient GetAuthorizedClientCore(UserData? user, string acceptHeader)
     {
         var client = _server.CreateClient();
         client.DefaultRequestHeaders.Accept.Clear();
@@ -309,215 +301,93 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
     #endregion HTTP Client Management
 
     #region Http Action Method
-
-    public async Task<Result<TResponse>> GetAsync<TResponse>(string relativeUri, UserData? user = null)
+    public Task<Result<TResponse>> GetAsync<TResponse>(string relativeUri, UserData? user = null)
     {
-        try
-        {
-            if (string.IsNullOrEmpty(relativeUri))
-                throw new ArgumentNullException(nameof(relativeUri));
-
-            var client = GetAuthorizedClient(user);
-
-            using var response = await client.GetAsync(relativeUri);
-
-            var result = await ProcessResultResponse<TResponse>(response);
-            return result;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogWarning(ex, "Error during GET request to {relativeUri}", relativeUri);
-            this.LastApiError = ex;
-            throw;
-        }
+        return SendAsync<Result<TResponse>>(c => c.GetAsync(relativeUri), relativeUri, user, null, "GET");
     }
 
-    public async Task<Result> PostAsync<TRequest>(string relativeUri, TRequest request, UserData? user = null)
-        where TRequest : ICommand
+    public Task<Result> PostAsync<TRequest>(string relativeUri, TRequest request, UserData? user = null)
     {
-        try
-        {
-            if (string.IsNullOrEmpty(relativeUri))
-                throw new ArgumentNullException(nameof(relativeUri));
-
-            if (request == null)
-                throw new ArgumentNullException(nameof(request));
-
-            var client = GetAuthorizedClient(user);
-            var requestBody = new StringContent(System.Text.Json.JsonSerializer.Serialize(request), Encoding.UTF8, "application/json");
-
-            _logger.LogInformation("Sending REQUEST as '{username}': POST {relativeUri} {jsonBody}", user?.Username ?? _defaultUser?.Username, relativeUri, requestBody);
-
-            using var response = await client.PostAsync(relativeUri, requestBody);
-
-            return await ProcessResultResponse(response);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogWarning(ex, "Error during POST request to {relativeUri}", relativeUri);
-            this.LastApiError = ex;
-            throw;
-        }
+        return SendAsync<Result>(
+             c => c.PostAsync(relativeUri, new StringContent(System.Text.Json.JsonSerializer.Serialize(request), Encoding.UTF8, "application/json")),
+             relativeUri, user, request, "POST");
     }
 
-    public async Task<Result<TResponse>> PostAsync<TRequest, TResponse>(string relativeUri, TRequest request, UserData? user = null)
-        where TRequest : ICommand<TResponse>
+    public Task<Result<TResponse>> PostAsync<TRequest, TResponse>(string relativeUri, TRequest request, UserData? user = null)
     {
-        try
-        {
-            if (string.IsNullOrEmpty(relativeUri))
-                throw new ArgumentNullException(nameof(relativeUri));
-
-            if (request == null)
-                throw new ArgumentNullException(nameof(request));
-
-            var client = GetAuthorizedClient(user);
-            var requestBody = new StringContent(System.Text.Json.JsonSerializer.Serialize(request), Encoding.UTF8, "application/json");
-
-            _logger.LogInformation("Sending REQUEST as '{username}': POST {relativeUri} {jsonBody}", user?.Username ?? _defaultUser?.Username, relativeUri, requestBody);
-
-            using var response = await client.PostAsync(relativeUri, requestBody);
-
-            return await ProcessResultResponse<TResponse>(response);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogWarning(ex, "Error during POST request to {relativeUri}", relativeUri);
-            this.LastApiError = ex;
-            throw;
-        }
+        return SendAsync<Result<TResponse>>(
+            c => c.PostAsync(relativeUri, new StringContent(System.Text.Json.JsonSerializer.Serialize(request), Encoding.UTF8, "application/json")),
+            relativeUri, user, request, "POST");
     }
 
-    public async Task<Result> PutAsync<TRequest>(string relativeUri, TRequest request, UserData? user = null)
-        where TRequest : ICommand
+    public Task<Result> PutAsync<TRequest>(string relativeUri, TRequest request, UserData? user = null)
     {
-        try
-        {
-            if (string.IsNullOrEmpty(relativeUri))
-                throw new ArgumentNullException(nameof(relativeUri));
-
-            if (request == null)
-                throw new ArgumentNullException(nameof(request));
-
-            var client = GetAuthorizedClient(user);
-            var requestBody = new StringContent(System.Text.Json.JsonSerializer.Serialize(request), Encoding.UTF8, "application/json");
-
-            _logger.LogInformation("Sending REQUEST as '{username}': PUT {relativeUri} {jsonBody}", user?.Username ?? _defaultUser?.Username, relativeUri, requestBody);
-
-            using var response = await client.PutAsync(relativeUri, requestBody);
-
-            return await ProcessResultResponse(response);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogWarning(ex, "Error during PUT request to {relativeUri}", relativeUri);
-            this.LastApiError = ex;
-            throw;
-        }
+        return SendAsync<Result>(
+            c => c.PutAsync(relativeUri, new StringContent(System.Text.Json.JsonSerializer.Serialize(request), Encoding.UTF8, "application/json")),
+            relativeUri, user, request, "PUT");
     }
 
-    public async Task<Result<TResponse>> PutAsync<TRequest, TResponse>(string relativeUri, TRequest request, UserData? user = null)
-        where TRequest : ICommand<TResponse>
+    public Task<Result<TResponse>> PutAsync<TRequest, TResponse>(string relativeUri, TRequest request, UserData? user = null)
     {
-        try
-        {
-            if (string.IsNullOrEmpty(relativeUri))
-                throw new ArgumentNullException(nameof(relativeUri));
-
-            if (request == null)
-                throw new ArgumentNullException(nameof(request));
-
-            var client = GetAuthorizedClient(user);
-            var requestBody = new StringContent(System.Text.Json.JsonSerializer.Serialize(request), Encoding.UTF8, "application/json");
-
-            _logger.LogInformation("Sending REQUEST as '{username}': PUT {relativeUri} {jsonBody}", user?.Username ?? _defaultUser?.Username, relativeUri, requestBody);
-
-            using var response = await client.PutAsync(relativeUri, requestBody);
-
-            return await ProcessResultResponse<TResponse>(response);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogWarning(ex, "Error during PUT request to {relativeUri}", relativeUri);
-            this.LastApiError = ex;
-            throw;
-        }
+        return SendAsync<Result<TResponse>>(
+            c => c.PutAsync(relativeUri, new StringContent(System.Text.Json.JsonSerializer.Serialize(request), Encoding.UTF8, "application/json")),
+            relativeUri, user, request, "PUT");
     }
 
-    public async Task<Result> PatchAsync<TRequest>(string relativeUri, TRequest request, UserData? user = null)
-        where TRequest : ICommand
+    public Task<Result> PatchAsync<TRequest>(string relativeUri, TRequest request, UserData? user = null)
     {
-        try
-        {
-            if (string.IsNullOrEmpty(relativeUri))
-                throw new ArgumentNullException(nameof(relativeUri));
-
-            if (request == null)
-                throw new ArgumentNullException(nameof(request));
-
-            var client = GetAuthorizedClient(user);
-            var requestBody = new StringContent(System.Text.Json.JsonSerializer.Serialize(request), Encoding.UTF8, "application/json");
-
-            _logger.LogInformation("Sending REQUEST as '{username}': PATCH {relativeUri} {jsonBody}", user?.Username ?? _defaultUser?.Username, relativeUri, requestBody);
-
-            using var response = await client.PatchAsync(relativeUri, requestBody);
-
-            return await ProcessResultResponse(response);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogWarning(ex, "Error during PATCH request to {relativeUri}", relativeUri);
-            this.LastApiError = ex;
-            throw;
-        }
+        return SendAsync<Result>(
+            c => c.PatchAsync(relativeUri, new StringContent(System.Text.Json.JsonSerializer.Serialize(request), Encoding.UTF8, "application/json")),
+            relativeUri, user, request, "PATCH");
     }
 
-    public async Task<Result<TResponse>> PatchAsync<TRequest, TResponse>(string relativeUri, TRequest request, UserData? user = null)
-        where TRequest : ICommand<TResponse>
+    public Task<Result<TResponse>> PatchAsync<TRequest, TResponse>(string relativeUri, TRequest request, UserData? user = null)
     {
-        try
-        {
-            if (string.IsNullOrEmpty(relativeUri))
-                throw new ArgumentNullException(nameof(relativeUri));
-
-            if (request == null)
-                throw new ArgumentNullException(nameof(request));
-
-            var client = GetAuthorizedClient(user);
-            var requestBody = new StringContent(System.Text.Json.JsonSerializer.Serialize(request), Encoding.UTF8, "application/json");
-
-            _logger.LogInformation("Sending REQUEST as '{username}': PATCH {relativeUri} {jsonBody}", user?.Username ?? _defaultUser?.Username, relativeUri, requestBody);
-
-            using var response = await client.PatchAsync(relativeUri, requestBody);
-
-            return await ProcessResultResponse<TResponse>(response);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogWarning(ex, "Error during PATCH request to {relativeUri}", relativeUri);
-            this.LastApiError = ex;
-            throw;
-        }
+        return SendAsync<Result<TResponse>>(
+            c => c.PatchAsync(relativeUri, new StringContent(System.Text.Json.JsonSerializer.Serialize(request), Encoding.UTF8, "application/json")),
+            relativeUri, user, request, "PATCH");
     }
 
-    public async Task<Result> DeleteAsync<TRequest>(string relativeUri, UserData? user = null)
+    public Task<Result> DeleteAsync<TRequest>(string relativeUri, UserData? user = null)
+    {
+
+        return SendAsync<Result>(c => c.DeleteAsync(relativeUri), relativeUri, user, null, "DELETE");
+    }
+
+    private async Task<TResult> SendAsync<TResult>(
+        Func<HttpClient, Task<HttpResponseMessage>> sendFunc,
+        string relativeUri,
+        UserData? user = null,
+        object? request = null,
+        string method = "")
     {
         try
         {
-            if (string.IsNullOrEmpty(relativeUri))
-                throw new ArgumentNullException(nameof(relativeUri));
-
+            ArgumentNullException.ThrowIfNull(relativeUri);
             var client = GetAuthorizedClient(user);
-
-            _logger.LogInformation("Sending REQUEST as '{username}': DELETE {relativeUri}", user?.Username ?? _defaultUser?.Username, relativeUri);
-
-            using var response = await client.DeleteAsync(relativeUri);
-
-            return await ProcessResultResponse(response);
+            if (request != null)
+            {
+                _logger.LogInformation("Sending REQUEST as '{username}': {method} {relativeUri} {jsonBody}", user?.Username ?? _defaultUser?.Username, method, relativeUri, request);
+            }
+            else
+            {
+                _logger.LogInformation("Sending REQUEST as '{username}': {method} {relativeUri}", user?.Username ?? _defaultUser?.Username, method, relativeUri);
+            }
+            using var response = await sendFunc(client);
+            if (typeof(TResult) == typeof(Result))
+            {
+                var result = await ProcessResultResponse(response);
+                return (TResult)(object)result;
+            }
+            else
+            {
+                var result = await ProcessResultResponse<TResult>(response);
+                return (TResult)(object)result;
+            }
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "Error during DELETE request to {relativeUri}", relativeUri);
+            _logger.LogWarning(ex, "Error during {method} request to {relativeUri}", method, relativeUri);
             this.LastApiError = ex;
             throw;
         }
@@ -542,10 +412,16 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
     #region Integration Event
 
     public async Task PublishIntegrationEvent<TEvent>(object eventData)
-        where TEvent : class, Shared.Contracts.Abstractions.MessageBus.IIntegrationEvent
+        where TEvent : class, IIntegrationEvent
     {
         var eventBusGateway = ServiceProvider.GetRequiredService<IEventBusGateway>();
         await eventBusGateway.PublishAsync<TEvent>(eventData);
+    }
+
+    public async Task PublishIntegrationEvent(IIntegrationEvent @event)
+    {
+        var eventBus = ServiceProvider.GetRequiredService<IEventBusGateway>();
+        await eventBus.PublishAsync(@event);
     }
 
     #endregion Integration Event
@@ -562,19 +438,6 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
             .ReadFrom.Configuration(serviceProvider.GetRequiredService<IConfiguration>())
             .WriteTo.Debug(outputTemplate: "[{Timestamp:HH:mm:ss.fff} {Level:u3}] (T={ThreadId}) {Message:lj} {Properties}{NewLine}{Exception}{NewLine}")
             .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss.fff} {Level:u3}] (T={ThreadId}) {Message:lj} {Properties}{NewLine}{Exception}{NewLine}");
-    }
-
-    private static bool CheckLogContextProperty(
-        IReadOnlyDictionary<string, Serilog.Events.LogEventPropertyValue> logContextProperties,
-        string propertyName,
-        string targetTextValue)
-    {
-        bool doesMatchTargetValue = false;
-        if (logContextProperties.ContainsKey(propertyName))
-        {
-            doesMatchTargetValue = logContextProperties[propertyName].ToString().Equals(targetTextValue, StringComparison.InvariantCultureIgnoreCase);
-        }
-        return doesMatchTargetValue;
     }
 
     #endregion Logging

@@ -1,7 +1,7 @@
 ﻿using EShop.Shared.Contracts.Services.Tenancy.Features;
 using EShop.Shared.EventBus.Services;
 using EShop.Shared.Scoping.ResourceAccessControl;
-using static EShop.Shared.Scoping.ResourceAccessControl.FeatureConstants;
+using static EShop.Shared.Scoping.ResourceAccessControl.FeatureIds;
 
 namespace EShop.Identity.Infrastructure.Producers;
 
@@ -12,25 +12,25 @@ public class UserFeatureRegistrationService(IEventBusGateway eventBusGateway) : 
     [
         new()
         {
-            Id = IdentityFeatures.OrganisationRingFencing_FeatureId,
+            Id = Authorization.OrganisationRingFencing,
             Name = "Organisation Ring Fencing",
             Description = "Organisation Ring Fencing"
         },
         new()
         {
-            Id = IdentityFeatures.ExternalApplicationIntegration_FeatureId,
+            Id = Authorization.ExternalApplicationIntegration,
             Name = "External Application Integration",
             Description = "External Application Integration"
         },
         new()
         {
-            Id = IdentityFeatures.CustomRoles_FeatureId,
+            Id = Authorization.CustomRoles,
             Name = "Custom Roles",
             Description = "Custom Roles"
         },
         new()
         {
-            Id = IdentityFeatures.UserInvites_FeatureId,
+            Id = Authorization.UserInvites,
             Name = "User Invites",
             Description = "User Invites"
         },

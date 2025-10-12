@@ -113,7 +113,7 @@ public static class ServiceCollectionExtensions
         services.AddOptions<CatalogSequenceOptions>()
             .BindConfiguration(CatalogSequenceOptions.SectionName);
 
-        services.AddScoped<IUnitOfWork, UnitOfWorkDbContext<CatalogDbContext>>();
+        services.AddScoped<IUnitOfWork, EFUnitOfWork<CatalogDbContext>>();
 
         services.AddScoped<IEventBusGateway, EventBusGateway>();
         services.AddScoped<IFeatureRegistrationService, CatalogFeatureRegistrationService>();

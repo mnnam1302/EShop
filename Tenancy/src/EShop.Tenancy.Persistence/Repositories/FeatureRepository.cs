@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EShop.Tenancy.Persistence.Repositories;
 
-internal class FeatureRepository : RepositoryBaseDbContext<TenancyDbContext, Feature, string>, IFeatureRepository
+internal class FeatureRepository : EFRepository<TenancyDbContext, Feature, string>, IFeatureRepository
 {
     private readonly TenancyDbContext _dbContext;
 

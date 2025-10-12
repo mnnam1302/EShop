@@ -4,7 +4,7 @@ using Microsoft.Extensions.Caching.Distributed;
 
 namespace EShop.Testing.JsonApiApplication.Providers;
 
-public class TestUserTokenProvider : IRedisCachingAsyncProvider<Response.AuthenticatedResponse>
+public class TestUserTokenProvider : IRedisCachingProvider<Response.AuthenticatedResponse>
 {
     private readonly Dictionary<string, Response.AuthenticatedResponse> userTokens = new();
 

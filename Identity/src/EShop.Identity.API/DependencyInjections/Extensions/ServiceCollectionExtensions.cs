@@ -86,7 +86,7 @@ public static class ServiceCollectionExtensions
         services.AddTransient<IPermissionValidator, CurrentUserPermissionsValidator>();
 
         services.AddTransient<IUserPermissionsProvider, OwnerCacheUserPermissionService>();
-        services.AddTransient<IRedisCachingAsyncProvider<string[]>, RedisCachingAsyncProvider<string[]>>();
+        services.AddTransient<IRedisCachingProvider<string[]>, RedisCachingProvider<string[]>>();
         services.AddTransient<IPermissionCachingService, PermissionRedisCachingService>();
         services.AddTransient<IPermissionCalculator, PermissionCalculator>();
     }
@@ -96,10 +96,10 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IUserOrganizationContextProvider, OwnerCacheUserOrganizationContextService>();
 
         services.AddScoped<IUserOrganizationContextCachingService, UserOrganizationContextCachingService>();
-        services.AddScoped<IRedisCachingAsyncProvider<UserOrganizationContext>, RedisCachingAsyncProvider<UserOrganizationContext>>();
+        services.AddScoped<IRedisCachingProvider<UserOrganizationContext>, RedisCachingProvider<UserOrganizationContext>>();
 
         services.AddScoped<IOrganizationContextCachingService, OrganizationContextCachingService>();
-        services.AddScoped<IRedisCachingAsyncProvider<OrganizationContext>, RedisCachingAsyncProvider<OrganizationContext>>();
+        services.AddScoped<IRedisCachingProvider<OrganizationContext>, RedisCachingProvider<OrganizationContext>>();
 
         services.AddScoped<IUserOrganizationContextCalculator, UserOrganizationContextCalculator>();
     }

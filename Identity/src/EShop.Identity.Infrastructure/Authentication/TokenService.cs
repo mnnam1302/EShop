@@ -20,14 +20,15 @@ public sealed class TokenService : ITokenService
 
     public string GenerateAccessToken(IEnumerable<Claim> claims)
     {
-        var screteKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtOptions.SecretKey));
+        // TODO: Kodi
+        var screteKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(string.Empty));
         var signatureCredentials = new SigningCredentials(screteKey, SecurityAlgorithms.HmacSha256);
 
         var tokenOptions = new JwtSecurityToken(
             issuer: _jwtOptions.Issuer,
             audience: _jwtOptions.Audience,
             claims: claims,
-            expires: DateTime.Now.AddHours(_jwtOptions.AccessTokenExpiryHours),
+            expires: DateTime.Now.AddHours(_jwtOptions.AccessTokenExpiryMinutes),
             signingCredentials: signatureCredentials
         );
 
@@ -47,7 +48,8 @@ public sealed class TokenService : ITokenService
 
     public ClaimsPrincipal GetPrincipalFromExpiredToken(string token)
     {
-        var Key = Encoding.UTF8.GetBytes(_jwtOptions.SecretKey);
+        // TODO: Kodi
+        var Key = Encoding.UTF8.GetBytes(string.Empty);
 
         var tokenValidationParameters = new TokenValidationParameters
         {
