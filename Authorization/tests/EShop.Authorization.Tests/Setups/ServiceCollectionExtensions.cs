@@ -1,7 +1,7 @@
 ﻿using EShop.Authorization.API.Boostrapping;
 using EShop.Authorization.Application.DependencyInjections;
 using EShop.Authorization.Infrastructure;
-using EShop.Authorization.Infrastructure.DependencyInjection;
+using EShop.Authorization.Infrastructure.DependencyInjections;
 using EShop.Shared.Cache.DependencyInejctions.Extensions;
 using EShop.Shared.Contracts.Services.Tenancy.Tenants;
 using EShop.Shared.CQRS;

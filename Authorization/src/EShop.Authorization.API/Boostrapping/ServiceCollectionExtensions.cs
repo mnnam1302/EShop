@@ -3,7 +3,7 @@ using EShop.Authorization.Application.Abstractions;
 using EShop.Authorization.Application.DependencyInjections;
 using EShop.Authorization.Infrastructure;
 using EShop.Authorization.Infrastructure.Authentication;
-using EShop.Authorization.Infrastructure.DependencyInjection;
+using EShop.Authorization.Infrastructure.DependencyInjections;
 using EShop.Shared.Cache.DependencyInejctions.Extensions;
 using EShop.Shared.CQRS;
 using EShop.Shared.DomainTools.DependencyInjections;

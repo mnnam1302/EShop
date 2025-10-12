@@ -16,7 +16,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace EShop.Authorization.Infrastructure.DependencyInjection;
+namespace EShop.Authorization.Infrastructure.DependencyInjections;
 
 public static class ServiceCollectionExtensions
 {
