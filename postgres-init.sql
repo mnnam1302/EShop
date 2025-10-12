@@ -21,9 +21,9 @@ END $do$;
 CREATE DATABASE eshop_authorization;
 
 GRANT ALL PRIVILEGES ON DATABASE eshop_authorization TO authorization;
-\c eshop_users
+\c eshop_authorization
 CREATE EXTENSION IF NOT EXISTS citext;
-\c eshop_users
+\c eshop_authorization
 GRANT ALL PRIVILEGES ON SCHEMA public TO authorization;
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO authorization;
 GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO authorization;
