@@ -26,8 +26,7 @@ public static class ServiceCollectionExtensions
             .AddDbContextWithScoping<AuthorizationDbContext>(configuration);
 
         services.AddRedisHealthCheck(configuration)
-            .AddRedisInfrastructure(configuration)
-            .AddUserTokensProvider();
+            .AddRedisInfrastructure(configuration);
 
         return services;
     }
@@ -68,20 +67,20 @@ public static class ServiceCollectionExtensions
 
     public static IServiceCollection AddMultiTenantAuthentication(this IServiceCollection services)
     {
-        // Configure options with validation
         services.AddOptions<JwtOptions>()
             .BindConfiguration(JwtOptions.ConfigurationSection)
             .ValidateDataAnnotations()
             .ValidateOnStart();
 
-        // Register RSA key management services
+        // RSA key management (tenant-specific)
         services.AddRsaKeyProvider();
         services.AddScoped<IRsaKeyManager, RsaKeyManager>();
 
         // Register background services
         //services.AddHostedService<RsaKeyRotationBackgroundService>();
 
-        // Register JWT token management
+        // JWT token management
+        services.AddUserTokensProvider();
         services.AddScoped<IJwtTokenManager, JwtTokenManager>();
         services.AddJwtTokenAuthentication();
 
