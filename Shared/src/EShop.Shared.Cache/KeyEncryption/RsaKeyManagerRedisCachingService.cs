@@ -7,10 +7,6 @@ using System.Security.Cryptography;
 
 namespace EShop.Shared.Cache.KeyEncryption;
 
-/// <summary>
-/// Manages caching of RSA key pairs and public keys for multi-tenant JWT token signing.
-/// Follows the established caching patterns used throughout the EShop platform.
-/// </summary>
 public sealed class RsaKeyManagerRedisCachingService : IKeyManagerCachingService
 {
     private readonly ILogger<RsaKeyManagerRedisCachingService> _logger;

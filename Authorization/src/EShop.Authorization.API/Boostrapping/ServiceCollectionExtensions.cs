@@ -5,8 +5,6 @@ using EShop.Authorization.Infrastructure;
 using EShop.Authorization.Infrastructure.Authentication;
 using EShop.Authorization.Infrastructure.DependencyInjection;
 using EShop.Shared.Cache.DependencyInejctions.Extensions;
-using EShop.Shared.Cache.KeyEncryption;
-using EShop.Shared.Cache.Providers;
 using EShop.Shared.CQRS;
 using EShop.Shared.DomainTools.DependencyInjections;
 using EShop.Shared.JsonApi.Extensions;
@@ -77,9 +75,7 @@ public static class ServiceCollectionExtensions
             .ValidateOnStart();
 
         // Register RSA key management services
-        services.AddScoped<IRedisCachingProvider<RsaKeyPair>, RedisCachingProvider<RsaKeyPair>>();
-        services.AddScoped<IRedisCachingProvider<RsaPublicKeyCacheEntry>, RedisCachingProvider<RsaPublicKeyCacheEntry>>();
-        services.AddScoped<IKeyManagerCachingService, RsaKeyManagerRedisCachingService>();
+        services.AddRsaKeyProvider();
         services.AddScoped<IRsaKeyManager, RsaKeyManager>();
 
         // Register background services

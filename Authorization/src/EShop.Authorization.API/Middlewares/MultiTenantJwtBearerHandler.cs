@@ -58,7 +58,6 @@ public sealed class MultiTenantJwtBearerHandler(
         return Result.Success(santitizedToken);
     }
 
-
     private async Task<Result> ValidateTokenInCacheAsync(ClaimsPrincipal principal, string accessToken)
     {
         var userId = GetClaimValue(principal, EShopClaimTypes.UserId);

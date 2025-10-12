@@ -24,7 +24,6 @@ if (app.Environment.IsDevelopment())
     app.UseCors("CorsPolicy");
 }
 
-// Production
 //app.UseHttpsRedirection();
 
 app.UseAuthentication();
@@ -47,5 +46,3 @@ finally
     await Log.CloseAndFlushAsync();
     await app.DisposeAsync();
 }
-
-public partial class Program { }
