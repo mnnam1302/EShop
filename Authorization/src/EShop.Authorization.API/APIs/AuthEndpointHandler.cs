@@ -45,14 +45,12 @@ public static class AuthEndpointHandler
 
     private static async Task<IResult> LogoutAsync(
         [FromBody] LogoutRequest request,
-        [FromServices] IUserDetailsProvider userDetailsProvider,
         [FromServices] IMediator mediator,
         CancellationToken cancellationToken)
     {
         var command = new LogoutCommand
         {
             UserId = request.UserId,
-            AccessToken = userDetailsProvider.GetRawAccessToken()
         };
 
         var result = await mediator.SendAsync(command, cancellationToken);

@@ -158,7 +158,7 @@ internal sealed class RefreshTokenQueryHandler : IQueryHandler<RefreshTokenQuery
         var tokenCache = new TokenAuthenticationCaching
         {
             UserId = response.UserId,
-            UserName = response.UserId, // Following established pattern
+            UserName = response.UserId,
             AccessToken = response.AccessToken,
             RefreshToken = response.RefreshToken,
             RefreshTokenExpiryTime = response.RefreshTokenExpiryTime
