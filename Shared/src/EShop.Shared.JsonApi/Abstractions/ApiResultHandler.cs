@@ -4,15 +4,23 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace EShop.Shared.JsonApi.Abstractions;
 
-public abstract class ApiEndpointBase : ControllerBase
+public static class ApiResultHandler
 {
-    protected static IResult HandlerFailure(Result result)
+    public static IResult HandleFailure(Result result)
     {
         return result switch
         {
             { IsSuccess: true } => throw new InvalidOperationException(),
-            IValidationResult validationResult => Results.BadRequest(CreateProblemDetails("Validation Error", StatusCodes.Status400BadRequest, result.Error, validationResult.Errors)),
-            _ => Results.BadRequest(CreateProblemDetails("Bad Request", StatusCodes.Status400BadRequest, result.Error))
+            IValidationResult validationResult =>
+                Results.BadRequest(CreateProblemDetails(
+                    "Validation Error",
+                    StatusCodes.Status400BadRequest,
+                    result.Error,
+                    validationResult.Errors)),
+            _ => Results.BadRequest(CreateProblemDetails(
+                "Bad Request",
+                StatusCodes.Status400BadRequest,
+                result.Error))
         };
     }
 

@@ -11,7 +11,7 @@ namespace EShop.Identity.Presentation.Controllers;
 [ApiController]
 [ApiVersion("1.0")]
 [Route("api/v{api:apiVersion}/[controller]")]
-public class UserOrganzationContextController : ApiEndpointBase
+public class UserOrganzationContextController
 {
     private readonly ISender _sender;
 
@@ -28,7 +28,7 @@ public class UserOrganzationContextController : ApiEndpointBase
 
         if (result.IsFailure)
         {
-            return HandlerFailure(result);
+            return ApiResultHandler.HandleFailure(result);
         }
 
         return TypedResults.Ok(result);

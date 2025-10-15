@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Routing;
 
 namespace EShop.Tenancy.Presentation.APIs.Tenants;
 
-public class TenantApi : ApiEndpointBase, ICarterModule
+public class TenantApi : ICarterModule
 {
     private const string BaseUrl = "api/v{version:apiVersion}/tenants";
 
@@ -31,7 +31,7 @@ public class TenantApi : ApiEndpointBase, ICarterModule
 
         if (result.IsFailure)
         {
-            return HandlerFailure(result);
+            return ApiResultHandler.HandleFailure(result);
         }
 
         return Results.Created("", result);

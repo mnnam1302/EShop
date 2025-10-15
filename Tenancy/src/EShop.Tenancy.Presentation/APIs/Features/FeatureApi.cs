@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Routing;
 
 namespace EShop.Tenancy.Presentation.APIs.Features;
 
-public class FeatureApi : ApiEndpointBase, ICarterModule
+public class FeatureApi : ICarterModule
 {
     private const string BaseUrl = "api/v{version:apiVersion}/features";
 
@@ -26,9 +26,10 @@ public class FeatureApi : ApiEndpointBase, ICarterModule
     private static async Task<IResult> GetFeaturesV1Async(ISender sender)
     {
         var result = await sender.Send(new Query.GetFeaturesQuery());
+
         if (result.IsFailure)
         {
-            return HandlerFailure(result);
+            return ApiResultHandler.HandleFailure(result);
         }
 
         return Results.Ok(result);

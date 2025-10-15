@@ -13,7 +13,7 @@ namespace EShop.Identity.Presentation.Controllers;
 [ApiController]
 [ApiVersion("1.0")]
 [Route("api/v{version:apiVersion}/auth")]
-public class AuthenticationController : ApiEndpointBase
+public class AuthenticationController
 {
     private readonly ISender _sender;
     private readonly IUserDetailsProvider _userDetailsProvider;
@@ -31,7 +31,7 @@ public class AuthenticationController : ApiEndpointBase
 
         if (result.IsFailure)
         {
-            return HandlerFailure(result);
+            return ApiResultHandler.HandleFailure(result);
         }
 
         return Results.Created("", result);
@@ -44,7 +44,7 @@ public class AuthenticationController : ApiEndpointBase
 
         if (result.IsFailure)
         {
-            return HandlerFailure(result);
+            return ApiResultHandler.HandleFailure(result);
         }
 
         return Results.Ok(result);
@@ -59,7 +59,7 @@ public class AuthenticationController : ApiEndpointBase
 
         if (result.IsFailure)
         {
-            return HandlerFailure(result);
+            return ApiResultHandler.HandleFailure(result);
         }
 
         return Results.Ok(result);
@@ -77,7 +77,7 @@ public class AuthenticationController : ApiEndpointBase
 
         if (result.IsFailure)
         {
-            return HandlerFailure(result);
+            return ApiResultHandler.HandleFailure(result);
         }
 
         return Results.Ok(result);

@@ -13,7 +13,7 @@ namespace EShop.Identity.Presentation.Controllers;
 [ApiController]
 [ApiVersion("1.0")]
 [Route("api/v{version:apiVersion}/organizations")]
-public class OrganizationsController : ApiEndpointBase
+public class OrganizationsController
 {
     private readonly ISender _sender;
 
@@ -31,7 +31,7 @@ public class OrganizationsController : ApiEndpointBase
 
         if (result.IsFailure)
         {
-            HandlerFailure(result);
+            ApiResultHandler.HandleFailure(result);
         }
 
         return Results.Created("", result);
@@ -47,7 +47,7 @@ public class OrganizationsController : ApiEndpointBase
         var result = await _sender.Send(command);
         if (result.IsFailure)
         {
-            HandlerFailure(result);
+            ApiResultHandler.HandleFailure(result);
         }
 
         return Results.Ok(result);
@@ -63,7 +63,7 @@ public class OrganizationsController : ApiEndpointBase
         var result = await _sender.Send(new Query.GetOrganizationById(id));
 
         if (result.IsFailure)
-            return HandlerFailure(result);
+            return ApiResultHandler.HandleFailure(result);
 
         return Results.Ok(result);
     }

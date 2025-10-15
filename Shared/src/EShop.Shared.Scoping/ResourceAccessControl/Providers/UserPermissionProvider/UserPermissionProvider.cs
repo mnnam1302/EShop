@@ -15,7 +15,7 @@ public class UserPermissionProvider : IUserPermissionsProvider
         _permissionCache = permissionCache;
         _userPermissionHttpClient = userPermissionHttpClient;
     }
-    public async Task<string[]> GetPermissions(string userId)
+    public async Task<string[]> GetPermissions(string userId, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrEmpty(userId))
         {
