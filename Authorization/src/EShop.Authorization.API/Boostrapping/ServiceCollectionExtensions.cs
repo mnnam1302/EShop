@@ -9,7 +9,7 @@ using EShop.Shared.CQRS;
 using EShop.Shared.DomainTools.DependencyInjections;
 using EShop.Shared.JsonApi.Extensions;
 using EShop.Shared.JsonApi.Middlewares;
-using EShop.Shared.Scoping.DependencyInjections.Options;
+using EShop.Shared.Scoping.DependencyInjections;
 using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 

@@ -1,4 +1,4 @@
-﻿using EShop.Shared.Scoping.DependencyInjections.Options;
+﻿using EShop.Shared.Scoping.DependencyInjections;
 using Microsoft.Extensions.Configuration;
 using System.Globalization;
 

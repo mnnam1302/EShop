@@ -149,7 +149,7 @@ internal sealed class LoginQueryHandler : IQueryHandler<LoginQuery, Authenticati
 
     private async Task StoreAuthenticatedResultAsync(AuthenticationResponse result)
     {
-        var authenticationCachedValue = new TokenAuthenticationCaching
+        var authenticationCachedValue = new TokenAuthentication
         {
             UserId = result.UserId,
             UserName = result.UserId,

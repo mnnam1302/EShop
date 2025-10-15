@@ -1,4 +1,5 @@
 ﻿using EShop.Shared.Contracts.Abstractions.Shared;
+using EShop.Shared.Scoping.Exceptions;
 using Newtonsoft.Json;
 using static EShop.Shared.Contracts.Services.Identity.Organizations.Response;
 using static EShop.Shared.Contracts.Services.Identity.Users.Response;
@@ -28,7 +29,7 @@ public class UserOrganizationContextHttpClient
         var response = await authenticatedClient.GetStringAsync($"api/v1/userOrganizationContext");
         var result = JsonConvert.DeserializeObject<Result<UserOrganizationContext>>(response);
 
-        return result?.Value ?? throw new UserOrganizationContextNotFoundException();
+        return result?.Value ?? throw new NotFoundException("User organization context is not found.");
     }
 
     public async Task<UserOrganizationContext> GetUserOrganizationContextAsync(string userId, string userType = UserTypes.TenantUsers)
@@ -42,7 +43,7 @@ public class UserOrganizationContextHttpClient
         var response = await authenticatedClient.GetStringAsync($"api/v1/userOrganizationContext");
         var result = JsonConvert.DeserializeObject<Result<UserOrganizationContext>>(response);
 
-        return result?.Value ?? throw new UserOrganizationContextNotFoundException();
+        return result?.Value ?? throw new NotFoundException("User organization context is not found.");
     }
 
     public async Task<OrganizationContext> GetOrganizationContextForSpecificOrganizationAsync(string organizationId)
@@ -56,7 +57,7 @@ public class UserOrganizationContextHttpClient
         var response = await authenticatedClient.GetStringAsync($"api/v1/organizations/{organizationId}");
         var result = JsonConvert.DeserializeObject<Result<OrganizationContext>>(response);
 
-        return result?.Value ?? throw new OrganizationContextNotFoundException();
+        return result?.Value ?? throw new NotFoundException("Organization context is not found.");
     }
 
     public async Task<OrganizationContext> GetOrganizationContextByPathAsync(string organizationContextPath)
@@ -70,6 +71,6 @@ public class UserOrganizationContextHttpClient
         var response = await authenticatedClient.GetStringAsync($"api/v1/organizations?organizationContextPath={organizationContextPath}");
         var result = JsonConvert.DeserializeObject<Result<OrganizationContext>>(response);
 
-        return result?.Value ?? throw new OrganizationContextNotFoundException();
+        return result?.Value ?? throw new NotFoundException("Organization context is not found.");
     }
 }

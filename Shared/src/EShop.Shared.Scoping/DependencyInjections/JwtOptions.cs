@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace EShop.Shared.Scoping.DependencyInjections.Options;
+namespace EShop.Shared.Scoping.DependencyInjections;
 
 public sealed class JwtOptions
 {

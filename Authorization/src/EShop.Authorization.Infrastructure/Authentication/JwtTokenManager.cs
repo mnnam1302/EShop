@@ -1,5 +1,5 @@
 ﻿using EShop.Authorization.Application.Abstractions;
-using EShop.Shared.Scoping.DependencyInjections.Options;
+using EShop.Shared.Scoping.DependencyInjections;
 using EShop.Shared.Scoping.ResourceAccessControl;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;

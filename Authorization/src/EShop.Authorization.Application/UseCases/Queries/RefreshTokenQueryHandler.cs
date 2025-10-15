@@ -95,24 +95,24 @@ internal sealed class RefreshTokenQueryHandler : IQueryHandler<RefreshTokenQuery
         return new TokenClaims(userId, tenantId, principal.Claims);
     }
 
-    private async Task<Result<TokenAuthenticationCaching>> ValidateCachedTokensAsync(string userId, RefreshTokenQuery query, CancellationToken cancellationToken)
+    private async Task<Result<TokenAuthentication>> ValidateCachedTokensAsync(string userId, RefreshTokenQuery query, CancellationToken cancellationToken)
     {
         var cachedToken = await _tokenCachingService.TryGetTokenAsync(userId, cancellationToken);
         if (cachedToken is null)
         {
-            return Result.Failure<TokenAuthenticationCaching>(ErrorContants.Authentication.TokenInvalidCache);
+            return Result.Failure<TokenAuthentication>(ErrorContants.Authentication.TokenInvalidCache);
         }
 
         var tokenValidationResult = ValidateTokensMatch(cachedToken, query);
         if (tokenValidationResult.IsFailure)
         {
-            return Result.Failure<TokenAuthenticationCaching>(tokenValidationResult.Error);
+            return Result.Failure<TokenAuthentication>(tokenValidationResult.Error);
         }
 
         return Result.Success(cachedToken);
     }
 
-    private static Result ValidateTokensMatch(TokenAuthenticationCaching cachedToken, RefreshTokenQuery query)
+    private static Result ValidateTokensMatch(TokenAuthentication cachedToken, RefreshTokenQuery query)
     {
         var sanitizedAccessToken = JwtEncodedStringHelper.GetJwtEncodedString(query.AccessToken);
 
@@ -129,7 +129,7 @@ internal sealed class RefreshTokenQueryHandler : IQueryHandler<RefreshTokenQuery
         return Result.Success();
     }
 
-    private static bool AreTokensMatching(TokenAuthenticationCaching cachedToken, string accessToken, string refreshToken) =>
+    private static bool AreTokensMatching(TokenAuthentication cachedToken, string accessToken, string refreshToken) =>
         cachedToken.AccessToken == accessToken && cachedToken.RefreshToken == refreshToken;
 
     private static bool IsRefreshTokenExpired(DateTimeOffset expiryTime) =>
@@ -151,7 +151,7 @@ internal sealed class RefreshTokenQueryHandler : IQueryHandler<RefreshTokenQuery
 
     private async Task StoreCachedTokensAsync(string userId, AuthenticationResponse response, CancellationToken cancellationToken)
     {
-        var tokenCache = new TokenAuthenticationCaching
+        var tokenCache = new TokenAuthentication
         {
             UserId = response.UserId,
             UserName = response.UserId,

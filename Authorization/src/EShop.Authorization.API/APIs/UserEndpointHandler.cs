@@ -17,13 +17,13 @@ public static class UserEndpointHandler
             .MapGroup(BaseUrl)
             .HasApiVersion(1);
 
-        group.MapGet("/{userId}/permissions", GetUserPermissionsAsync)
-            .RequireAuthenticatedUser();
+        group.MapGet("/{userId}/permissions", GetUserPermissions).RequireAuthenticatedUser();
+        group.MapGet("/{userId}/organizationContext", GetUserOrganizationContext).RequireAuthenticatedUser();
 
         return endpoints;
     }
 
-    private static async Task<IResult> GetUserPermissionsAsync(
+    private static async Task<IResult> GetUserPermissions(
         [FromRoute] string userId,
         [FromServices] IMediator mediator,
         CancellationToken cancellationToken)
@@ -38,5 +38,13 @@ public static class UserEndpointHandler
         }
 
         return Results.Ok(result);
+    }
+
+    private static async Task<IResult> GetUserOrganizationContext(
+        [FromRoute] string userId,
+        [FromServices] IMediator mediator,
+        CancellationToken cancellationToken)
+    {
+        return Results.Ok();
     }
 }

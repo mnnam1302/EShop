@@ -56,7 +56,7 @@ public class LoginHandler : IQueryHandler<Query.Login, Response.AuthenticatedRes
         };
 
         // Convert to AuthenticationCaching for caching
-        var authenticationCaching = new TokenAuthenticationCaching
+        var authenticationCaching = new TokenAuthentication
         {
             UserId = result.UserId,
             UserName = result.UserName,

@@ -1,6 +1,6 @@
 ﻿using EShop.Shared.Cache.KeyEncryption;
 using EShop.Shared.Contracts.Abstractions.Shared;
-using EShop.Shared.Scoping.DependencyInjections.Options;
+using EShop.Shared.Scoping.DependencyInjections;
 using EShop.Shared.Scoping.ResourceAccessControl;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserTokenProvider;
 using Microsoft.AspNetCore.Authentication;
