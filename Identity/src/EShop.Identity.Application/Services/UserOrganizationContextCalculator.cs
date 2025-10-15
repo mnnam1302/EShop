@@ -51,7 +51,7 @@ public class UserOrganizationContextCalculator : IUserOrganizationContextCalcula
                 authenticatedUser.Id,
                 authenticatedUser.UserType,
                 authenticatedUser.TenantId)
-                ?? throw new UserOrganizationContextNotFound("User organization is not found");
+                ?? throw new NotFoundException("User organization is not found");
 
             return userOrganizationContext;
         }
@@ -121,7 +121,7 @@ public class UserOrganizationContextCalculator : IUserOrganizationContextCalcula
                 userId,
                 typeUser,
                 authenticatedUser.TenantId)
-                ?? throw new UserOrganizationContextNotFound($"User organization context with Id {userId} is not found");
+                ?? throw new NotFoundException($"User organization context with Id {userId} is not found");
 
             return userOrganizationContext;
         }
