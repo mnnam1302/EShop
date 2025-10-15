@@ -13,7 +13,7 @@ internal sealed class OwnerCacheUserPermissionService : IUserPermissionsProvider
         _permissionCalculator = permissionCalculator;
     }
 
-    public async Task<string[]> GetPermissions(string userId)
+    public async Task<string[]> GetPermissions(string userId, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrEmpty(userId))
         {

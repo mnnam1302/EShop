@@ -17,4 +17,9 @@ public static class ErrorContants
         public static readonly Error InvalidToken = new("Authentication.InvalidToken", "The provided token is invalid or malformed");
         public static readonly Error TokenInvalidCache = new("Authentication.TokenInvalidCache", "The token is not found in cache or has been revoked");
     }
+
+    public static class User
+    {
+        public static readonly Error PermissionNotFound = new("User.PermissionNotFound", "The specified permission is not found.");
+    }
 }
