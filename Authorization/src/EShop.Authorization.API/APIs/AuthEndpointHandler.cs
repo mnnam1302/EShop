@@ -12,7 +12,7 @@ public static class AuthEndpointHandler
 {
     private const string BaseUrl = "api/v{version:apiVersion}/auth";
 
-    public static IEndpointRouteBuilder MapAuthenticationEndpoints(this IEndpointRouteBuilder endpoints)
+    public static IEndpointRouteBuilder MapAuthEndpoints(this IEndpointRouteBuilder endpoints)
     {
         var group = endpoints
             .NewVersionedApi("Auth")

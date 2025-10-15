@@ -34,6 +34,6 @@ public sealed class TestStartup : Authorization.API.Startup
         }
 
         app.UseRouting();
-        app.MapAuthenticationEndpoints();
+        app.MapAuthEndpoints();
     }
 }

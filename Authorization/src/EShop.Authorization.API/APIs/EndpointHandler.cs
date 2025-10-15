@@ -5,7 +5,9 @@ public static class EndpointHandler
     public static IEndpointRouteBuilder MapAuthorizationEndpoints(this IEndpointRouteBuilder endpoints)
     {
         endpoints.MapControllers();
-        endpoints.MapAuthenticationEndpoints();
+        endpoints
+            .MapAuthEndpoints()
+            .MapUserEndpoints();
 
         return endpoints;
     }

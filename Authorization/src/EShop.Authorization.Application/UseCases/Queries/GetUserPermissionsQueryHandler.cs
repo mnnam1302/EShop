@@ -1,0 +1,29 @@
+﻿using EShop.Shared.Contracts.Abstractions.Shared;
+using EShop.Shared.CQRS.Query;
+using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserPermissionProvider;
+
+namespace EShop.Authorization.Application.UseCases.Queries;
+
+public sealed record GetUserPermissionsQuery(string UserId) : IQuery<IEnumerable<string>>;
+
+internal sealed class GetUserPermissionsQueryHandler : IQueryHandler<GetUserPermissionsQuery, IEnumerable<string>>
+{
+    private readonly IUserPermissionsProvider _userPermissionsProvider;
+
+    public GetUserPermissionsQueryHandler(IUserPermissionsProvider userPermissionsProvider)
+    {
+        _userPermissionsProvider = userPermissionsProvider;
+    }
+
+    public async Task<Result<IEnumerable<string>>> HandleAsync(GetUserPermissionsQuery query, CancellationToken cancellationToken = default)
+    {
+        var permissions = await _userPermissionsProvider.GetPermissions(query.UserId);
+
+        if (permissions == null || permissions.Length == 0)
+        {
+            return Result.Failure<IEnumerable<string>>(new("User.Permission", "No permissions found for the specified user."));
+        }
+
+        return Result.Success(permissions.AsEnumerable());
+    }
+}
