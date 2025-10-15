@@ -7,10 +7,7 @@ using Microsoft.Extensions.Logging;
 
 namespace EShop.Authorization.Application.UseCases.Commands;
 
-public sealed class LogoutCommand : ICommand
-{
-    public required string UserId { get; init; }
-}
+public sealed record LogoutCommand(string UserId) : ICommand;
 
 internal sealed class LogoutCommandHandler : ICommandHandler<LogoutCommand>
 {

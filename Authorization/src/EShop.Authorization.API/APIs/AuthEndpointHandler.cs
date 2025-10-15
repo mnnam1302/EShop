@@ -2,6 +2,7 @@
 using EShop.Authorization.Application.UseCases.Commands;
 using EShop.Authorization.Application.UseCases.Queries;
 using EShop.Shared.CQRS;
+using EShop.Shared.JsonApi.Abstractions;
 using EShop.Shared.JsonApi.ResourceAccessControl;
 using EShop.Shared.Scoping;
 using Microsoft.AspNetCore.Mvc;
@@ -37,7 +38,7 @@ public static class AuthEndpointHandler
 
         if (result.IsFailure)
         {
-            return Results.Unauthorized();
+            return ApiResultHandler.HandleFailure(result);
         }
 
         return Results.Ok(result);
@@ -48,16 +49,13 @@ public static class AuthEndpointHandler
         [FromServices] IMediator mediator,
         CancellationToken cancellationToken)
     {
-        var command = new LogoutCommand
-        {
-            UserId = request.UserId,
-        };
+        var command = new LogoutCommand(request.UserId);
 
         var result = await mediator.SendAsync(command, cancellationToken);
 
         if (result.IsFailure)
         {
-            throw new InvalidOperationException($"Logout failed: {result.Error}");
+            ApiResultHandler.HandleFailure(result);
         }
 
         return Results.Ok();
@@ -69,17 +67,13 @@ public static class AuthEndpointHandler
         [FromServices] IMediator mediator,
         CancellationToken cancellationToken)
     {
-        var query = new RefreshTokenQuery
-        {
-            AccessToken = userDetailsProvider.GetRawAccessToken(),
-            RefreshToken = request.RefreshToken
-        };
+        var query = new RefreshTokenQuery(userDetailsProvider.GetRawAccessToken(), request.RefreshToken);
 
         var result = await mediator.QueryAsync<RefreshTokenQuery, AuthenticationResponse>(query, cancellationToken);
 
         if (result.IsFailure)
         {
-            throw new InvalidOperationException($"Token refresh failed: {result.Error}");
+            ApiResultHandler.HandleFailure(result);
         }
 
         return Results.Ok(result);

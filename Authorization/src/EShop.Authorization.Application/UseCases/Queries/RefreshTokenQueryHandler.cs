@@ -8,11 +8,7 @@ using System.Security.Claims;
 
 namespace EShop.Authorization.Application.UseCases.Queries;
 
-public sealed class RefreshTokenQuery : IQuery<AuthenticationResponse>
-{
-    public required string AccessToken { get; init; }
-    public required string RefreshToken { get; init; }
-}
+public sealed record RefreshTokenQuery(string AccessToken, string RefreshToken) : IQuery<AuthenticationResponse>;
 
 internal sealed class RefreshTokenQueryHandler : IQueryHandler<RefreshTokenQuery, AuthenticationResponse>
 {

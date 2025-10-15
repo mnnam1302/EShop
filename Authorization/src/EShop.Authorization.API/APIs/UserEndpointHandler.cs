@@ -1,5 +1,6 @@
 ﻿using EShop.Authorization.Application.UseCases.Queries;
 using EShop.Shared.CQRS;
+using EShop.Shared.JsonApi.Abstractions;
 using EShop.Shared.JsonApi.ResourceAccessControl;
 using Microsoft.AspNetCore.Mvc;
 
@@ -33,7 +34,7 @@ public static class UserEndpointHandler
 
         if (result.IsFailure)
         {
-            return Results.BadRequest(result);
+            return ApiResultHandler.HandleFailure(result);
         }
 
         return Results.Ok(result);
