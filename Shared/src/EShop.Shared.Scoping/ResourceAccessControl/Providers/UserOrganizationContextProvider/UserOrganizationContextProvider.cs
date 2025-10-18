@@ -63,25 +63,27 @@ public sealed class UserOrganizationContextProvider : IUserOrganizationContextPr
             OrganizationName = _userDetailsProvider.AuthenticatedUser.TenantId
         };
 
-    public async Task<OrganizationContext> GetOrganizationContextForSpecificOrganizationAsync(string organizationId)
+    public async Task<OrganizationContext> GetOrganizationContextForSpecificOrganizationAsync(string organizationId, CancellationToken cancellationToken = default)
     {
-        var cachedOrganizationContext = await _organizationContextCachingService.GetValue(organizationId);
+        var cachedOrganizationContext = await _organizationContextCachingService.GetValue(organizationId, cancellationToken);
+
         if (cachedOrganizationContext != null)
         {
             return cachedOrganizationContext;
         }
 
-        return await _userOrganizationContextHttpClient.GetOrganizationContextForSpecificOrganizationAsync(organizationId);
+        return await _userOrganizationContextHttpClient.GetOrganizationContextForSpecificOrganizationAsync(organizationId, cancellationToken);
     }
 
-    public async Task<OrganizationContext> GetOrganizationContextByPathAsync(string organizationContextPath)
+    public async Task<OrganizationContext> GetOrganizationContextByPathAsync(string organizationContextPath, CancellationToken cancellationToken = default)
     {
-        var cachedOrganizationContext = await _organizationContextCachingService.GetValue(organizationContextPath);
+        var cachedOrganizationContext = await _organizationContextCachingService.GetValue(organizationContextPath, cancellationToken);
+
         if (cachedOrganizationContext != null)
         {
             return cachedOrganizationContext;
         }
 
-        return await _userOrganizationContextHttpClient.GetOrganizationContextByPathAsync(organizationContextPath);
+        return await _userOrganizationContextHttpClient.GetOrganizationContextByPathAsync(organizationContextPath, cancellationToken);
     }
 }

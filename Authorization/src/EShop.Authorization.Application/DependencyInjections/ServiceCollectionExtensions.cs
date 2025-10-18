@@ -37,5 +37,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IUserOrganizationContextCalculator, UserOrganizationContextCalculator>();
         services.AddScoped<IUserOrganizationContextCachingService, UserOrganizationContextCachingService>();
         services.AddScoped<IRedisCachingProvider<UserOrganizationContext>, RedisCachingProvider<UserOrganizationContext>>();
+        services.AddScoped<IOrganizationContextCachingService, OrganizationContextCachingService>();
+        services.AddScoped<IRedisCachingProvider<OrganizationContext>, RedisCachingProvider<OrganizationContext>>();
     }
 }

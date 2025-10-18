@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 
 namespace EShop.Shared.Scoping.ResourceAccessControl.Providers.UserOrganizationContextProvider;
 
-public class UserOrganizationContextHttpClient
+public sealed class UserOrganizationContextHttpClient
 {
     private readonly HttpClient _httpClient;
     private readonly IUserDetailsProvider _userDetailsProvider;
@@ -15,7 +15,7 @@ public class UserOrganizationContextHttpClient
         _userDetailsProvider = userDetailsProvider;
     }
 
-    public async Task<UserOrganizationContext> GetUserOrganizationContextAsync(string userId, CancellationToken cancellationToken = default)
+    public async Task<UserOrganizationContext> GetUserOrganizationContextAsync(string userId, CancellationToken cancellationToken)
     {
         if (!_userDetailsProvider.IsAuthenticatedUser)
         {
@@ -24,11 +24,15 @@ public class UserOrganizationContextHttpClient
 
         // TODO: Please Kodi strongly focus here since inconsistency with JwtTokenManager (JwtToken & SecretKey) Authorization service
         var authenticatedClient = SystemInternalJwtTokenFactory.AddUserContext(_httpClient, _userDetailsProvider.AuthenticatedUser);
-
         var response = await authenticatedClient.GetStringAsync($"api/v1/users/{userId}/organizationContext", cancellationToken);
-        var result = JsonConvert.DeserializeObject<Result<UserOrganizationContext>>(response);
 
-        return result?.Value ?? throw new NotFoundException($"User organization context '{userId}' is not found.");
+        var result = JsonConvert.DeserializeObject<Result<UserOrganizationContext>>(response);
+        if (result == null)
+        {
+            throw new NotFoundException($"User organization context '{userId}' is not found.");
+        }
+
+        return result.Value;
     }
 
     public async Task<UserOrganizationContext> GetUserOrganizationContextAsync(string userId, string userType = UserTypes.TenantUsers, CancellationToken cancellationToken = default)
@@ -36,39 +40,52 @@ public class UserOrganizationContextHttpClient
         var tenantId = _userDetailsProvider.AuthenticatedUser.TenantId;
         var operationalUser = new UserData(userId, userId, tenantId, false, null, userType);
 
+        // TODO: Please Kodi strongly focus here since inconsistency with JwtTokenManager (JwtToken & SecretKey) Authorization service
         var authenticatedClient = SystemInternalJwtTokenFactory.AddUserContext(_httpClient, operationalUser);
-
         var response = await authenticatedClient.GetStringAsync($"api/v1/users/{operationalUser.Id}/organizationContext", cancellationToken);
+
         var result = JsonConvert.DeserializeObject<Result<UserOrganizationContext>>(response);
+        if (result == null)
+        {
+            throw new NotFoundException($"User organization context '{userId}' is not found.");
+        }
 
-        return result?.Value ?? throw new NotFoundException($"User organization context '{operationalUser.Id}' is not found.");
+        return result.Value;
     }
 
-    public async Task<OrganizationContext> GetOrganizationContextForSpecificOrganizationAsync(string organizationId)
+    public async Task<OrganizationContext> GetOrganizationContextForSpecificOrganizationAsync(string organizationId, CancellationToken cancellationToken)
     {
-        var userData = UserData.GetSystemUser(
-            _userDetailsProvider.AuthenticatedUser.TenantId,
-            _userDetailsProvider.AuthenticatedUser.Id);
+        var operationalUser = _userDetailsProvider.AuthenticatedUser;
+        var systemUser = UserData.GetSystemUser(operationalUser.TenantId, operationalUser.Id);
 
-        var authenticatedClient = SystemInternalJwtTokenFactory.AddUserContext(_httpClient, userData);
+        // TODO: Please Kodi strongly focus here since inconsistency with JwtTokenManager (JwtToken & SecretKey) Authorization service
+        var authenticatedClient = SystemInternalJwtTokenFactory.AddUserContext(_httpClient, systemUser);
+        var response = await authenticatedClient.GetStringAsync($"api/v1/organizations/{organizationId}/organizationContext", cancellationToken);
 
-        var response = await authenticatedClient.GetStringAsync($"api/v1/organizations/{organizationId}");
         var result = JsonConvert.DeserializeObject<Result<OrganizationContext>>(response);
+        if (result == null)
+        {
+            throw new NotFoundException($"Organization context with Id '{organizationId}' is not found.");
+        }
 
-        return result?.Value ?? throw new NotFoundException("Organization context is not found.");
+        return result.Value;
     }
 
-    public async Task<OrganizationContext> GetOrganizationContextByPathAsync(string organizationContextPath)
+    public async Task<OrganizationContext> GetOrganizationContextByPathAsync(string organizationContextPath, CancellationToken cancellationToken)
     {
-        var userData = UserData.GetSystemUser(
-           _userDetailsProvider.AuthenticatedUser.TenantId,
-           _userDetailsProvider.AuthenticatedUser.Id);
+        var operationalUser = _userDetailsProvider.AuthenticatedUser;
+        var systemUser = UserData.GetSystemUser(operationalUser.TenantId, operationalUser.Id);
 
-        var authenticatedClient = SystemInternalJwtTokenFactory.AddUserContext(_httpClient, userData);
+        // TODO: Please Kodi strongly focus here since inconsistency with JwtTokenManager (JwtToken & SecretKey) Authorization service
+        var authenticatedClient = SystemInternalJwtTokenFactory.AddUserContext(_httpClient, systemUser);
+        var response = await authenticatedClient.GetStringAsync($"api/v1/organizations?organizationContextPath={organizationContextPath}", cancellationToken);
 
-        var response = await authenticatedClient.GetStringAsync($"api/v1/organizations?organizationContextPath={organizationContextPath}");
         var result = JsonConvert.DeserializeObject<Result<OrganizationContext>>(response);
+        if (result == null)
+        {
+            throw new NotFoundException($"Organization context with path '{organizationContextPath}' is not found.");
+        }
 
-        return result?.Value ?? throw new NotFoundException("Organization context is not found.");
+        return result.Value;
     }
 }
