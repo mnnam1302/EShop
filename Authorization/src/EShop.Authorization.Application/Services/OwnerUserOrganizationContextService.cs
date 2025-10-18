@@ -6,12 +6,12 @@ namespace EShop.Authorization.Application.Services;
 
 internal sealed class OwnerUserOrganizationContextService : IUserOrganizationContextProvider
 {
-    //private readonly IUserOrganizationContextCalculator _userOrganizationContext;
+    private readonly IUserOrganizationContextCalculator _userOrganizationContext;
 
-    //public OwnerUserOrganizationContextService(IUserOrganizationContextCalculator userOrganizationContext)
-    //{
-    //    _userOrganizationContext = userOrganizationContext;
-    //}
+    public OwnerUserOrganizationContextService(IUserOrganizationContextCalculator userOrganizationContext)
+    {
+        _userOrganizationContext = userOrganizationContext;
+    }
 
     public Task<OrganizationContext> GetOrganizationContextByPathAsync(string organizationContextPath)
     {
