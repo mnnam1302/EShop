@@ -21,14 +21,14 @@ namespace EShop.Authorization.Application.Services
 
         public async Task<UserOrganizationContext> GetUserOrganizationContextAsync(CancellationToken cancellationToken = default)
         {
-            var user = _userDetailsProvider.AuthenticatedUser;
+            var operationalUser = _userDetailsProvider.AuthenticatedUser;
 
-            if (UserData.IsSystemUser(user.UserType))
+            if (UserData.IsSystemUser(operationalUser.Id))
             {
                 return GetUserOrganizationContextForSystemUser();
             }
 
-            var cachedValue = await _userContextCachingService.GetValue(user.Id, user.UserType);
+            var cachedValue = await _userContextCachingService.GetValue(operationalUser.Id, operationalUser.UserType, cancellationToken);
 
             if (cachedValue != null)
             {
@@ -38,8 +38,8 @@ namespace EShop.Authorization.Application.Services
             var userOrganizationContext = await _userContextCalculator.GetUserOrganizationContextAsync(cancellationToken);
 
             await _userContextCachingService.AddValue(
-                user.Id,
-                user.UserType,
+                operationalUser.Id,
+                operationalUser.UserType,
                 userOrganizationContext,
                 cancellationToken);
 
