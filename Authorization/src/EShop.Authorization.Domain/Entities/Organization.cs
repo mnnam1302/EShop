@@ -1,5 +1,5 @@
 ﻿using EShop.Authorization.Domain.DomainEvents;
-using EShop.Shared.Contracts.Abstractions.MessageBus;
+using EShop.Authorization.Domain.ValueObjects;
 using EShop.Shared.DomainTools.Aggregates;
 using EShop.Shared.Scoping;
 using System.ComponentModel.DataAnnotations;
@@ -16,13 +16,27 @@ public class Organization : AggregateRoot<string>, IExcludedFromScoping
 
     [MaxLength(ModelConstants.ShortText)]
     public string? ParentOrganizationId { get; set; }
-    public virtual Organization? ParentOrganization { get; set; }
+
+    [MaxLength(ModelConstants.ShortText)]
+    public string? OrganizationNumber { get; set; }
+
+    [MaxLength(ModelConstants.MediumText)]
+    public string? Email { get; set; }
+
+    [MaxLength(ModelConstants.ShortText)]
+    public string? PhoneNumber { get; set; }
+
+    public OrganisationContext Context { get; set; } = OrganisationContext.Empty();
+
+    public Address? Address { get; set; }
 
     [MaxLength(ModelConstants.ShortText)]
     public string TenantId { get; private set; } = string.Empty;
 
     [MaxLength(ModelConstants.VeryLongText)]
     public string Scope { get; private set; } = string.Empty;
+
+    public virtual Organization? ParentOrganization { get; set; }
 
     public static Organization CreateRootOrganization(string tenantId, string tenantName)
     {
@@ -32,6 +46,7 @@ public class Organization : AggregateRoot<string>, IExcludedFromScoping
             Name = tenantName,
             Description = "Root Organization",
             ParentOrganizationId = null,
+            Context = OrganisationContext.NewRoot(tenantId),
             TenantId = tenantId,
             Scope = tenantId
         };
