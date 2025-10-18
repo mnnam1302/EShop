@@ -42,7 +42,7 @@ internal sealed class RootOrganizationService : IRootOrganizationService
         var existingOrganization = await _organizationRepository.FindByIdAsync(tenantId, false, cancellationToken);
         if (existingOrganization is not null)
         {
-            _logger.LogWarning("Organization with ID {TenantId} already exists", tenantId);
+            _logger.LogWarning("Organization with ID '{TenantId}' already exists", tenantId);
             return Result.Failure<RootOrganizationSetup>(ErrorContants.Organization.AlreadyExists);
         }
 

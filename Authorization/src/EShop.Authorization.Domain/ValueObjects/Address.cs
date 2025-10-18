@@ -2,7 +2,7 @@
 
 namespace EShop.Authorization.Domain.ValueObjects;
 
-public sealed class Address : ValueObject
+public class Address : ValueObject
 {
     public string Street { get; init; } = string.Empty;
     public string City { get; init; } = string.Empty;
