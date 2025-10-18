@@ -15,7 +15,7 @@ public sealed class PasswordHasher : IPasswordHasher
 
     private const int SaltSize = 16;
     private const int HashSize = 32;
-    private const int Interations = 10000;
+    private const int Interations = 100000;
 
     private static HashAlgorithmName Algorithm = HashAlgorithmName.SHA512;
     private const char Delimeter = '-';
