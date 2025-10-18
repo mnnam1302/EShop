@@ -87,7 +87,7 @@ public class UserOrganizationContextCalculator : IUserOrganizationContextCalcula
                 OrganizationEmail = u.Organization.Email,
                 OrganizationStreet = u.Organization.Address,
                 OrganizationCity = u.Organization.City,
-                OrganizationCountry = u.Organization.Postcode,
+                OrganizationPostcode = u.Organization.Postcode,
                 UserId = u.Id,
                 UserDisplayName = u.DisplayName,
                 UserEmail = u.Email,

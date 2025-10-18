@@ -2,6 +2,7 @@
 using EShop.Shared.CQRS;
 using EShop.Shared.JsonApi.Abstractions;
 using EShop.Shared.JsonApi.ResourceAccessControl;
+using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserOrganizationContextProvider;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EShop.Authorization.API.APIs;
@@ -45,6 +46,15 @@ public static class UserEndpointHandler
         [FromServices] IMediator mediator,
         CancellationToken cancellationToken)
     {
-        return Results.Ok();
+        var query = new GetUserOrganizationContextQuery(userId);
+
+        var result = await mediator.QueryAsync<GetUserOrganizationContextQuery, UserOrganizationContext>(query, cancellationToken);
+
+        if (result.IsFailure)
+        {
+            return ApiResultHandler.HandleFailure(result);
+        }
+
+        return Results.Ok(result);
     }
 }

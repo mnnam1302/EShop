@@ -1,6 +1,6 @@
 ﻿using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.CQRS.Query;
-using static EShop.Shared.Contracts.Services.Identity.Users.Response;
+using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserOrganizationContextProvider;
 
 namespace EShop.Authorization.Application.UseCases.Queries;
 
@@ -8,8 +8,17 @@ public sealed record GetUserOrganizationContextQuery(string UserId) : IQuery<Use
 
 internal class GetUserOrganizationContextQueryHandler : IQueryHandler<GetUserOrganizationContextQuery, UserOrganizationContext>
 {
-    public Task<Result<UserOrganizationContext>> HandleAsync(GetUserOrganizationContextQuery query, CancellationToken cancellationToken = default)
+    private readonly IUserOrganizationContextProvider _userOrganizationContextProvider;
+
+    public GetUserOrganizationContextQueryHandler(IUserOrganizationContextProvider userOrganizationContextProvider)
     {
-        throw new NotImplementedException();
+        _userOrganizationContextProvider = userOrganizationContextProvider;
+    }
+
+    public async Task<Result<UserOrganizationContext>> HandleAsync(GetUserOrganizationContextQuery query, CancellationToken cancellationToken = default)
+    {
+        var userOrganizationContext = await _userOrganizationContextProvider.GetUserOrganizationContextAsync(cancellationToken);
+
+        return Result.Success(userOrganizationContext);
     }
 }

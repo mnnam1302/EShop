@@ -1,10 +1,8 @@
 ﻿using EShop.Authorization.Domain.Repositories;
 using EShop.Shared.Scoping;
 using EShop.Shared.Scoping.Exceptions;
+using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserOrganizationContextProvider;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using static EShop.Shared.Contracts.Services.Identity.Organizations.Response;
-using static EShop.Shared.Contracts.Services.Identity.Users.Response;
 
 namespace EShop.Authorization.Application.Services;
 
@@ -21,20 +19,12 @@ public interface IUserOrganizationContextCalculator
 
 internal sealed class UserOrganizationContextCalculator : IUserOrganizationContextCalculator
 {
-    private readonly ILogger<UserOrganizationContextCalculator> _logger;
     private readonly IUserDetailsProvider _userDetailsProvider;
-    private readonly IOrganizationRepository _organizationRepository;
     private readonly IUserRepository _userRepository;
 
-    public UserOrganizationContextCalculator(
-        ILogger<UserOrganizationContextCalculator> logger,
-        IUserDetailsProvider userDetailsProvider,
-        IOrganizationRepository organizationRepository,
-        IUserRepository userRepository)
+    public UserOrganizationContextCalculator(IUserDetailsProvider userDetailsProvider, IUserRepository userRepository)
     {
-        _logger = logger;
         _userDetailsProvider = userDetailsProvider;
-        _organizationRepository = organizationRepository;
         _userRepository = userRepository;
     }
 
