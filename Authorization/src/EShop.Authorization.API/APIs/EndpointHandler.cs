@@ -6,7 +6,8 @@ public static class EndpointHandler
     {
         endpoints
             .MapAuthEndpoints()
-            .MapUserEndpoints();
+            .MapUserEndpoints()
+            .MapOrganizationEndpoints();
 
         return endpoints;
     }

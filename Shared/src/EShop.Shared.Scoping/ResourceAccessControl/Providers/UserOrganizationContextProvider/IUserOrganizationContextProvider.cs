@@ -6,7 +6,7 @@ public interface IUserOrganizationContextProvider
 
     Task<UserOrganizationContext> GetUserOrganizationContextForSpecificUserAsync(string userId, string userType = UserTypes.TenantUsers, CancellationToken cancellationToken = default);
 
-    Task<OrganizationContext> GetOrganizationContextForSpecificOrganizationAsync(string organizationId);
+    Task<OrganizationContext> GetOrganizationContextForSpecificOrganizationAsync(string organizationId, CancellationToken cancellationToken = default);
 
-    Task<OrganizationContext> GetOrganizationContextByPathAsync(string organizationContextPath);
+    Task<OrganizationContext> GetOrganizationContextByPathAsync(string organizationContextPath, CancellationToken cancellationToken = default);
 }

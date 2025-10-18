@@ -2,7 +2,6 @@
 using EShop.Shared.Scoping;
 using EShop.Shared.Scoping.Exceptions;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserOrganizationContextProvider;
-using Microsoft.EntityFrameworkCore;
 
 namespace EShop.Authorization.Application.Services;
 
@@ -21,11 +20,16 @@ internal sealed class UserOrganizationContextCalculator : IUserOrganizationConte
 {
     private readonly IUserDetailsProvider _userDetailsProvider;
     private readonly IUserRepository _userRepository;
+    private readonly IOrganizationRepository _organizationRepository;
 
-    public UserOrganizationContextCalculator(IUserDetailsProvider userDetailsProvider, IUserRepository userRepository)
+    public UserOrganizationContextCalculator(
+        IUserDetailsProvider userDetailsProvider,
+        IUserRepository userRepository,
+        IOrganizationRepository organizationRepository)
     {
         _userDetailsProvider = userDetailsProvider;
         _userRepository = userRepository;
+        _organizationRepository = organizationRepository;
     }
 
     public async Task<UserOrganizationContext> GetUserOrganizationContextAsync(CancellationToken cancellationToken)
@@ -39,11 +43,6 @@ internal sealed class UserOrganizationContextCalculator : IUserOrganizationConte
                 authenticatedUser.Id,
                 authenticatedUser.UserType,
                 cancellationToken);
-
-            if (userOrganizationContext == null)
-            {
-                throw new NotFoundException($"User organization context '{authenticatedUser.Id}' is not found.");
-            }
 
             return userOrganizationContext;
         }
@@ -62,11 +61,6 @@ internal sealed class UserOrganizationContextCalculator : IUserOrganizationConte
 
             var userOrganizationContext = await CalculateUserOrganizationContext(userId, userType, cancellationToken);
 
-            if (userOrganizationContext == null)
-            {
-                throw new NotFoundException($"User organization context with Id {userId} is not found");
-            }
-
             return userOrganizationContext;
         }
         finally
@@ -75,7 +69,7 @@ internal sealed class UserOrganizationContextCalculator : IUserOrganizationConte
         }
     }
 
-    private async Task<UserOrganizationContext?> CalculateUserOrganizationContext(string userId, string userType, CancellationToken cancellationToken)
+    private async Task<UserOrganizationContext> CalculateUserOrganizationContext(string userId, string userType, CancellationToken cancellationToken)
     {
         return userType switch
         {
@@ -84,40 +78,113 @@ internal sealed class UserOrganizationContextCalculator : IUserOrganizationConte
         };
     }
 
-    private async Task<UserOrganizationContext?> GetTenantUserOrganizationContextAsync(string userId, CancellationToken cancellationToken)
+    private async Task<UserOrganizationContext> GetTenantUserOrganizationContextAsync(string userId, CancellationToken cancellationToken)
     {
-        var userOrganization = await _userRepository.FindByCondition(
-                predicate: u => u.Id == userId && u.Organization != null,
-                trackChanges: false,
-                includeProperties: u => u.Organization!)
-            .Select(u => new UserOrganizationContext
-            {
-                OrganizationId = u.Organization!.Id,
-                OrganizationContextPath = u.Organization!.Context.Path, // important Ring-fencing
-                OrganizationName = u.Organization.Name,
-                OrganizationNumber = u.Organization.OrganizationNumber,
-                OrganizationPhoneNumber = u.Organization.PhoneNumber,
-                OrganizationEmail = u.Organization.Email,
-                OrganizationStreet = u.Organization.Address.Street,
-                OrganizationCity = u.Organization.Address.City,
-                OrganizationCountry = u.Organization.Address.Country,
-                UserId = u.Id,
-                UserDisplayName = u.Name,
-                UserEmail = u.Email,
-                UserPhoneNumber = u.PhoneNumber,
-            })
-            .SingleOrDefaultAsync(cancellationToken);
+        var user = await _userRepository.FindSingleAsync(
+            predicate: u => u.Id == userId && u.Organization != null,
+            includeProperties: u => u.Organization!,
+            cancellationToken: cancellationToken);
 
-        return userOrganization;
+        if (user == null)
+        {
+            throw new NotFoundException($"User organization context with Id {userId} is not found");
+        }
+
+        return new UserOrganizationContext
+        {
+            OrganizationId = user!.Organization!.Id,
+            OrganizationContextPath = user.Organization.Context.Path, // important Ring-fencing
+            OrganizationName = user.Organization.Name,
+            OrganizationNumber = user.Organization.OrganizationNumber,
+            OrganizationPhoneNumber = user.Organization.PhoneNumber,
+            OrganizationEmail = user.Organization.Email,
+            OrganizationStreet = user.Organization.Address?.Street,
+            OrganizationCity = user.Organization.Address?.City,
+            OrganizationCountry = user.Organization.Address?.Country,
+            UserId = user.Id,
+            UserDisplayName = user.Name,
+            UserEmail = user.Email,
+            UserPhoneNumber = user.PhoneNumber,
+        };
     }
 
-    public Task<OrganizationContext> GetOrganizationContextByPathAsync(string organizationContextPath, CancellationToken cancellationToken)
+    public async Task<OrganizationContext> GetOrganizationContextForSpecificOrganizationAsync(string organizationId, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        try
+        {
+            var operationalUser = _userDetailsProvider.AuthenticatedUser;
+            _userDetailsProvider.SetSystemUserContext(operationalUser.TenantId);
+
+            var organizationContext = await CalculateOrganizationContext(organizationId, cancellationToken);
+
+            return organizationContext;
+        }
+        finally
+        {
+            _userDetailsProvider.ClearSystemUserContext();
+        }
     }
 
-    public Task<OrganizationContext> GetOrganizationContextForSpecificOrganizationAsync(string organizationId, CancellationToken cancellationToken)
+    private async Task<OrganizationContext> CalculateOrganizationContext(string organizationId, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        var organization = await _organizationRepository.FindByIdAsync(organizationId, cancellationToken: cancellationToken);
+
+        if (organization == null)
+        {
+            throw new NotFoundException($"Organization context with Id {organizationId} is not found.");
+        }
+
+        return new OrganizationContext
+        {
+            OrganizationId = organization.Id,
+            OrganizationName = organization.Name,
+            OrganizationContextPath = organization.Context.Path,
+            OrganizationNumber = organization.OrganizationNumber,
+            OrganizationPhoneNumber = organization.PhoneNumber,
+            OrganizationEmail = organization.Email,
+            OrganizationStreet = organization.Address?.Street,
+            OrganizationCity = organization.Address?.City,
+            OrganizationCountry = organization.Address?.Country
+        };
+    }
+
+    public async Task<OrganizationContext> GetOrganizationContextByPathAsync(string organizationContextPath, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var authenticatedUser = _userDetailsProvider.AuthenticatedUser;
+            _userDetailsProvider.SetSystemUserContext(authenticatedUser.TenantId);
+
+            var organizationContext = await CalculateOrganizationContextByPath(organizationContextPath, cancellationToken);
+
+            return organizationContext;
+        }
+        finally
+        {
+            _userDetailsProvider.ClearSystemUserContext();
+        }
+    }
+
+    private async Task<OrganizationContext> CalculateOrganizationContextByPath(string organizationContextPath, CancellationToken cancellationToken)
+    {
+        var organization = await _organizationRepository.FindSingleAsync(o => o.Context.Path == organizationContextPath, cancellationToken: cancellationToken);
+
+        if (organization == null)
+        {
+            throw new NotFoundException($"Organization context with context path {organizationContextPath} is not found.");
+        }
+
+        return new OrganizationContext
+        {
+            OrganizationId = organization.Id,
+            OrganizationName = organization.Name,
+            OrganizationContextPath = organization.Context.Path,
+            OrganizationNumber = organization.OrganizationNumber,
+            OrganizationPhoneNumber = organization.PhoneNumber,
+            OrganizationEmail = organization.Email,
+            OrganizationStreet = organization.Address?.Street,
+            OrganizationCity = organization.Address?.City,
+            OrganizationCountry = organization.Address?.Country
+        };
     }
 }

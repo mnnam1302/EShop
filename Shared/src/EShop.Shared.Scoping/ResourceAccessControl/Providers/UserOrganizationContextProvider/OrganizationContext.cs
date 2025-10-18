@@ -7,9 +7,9 @@
         public string? OrganizationNumber { get; init; }
         public string? OrganizationPhoneNumber { get; init; }
         public string? OrganizationEmail { get; init; }
-        public string? OrganizationAddress { get; init; }
+        public string? OrganizationStreet { get; init; }
         public string? OrganizationCity { get; init; }
-        public string? OrganizationPostcode { get; init; }
+        public string? OrganizationCountry { get; init; }
         public required string OrganizationContextPath { get; init; }
     }
 }

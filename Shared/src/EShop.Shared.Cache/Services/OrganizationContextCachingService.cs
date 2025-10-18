@@ -3,11 +3,10 @@ using EShop.Shared.Cache.Providers;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserOrganizationContextProvider;
 using Microsoft.Extensions.Caching.Distributed;
-using static EShop.Shared.Contracts.Services.Identity.Organizations.Response;
 
 namespace EShop.Shared.Cache.Services;
 
-public class OrganizationContextCachingService : IOrganizationContextCachingService
+public sealed class OrganizationContextCachingService : IOrganizationContextCachingService
 {
     private readonly IRedisCachingProvider<OrganizationContext> _redisCachingAsyncProvider;
     private readonly CachedRemoteConfiguration _cachedRemoteConfiguration;
@@ -20,25 +19,30 @@ public class OrganizationContextCachingService : IOrganizationContextCachingServ
         _cachedRemoteConfiguration = cachedRemoteConfiguration;
     }
 
-    public Task AddValue(string organizationId, OrganizationContext organizationContext)
+    public Task AddValue(string organizationId, OrganizationContext organizationContext, CancellationToken cancellationToken = default)
     {
         var cacheKey = OrganizationContextCacheKeyProvider.GetOrganizationContextCacheKey(organizationId);
-        return _redisCachingAsyncProvider.AddAsync(
-            cacheKey,
-            organizationContext,
-            new DistributedCacheEntryOptions { SlidingExpiration = _cachedRemoteConfiguration.GetSlidingTokenExpiration() });
+        var cacheOptions = new DistributedCacheEntryOptions
+        {
+            SlidingExpiration = _cachedRemoteConfiguration.GetSlidingTokenExpiration()
+        };
+
+        return _redisCachingAsyncProvider.AddAsync(cacheKey, organizationContext, cacheOptions, cancellationToken);
     }
 
-    public async Task<OrganizationContext?> GetValue(string organizationId)
+    public async Task<OrganizationContext?> GetValue(string organizationId, CancellationToken cancellationToken = default)
     {
-        var cachedOrganizationContext = await _redisCachingAsyncProvider.GetAsync(
-            OrganizationContextCacheKeyProvider.GetOrganizationContextCacheKey(organizationId));
+        var cacheKey = OrganizationContextCacheKeyProvider.GetOrganizationContextCacheKey(organizationId);
+
+        var cachedOrganizationContext = await _redisCachingAsyncProvider.GetAsync(cacheKey, cancellationToken);
+
         return cachedOrganizationContext;
     }
 
-    public async Task RemoveValue(string organizationId)
+    public async Task RemoveValue(string organizationId, CancellationToken cancellationToken = default)
     {
         var cacheKey = OrganizationContextCacheKeyProvider.GetOrganizationContextCacheKey(organizationId);
-        await _redisCachingAsyncProvider.ClearAsync(cacheKey);
+
+        await _redisCachingAsyncProvider.ClearAsync(cacheKey, cancellationToken);
     }
 }
