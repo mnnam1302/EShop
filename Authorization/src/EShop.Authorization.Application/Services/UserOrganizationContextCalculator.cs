@@ -53,6 +53,28 @@ internal sealed class UserOrganizationContextCalculator : IUserOrganizationConte
         }
     }
 
+    public async Task<UserOrganizationContext> GetUserOrganizationContextForSpecificUserAsync(string userId, string userType, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var operationalUser = _userDetailsProvider.AuthenticatedUser;
+            _userDetailsProvider.SetSystemUserContext(operationalUser.TenantId);
+
+            var userOrganizationContext = await CalculateUserOrganizationContext(userId, userType, cancellationToken);
+
+            if (userOrganizationContext == null)
+            {
+                throw new NotFoundException($"User organization context with Id {userId} is not found");
+            }
+
+            return userOrganizationContext;
+        }
+        finally
+        {
+            _userDetailsProvider.ClearSystemUserContext();
+        }
+    }
+
     private async Task<UserOrganizationContext?> CalculateUserOrganizationContext(string userId, string userType, CancellationToken cancellationToken)
     {
         return userType switch
@@ -87,11 +109,6 @@ internal sealed class UserOrganizationContextCalculator : IUserOrganizationConte
             .SingleOrDefaultAsync(cancellationToken);
 
         return userOrganization;
-    }
-
-    public Task<UserOrganizationContext> GetUserOrganizationContextForSpecificUserAsync(string userId, string typeUser, CancellationToken cancellationToken)
-    {
-        throw new NotImplementedException();
     }
 
     public Task<OrganizationContext> GetOrganizationContextByPathAsync(string organizationContextPath, CancellationToken cancellationToken)
