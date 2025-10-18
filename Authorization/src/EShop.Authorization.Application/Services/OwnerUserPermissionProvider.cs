@@ -2,12 +2,12 @@
 
 namespace EShop.Authorization.Application.Services;
 
-internal sealed class OwnerCacheUserPermissionService : IUserPermissionsProvider
+internal sealed class OwnerUserPermissionProvider : IUserPermissionsProvider
 {
     private readonly IPermissionCachingService _permissionCache;
     private readonly IPermissionCalculator _permissionCalculator;
 
-    public OwnerCacheUserPermissionService(IPermissionCachingService permissionCache, IPermissionCalculator permissionCalculator)
+    public OwnerUserPermissionProvider(IPermissionCachingService permissionCache, IPermissionCalculator permissionCalculator)
     {
         _permissionCache = permissionCache;
         _permissionCalculator = permissionCalculator;

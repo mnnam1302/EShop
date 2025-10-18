@@ -7,7 +7,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace EShop.Shared.DbResourceAccessControl.Interceptors;
 
-public class PostgresMultiTenantConnectionInterceptor : DbConnectionInterceptor, IMultiTenantIsolationStrategy
+public sealed class PostgresMultiTenantConnectionInterceptor : DbConnectionInterceptor, IMultiTenantIsolationStrategy
 {
     private readonly IUserDetailsProvider _userDetailsProvider;
     private readonly ILogger<PostgresMultiTenantConnectionInterceptor> _logger;

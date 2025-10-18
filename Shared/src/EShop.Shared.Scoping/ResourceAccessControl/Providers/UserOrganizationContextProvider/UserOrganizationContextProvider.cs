@@ -1,12 +1,9 @@
-﻿using static EShop.Shared.Contracts.Services.Identity.Organizations.Response;
-using static EShop.Shared.Contracts.Services.Identity.Users.Response;
+﻿namespace EShop.Shared.Scoping.ResourceAccessControl.Providers.UserOrganizationContextProvider;
 
-namespace EShop.Shared.Scoping.ResourceAccessControl.Providers.UserOrganizationContextProvider;
-
-public class UserOrganizationContextProvider : IUserOrganizationContextProvider
+public sealed class UserOrganizationContextProvider : IUserOrganizationContextProvider
 {
     private readonly UserOrganizationContextHttpClient _userOrganizationContextHttpClient;
-    private readonly IUserOrganizationContextCachingService _userOrganizationContextCachingService;
+    private readonly IUserOrganizationContextCachingService _userContextCachingService;
     private readonly IOrganizationContextCachingService _organizationContextCachingService;
     private readonly IUserDetailsProvider _userDetailsProvider;
 
@@ -17,42 +14,43 @@ public class UserOrganizationContextProvider : IUserOrganizationContextProvider
         IUserDetailsProvider userDetailsProvider)
     {
         _userOrganizationContextHttpClient = userOrganizationContextHttpClient;
-        _userOrganizationContextCachingService = userOrganizationContextCachingService;
+        _userContextCachingService = userOrganizationContextCachingService;
         _organizationContextCachingService = organizationContextCachingService;
         _userDetailsProvider = userDetailsProvider;
     }
 
-    public async Task<UserOrganizationContext> GetUserOrganizationContextAsync()
+    public async Task<UserOrganizationContext> GetUserOrganizationContextAsync(CancellationToken cancellationToken = default)
     {
         if (_userDetailsProvider.IsSystemUser)
         {
             return GetUserOrganizationContextForSystemUser();
         }
 
-        var cachedUserOrganizationContext = await _userOrganizationContextCachingService
-            .GetValue(_userDetailsProvider.AuthenticatedUser.Id, _userDetailsProvider.AuthenticatedUser.UserType);
+        var operationalUser = _userDetailsProvider.AuthenticatedUser;
+        var cachedUserOrganizationContext = await _userContextCachingService.GetValue(operationalUser.Id, operationalUser.UserType, cancellationToken);
+
         if (cachedUserOrganizationContext != null)
         {
             return cachedUserOrganizationContext;
         }
 
-        return await _userOrganizationContextHttpClient.GetUserOrganizationContextAsync();
+        return await _userOrganizationContextHttpClient.GetUserOrganizationContextAsync(operationalUser.Id, cancellationToken);
     }
 
-    public async Task<UserOrganizationContext> GetUserOrganizationContextForSpecificUserAsync(string userId, string typeUser = "TenantUsers")
+    public async Task<UserOrganizationContext> GetUserOrganizationContextForSpecificUserAsync(string userId, string userType = UserTypes.TenantUsers, CancellationToken cancellationToken = default)
     {
         if (_userDetailsProvider.IsSystemUser)
         {
             return GetUserOrganizationContextForSystemUser();
         }
 
-        var cachedUserOrganizationContext = await _userOrganizationContextCachingService.GetValue(userId, typeUser);
+        var cachedUserOrganizationContext = await _userContextCachingService.GetValue(userId, userType, cancellationToken);
         if (cachedUserOrganizationContext != null)
         {
             return cachedUserOrganizationContext;
         }
 
-        return await _userOrganizationContextHttpClient.GetUserOrganizationContextAsync(userId, typeUser);
+        return await _userOrganizationContextHttpClient.GetUserOrganizationContextAsync(userId, userType, cancellationToken);
     }
 
     private UserOrganizationContext GetUserOrganizationContextForSystemUser() =>
