@@ -5,7 +5,7 @@ using EShop.Shared.CQRS.Command;
 using EShop.Shared.DomainTools.UnitOfWorks;
 using Microsoft.Extensions.Logging;
 
-namespace EShop.Authorization.Application.UseCases.Commands;
+namespace EShop.Authorization.Application.UseCases.Organizations;
 
 public sealed class CreateRootOrganizationCommand : ICommand
 {

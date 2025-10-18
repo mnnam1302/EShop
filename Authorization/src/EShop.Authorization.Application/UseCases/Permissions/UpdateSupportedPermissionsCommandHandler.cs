@@ -6,7 +6,7 @@ using EShop.Shared.CQRS.Command;
 using EShop.Shared.DomainTools.UnitOfWorks;
 using Microsoft.Extensions.Logging;
 
-namespace EShop.Authorization.Application.UseCases.Commands;
+namespace EShop.Authorization.Application.UseCases.Permissions;
 
 
 public sealed class UpdateSupportedPermissionsCommand : ICommand
@@ -59,7 +59,7 @@ internal sealed class UpdateSupportedPermissionsCommandHandler : ICommandHandler
         return Result.Success();
     }
 
-    private async Task CreateOrUpdatePermissionAsync(Domain.Entities.Permission permission, CancellationToken cancellationToken)
+    private async Task CreateOrUpdatePermissionAsync(Permission permission, CancellationToken cancellationToken)
     {
         var existingPermission = await _permissionRepository.FindByIdAsync(permission.Id);
         if (existingPermission is null)
@@ -75,7 +75,7 @@ internal sealed class UpdateSupportedPermissionsCommandHandler : ICommandHandler
         _logger.LogTrace("Permission '{PermissionId}' added to the system.", permission.Id);
     }
 
-    private async Task RemovePermissionAsync(Domain.Entities.Permission permission, CancellationToken cancellationToken)
+    private async Task RemovePermissionAsync(Permission permission, CancellationToken cancellationToken)
     {
         var existingPermission = await _permissionRepository.FindByIdAsync(permission.Id);
         if (existingPermission is not null)

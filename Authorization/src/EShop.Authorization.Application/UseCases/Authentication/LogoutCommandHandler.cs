@@ -5,7 +5,7 @@ using EShop.Shared.Scoping;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserTokenProvider;
 using Microsoft.Extensions.Logging;
 
-namespace EShop.Authorization.Application.UseCases.Commands;
+namespace EShop.Authorization.Application.UseCases.Authentication;
 
 public sealed record LogoutCommand(string UserId) : ICommand;
 

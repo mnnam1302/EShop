@@ -1,4 +1,4 @@
-﻿using EShop.Authorization.Application.UseCases.Queries;
+﻿using EShop.Authorization.Application.UseCases.Users;
 using EShop.Shared.CQRS;
 using EShop.Shared.JsonApi.Abstractions;
 using EShop.Shared.JsonApi.ResourceAccessControl;

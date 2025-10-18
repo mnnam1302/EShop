@@ -2,7 +2,7 @@
 using EShop.Shared.CQRS.Query;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserOrganizationContextProvider;
 
-namespace EShop.Authorization.Application.UseCases.Queries;
+namespace EShop.Authorization.Application.UseCases.Organizations;
 
 public sealed record GetOrganizationContextQuery(string OrganizationId) : IQuery<OrganizationContext>;
 

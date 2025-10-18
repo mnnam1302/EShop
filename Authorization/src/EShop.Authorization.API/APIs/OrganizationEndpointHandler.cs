@@ -1,4 +1,4 @@
-﻿using EShop.Authorization.Application.UseCases.Queries;
+﻿using EShop.Authorization.Application.UseCases.Organizations;
 using EShop.Shared.CQRS;
 using EShop.Shared.JsonApi.Abstractions;
 using EShop.Shared.JsonApi.ResourceAccessControl;
@@ -18,7 +18,9 @@ namespace EShop.Authorization.API.APIs
                 .MapGroup(BaseUrl)
                 .HasApiVersion(1);
 
-            group.MapGet("/{organizationId}/organizationContext", GetOrganizationContext).RequireAuthenticatedUser();
+            group.MapGet("/{organizationId}/organizationContext", GetOrganizationContext)
+                .RequireAuthenticatedUser()
+                .RequireSystemUserFilter();
 
             return endpoints;
         }

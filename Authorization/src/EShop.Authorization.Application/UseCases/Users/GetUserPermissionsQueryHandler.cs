@@ -3,7 +3,7 @@ using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.CQRS.Query;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserPermissionProvider;
 
-namespace EShop.Authorization.Application.UseCases.Queries;
+namespace EShop.Authorization.Application.UseCases.Users;
 
 public sealed record GetUserPermissionsQuery(string UserId) : IQuery<IEnumerable<string>>;
 

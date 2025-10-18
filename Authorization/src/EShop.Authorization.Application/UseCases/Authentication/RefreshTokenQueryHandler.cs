@@ -6,7 +6,7 @@ using EShop.Shared.Scoping.ResourceAccessControl;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserTokenProvider;
 using System.Security.Claims;
 
-namespace EShop.Authorization.Application.UseCases.Queries;
+namespace EShop.Authorization.Application.UseCases.Authentication;
 
 public sealed record RefreshTokenQuery(string AccessToken, string RefreshToken) : IQuery<AuthenticationResponse>;
 
