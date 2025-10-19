@@ -1,6 +1,5 @@
 ﻿using EShop.Authorization.API.Models;
 using EShop.Authorization.Application.UseCases.Authentication;
-using EShop.Authorization.Application.UseCases.Commands;
 using EShop.Shared.CQRS;
 using EShop.Shared.JsonApi.Abstractions;
 using EShop.Shared.JsonApi.ResourceAccessControl;
