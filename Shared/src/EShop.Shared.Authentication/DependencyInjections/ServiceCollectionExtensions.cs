@@ -1,5 +1,6 @@
 ﻿using EShop.Shared.Authentication.Abstractions;
 using EShop.Shared.Authentication.Managers.JwtTokens;
+using EShop.Shared.Authentication.Managers.RsaKey;
 using EShop.Shared.Authentication.Middlewares;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.DependencyInjection;
@@ -15,10 +16,16 @@ namespace EShop.Shared.Authentication.DependencyInjections
                 .ValidateDataAnnotations()
                 .ValidateOnStart();
 
+            services.AddRsaKeyManger();
             services.AddScoped<IJwtTokenManager, JwtTokenManager>();
             services.AddAuthenticationHandler();
 
             return services;
+        }
+
+        public static IServiceCollection AddRsaKeyManger(this IServiceCollection services)
+        {
+            return services.AddScoped<IRsaKeyManager, RsaKeyManager>();
         }
 
         public static IServiceCollection AddAuthenticationHandler(this IServiceCollection services)

@@ -1,8 +1,7 @@
 ﻿using EShop.Authorization.Domain.Repositories;
 using EShop.Shared.Authentication;
 using EShop.Shared.Authentication.Abstractions;
-using EShop.Shared.Scoping;
-using EShop.Shared.Scoping.Exceptions;
+using EShop.Shared.DomainTools.Exceptions;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserOrganizationContextProvider;
 
 namespace EShop.Authorization.Application.Services;

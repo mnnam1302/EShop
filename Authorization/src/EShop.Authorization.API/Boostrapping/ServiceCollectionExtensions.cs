@@ -64,9 +64,9 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddAuthentication(this IServiceCollection services)
     {
         services
+            .AddRsaKeyCachingProvider()
             .AddJwtTokenAuthentication()
-            .AddUserTokensProvider()
-            .AddRsaKeyCachingProvider();
+            .AddUserTokensProvider();
 
         return services;
     }

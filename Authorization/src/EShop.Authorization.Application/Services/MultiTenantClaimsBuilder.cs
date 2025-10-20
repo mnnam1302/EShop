@@ -1,7 +1,5 @@
 using EShop.Authorization.Domain.Entities;
 using EShop.Shared.Authentication;
-using EShop.Shared.Scoping;
-using EShop.Shared.Scoping.ResourceAccessControl;
 using System.Security.Claims;
 
 namespace EShop.Authorization.Application.Services;
@@ -46,11 +44,6 @@ public sealed class MultiTenantClaimsBuilder : IMultiTenantClaimsBuilder
         foreach (var tenantId in accessibleTenants)
         {
             claims.Add(new Claim(EShopClaimTypes.TenantGroups, tenantId));
-        }
-
-        if (!string.IsNullOrEmpty(user.OrganizationId))
-        {
-            claims.Add(new Claim(EShopClaimTypes.OrganizationId, user.OrganizationId));
         }
 
         return claims;

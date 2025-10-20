@@ -24,7 +24,7 @@ public sealed class UserOrganizationContextCachingService : IUserOrganizationCon
         var cacheKey = OrganizationContextCacheKeyProvider.GetUserOrganizationContextCacheKey(userId, userType);
         var cacheOptions = new DistributedCacheEntryOptions
         {
-            SlidingExpiration = _cachedRemoteConfiguration.GetSlidingTokenExpiration()
+            SlidingExpiration = _cachedRemoteConfiguration.GetSlidingExpiration()
         };
 
         await _redisCachingProvider.AddAsync(cacheKey, userOrganizationContext, cacheOptions, cancellationToken);

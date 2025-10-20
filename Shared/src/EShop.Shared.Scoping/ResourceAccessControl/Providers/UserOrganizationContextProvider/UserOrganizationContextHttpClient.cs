@@ -1,5 +1,8 @@
-﻿using EShop.Shared.Contracts.Abstractions.Shared;
-using EShop.Shared.Scoping.Exceptions;
+﻿using EShop.Shared.Authentication;
+using EShop.Shared.Authentication.Abstractions;
+using EShop.Shared.Authentication.Managers.JwtTokens;
+using EShop.Shared.Contracts.Abstractions.Shared;
+using EShop.Shared.DomainTools.Exceptions;
 using Newtonsoft.Json;
 
 namespace EShop.Shared.Scoping.ResourceAccessControl.Providers.UserOrganizationContextProvider;

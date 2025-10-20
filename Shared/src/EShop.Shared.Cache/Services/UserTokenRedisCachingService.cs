@@ -2,7 +2,7 @@
 using EShop.Shared.Authentication.Abstractions;
 using EShop.Shared.Cache.CacheKeys;
 using EShop.Shared.Cache.Providers;
-using EShop.Shared.Scoping.Exceptions;
+using EShop.Shared.DomainTools.Exceptions;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers;
 using Microsoft.Extensions.Caching.Distributed;
 
@@ -38,7 +38,7 @@ public sealed class UserTokenRedisCachingService : IUserTokenCachingService
         var cacheKey = UserTokenCacheKeyProvider.GetCacheKey(userId);
         await _redisCachingService.AddAsync(cacheKey, token, new DistributedCacheEntryOptions
         {
-            SlidingExpiration = _cachedRemoteConfiguration.GetSlidingTokenExpiration()
+            SlidingExpiration = _cachedRemoteConfiguration.GetSlidingExpiration()
         }, cancellationToken);
     }
 

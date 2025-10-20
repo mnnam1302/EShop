@@ -1,5 +1,5 @@
-﻿using EShop.Shared.DomainTools.Entities;
-using EShop.Shared.Scoping;
+﻿using EShop.Shared.Authentication.Abstractions;
+using EShop.Shared.DomainTools.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Diagnostics;

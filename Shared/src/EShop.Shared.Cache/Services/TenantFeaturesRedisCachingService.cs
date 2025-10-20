@@ -34,7 +34,7 @@ public class TenantFeaturesRedisCachingService : ITenantFeaturesCachingService
             features,
             new DistributedCacheEntryOptions
             {
-                SlidingExpiration = _cachedRemoteConfiguration.GetSlidingTokenExpiration()
+                SlidingExpiration = _cachedRemoteConfiguration.GetSlidingExpiration()
             },
             cancellationToken);
     }

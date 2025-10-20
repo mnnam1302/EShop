@@ -1,5 +1,5 @@
-﻿using EShop.Shared.DbResourceAccessControl.Extensions;
-using EShop.Shared.Scoping;
+﻿using EShop.Shared.Authentication.Abstractions;
+using EShop.Shared.DbResourceAccessControl.Extensions;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Logging;
 using System.Data.Common;

@@ -1,4 +1,4 @@
-﻿using EShop.Shared.Scoping;
+﻿using EShop.Shared.Authentication.Abstractions;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserOrganizationContextProvider;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Logging;
