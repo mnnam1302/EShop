@@ -9,6 +9,11 @@ namespace EShop.Shared.Authentication.DependencyInjections
 {
     public static class ServiceCollectionExtensions
     {
+        public static IServiceCollection AddMultiTenantKeyManager(this IServiceCollection services)
+        {
+            return services.AddScoped<IRsaKeyManager, RsaKeyManager>();
+        }
+
         public static IServiceCollection AddJwtTokenAuthentication(this IServiceCollection services)
         {
             services.AddOptions<JwtOptions>()
@@ -16,17 +21,12 @@ namespace EShop.Shared.Authentication.DependencyInjections
                 .ValidateDataAnnotations()
                 .ValidateOnStart();
 
-            services.AddRsaKeyManger();
             services.AddScoped<IJwtTokenManager, JwtTokenManager>();
             services.AddAuthenticationHandler();
 
             return services;
         }
 
-        public static IServiceCollection AddRsaKeyManger(this IServiceCollection services)
-        {
-            return services.AddScoped<IRsaKeyManager, RsaKeyManager>();
-        }
 
         public static IServiceCollection AddAuthenticationHandler(this IServiceCollection services)
         {

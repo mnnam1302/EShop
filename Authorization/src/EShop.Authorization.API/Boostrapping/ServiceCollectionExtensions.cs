@@ -56,6 +56,7 @@ public static class ServiceCollectionExtensions
                 options.SubstituteApiVersionInUrl = true;
             });
 
+        services.AddRsaKeyServices();
         services.AddAuthentication();
 
         return services;
@@ -64,9 +65,17 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddAuthentication(this IServiceCollection services)
     {
         services
-            .AddRsaKeyCachingProvider()
             .AddJwtTokenAuthentication()
             .AddUserTokensProvider();
+
+        return services;
+    }
+
+    public static IServiceCollection AddRsaKeyServices(this IServiceCollection services)
+    {
+        services
+            .AddMultiTenantKeyManager()
+            .AddRsaKeyCachingProvider();
 
         return services;
     }

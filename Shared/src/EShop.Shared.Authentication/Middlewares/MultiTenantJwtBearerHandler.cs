@@ -68,7 +68,9 @@ namespace EShop.Shared.Authentication.Middlewares
 
         private async Task<Result> ValidateTokenInCacheAsync(ClaimsPrincipal principal, string accessToken)
         {
-            var userId = GetClaimValue(principal, EShopClaimTypes.UserId);
+            var userId = GetClaimValue(principal, EShopClaimTypes.UserId)
+                ?? GetClaimValue(principal, ClaimTypes.NameIdentifier);
+
             if (string.IsNullOrEmpty(userId))
             {
                 return Result.Failure(new("Authentication.InvalidToken", "The provided token is invalid."));
