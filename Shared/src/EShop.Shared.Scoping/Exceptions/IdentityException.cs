@@ -1,4 +1,5 @@
 ﻿namespace EShop.Shared.Scoping.Exceptions;
+
 public class UnauthorizedException : DomainException
 {
     public UnauthorizedException(string message)

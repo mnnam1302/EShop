@@ -1,4 +1,5 @@
 ﻿using EShop.Identity.Tests.Setups;
+using EShop.Shared.Authentication;
 using EShop.Shared.Scoping;
 using Reqnroll;
 using static EShop.Shared.Scoping.ResourceAccessControl.PermissionConstants;

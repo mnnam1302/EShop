@@ -1,4 +1,6 @@
-﻿using EShop.Shared.Cache.KeyEncryption;
+﻿using EShop.Shared.Authentication.Abstractions;
+using EShop.Shared.Authentication.Managers.JwtTokens;
+using EShop.Shared.Cache.KeyEncryption;
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.Scoping.DependencyInjections;
 using EShop.Shared.Scoping.ResourceAccessControl;

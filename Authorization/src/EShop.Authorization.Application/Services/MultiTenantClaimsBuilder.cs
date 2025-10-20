@@ -1,4 +1,5 @@
 using EShop.Authorization.Domain.Entities;
+using EShop.Shared.Authentication;
 using EShop.Shared.Scoping;
 using EShop.Shared.Scoping.ResourceAccessControl;
 using System.Security.Claims;

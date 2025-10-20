@@ -1,6 +1,7 @@
 ﻿using EShop.Identity.API;
 using EShop.Identity.Application.Abstractions;
 using EShop.Identity.Persistence;
+using EShop.Shared.Authentication.Abstractions;
 using EShop.Shared.DbResourceAccessControl;
 using EShop.Shared.Scoping;
 using EShop.Testing.JsonApiApplication;

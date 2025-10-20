@@ -1,4 +1,5 @@
-﻿using EShop.Shared.Contracts.Abstractions.Requests;
+﻿using EShop.Shared.Authentication.Abstractions;
+using EShop.Shared.Contracts.Abstractions.Requests;
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.Contracts.Services.Tenancy.Tenants;
 using EShop.Shared.EventBus.Services;

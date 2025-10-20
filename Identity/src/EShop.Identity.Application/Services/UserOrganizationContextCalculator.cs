@@ -1,5 +1,7 @@
 ﻿using EShop.Identity.Domain.Entities;
 using EShop.Identity.Domain.Repositories;
+using EShop.Shared.Authentication;
+using EShop.Shared.Authentication.Abstractions;
 using EShop.Shared.Scoping;
 using EShop.Shared.Scoping.Exceptions;
 using MassTransit.Initializers;

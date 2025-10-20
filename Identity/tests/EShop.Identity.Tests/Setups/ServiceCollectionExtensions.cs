@@ -5,6 +5,7 @@ using EShop.Identity.Infrastructure.Authentication;
 using EShop.Identity.Infrastructure.HashServices;
 using EShop.Identity.Persistence;
 using EShop.Identity.Persistence.DependencyInjections.Extensions;
+using EShop.Shared.Authentication.Abstractions;
 using EShop.Shared.Cache.DependencyInejctions.Extensions;
 using EShop.Shared.Cache.Providers;
 using EShop.Shared.Cache.Services;

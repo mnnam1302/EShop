@@ -28,7 +28,7 @@ public sealed class RsaKeyManagerRedisCachingService : IKeyManagerCachingService
 
     public async Task<RsaKeyPair?> TryGetActiveKeyPairAsync(string tenantId)
     {
-        var cacheKey = RsaKeyCacheKeyProvider.GetActiveKeyPairCacheKey(tenantId);
+        var cacheKey = RsaCacheKeyProvider.GetRsaKeyPairCacheKey(tenantId);
         var keyPair = await _rsaKeyPairCaching.GetAsync(cacheKey);
 
         if (keyPair != null)
@@ -41,7 +41,7 @@ public sealed class RsaKeyManagerRedisCachingService : IKeyManagerCachingService
 
     public async Task AddActiveKeyPairAsync(string tenantId, RsaKeyPair keyPair)
     {
-        var cacheKey = RsaKeyCacheKeyProvider.GetActiveKeyPairCacheKey(tenantId);
+        var cacheKey = RsaCacheKeyProvider.GetRsaKeyPairCacheKey(tenantId);
         var options = CreateCacheOptions(keyPair.ExpiresAt);
 
         await _rsaKeyPairCaching.AddAsync(cacheKey, keyPair, options);
@@ -53,14 +53,14 @@ public sealed class RsaKeyManagerRedisCachingService : IKeyManagerCachingService
 
     public async Task RemoveActiveKeyPairAsync(string tenantId)
     {
-        var cacheKey = RsaKeyCacheKeyProvider.GetActiveKeyPairCacheKey(tenantId);
+        var cacheKey = RsaCacheKeyProvider.GetRsaKeyPairCacheKey(tenantId);
         await _rsaKeyPairCaching.ClearAsync(cacheKey);
         _logger.LogInformation("Removed active RSA key pair cache for tenant {TenantId}", tenantId);
     }
 
     public async Task<RSA?> TryGetPublicKeyAsync(string tenantId, string keyId)
     {
-        var cacheKey = RsaKeyCacheKeyProvider.GetPublicKeyCacheKey(tenantId, keyId);
+        var cacheKey = RsaCacheKeyProvider.GetPublicKeyCacheKey(tenantId, keyId);
         var cachedEntry = await _publicKeyCaching.GetAsync(cacheKey);
 
         if (cachedEntry?.PublicKeyPem == null)
@@ -81,7 +81,7 @@ public sealed class RsaKeyManagerRedisCachingService : IKeyManagerCachingService
 
     public async Task AddPublicKeyAsync(string tenantId, string keyId, RSA publicKey, DateTimeOffset expiresAt)
     {
-        var cacheKey = RsaKeyCacheKeyProvider.GetPublicKeyCacheKey(tenantId, keyId);
+        var cacheKey = RsaCacheKeyProvider.GetPublicKeyCacheKey(tenantId, keyId);
         var publicKeyPem = publicKey.ExportRSAPublicKeyPem();
 
         var cacheEntry = new RsaPublicKeyCacheEntry
@@ -102,7 +102,7 @@ public sealed class RsaKeyManagerRedisCachingService : IKeyManagerCachingService
 
     public async Task RemovePublicKeyAsync(string tenantId, string keyId)
     {
-        var cacheKey = RsaKeyCacheKeyProvider.GetPublicKeyCacheKey(tenantId, keyId);
+        var cacheKey = RsaCacheKeyProvider.GetPublicKeyCacheKey(tenantId, keyId);
         await _publicKeyCaching.ClearAsync(cacheKey);
 
         _logger.LogDebug("Removed RSA public key cache for tenant {TenantId} and keyId {KeyId}",

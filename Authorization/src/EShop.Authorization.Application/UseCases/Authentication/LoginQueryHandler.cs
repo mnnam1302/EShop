@@ -1,14 +1,11 @@
-﻿using EShop.Authorization.Application.Abstractions;
-using EShop.Authorization.Application.Services;
+﻿using EShop.Authorization.Application.Services;
 using EShop.Authorization.Domain.Constants;
 using EShop.Authorization.Domain.Entities;
 using EShop.Authorization.Domain.Repositories;
+using EShop.Shared.Authentication;
+using EShop.Shared.Authentication.Abstractions;
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.CQRS.Query;
-using EShop.Shared.Scoping;
-using EShop.Shared.Scoping.ResourceAccessControl;
-using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserTokenProvider;
-using System.Security.Claims;
 
 namespace EShop.Authorization.Application.UseCases.Authentication;
 
@@ -28,20 +25,17 @@ internal sealed class LoginQueryHandler : IQueryHandler<LoginQuery, Authenticati
     private readonly IJwtTokenManager _jwtTokenManager;
     private readonly IUserTokenCachingService _tokenCachingService;
     private readonly IPasswordHasher _passwordHasher;
-    private readonly IRsaKeyManager _rsaKeyManager;
 
     public LoginQueryHandler(
         IJwtTokenManager jwtTokenManager,
         IUserRepository userRepository,
         IUserTokenCachingService tokenCachingService,
-        IPasswordHasher passwordHasher,
-        IRsaKeyManager rsaKeyManager)
+        IPasswordHasher passwordHasher)
     {
         _jwtTokenManager = jwtTokenManager;
         _userRepository = userRepository;
         _tokenCachingService = tokenCachingService;
         _passwordHasher = passwordHasher;
-        _rsaKeyManager = rsaKeyManager;
     }
 
     public async Task<Result<AuthenticationResponse>> HandleAsync(LoginQuery query, CancellationToken cancellationToken = default)
@@ -62,18 +56,15 @@ internal sealed class LoginQueryHandler : IQueryHandler<LoginQuery, Authenticati
 
         var user = userResult.Value;
 
-        // 3. Ensure RSA key pair exists for tenant (auto-generated if needed)
-        await _rsaKeyManager.EnsureValidKeyPairExistsAsync(user.TenantId);
-
-        // 4. Generate RSA-signed JWT tokens
-        var tokenResult = await GenerateAuthenticationTokensAsync(user);
+        // 3. Generate RSA-signed JWT tokens
+        var tokenResult = await GenerateAuthenticationTokensAsync(user, cancellationToken);
         if (tokenResult.IsFailure)
         {
             return Result.Failure<AuthenticationResponse>(tokenResult.Error);
         }
 
-        // 5. Cache authentication tokens for session management
-        await StoreAuthenticatedResultAsync(tokenResult.Value);
+        // 4. Cache authentication tokens for session management
+        await StoreAuthenticatedResultAsync(tokenResult.Value, cancellationToken);
 
         return Result.Success(tokenResult.Value);
     }
@@ -108,45 +99,23 @@ internal sealed class LoginQueryHandler : IQueryHandler<LoginQuery, Authenticati
         return Result.Success(user);
     }
 
-    private async Task<Result<AuthenticationResponse>> GenerateAuthenticationTokensAsync(User user)
+    private async Task<Result<AuthenticationResponse>> GenerateAuthenticationTokensAsync(User user, CancellationToken cancellationToken)
     {
-        try
-        {
-            var userClaims = BuildUserClaims(user);
-            var accessToken = await _jwtTokenManager.GenerateAccessTokenAsync(userClaims, user.TenantId);
-            var refreshToken = _jwtTokenManager.GenerateRefreshToken();
+        var accessToken = await _jwtTokenManager.GenerateAccessToken(user.Id, user.TenantId, cancellationToken: cancellationToken);
+        var refreshToken = _jwtTokenManager.GenerateRefreshToken();
 
-            var result = new AuthenticationResponse
-            {
-                UserId = user.Id,
-                AccessToken = accessToken,
-                RefreshToken = refreshToken,
-                RefreshTokenExpiryTime = DateTimeOffset.UtcNow.AddDays(7)
-            };
-
-            return Result.Success(result);
-        }
-        catch (Exception ex)
+        var result = new AuthenticationResponse
         {
-            return Result.Failure<AuthenticationResponse>(new Error("TokenGeneration.Failed", ex.Message));
-        }
-    }
-
-    private static List<Claim> BuildUserClaims(User user)
-    {
-        var claims = new List<Claim>
-        {
-            new(EShopClaimTypes.UserId, user.Id),
-            new(EShopClaimTypes.Username, user.Username),
-            new(EShopClaimTypes.TenantId, user.TenantId),
-            new(EShopClaimTypes.TenantGroups, user.TenantId),
-            new(EShopClaimTypes.UserType, UserTypes.TenantUsers),
+            UserId = user.Id,
+            AccessToken = accessToken,
+            RefreshToken = refreshToken,
+            RefreshTokenExpiryTime = DateTimeOffset.UtcNow.AddDays(7)
         };
 
-        return claims;
+        return Result.Success(result);
     }
 
-    private async Task StoreAuthenticatedResultAsync(AuthenticationResponse result)
+    private async Task StoreAuthenticatedResultAsync(AuthenticationResponse result, CancellationToken cancellationToken)
     {
         var authenticationCachedValue = new TokenAuthentication
         {
@@ -157,6 +126,6 @@ internal sealed class LoginQueryHandler : IQueryHandler<LoginQuery, Authenticati
             RefreshTokenExpiryTime = result.RefreshTokenExpiryTime
         };
 
-        await _tokenCachingService.AddTokenAsync(result.UserId, authenticationCachedValue);
+        await _tokenCachingService.AddAsync(result.UserId, authenticationCachedValue, cancellationToken);
     }
 }

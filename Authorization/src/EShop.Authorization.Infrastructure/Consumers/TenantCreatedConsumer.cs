@@ -1,4 +1,5 @@
 ﻿using EShop.Authorization.Application.UseCases.Commands;
+using EShop.Shared.Authentication.Abstractions;
 using EShop.Shared.Contracts.Services.Tenancy.Tenants;
 using EShop.Shared.CQRS;
 using EShop.Shared.Scoping;

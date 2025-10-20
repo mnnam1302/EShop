@@ -2,6 +2,7 @@
 using EShop.Authorization.Domain.Entities;
 using EShop.Authorization.Domain.Repositories;
 using EShop.Authorization.Domain.Services;
+using EShop.Shared.Authentication;
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.Scoping;
 using Microsoft.EntityFrameworkCore;

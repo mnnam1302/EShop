@@ -1,5 +1,6 @@
 ﻿using EShop.Identity.Domain.Entities;
 using EShop.Identity.Domain.Repositories;
+using EShop.Shared.Authentication.Abstractions;
 using EShop.Shared.Contracts.Abstractions.Requests;
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.Contracts.Services.Identity.Roles;

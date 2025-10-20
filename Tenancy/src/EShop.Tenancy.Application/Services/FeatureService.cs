@@ -1,4 +1,5 @@
-﻿using EShop.Shared.Contracts.Services.Tenancy.Features;
+﻿using EShop.Shared.Authentication.Abstractions;
+using EShop.Shared.Contracts.Services.Tenancy.Features;
 using EShop.Shared.EventBus.Services;
 using EShop.Shared.Scoping;
 using EShop.Shared.Scoping.Exceptions;

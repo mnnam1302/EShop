@@ -1,4 +1,5 @@
 ﻿using EShop.Authorization.Infrastructure;
+using EShop.Shared.Authentication.Abstractions;
 using EShop.Shared.DbResourceAccessControl;
 using EShop.Shared.EventBus.Services;
 using EShop.Shared.Scoping;

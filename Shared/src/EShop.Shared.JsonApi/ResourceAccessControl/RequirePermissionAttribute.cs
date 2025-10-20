@@ -1,4 +1,5 @@
-﻿using EShop.Shared.Scoping;
+﻿using EShop.Shared.Authentication.Abstractions;
+using EShop.Shared.Scoping;
 using EShop.Shared.Scoping.ResourceAccessControl;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;

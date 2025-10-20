@@ -1,9 +1,9 @@
-﻿using EShop.Authorization.Application.Abstractions;
-using EShop.Authorization.Domain.Constants;
+﻿using EShop.Authorization.Domain.Constants;
+using EShop.Shared.Authentication;
+using EShop.Shared.Authentication.Abstractions;
+using EShop.Shared.Authentication.Managers.JwtTokens;
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.CQRS.Query;
-using EShop.Shared.Scoping.ResourceAccessControl;
-using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserTokenProvider;
 using System.Security.Claims;
 
 namespace EShop.Authorization.Application.UseCases.Authentication;
@@ -29,7 +29,7 @@ internal sealed class RefreshTokenQueryHandler : IQueryHandler<RefreshTokenQuery
             return Result.Failure<AuthenticationResponse>(validationResult.Error);
         }
 
-        var tokenClaimsResult = await ParseAndValidateAccessTokenAsync(query.AccessToken, cancellationToken);
+        var tokenClaimsResult = await ParseAccessTokenAsync(query.AccessToken, cancellationToken);
         if (tokenClaimsResult.IsFailure)
         {
             return Result.Failure<AuthenticationResponse>(tokenClaimsResult.Error);
@@ -44,7 +44,7 @@ internal sealed class RefreshTokenQueryHandler : IQueryHandler<RefreshTokenQuery
         }
 
         var cachedToken = cachedTokenResult.Value;
-        var newTokens = await IssueNewTokensAsync(tokenClaims, cachedToken.RefreshTokenExpiryTime);
+        var newTokens = await GenerateNewTokensAsync(tokenClaims, cachedToken.RefreshTokenExpiryTime, cancellationToken: cancellationToken);
 
         await StoreCachedTokensAsync(tokenClaims.UserId, newTokens, cancellationToken);
 
@@ -61,28 +61,21 @@ internal sealed class RefreshTokenQueryHandler : IQueryHandler<RefreshTokenQuery
         return Result.Success();
     }
 
-    private async Task<Result<TokenClaims>> ParseAndValidateAccessTokenAsync(string accessToken, CancellationToken cancellationToken)
+    private async Task<Result<TokenClaims>> ParseAccessTokenAsync(string accessToken, CancellationToken cancellationToken)
     {
-        try
-        {
-            var sanitizedToken = JwtEncodedStringHelper.GetJwtEncodedString(accessToken);
-            var principal = await _jwtTokenManager.GetPrincipalFromExpiredToken(sanitizedToken, cancellationToken);
+        var sanitizedToken = JwtEncodedStringHelper.GetJwtEncodedString(accessToken);
+        var principal = await _jwtTokenManager.GetPrincipalFromExpiredToken(sanitizedToken, cancellationToken);
 
-            var tokenClaims = ExtractTokenClaims(principal);
-            if (!tokenClaims.IsValid)
-            {
-                return Result.Failure<TokenClaims>(ErrorContants.Authentication.InvalidToken);
-            }
-
-            return Result.Success(tokenClaims);
-        }
-        catch (Exception)
+        var tokenClaims = GetTokenMetadata(principal);
+        if (!tokenClaims.IsValid)
         {
             return Result.Failure<TokenClaims>(ErrorContants.Authentication.InvalidToken);
         }
+
+        return Result.Success(tokenClaims);
     }
 
-    private static TokenClaims ExtractTokenClaims(ClaimsPrincipal principal)
+    private static TokenClaims GetTokenMetadata(ClaimsPrincipal principal)
     {
         var userId = principal.FindFirst(EShopClaimTypes.UserId)?.Value;
         var tenantId = principal.FindFirst(EShopClaimTypes.TenantId)?.Value;
@@ -97,7 +90,7 @@ internal sealed class RefreshTokenQueryHandler : IQueryHandler<RefreshTokenQuery
 
     private async Task<Result<TokenAuthentication>> ValidateCachedTokensAsync(string userId, RefreshTokenQuery query, CancellationToken cancellationToken)
     {
-        var cachedToken = await _tokenCachingService.TryGetTokenAsync(userId, cancellationToken);
+        var cachedToken = await _tokenCachingService.GetAsync(userId, cancellationToken);
         if (cachedToken is null)
         {
             return Result.Failure<TokenAuthentication>(ErrorContants.Authentication.TokenInvalidCache);
@@ -135,9 +128,9 @@ internal sealed class RefreshTokenQueryHandler : IQueryHandler<RefreshTokenQuery
     private static bool IsRefreshTokenExpired(DateTimeOffset expiryTime) =>
         expiryTime <= DateTimeOffset.UtcNow;
 
-    private async Task<AuthenticationResponse> IssueNewTokensAsync(TokenClaims tokenClaims, DateTimeOffset refreshTokenExpiryTime)
+    private async Task<AuthenticationResponse> GenerateNewTokensAsync(TokenClaims tokenClaims, DateTimeOffset refreshTokenExpiryTime, CancellationToken cancellationToken)
     {
-        var newAccessToken = await _jwtTokenManager.GenerateAccessTokenAsync(tokenClaims.Claims, tokenClaims.TenantId);
+        var newAccessToken = await _jwtTokenManager.GenerateAccessToken(tokenClaims.UserId, tokenClaims.TenantId, cancellationToken: cancellationToken);
         var newRefreshToken = _jwtTokenManager.GenerateRefreshToken();
 
         return new AuthenticationResponse
@@ -160,7 +153,7 @@ internal sealed class RefreshTokenQueryHandler : IQueryHandler<RefreshTokenQuery
             RefreshTokenExpiryTime = response.RefreshTokenExpiryTime
         };
 
-        await _tokenCachingService.AddTokenAsync(userId, tokenCache, cancellationToken);
+        await _tokenCachingService.AddAsync(userId, tokenCache, cancellationToken);
     }
 
     private readonly record struct TokenClaims(string UserId, string TenantId, IEnumerable<Claim> Claims)

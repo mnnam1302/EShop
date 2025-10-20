@@ -1,4 +1,6 @@
 ﻿using EShop.Authorization.Domain.Entities;
+using EShop.Shared.Authentication;
+using EShop.Shared.Authentication.Abstractions;
 using EShop.Shared.Contracts.Services.Tenancy.Tenants;
 using EShop.Shared.DbResourceAccessControl;
 using EShop.Shared.EventBus.Services;

@@ -1,8 +1,8 @@
 ﻿using EShop.Authorization.Domain.Constants;
+using EShop.Shared.Authentication.Abstractions;
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.CQRS.Command;
 using EShop.Shared.Scoping;
-using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserTokenProvider;
 using Microsoft.Extensions.Logging;
 
 namespace EShop.Authorization.Application.UseCases.Authentication;
@@ -36,7 +36,7 @@ internal sealed class LogoutCommandHandler : ICommandHandler<LogoutCommand>
             return Result.Failure(ErrorContants.Authentication.InvalidToken);
         }
 
-        await _userTokenCaching.RemoveCacheAsync(command.UserId, cancellationToken);
+        await _userTokenCaching.RemoveAsync(command.UserId, cancellationToken);
 
         _logger.LogInformation("User {UserId} successfully logged out", command.UserId);
         return Result.Success();

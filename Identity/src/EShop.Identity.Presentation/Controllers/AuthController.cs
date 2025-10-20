@@ -1,4 +1,6 @@
 ﻿using Asp.Versioning;
+using EShop.Shared.Authentication.Abstractions;
+using EShop.Shared.Authentication.Managers.JwtTokens;
 using EShop.Shared.Contracts.Services.Identity.Auth;
 using EShop.Shared.JsonApi.Abstractions;
 using EShop.Shared.JsonApi.ResourceAccessControl;

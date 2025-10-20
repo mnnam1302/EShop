@@ -1,10 +1,9 @@
-﻿using EShop.Shared.Scoping.ResourceAccessControl;
-using Microsoft.IdentityModel.JsonWebTokens;
+﻿using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 using System.Net.Http.Headers;
 using System.Security.Cryptography;
 
-namespace EShop.Shared.Scoping;
+namespace EShop.Shared.Authentication.Managers.JwtTokens;
 
 public static class SystemInternalJwtTokenFactory
 {

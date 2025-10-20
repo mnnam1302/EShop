@@ -1,4 +1,6 @@
-﻿using EShop.Shared.DbResourceAccessControl;
+﻿using EShop.Shared.Authentication.Abstractions;
+using EShop.Shared.Authentication.Managers;
+using EShop.Shared.DbResourceAccessControl;
 using EShop.Shared.DbResourceAccessControl.Interceptors;
 using EShop.Shared.DbResourceAccessControl.Options;
 using EShop.Shared.Scoping;

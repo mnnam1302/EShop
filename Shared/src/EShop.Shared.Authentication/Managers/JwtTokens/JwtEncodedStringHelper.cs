@@ -1,4 +1,4 @@
-﻿namespace EShop.Shared.Scoping.ResourceAccessControl;
+﻿namespace EShop.Shared.Authentication.Managers.JwtTokens;
 
 public static class JwtEncodedStringHelper
 {

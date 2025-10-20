@@ -1,4 +1,5 @@
 ﻿using Asp.Versioning;
+using EShop.Shared.Authentication.Abstractions;
 using EShop.Shared.Contracts.Services.Identity.Users;
 using EShop.Shared.JsonApi.Abstractions;
 using EShop.Shared.JsonApi.ResourceAccessControl;

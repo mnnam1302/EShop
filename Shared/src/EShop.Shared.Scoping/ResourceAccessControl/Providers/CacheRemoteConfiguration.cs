@@ -1,5 +1,4 @@
-﻿using EShop.Shared.Scoping.DependencyInjections;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using System.Globalization;
 
 namespace EShop.Shared.Scoping.ResourceAccessControl.Providers;
@@ -20,22 +19,6 @@ public class CachedRemoteConfiguration
         if (!TimeSpan.TryParse(slidingExpirationSetting, CultureInfo.InvariantCulture, out TimeSpan slidingExpiration))
         {
             throw new InvalidOperationException($"Cannot use 'SlidingExpiration' setting with value '{slidingExpirationSetting}'.");
-        }
-
-        return slidingExpiration;
-    }
-
-    public TimeSpan GetSlidingTokenExpiration()
-    {
-        // Cache set to generous 01 hour because we invalidated cahce when user token change
-        var jwtOptions = new JwtOptions();
-        _configuration.GetSection(nameof(JwtOptions)).Bind(jwtOptions);
-
-        var slidingTokenExpirationSetting = jwtOptions.AccessTokenExpiryMinutes.ToString();
-
-        if (!TimeSpan.TryParse(slidingTokenExpirationSetting, CultureInfo.InvariantCulture, out TimeSpan slidingExpiration))
-        {
-            throw new InvalidOperationException($"Cannot use 'SlidingTokenExpiration' setting with value '{slidingTokenExpirationSetting}'.");
         }
 
         return slidingExpiration;
