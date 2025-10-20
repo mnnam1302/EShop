@@ -34,10 +34,11 @@ public class Startup
             app.UseSwaggerAPI();
         }
 
+        app.UseRouting();
+
         app.UseAuthentication();
         app.UseAuthorization();
 
-        app.UseRouting();
         app.MapAuthorizationEndpoints();
 
         app.RegisterFeatures(applicationLifetime, logger);

@@ -40,6 +40,8 @@ namespace EShop.Shared.Authentication.DependencyInjections
                 .AddScheme<JwtBearerOptions, MultiTenantJwtBearerHandler>(JwtBearerDefaults.AuthenticationScheme, options => { });
 
             services.AddAuthorization();
+            //services.AddAuthorization(options
+            //    => options.AddPolicy("authPolicy", policy => policy.RequireAuthenticatedUser()));
 
             return services;
         }
