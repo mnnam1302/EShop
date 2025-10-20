@@ -1,5 +1,6 @@
-﻿using Newtonsoft.Json;
-using System.Net.Http.Json;
+﻿using EShop.Shared.Authentication.Abstractions;
+using EShop.Shared.Authentication.Managers.JwtTokens;
+using Newtonsoft.Json;
 
 namespace EShop.Shared.Scoping.ResourceAccessControl.Providers.UserPermissionProvider;
 

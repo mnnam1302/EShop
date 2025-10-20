@@ -1,4 +1,4 @@
-﻿namespace EShop.Shared.Scoping;
+﻿namespace EShop.Shared.DomainTools;
 
 public static class Jitterer
 {

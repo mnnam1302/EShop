@@ -2,9 +2,8 @@
 using EShop.Shared.Contracts.Abstractions.Requests;
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.Contracts.Services.Tenancy.Tenants;
+using EShop.Shared.DomainTools.Exceptions;
 using EShop.Shared.EventBus.Services;
-using EShop.Shared.Scoping;
-using EShop.Shared.Scoping.Exceptions;
 using EShop.Shared.Scoping.ResourceAccessControl;
 using EShop.Tenancy.Domain;
 using EShop.Tenancy.Domain.Entities;

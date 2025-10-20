@@ -6,9 +6,9 @@ using EShop.Shared.Authentication.Abstractions;
 using EShop.Shared.Contracts.Abstractions.Requests;
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.Contracts.Services.Tenancy.Tenants;
+using EShop.Shared.DomainTools.Exceptions;
 using EShop.Shared.DomainTools.UnitOfWorks;
 using EShop.Shared.Scoping;
-using EShop.Shared.Scoping.Exceptions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 

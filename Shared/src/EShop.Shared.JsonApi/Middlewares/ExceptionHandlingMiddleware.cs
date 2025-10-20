@@ -1,5 +1,5 @@
 ﻿using EShop.Shared.Contracts.Abstractions.Shared;
-using EShop.Shared.Scoping.Exceptions;
+using EShop.Shared.DomainTools.Exceptions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;

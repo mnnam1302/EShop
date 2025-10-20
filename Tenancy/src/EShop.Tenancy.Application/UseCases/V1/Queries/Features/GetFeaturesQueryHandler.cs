@@ -2,7 +2,6 @@
 using EShop.Shared.Contracts.Abstractions.Requests;
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.Contracts.Services.Tenancy.Features;
-using EShop.Shared.Scoping;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers.TenantFeaturesProvider;
 
 namespace EShop.Tenancy.Application.UseCases.V1.Queries.Features;

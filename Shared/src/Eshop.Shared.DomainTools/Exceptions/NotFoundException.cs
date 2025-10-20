@@ -1,4 +1,4 @@
-﻿namespace EShop.Shared.Scoping.Exceptions;
+﻿namespace EShop.Shared.DomainTools.Exceptions;
 
 public class NotFoundException : DomainException
 {

@@ -1,4 +1,7 @@
-﻿namespace EShop.Shared.Scoping.ResourceAccessControl.Providers.UserOrganizationContextProvider;
+﻿using EShop.Shared.Authentication;
+using EShop.Shared.Authentication.Abstractions;
+
+namespace EShop.Shared.Scoping.ResourceAccessControl.Providers.UserOrganizationContextProvider;
 
 public sealed class UserOrganizationContextProvider : IUserOrganizationContextProvider
 {

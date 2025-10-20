@@ -1,6 +1,6 @@
 ﻿using EShop.Shared.Authentication.Abstractions;
 using EShop.Shared.Authentication.Managers.JwtTokens;
-using EShop.Shared.Scoping.Exceptions;
+using EShop.Shared.DomainTools.Exceptions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.JsonWebTokens;

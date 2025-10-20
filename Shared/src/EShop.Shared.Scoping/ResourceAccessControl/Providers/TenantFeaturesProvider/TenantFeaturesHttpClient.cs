@@ -1,4 +1,7 @@
-﻿using EShop.Shared.Contracts.Abstractions.Shared;
+﻿using EShop.Shared.Authentication;
+using EShop.Shared.Authentication.Abstractions;
+using EShop.Shared.Authentication.Managers.JwtTokens;
+using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.Contracts.Services.Tenancy.Features;
 using Newtonsoft.Json;
 

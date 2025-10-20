@@ -1,5 +1,4 @@
 ﻿using EShop.Shared.Authentication.Abstractions;
-using EShop.Shared.Scoping;
 using EShop.Shared.Scoping.ResourceAccessControl;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -10,7 +9,7 @@ using Microsoft.Extensions.Logging;
 namespace EShop.Shared.JsonApi.ResourceAccessControl;
 
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
-public class RequirePermissionAttribute : Attribute, IFilterFactory, IUserPermissionFilter
+public sealed class RequirePermissionAttribute : Attribute, IFilterFactory, IUserPermissionFilter
 {
     public RequirePermissionAttribute(string permissionId)
     {
@@ -31,10 +30,10 @@ public class RequirePermissionAttribute : Attribute, IFilterFactory, IUserPermis
 
     private sealed class InternalRequirePermissionFilter : IAsyncAuthorizationFilter
     {
-        private readonly string _requirePermission;
-        private readonly IPermissionValidator _permissionValidator;
-        private readonly IUserDetailsProvider _userDetailsProvider;
-        private readonly ILogger _logger;
+        private readonly string requirePermission;
+        private readonly IPermissionValidator permissionValidator;
+        private readonly IUserDetailsProvider userDetailsProvider;
+        private readonly ILogger logger;
 
         public InternalRequirePermissionFilter(
             IPermissionValidator permissionValidator,
@@ -42,25 +41,25 @@ public class RequirePermissionAttribute : Attribute, IFilterFactory, IUserPermis
             ILogger<InternalRequirePermissionFilter> logger,
             string requirePermission)
         {
-            _permissionValidator = permissionValidator;
-            _userDetailsProvider = userDetailsProvider;
-            _requirePermission = requirePermission;
-            _logger = logger;
+            this.permissionValidator = permissionValidator;
+            this.userDetailsProvider = userDetailsProvider;
+            this.requirePermission = requirePermission;
+            this.logger = logger;
         }
 
         public async Task OnAuthorizationAsync(AuthorizationFilterContext context)
         {
-            if (!_userDetailsProvider.IsAuthenticatedUser)
+            if (!userDetailsProvider.IsAuthenticatedUser)
             {
                 context.Result = new StatusCodeResult(StatusCodes.Status401Unauthorized);
-                _logger.LogTrace("Rejecting unauthenticated user");
+                logger.LogTrace("Rejecting unauthenticated user");
                 return;
             }
 
-            if (!await _permissionValidator.HasPermissionAsync(_requirePermission))
+            if (!await permissionValidator.HasPermissionAsync(requirePermission))
             {
                 context.Result = new StatusCodeResult(StatusCodes.Status403Forbidden);
-                _logger.LogTrace("Rejecting user without {expectedPermission} permissions", _requirePermission);
+                logger.LogTrace("Rejecting user without {ExpectedPermission} permissions", requirePermission);
             }
         }
     }

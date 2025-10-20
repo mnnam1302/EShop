@@ -1,4 +1,5 @@
-﻿using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserPermissionProvider;
+﻿using EShop.Shared.Authentication.Abstractions;
+using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserPermissionProvider;
 
 namespace EShop.Shared.Scoping.ResourceAccessControl;
 

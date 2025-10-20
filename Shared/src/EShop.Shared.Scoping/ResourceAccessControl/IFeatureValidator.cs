@@ -1,4 +1,5 @@
-﻿using EShop.Shared.Scoping.ResourceAccessControl.Providers.TenantFeaturesProvider;
+﻿using EShop.Shared.Authentication.Abstractions;
+using EShop.Shared.Scoping.ResourceAccessControl.Providers.TenantFeaturesProvider;
 
 namespace EShop.Shared.Scoping.ResourceAccessControl;
 

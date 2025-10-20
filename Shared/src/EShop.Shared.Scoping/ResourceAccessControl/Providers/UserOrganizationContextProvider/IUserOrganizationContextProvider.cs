@@ -1,4 +1,6 @@
-﻿namespace EShop.Shared.Scoping.ResourceAccessControl.Providers.UserOrganizationContextProvider;
+﻿using EShop.Shared.Authentication;
+
+namespace EShop.Shared.Scoping.ResourceAccessControl.Providers.UserOrganizationContextProvider;
 
 public interface IUserOrganizationContextProvider
 {
