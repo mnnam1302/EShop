@@ -16,10 +16,10 @@ namespace EShop.Authorization.API.APIs
             var group = endpoints
                 .NewVersionedApi("Organizations")
                 .MapGroup(BaseUrl)
-                .HasApiVersion(1);
+                .HasApiVersion(1)
+                .RequireAuthorization();
 
             group.MapGet("/{organizationId}/organizationContext", GetOrganizationContext)
-                .RequireAuthenticatedUser()
                 .RequireSystemUserFilter();
 
             return endpoints;

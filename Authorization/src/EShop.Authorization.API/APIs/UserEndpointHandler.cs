@@ -1,7 +1,6 @@
 ﻿using EShop.Authorization.Application.UseCases.Users;
 using EShop.Shared.CQRS;
 using EShop.Shared.JsonApi.Abstractions;
-using EShop.Shared.JsonApi.ResourceAccessControl;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserOrganizationContextProvider;
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,10 +15,11 @@ namespace EShop.Authorization.API.APIs
             var group = endpoints
                 .NewVersionedApi("Users")
                 .MapGroup(BaseUrl)
-                .HasApiVersion(1);
+                .HasApiVersion(1)
+                .RequireAuthorization();
 
-            group.MapGet("/{userId}/permissions", GetUserPermissions).RequireAuthenticatedUser();
-            group.MapGet("/{userId}/organizationContext", GetUserOrganizationContext).RequireAuthenticatedUser();
+            group.MapGet("/{userId}/permissions", GetUserPermissions);
+            group.MapGet("/{userId}/organizationContext", GetUserOrganizationContext);
 
             return endpoints;
         }

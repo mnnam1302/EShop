@@ -10,31 +10,6 @@ namespace EShop.Shared.JsonApi.ResourceAccessControl;
 
 public static class EndpointFilterExtensions
 {
-    [Obsolete("Use RequireAuthenticatedUserFilter instead")]
-    public static TBuilder RequireAuthenticatedUser<TBuilder>(this TBuilder builder)
-        where TBuilder : IEndpointConventionBuilder
-    {
-        builder.AddEndpointFilterFactory((_, next) =>
-        {
-            return async invocationContext =>
-            {
-                var serviceProvider = invocationContext.HttpContext.RequestServices;
-                var userDetailsProvider = serviceProvider.GetRequiredService<IUserDetailsProvider>();
-                var logger = serviceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("AuthenticatedUserFilterMinimalApi");
-
-                if (!userDetailsProvider.IsAuthenticatedUser)
-                {
-                    logger.LogTrace("Rejecting unauthenticated user");
-                    return TypedResults.Unauthorized();
-                }
-
-                return await next(invocationContext);
-            };
-        });
-
-        return builder;
-    }
-
     public static TBuilder RequireSystemUserFilter<TBuilder>(this TBuilder builder)
         where TBuilder : IEndpointConventionBuilder
     {
