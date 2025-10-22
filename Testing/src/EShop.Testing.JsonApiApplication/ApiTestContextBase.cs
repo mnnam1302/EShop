@@ -1,4 +1,7 @@
-﻿using EShop.Shared.Contracts.Abstractions.MessageBus;
+﻿using EShop.Shared.Authentication;
+using EShop.Shared.Authentication.Managers;
+using EShop.Shared.Authentication.Managers.JwtTokens;
+using EShop.Shared.Contracts.Abstractions.MessageBus;
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.EventBus.Services;
 using EShop.Shared.Scoping;

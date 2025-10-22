@@ -1,5 +1,5 @@
-﻿using EShop.Shared.DomainTools.DependencyInjections;
-using EShop.Shared.Scoping;
+﻿using EShop.Shared.Authentication.Abstractions;
+using EShop.Shared.DomainTools.DependencyInjections;
 using EShop.Shared.Scoping.ResourceAccessControl;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -10,30 +10,6 @@ namespace EShop.Shared.JsonApi.ResourceAccessControl;
 
 public static class EndpointFilterExtensions
 {
-    public static TBuilder RequireAuthenticatedUser<TBuilder>(this TBuilder builder)
-        where TBuilder : IEndpointConventionBuilder
-    {
-        builder.AddEndpointFilterFactory((_, next) =>
-        {
-            return async invocationContext =>
-            {
-                var serviceProvider = invocationContext.HttpContext.RequestServices;
-                var userDetailsProvider = serviceProvider.GetRequiredService<IUserDetailsProvider>();
-                var logger = serviceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("AuthenticatedUserFilterMinimalApi");
-
-                if (!userDetailsProvider.IsAuthenticatedUser)
-                {
-                    logger.LogTrace("Rejecting unauthenticated user");
-                    return TypedResults.Unauthorized();
-                }
-
-                return await next(invocationContext);
-            };
-        });
-
-        return builder;
-    }
-
     public static TBuilder RequireSystemUserFilter<TBuilder>(this TBuilder builder)
         where TBuilder : IEndpointConventionBuilder
     {

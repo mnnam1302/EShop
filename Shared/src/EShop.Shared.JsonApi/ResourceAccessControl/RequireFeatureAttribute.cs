@@ -1,4 +1,4 @@
-﻿using EShop.Shared.Scoping;
+﻿using EShop.Shared.Authentication.Abstractions;
 using EShop.Shared.Scoping.ResourceAccessControl;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -9,14 +9,14 @@ using Microsoft.Extensions.Logging;
 namespace EShop.Shared.JsonApi.ResourceAccessControl;
 
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
-public class RequireFeatureAttribute : Attribute, IFilterFactory
+public sealed class RequireFeatureAttribute : Attribute, IFilterFactory
 {
     public RequireFeatureAttribute(string featureId)
     {
         Feature = featureId;
     }
 
-    public string Feature { get; set; } = string.Empty;
+    public string Feature { get; set; }
 
     public bool IsReusable => false;
 
@@ -31,10 +31,10 @@ public class RequireFeatureAttribute : Attribute, IFilterFactory
 
     private sealed class InternalRequireFeatureFilter : IAsyncAuthorizationFilter
     {
-        private readonly string _requiredFeature;
-        private readonly IFeatureValidator _featureValidator;
-        private readonly IUserDetailsProvider _userDetailsProvider;
-        private ILogger _logger;
+        private readonly string requiredFeature;
+        private readonly IFeatureValidator featureValidator;
+        private readonly IUserDetailsProvider userDetailsProvider;
+        private readonly ILogger logger;
 
         internal InternalRequireFeatureFilter(
             IFeatureValidator featureValidator,
@@ -42,26 +42,25 @@ public class RequireFeatureAttribute : Attribute, IFilterFactory
             ILogger logger,
             string requiredFeature)
         {
-            _featureValidator = featureValidator;
-            _userDetailsProvider = userDetailsProvider;
-            _logger = logger;
-            _requiredFeature = requiredFeature;
+            this.featureValidator = featureValidator;
+            this.userDetailsProvider = userDetailsProvider;
+            this.logger = logger;
+            this.requiredFeature = requiredFeature;
         }
 
         public async Task OnAuthorizationAsync(AuthorizationFilterContext context)
         {
-            if (!_userDetailsProvider.IsAuthenticatedUser)
+            if (!userDetailsProvider.IsAuthenticatedUser)
             {
                 context.Result = new StatusCodeResult(StatusCodes.Status401Unauthorized);
-                _logger.LogTrace("Rejecting unauthenticated user");
+                logger.LogTrace("Rejecting unauthenticated user");
                 return;
             }
 
-            if (!await _featureValidator.HasFeatureAsync(_requiredFeature))
+            if (!await featureValidator.HasFeatureAsync(requiredFeature))
             {
                 context.Result = new StatusCodeResult(StatusCodes.Status403Forbidden);
-                _logger.LogTrace("Rejecting user without {expectedFeature}", _requiredFeature);
-                return;
+                logger.LogTrace("Rejecting user without {ExpectedFeature}", requiredFeature);
             }
         }
     }

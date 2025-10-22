@@ -7,7 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 namespace EShop.Shared.JsonApi.ResourceAccessControl;
 
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
-public class RequireSupportUserAttribute : Attribute, IFilterFactory, IUserPermissionFilter
+public sealed class RequireSupportUserAttribute : Attribute, IUserPermissionFilter
 {
     public bool IsReusable => false;
 
@@ -18,16 +18,16 @@ public class RequireSupportUserAttribute : Attribute, IFilterFactory, IUserPermi
 
     private sealed class InternaSupportUserFilter : IAsyncAuthorizationFilter
     {
-        private readonly IPermissionValidator _permissionValidator;
+        private readonly IPermissionValidator permissionValidator;
 
         public InternaSupportUserFilter(IPermissionValidator permissionValidator)
         {
-            _permissionValidator = permissionValidator;
+            this.permissionValidator = permissionValidator;
         }
 
         public async Task OnAuthorizationAsync(AuthorizationFilterContext context)
         {
-            if (!await _permissionValidator.HasSupportUserAccessAsync())
+            if (!await permissionValidator.HasSupportUserAccessAsync())
             {
                 context.Result = new StatusCodeResult(StatusCodes.Status403Forbidden);
             }

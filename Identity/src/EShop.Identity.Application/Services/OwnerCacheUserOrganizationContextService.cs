@@ -1,4 +1,6 @@
-﻿using EShop.Shared.Scoping;
+﻿using EShop.Shared.Authentication;
+using EShop.Shared.Authentication.Abstractions;
+using EShop.Shared.Scoping;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserOrganizationContextProvider;
 using static EShop.Shared.Contracts.Services.Identity.Organizations.Response;
 using static EShop.Shared.Contracts.Services.Identity.Users.Response;

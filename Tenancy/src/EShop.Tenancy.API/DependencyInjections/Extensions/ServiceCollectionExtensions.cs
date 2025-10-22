@@ -42,22 +42,22 @@ public static class ServiceCollectionExtensions
 
     public static IServiceCollection AddBoostrapping(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment)
     {
-        // Clean architecture
-        services.AddTenancyAPI();
-        services.AddTenancyApplication();
-        services.AddTenancyPersistence();
-        services.AddTenancyInfrastructure(configuration, environment, Program.ApplicationName);
+        services
+            .AddTenancyAPI()
+            .AddTenancyApplication()
+            .AddTenancyPersistence()
+            .AddTenancyInfrastructure(configuration, environment, Program.ApplicationName);
 
-        // Owner services
-        services.AddTenantFeaturesProviderForOwnerService(configuration);
+        services.AddTenantFeaturesProviderForOwnerService();
 
         return services;
     }
 
-    private static void AddTenancyAPI(this IServiceCollection services)
+    private static IServiceCollection AddTenancyAPI(this IServiceCollection services)
     {
         services.AddCors();
         services.AddSingleton<ExceptionHandlingMiddleware>();
+        services.AddTransient<DbInitializer>();
 
         services.AddCarter();
 
@@ -75,10 +75,10 @@ public static class ServiceCollectionExtensions
                 options.SubstituteApiVersionInUrl = true;
             });
 
-        services.AddTransient<DbInitializer>();
+        return services;
     }
 
-    private static void AddTenantFeaturesProviderForOwnerService(this IServiceCollection services, IConfiguration configuration)
+    private static void AddTenantFeaturesProviderForOwnerService(this IServiceCollection services)
     {
         services.AddScoped<IFeatureValidator, CurrentUserFeaturesValidator>();
         services.AddScoped<ITenantFeaturesProvider, OwnerTenantFeaturesProvider>();

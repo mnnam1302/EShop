@@ -13,7 +13,7 @@ namespace EShop.Identity.Presentation.Controllers;
 [ApiController]
 [ApiVersion("1.0")]
 [Route("api/v{version:apiVersion}/[controller]")]
-public class RolesController : ApiEndpointBase
+public class RolesController
 {
     private readonly ISender _sender;
 
@@ -37,7 +37,7 @@ public class RolesController : ApiEndpointBase
 
         if (result.IsFailure)
         {
-            return HandlerFailure(result);
+            return ApiResultHandler.HandleFailure(result);
         }
 
         return Results.Ok(result);
@@ -54,7 +54,7 @@ public class RolesController : ApiEndpointBase
 
         if (result.IsFailure)
         {
-            return HandlerFailure(result);
+            return ApiResultHandler.HandleFailure(result);
         }
 
         return Results.Ok(result);
@@ -68,7 +68,7 @@ public class RolesController : ApiEndpointBase
 
         if (result.IsFailure)
         {
-            return HandlerFailure(result);
+            return ApiResultHandler.HandleFailure(result);
         }
 
         return Results.Created("", result);
@@ -83,7 +83,7 @@ public class RolesController : ApiEndpointBase
 
         if (result.IsFailure)
         {
-            return HandlerFailure(result);
+            return ApiResultHandler.HandleFailure(result);
         }
 
         return Results.Ok(result);
@@ -98,7 +98,7 @@ public class RolesController : ApiEndpointBase
 
         if (result.IsFailure)
         {
-            return HandlerFailure(result);
+            return ApiResultHandler.HandleFailure(result);
         }
 
         return Results.NoContent();

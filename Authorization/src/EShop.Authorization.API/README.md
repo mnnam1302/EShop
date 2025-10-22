@@ -8,3 +8,18 @@ This service provides RSA-based JWT token generation and validation for multi-te
 ```bash
 dotnet ef migrations add <MigrationName> -p ../EShop.Authorization.Infrastructure --startup-project .
 ```
+
+## Feature Login
+
+### Endpoint
+`POST /api/auth/login`
+
+### Request Body
+```json
+{
+  "username": "string",
+  "password": "string",
+}
+```
+
+### CQRS: LoginQuery - LoginQueryHandler

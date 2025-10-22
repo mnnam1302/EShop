@@ -2,7 +2,7 @@
 
 namespace EShop.Testing.JsonApiApplication.Providers;
 
-public class TestUserPermissionProvider : IUserPermissionsProvider
+public sealed class TestUserPermissionProvider : IUserPermissionsProvider
 {
     private readonly Dictionary<string, List<string>> userPermissions = new Dictionary<string, List<string>>();
 
@@ -21,13 +21,13 @@ public class TestUserPermissionProvider : IUserPermissionsProvider
         }
     }
 
-    public async Task<string[]> GetPermissions(string userId)
+    public async Task<string[]> GetPermissions(string userId, CancellationToken cancellationToken = default)
     {
         var userIdKey = userId.ToLower();
+        var permissions = userPermissions.ContainsKey(userIdKey)
+                ? [.. userPermissions[userIdKey]]
+                : Array.Empty<string>();
 
-        return await Task.FromResult(
-            userPermissions.ContainsKey(userIdKey) 
-                ? userPermissions[userIdKey].ToArray() 
-                : Array.Empty<string>());
+        return await Task.FromResult(permissions);
     }
 }

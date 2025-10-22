@@ -1,4 +1,5 @@
 ﻿using Asp.Versioning;
+using EShop.Shared.Authentication.Abstractions;
 using EShop.Shared.Contracts.Services.Identity.Users;
 using EShop.Shared.JsonApi.Abstractions;
 using EShop.Shared.JsonApi.ResourceAccessControl;
@@ -13,7 +14,7 @@ namespace EShop.Identity.Presentation.Controllers;
 [ApiController]
 [ApiVersion("1.0")]
 [Route("api/v{api:apiVersion}/[controller]")]
-public class UsersController : ApiEndpointBase
+public class UsersController
 {
     private readonly ISender _sender;
     private readonly IUserDetailsProvider _userDetailsProvider;
@@ -31,7 +32,7 @@ public class UsersController : ApiEndpointBase
         var result = await _sender.Send(request);
         if (result.IsFailure)
         {
-            return HandlerFailure(result);
+            return ApiResultHandler.HandleFailure(result);
         }
 
         return Results.Ok(result);
@@ -48,7 +49,7 @@ public class UsersController : ApiEndpointBase
         var result = await _sender.Send(request);
         if (result.IsFailure)
         {
-            return HandlerFailure(result);
+            return ApiResultHandler.HandleFailure(result);
         }
 
         return Results.Ok(result);
@@ -65,7 +66,7 @@ public class UsersController : ApiEndpointBase
         var result = await _sender.Send(request);
         if (result.IsFailure)
         {
-            return HandlerFailure(result);
+            return ApiResultHandler.HandleFailure(result);
         }
 
         return Results.Ok(result);

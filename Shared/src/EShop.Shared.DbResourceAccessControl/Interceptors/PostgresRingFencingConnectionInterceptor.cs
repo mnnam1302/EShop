@@ -1,11 +1,10 @@
-﻿using EShop.Shared.Scoping;
+﻿using EShop.Shared.Authentication.Abstractions;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserOrganizationContextProvider;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Logging;
 using Nito.AsyncEx;
 using System.Data.Common;
 using System.Diagnostics.CodeAnalysis;
-using static EShop.Shared.Contracts.Services.Identity.Users.Response;
 
 namespace EShop.Shared.DbResourceAccessControl.Interceptors;
 
@@ -54,7 +53,7 @@ public sealed class PostgresRingFencingConnectionInterceptor : DbConnectionInter
             // Any calls without user in http context would crash but might be needed in some cases (e.g. VS debugger)
             // It is not responsibility of this class to make sure only authenticated users will get access
             // but if the connection doesn't have 'app.scope' set the query will not return results anyway.
-            _logger.LogWarning("Opening db connection without ring fencing. Scoped queries will not return any results! [{providerId}]", _userDetailsProvider.GetHashCode());
+            _logger.LogWarning("Opening db connection without ring fencing. Scoped queries will not return any results! [{ProviderId}]", _userDetailsProvider.GetHashCode());
             setContextCommand = null;
             return false;
         }
@@ -75,7 +74,7 @@ public sealed class PostgresRingFencingConnectionInterceptor : DbConnectionInter
             ? "SET app.scope = '';"
             : $"SET app.scope = '{contextPath}%';";
 
-        _logger.LogTrace("Setting connection user context to '{path}' for user '{user}'", contextPath, _userDetailsProvider.AuthenticatedUser.Id);
+        _logger.LogTrace("Setting connection user context to '{Path}' for user '{User}'", contextPath, _userDetailsProvider.AuthenticatedUser.Id);
         return true;
     }
 
@@ -89,9 +88,9 @@ public sealed class PostgresRingFencingConnectionInterceptor : DbConnectionInter
                     _userDetailsProvider.AuthenticatedUser.Id,
                     _userDetailsProvider.AuthenticatedUser.UserType));
         }
-        catch
+        catch (Exception ex)
         {
-            _logger.LogWarning("Error getting user organization context");
+            _logger.LogWarning(ex, $"Error retriving user organization context");
             userOrganizationContext = null;
         }
 

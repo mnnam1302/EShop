@@ -1,5 +1,5 @@
-﻿using EShop.Shared.DbResourceAccessControl.Extensions;
-using EShop.Shared.Scoping;
+﻿using EShop.Shared.Authentication.Abstractions;
+using EShop.Shared.DbResourceAccessControl.Extensions;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Logging;
 using System.Data.Common;
@@ -7,7 +7,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace EShop.Shared.DbResourceAccessControl.Interceptors;
 
-public class PostgresMultiTenantConnectionInterceptor : DbConnectionInterceptor, IMultiTenantIsolationStrategy
+public sealed class PostgresMultiTenantConnectionInterceptor : DbConnectionInterceptor, IMultiTenantIsolationStrategy
 {
     private readonly IUserDetailsProvider _userDetailsProvider;
     private readonly ILogger<PostgresMultiTenantConnectionInterceptor> _logger;

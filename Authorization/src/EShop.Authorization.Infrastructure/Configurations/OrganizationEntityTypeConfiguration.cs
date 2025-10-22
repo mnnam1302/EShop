@@ -1,5 +1,7 @@
 ﻿using EShop.Authorization.Domain;
 using EShop.Authorization.Domain.Entities;
+using EShop.Authorization.Domain.ValueObjects;
+using EShop.Shared.Scoping;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -18,6 +20,31 @@ internal sealed class OrganizationEntityTypeConfiguration : IEntityTypeConfigura
         builder.Property(o => o.Id)
             .HasMaxLength(ModelConstants.ShortText)
             .IsRequired();
+
+        builder.OwnsOne<OrganisationContext>(o => o.Context);
+
+        builder.OwnsOne<Address>(o => o.Address, addressBuilder =>
+        {
+            addressBuilder.Property(a => a.Street)
+                .HasColumnName("Street")
+                .HasMaxLength(ModelConstants.MediumText);
+
+            addressBuilder.Property(a => a.City)
+                .HasColumnName("City")
+                .HasMaxLength(ModelConstants.ShortText);
+
+            addressBuilder.Property(a => a.Country)
+                .HasColumnName("Country")
+                .HasMaxLength(ModelConstants.ShortText);
+
+            addressBuilder.Property(a => a.State)
+                .HasColumnName("State")
+                .HasMaxLength(ModelConstants.ShortText);
+
+            addressBuilder.Property(a => a.ZipCode)
+                .HasColumnName("ZipCode")
+                .HasMaxLength(ModelConstants.ShortText);
+        });
 
         builder
             .HasOne(o => o.ParentOrganization)

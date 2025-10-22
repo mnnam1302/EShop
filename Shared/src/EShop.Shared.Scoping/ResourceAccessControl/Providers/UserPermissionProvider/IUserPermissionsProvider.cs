@@ -2,5 +2,5 @@
 
 public interface IUserPermissionsProvider
 {
-    Task<string[]> GetPermissions(string userId);
+    Task<string[]> GetPermissions(string userId, CancellationToken cancellationToken = default);
 }

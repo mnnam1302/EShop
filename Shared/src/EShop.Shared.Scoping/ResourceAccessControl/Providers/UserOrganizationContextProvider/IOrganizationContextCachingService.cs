@@ -1,12 +1,10 @@
-﻿using static EShop.Shared.Contracts.Services.Identity.Organizations.Response;
-
-namespace EShop.Shared.Scoping.ResourceAccessControl.Providers.UserOrganizationContextProvider;
+﻿namespace EShop.Shared.Scoping.ResourceAccessControl.Providers.UserOrganizationContextProvider;
 
 public interface IOrganizationContextCachingService
 {
-    Task<OrganizationContext?> GetValue(string organizationId);
+    Task<OrganizationContext?> GetValue(string organizationId, CancellationToken cancellationToken = default);
 
-    Task AddValue(string organizationId, OrganizationContext organizationContext);
+    Task AddValue(string organizationId, OrganizationContext organizationContext, CancellationToken cancellationToken = default);
 
-    Task RemoveValue(string organizationId);
+    Task RemoveValue(string organizationId, CancellationToken cancellationToken = default);
 }

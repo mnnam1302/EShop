@@ -13,6 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\EShop.Shared.Authentication\EShop.Shared.Authentication.csproj" />
     <ProjectReference Include="..\EShop.Shared.Contracts\EShop.Shared.Contracts.csproj" />
     <ProjectReference Include="..\EShop.Shared.HealthChecks\EShop.Shared.HealthChecks.csproj" />
   </ItemGroup>

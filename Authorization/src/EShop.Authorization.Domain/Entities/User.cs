@@ -16,9 +16,14 @@ public class User : AggregateRoot<string>, IExcludedFromScoping
     [MaxLength(ModelConstants.MediumText)]
     public string Name { get; set; } = string.Empty;
 
+    [MaxLength(ModelConstants.MediumText)]
+    public string Email { get; set; } = string.Empty;
+
+    [MaxLength(ModelConstants.ShortText)]
+    public string PhoneNumber { get; set; } = string.Empty;
+
     [MaxLength(ModelConstants.ShortText)]
     public string Status { get; set; } = nameof(UserStatus.Inactive);
-
 
     [MaxLength(ModelConstants.ShortText)]
     public string CreatedByUserId { get; set; } = string.Empty;
@@ -55,6 +60,7 @@ public class User : AggregateRoot<string>, IExcludedFromScoping
             Username = ownerUsername,
             HashedPassword = hashedPassword,
             Name = ownerDisplayName,
+            Email = ownerEmail,
             Status = nameof(UserStatus.Inactive),
             OrganizationId = organizationId,
             CreatedByUserId = createdByUserId,
@@ -68,7 +74,9 @@ public class User : AggregateRoot<string>, IExcludedFromScoping
     public void AssignRole(Guid roleId)
     {
         if (_userRoles.Any(ur => ur.RoleId == roleId))
+        {
             return;
+        }
 
         var userRole = new UserRole
         {
@@ -84,5 +92,4 @@ public enum UserStatus
 {
     Inactive,
     Active,
-    Suspended
 }

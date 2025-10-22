@@ -38,6 +38,6 @@ public class ResiliencePolicyFactory : IResiliencePolicyFactory
 
     private static TimeSpan GetExponentialBackOffPlusSomeJitter(int retryAttempt)
     {
-        return TimeSpan.FromSeconds(Math.Pow(BaseNumber, retryAttempt)) + Scoping.Jitterer.GetJitteredDelay() * JitterMultiplierWindow;
+        return TimeSpan.FromSeconds(Math.Pow(BaseNumber, retryAttempt)) + Jitterer.GetJitteredDelay() * JitterMultiplierWindow;
     }
 }

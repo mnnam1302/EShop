@@ -1,7 +1,7 @@
-﻿using EShop.Authorization.Application.UseCases.Commands;
+﻿using EShop.Authorization.Application.UseCases.Organizations;
+using EShop.Shared.Authentication.Abstractions;
 using EShop.Shared.Contracts.Services.Tenancy.Tenants;
 using EShop.Shared.CQRS;
-using EShop.Shared.Scoping;
 using MassTransit;
 using Microsoft.Extensions.Logging;
 

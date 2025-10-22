@@ -1,5 +1,5 @@
 ﻿using EShop.Identity.Application.Abstractions;
-using EShop.Shared.Scoping.DependencyInjections.Options;
+using EShop.Shared.Scoping.DependencyInjections;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;

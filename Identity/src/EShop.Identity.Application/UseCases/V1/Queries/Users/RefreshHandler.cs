@@ -1,4 +1,6 @@
 ﻿using EShop.Identity.Application.Abstractions;
+using EShop.Shared.Authentication;
+using EShop.Shared.Authentication.Abstractions;
 using EShop.Shared.Contracts.Abstractions.Requests;
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.Contracts.Services.Identity.Auth;
@@ -44,7 +46,7 @@ public class RefreshHandler : IQueryHandler<Query.Refresh, Response.Authenticate
         };
 
         // Convert to AuthenticationCaching for caching
-        var authenticationCaching = new TokenAuthenticationCaching
+        var authenticationCaching = new TokenAuthentication
         {
             UserId = newToken.UserId,
             UserName = newToken.UserName,
@@ -57,7 +59,7 @@ public class RefreshHandler : IQueryHandler<Query.Refresh, Response.Authenticate
         return Result.Success(newToken);
     }
 
-    private async Task<TokenAuthenticationCaching> ValidateAndRetrieveTokenAsync(string userId, Query.Refresh request)
+    private async Task<TokenAuthentication> ValidateAndRetrieveTokenAsync(string userId, Query.Refresh request)
     {
         var tokenCached = await _tokenCacheService.TryGetTokenAsync(userId);
 

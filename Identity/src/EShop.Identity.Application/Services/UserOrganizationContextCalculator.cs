@@ -1,5 +1,7 @@
 ﻿using EShop.Identity.Domain.Entities;
 using EShop.Identity.Domain.Repositories;
+using EShop.Shared.Authentication;
+using EShop.Shared.Authentication.Abstractions;
 using EShop.Shared.Scoping;
 using EShop.Shared.Scoping.Exceptions;
 using MassTransit.Initializers;
@@ -51,7 +53,7 @@ public class UserOrganizationContextCalculator : IUserOrganizationContextCalcula
                 authenticatedUser.Id,
                 authenticatedUser.UserType,
                 authenticatedUser.TenantId)
-                ?? throw new UserOrganizationContextNotFound("User organization is not found");
+                ?? throw new NotFoundException("User organization is not found");
 
             return userOrganizationContext;
         }
@@ -85,7 +87,7 @@ public class UserOrganizationContextCalculator : IUserOrganizationContextCalcula
                 OrganizationNumber = u.Organization.OrganizationNumber,
                 OrganizationPhoneNumber = u.Organization.PhoneNumber,
                 OrganizationEmail = u.Organization.Email,
-                OrganizationAddress = u.Organization.Address,
+                OrganizationStreet = u.Organization.Address,
                 OrganizationCity = u.Organization.City,
                 OrganizationPostcode = u.Organization.Postcode,
                 UserId = u.Id,
@@ -121,7 +123,7 @@ public class UserOrganizationContextCalculator : IUserOrganizationContextCalcula
                 userId,
                 typeUser,
                 authenticatedUser.TenantId)
-                ?? throw new UserOrganizationContextNotFound($"User organization context with Id {userId} is not found");
+                ?? throw new NotFoundException($"User organization context with Id {userId} is not found");
 
             return userOrganizationContext;
         }

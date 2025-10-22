@@ -2,6 +2,7 @@
 using EShop.Authorization.Domain.Entities;
 using EShop.Authorization.Domain.Repositories;
 using EShop.Authorization.Domain.Services;
+using EShop.Shared.Authentication;
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.Scoping;
 using Microsoft.EntityFrameworkCore;
@@ -42,7 +43,7 @@ internal sealed class RootOrganizationService : IRootOrganizationService
         var existingOrganization = await _organizationRepository.FindByIdAsync(tenantId, false, cancellationToken);
         if (existingOrganization is not null)
         {
-            _logger.LogWarning("Organization with ID {TenantId} already exists", tenantId);
+            _logger.LogWarning("Organization with ID '{TenantId}' already exists", tenantId);
             return Result.Failure<RootOrganizationSetup>(ErrorContants.Organization.AlreadyExists);
         }
 

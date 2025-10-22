@@ -1,4 +1,5 @@
-﻿using EventFlow.Exceptions;
+﻿using EShop.Shared.DomainTools;
+using EventFlow.Exceptions;
 using Polly;
 using Polly.Extensions.Http;
 
@@ -57,6 +58,6 @@ public static class ResilientClientPolicies
     private static TimeSpan GetExponentialBackOffPlusSomeJitter(int retryAttempt)
     {
         const int BaseNumber = 2;
-        return TimeSpan.FromSeconds(Math.Pow(BaseNumber, retryAttempt)) + Scoping.Jitterer.GetJitteredDelay();
+        return TimeSpan.FromSeconds(Math.Pow(BaseNumber, retryAttempt)) + Jitterer.GetJitteredDelay();
     }
 }

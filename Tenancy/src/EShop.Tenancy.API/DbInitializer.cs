@@ -1,5 +1,5 @@
-﻿using EShop.Shared.DbResourceAccessControl;
-using EShop.Shared.Scoping;
+﻿using EShop.Shared.Authentication.Abstractions;
+using EShop.Shared.DbResourceAccessControl;
 using EShop.Tenancy.Persistence;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;

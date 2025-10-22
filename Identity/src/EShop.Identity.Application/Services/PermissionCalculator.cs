@@ -39,7 +39,9 @@ public class PermissionCalculator : IPermissionCalculator, IUserPermissionsProvi
 
         var distinctPermissions = await userPermissions.Distinct().ToArrayAsync();
 
-        _logger.LogDebug("Calculated permissions for user '{UserId}' based on roles stored in the database. Result: {Count} permissions available.", userId, distinctPermissions.Length);
+        _logger.LogInformation(
+            "Calculated permissions for user '{UserId}' based on roles stored in the database. Result: {Count} permissions available.",
+            userId, distinctPermissions.Length);
 
         return distinctPermissions;
     }

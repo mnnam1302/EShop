@@ -2,7 +2,7 @@
 using EShop.Shared.Cache.DependencyInejctions.Extensions;
 using EShop.Shared.JsonApi.Extensions;
 using EShop.Shared.JsonApi.Middlewares;
-using EShop.Shared.Scoping.DependencyInjections.Options;
+using EShop.Shared.Scoping.DependencyInjections;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 
