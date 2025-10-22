@@ -7,31 +7,34 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 
-namespace EShop.Tenancy.Presentation.APIs.Features;
-
-public class FeatureApi : ICarterModule
+namespace EShop.Tenancy.Presentation.APIs.Features
 {
-    private const string BaseUrl = "api/v{version:apiVersion}/features";
 
-    public void AddRoutes(IEndpointRouteBuilder app)
+    public sealed class FeatureApi : ICarterModule
     {
-        var group = app.NewVersionedApi("Features")
-            .MapGroup(BaseUrl)
-            .HasApiVersion(1);
+        private const string BaseUrl = "api/v{version:apiVersion}/features";
 
-        group.MapGet("/", GetFeaturesV1Async)
-            .RequireSystemUserFilter();
-    }
-
-    private static async Task<IResult> GetFeaturesV1Async(ISender sender)
-    {
-        var result = await sender.Send(new Query.GetFeaturesQuery());
-
-        if (result.IsFailure)
+        public void AddRoutes(IEndpointRouteBuilder app)
         {
-            return ApiResultHandler.HandleFailure(result);
+            var group = app.NewVersionedApi("Features")
+                .MapGroup(BaseUrl)
+                .HasApiVersion(1)
+                .RequireAuthorization();
+
+            group.MapGet("/", GetFeaturesV1Async)
+                .RequireSystemUserFilter();
         }
 
-        return Results.Ok(result);
+        private static async Task<IResult> GetFeaturesV1Async(ISender sender)
+        {
+            var result = await sender.Send(new Query.GetFeaturesQuery());
+
+            if (result.IsFailure)
+            {
+                return ApiResultHandler.HandleFailure(result);
+            }
+
+            return Results.Ok(result);
+        }
     }
 }
