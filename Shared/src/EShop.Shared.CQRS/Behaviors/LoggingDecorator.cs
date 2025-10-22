@@ -35,7 +35,7 @@ public static class LoggingDecorator
             }
             else
             {
-                _logger.LogWarning("Completed request  {RequestName} with error: {Error}", requestName, result.Error);
+                _logger.LogWarning("Completed request  {RequestName} with error: {Error}", requestName, result.Error.Message);
             }
 
             return result;
@@ -70,7 +70,7 @@ public static class LoggingDecorator
             }
             else
             {
-                _logger.LogWarning("Completed request  {RequestName} with error: {Error}", requestName, result.Error);
+                _logger.LogWarning("Completed request  {RequestName} with message: {Message}", requestName, result.Error.Message);
             }
 
             return result;

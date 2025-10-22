@@ -1,5 +1,7 @@
-﻿using EShop.Authorization.Domain.Repositories;
+﻿using EShop.Authorization.Application.Abstractions;
+using EShop.Authorization.Domain.Repositories;
 using EShop.Authorization.Infrastructure.Consumers;
+using EShop.Authorization.Infrastructure.EmailServices;
 using EShop.Authorization.Infrastructure.Producers;
 using EShop.Authorization.Infrastructure.Repositories;
 using EShop.Shared.Contracts.Services.Identity.Permissions;
@@ -11,6 +13,8 @@ using EShop.Shared.EventBus.JsonConverters;
 using EShop.Shared.EventBus.PipelineObservers;
 using EShop.Shared.EventBus.Services;
 using EShop.Shared.Scoping.ResourceAccessControl;
+using FluentEmail.MailKitSmtp;
+using MailKit.Security;
 using MassTransit;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -39,6 +43,14 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IRoleRepository, RoleRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IPermissionRepository, PermissionRepository>();
+
+        return services;
+    }
+
+    public static IServiceCollection AddAuthorizationInfrastructure(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment)
+    {
+        services.AddAuthorizationEventBus(configuration, environment);
+        services.AddEmailServices(configuration);
 
         return services;
     }
@@ -141,5 +153,35 @@ public static class ServiceCollectionExtensions
             context,
             environment.EnvironmentName,
             serviceName);
+    }
+
+    public static IServiceCollection AddEmailServices(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddOptions<EmailSettingOptions>()
+            .BindConfiguration(EmailSettingOptions.SectionName)
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
+        var emailSettings = configuration
+            .GetSection(EmailSettingOptions.SectionName)
+            .Get<EmailSettingOptions>()
+            ?? throw new InvalidOperationException("Email settings are not configured properly.");
+
+
+        services.AddFluentEmail(emailSettings.DefaultFromEmail)
+            .AddMailKitSender(new SmtpClientOptions
+            {
+                Server = emailSettings.Host,
+                Port = emailSettings.Port,
+                User = emailSettings.UserName,
+                Password = emailSettings.Password,
+                UseSsl = emailSettings.EnableSsl,
+                RequiresAuthentication = true,
+                SocketOptions = SecureSocketOptions.StartTlsWhenAvailable
+            });
+
+        services.AddScoped<IEmailService, EmailService>();
+
+        return services;
     }
 }

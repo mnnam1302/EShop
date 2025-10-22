@@ -33,7 +33,7 @@ public static class ServiceCollectionExtensions
             .AddAuthorizationAPI()
             .AddAuthorizationApplication()
             .AddAuthorizationPersistence()
-            .AddAuthorizationEventBus(configuration, environment);
+            .AddAuthorizationInfrastructure(configuration, environment);
 
         return services;
     }
