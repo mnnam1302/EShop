@@ -11,7 +11,7 @@ public interface IRootOrganizationService
     /// <summary>
     /// Sets up a complete root organization with owner role and user
     /// </summary>
-    Task<Result<RootOrganizationSetup>> SetupRootOrganizationAsync(
+    Task<Result<RootOrganizationCreation>> SetupRootOrganizationAsync(
         string tenantId,
         string tenantName,
         string ownerUsername,
@@ -23,7 +23,7 @@ public interface IRootOrganizationService
 /// <summary>
 /// Result of root organization setup operation
 /// </summary>
-public sealed record RootOrganizationSetup(
+public sealed record RootOrganizationCreation(
     Organization Organization,
     Role OwnerRole,
     User OwnerUser);

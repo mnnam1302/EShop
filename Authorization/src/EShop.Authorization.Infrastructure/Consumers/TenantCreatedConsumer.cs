@@ -35,20 +35,11 @@ public sealed class TenantCreatedConsumer : IConsumer<ITenantCreated>
                 OwnerEmail = context.Message.OwnerEmail
             };
 
-            var result = await _mediator.SendAsync(command, context.CancellationToken);
-
-            if (result.IsFailure)
-            {
-                _logger.LogWarning(
-                    "Failed to create root organization for tenant {TenantId}. Errors: {Errors}",
-                    context.Message.TenantId,
-                    result.Error.Message);
-            }
+            await _mediator.SendAsync(command, context.CancellationToken);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Exception occurred while creating root organization for tenant {TenantId}", context.Message.TenantId);
-            throw;
         }
         finally
         {
