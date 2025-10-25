@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EShop.Tenancy.API;
 
-public class DbInitializer
+internal sealed class DbInitializer
 {
     private readonly TenancyDbContext _tenancyDbContext;
     private readonly IUserDetailsProvider _userDetailsProvider;

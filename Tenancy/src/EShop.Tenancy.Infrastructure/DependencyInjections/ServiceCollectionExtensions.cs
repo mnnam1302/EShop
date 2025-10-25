@@ -12,7 +12,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace EShop.Tenancy.Infrastructure.DependencyInjections.Extensions;
+namespace EShop.Tenancy.Infrastructure.DependencyInjections;
 
 public static class ServiceCollectionExtensions
 {

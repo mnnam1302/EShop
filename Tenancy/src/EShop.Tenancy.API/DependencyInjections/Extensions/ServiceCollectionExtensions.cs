@@ -10,7 +10,7 @@ using EShop.Shared.Scoping.ResourceAccessControl;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers.TenantFeaturesProvider;
 using EShop.Tenancy.Application.DependencyInjections.Extensions;
 using EShop.Tenancy.Application.Services;
-using EShop.Tenancy.Infrastructure.DependencyInjections.Extensions;
+using EShop.Tenancy.Infrastructure.DependencyInjections;
 using EShop.Tenancy.Persistence;
 using EShop.Tenancy.Persistence.DependencyInjections.Extensions;
 using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
