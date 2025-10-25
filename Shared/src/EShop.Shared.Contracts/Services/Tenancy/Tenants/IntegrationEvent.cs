@@ -10,13 +10,3 @@ public interface ITenantCreated : TenancyEvent
 
     string OwnerEmail { get; }
 }
-
-public interface ITenantSettingCreated : TenancyEvent
-{
-    string TenantName { get; }
-    string DisplayDateFormat { get; }
-    string DisplayTimeFormat { get; }
-    string Currency { get; }
-    string CurrencyDisplayFormat { get; }
-    string DefaultSystemLanguage { get; }
-}
