@@ -23,7 +23,7 @@ public sealed class TenantApi : ICarterModule
             .RequireAuthorization();
 
         group.MapPost("/", CreateTenantV1Async)
-            .RequireSupportUserFilter();
+            .RequireSystemUserFilter();
     }
 
     private static async Task<IResult> CreateTenantV1Async(ISender sender, [FromBody] Command.CreateTenantCommand request)

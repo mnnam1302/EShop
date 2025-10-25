@@ -50,21 +50,16 @@ public class Tenant : AggregateRoot<string>, IExcludedFromScoping
         AssertTenant(command);
 
         var tenant = new Tenant(
-            command.Id,
-            command.Name,
-            command.OwnerUsername,
-            command.OwnerEmail,
-            command.PhoneNumber,
-            command.Description);
+            command.Id, command.Name, command.OwnerUsername, command.OwnerEmail, command.PhoneNumber, command.Description);
 
-        // Add domain event for tenant creation if needed
+        // TODO: Add domain event for tenant creation if needed
 
         return tenant;
     }
 
     private static void AssertTenant(Command.CreateTenantCommand command)
     {
-        // TenantId should value object contains domain invariants
+        // TODO: TenantId should value object contains domain invariants
         AssertTenantId(command.Id);
 
         command.Id = command.Id.ToLowerInvariant();

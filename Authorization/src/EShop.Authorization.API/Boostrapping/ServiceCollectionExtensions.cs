@@ -62,20 +62,20 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    public static IServiceCollection AddAuthentication(this IServiceCollection services)
-    {
-        services
-            .AddJwtTokenAuthentication()
-            .AddUserTokensProvider();
-
-        return services;
-    }
-
     public static IServiceCollection AddRsaKeyServices(this IServiceCollection services)
     {
         services
             .AddMultiTenantKeyManager()
             .AddRsaKeyCachingProvider();
+
+        return services;
+    }
+
+    public static IServiceCollection AddAuthentication(this IServiceCollection services)
+    {
+        services
+            .AddJwtTokenAuthentication()
+            .AddUserTokensProvider();
 
         return services;
     }

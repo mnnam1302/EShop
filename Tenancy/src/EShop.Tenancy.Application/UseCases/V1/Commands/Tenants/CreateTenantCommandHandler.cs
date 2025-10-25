@@ -3,9 +3,9 @@ using EShop.Shared.Contracts.Abstractions.Requests;
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.Contracts.Services.Tenancy.Tenants;
 using EShop.Shared.DomainTools.Exceptions;
+using EShop.Shared.DomainTools.UnitOfWorks;
 using EShop.Shared.EventBus.Services;
 using EShop.Shared.Scoping.ResourceAccessControl;
-using EShop.Tenancy.Domain;
 using EShop.Tenancy.Domain.Entities;
 using EShop.Tenancy.Domain.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -14,7 +14,7 @@ namespace EShop.Tenancy.Application.UseCases.V1.Commands.Tenants;
 
 internal sealed class CreateTenantCommandHandler(
     ITenantRepository tenantRepository,
-    ITenancyUnitOfWork tenancyUnitOfWork,
+    IUnitOfWork unitOfWork,
     IEventBusGateway eventBusGateway,
     IUserDetailsProvider userDetailsProvider,
     IFeatureRepository featureRepository) : ICommandHandler<Command.CreateTenantCommand>
@@ -32,6 +32,7 @@ internal sealed class CreateTenantCommandHandler(
         var tenant = Tenant.Create(request);
         tenant.AddDefaultTenantSetting();
 
+        // TODO: can implement domain event handler to handle tenant features
         await EnsureTenantAvailableFeatures(tenant, operationalUser.ActionUserId, cancellationToken);
 
         await eventBusGateway.PublishAsync<ITenantCreated>(new
@@ -61,7 +62,7 @@ internal sealed class CreateTenantCommandHandler(
             }
 
             tenantRepository.Add(tenant);
-            await tenancyUnitOfWork.SaveChangesAsync(cancellationToken);
+            await unitOfWork.SaveChangesAsync(cancellationToken);
         }
         catch (Exception ex)
         {

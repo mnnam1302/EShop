@@ -1,4 +1,5 @@
 ﻿using Carter;
+using EShop.Shared.Authentication.DependencyInjections;
 using EShop.Shared.Cache.DependencyInejctions.Extensions;
 using EShop.Shared.Cache.Providers;
 using EShop.Shared.Cache.Services;
@@ -33,9 +34,8 @@ public static class ServiceCollectionExtensions
             .AddRedisInfrastructure(configuration);
 
         // Providers
-        services
-            .AddUserPermissionsProvider()
-            .AddUserOrganizationContextProvider();
+        services.AddUserPermissionsProvider();
+        services.AddUserOrganizationContextProvider();
 
         return services;
     }
@@ -47,8 +47,6 @@ public static class ServiceCollectionExtensions
             .AddTenancyApplication()
             .AddTenancyPersistence()
             .AddTenancyInfrastructure(configuration, environment, Program.ApplicationName);
-
-        services.AddTenantFeaturesProviderForOwnerService();
 
         return services;
     }
@@ -75,6 +73,10 @@ public static class ServiceCollectionExtensions
                 options.SubstituteApiVersionInUrl = true;
             });
 
+        services.AddTenantFeaturesProviderForOwnerService();
+        services.AddRsaKeyServices();
+        services.AddAuthentication();
+
         return services;
     }
 
@@ -85,5 +87,17 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ITenantFeaturesCachingService, TenantFeaturesRedisCachingService>();
         services.AddScoped<IRedisCachingProvider<string[]>, RedisCachingProvider<string[]>>();
         services.AddScoped<IFeatureService, FeatureService>();
+    }
+
+    public static void AddRsaKeyServices(this IServiceCollection services)
+    {
+        services.AddMultiTenantKeyManager();
+        services.AddRsaKeyCachingProvider();
+    }
+
+    public static void AddAuthentication(this IServiceCollection services)
+    {
+        services.AddJwtTokenAuthentication();
+        services.AddUserTokensProvider();
     }
 }
