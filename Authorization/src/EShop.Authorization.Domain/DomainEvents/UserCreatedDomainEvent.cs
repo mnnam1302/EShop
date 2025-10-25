@@ -1,5 +1,13 @@
-﻿namespace EShop.Authorization.Domain.DomainEvents;
+﻿using EShop.Shared.Contracts.Abstractions.MessageBus;
 
-public sealed class UserCreatedDomainEvent
+namespace EShop.Authorization.Domain.DomainEvents;
+
+public sealed class UserCreatedDomainEvent : IDomainEvent
 {
+    public DateTimeOffset TimeStamp => DateTimeOffset.UtcNow;
+
+    public required string UserId { get; init; }
+    public required string Username { get; init; }
+    public required string Email { get; init; }
+    public required string Password { get; init; }
 }

@@ -4,7 +4,9 @@ using Microsoft.Extensions.Logging;
 
 namespace EShop.Authorization.Infrastructure.EmailServices;
 
-internal sealed class EmailService(IFluentEmail fluentEmail, ILogger<EmailService> logger) : IEmailService
+internal sealed class EmailService(
+    IFluentEmail fluentEmail,
+    ILogger<EmailService> logger) : IEmailService
 {
     public async Task Send(EmailMetaData emailMetadata, CancellationToken cancellationToken)
     {

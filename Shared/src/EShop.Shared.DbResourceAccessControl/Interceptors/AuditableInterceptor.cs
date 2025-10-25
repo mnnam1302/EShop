@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace EShop.Shared.DbResourceAccessControl.Interceptors;
 
-public class AuditableInterceptor : SaveChangesInterceptor
+public sealed class AuditableInterceptor : SaveChangesInterceptor
 {
     private readonly IUserDetailsProvider _userDetailsProvider;
 

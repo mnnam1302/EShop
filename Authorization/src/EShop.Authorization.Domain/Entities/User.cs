@@ -46,13 +46,7 @@ public class User : AggregateRoot<string>, IExcludedFromScoping
     public string Scope { get; private set; } = string.Empty;
 
     public static User Create(
-        string ownerUsername,
-        string randomPassword,
-        string hashedPassword,
-        string ownerEmail,
-        string ownerDisplayName,
-        string organizationId,
-        string createdByUserId)
+        string ownerUsername, string randomPassword, string hashedPassword, string ownerEmail, string ownerDisplayName, string organizationId, string createdByUserId)
     {
         var user = new User
         {
@@ -67,6 +61,14 @@ public class User : AggregateRoot<string>, IExcludedFromScoping
             TenantId = organizationId,
             Scope = organizationId
         };
+
+        user.Raise(new DomainEvents.UserCreatedDomainEvent
+        {
+            UserId = user.Id,
+            Username = user.Username,
+            Email = user.Email,
+            Password = randomPassword
+        });
 
         return user;
     }

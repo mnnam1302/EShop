@@ -70,17 +70,11 @@ internal sealed class RootOrganizationService : IRootOrganizationService
     private Result<User> CreateOwnerUser(
         string username, string email, string displayName, string organizationId, Guid roleId)
     {
-        var temporaryPassword = "Password123!";
-        var hashedPassword = passwordHasher.Hash(temporaryPassword);
+        var rawPassword = passwordHasher.GenerateRandomPassword();
+        var hashedPassword = passwordHasher.Hash(rawPassword);
 
         var ownerUser = User.Create(
-            username,
-            temporaryPassword,
-            hashedPassword,
-            email,
-            displayName,
-            organizationId,
-            UserData.SystemUsername);
+            username, rawPassword, hashedPassword, email, displayName, organizationId, UserData.SystemUsername);
 
         ownerUser.AssignRole(roleId);
 
