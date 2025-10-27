@@ -8,7 +8,7 @@ internal sealed class EmailService(
     IFluentEmail fluentEmail,
     ILogger<EmailService> logger) : IEmailService
 {
-    public async Task Send(EmailMetaData emailMetadata, CancellationToken cancellationToken)
+    public async Task SendAsync(EmailMetaData emailMetadata, CancellationToken cancellationToken)
     {
         try
         {

@@ -43,12 +43,12 @@ public enum EmailPriority
 
 public static class EmailMetaDataFactory
 {
-    public static EmailMetaData CreateWelcomeEmail(string toAddress, string userName)
+    public static EmailMetaData CreateWelcomeEmail(string toAddress, string userName, string rawPassword)
     {
         return new EmailMetaData(toAddress, "Welcome to EShop!")
         {
             TemplateName = "welcome",
-            TemplateModel = new { UserName = userName, Year = DateTime.Now.Year },
+            TemplateModel = new { UserName = userName, DefaultPassword = rawPassword },
             IsHtml = true
         };
     }

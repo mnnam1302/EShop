@@ -1,6 +1,7 @@
 ﻿using Carter;
 using EShop.Shared.Authentication.DependencyInjections;
 using EShop.Shared.Cache.DependencyInejctions.Extensions;
+using EShop.Shared.CQRS;
 using EShop.Shared.DomainTools.DependencyInjections;
 using EShop.Shared.JsonApi.Extensions;
 using EShop.Shared.JsonApi.Middlewares;
@@ -17,6 +18,9 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddShared(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment)
     {
         services.AddResiliencePolicy();
+
+        // Register CQRS services first before DbContext to ensure IDomainEventsDispatcher is available
+        services.AddMediator(Application.AssemblyReference.Assembly);
 
         // PostgreSQL
         services

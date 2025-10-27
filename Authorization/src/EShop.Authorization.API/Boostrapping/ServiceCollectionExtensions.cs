@@ -16,6 +16,8 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddShared(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddResiliencePolicy();
+
+        // Register CQRS services first before DbContext to ensure IDomainEventsDispatcher is available
         services.AddMediator(Application.AssemblyReference.Assembly);
 
         services.AddPostgreSqlHealthCheck(configuration)
