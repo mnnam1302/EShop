@@ -4,7 +4,7 @@ using EShop.Shared.Contracts.Abstractions.Shared;
 namespace EShop.Authorization.Domain.Services;
 
 /// <summary>
-/// Domain service for managing root organization setup operations
+/// Domain service for managing root organization setup operations when tenant provisioned
 /// </summary>
 public interface IRootOrganizationService
 {
@@ -20,9 +20,6 @@ public interface IRootOrganizationService
         CancellationToken cancellationToken = default);
 }
 
-/// <summary>
-/// Result of root organization setup operation
-/// </summary>
 public sealed record RootOrganizationCreation(
     Organization Organization,
     Role OwnerRole,

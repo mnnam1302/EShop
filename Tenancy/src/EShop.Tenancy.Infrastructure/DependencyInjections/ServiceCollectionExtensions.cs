@@ -5,7 +5,10 @@ using EShop.Shared.EventBus.JsonConverters;
 using EShop.Shared.EventBus.PipelineObservers;
 using EShop.Shared.EventBus.Services;
 using EShop.Shared.Scoping.ResourceAccessControl;
+using EShop.Tenancy.Application.Abstractions;
+using EShop.Tenancy.Application.Services;
 using EShop.Tenancy.Infrastructure.Consumers;
+using EShop.Tenancy.Infrastructure.Jobs;
 using EShop.Tenancy.Infrastructure.Producers;
 using MassTransit;
 using Microsoft.AspNetCore.Hosting;
@@ -17,14 +20,15 @@ namespace EShop.Tenancy.Infrastructure.DependencyInjections;
 public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddTenancyInfrastructure(
-        this IServiceCollection services,
-        IConfiguration configuration,
-        IWebHostEnvironment environment,
-        string serviceName = "tenancy")
+        this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment, string serviceName = "tenancy")
     {
         services.AddMassTransitRabbitMQ(configuration, environment, serviceName);
         services.AddEventBusGateway();
+
         services.AddRegistrationFeatures();
+
+        services.AddSystemInitialization();
+
         return services;
     }
 
@@ -106,15 +110,19 @@ public static class ServiceCollectionExtensions
             serviceName);
     }
 
-    private static IServiceCollection AddEventBusGateway(this IServiceCollection services)
+    private static void AddEventBusGateway(this IServiceCollection services)
     {
         services.AddScoped<IEventBusGateway, EventBusGateway>();
-        return services;
     }
 
-    private static IServiceCollection AddRegistrationFeatures(this IServiceCollection services)
+    private static void AddRegistrationFeatures(this IServiceCollection services)
     {
         services.AddScoped<IFeatureRegistrationService, TenantFeatureRegistrationService>();
-        return services;
+    }
+
+    private static void AddSystemInitialization(this IServiceCollection services)
+    {
+        services.AddTransient<ISystemInitializationService, SystemInitializationService>();
+        services.AddHostedService<SystemInitializationJob>();
     }
 }

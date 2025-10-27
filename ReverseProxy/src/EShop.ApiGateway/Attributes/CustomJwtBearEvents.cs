@@ -1,8 +1,5 @@
 ﻿using EShop.Shared.Authentication.Abstractions;
 using EShop.Shared.Authentication.Managers.JwtTokens;
-using EShop.Shared.Scoping;
-using EShop.Shared.Scoping.ResourceAccessControl;
-using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserTokenProvider;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 namespace EShop.ApiGateway.Attributes;
@@ -25,12 +22,12 @@ public class CustomJwtBearEvents : JwtBearerEvents
 
         requestToken = JwtEncodedStringHelper.GetJwtEncodedString(requestToken);
 
-        var tokenCached = await _cacheService.TryGetTokenAsync(userId);
+        //var tokenCached = await _cacheService.TryGetTokenAsync(userId);
 
-        if (tokenCached is null || tokenCached.AccessToken is null || tokenCached.AccessToken != requestToken)
-        {
-            context.HttpContext.Response.Headers.TryAdd("IS-TOKEN-REVOKED", "true");
-            context.Fail("Authentication fail. Token has been revoked!");
-        }
+        //if (tokenCached is null || tokenCached.AccessToken is null || tokenCached.AccessToken != requestToken)
+        //{
+        //    context.HttpContext.Response.Headers.TryAdd("IS-TOKEN-REVOKED", "true");
+        //    context.Fail("Authentication fail. Token has been revoked!");
+        //}
     }
 }

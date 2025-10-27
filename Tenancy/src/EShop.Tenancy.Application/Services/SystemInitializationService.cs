@@ -1,92 +1,54 @@
-﻿using EShop.Shared.Authentication;
+using EShop.Shared.Authentication;
 using EShop.Shared.Authentication.Abstractions;
 using EShop.Shared.Contracts.Services.Tenancy.Tenants;
 using EShop.Shared.DomainTools.UnitOfWorks;
 using EShop.Shared.EventBus.Services;
+using EShop.Tenancy.Application.Abstractions;
 using EShop.Tenancy.Domain.Entities;
 using EShop.Tenancy.Domain.Repositories;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace EShop.Tenancy.Application.Services;
 
-internal sealed class SystemInitializationService : BackgroundService
+public sealed class SystemInitializationService(
+    ILogger<SystemInitializationService> logger,
+    IUserDetailsProvider userDetailsProvider,
+    IEventBusGateway eventBusGateway,
+    ITenantRepository tenantRepository,
+    IUnitOfWork unitOfWork,
+    IConfiguration configuration) : ISystemInitializationService
 {
-    private readonly ILogger<SystemInitializationService> _logger;
-    private readonly IUserDetailsProvider _userDetailsProvider;
-    private readonly IEventBusGateway _eventBusGateway;
-    private readonly ITenantRepository _tenantRepository;
-    private readonly IUnitOfWork _unitOfWork;
-    private readonly IConfiguration _configuration;
-
-    public SystemInitializationService(
-        ILogger<SystemInitializationService> logger,
-        IUserDetailsProvider userDetailsProvider,
-        IEventBusGateway eventBusGateway,
-        ITenantRepository tenantRepository,
-        IConfiguration configuration,
-        IUnitOfWork unitOfWork)
+    public async Task InitializeSystemAsync(CancellationToken cancellationToken = default)
     {
-        _logger = logger;
-        _userDetailsProvider = userDetailsProvider;
-        _eventBusGateway = eventBusGateway;
-        _tenantRepository = tenantRepository;
-        _unitOfWork = unitOfWork;
-        _configuration = configuration;
-    }
+        userDetailsProvider.SetSystemUserContext(UserData.SystemTenantId);
 
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
-    {
         try
         {
-            _userDetailsProvider.SetSystemUserContext(UserData.SystemTenantId);
-
-            _logger.LogInformation("Starting system initialization...");
-
-            await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
-
-            if (await IsSystemInitialized(stoppingToken))
+            if (await IsSystemInitializedAsync(cancellationToken))
                 return;
 
-            _logger.LogInformation("System not initialized yet, creating Super Admin...");
+            logger.LogInformation("System not initialized yet, creating Super Admin...");
 
-            var systemTenant = await InitializeSystemTenantAsync(stoppingToken);
+            var systemTenant = await CreateSystemTenantAsync(cancellationToken);
 
-            await _eventBusGateway.PublishAsync<ITenantCreated>(new
-            {
-                TenantId = systemTenant.Id,
-                TenantName = systemTenant.Name,
-                OwnerUsername = systemTenant.OwnerUsername,
-                OwnerDisplayName = systemTenant.Name,
-                OwnerEmail = systemTenant.Email,
-                ActionUserId = _userDetailsProvider.AuthenticatedUser.ActionUserId,
-                ActionUserType = _userDetailsProvider.AuthenticatedUser.ActionUserType
-            }, stoppingToken);
+            await PublishTenantCreatedEventAsync(systemTenant, cancellationToken);
 
-            _logger.LogInformation("Super Admin initialized successfully");
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Failed to initialize system");
+            logger.LogInformation("Super Admin initialized successfully");
         }
         finally
         {
-            _userDetailsProvider.ClearSystemUserContext();
+            userDetailsProvider.ClearSystemUserContext();
         }
     }
 
-    private async Task<bool> IsSystemInitialized(CancellationToken cancellationToken)
+    private async Task<bool> IsSystemInitializedAsync(CancellationToken cancellationToken = default)
     {
-        var systemTenant = await _tenantRepository.FindByIdAsync(UserData.SystemTenantId, cancellationToken: cancellationToken);
-
-        if (systemTenant is not null)
-            return true;
-
-        return false;
+        var systemTenant = await tenantRepository.FindByIdAsync(UserData.SystemTenantId, cancellationToken: cancellationToken);
+        return systemTenant is not null;
     }
 
-    private async Task<Tenant> InitializeSystemTenantAsync(CancellationToken cancellationToken)
+    private async Task<Tenant> CreateSystemTenantAsync(CancellationToken cancellationToken)
     {
         var systemEmail = GetSystemUserEmail();
         var tenant = Tenant.CreateSystemTenant(
@@ -95,14 +57,28 @@ internal sealed class SystemInitializationService : BackgroundService
             UserData.SystemUsername,
             systemEmail);
 
-        _tenantRepository.Add(tenant);
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
+        tenantRepository.Add(tenant);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return tenant;
     }
 
+    private async Task PublishTenantCreatedEventAsync(Tenant systemTenant, CancellationToken cancellationToken)
+    {
+        await eventBusGateway.PublishAsync<ITenantCreated>(new
+        {
+            TenantId = systemTenant.Id,
+            TenantName = systemTenant.Name,
+            OwnerUsername = systemTenant.OwnerUsername,
+            OwnerDisplayName = systemTenant.Name,
+            OwnerEmail = systemTenant.Email,
+            ActionUserId = userDetailsProvider.AuthenticatedUser.ActionUserId,
+            ActionUserType = userDetailsProvider.AuthenticatedUser.ActionUserType
+        }, cancellationToken);
+    }
+
     private string GetSystemUserEmail()
     {
-        return _configuration["SystemUser:Email"] ?? $"{UserData.SystemUsername}@eshop.com";
+        return configuration["SystemUser:Email"] ?? $"{UserData.SystemUsername}@eshop.com";
     }
 }

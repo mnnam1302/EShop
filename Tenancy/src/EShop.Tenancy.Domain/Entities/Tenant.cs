@@ -26,8 +26,8 @@ public class Tenant : AggregateRoot<string>, IExcludedFromScoping
     public string? PhoneNumber { get; private set; }
 
     private readonly List<TenantFeature> _tenantFeatures = [];
-
     public virtual IReadOnlyCollection<TenantFeature> TenantFeatures => _tenantFeatures.AsReadOnly();
+
 
     private readonly List<TenantSetting> tenantSettings = [];
     public virtual IReadOnlyCollection<TenantSetting> TenantSettings => tenantSettings.AsReadOnly();
