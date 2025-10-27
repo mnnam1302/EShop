@@ -1,5 +1,6 @@
 ﻿using EShop.Shared.JsonApi.Behaviors;
 using EShop.Tenancy.Application.DependencyInjections.Extensions;
+using EShop.Tenancy.Application.Services;
 using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
@@ -25,6 +26,12 @@ public static class ServiceCollectionExtensions
                 .AddTransient(typeof(IPipelineBehavior<,>), typeof(TracingPipelineBehavior<,>))
                 .AddValidatorsFromAssembly(Shared.Contracts.AssemblyReference.Assembly, includeInternalTypes: true);
 
+        return services;
+    }
+
+    public static IServiceCollection AddSystemInitialization(this IServiceCollection services)
+    {
+        services.AddHostedService<SystemInitializationService>();
         return services;
     }
 }

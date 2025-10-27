@@ -1,4 +1,4 @@
-﻿using EShop.Shared.Scoping;
+﻿using EShop.Shared.Authentication.Abstractions;
 using EShop.Shared.Scoping.ResourceAccessControl;
 using static EShop.Shared.Scoping.ResourceAccessControl.FeatureIds;
 

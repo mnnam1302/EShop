@@ -32,25 +32,33 @@ public class Tenant : AggregateRoot<string>, IExcludedFromScoping
     private readonly List<TenantSetting> tenantSettings = [];
     public virtual IReadOnlyCollection<TenantSetting> TenantSettings => tenantSettings.AsReadOnly();
 
-    // EF Core
-    public Tenant() { }
-
-    public Tenant(string id, string name, string ownerUsername, string email, string? phoneNumber, string? description)
+    public static Tenant CreateSystemTenant(string id, string name, string ownerUsername, string ownerEmail)
     {
-        Id = id;
-        Name = name;
-        OwnerUsername = ownerUsername;
-        Email = email;
-        PhoneNumber = phoneNumber;
-        Description = description;
+        var tenant = new Tenant
+        {
+            Id = id,
+            Name = name,
+            OwnerUsername = ownerUsername,
+            Email = ownerEmail,
+            Description = "Tenant for system administration and system user."
+        };
+
+        return tenant;
     }
 
     public static Tenant Create(Command.CreateTenantCommand command)
     {
         AssertTenant(command);
 
-        var tenant = new Tenant(
-            command.Id, command.Name, command.OwnerUsername, command.OwnerEmail, command.PhoneNumber, command.Description);
+        var tenant = new Tenant
+        {
+            Id = command.Id,
+            Name = command.Name,
+            OwnerUsername = command.OwnerUsername,
+            Email = command.OwnerEmail,
+            PhoneNumber = command.PhoneNumber,
+            Description = command.Description
+        };
 
         // TODO: Add domain event for tenant creation if needed
 
@@ -159,8 +167,8 @@ public class Tenant : AggregateRoot<string>, IExcludedFromScoping
             DefaultCurrency = SupportedCurrencies.DefaultCurrencyCode,
             CurrencyDisplayFormat = SupportedCurrencies.DefaultCurrencyDisplayFormat,
             DefaultSystemLanguage = SupportedLanguages.DefaultLanguageCode,
-            TenantId = this.Id,
-            Scope = this.Id
+            TenantId = Id,
+            Scope = Id
         };
 
         tenantSettings.Add(tenantSetting);
