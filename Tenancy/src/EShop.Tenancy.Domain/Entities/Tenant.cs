@@ -1,5 +1,7 @@
-﻿using EShop.Shared.Contracts.Services.Tenancy.Tenants;
+﻿using EShop.Shared.Authentication;
+using EShop.Shared.Contracts.Services.Tenancy.Tenants;
 using EShop.Shared.DomainTools.Aggregates;
+using EShop.Shared.DomainTools.Exceptions;
 using EShop.Shared.Scoping;
 using System.ComponentModel.DataAnnotations;
 
@@ -24,36 +26,48 @@ public class Tenant : AggregateRoot<string>, IExcludedFromScoping
     public string? PhoneNumber { get; private set; }
 
     private readonly List<TenantFeature> _tenantFeatures = [];
-
     public virtual IReadOnlyCollection<TenantFeature> TenantFeatures => _tenantFeatures.AsReadOnly();
 
-    public readonly List<TenantSetting> tenantSettings = [];
+
+    private readonly List<TenantSetting> tenantSettings = [];
     public virtual IReadOnlyCollection<TenantSetting> TenantSettings => tenantSettings.AsReadOnly();
 
-    // EF Core
-    public Tenant() { }
-
-    public Tenant(string id, string name, string ownerUsername, string email, string? phoneNumber, string? description)
+    public static Tenant CreateSystemTenant(string id, string name, string ownerUsername, string ownerEmail)
     {
-        Id = id;
-        Name = name;
-        OwnerUsername = ownerUsername;
-        Email = email;
-        PhoneNumber = phoneNumber;
-        Description = description;
-    }
-
-    public static Tenant Create(Command.CreateTenantCommand command)
-    {
-        EnsureValidTenant(command);
-
-        var tenant = new Tenant(command.Id, command.Name, command.OwnerUsername, command.OwnerEmail, command.PhoneNumber, command.Description);
+        var tenant = new Tenant
+        {
+            Id = id,
+            Name = name,
+            OwnerUsername = ownerUsername,
+            Email = ownerEmail,
+            Description = "Tenant for system administration and system user."
+        };
 
         return tenant;
     }
 
-    private static void EnsureValidTenant(Command.CreateTenantCommand command)
+    public static Tenant Create(Command.CreateTenantCommand command)
     {
+        AssertTenant(command);
+
+        var tenant = new Tenant
+        {
+            Id = command.Id,
+            Name = command.Name,
+            OwnerUsername = command.OwnerUsername,
+            Email = command.OwnerEmail,
+            PhoneNumber = command.PhoneNumber,
+            Description = command.Description
+        };
+
+        // TODO: Add domain event for tenant creation if needed
+
+        return tenant;
+    }
+
+    private static void AssertTenant(Command.CreateTenantCommand command)
+    {
+        // TODO: TenantId should value object contains domain invariants
         AssertTenantId(command.Id);
 
         command.Id = command.Id.ToLowerInvariant();
@@ -61,13 +75,13 @@ public class Tenant : AggregateRoot<string>, IExcludedFromScoping
 
         if (UserData.IsSystemUser(command.OwnerUsername))
         {
-            throw new ArgumentException("Invalid username");
+            throw new BadRequestException("Invalid username");
         }
 
         var usernameWithoutDomainSuffix = RemoveDomainSuffix(command.OwnerUsername, tenantId);
         AssertUsername(usernameWithoutDomainSuffix);
 
-        if (!isFullUsername(command.OwnerUsername, tenantId))
+        if (!IsFullUsername(command.OwnerUsername, tenantId))
         {
             command.OwnerUsername = $"{command.OwnerUsername}@{tenantId}";
         }
@@ -96,7 +110,13 @@ public class Tenant : AggregateRoot<string>, IExcludedFromScoping
         return char.IsLetterOrDigit(c) || c == '-' || c == '_';
     }
 
-    public static string RemoveDomainSuffix(string username, string tenantId) => username.Replace($"@{tenantId}", null, StringComparison.OrdinalIgnoreCase);
+    public static string RemoveDomainSuffix(string username, string tenantId)
+    {
+        var suffix = $"@{tenantId}";
+        return username.EndsWith(suffix, StringComparison.OrdinalIgnoreCase)
+            ? username[..^suffix.Length]
+            : username;
+    }
 
     private static void AssertUsername(string usernameWithoutDomainSuffix)
     {
@@ -112,17 +132,16 @@ public class Tenant : AggregateRoot<string>, IExcludedFromScoping
         }
     }
 
-    private static bool isFullUsername(string ownerUsername, string tenantId)
+    private static bool IsFullUsername(string ownerUsername, string tenantId)
     {
-        var domainSuffix = $"@{tenantId}";
-        return ownerUsername.Contains(domainSuffix, StringComparison.OrdinalIgnoreCase);
+        return ownerUsername.Contains($"@{tenantId}", StringComparison.OrdinalIgnoreCase);
     }
 
     public void AddTenantFeature(string featureId, string state, string createdBy)
     {
         if (string.IsNullOrEmpty(featureId))
         {
-            throw new ArgumentNullException(nameof(featureId));
+            throw new BadRequestException("Feature ID must not ne null or empty.");
         }
 
         var newTenantFeature = new TenantFeature(Guid.NewGuid(), Id, featureId, state, Id, createdBy);
@@ -138,7 +157,7 @@ public class Tenant : AggregateRoot<string>, IExcludedFromScoping
         }
     }
 
-    public TenantSetting AddDefaultTenantSetting()
+    public void AddDefaultTenantSetting()
     {
         var tenantSetting = new TenantSetting
         {
@@ -148,11 +167,10 @@ public class Tenant : AggregateRoot<string>, IExcludedFromScoping
             DefaultCurrency = SupportedCurrencies.DefaultCurrencyCode,
             CurrencyDisplayFormat = SupportedCurrencies.DefaultCurrencyDisplayFormat,
             DefaultSystemLanguage = SupportedLanguages.DefaultLanguageCode,
-            TenantId = this.Id,
-            Scope = this.Id
+            TenantId = Id,
+            Scope = Id
         };
 
         tenantSettings.Add(tenantSetting);
-        return tenantSetting;
     }
 }

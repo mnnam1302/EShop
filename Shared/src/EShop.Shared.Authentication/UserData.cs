@@ -5,6 +5,7 @@ namespace EShop.Shared.Authentication;
 public sealed class UserData : ValueObject
 {
     public const string SystemUsername = "system";
+    public const string SystemTenantId = "system";
     public const string EShopSupportGroup = "eshop-support";
 
     public UserData(string id, string username, string tenantId)
@@ -13,13 +14,7 @@ public sealed class UserData : ValueObject
     }
 
     public UserData(
-        string id,
-        string username,
-        string tenantId,
-        bool isSupportUser,
-        string? actionUserId = null,
-        string userType = UserTypes.TenantUsers,
-        string? actionUserType = null)
+        string id, string username, string tenantId, bool isSupportUser, string? actionUserId = null, string userType = UserTypes.TenantUsers, string? actionUserType = null)
     {
         Id = id.ToLower();
         Username = username.ToLower();
@@ -42,7 +37,8 @@ public sealed class UserData : ValueObject
         => new UserData(SystemUsername, SystemUsername, tenantId ?? string.Empty);
 
     public static UserData GetSystemUser(string? tenantId, string actionUserId, string? actionUserType = null)
-        => new UserData(
+    {
+        return new UserData(
             SystemUsername,
             SystemUsername,
             tenantId ?? string.Empty,
@@ -50,8 +46,11 @@ public sealed class UserData : ValueObject
             actionUserId,
             UserTypes.SystemUsers,
             actionUserType: actionUserType);
+    }
 
     public static bool IsSystemUser(string username) => username.Equals(SystemUsername, StringComparison.OrdinalIgnoreCase);
+
+    public bool CanCreateTenant() => IsSystemUser(Username) || (IsSupportUser && UserType == UserTypes.SystemUsers);
 
     protected override IEnumerable<object> GetAtomicValues()
     {

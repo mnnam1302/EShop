@@ -4,7 +4,7 @@ namespace EShop.Shared.Contracts.Services.Tenancy.Tenants;
 
 public static class Command
 {
-    public record CreateTenantCommand : ICommand
+    public sealed class CreateTenantCommand : ICommand
     {
         public required string Id { get; set; }
         public required string Name { get; set; }

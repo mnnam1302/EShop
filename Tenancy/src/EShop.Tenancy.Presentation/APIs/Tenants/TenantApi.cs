@@ -8,34 +8,33 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 
-namespace EShop.Tenancy.Presentation.APIs.Tenants
+namespace EShop.Tenancy.Presentation.APIs.Tenants;
+
+public sealed class TenantApi : ICarterModule
 {
-    public sealed class TenantApi : ICarterModule
+    private const string BaseUrl = "api/v{version:apiVersion}/tenants";
+
+    public void AddRoutes(IEndpointRouteBuilder app)
     {
-        private const string BaseUrl = "api/v{version:apiVersion}/tenants";
+        var group = app
+            .NewVersionedApi("Tenants")
+            .MapGroup(BaseUrl)
+            .HasApiVersion(1)
+            .RequireAuthorization();
 
-        public void AddRoutes(IEndpointRouteBuilder app)
+        group.MapPost("/", CreateTenantV1Async)
+            .RequireSystemUserFilter();
+    }
+
+    private static async Task<IResult> CreateTenantV1Async(ISender sender, [FromBody] Command.CreateTenantCommand request)
+    {
+        var result = await sender.Send(request);
+
+        if (result.IsFailure)
         {
-            var group1 = app
-                .NewVersionedApi("Tenants")
-                .MapGroup(BaseUrl)
-                .HasApiVersion(1)
-                .RequireAuthorization();
-
-            group1.MapPost("/", CreateTenantV1Async)
-                .RequireSupportUserFilter();
+            return ApiResultHandler.HandleFailure(result);
         }
 
-        private static async Task<IResult> CreateTenantV1Async(ISender sender, [FromBody] Command.CreateTenantCommand request)
-        {
-            var result = await sender.Send(request);
-
-            if (result.IsFailure)
-            {
-                return ApiResultHandler.HandleFailure(result);
-            }
-
-            return Results.Created("", result);
-        }
+        return Results.Created("", result);
     }
 }

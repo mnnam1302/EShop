@@ -2,8 +2,7 @@
 
 namespace EShop.Shared.DomainTools.UnitOfWorks;
 
-public class EFUnitOfWork<TDbContext> : IUnitOfWork
-    where TDbContext : DbContext
+public sealed class EFUnitOfWork<TDbContext> : IUnitOfWork where TDbContext : DbContext
 {
     private readonly TDbContext _dbContext;
 

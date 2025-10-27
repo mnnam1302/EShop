@@ -7,9 +7,12 @@ public abstract class AggregateRoot<TKey> : EntityBase<TKey>, IAggregateRoot<TKe
 {
     private readonly List<IDomainEvent> _domainEvents = new();
 
-    public IReadOnlyCollection<IDomainEvent> GetDomainEvents() => _domainEvents.ToList();
+    public IReadOnlyCollection<IDomainEvent> GetDomainEvents()
+    {
+        return _domainEvents.ToList();
+    }
 
-    public void Raise(IDomainEvent domainEvent)
+    public void RaiseDomainEvent(IDomainEvent domainEvent)
     {
         _domainEvents.Add(domainEvent);
     }

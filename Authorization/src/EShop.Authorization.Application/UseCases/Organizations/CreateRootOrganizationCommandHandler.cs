@@ -18,12 +18,12 @@ public sealed class CreateRootOrganizationCommand : ICommand
 
 internal sealed class CreateRootOrganizationCommandHandler : ICommandHandler<CreateRootOrganizationCommand>
 {
-    private readonly IOrganizationRepository _organizationRepository;
-    private readonly IUserRepository _userRepository;
-    private readonly IRoleRepository _roleRepository;
-    private readonly IUnitOfWork _unitOfWork;
-    private readonly ILogger<CreateRootOrganizationCommandHandler> _logger;
-    private readonly IRootOrganizationService _rootOrganizationService;
+    private readonly IOrganizationRepository organizationRepository;
+    private readonly IUserRepository userRepository;
+    private readonly IRoleRepository roleRepository;
+    private readonly IUnitOfWork unitOfWork;
+    private readonly ILogger<CreateRootOrganizationCommandHandler> logger;
+    private readonly IRootOrganizationService rootOrganizationService;
 
     public CreateRootOrganizationCommandHandler(
         IOrganizationRepository organizationRepository,
@@ -33,19 +33,19 @@ internal sealed class CreateRootOrganizationCommandHandler : ICommandHandler<Cre
         ILogger<CreateRootOrganizationCommandHandler> logger,
         IRootOrganizationService rootOrganizationService)
     {
-        _organizationRepository = organizationRepository;
-        _userRepository = userRepository;
-        _roleRepository = roleRepository;
-        _unitOfWork = unitOfWork;
-        _logger = logger;
-        _rootOrganizationService = rootOrganizationService;
+        this.organizationRepository = organizationRepository;
+        this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
+        this.unitOfWork = unitOfWork;
+        this.logger = logger;
+        this.rootOrganizationService = rootOrganizationService;
     }
 
     public async Task<Result> HandleAsync(CreateRootOrganizationCommand command, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Handling CreateRootOrganizationCommand for tenant {TenantId}", command.TenantId);
+        logger.LogInformation("Creating root organization for tenant {TenantId}", command.TenantId);
 
-        var setupResult = await _rootOrganizationService.SetupRootOrganizationAsync(
+        var setupResult = await rootOrganizationService.SetupRootOrganizationAsync(
             command.TenantId,
             command.TenantName,
             command.OwnerUsername,
@@ -55,18 +55,19 @@ internal sealed class CreateRootOrganizationCommandHandler : ICommandHandler<Cre
 
         if (setupResult.IsFailure)
         {
-            _logger.LogWarning("Failed to setup root organization: {Error}", setupResult.Error);
+            logger.LogWarning("Failed to setup root organization: {Error}", setupResult.Error);
             return Result.Failure(setupResult.Error);
         }
 
         var setup = setupResult.Value;
-        _organizationRepository.Add(setup.Organization);
-        _roleRepository.Add(setup.OwnerRole);
-        _userRepository.Add(setup.OwnerUser);
 
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
+        organizationRepository.Add(setup.Organization);
+        roleRepository.Add(setup.OwnerRole);
+        userRepository.Add(setup.OwnerUser);
 
-        _logger.LogInformation("Root organization created successfully for tenant {TenantId}", command.TenantId);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
+
+        logger.LogInformation("Root organization created successfully for tenant {TenantId}", command.TenantId);
         return Result.Success();
     }
 }

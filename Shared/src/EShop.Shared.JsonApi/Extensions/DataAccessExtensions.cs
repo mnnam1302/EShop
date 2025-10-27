@@ -1,4 +1,5 @@
-﻿using EShop.Shared.DbResourceAccessControl.Interceptors;
+﻿using EShop.Shared.DbResourceAccessControl.Extensions;
+using EShop.Shared.DbResourceAccessControl.Interceptors;
 using EShop.Shared.DbResourceAccessControl.Options;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -31,15 +32,16 @@ public static class DataAccessExtensions
         bool useRingFencedScoping = false)
         where TContext : DbContext
     {
-        services
-            .AddDatabaseOptions(configuration)
-            .AddMultiTenantScoping();
+        services.AddDatabaseOptions(configuration);
+        services.AddMultiTenantScoping();
+        services.AddDomainEventsDispatcherInterceptor();
 
         services.AddDbContext<DbContext, TContext>((provider, builder) =>
         {
             var ngsqlRetryOptions = provider.GetRequiredService<IOptionsMonitor<NgSqlRetryOptions>>();
             var ngsqlVersionOptions = provider.GetRequiredService<IOptionsMonitor<NgSqlVersionOptions>>();
             var tenantIsolationStrategy = provider.GetRequiredService<IMultiTenantIsolationStrategy>();
+            var domainEventsDispatcherInterceptor = provider.GetRequiredService<IDispatchDomainEventsInterceptor>();
 
             builder
                 .EnableDetailedErrors(true)
@@ -56,7 +58,9 @@ public static class DataAccessExtensions
                                 maxRetryDelay: ngsqlRetryOptions.CurrentValue.MaxRetryDelay,
                                 errorCodesToAdd: ngsqlRetryOptions.CurrentValue.ErrorNumbersoAdd))
                             .MigrationsAssembly(typeof(TContext).Assembly.GetName().Name))
-                .AddInterceptors(tenantIsolationStrategy);
+                .AddInterceptors(
+                    tenantIsolationStrategy,
+                    domainEventsDispatcherInterceptor);
         });
 
         return services;
@@ -68,13 +72,8 @@ public static class DataAccessExtensions
         bool useRingFencedScoping = false)
         where TDbContext : DbContext
     {
-        services
-            .AddDatabaseOptions(configuration)
-            .AddMultiTenantScoping();
-
-        services
-            .AddDatabaseOptions(configuration)
-            .AddMultiTenantScoping();
+        services.AddDatabaseOptions(configuration);
+        services.AddMultiTenantScoping();
 
         if (IsDesignTime())
         {

@@ -1,9 +1,9 @@
 ﻿using EShop.Shared.Authentication.Abstractions;
 using EShop.Shared.Contracts.Services.Tenancy.Features;
 using EShop.Shared.DomainTools.Exceptions;
+using EShop.Shared.DomainTools.UnitOfWorks;
 using EShop.Shared.EventBus.Services;
 using EShop.Shared.Scoping.ResourceAccessControl;
-using EShop.Tenancy.Domain;
 using EShop.Tenancy.Domain.Entities;
 using EShop.Tenancy.Domain.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -24,7 +24,7 @@ public class FeatureService : IFeatureService
 {
     private readonly IFeatureRepository _featureRepository;
     private readonly ITenantRepository _tenantRepository;
-    private readonly ITenancyUnitOfWork _unitOfWork;
+    private readonly IUnitOfWork _unitOfWork;
     private readonly IUserDetailsProvider _userDetailsProvider;
     private readonly IEventBusGateway _eventBusGateway;
     private readonly ILogger _logger;
@@ -32,7 +32,7 @@ public class FeatureService : IFeatureService
     public FeatureService(
         IFeatureRepository featureRepository,
         ITenantRepository tenantRepository,
-        ITenancyUnitOfWork unitOfWork,
+        IUnitOfWork unitOfWork,
         IUserDetailsProvider userDetailsProvider,
         IEventBusGateway eventBusGateway,
         ILogger<FeatureService> logger)

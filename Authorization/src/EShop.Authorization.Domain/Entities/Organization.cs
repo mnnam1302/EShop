@@ -52,7 +52,7 @@ public class Organization : AggregateRoot<string>, IExcludedFromScoping
         };
 
         // Raise domain event
-        organization.Raise(new OrganizationEvents.RootOrganizationCreated
+        organization.RaiseDomainEvent(new OrganizationEvents.RootOrganizationCreated
         {
             EventId = Guid.NewGuid(),
             TimeStamp = DateTimeOffset.UtcNow,

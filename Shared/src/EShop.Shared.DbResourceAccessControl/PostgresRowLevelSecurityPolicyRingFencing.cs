@@ -6,7 +6,7 @@ using Microsoft.Extensions.Options;
 
 namespace EShop.Shared.DbResourceAccessControl;
 
-public sealed class PostgresRowLevelSecurityPolicyRingFencing : PostgresRowLevelSecurityPolicyBaseStrategy, IRingFencingIsolationStrategy
+internal sealed class PostgresRowLevelSecurityPolicyRingFencing : PostgresRowLevelSecurityPolicyBaseStrategy, IRingFencingIsolationStrategy
 {
     private const string PolicyName = "tenant_isolation_with_ring_fencing";
 

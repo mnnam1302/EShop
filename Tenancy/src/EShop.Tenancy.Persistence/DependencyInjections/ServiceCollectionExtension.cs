@@ -1,4 +1,4 @@
-﻿using EShop.Tenancy.Domain;
+﻿using EShop.Shared.DomainTools.UnitOfWorks;
 using EShop.Tenancy.Domain.Repositories;
 using EShop.Tenancy.Persistence.Repositories;
 using Microsoft.Extensions.DependencyInjection;
@@ -12,7 +12,7 @@ public static class ServiceCollectionExtension
         services.AddScoped<ITenantRepository, TenantRepository>();
         services.AddScoped<IFeatureRepository, FeatureRepository>();
 
-        services.AddScoped<ITenancyUnitOfWork, TenancyUnitOfWork>();
+        services.AddScoped<IUnitOfWork, EFUnitOfWork<TenancyDbContext>>();
 
         return services;
     }

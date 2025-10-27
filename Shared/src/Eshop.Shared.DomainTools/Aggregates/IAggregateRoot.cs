@@ -3,9 +3,13 @@ using EShop.Shared.DomainTools.Entities;
 
 namespace EShop.Shared.DomainTools.Aggregates;
 
-public interface IAggregateRoot<TKey> : IEntityBase<TKey>
+public interface IAggregateRoot
 {
-    public IReadOnlyCollection<IDomainEvent> GetDomainEvents();
-    public void ClearDomainEvents();
-    public void Raise(IDomainEvent domainEvent);
+    IReadOnlyCollection<IDomainEvent> GetDomainEvents();
+    void ClearDomainEvents();
+    void RaiseDomainEvent(IDomainEvent domainEvent);
+}
+
+public interface IAggregateRoot<TKey> : IAggregateRoot, IEntityBase<TKey>
+{
 }
