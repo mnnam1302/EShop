@@ -62,12 +62,12 @@ public class User : AggregateRoot<string>, IExcludedFromScoping
             Scope = organizationId
         };
 
-        user.Raise(new DomainEvents.UserCreatedDomainEvent
+        user.RaiseDomainEvent(new DomainEvents.UserCreatedDomainEvent
         {
             UserId = user.Id,
             Username = user.Username,
             Email = user.Email,
-            Password = randomPassword
+            RawPassword = randomPassword
         });
 
         return user;

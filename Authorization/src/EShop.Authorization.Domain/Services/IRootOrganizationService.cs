@@ -8,9 +8,6 @@ namespace EShop.Authorization.Domain.Services;
 /// </summary>
 public interface IRootOrganizationService
 {
-    /// <summary>
-    /// Sets up a complete root organization with owner role and user
-    /// </summary>
     Task<Result<RootOrganizationCreation>> SetupRootOrganizationAsync(
         string tenantId,
         string tenantName,

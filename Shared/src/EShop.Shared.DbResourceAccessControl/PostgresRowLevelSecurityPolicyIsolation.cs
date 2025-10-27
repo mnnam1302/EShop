@@ -6,7 +6,7 @@ using System.Reflection;
 
 namespace EShop.Shared.DbResourceAccessControl;
 
-public sealed class PostgresRowLevelSecurityPolicyIsolation : PostgresRowLevelSecurityPolicyBaseStrategy, ITenantIsolationStrategy
+internal sealed class PostgresRowLevelSecurityPolicyIsolation : PostgresRowLevelSecurityPolicyBaseStrategy, ITenantIsolationStrategy
 {
     internal const string PolicyName = "tenant_isolation";
 

@@ -10,7 +10,7 @@ namespace EShop.Shared.DbResourceAccessControl.Interceptors;
 
 public interface IRingFencingConnectionInterceptor : IDbConnectionInterceptor;
 
-public sealed class PostgresRingFencingConnectionInterceptor : DbConnectionInterceptor, IRingFencingConnectionInterceptor
+internal sealed class PostgresRingFencingConnectionInterceptor : DbConnectionInterceptor, IRingFencingConnectionInterceptor
 {
     private readonly IUserDetailsProvider _userDetailsProvider;
     private readonly IUserOrganizationContextProvider _userOrganizationContextProvider;
