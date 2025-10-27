@@ -3,4 +3,6 @@
 public interface IEmailService
 {
     Task SendAsync(EmailMetaData emailMetadata, CancellationToken cancellationToken);
+
+    Task SendUsingTemplateAsync(EmailMetaData emailMetadata, CancellationToken cancellationToken);
 }

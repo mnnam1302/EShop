@@ -19,6 +19,7 @@ public sealed class EmailMetaData
     public EmailPriority Priority { get; set; } = EmailPriority.Normal;
 
     public string? TemplateName { get; set; }
+    public string? Template { get; set; }
     public object? TemplateModel { get; set; }
 
     public List<string> CcAddresses { get; set; } = new();
@@ -45,10 +46,19 @@ public static class EmailMetaDataFactory
 {
     public static EmailMetaData CreateWelcomeEmail(string toAddress, string userName, string rawPassword)
     {
+        var template = @"
+            <h1>Welcome to EShop, {{ @Model.UserName }}!</h1>
+            <p>Your account has been created successfully.</p>
+            <p>Your temporary password is: <strong>{{ @Model.DefaultPassword }}</strong></p>
+            <p>Please change your password after your first login.</p>
+            <p>Happy shopping!</p>";
+
         return new EmailMetaData(toAddress, "Welcome to EShop!")
         {
             TemplateName = "welcome",
+            Template = template,
             TemplateModel = new { UserName = userName, DefaultPassword = rawPassword },
+            Body = $"Welcome to EShop, {userName}! Your temporary password is: {rawPassword}",
             IsHtml = true
         };
     }
