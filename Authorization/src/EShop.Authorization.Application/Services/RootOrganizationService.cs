@@ -29,7 +29,6 @@ internal sealed class RootOrganizationService : IRootOrganizationService
     public async Task<Result<RootOrganizationCreation>> SetupRootOrganizationAsync(
         string tenantId, string tenantName, string ownerUsername, string ownerEmail, string ownerDisplayName, CancellationToken cancellationToken = default)
     {
-        // 1. Validate tenant doesn't already have an organization
         var existingOrganization = await organizationRepository.FindByIdAsync(tenantId, false, cancellationToken);
 
         if (existingOrganization is not null)
@@ -37,19 +36,15 @@ internal sealed class RootOrganizationService : IRootOrganizationService
             return Result.Failure<RootOrganizationCreation>(ErrorContants.Organization.AlreadyExists);
         }
 
-        // 2. Create root organization
         var rootOrganization = Organization.CreateRootOrganization(tenantId, tenantName);
 
-        // 3. Get all available permissions for owner role
         var availablePermissions = await permissionRepository
             .FindAll()
             .ToArrayAsync(cancellationToken);
 
-        // 4. Create owner role with all permissions
         var ownerRole = Role.CreateOwnerRole(tenantId);
         ownerRole.GrantPermissions(availablePermissions.Select(p => p.Id));
 
-        // 5. Create owner user
         var ownerUserResult = CreateOwnerUser(
             ownerUsername,
             ownerEmail,

@@ -89,7 +89,11 @@ internal sealed class SystemInitializationService : BackgroundService
     private async Task<Tenant> InitializeSystemTenantAsync(CancellationToken cancellationToken)
     {
         var systemEmail = GetSystemUserEmail();
-        var tenant = Tenant.CreateSystemTenant(UserData.SystemTenantId, UserData.SystemTenantId, UserData.SystemUsername, systemEmail);
+        var tenant = Tenant.CreateSystemTenant(
+            UserData.SystemTenantId,
+            UserData.SystemTenantId,
+            UserData.SystemUsername,
+            systemEmail);
 
         _tenantRepository.Add(tenant);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
