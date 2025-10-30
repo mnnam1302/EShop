@@ -110,7 +110,7 @@ public static class ServiceCollectionExtensions
             serviceName);
     }
 
-    private static void AddEventBusGateway(this IServiceCollection services)
+    public static void AddEventBusGateway(this IServiceCollection services)
     {
         services.AddScoped<IEventBusGateway, EventBusGateway>();
     }

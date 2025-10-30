@@ -19,20 +19,14 @@ public static class ServiceCollectionExtensions
     {
         services.AddResiliencePolicy();
 
-        // Register CQRS services first before DbContext to ensure IDomainEventsDispatcher is available
         services.AddMediator(Application.AssemblyReference.Assembly);
 
-        // PostgreSQL
-        services
-            .AddPostgreSqlHealthCheck(configuration)
+        services.AddPostgreSqlHealthCheck(configuration)
             .AddDbContextWithScoping<TenancyDbContext>(configuration);
 
-        // Redis infrastructure
-        services
-            .AddRedisHealthCheck(configuration)
+        services.AddRedisHealthCheck(configuration)
             .AddRedisInfrastructure(configuration);
 
-        // Providers
         services.AddUserPermissionsProvider();
         services.AddUserOrganizationContextProvider();
 
@@ -49,7 +43,7 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    private static IServiceCollection AddTenancyAPI(this IServiceCollection services)
+    public static IServiceCollection AddTenancyAPI(this IServiceCollection services)
     {
         services.AddCors();
         services.AddSingleton<ExceptionHandlingMiddleware>();
