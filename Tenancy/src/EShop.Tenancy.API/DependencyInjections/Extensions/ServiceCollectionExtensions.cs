@@ -8,7 +8,7 @@ using EShop.Shared.JsonApi.Middlewares;
 using EShop.Tenancy.Application.DependencyInjections;
 using EShop.Tenancy.Infrastructure.DependencyInjections;
 using EShop.Tenancy.Persistence;
-using EShop.Tenancy.Persistence.DependencyInjections.Extensions;
+using EShop.Tenancy.Persistence.DependencyInjections;
 using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
 
 namespace EShop.Tenancy.API.DependencyInjections.Extensions;
@@ -65,21 +65,20 @@ public static class ServiceCollectionExtensions
                 options.SubstituteApiVersionInUrl = true;
             });
 
-        services.AddRsaKeyServices();
         services.AddAuthentication();
 
         return services;
     }
 
+    public static void AddAuthentication(this IServiceCollection services)
+    {
+        services.AddRsaKeyServices();
+        services.AddJwtTokenAuthentication();
+        services.AddUserTokensProvider();
+    }
     public static void AddRsaKeyServices(this IServiceCollection services)
     {
         services.AddMultiTenantKeyManager();
         services.AddRsaKeyCachingProvider();
-    }
-
-    public static void AddAuthentication(this IServiceCollection services)
-    {
-        services.AddJwtTokenAuthentication();
-        services.AddUserTokensProvider();
     }
 }

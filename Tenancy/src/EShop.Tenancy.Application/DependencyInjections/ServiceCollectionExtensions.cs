@@ -21,7 +21,7 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    private static void AddMediatR(this IServiceCollection services)
+    public static void AddMediatR(this IServiceCollection services)
     {
         services.AddMediatR(cfg =>
             cfg.RegisterServicesFromAssemblies(AssemblyReference.Assembly))

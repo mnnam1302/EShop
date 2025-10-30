@@ -6,59 +6,44 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EShop.Tenancy.API;
 
-internal sealed class DbInitializer
+public sealed class DbInitializer(
+    TenancyDbContext tenancyDbContext,
+    IUserDetailsProvider userDetailsProvider,
+    ITenantIsolationStrategy tenantIsolationStrategy,
+    IConfiguration configuration,
+    ILogger<DbInitializer> logger)
 {
-    private readonly TenancyDbContext _tenancyDbContext;
-    private readonly IUserDetailsProvider _userDetailsProvider;
-    private readonly ITenantIsolationStrategy _tenantIsolationStrategy;
-    private readonly IConfiguration _configuration;
-    private readonly ILogger _logger;
-
-    public DbInitializer(
-        TenancyDbContext tenancyDbContext,
-        IUserDetailsProvider userDetailsProvider,
-        ITenantIsolationStrategy tenantIsolationStrategy,
-        IConfiguration configuration,
-        ILogger<DbInitializer> logger)
-    {
-        _tenancyDbContext = tenancyDbContext;
-        _userDetailsProvider = userDetailsProvider;
-        _tenantIsolationStrategy = tenantIsolationStrategy;
-        _configuration = configuration;
-        _logger = logger;
-    }
-
     public async Task Initialize(bool applyMigrations = true, bool applyTenantIsolation = true)
     {
         try
         {
-            _userDetailsProvider.SetSystemUserContextWithEmptyScope();
+            userDetailsProvider.SetSystemUserContextWithEmptyScope();
 
             if (applyMigrations)
             {
-                _logger.LogDebug("Applying any pending migrations...");
-                await _tenancyDbContext.Database.MigrateAsync();
+                logger.LogDebug("Applying any pending migrations...");
+                await tenancyDbContext.Database.MigrateAsync();
             }
             else
             {
-                _logger.LogInformation("Ensuring database is created without running migrations...");
-                await _tenancyDbContext.Database.EnsureCreatedAsync();
+                logger.LogInformation("Ensuring database is created without running migrations...");
+                await tenancyDbContext.Database.EnsureCreatedAsync();
             }
 
-            if (applyTenantIsolation && _configuration.GetValue<bool>("AllowTenantIsolation", true))
+            if (applyTenantIsolation && configuration.GetValue<bool>("AllowTenantIsolation", true))
             {
-                _tenantIsolationStrategy.AddTenantIsolation(_tenancyDbContext);
+                tenantIsolationStrategy.AddTenantIsolation(tenancyDbContext);
             }
 
-            await _tenancyDbContext.SaveChangesAsync();
+            await tenancyDbContext.SaveChangesAsync();
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Database initialization error");
+            logger.LogError(ex, "Database initialization error");
         }
         finally
         {
-            _userDetailsProvider.ClearSystemUserContext();
+            userDetailsProvider.ClearSystemUserContext();
         }
     }
 }

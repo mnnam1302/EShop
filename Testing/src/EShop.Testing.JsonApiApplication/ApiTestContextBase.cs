@@ -4,7 +4,6 @@ using EShop.Shared.Authentication.Managers.JwtTokens;
 using EShop.Shared.Contracts.Abstractions.MessageBus;
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.EventBus.Services;
-using EShop.Shared.Scoping;
 using EShop.Shared.Scoping.ResourceAccessControl;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers.TenantFeaturesProvider;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserPermissionProvider;
@@ -63,27 +62,21 @@ public abstract class ApiTestContextBase
 public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTestContextBase, IDisposable
     where TStartup : class
 {
-    private bool _disposed = false;
-    private readonly TestServer _server;
-    private readonly IServiceScope _serviceScope;
-    private readonly Microsoft.Extensions.Logging.ILogger _logger;
-    private readonly TestUserPermissionProvider _testUserPermissionProvider;
-    private readonly TestTenantFeatureProvider _testTenantFeatureProvider;
+    private bool disposed = false;
+    private readonly TestServer server;
+    private readonly IServiceScope serviceScope;
+    private readonly Microsoft.Extensions.Logging.ILogger logger;
+    private readonly TestUserPermissionProvider testUserPermissionProvider;
+    private readonly TestTenantFeatureProvider testTenantFeatureProvider;
 
-    private readonly Dictionary<string, UserData> _users = new();
+    private readonly Dictionary<string, UserData> _users = [];
 
-    private UserData _defaultUser = new UserData(
-        "TEST_ADMIN",
-        "TEST_ADMIN",
-        DefaultTenantId,
-        isSupportUser: true);
+    private UserData defaultUser = new("TEST_ADMIN", "TEST_ADMIN", DefaultTenantId, isSupportUser: true);
 
     private string LoggedInUser;
 
     protected ApiTestContextBase(Func<WebHostBuilderContext, TStartup> startupFactory)
     {
-        var mutableMemoryConfigurationProvider = new MutableMemoryConfigurationProvider(new Dictionary<string, string>());
-
         var webHostBuilder = new WebHostBuilder()
             .UseDefaultServiceProvider((context, options) =>
             {
@@ -94,14 +87,12 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
             {
                 services.AddTransient<HttpClient>(sp => this.GetClientWithHeaderPropagation());
                 services.AddSingleton<IIntegrationEventsTracker, IntegrationEventsTracker>();
-                services.AddSingleton(mutableMemoryConfigurationProvider);
                 services.AddSerilog(SetupLogging);
             })
             .ConfigureAppConfiguration((hostingContext, config) =>
             {
                 config.SetBasePath(hostingContext.HostingEnvironment.ContentRootPath);
                 config.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
-                config.Add(mutableMemoryConfigurationProvider);
                 config.AddUserSecrets<TStartup>();
             });
 
@@ -111,26 +102,26 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
 
         webHostBuilder = webHostBuilder.ConfigureLogging(builder => builder.ClearProviders().AddSerilog());
 
-        _server = new TestServer(webHostBuilder);
+        server = new TestServer(webHostBuilder);
+        serviceScope = server.Host.Services.CreateScope();
 
-        _serviceScope = _server.Host.Services.CreateScope();
-        _logger = ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger<ApiTestContextBase<TStartup>>();
+        logger = ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger<ApiTestContextBase<TStartup>>();
 
-        _testUserPermissionProvider = ServiceProvider.GetRequiredService<IUserPermissionsProvider>() as TestUserPermissionProvider
+        testUserPermissionProvider = ServiceProvider.GetRequiredService<IUserPermissionsProvider>() as TestUserPermissionProvider
                                      ?? throw new InvalidOperationException("Service provider did not return a TestUserPermissionProvider instance.");
 
-        _testTenantFeatureProvider = ServiceProvider.GetRequiredService<ITenantFeaturesProvider>() as TestTenantFeatureProvider
+        testTenantFeatureProvider = ServiceProvider.GetRequiredService<ITenantFeaturesProvider>() as TestTenantFeatureProvider
                                      ?? throw new InvalidOperationException("Service provider did not return a TestTenantFeatureProvider instance.");
 
         EventTracker = ServiceProvider.GetRequiredService<IIntegrationEventsTracker>();
     }
 
-    public Microsoft.Extensions.Logging.ILogger Logger => _logger;
+    public Microsoft.Extensions.Logging.ILogger Logger => logger;
     public ILoggerFactory LoggerFactory => ServiceProvider.GetRequiredService<ILoggerFactory>();
-    public IServiceProvider ServiceProvider => _serviceScope.ServiceProvider;
+    public IServiceProvider ServiceProvider => serviceScope.ServiceProvider;
     public IIntegrationEventsTracker EventTracker { get; private set; }
     public Exception LastApiError { get; set; }
-    public HttpClient Client => GetAuthorizedClient(_defaultUser);
+    public HttpClient Client => GetAuthorizedClient(defaultUser);
     public HttpStatusCode LastStatusCode { get; set; }
 
     #region Manage User Management
@@ -140,8 +131,8 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
         _users.Add(user.Username.ToLower(), user);
         if (setAsDefault)
         {
-            _defaultUser = user;
-            _logger.LogWarning("Changing default user to '{username}'({tenantId})", user.Username, user.TenantId);
+            defaultUser = user;
+            logger.LogWarning("Changing default user to '{username}'({tenantId})", user.Username, user.TenantId);
         }
     }
 
@@ -157,8 +148,8 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
         }
         if (setAsDefault)
         {
-            _defaultUser = user;
-            _logger.LogWarning("Changing default user to '{username}'({tenantId})", user.Username, user.TenantId);
+            defaultUser = user;
+            logger.LogWarning("Changing default user to '{username}'({tenantId})", user.Username, user.TenantId);
         }
     }
 
@@ -166,9 +157,9 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
     {
         var operationalUsername = username ?? LoggedInUser;
         operationalUsername = operationalUsername?.ToLower();
-        if (string.IsNullOrEmpty(operationalUsername) || string.Equals(username, _defaultUser.Username, StringComparison.OrdinalIgnoreCase))
+        if (string.IsNullOrEmpty(operationalUsername) || string.Equals(username, defaultUser.Username, StringComparison.OrdinalIgnoreCase))
         {
-            return _defaultUser;
+            return defaultUser;
         }
         else
         {
@@ -217,20 +208,20 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
 
     public void AddPermissionToUser(string userId, string permissionId)
     {
-        _testUserPermissionProvider.AddPermission(userId, permissionId);
+        testUserPermissionProvider.AddPermission(userId, permissionId);
     }
 
     public void GrantAllPermissionsToUser(string userId)
     {
         foreach (var permissionId in AllPermissionIds)
         {
-            _testUserPermissionProvider.AddPermission(userId, permissionId);
+            testUserPermissionProvider.AddPermission(userId, permissionId);
         }
     }
 
     public void SetupStandardFeaturesForDefaultTenant()
     {
-        SetupFeaturesForTenant(_defaultUser.TenantId, StandardFeatureIds);
+        SetupFeaturesForTenant(defaultUser.TenantId, StandardFeatureIds);
     }
 
     public void SetupStandardFeaturesForTenant(string tenantId)
@@ -242,7 +233,7 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
     {
         foreach (var featureId in featureIds)
         {
-            _testTenantFeatureProvider.AddTenantFeature(tenantId, featureId);
+            testTenantFeatureProvider.AddTenantFeature(tenantId, featureId);
         }
     }
 
@@ -255,7 +246,7 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
         }
 
         LoggedInUser = user.Username;
-        _logger.LogInformation("User '{username}' logged in", LoggedInUser);
+        logger.LogInformation("User '{username}' logged in", LoggedInUser);
     }
 
     #endregion Manage User Management
@@ -264,10 +255,10 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
 
     private HttpClient GetClientWithHeaderPropagation()
     {
-        var client = _server.CreateClient();
+        var client = server.CreateClient();
         client.DefaultRequestHeaders.Accept.Clear();
 
-        var httpContext = _server.Services.GetService<IHttpContextAccessor>()?.HttpContext;
+        var httpContext = server.Services.GetService<IHttpContextAccessor>()?.HttpContext;
         if (httpContext != null &&
             httpContext.Request.Headers.TryGetValue("Authorization", out var values) &&
             !StringValues.IsNullOrEmpty(values))
@@ -285,7 +276,7 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
 
     private HttpClient GetAuthorizedClientCore(UserData? user, string acceptHeader)
     {
-        var client = _server.CreateClient();
+        var client = server.CreateClient();
         client.DefaultRequestHeaders.Accept.Clear();
         client.DefaultRequestHeaders.Accept.ParseAdd(acceptHeader);
 
@@ -297,7 +288,7 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
             client.DefaultRequestHeaders.Add(HttpRequestUserDataProvider.ActionUserIdCustomHeaderName, user.Username);
         }
 
-        user ??= _defaultUser;
+        user ??= defaultUser;
         return SystemInternalJwtTokenFactory.AddUserContext(client, user);
     }
 
@@ -370,11 +361,11 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
             var client = GetAuthorizedClient(user);
             if (request != null)
             {
-                _logger.LogInformation("Sending REQUEST as '{username}': {method} {relativeUri} {jsonBody}", user?.Username ?? _defaultUser?.Username, method, relativeUri, request);
+                logger.LogInformation("Sending REQUEST as '{username}': {method} {relativeUri} {jsonBody}", user?.Username ?? defaultUser?.Username, method, relativeUri, request);
             }
             else
             {
-                _logger.LogInformation("Sending REQUEST as '{username}': {method} {relativeUri}", user?.Username ?? _defaultUser?.Username, method, relativeUri);
+                logger.LogInformation("Sending REQUEST as '{username}': {method} {relativeUri}", user?.Username ?? defaultUser?.Username, method, relativeUri);
             }
             using var response = await sendFunc(client);
             if (typeof(TResult) == typeof(Result))
@@ -390,7 +381,7 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "Error during {method} request to {relativeUri}", method, relativeUri);
+            logger.LogWarning(ex, "Error during {method} request to {relativeUri}", method, relativeUri);
             this.LastApiError = ex;
             throw;
         }
@@ -455,20 +446,20 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
 
     public virtual void Dispose(bool disposing)
     {
-        if (_disposed)
+        if (disposed)
         {
             return;
         }
 
         if (disposing)
         {
-            _serviceScope.Dispose();
+            serviceScope.Dispose();
 
             // the factory tracks and disposes of any clients created
-            _server.Dispose();
+            server.Dispose();
         }
 
-        _disposed = true;
+        disposed = true;
     }
 
     #endregion Dispose
