@@ -12,15 +12,14 @@ Background:
 
 Scenario: System user register a new tenant successfully
 	Given user of group 'eshop-support' logged in
-	And System User has logged in
 	When System user registers a new tenant with following details
-		| Attribute     | Value         |
-		| Id            | test-tenant   |
-		| Name          | Test Owner    |
-		| OwnerUsername | test-owner    |
-		| OwnerEmail    | mail@test.com |
-		| PhoneNumber   | '123456789'   |
+		| Attribute     | Value                |
+		| Id            | test-tenant          |
+		| Name          | Test Owner           |
+		| OwnerUsername | test-owner           |
+		| OwnerEmail    | test-owner@eshop.com |
+		| PhoneNumber   | '123456789'          |
 	Then the tenant 'test-tenant' has following details
-		| TenantId    | TenantName | OwnerUsername | OwnerEmail    | PhoneNumber |
-		| test-tenant | Test Owner | test-owner    | mail@test.com | '123456789' |
+		| Id          | Name       | OwnerUsername          | OwnerEmail           | PhoneNumber |
+		| test-tenant | Test Owner | test-owner@test-tenant | test-owner@eshop.com | '123456789' |
 

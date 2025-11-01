@@ -179,9 +179,6 @@ await this.FeatureBackgroundAsync();
 #line 14
  await testRunner.GivenAsync("user of group \'eshop-support\' logged in", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
-#line 15
- await testRunner.AndAsync("System User has logged in", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
-#line hidden
                 global::Reqnroll.Table table2 = new global::Reqnroll.Table(new string[] {
                             "Attribute",
                             "Value"});
@@ -196,26 +193,26 @@ await this.FeatureBackgroundAsync();
                             "test-owner"});
                 table2.AddRow(new string[] {
                             "OwnerEmail",
-                            "mail@test.com"});
+                            "test-owner@eshop.com"});
                 table2.AddRow(new string[] {
                             "PhoneNumber",
                             "\'123456789\'"});
-#line 16
+#line 15
  await testRunner.WhenAsync("System user registers a new tenant with following details", ((string)(null)), table2, "When ");
 #line hidden
                 global::Reqnroll.Table table3 = new global::Reqnroll.Table(new string[] {
-                            "TenantId",
-                            "TenantName",
+                            "Id",
+                            "Name",
                             "OwnerUsername",
                             "OwnerEmail",
                             "PhoneNumber"});
                 table3.AddRow(new string[] {
                             "test-tenant",
                             "Test Owner",
-                            "test-owner",
-                            "mail@test.com",
+                            "test-owner@test-tenant",
+                            "test-owner@eshop.com",
                             "\'123456789\'"});
-#line 23
+#line 22
  await testRunner.ThenAsync("the tenant \'test-tenant\' has following details", ((string)(null)), table3, "Then ");
 #line hidden
             }

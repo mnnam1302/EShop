@@ -1,5 +1,4 @@
-﻿using EShop.Shared.Authentication;
-using EShop.Tenancy.Tests.Setups;
+﻿using EShop.Tenancy.Tests.Setups;
 using Reqnroll;
 
 namespace EShop.Tenancy.Tests.Shared
@@ -18,12 +17,6 @@ namespace EShop.Tenancy.Tests.Shared
         public void GivenAllFeaturesAreAvailableForSystemUser()
         {
             apiContext.SetupStandardFeaturesForDefaultTenant();
-        }
-
-        [Given("System User has logged in")]
-        public void GivenSystemUserHasLoggedIn()
-        {
-            apiContext.SignIn(UserData.SystemUsername);
         }
     }
 }

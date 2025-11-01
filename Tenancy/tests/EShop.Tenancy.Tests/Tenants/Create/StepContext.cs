@@ -11,24 +11,17 @@ internal class StepContext(ApiContext apiContext)
 
     public string LoggedInGroup { get; internal set; } = string.Empty;
 
-    internal async Task CreateTenantAsync(Command.CreateTenantCommand request)
+    internal async Task CreateTenantAsync(Command.CreateTenantCommand request, string? operationalUsername = null)
     {
-        try
-        {
-            var operationalUser = new UserData("TEST_ADMIN", "TEST_ADMIN", LoggedInGroup, LoggedInGroup == UserData.EShopSupportGroup);
-            await apiContext.PostAsync($"{BaseUrl}", request, operationalUser);
-        }
-        catch (Exception ex)
-        {
-            apiContext.LastApiError = ex;
-        }
+        var systemUser = UserData.GetSystemUser(LoggedInGroup);
+        await apiContext.PostAsync($"{BaseUrl}", request, systemUser);
     }
 
     internal async Task<TenantDetailsResponse> GetTenantAsync(string tenantId, string? operationalUsername = null)
     {
-        var operationUser = apiContext.GetUserByUsername(operationalUsername);
+        var systemUser = UserData.GetSystemUser(LoggedInGroup);
+        var result = await apiContext.GetAsync<TenantDetailsResponse>($"{BaseUrl}/{tenantId}", systemUser);
 
-        var result = await apiContext.GetAsync<TenantDetailsResponse>($"{BaseUrl}/{tenantId}", operationUser);
         return result.Value;
     }
 }

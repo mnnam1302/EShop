@@ -61,6 +61,8 @@ public abstract class ApiTestContextBase
 public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTestContextBase, IDisposable
     where TStartup : class
 {
+    private const string JsonMediaType = "application/json";
+
     private bool disposed = false;
     private readonly TestServer server;
     private readonly IServiceScope serviceScope;
@@ -282,114 +284,176 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
 
     #endregion HTTP Client Management
 
-    #region Http Action Method
+    #region Http Action Methods
+
     public Task<Result<TResponse>> GetAsync<TResponse>(string relativeUri, UserData? user = null)
     {
-        return SendAsync<Result<TResponse>>(c => c.GetAsync(relativeUri), relativeUri, user, null, "GET");
+        return ExecuteHttpRequestAsync<Result<TResponse>>(
+            client => client.GetAsync(relativeUri),
+            relativeUri,
+            user,
+            HttpMethod.Get.Method);
     }
 
     public Task<Result> PostAsync<TRequest>(string relativeUri, TRequest request, UserData? user = null)
     {
-        return SendAsync<Result>(
-             c => c.PostAsync(relativeUri, new StringContent(System.Text.Json.JsonSerializer.Serialize(request), Encoding.UTF8, "application/json")),
-             relativeUri, user, request, "POST");
+        return ExecuteHttpRequestWithBodyAsync<TRequest, Result>(
+            relativeUri,
+            request,
+            user,
+            HttpMethod.Post.Method);
     }
 
     public Task<Result<TResponse>> PostAsync<TRequest, TResponse>(string relativeUri, TRequest request, UserData? user = null)
     {
-        return SendAsync<Result<TResponse>>(
-            c => c.PostAsync(relativeUri, new StringContent(System.Text.Json.JsonSerializer.Serialize(request), Encoding.UTF8, "application/json")),
-            relativeUri, user, request, "POST");
+        return ExecuteHttpRequestWithBodyAsync<TRequest, Result<TResponse>>(
+            relativeUri,
+            request,
+            user,
+            HttpMethod.Post.Method);
     }
 
     public Task<Result> PutAsync<TRequest>(string relativeUri, TRequest request, UserData? user = null)
     {
-        return SendAsync<Result>(
-            c => c.PutAsync(relativeUri, new StringContent(System.Text.Json.JsonSerializer.Serialize(request), Encoding.UTF8, "application/json")),
-            relativeUri, user, request, "PUT");
+        return ExecuteHttpRequestWithBodyAsync<TRequest, Result>(
+            relativeUri,
+            request,
+            user,
+            HttpMethod.Put.Method);
     }
 
     public Task<Result<TResponse>> PutAsync<TRequest, TResponse>(string relativeUri, TRequest request, UserData? user = null)
     {
-        return SendAsync<Result<TResponse>>(
-            c => c.PutAsync(relativeUri, new StringContent(System.Text.Json.JsonSerializer.Serialize(request), Encoding.UTF8, "application/json")),
-            relativeUri, user, request, "PUT");
+        return ExecuteHttpRequestWithBodyAsync<TRequest, Result<TResponse>>(
+            relativeUri,
+            request,
+            user,
+            HttpMethod.Put.Method);
     }
 
     public Task<Result> PatchAsync<TRequest>(string relativeUri, TRequest request, UserData? user = null)
     {
-        return SendAsync<Result>(
-            c => c.PatchAsync(relativeUri, new StringContent(System.Text.Json.JsonSerializer.Serialize(request), Encoding.UTF8, "application/json")),
-            relativeUri, user, request, "PATCH");
+        return ExecuteHttpRequestWithBodyAsync<TRequest, Result>(
+            relativeUri,
+            request,
+            user,
+            HttpMethod.Patch.Method);
     }
 
     public Task<Result<TResponse>> PatchAsync<TRequest, TResponse>(string relativeUri, TRequest request, UserData? user = null)
     {
-        return SendAsync<Result<TResponse>>(
-            c => c.PatchAsync(relativeUri, new StringContent(System.Text.Json.JsonSerializer.Serialize(request), Encoding.UTF8, "application/json")),
-            relativeUri, user, request, "PATCH");
+        return ExecuteHttpRequestWithBodyAsync<TRequest, Result<TResponse>>(
+            relativeUri,
+            request,
+            user,
+            HttpMethod.Patch.Method);
     }
 
-    public Task<Result> DeleteAsync<TRequest>(string relativeUri, UserData? user = null)
+    public Task<Result> DeleteAsync(string relativeUri, UserData? user = null)
     {
-
-        return SendAsync<Result>(c => c.DeleteAsync(relativeUri), relativeUri, user, null, "DELETE");
+        return ExecuteHttpRequestAsync<Result>(
+            client => client.DeleteAsync(relativeUri),
+            relativeUri,
+            user,
+            HttpMethod.Delete.Method);
     }
 
-    private async Task<TResult> SendAsync<TResult>(
-        Func<HttpClient, Task<HttpResponseMessage>> sendFunc,
+    private Task<TResult> ExecuteHttpRequestWithBodyAsync<TRequest, TResult>(
+        string relativeUri,
+        TRequest request,
+        UserData? user,
+        string httpMethod)
+    {
+        var httpContent = CreateJsonHttpContent(request);
+
+        return ExecuteHttpRequestAsync<TResult>(
+            client => CreateHttpRequestWithBody(client, relativeUri, httpContent, httpMethod),
+            relativeUri,
+            user,
+            httpMethod,
+            request);
+    }
+
+    private static Task<HttpResponseMessage> CreateHttpRequestWithBody(HttpClient client, string relativeUri, HttpContent content, string method)
+    {
+        return method.ToUpperInvariant() switch
+        {
+            "POST" => client.PostAsync(relativeUri, content),
+            "PUT" => client.PutAsync(relativeUri, content),
+            "PATCH" => client.PatchAsync(relativeUri, content),
+            _ => throw new ArgumentException($"HTTP method '{method}' with body is not supported.", nameof(method))
+        };
+    }
+
+    private static HttpContent CreateJsonHttpContent<TRequest>(TRequest request)
+    {
+        var serializedRequest = System.Text.Json.JsonSerializer.Serialize(request);
+        return new StringContent(serializedRequest, Encoding.UTF8, JsonMediaType);
+    }
+
+    private async Task<TResult> ExecuteHttpRequestAsync<TResult>(
+        Func<HttpClient, Task<HttpResponseMessage>> httpRequestFactory,
         string relativeUri,
         UserData? user = null,
-        object? request = null,
-        string method = "")
+        string httpMethod = "",
+        object? requestBody = null)
     {
         try
         {
-            ArgumentNullException.ThrowIfNull(relativeUri);
+            ArgumentException.ThrowIfNullOrEmpty(relativeUri);
+
             var client = await GetAuthorizedClient(user);
-            if (request != null)
+            var operationalUser = user ?? defaultUser;
+
+            if (requestBody != null)
             {
-                logger.LogInformation("Sending REQUEST as '{username}': {method} {relativeUri} {jsonBody}", user?.Username ?? defaultUser?.Username, method, relativeUri, request);
+                logger.LogInformation("Sending {HttpMethod} request to {RelativeUri} as '{Username}' with body: {RequestBody}",
+                    httpMethod, relativeUri, operationalUser.Username, requestBody);
             }
             else
             {
-                logger.LogInformation("Sending REQUEST as '{username}': {method} {relativeUri}", user?.Username ?? defaultUser?.Username, method, relativeUri);
+                logger.LogInformation("Sending {HttpMethod} request to {RelativeUri} as '{Username}'",
+                    httpMethod, relativeUri, operationalUser.Username);
             }
-            using var response = await sendFunc(client);
-            if (typeof(TResult) == typeof(Result))
-            {
-                var result = await ProcessResultResponse(response);
-                return (TResult)(object)result;
-            }
-            else
-            {
-                var result = await ProcessResultResponse<TResult>(response);
-                return (TResult)(object)result;
-            }
+
+            using var response = await httpRequestFactory(client);
+            return await ProcessHttpResponse<TResult>(response);
         }
         catch (Exception ex)
         {
-            logger.LogWarning(ex, "Error during {method} request to {relativeUri}", method, relativeUri);
-            this.LastApiError = ex;
+            logger.LogWarning(ex, "Error during {HttpMethod} request to {RelativeUri}", httpMethod, relativeUri);
+            LastApiError = ex;
             throw;
         }
     }
 
-    private static async Task<Result> ProcessResultResponse(HttpResponseMessage response)
+    private static async Task<TResult> ProcessHttpResponse<TResult>(HttpResponseMessage response)
     {
-        var responseJson = await response.Content.ReadAsStringAsync();
-        var result = JsonConvert.DeserializeObject<Result>(responseJson);
-        return result ?? new Result(false, Error.NullValue);
+        if (typeof(TResult) == typeof(Result))
+        {
+            var result = await DeserializeResultResponse(response);
+            return (TResult)(object)result;
+        }
+
+        var genericResult = await DeserializeGenericResponse<TResult>(response);
+        return genericResult;
     }
 
-    private static async Task<Result<TValue>> ProcessResultResponse<TValue>(HttpResponseMessage response)
+    private static async Task<Result> DeserializeResultResponse(HttpResponseMessage response)
     {
-        var responseJson = await response.Content.ReadAsStringAsync();
-        var result = JsonConvert.DeserializeObject<Result<TValue>>(responseJson);
-        return result ?? new Result<TValue>(default, false, Error.NullValue);
+        var responseContent = await response.Content.ReadAsStringAsync();
+        var result = JsonConvert.DeserializeObject<Result>(responseContent);
+        return result ?? throw new InvalidOperationException("Failed to deserialize API response to Result.");
     }
 
-    #endregion Http Action Method
+    private static async Task<TValue> DeserializeGenericResponse<TValue>(HttpResponseMessage response)
+    {
+        var responseContent = await response.Content.ReadAsStringAsync();
+        var result = JsonConvert.DeserializeObject<TValue>(responseContent);
+        return result ?? throw new InvalidOperationException($"Failed to deserialize API response to {typeof(TValue).Name}.");
+    }
+
+    #endregion Http Action Methods
 
     #region Integration Event
 
