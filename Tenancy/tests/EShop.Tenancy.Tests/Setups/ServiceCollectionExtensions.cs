@@ -70,26 +70,23 @@ public static class ServiceCollectionExtensions
 
     private static void AddTestAuthentication(this IServiceCollection services)
     {
-        services.AddRsaKeyServices();
-        services.AddTenantAuthentication();
-        services.AddUserTokensCachingServices();
-    }
-
-    private static void AddRsaKeyServices(this IServiceCollection services)
-    {
         services.AddTenantKeyProvider();
         services.AddRsaKeyCachingServices();
+
+        services.AddOptions<JwtOptions>()
+            .BindConfiguration(nameof(JwtOptions));
+
+        services.AddTenantAuthentication();
+        services.AddUserTokensCachingServices();
     }
 
     private static void AddTestTenancyApplication(this IServiceCollection services)
     {
         services.AddMediatR();
 
-        // permission validator
         services.AddScoped<IPermissionValidator, CurrentUserPermissionsValidator>();
         services.AddSingleton<IUserPermissionsProvider, TestUserPermissionProvider>();
 
-        // feature validator
         services.AddScoped<IFeatureValidator, CurrentUserFeaturesValidator>();
         services.AddScoped<ITenantFeaturesProvider, TestTenantFeatureProvider>();
         services.AddSingleton<ITenantFeaturesCachingService, TestTenantFeaturesCachingService>();

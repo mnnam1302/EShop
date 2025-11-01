@@ -58,7 +58,7 @@ public class AuthorizationStepDefinition
     [Given("user '(.*)' logs in to the system")]
     public void GivenUserLogsInToTheSystem(string username)
     {
-        _apiContext.UserLogsIn(username);
+        _apiContext.SignIn(username);
     }
 
     [Given("user '(.*)' has the following permissions")]

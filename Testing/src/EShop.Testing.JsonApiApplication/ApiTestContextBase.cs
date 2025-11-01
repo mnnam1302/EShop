@@ -1,6 +1,5 @@
 ﻿using EShop.Shared.Authentication;
-using EShop.Shared.Authentication.Managers;
-using EShop.Shared.Authentication.Managers.JwtTokens;
+using EShop.Shared.Authentication.Abstractions;
 using EShop.Shared.Contracts.Abstractions.MessageBus;
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.EventBus.Services;
@@ -30,7 +29,7 @@ public interface IApiTestContextBase
 
     Exception LastApiError { get; }
 
-    HttpClient GetAuthorizedClient(UserData user, string acceptHeader = "application/json");
+    Task<HttpClient> GetAuthorizedClient(UserData user, string acceptHeader = "application/json");
 
     UserData GetUserByUsername(string? username = null);
 }
@@ -68,6 +67,7 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
     private readonly Microsoft.Extensions.Logging.ILogger logger;
     private readonly TestUserPermissionProvider testUserPermissionProvider;
     private readonly TestTenantFeatureProvider testTenantFeatureProvider;
+    private readonly ISystemInternalJwtTokenFactory systemInternalJwtTokenFactory;
 
     private readonly Dictionary<string, UserData> _users = [];
 
@@ -113,6 +113,8 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
         testTenantFeatureProvider = ServiceProvider.GetRequiredService<ITenantFeaturesProvider>() as TestTenantFeatureProvider
                                      ?? throw new InvalidOperationException("Service provider did not return a TestTenantFeatureProvider instance.");
 
+        systemInternalJwtTokenFactory = ServiceProvider.GetRequiredService<ISystemInternalJwtTokenFactory>();
+
         EventTracker = ServiceProvider.GetRequiredService<IIntegrationEventsTracker>();
     }
 
@@ -121,7 +123,6 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
     public IServiceProvider ServiceProvider => serviceScope.ServiceProvider;
     public IIntegrationEventsTracker EventTracker { get; private set; }
     public Exception LastApiError { get; set; }
-    public HttpClient Client => GetAuthorizedClient(defaultUser);
     public HttpStatusCode LastStatusCode { get; set; }
 
     #region Manage User Management
@@ -237,16 +238,16 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
         }
     }
 
-    public void UserLogsIn(string username)
+    public void SignIn(string username)
     {
         var user = GetUserByUsername(username);
         if (user == null)
         {
-            throw new ArgumentException($"User '{username}' not found.");
+            throw new ArgumentException($"User '{username}' is not found.");
         }
 
         LoggedInUser = user.Username;
-        logger.LogInformation("User '{username}' logged in", LoggedInUser);
+        logger.LogInformation("User '{username}' has logged in", LoggedInUser);
     }
 
     #endregion Manage User Management
@@ -269,22 +270,14 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
         return client;
     }
 
-    public HttpClient GetAuthorizedClient(UserData? user, string acceptHeader = "application/json")
+    public async Task<HttpClient> GetAuthorizedClient(UserData? user, string acceptHeader = "application/json")
     {
         var client = server.CreateClient();
         client.DefaultRequestHeaders.Accept.Clear();
         client.DefaultRequestHeaders.Accept.ParseAdd(acceptHeader);
 
-        if (user?.UserType is UserTypes.AppClientWithIndividualUsers or UserTypes.AppClientWithoutIndividualUsers)
-        {
-            client.DefaultRequestHeaders.Add(HttpRequestUserDataProvider.UserTypeCustomHeaderName, user.UserType);
-            client.DefaultRequestHeaders.Add(HttpRequestUserDataProvider.TenantIdCustomHeaderName, user.TenantId);
-            client.DefaultRequestHeaders.Add(HttpRequestUserDataProvider.UserIdCustomHeaderName, user.Id);
-            client.DefaultRequestHeaders.Add(HttpRequestUserDataProvider.ActionUserIdCustomHeaderName, user.Username);
-        }
-
         user ??= defaultUser;
-        return SystemInternalJwtTokenFactory.AddUserContext(client, user);
+        return await systemInternalJwtTokenFactory.AddUserContext(client, user);
     }
 
     #endregion HTTP Client Management
@@ -353,7 +346,7 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
         try
         {
             ArgumentNullException.ThrowIfNull(relativeUri);
-            var client = GetAuthorizedClient(user);
+            var client = await GetAuthorizedClient(user);
             if (request != null)
             {
                 logger.LogInformation("Sending REQUEST as '{username}': {method} {relativeUri} {jsonBody}", user?.Username ?? defaultUser?.Username, method, relativeUri, request);

@@ -21,6 +21,7 @@ public static class ServiceCollectionExtensions
             .ValidateDataAnnotations()
             .ValidateOnStart();
 
+        services.AddScoped<ISystemInternalJwtTokenFactory, SystemInternalJwtTokenFactory>();
         services.AddScoped<IJwtTokenManager, JwtTokenManager>();
         services.AddAuthenticationHandler();
 

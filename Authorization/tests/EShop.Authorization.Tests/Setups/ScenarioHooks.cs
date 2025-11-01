@@ -1,8 +1,6 @@
 ﻿using EShop.Authorization.Infrastructure;
 using EShop.Shared.Authentication.Abstractions;
 using EShop.Shared.DbResourceAccessControl;
-using EShop.Shared.EventBus.Services;
-using EShop.Shared.Scoping;
 using EShop.Testing.JsonApiApplication;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
@@ -65,8 +63,7 @@ public sealed class ScenarioHooks
             scope.ServiceProvider.GetRequiredService<IUserDetailsProvider>(),
             scope.ServiceProvider.GetRequiredService<ITenantIsolationStrategy>(),
             scope.ServiceProvider.GetRequiredService<IConfiguration>(),
-            scope.ServiceProvider.GetRequiredService<ILogger<DbInitializer>>(),
-            scope.ServiceProvider.GetRequiredService<IEventBusGateway>());
+            scope.ServiceProvider.GetRequiredService<ILogger<DbInitializer>>());
 
         await dbInitilize.Initialize(applyMigrations: true, applyTenantIsolation: true);
     }

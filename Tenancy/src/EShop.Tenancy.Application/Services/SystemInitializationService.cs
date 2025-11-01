@@ -63,6 +63,11 @@ public sealed class SystemInitializationService(
         return tenant;
     }
 
+    private string GetSystemUserEmail()
+    {
+        return configuration["SystemUser:Email"] ?? $"{UserData.SystemUsername}@eshop.com";
+    }
+
     private async Task PublishTenantCreatedEventAsync(Tenant systemTenant, CancellationToken cancellationToken)
     {
         await eventBusGateway.PublishAsync<ITenantCreated>(new
@@ -75,10 +80,5 @@ public sealed class SystemInitializationService(
             ActionUserId = userDetailsProvider.AuthenticatedUser.ActionUserId,
             ActionUserType = userDetailsProvider.AuthenticatedUser.ActionUserType
         }, cancellationToken);
-    }
-
-    private string GetSystemUserEmail()
-    {
-        return configuration["SystemUser:Email"] ?? $"{UserData.SystemUsername}@eshop.com";
     }
 }

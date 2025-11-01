@@ -117,6 +117,9 @@ namespace EShop.Tenancy.Tests.Tenants.Create
 #line 7
  await testRunner.GivenAsync("System user with following permissions", ((string)(null)), table1, "Given ");
 #line hidden
+#line 11
+ await testRunner.AndAsync("all features are available for System User", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
         }
         
         private static global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages InitializeCucumberMessages()
@@ -160,7 +163,7 @@ namespace EShop.Tenancy.Tests.Tenants.Create
             global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("System user register a new tenant successfully", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
-#line 12
+#line 13
 this.ScenarioInitialize(scenarioInfo, ruleInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
@@ -173,11 +176,11 @@ this.ScenarioInitialize(scenarioInfo, ruleInfo);
 #line 6
 await this.FeatureBackgroundAsync();
 #line hidden
-#line 13
- await testRunner.GivenAsync("all features are available for System User", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
-#line hidden
 #line 14
- await testRunner.AndAsync("user of group \'eshop-support\' logged in", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+ await testRunner.GivenAsync("user of group \'eshop-support\' logged in", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line hidden
+#line 15
+ await testRunner.AndAsync("System User has logged in", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
                 global::Reqnroll.Table table2 = new global::Reqnroll.Table(new string[] {
                             "Attribute",
@@ -197,7 +200,7 @@ await this.FeatureBackgroundAsync();
                 table2.AddRow(new string[] {
                             "PhoneNumber",
                             "\'123456789\'"});
-#line 15
+#line 16
  await testRunner.WhenAsync("System user registers a new tenant with following details", ((string)(null)), table2, "When ");
 #line hidden
                 global::Reqnroll.Table table3 = new global::Reqnroll.Table(new string[] {
@@ -212,7 +215,7 @@ await this.FeatureBackgroundAsync();
                             "test-owner",
                             "mail@test.com",
                             "\'123456789\'"});
-#line 22
+#line 23
  await testRunner.ThenAsync("the tenant \'test-tenant\' has following details", ((string)(null)), table3, "Then ");
 #line hidden
             }

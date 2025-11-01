@@ -72,11 +72,9 @@ public static class ServiceCollectionExtensions
 
     public static void AddAuthentication(this IServiceCollection services)
     {
-        // tenant key generator and caching provider
         services.AddTenantKeyProvider();
         services.AddRsaKeyCachingServices();
 
-        // user tokens caching provider and tenant authentication
         services.AddTenantAuthentication();
         services.AddUserTokensCachingServices();
     }

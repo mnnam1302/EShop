@@ -11,7 +11,6 @@ namespace EShop.Tenancy.Tests.Shared
         public void GivenSystemUserWithFollowingPermissions(DataTable dataTable)
         {
             var permissionIds = dataTable.Rows.Select(row => row["PermissionId"]).ToArray();
-
             apiContext.SetupPermissionsForDefaultAdminUser(permissionIds);
         }
 
@@ -24,7 +23,7 @@ namespace EShop.Tenancy.Tests.Shared
         [Given("System User has logged in")]
         public void GivenSystemUserHasLoggedIn()
         {
-            apiContext.UserLogsIn(UserData.SystemUsername);
+            apiContext.SignIn(UserData.SystemUsername);
         }
     }
 }

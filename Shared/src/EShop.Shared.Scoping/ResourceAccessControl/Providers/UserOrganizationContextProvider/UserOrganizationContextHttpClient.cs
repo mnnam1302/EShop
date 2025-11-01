@@ -1,6 +1,5 @@
 ﻿using EShop.Shared.Authentication;
 using EShop.Shared.Authentication.Abstractions;
-using EShop.Shared.Authentication.Managers.JwtTokens;
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.DomainTools.Exceptions;
 using Newtonsoft.Json;
@@ -11,11 +10,16 @@ public sealed class UserOrganizationContextHttpClient
 {
     private readonly HttpClient _httpClient;
     private readonly IUserDetailsProvider _userDetailsProvider;
+    private readonly ISystemInternalJwtTokenFactory _systemInternalJwtTokenFactory;
 
-    public UserOrganizationContextHttpClient(HttpClient httpClient, IUserDetailsProvider userDetailsProvider)
+    public UserOrganizationContextHttpClient(
+        HttpClient httpClient,
+        IUserDetailsProvider userDetailsProvider,
+        ISystemInternalJwtTokenFactory systemInternalJwtTokenFactory)
     {
         _httpClient = httpClient;
         _userDetailsProvider = userDetailsProvider;
+        _systemInternalJwtTokenFactory = systemInternalJwtTokenFactory;
     }
 
     public async Task<UserOrganizationContext> GetUserOrganizationContextAsync(string userId, CancellationToken cancellationToken)
@@ -25,8 +29,7 @@ public sealed class UserOrganizationContextHttpClient
             return new UserOrganizationContext();
         }
 
-        // TODO: Please Kodi strongly focus here since inconsistency with JwtTokenManager (JwtToken & SecretKey) Authorization service
-        var authenticatedClient = SystemInternalJwtTokenFactory.AddUserContext(_httpClient, _userDetailsProvider.AuthenticatedUser);
+        var authenticatedClient = await _systemInternalJwtTokenFactory.AddUserContext(_httpClient, _userDetailsProvider.AuthenticatedUser);
         var response = await authenticatedClient.GetStringAsync($"api/v1/users/{userId}/organizationContext", cancellationToken);
 
         var result = JsonConvert.DeserializeObject<Result<UserOrganizationContext>>(response);
@@ -43,8 +46,7 @@ public sealed class UserOrganizationContextHttpClient
         var tenantId = _userDetailsProvider.AuthenticatedUser.TenantId;
         var operationalUser = new UserData(userId, userId, tenantId, false, null, userType);
 
-        // TODO: Please Kodi strongly focus here since inconsistency with JwtTokenManager (JwtToken & SecretKey) Authorization service
-        var authenticatedClient = SystemInternalJwtTokenFactory.AddUserContext(_httpClient, operationalUser);
+        var authenticatedClient = await _systemInternalJwtTokenFactory.AddUserContext(_httpClient, operationalUser, cancellationToken);
         var response = await authenticatedClient.GetStringAsync($"api/v1/users/{operationalUser.Id}/organizationContext", cancellationToken);
 
         var result = JsonConvert.DeserializeObject<Result<UserOrganizationContext>>(response);
@@ -61,8 +63,7 @@ public sealed class UserOrganizationContextHttpClient
         var operationalUser = _userDetailsProvider.AuthenticatedUser;
         var systemUser = UserData.GetSystemUser(operationalUser.TenantId, operationalUser.Id);
 
-        // TODO: Please Kodi strongly focus here since inconsistency with JwtTokenManager (JwtToken & SecretKey) Authorization service
-        var authenticatedClient = SystemInternalJwtTokenFactory.AddUserContext(_httpClient, systemUser);
+        var authenticatedClient = await _systemInternalJwtTokenFactory.AddUserContext(_httpClient, systemUser, cancellationToken);
         var response = await authenticatedClient.GetStringAsync($"api/v1/organizations/{organizationId}/organizationContext", cancellationToken);
 
         var result = JsonConvert.DeserializeObject<Result<OrganizationContext>>(response);
@@ -79,8 +80,7 @@ public sealed class UserOrganizationContextHttpClient
         var operationalUser = _userDetailsProvider.AuthenticatedUser;
         var systemUser = UserData.GetSystemUser(operationalUser.TenantId, operationalUser.Id);
 
-        // TODO: Please Kodi strongly focus here since inconsistency with JwtTokenManager (JwtToken & SecretKey) Authorization service
-        var authenticatedClient = SystemInternalJwtTokenFactory.AddUserContext(_httpClient, systemUser);
+        var authenticatedClient = await _systemInternalJwtTokenFactory.AddUserContext(_httpClient, systemUser, cancellationToken);
         var response = await authenticatedClient.GetStringAsync($"api/v1/organizations?organizationContextPath={organizationContextPath}", cancellationToken);
 
         var result = JsonConvert.DeserializeObject<Result<OrganizationContext>>(response);

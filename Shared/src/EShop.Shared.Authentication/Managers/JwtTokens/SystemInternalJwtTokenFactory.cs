@@ -1,39 +1,33 @@
-﻿using Microsoft.IdentityModel.JsonWebTokens;
-using Microsoft.IdentityModel.Tokens;
+﻿using EShop.Shared.Authentication.Abstractions;
 using System.Net.Http.Headers;
-using System.Security.Cryptography;
 
 namespace EShop.Shared.Authentication.Managers.JwtTokens;
 
-public static class SystemInternalJwtTokenFactory
+public sealed class SystemInternalJwtTokenFactory : ISystemInternalJwtTokenFactory
 {
-    public static string Issuer { get; } = "SYSTEM-INTERNAL";
-    public static string Audience { get; } = "SYSTEM-INTERNAL";
-    public static SecurityKey SecurityKey { get; }
-    public static SigningCredentials SigningCredentials { get; }
+    private readonly IJwtTokenManager jwtTokenManager;
+    private readonly IUserTokenCachingService userTokenCachingService;
 
-    private static readonly JsonWebTokenHandler _tokenHandler = new JsonWebTokenHandler();
-    private static readonly RandomNumberGenerator _randomNumberGenerator = RandomNumberGenerator.Create();
-    private static readonly byte[] _securityKey = new byte[32];
-
-    static SystemInternalJwtTokenFactory()
+    public SystemInternalJwtTokenFactory(IJwtTokenManager jwtTokenManager, IUserTokenCachingService userTokenCachingService)
     {
-        _randomNumberGenerator.GetBytes(_securityKey);
-        SecurityKey = new SymmetricSecurityKey(_securityKey) { KeyId = Guid.NewGuid().ToString() };
-        SigningCredentials = new SigningCredentials(SecurityKey, SecurityAlgorithms.HmacSha256);
+        this.jwtTokenManager = jwtTokenManager;
+        this.userTokenCachingService = userTokenCachingService;
     }
 
-    public static HttpClient AddUserContext(HttpClient client, UserData user)
+    public async Task<HttpClient> AddUserContext(HttpClient client, UserData operationalUser, CancellationToken cancellationToken = default)
     {
-        var authenticationHeaderValue = GenerateAuthorizationHeaderValue(user);
-        client.DefaultRequestHeaders.Authorization = authenticationHeaderValue;
-        if (user.UserType is UserTypes.AppClientWithIndividualUsers or UserTypes.AppClientWithoutIndividualUsers)
+        var accessToken = await GenerateAuthorizationHeaderValue(operationalUser);
+        client.DefaultRequestHeaders.Authorization = accessToken;
+
+        if (operationalUser.UserType is UserTypes.AppClientWithIndividualUsers or UserTypes.AppClientWithoutIndividualUsers)
         {
-            AddDefaultCustomHeadersForUser(client, user);
+            AddDefaultCustomHeadersForUser(client, operationalUser);
         }
+
         return client;
     }
-    public static AuthenticationHeaderValue GenerateAuthorizationHeaderValue(UserData user)
+
+    private async Task<AuthenticationHeaderValue> GenerateAuthorizationHeaderValue(UserData user)
     {
         var tenantGroups = new List<string> { user.TenantId };
         if (user.IsSupportUser && user.TenantId != UserData.EShopSupportGroup)
@@ -41,38 +35,27 @@ public static class SystemInternalJwtTokenFactory
             tenantGroups.Add(UserData.EShopSupportGroup);
         }
 
-        var tokenForSpecificUser = GenerateToken(user.Id, tenantGroups, user.Username);
+        var tokenForSpecificUser = await GenerateToken(user, tenantGroups);
         return new AuthenticationHeaderValue("Bearer", tokenForSpecificUser);
     }
 
-    public static string GenerateToken(string userId, List<string> tenantGroups, string username, IDictionary<string, object>? additionalClaims = null, int expireInDays = 1)
+    private async Task<string> GenerateToken(UserData user, List<string> tenantGroups, IDictionary<string, object>? additionalClaims = null)
     {
-        var claims = new Dictionary<string, object>
+        var accessToken = await jwtTokenManager.GenerateAccessToken(user.Id, user.TenantId, additionalClaims, CancellationToken.None);
+        var refreshToken = jwtTokenManager.GenerateRefreshToken();
+
+        var authenticationValue = new TokenAuthentication
         {
-            ["jti"] = Guid.NewGuid().ToString(),
-            [EShopClaimTypes.UserId] = userId,
-            [EShopClaimTypes.Username] = username,
-            [EShopClaimTypes.TenantGroups] = tenantGroups
+            UserId = user.Id,
+            UserName = user.Username,
+            AccessToken = accessToken,
+            RefreshToken = refreshToken,
+            RefreshTokenExpiryTime = DateTimeOffset.UtcNow.AddDays(7)
         };
 
-        if (additionalClaims != null)
-        {
-            foreach (var additionalClaim in additionalClaims)
-            {
-                claims.Add(additionalClaim.Key, additionalClaim.Value.ToString() ?? string.Empty);
-            }
-        }
+        await userTokenCachingService.AddAsync(user.Id, authenticationValue, CancellationToken.None);
 
-        var tokenDescriptor = new SecurityTokenDescriptor
-        {
-            Issuer = Issuer,
-            Audience = Audience,
-            Claims = claims,
-            Expires = DateTime.UtcNow.AddDays(expireInDays),
-            SigningCredentials = SigningCredentials
-        };
-
-        return _tokenHandler.CreateToken(tokenDescriptor);
+        return accessToken;
     }
 
     private static void AddDefaultCustomHeadersForUser(HttpClient client, UserData user)

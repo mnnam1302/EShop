@@ -1,22 +1,27 @@
 ﻿using EShop.Shared.Authentication;
 using EShop.Shared.Authentication.Abstractions;
-using EShop.Shared.Authentication.Managers.JwtTokens;
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.Contracts.Services.Tenancy.Features;
 using Newtonsoft.Json;
 
 namespace EShop.Shared.Scoping.ResourceAccessControl.Providers.TenantFeaturesProvider;
 
-public class TenantFeaturesHttpClient
+public sealed class TenantFeaturesHttpClient
 {
     private const string tenantFeaturesEndpoint = "api/v1/features";
+
     private readonly IUserDetailsProvider _userDetailsProvider;
     private readonly HttpClient _httpClient;
+    private readonly ISystemInternalJwtTokenFactory _systemInternalJwtTokenFactory;
 
-    public TenantFeaturesHttpClient(IUserDetailsProvider userDetailsProvider, HttpClient httpClient)
+    public TenantFeaturesHttpClient(
+        IUserDetailsProvider userDetailsProvider,
+        HttpClient httpClient,
+        ISystemInternalJwtTokenFactory systemInternalJwtTokenFactory)
     {
         _userDetailsProvider = userDetailsProvider;
         _httpClient = httpClient;
+        _systemInternalJwtTokenFactory = systemInternalJwtTokenFactory;
     }
 
     public async Task<string[]> GetTenantFeaturesAsync(string tenantId)
@@ -26,7 +31,7 @@ public class TenantFeaturesHttpClient
             return Array.Empty<string>();
         }
 
-        var authenticatedClient = SystemInternalJwtTokenFactory.AddUserContext(_httpClient, UserData.GetSystemUser(tenantId));
+        var authenticatedClient = await _systemInternalJwtTokenFactory.AddUserContext(_httpClient, UserData.GetSystemUser(tenantId));
 
         var response = await authenticatedClient.GetStringAsync($"{tenantFeaturesEndpoint}");
 
