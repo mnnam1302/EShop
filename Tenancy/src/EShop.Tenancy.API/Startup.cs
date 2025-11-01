@@ -1,7 +1,7 @@
 ﻿using Carter;
 using EShop.Shared.JsonApi.Extensions;
 using EShop.Shared.JsonApi.Middlewares;
-using EShop.Tenancy.API.DependencyInjections.Extensions;
+using EShop.Tenancy.API.Boostrapping;
 
 namespace EShop.Tenancy.API;
 
@@ -18,9 +18,7 @@ public class Startup
 
     public virtual void ConfigureServices(IServiceCollection services)
     {
-        services
-            .AddShared(Configuration, Environment)
-            .AddBoostrapping(Configuration, Environment);
+        services.AddBoostrapping(Configuration, Environment);
     }
 
     internal void Configure(WebApplication app, IHostApplicationLifetime applicationLifetime, ILoggerFactory loggerFactory)

@@ -68,7 +68,7 @@ public static class ServiceCollectionExtensions
     {
         services
             .AddTenantKeyProvider()
-            .AddRsaKeyCachingServices();
+            .AddTenantKeyCachingServices();
 
         return services;
     }

@@ -1,10 +1,9 @@
-﻿using EShop.Tenancy.Tests.Setups;
-using Reqnroll;
+﻿using Reqnroll;
 
 namespace EShop.Tenancy.Tests.Shared;
 
 [Binding]
-internal class Steps(ApiContext apiContext)
+internal class Steps
 {
 
 }

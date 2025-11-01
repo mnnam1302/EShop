@@ -1,10 +1,9 @@
 ﻿using Asp.Versioning.ApiExplorer;
-using EShop.Tenancy.API.DependencyInjections.Options;
 using Microsoft.Extensions.Options;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using Swashbuckle.AspNetCore.SwaggerUI;
 
-namespace EShop.Tenancy.API.DependencyInjections.Extensions;
+namespace EShop.Tenancy.API.Boostrapping;
 
 public static class SwaggerExtensions
 {

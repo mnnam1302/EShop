@@ -9,11 +9,6 @@ namespace EShop.Shared.Authentication.DependencyInjections;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddTenantKeyProvider(this IServiceCollection services)
-    {
-        return services.AddScoped<ITenantKeyProvider, TenantKeyProvider>();
-    }
-
     public static IServiceCollection AddTenantAuthentication(this IServiceCollection services)
     {
         services.AddOptions<JwtOptions>()
@@ -21,24 +16,22 @@ public static class ServiceCollectionExtensions
             .ValidateDataAnnotations()
             .ValidateOnStart();
 
-        services.AddScoped<ISystemInternalJwtTokenFactory, SystemInternalJwtTokenFactory>();
+        services.AddScoped<ITenantKeyProvider, TenantKeyProvider>();
         services.AddScoped<IJwtTokenManager, JwtTokenManager>();
+        services.AddScoped<ISystemInternalJwtTokenFactory, SystemInternalJwtTokenFactory>();
         services.AddAuthenticationHandler();
 
         return services;
     }
 
-
     public static IServiceCollection AddAuthenticationHandler(this IServiceCollection services)
     {
-        services
-            .AddAuthentication(options =>
-            {
-                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-            })
-            .AddScheme<JwtBearerOptions, MultiTenantJwtBearerHandler>(JwtBearerDefaults.AuthenticationScheme, options => { });
+        services.AddAuthentication(options =>
+        {
+            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+        }).AddScheme<JwtBearerOptions, MultiTenantJwtBearerHandler>(JwtBearerDefaults.AuthenticationScheme, options => { });
 
         services.AddAuthorization();
         services.AddAuthorizationBuilder()

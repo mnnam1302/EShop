@@ -1,4 +1,5 @@
-﻿using EShop.Shared.Contracts.Services.Tenancy.Features;
+﻿using EShop.Shared.Cache.DependencyInejctions.Extensions;
+using EShop.Shared.Contracts.Services.Tenancy.Features;
 using EShop.Shared.EventBus.DependencyInjections.Extensions;
 using EShop.Shared.EventBus.DependencyInjections.Options;
 using EShop.Shared.EventBus.JsonConverters;
@@ -22,10 +23,13 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddTenancyInfrastructure(
         this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment, string serviceName = "tenancy")
     {
-        services.AddMassTransitRabbitMQ(configuration, environment, serviceName);
-        services.AddEventBusGateway();
+        services
+            .AddMassTransitRabbitMQ(configuration, environment, serviceName)
+            .AddEventBusGateway()
+            .AddRegistrationFeatures();
 
-        services.AddRegistrationFeatures();
+        services.AddRedisHealthCheck(configuration)
+            .AddRedisCacheInfrastructure(configuration);
 
         services.AddSystemInitialization();
 
@@ -33,10 +37,7 @@ public static class ServiceCollectionExtensions
     }
 
     private static IServiceCollection AddMassTransitRabbitMQ(
-        this IServiceCollection services,
-        IConfiguration configuration,
-        IWebHostEnvironment environment,
-        string serviceName)
+        this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment, string serviceName)
     {
         var massTransitConfiguration = new MasstransitConfiguration();
         configuration.GetSection(nameof(MasstransitConfiguration)).Bind(massTransitConfiguration);
@@ -93,7 +94,7 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    public static void ConfigureRecieveEndpoints(
+    private static void ConfigureRecieveEndpoints(
         this IRabbitMqBusFactoryConfigurator bus,
         IRegistrationContext context,
         IWebHostEnvironment environment,
@@ -110,9 +111,10 @@ public static class ServiceCollectionExtensions
             serviceName);
     }
 
-    public static void AddEventBusGateway(this IServiceCollection services)
+    public static IServiceCollection AddEventBusGateway(this IServiceCollection services)
     {
         services.AddScoped<IEventBusGateway, EventBusGateway>();
+        return services;
     }
 
     private static void AddRegistrationFeatures(this IServiceCollection services)

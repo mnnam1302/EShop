@@ -4,11 +4,12 @@ using EShop.Shared.Cache.DependencyInejctions.Extensions;
 using EShop.Shared.Contracts.Services.Tenancy.Tenants;
 using EShop.Shared.DomainTools.DependencyInjections;
 using EShop.Shared.EventBus.JsonConverters;
+using EShop.Shared.JsonApi.Extensions;
 using EShop.Shared.Scoping.ResourceAccessControl;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers.TenantFeaturesProvider;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserPermissionProvider;
 using EShop.Tenancy.API;
-using EShop.Tenancy.API.DependencyInjections.Extensions;
+using EShop.Tenancy.API.Boostrapping;
 using EShop.Tenancy.Application.DependencyInjections;
 using EShop.Tenancy.Application.Services;
 using EShop.Tenancy.Infrastructure.DependencyInjections;
@@ -26,24 +27,20 @@ namespace EShop.Tenancy.Tests.Setups;
 
 public static class ServiceCollectionExtensions
 {
-    public static void AddTestShared(this IServiceCollection services, PostgreSqlTestDatabase testDatabase)
+    public static IServiceCollection AddTestBoostrapping(this IServiceCollection services, PostgreSqlTestDatabase testDatabase)
     {
-        services.AddResiliencePolicy();
-        services.AddMemoryCacheInfrastructure();
-        services.AddPostgreSqlTestDbContext<TenancyDbContext>(testDatabase);
-    }
+        services.AddTestTenancyAPI()
+            .AddTestTenancyApplication()
+            .AddTestTenancyPersistence(testDatabase)
+            .AddTestTenancyInfrastructure();
 
-    public static void AddTestBoostrapping(this IServiceCollection services)
-    {
-        services.AddTestTenancyAPI();
-        services.AddTestTenancyApplication();
-        services.AddTenancyPersistence();
-        services.AddTestTenancyInfrastructure();
+        return services;
     }
 
     private static IServiceCollection AddTestTenancyAPI(this IServiceCollection services)
     {
         services.AddCors();
+        services.AddResiliencePolicy();
         services.AddTransient<DbInitializer>();
 
         services.AddControllers().AddApplicationPart(Presentation.AssemblyReference.Assembly);
@@ -63,6 +60,7 @@ public static class ServiceCollectionExtensions
                 options.SubstituteApiVersionInUrl = true;
             });
 
+
         services.AddTestAuthentication();
 
         return services;
@@ -70,17 +68,13 @@ public static class ServiceCollectionExtensions
 
     private static void AddTestAuthentication(this IServiceCollection services)
     {
-        services.AddTenantKeyProvider();
-        services.AddRsaKeyCachingServices();
-
         services.AddOptions<JwtOptions>()
             .BindConfiguration(nameof(JwtOptions));
 
-        services.AddTenantAuthentication();
-        services.AddUserTokensCachingServices();
+        services.AddTenantAuthenticationProvider();
     }
 
-    private static void AddTestTenancyApplication(this IServiceCollection services)
+    private static IServiceCollection AddTestTenancyApplication(this IServiceCollection services)
     {
         services.AddMediatR();
 
@@ -91,11 +85,30 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ITenantFeaturesProvider, TestTenantFeatureProvider>();
         services.AddSingleton<ITenantFeaturesCachingService, TestTenantFeaturesCachingService>();
         services.AddScoped<IFeatureService, FeatureService>();
+
+        return services;
     }
 
-    private static void AddTestTenancyInfrastructure(this IServiceCollection services)
+    private static IServiceCollection AddTestTenancyPersistence(this IServiceCollection services, PostgreSqlTestDatabase testDatabase)
     {
-        services.AddEventBusGateway();
+        services.AddPostgreSqlTestDbContext<TenancyDbContext>(testDatabase);
+        services.AddPersistenceServices();
+        return services;
+    }
+
+    private static IServiceCollection AddTestTenancyInfrastructure(this IServiceCollection services)
+    {
+        services
+            .AddMassTransitMemory()
+            .AddEventBusGateway();
+
+        services.AddMemoryCacheInfrastructure();
+
+        return services;
+    }
+
+    private static IServiceCollection AddMassTransitMemory(this IServiceCollection services)
+    {
         services.AddMassTransit(cfg =>
         {
             cfg.SetKebabCaseEndpointNameFormatter();
@@ -124,5 +137,7 @@ public static class ServiceCollectionExtensions
                 });
             });
         });
+
+        return services;
     }
 }

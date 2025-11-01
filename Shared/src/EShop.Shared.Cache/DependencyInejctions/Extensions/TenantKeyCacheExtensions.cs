@@ -7,9 +7,9 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace EShop.Shared.Cache.DependencyInejctions.Extensions;
 
-public static class RsaKeyCacheExtensions
+public static class TenantKeyCacheExtensions
 {
-    public static IServiceCollection AddRsaKeyCachingServices(this IServiceCollection services)
+    public static IServiceCollection AddTenantKeyCachingServices(this IServiceCollection services)
     {
         services.AddOptions<TenantKeyOptions>()
             .BindConfiguration(nameof(TenantKeyOptions))

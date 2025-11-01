@@ -1,6 +1,7 @@
 ﻿using EShop.Shared.Cache.Providers;
 using EShop.Shared.Cache.Services;
 using EShop.Shared.JsonApi.Behaviors;
+using EShop.Shared.JsonApi.Extensions;
 using EShop.Shared.Scoping.ResourceAccessControl;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers.TenantFeaturesProvider;
 using EShop.Tenancy.Application.DependencyInjections;
@@ -16,6 +17,9 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddTenancyApplication(this IServiceCollection services)
     {
         services.AddMediatR();
+
+        services.AddUserPermissionsProvider();
+        services.AddUserOrganizationContextProvider();
         services.AddTenantFeaturesProvider();
 
         return services;
@@ -31,7 +35,7 @@ public static class ServiceCollectionExtensions
                 .AddValidatorsFromAssembly(Shared.Contracts.AssemblyReference.Assembly, includeInternalTypes: true);
     }
 
-    private static void AddTenantFeaturesProvider(this IServiceCollection services)
+    public static void AddTenantFeaturesProvider(this IServiceCollection services)
     {
         services.AddScoped<IFeatureValidator, CurrentUserFeaturesValidator>();
         services.AddScoped<ITenantFeaturesProvider, OwnerTenantFeaturesProvider>();

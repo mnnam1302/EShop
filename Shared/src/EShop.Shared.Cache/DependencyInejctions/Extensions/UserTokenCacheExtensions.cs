@@ -12,7 +12,6 @@ public static class UserTokenCacheExtensions
     {
         services.AddScoped<IRedisCachingProvider<TokenAuthentication>, RedisCachingProvider<TokenAuthentication>>();
         services.AddScoped<IUserTokenCachingService, UserTokenRedisCachingService>();
-
         return services;
     }
 }

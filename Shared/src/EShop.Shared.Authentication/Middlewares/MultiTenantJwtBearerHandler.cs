@@ -52,7 +52,7 @@ internal sealed class MultiTenantJwtBearerHandler : JwtBearerHandler
     {
         if (!Request.Headers.ContainsKey("Authorization"))
         {
-            return Result.Failure<string>(new("Authentication.MissingToken", "The Authorization header is missing."));
+            return Result.Failure<string>(new("Authentication.MissingAuthorization", "The Authorization header is missing."));
         }
 
         var token = Request.Headers.Authorization.ToString();
@@ -60,7 +60,7 @@ internal sealed class MultiTenantJwtBearerHandler : JwtBearerHandler
 
         if (string.IsNullOrEmpty(santitizedToken))
         {
-            return Result.Failure<string>(new("Authentication.InvalidToken", "The provided token is invalid."));
+            return Result.Failure<string>(new("Authentication.InvalidToken", "The provided token must not null or empty."));
         }
 
         return Result.Success(santitizedToken);
@@ -73,19 +73,14 @@ internal sealed class MultiTenantJwtBearerHandler : JwtBearerHandler
 
         if (string.IsNullOrEmpty(userId))
         {
-            return Result.Failure(new("Authentication.InvalidToken", "The provided token is invalid."));
+            return Result.Failure<string>(new("Authentication.InvalidToken", "The provided token must not null or empty."));
         }
 
         var cachedToken = await userTokenCaching.GetAsync(userId, Context.RequestAborted);
 
         if (cachedToken?.AccessToken != accessToken)
         {
-            return Result.Failure(new("Authentication.InvalidToken", "The provided token is invalid."));
-        }
-
-        if (cachedToken.RefreshTokenExpiryTime <= DateTimeOffset.UtcNow)
-        {
-            return Result.Failure(new("Authentication.TokenExpired", "The provided token has expired."));
+            return Result.Failure(new("Authentication.InvalidToken", "The provided token does not match the cached token or no cached token exists."));
         }
 
         return Result.Success();

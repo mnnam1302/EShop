@@ -1,5 +1,5 @@
 ﻿using Carter;
-using EShop.Tenancy.API.DependencyInjections.Extensions;
+using EShop.Tenancy.API.Boostrapping;
 using EShop.Testing.JsonApiApplication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -22,8 +22,7 @@ public sealed class TestStartup : API.Startup
 
     public override void ConfigureServices(IServiceCollection services)
     {
-        services.AddTestShared(testDatabase);
-        services.AddTestBoostrapping();
+        services.AddTestBoostrapping(testDatabase);
     }
 
     public void Configure(IApplicationBuilder app, IHostApplicationLifetime applicationLifetime, ILoggerFactory loggerFactory)
@@ -35,10 +34,10 @@ public sealed class TestStartup : API.Startup
         }
 
         app.UseRouting();
-        
+
         app.UseAuthentication();
         app.UseAuthorization();
-        
+
         app.UseEndpoints(endpoints =>
         {
             endpoints.MapCarter();

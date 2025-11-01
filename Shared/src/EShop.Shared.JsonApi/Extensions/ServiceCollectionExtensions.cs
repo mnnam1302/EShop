@@ -11,7 +11,7 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddMultiTenantScoping(this IServiceCollection services)
     {
         services.AddOptions<DbResourceAccessControlOptions>()
-                .BindConfiguration(DbResourceAccessControlOptions.SectionName);
+            .BindConfiguration(DbResourceAccessControlOptions.SectionName);
 
         services.AddHttpContextAccessor();
         services.AddScoped<IUserDetailsProvider, HttpRequestUserDataProvider>();

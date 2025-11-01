@@ -1,4 +1,4 @@
-﻿Feature: TenancyCreation
+﻿Feature: TenantCreation
 	As a System user 
 	I want to configure some settings at the tenant level
 	So that users with permission can view and edit tenant settings

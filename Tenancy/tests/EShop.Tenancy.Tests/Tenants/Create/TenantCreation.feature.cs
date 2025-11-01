@@ -17,14 +17,14 @@ namespace EShop.Tenancy.Tests.Tenants.Create
     
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Reqnroll", "3.0.0.0")]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    public partial class TenancyCreationFeature : object, global::Xunit.IClassFixture<TenancyCreationFeature.FixtureData>, global::Xunit.IAsyncLifetime
+    public partial class TenantCreationFeature : object, global::Xunit.IClassFixture<TenantCreationFeature.FixtureData>, global::Xunit.IAsyncLifetime
     {
         
         private global::Reqnroll.ITestRunner testRunner;
         
         private static string[] featureTags = ((string[])(null));
         
-        private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new global::System.Globalization.CultureInfo("en-US"), "Tenants/Create", "TenancyCreation", "\tAs a System user \r\n\tI want to configure some settings at the tenant level\r\n\tSo t" +
+        private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new global::System.Globalization.CultureInfo("en-US"), "Tenants/Create", "TenantCreation", "\tAs a System user \r\n\tI want to configure some settings at the tenant level\r\n\tSo t" +
                 "hat users with permission can view and edit tenant settings", global::Reqnroll.ProgrammingLanguage.CSharp, featureTags, InitializeCucumberMessages());
         
         private global::Xunit.Abstractions.ITestOutputHelper _testOutputHelper;
@@ -32,7 +32,7 @@ namespace EShop.Tenancy.Tests.Tenants.Create
 #line 1 "TenantCreation.feature"
 #line hidden
         
-        public TenancyCreationFeature(TenancyCreationFeature.FixtureData fixtureData, global::Xunit.Abstractions.ITestOutputHelper testOutputHelper)
+        public TenantCreationFeature(TenantCreationFeature.FixtureData fixtureData, global::Xunit.Abstractions.ITestOutputHelper testOutputHelper)
         {
             this._testOutputHelper = testOutputHelper;
         }
@@ -153,7 +153,7 @@ namespace EShop.Tenancy.Tests.Tenants.Create
         }
         
         [global::Xunit.SkippableFactAttribute(DisplayName="System user register a new tenant successfully")]
-        [global::Xunit.TraitAttribute("FeatureTitle", "TenancyCreation")]
+        [global::Xunit.TraitAttribute("FeatureTitle", "TenantCreation")]
         [global::Xunit.TraitAttribute("Description", "System user register a new tenant successfully")]
         public async global::System.Threading.Tasks.Task SystemUserRegisterANewTenantSuccessfully()
         {
@@ -226,12 +226,12 @@ await this.FeatureBackgroundAsync();
             
             async global::System.Threading.Tasks.Task global::Xunit.IAsyncLifetime.InitializeAsync()
             {
-                await TenancyCreationFeature.FeatureSetupAsync();
+                await TenantCreationFeature.FeatureSetupAsync();
             }
             
             async global::System.Threading.Tasks.Task global::Xunit.IAsyncLifetime.DisposeAsync()
             {
-                await TenancyCreationFeature.FeatureTearDownAsync();
+                await TenantCreationFeature.FeatureTearDownAsync();
             }
         }
     }
