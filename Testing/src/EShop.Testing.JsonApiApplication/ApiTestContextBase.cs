@@ -75,7 +75,7 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
 
     private UserData defaultUser = new("TEST_ADMIN", "TEST_ADMIN", DefaultTenantId, isSupportUser: true);
 
-    private string LoggedInUser;
+    private string LoggedInUser = string.Empty;
 
     protected ApiTestContextBase(Func<WebHostBuilderContext, TStartup> startupFactory)
     {
