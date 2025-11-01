@@ -4,16 +4,15 @@ using EShop.Shared.Cache.Providers;
 using EShop.Shared.Cache.Services;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace EShop.Shared.Cache.DependencyInejctions.Extensions
-{
-    public static class UserTokenCacheExtensions
-    {
-        public static IServiceCollection AddUserTokensProvider(this IServiceCollection services)
-        {
-            services.AddTransient<IRedisCachingProvider<TokenAuthentication>, RedisCachingProvider<TokenAuthentication>>();
-            services.AddTransient<IUserTokenCachingService, UserTokenRedisCachingService>();
+namespace EShop.Shared.Cache.DependencyInejctions.Extensions;
 
-            return services;
-        }
+public static class UserTokenCacheExtensions
+{
+    public static IServiceCollection AddUserTokensCachingServices(this IServiceCollection services)
+    {
+        services.AddTransient<IRedisCachingProvider<TokenAuthentication>, RedisCachingProvider<TokenAuthentication>>();
+        services.AddTransient<IUserTokenCachingService, UserTokenRedisCachingService>();
+
+        return services;
     }
 }

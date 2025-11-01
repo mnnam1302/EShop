@@ -16,7 +16,7 @@ public static class ServiceCollectionExtensions
             .AddRedisHealthCheck(configuration)
             .AddRedisCacheInfrastructure(configuration);
 
-        services.AddUserTokensProvider();
+        services.AddUserTokensCachingServices();
         services.AddRsaKeyProvider();
 
         return services;

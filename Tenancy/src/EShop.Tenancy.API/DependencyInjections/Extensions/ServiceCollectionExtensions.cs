@@ -72,13 +72,12 @@ public static class ServiceCollectionExtensions
 
     public static void AddAuthentication(this IServiceCollection services)
     {
-        services.AddRsaKeyServices();
-        services.AddJwtTokenAuthentication();
-        services.AddUserTokensProvider();
-    }
-    public static void AddRsaKeyServices(this IServiceCollection services)
-    {
-        services.AddMultiTenantKeyManager();
-        services.AddRsaKeyCachingProvider();
+        // tenant key generator and caching provider
+        services.AddTenantKeyProvider();
+        services.AddRsaKeyCachingServices();
+
+        // user tokens caching provider and tenant authentication
+        services.AddTenantAuthentication();
+        services.AddUserTokensCachingServices();
     }
 }

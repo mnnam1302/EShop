@@ -10,10 +10,10 @@ namespace EShop.Shared.Authentication.Managers.JwtTokens;
 
 internal sealed class JwtTokenManager : IJwtTokenManager
 {
-    private readonly IRsaKeyManager _rsaKeyManager;
+    private readonly ITenantKeyProvider _rsaKeyManager;
     private readonly JwtOptions _jwtOptions;
 
-    public JwtTokenManager(IRsaKeyManager rsaKeyManager, IOptionsMonitor<JwtOptions> jwtOptions)
+    public JwtTokenManager(ITenantKeyProvider rsaKeyManager, IOptionsMonitor<JwtOptions> jwtOptions)
     {
         _rsaKeyManager = rsaKeyManager;
         _jwtOptions = jwtOptions.CurrentValue;

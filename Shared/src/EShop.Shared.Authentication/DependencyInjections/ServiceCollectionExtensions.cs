@@ -5,45 +5,44 @@ using EShop.Shared.Authentication.Middlewares;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace EShop.Shared.Authentication.DependencyInjections
+namespace EShop.Shared.Authentication.DependencyInjections;
+
+public static class ServiceCollectionExtensions
 {
-    public static class ServiceCollectionExtensions
+    public static IServiceCollection AddTenantKeyProvider(this IServiceCollection services)
     {
-        public static IServiceCollection AddMultiTenantKeyManager(this IServiceCollection services)
-        {
-            return services.AddScoped<IRsaKeyManager, RsaKeyManager>();
-        }
+        return services.AddScoped<ITenantKeyProvider, TenantKeyProvider>();
+    }
 
-        public static IServiceCollection AddJwtTokenAuthentication(this IServiceCollection services)
-        {
-            services.AddOptions<JwtOptions>()
-                .BindConfiguration(nameof(JwtOptions))
-                .ValidateDataAnnotations()
-                .ValidateOnStart();
+    public static IServiceCollection AddTenantAuthentication(this IServiceCollection services)
+    {
+        services.AddOptions<JwtOptions>()
+            .BindConfiguration(nameof(JwtOptions))
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
 
-            services.AddScoped<IJwtTokenManager, JwtTokenManager>();
-            services.AddAuthenticationHandler();
+        services.AddScoped<IJwtTokenManager, JwtTokenManager>();
+        services.AddAuthenticationHandler();
 
-            return services;
-        }
+        return services;
+    }
 
 
-        public static IServiceCollection AddAuthenticationHandler(this IServiceCollection services)
-        {
-            services
-                .AddAuthentication(options =>
-                {
-                    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-                    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-                })
-                .AddScheme<JwtBearerOptions, MultiTenantJwtBearerHandler>(JwtBearerDefaults.AuthenticationScheme, options => { });
+    public static IServiceCollection AddAuthenticationHandler(this IServiceCollection services)
+    {
+        services
+            .AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddScheme<JwtBearerOptions, MultiTenantJwtBearerHandler>(JwtBearerDefaults.AuthenticationScheme, options => { });
 
-            services.AddAuthorization();
-            services.AddAuthorizationBuilder()
-                .AddPolicy("authPolicy", policy => policy.RequireAuthenticatedUser());
+        services.AddAuthorization();
+        services.AddAuthorizationBuilder()
+            .AddPolicy("authPolicy", policy => policy.RequireAuthenticatedUser());
 
-            return services;
-        }
+        return services;
     }
 }

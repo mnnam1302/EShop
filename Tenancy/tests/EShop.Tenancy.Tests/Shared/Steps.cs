@@ -1,4 +1,5 @@
-﻿using EShop.Tenancy.Tests.Setups;
+﻿using EShop.Shared.Authentication;
+using EShop.Tenancy.Tests.Setups;
 using Reqnroll;
 
 namespace EShop.Tenancy.Tests.Shared
@@ -12,14 +13,18 @@ namespace EShop.Tenancy.Tests.Shared
             var permissionIds = dataTable.Rows.Select(row => row["PermissionId"]).ToArray();
 
             apiContext.SetupPermissionsForDefaultAdminUser(permissionIds);
-            //apiContext.SetupOrganizationContextForDefaultAdminUser();
-            //apiContext.AssociateUserToRootOrganization(UserData.SystemUsername);
         }
 
         [Given("all features are available for System User")]
         public void GivenAllFeaturesAreAvailableForSystemUser()
         {
             apiContext.SetupStandardFeaturesForDefaultTenant();
+        }
+
+        [Given("System User has logged in")]
+        public void GivenSystemUserHasLoggedIn()
+        {
+            apiContext.UserLogsIn(UserData.SystemUsername);
         }
     }
 }

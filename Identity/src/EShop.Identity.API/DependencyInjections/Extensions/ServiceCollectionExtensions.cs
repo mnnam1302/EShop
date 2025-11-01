@@ -33,7 +33,7 @@ public static class ServiceCollectionExtensions
             .AddRedisCacheInfrastructure(configuration);
 
         services
-            .AddUserTokensProvider()
+            .AddUserTokensCachingServices()
             .AddTenantFeaturesProvider();
 
         return services;

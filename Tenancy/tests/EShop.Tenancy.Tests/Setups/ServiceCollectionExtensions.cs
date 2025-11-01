@@ -71,14 +71,14 @@ public static class ServiceCollectionExtensions
     private static void AddTestAuthentication(this IServiceCollection services)
     {
         services.AddRsaKeyServices();
-        services.AddJwtTokenAuthentication();
-        services.AddUserTokensProvider();
+        services.AddTenantAuthentication();
+        services.AddUserTokensCachingServices();
     }
 
     private static void AddRsaKeyServices(this IServiceCollection services)
     {
-        services.AddMultiTenantKeyManager();
-        services.AddRsaKeyCachingProvider();
+        services.AddTenantKeyProvider();
+        services.AddRsaKeyCachingServices();
     }
 
     private static void AddTestTenancyApplication(this IServiceCollection services)

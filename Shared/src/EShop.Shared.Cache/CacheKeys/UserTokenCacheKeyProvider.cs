@@ -2,7 +2,7 @@
 
 public static class UserTokenCacheKeyProvider
 {
-    private const string OwnerService = "users";
+    private const string OwnerService = "authorization";
 
     public static string GetCacheKey(string userId)
     {

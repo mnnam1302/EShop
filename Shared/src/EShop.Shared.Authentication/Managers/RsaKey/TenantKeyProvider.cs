@@ -6,29 +6,32 @@ using System.Security.Cryptography;
 
 namespace EShop.Shared.Authentication.Managers.RsaKey;
 
-internal sealed class RsaKeyManager : IRsaKeyManager
+internal sealed class TenantKeyProvider : ITenantKeyProvider
 {
-    private readonly IRsaKeyCachingService _rsaKeyCachingService;
-    private readonly ILogger<RsaKeyManager> _logger;
-    private readonly RsaKeyOptions _keyOptions;
+    private readonly ITenantKeyCachingService _tenantKeyCachingService;
+    private readonly ILogger<TenantKeyProvider> _logger;
+    private readonly TenantKeyOptions _keyOptions;
 
-    public RsaKeyManager(IRsaKeyCachingService rsaKeyCachingService, ILogger<RsaKeyManager> logger, IOptionsMonitor<RsaKeyOptions> rsaKeyOptions)
+    public TenantKeyProvider(
+        ITenantKeyCachingService tenantKeyCachingService,
+        ILogger<TenantKeyProvider> logger,
+        IOptionsMonitor<TenantKeyOptions> rsaKeyOptions)
     {
-        _rsaKeyCachingService = rsaKeyCachingService;
+        _tenantKeyCachingService = tenantKeyCachingService;
         _logger = logger;
         _keyOptions = rsaKeyOptions.CurrentValue;
     }
 
     public async Task<RsaKeyPair> GetOrCreateKeyPairAsync(string tenantId, CancellationToken cancellationToken)
     {
-        var existingKeyPair = await _rsaKeyCachingService.GetAsync(tenantId, cancellationToken);
+        var existingKeyPair = await _tenantKeyCachingService.GetAsync(tenantId, cancellationToken);
         if (existingKeyPair != null)
         {
             return existingKeyPair;
         }
 
         var newKeyPair = CreateRsaKeyPair(tenantId);
-        await _rsaKeyCachingService.AddAsync(tenantId, newKeyPair, cancellationToken);
+        await _tenantKeyCachingService.AddAsync(tenantId, newKeyPair, cancellationToken);
 
         _logger.LogInformation("Generated new RSA key pair for tenant {TenantId} with KeyId {KeyId}", tenantId, newKeyPair.KeyId);
 
@@ -52,7 +55,7 @@ internal sealed class RsaKeyManager : IRsaKeyManager
 
     public async Task<RsaKeyPair> GetKeyPairAsync(string tenantId, CancellationToken cancellationToken)
     {
-        var rsaKeyPair = await _rsaKeyCachingService.GetAsync(tenantId, cancellationToken);
+        var rsaKeyPair = await _tenantKeyCachingService.GetAsync(tenantId, cancellationToken);
         if (rsaKeyPair == null)
         {
             throw new InvalidOperationException($"RSA key pair for tenant {tenantId} is not found.");

@@ -271,11 +271,6 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
 
     public HttpClient GetAuthorizedClient(UserData? user, string acceptHeader = "application/json")
     {
-        return GetAuthorizedClientCore(user, acceptHeader);
-    }
-
-    private HttpClient GetAuthorizedClientCore(UserData? user, string acceptHeader)
-    {
         var client = server.CreateClient();
         client.DefaultRequestHeaders.Accept.Clear();
         client.DefaultRequestHeaders.Accept.ParseAdd(acceptHeader);

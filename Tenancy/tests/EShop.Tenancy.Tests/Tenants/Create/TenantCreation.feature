@@ -8,10 +8,11 @@ Background:
 		| PermissionId               |
 		| Users_ViewSystemSettings   |
 		| Users_ManageSystemSettings |
+	And all features are available for System User
 
 Scenario: System user register a new tenant successfully
-	Given all features are available for System User
-	And user of group 'eshop-support' logged in
+	Given user of group 'eshop-support' logged in
+	And System User has logged in
 	When System user registers a new tenant with following details
 		| Attribute     | Value         |
 		| Id            | test-tenant   |

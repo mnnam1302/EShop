@@ -67,8 +67,8 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddRsaKeyServices(this IServiceCollection services)
     {
         services
-            .AddMultiTenantKeyManager()
-            .AddRsaKeyCachingProvider();
+            .AddTenantKeyProvider()
+            .AddRsaKeyCachingServices();
 
         return services;
     }
@@ -76,8 +76,8 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddAuthentication(this IServiceCollection services)
     {
         services
-            .AddJwtTokenAuthentication()
-            .AddUserTokensProvider();
+            .AddTenantAuthentication()
+            .AddUserTokensCachingServices();
 
         return services;
     }
