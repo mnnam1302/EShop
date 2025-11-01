@@ -12,7 +12,6 @@
   <ItemGroup>
     <PackageReference Include="coverlet.collector" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
-    <PackageReference Include="Reqnroll.Tools.MsBuild.Generation" />
     <PackageReference Include="Reqnroll.xUnit" />
     <PackageReference Include="Reqnroll.Tools.MsBuild.Generation" />
     <PackageReference Include="xunit" />
@@ -22,10 +21,6 @@
   <ItemGroup>
     <ProjectReference Include="..\..\..\Testing\src\EShop.Testing.JsonApiApplication\EShop.Testing.JsonApiApplication.csproj" />
     <ProjectReference Include="..\..\src\EShop.Tenancy.API\EShop.Tenancy.API.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Using Include="Xunit" />
   </ItemGroup>
 
 </Project>
