@@ -20,7 +20,7 @@ public interface IFeatureService
     Task DeleteFeatureAsync(Feature feature, CancellationToken cancellationToken);
 }
 
-public class FeatureService : IFeatureService
+public sealed class FeatureService : IFeatureService
 {
     private readonly IFeatureRepository _featureRepository;
     private readonly ITenantRepository _tenantRepository;

@@ -7,13 +7,10 @@ namespace EShop.Tenancy.Persistence.DependencyInjections;
 
 public static class ServiceCollectionExtension
 {
-    public static IServiceCollection AddTenancyPersistence(this IServiceCollection services)
+    public static void AddTenancyPersistence(this IServiceCollection services)
     {
         services.AddScoped<ITenantRepository, TenantRepository>();
         services.AddScoped<IFeatureRepository, FeatureRepository>();
-
         services.AddScoped<IUnitOfWork, EFUnitOfWork<TenancyDbContext>>();
-
-        return services;
     }
 }

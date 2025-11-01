@@ -28,7 +28,7 @@ namespace EShop.Shared.Authentication.Middlewares
 
         protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
         {
-            var tokenExtractionResult = GetTokenMetadata();
+            var tokenExtractionResult = GetAccessTokenMetadata();
             if (tokenExtractionResult.IsFailure)
             {
                 return AuthenticateResult.Fail(tokenExtractionResult.Error.Message);
@@ -48,7 +48,7 @@ namespace EShop.Shared.Authentication.Middlewares
             return AuthenticateResult.Success(ticket);
         }
 
-        private Result<string> GetTokenMetadata()
+        private Result<string> GetAccessTokenMetadata()
         {
             if (!Request.Headers.ContainsKey("Authorization"))
             {

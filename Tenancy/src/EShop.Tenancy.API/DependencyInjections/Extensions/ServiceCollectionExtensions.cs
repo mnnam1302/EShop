@@ -25,7 +25,7 @@ public static class ServiceCollectionExtensions
             .AddDbContextWithScoping<TenancyDbContext>(configuration);
 
         services.AddRedisHealthCheck(configuration)
-            .AddRedisInfrastructure(configuration);
+            .AddRedisCacheInfrastructure(configuration);
 
         services.AddUserPermissionsProvider();
         services.AddUserOrganizationContextProvider();

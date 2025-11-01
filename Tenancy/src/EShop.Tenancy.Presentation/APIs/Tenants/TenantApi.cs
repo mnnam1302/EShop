@@ -23,10 +23,10 @@ public sealed class TenantApi : ICarterModule
             .HasApiVersion(1)
             .RequireAuthorization();
 
-        group.MapPost("/", CreateTenantV1Async)
+        group.MapPost("", CreateTenantV1Async)
             .RequireSystemUserFilter();
 
-        group.MapGet("/{tenantId}", GetTenantDetailsAsync)
+        group.MapGet("{tenantId}", GetTenantDetailsAsync)
             .RequireSystemUserFilter();
     }
 
@@ -45,7 +45,7 @@ public sealed class TenantApi : ICarterModule
         return Results.Created("", result);
     }
 
-    private async Task<IResult> GetTenantDetailsAsync(
+    private static async Task<IResult> GetTenantDetailsAsync(
         [FromRoute] string tenantId,
         [FromServices] ISender sender,
         CancellationToken cancellationToken)

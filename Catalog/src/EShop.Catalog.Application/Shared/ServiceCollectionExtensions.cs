@@ -20,7 +20,7 @@ public static class ServiceCollectionExtensions
 
         services
             .AddRedisHealthCheck(configuration)
-            .AddRedisInfrastructure(configuration);
+            .AddRedisCacheInfrastructure(configuration);
 
         services
             .AddUserPermissionsProvider()

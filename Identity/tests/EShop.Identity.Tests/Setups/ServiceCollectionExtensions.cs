@@ -42,7 +42,7 @@ internal static class ServiceCollectionExtensions
         services.AddPostgreSqlTestDbContext<UsersDbContext>(testDatabase);
         services.AddMultiTenantScoping();
 
-        services.AddMemoryInfrastructure();
+        services.AddMemoryCacheInfrastructure();
         return services;
     }
 

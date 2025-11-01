@@ -26,7 +26,7 @@ public sealed class TestStartup : API.Startup
         services.AddTestBoostrapping();
     }
 
-    public override void Configure(WebApplication app, IHostApplicationLifetime applicationLifetime, ILoggerFactory loggerFactory)
+    public void Configure(IApplicationBuilder app, IHostApplicationLifetime applicationLifetime, ILoggerFactory loggerFactory)
     {
         if (Environment.IsDevelopment())
         {
@@ -35,6 +35,13 @@ public sealed class TestStartup : API.Startup
         }
 
         app.UseRouting();
-        app.MapCarter();
+        
+        app.UseAuthentication();
+        app.UseAuthorization();
+        
+        app.UseEndpoints(endpoints =>
+        {
+            endpoints.MapCarter();
+        });
     }
 }

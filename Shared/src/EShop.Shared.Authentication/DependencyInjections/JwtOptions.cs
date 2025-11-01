@@ -9,9 +9,9 @@ namespace EShop.Shared.Authentication.DependencyInjections
         public string Audience { get; init; } = string.Empty;
 
         [Range(1, 60)]
-        public int AccessTokenExpiryMinutes { get; init; }
+        public int AccessTokenExpiryMinutes { get; init; } = 5;
 
         [Range(1, 12)]
-        public int RefreshTokenExpiryHours { get; init; }
+        public int RefreshTokenExpiryHours { get; init; } = 1;
     }
 }

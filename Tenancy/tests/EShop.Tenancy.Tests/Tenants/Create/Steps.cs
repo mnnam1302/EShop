@@ -16,7 +16,6 @@ namespace EShop.Tenancy.Tests.Tenancy.Create
         public async Task WhenSystemUserRegistersANewTenantWithFollowingDetails(DataTable dataTable)
         {
             var request = dataTable.CreateInstance<Command.CreateTenantCommand>();
-
             await stepContext.CreateTenantAsync(request);
         }
 

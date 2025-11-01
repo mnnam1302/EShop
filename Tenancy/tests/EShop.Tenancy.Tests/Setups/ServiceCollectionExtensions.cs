@@ -1,7 +1,7 @@
 ﻿using Carter;
+using EShop.Shared.Authentication.DependencyInjections;
 using EShop.Shared.Cache.DependencyInejctions.Extensions;
 using EShop.Shared.Contracts.Services.Tenancy.Tenants;
-using EShop.Shared.CQRS;
 using EShop.Shared.DomainTools.DependencyInjections;
 using EShop.Shared.EventBus.JsonConverters;
 using EShop.Shared.Scoping.ResourceAccessControl;
@@ -10,6 +10,7 @@ using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserPermissionProvide
 using EShop.Tenancy.API;
 using EShop.Tenancy.API.DependencyInjections.Extensions;
 using EShop.Tenancy.Application.DependencyInjections;
+using EShop.Tenancy.Application.Services;
 using EShop.Tenancy.Infrastructure.DependencyInjections;
 using EShop.Tenancy.Persistence;
 using EShop.Tenancy.Persistence.DependencyInjections;
@@ -28,10 +29,7 @@ public static class ServiceCollectionExtensions
     public static void AddTestShared(this IServiceCollection services, PostgreSqlTestDatabase testDatabase)
     {
         services.AddResiliencePolicy();
-        services.AddMediator(Application.AssemblyReference.Assembly);
-
-        services.AddMemoryInfrastructure();
-
+        services.AddMemoryCacheInfrastructure();
         services.AddPostgreSqlTestDbContext<TenancyDbContext>(testDatabase);
     }
 
@@ -48,6 +46,7 @@ public static class ServiceCollectionExtensions
         services.AddCors();
         services.AddTransient<DbInitializer>();
 
+        services.AddControllers().AddApplicationPart(Presentation.AssemblyReference.Assembly);
         services.AddCarter();
 
         services
@@ -64,19 +63,42 @@ public static class ServiceCollectionExtensions
                 options.SubstituteApiVersionInUrl = true;
             });
 
-        // Authentication    
+        services.AddTestAuthentication();
 
         return services;
+    }
+
+    private static void AddTestAuthentication(this IServiceCollection services)
+    {
+        services.AddRsaKeyServices();
+        services.AddJwtTokenAuthentication();
+        services.AddUserTokensProvider();
+    }
+
+    private static void AddRsaKeyServices(this IServiceCollection services)
+    {
+        services.AddMultiTenantKeyManager();
+        services.AddRsaKeyCachingProvider();
+    }
+
+    private static void AddTestTenancyApplication(this IServiceCollection services)
+    {
+        services.AddMediatR();
+
+        // permission validator
+        services.AddScoped<IPermissionValidator, CurrentUserPermissionsValidator>();
+        services.AddSingleton<IUserPermissionsProvider, TestUserPermissionProvider>();
+
+        // feature validator
+        services.AddScoped<IFeatureValidator, CurrentUserFeaturesValidator>();
+        services.AddScoped<ITenantFeaturesProvider, TestTenantFeatureProvider>();
+        services.AddSingleton<ITenantFeaturesCachingService, TestTenantFeaturesCachingService>();
+        services.AddScoped<IFeatureService, FeatureService>();
     }
 
     private static void AddTestTenancyInfrastructure(this IServiceCollection services)
     {
         services.AddEventBusGateway();
-        services.AddTestMasstransitMemmory();
-    }
-
-    private static IServiceCollection AddTestMasstransitMemmory(this IServiceCollection services)
-    {
         services.AddMassTransit(cfg =>
         {
             cfg.SetKebabCaseEndpointNameFormatter();
@@ -105,22 +127,5 @@ public static class ServiceCollectionExtensions
                 });
             });
         });
-
-        return services;
-    }
-
-    private static void AddTestTenancyApplication(this IServiceCollection services)
-    {
-        services.AddMediatR();
-
-        // permission validator
-        services.AddScoped<IPermissionValidator, CurrentUserPermissionsValidator>();
-        services.AddSingleton<IUserPermissionsProvider, TestUserPermissionProvider>();
-
-        // feature validator
-        services.AddScoped<IFeatureValidator, CurrentUserFeaturesValidator>();
-        services.AddSingleton<ITenantFeaturesProvider, TestTenantFeatureProvider>();
-
-        // token validator
     }
 }

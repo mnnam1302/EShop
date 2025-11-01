@@ -11,7 +11,7 @@
 #region Designer generated code
 #pragma warning disable
 using Reqnroll;
-namespace EShop.Tenancy.Tests.Tenancy.Create
+namespace EShop.Tenancy.Tests.Tenants.Create
 {
     
     
@@ -24,12 +24,12 @@ namespace EShop.Tenancy.Tests.Tenancy.Create
         
         private static string[] featureTags = ((string[])(null));
         
-        private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new global::System.Globalization.CultureInfo("en-US"), "Tenancy/Create", "TenancyCreation", "\tAs a System user \r\n\tI want to configure some settings at the tenant level\r\n\tSo t" +
+        private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new global::System.Globalization.CultureInfo("en-US"), "Tenants/Create", "TenancyCreation", "\tAs a System user \r\n\tI want to configure some settings at the tenant level\r\n\tSo t" +
                 "hat users with permission can view and edit tenant settings", global::Reqnroll.ProgrammingLanguage.CSharp, featureTags, InitializeCucumberMessages());
         
         private global::Xunit.Abstractions.ITestOutputHelper _testOutputHelper;
         
-#line 1 "TenancyCreation.feature"
+#line 1 "TenantCreation.feature"
 #line hidden
         
         public TenancyCreationFeature(TenancyCreationFeature.FixtureData fixtureData, global::Xunit.Abstractions.ITestOutputHelper testOutputHelper)
@@ -121,7 +121,7 @@ namespace EShop.Tenancy.Tests.Tenancy.Create
         
         private static global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages InitializeCucumberMessages()
         {
-            return new global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages("Tenancy/Create/TenancyCreation.feature.ndjson", 3);
+            return new global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages("Tenants/Create/TenantCreation.feature.ndjson", 3);
         }
         
         async global::System.Threading.Tasks.Task global::Xunit.IAsyncLifetime.InitializeAsync()

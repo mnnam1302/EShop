@@ -24,7 +24,7 @@ public static class ServiceCollectionExtensions
             .AddDbContextWithScoping<AuthorizationDbContext>(configuration);
 
         services.AddRedisHealthCheck(configuration)
-            .AddRedisInfrastructure(configuration);
+            .AddRedisCacheInfrastructure(configuration);
 
         return services;
     }

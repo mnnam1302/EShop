@@ -16,7 +16,7 @@ namespace EShop.Tenancy.Tests.Tenancy.Create
             try
             {
                 var operationalUser = new UserData("TEST_ADMIN", "TEST_ADMIN", LoggedInGroup, LoggedInGroup == UserData.EShopSupportGroup);
-                var result = await apiContext.PostAsync($"{BaseUrl}", request, operationalUser);
+                await apiContext.PostAsync($"{BaseUrl}", request, operationalUser);
             }
             catch (Exception ex)
             {

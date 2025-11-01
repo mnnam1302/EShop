@@ -22,7 +22,7 @@ public static class ServiceCollectionExtensions
         services.AddResiliencePolicy();
         services.AddMediator(Authorization.Application.AssemblyReference.Assembly);
 
-        services.AddMemoryInfrastructure();
+        services.AddMemoryCacheInfrastructure();
 
         services.AddPostgreSqlTestDbContext<AuthorizationDbContext>(testDatabase);
 

@@ -28,7 +28,7 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    public static IServiceCollection AddRedisInfrastructure(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddRedisCacheInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
         var redisOptions = new RedisOptions();
         configuration.GetSection(nameof(RedisOptions)).Bind(redisOptions);
@@ -49,7 +49,7 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    public static IServiceCollection AddMemoryInfrastructure(this IServiceCollection services)
+    public static IServiceCollection AddMemoryCacheInfrastructure(this IServiceCollection services)
     {
         services.AddDistributedMemoryCache();
         services.AddScoped(typeof(CachedRemoteConfiguration));
