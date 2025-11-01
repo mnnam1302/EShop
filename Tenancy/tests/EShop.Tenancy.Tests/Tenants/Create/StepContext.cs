@@ -11,13 +11,13 @@ internal class StepContext(ApiContext apiContext)
 
     public string LoggedInGroup { get; internal set; } = string.Empty;
 
-    internal async Task CreateTenantAsync(Command.CreateTenantCommand request, string? operationalUsername = null)
+    internal async Task CreateTenantAsync(Command.CreateTenantCommand request)
     {
         var systemUser = UserData.GetSystemUser(LoggedInGroup);
         await apiContext.PostAsync($"{BaseUrl}", request, systemUser);
     }
 
-    internal async Task<TenantDetailsResponse> GetTenantAsync(string tenantId, string? operationalUsername = null)
+    internal async Task<TenantDetailsResponse> GetTenantAsync(string tenantId)
     {
         var systemUser = UserData.GetSystemUser(LoggedInGroup);
         var result = await apiContext.GetAsync<TenantDetailsResponse>($"{BaseUrl}/{tenantId}", systemUser);

@@ -1,8 +1,7 @@
 ﻿using EShop.Shared.Contracts.Services.Tenancy.Tenants;
-using EShop.Tenancy.Tests.Tenants.Create;
 using Reqnroll;
 
-namespace EShop.Tenancy.Tests.Tenancy.Create;
+namespace EShop.Tenancy.Tests.Tenants.Create;
 
 [Binding]
 internal class Steps(StepContext stepContext)
