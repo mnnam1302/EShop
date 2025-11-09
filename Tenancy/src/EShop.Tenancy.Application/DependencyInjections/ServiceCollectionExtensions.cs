@@ -1,5 +1,6 @@
 ﻿using EShop.Shared.Cache.Providers;
 using EShop.Shared.Cache.Services;
+using EShop.Shared.CQRS;
 using EShop.Shared.JsonApi.Behaviors;
 using EShop.Shared.JsonApi.Extensions;
 using EShop.Shared.Scoping.ResourceAccessControl;
@@ -17,6 +18,7 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddTenancyApplication(this IServiceCollection services)
     {
         services.AddMediatR();
+        services.AddMediator(AssemblyReference.Assembly);
 
         services.AddUserPermissionsProvider();
         services.AddUserOrganizationContextProvider();

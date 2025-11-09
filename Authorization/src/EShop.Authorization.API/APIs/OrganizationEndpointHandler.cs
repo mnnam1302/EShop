@@ -1,4 +1,5 @@
-﻿using EShop.Authorization.Application.UseCases.Organizations;
+﻿using EShop.Authorization.API.Models;
+using EShop.Authorization.Application.UseCases.Organizations;
 using EShop.Shared.CQRS;
 using EShop.Shared.JsonApi.Abstractions;
 using EShop.Shared.JsonApi.ResourceAccessControl;
@@ -18,30 +19,21 @@ public static class OrganizationEndpointHandler
             .NewVersionedApi("Organizations")
             .MapGroup(BaseUrl)
             .HasApiVersion(1)
-            .RequireAuthorization();
+            .RequireAuthorization()
+            .RequireFeatureFilter(FeatureConstants.Authorization.OrganizationManagement);
 
-        group.MapGet("/{organizationId}/organizationContext", GetOrganizationContext)
+        group.MapGet("{organizationId}/organizationContext", GetOrganizationContext)
             .RequireSystemUserFilter();
 
-        group.MapGet("", GetOrganizationsAsync)
+        group.MapGet("", GetListOrganizations)
             .RequireOneOfPermissionsFilter(
                 PermissionConstants.Authorization.ViewOrganizations,
                 PermissionConstants.Authorization.ManageOrganizations);
 
+        group.MapPost("{organizationId}/createChildOrganization", CreateChildOrganization)
+            .RequirePermissionFilter(PermissionConstants.Authorization.ManageOrganizations);
+
         return endpoints;
-    }
-
-    private static async Task<IResult> GetOrganizationsAsync([FromServices] IMediator mediator, CancellationToken cancellationToken)
-    {
-        var query = new GetOrganizationsQuery();
-        var result = await mediator.QueryAsync<GetOrganizationsQuery, List<OrganizationsResponse>>(query, cancellationToken);
-
-        if (result.IsFailure)
-        {
-            return ApiResultHandler.HandleFailure(result);
-        }
-
-        return Results.Ok(result);
     }
 
     private static async Task<IResult> GetOrganizationContext([FromRoute] string organizationId, [FromServices] IMediator mediator, CancellationToken cancellationToken)
@@ -55,5 +47,48 @@ public static class OrganizationEndpointHandler
         }
 
         return Results.Ok(result);
+    }
+
+    private static async Task<IResult> GetListOrganizations([FromServices] IMediator mediator, CancellationToken cancellationToken)
+    {
+        var query = new GetOrganizationsQuery();
+        var result = await mediator.QueryAsync<GetOrganizationsQuery, List<OrganizationsResponse>>(query, cancellationToken);
+
+        if (result.IsFailure)
+        {
+            return ApiResultHandler.HandleFailure(result);
+        }
+
+        return Results.Ok(result);
+    }
+
+    private static async Task<IResult> CreateChildOrganization(
+        [FromRoute] string organizationId,
+        [FromBody] CreateChildOrganizationRequest request,
+        [FromServices] IMediator mediator, CancellationToken cancellationToken)
+    {
+        var command = new CreateChildOrganizationCommand
+        {
+            Id = request.Id,
+            Name = request.Name,
+            Email = request.Email,
+            OrganizationNumber = request.OrganizationNumber,
+            PhoneNumber = request.PhoneNumber,
+            Description = request.Description,
+            Street = request.Street,
+            City = request.City,
+            State = request.State,
+            Country = request.Country,
+            ZipCode = request.ZipCode,
+            ParentOrganizationId = organizationId
+        };
+
+        var result = await mediator.SendAsync(command, cancellationToken);
+        if (result.IsFailure)
+        {
+            return ApiResultHandler.HandleFailure(result);
+        }
+
+        return Results.Created();
     }
 }
