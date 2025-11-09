@@ -14,7 +14,7 @@ public static class EndpointHandler
             .NewVersionedApi("Agencies")
             .MapGroup(BaseUrl)
             .HasApiVersion(1)
-            .RequireFeatureFilter(FeatureIds.Catalog.ProductBuilder_FeatureId);
+            .RequireFeatureFilter(FeatureConstants.Catalog.ProductBuilder_FeatureId);
 
         productEndpointsV1
             .MapGetAgencies();

@@ -9,7 +9,7 @@ public static class EndpointHandler
     public static RouteGroupBuilder MapGetAgencies(this RouteGroupBuilder agencyEndpointBuilder)
     {
         agencyEndpointBuilder.MapGet("/", GetAgenciesAsync)
-            .RequirePermissionFilter(CatalogPermissions.ViewProductsPermissionId);
+            .RequirePermissionFilter(EShop.Shared.Scoping.ResourceAccessControl.PermissionConstants.Catalog.ViewProducts);
 
         return agencyEndpointBuilder;
     }

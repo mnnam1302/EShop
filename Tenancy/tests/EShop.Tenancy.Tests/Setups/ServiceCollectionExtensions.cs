@@ -61,17 +61,10 @@ public static class ServiceCollectionExtensions
             });
 
 
-        services.AddTestAuthentication();
+        services.AddOptions<JwtOptions>().BindConfiguration(nameof(JwtOptions));
+        services.AddTenantAuthenticationProvider();
 
         return services;
-    }
-
-    private static void AddTestAuthentication(this IServiceCollection services)
-    {
-        services.AddOptions<JwtOptions>()
-            .BindConfiguration(nameof(JwtOptions));
-
-        services.AddTenantAuthenticationProvider();
     }
 
     private static IServiceCollection AddTestTenancyApplication(this IServiceCollection services)

@@ -8,6 +8,8 @@ namespace EShop.Authorization.Domain.Entities;
 
 public class Organization : AggregateRoot<string>, IExcludedFromScoping
 {
+    public const int MaxSupportedLevel = 5;
+
     [MaxLength(ModelConstants.MediumText)]
     public string Name { get; set; } = string.Empty;
 
@@ -62,5 +64,47 @@ public class Organization : AggregateRoot<string>, IExcludedFromScoping
         });
 
         return organization;
+    }
+
+    public Organization AddChildOrganization(
+        string id,
+        string name,
+        string email,
+        string? description = null,
+        string? organizationNumber = null,
+        string? phoneNumber = null,
+        string? street = null,
+        string? city = null,
+        string? state = null,
+        string? country = null,
+        string? zipCode = null)
+    {
+        var context = Context.AddChild(id);
+
+        var childOrganization = new Organization
+        {
+            Id = id,
+            Name = name,
+            Description = description,
+            OrganizationNumber = organizationNumber,
+            Email = email,
+            PhoneNumber = phoneNumber,
+            Address = new Address
+            {
+                Street = street ?? string.Empty,
+                City = city ?? string.Empty,
+                State = state ?? string.Empty,
+                Country = country ?? string.Empty,
+                ZipCode = zipCode ?? string.Empty
+            },
+            ParentOrganizationId = this.Id,
+            Context = context,
+            TenantId = TenantId,
+            Scope = context.Path
+        };
+
+        // Raise domain event
+
+        return childOrganization;
     }
 }

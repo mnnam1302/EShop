@@ -1,6 +1,6 @@
 ﻿namespace EShop.Shared.Scoping.ResourceAccessControl;
 
-public static class FeatureIds
+public static class FeatureConstants
 {
     public const string InitialState = nameof(FeatureState.Enabled);
 
@@ -11,11 +11,13 @@ public static class FeatureIds
 
     public static class Authorization
     {
+        public const string OrganisationRingFencing = "Authorization_OrganisationRingFencing";
+        public const string EnableTenantSpecificSequences = "Authorization_EnableTenantSpecificSequences";
+
+        public const string OrganizationManagement = "Authorization_OrganizationManagement";
         public const string ExternalApplicationIntegration = "Authorization_ExternalApplicationIntegration";
         public const string UserInvites = "Authorization_UserInvites";
-        public const string OrganisationRingFencing = "Authorization_OrganisationRingFencing";
         public const string CustomRoles = "Authorization_CustomRoles";
-        public const string EnableTenantSpecificSequences = "Authorization_EnableTenantSpecificSequences";
     }
 
     public static class Catalog

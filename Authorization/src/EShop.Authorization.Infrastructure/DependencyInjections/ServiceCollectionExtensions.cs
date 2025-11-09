@@ -4,6 +4,7 @@ using EShop.Authorization.Infrastructure.Consumers;
 using EShop.Authorization.Infrastructure.EmailServices;
 using EShop.Authorization.Infrastructure.Producers;
 using EShop.Authorization.Infrastructure.Repositories;
+using EShop.Shared.Cache.DependencyInejctions.Extensions;
 using EShop.Shared.Contracts.Services.Identity.Permissions;
 using EShop.Shared.Contracts.Services.Tenancy.Tenants;
 using EShop.Shared.DomainTools.UnitOfWorks;
@@ -12,6 +13,7 @@ using EShop.Shared.EventBus.DependencyInjections.Options;
 using EShop.Shared.EventBus.JsonConverters;
 using EShop.Shared.EventBus.PipelineObservers;
 using EShop.Shared.EventBus.Services;
+using EShop.Shared.JsonApi.Extensions;
 using EShop.Shared.Scoping.ResourceAccessControl;
 using FluentEmail.MailKitSmtp;
 using MailKit.Security;
@@ -24,43 +26,35 @@ namespace EShop.Authorization.Infrastructure.DependencyInjections;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddAuthorizationPersistence(this IServiceCollection services)
+    public static IServiceCollection AddAuthorizationPersistence(this IServiceCollection services, IConfiguration configuration)
     {
-        return services.AddTransient<DbInitializer>()
-            .AddUnitOfWork()
-            .AddRepositories();
-    }
+        services.AddPostgreSqlHealthCheck(configuration)
+            .AddDbContextWithScoping<AuthorizationDbContext>(configuration)
+            .AddPersistenceServices();
 
-    private static IServiceCollection AddUnitOfWork(this IServiceCollection services)
-    {
-        services.AddScoped<IUnitOfWork, EFUnitOfWork<AuthorizationDbContext>>();
         return services;
     }
 
-    private static IServiceCollection AddRepositories(this IServiceCollection services)
+    public static void AddPersistenceServices(this IServiceCollection services)
     {
         services.AddScoped<IOrganizationRepository, OrganizationRepository>();
         services.AddScoped<IRoleRepository, RoleRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IPermissionRepository, PermissionRepository>();
 
-        return services;
+        services.AddScoped<IUnitOfWork, EFUnitOfWork<AuthorizationDbContext>>();
     }
 
     public static IServiceCollection AddAuthorizationInfrastructure(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment)
     {
-        services.AddAuthorizationEventBus(configuration, environment);
+        services.AddEventBus()
+            .AddMasstransitRabbitMQ(configuration, environment)
+            .AddProducers();
+
+        services.AddRedisHealthCheck(configuration)
+            .AddRedisCacheInfrastructure(configuration);
+
         services.AddEmailServices(configuration);
-
-        return services;
-    }
-
-    public static IServiceCollection AddAuthorizationEventBus(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment)
-    {
-        services.AddScoped<IEventBusGateway, EventBusGateway>();
-        services
-            .AddProducers()
-            .AddMasstransitRabbitMQ(configuration, environment);
 
         return services;
     }
@@ -79,7 +73,7 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    public static IServiceCollection AddMasstransitRabbitMQ(
+    private static IServiceCollection AddMasstransitRabbitMQ(
         this IServiceCollection services,
         IConfiguration configuration,
         IWebHostEnvironment environment)

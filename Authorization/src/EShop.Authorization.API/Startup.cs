@@ -18,12 +18,10 @@ public class Startup
 
     public virtual void ConfigureServices(IServiceCollection services)
     {
-        services
-            .AddShared(Configuration)
-            .AddBoostrapping(Configuration, Environment);
+        services.AddBoostrapping(Configuration, Environment);
     }
 
-    public virtual void Configure(WebApplication app, IHostApplicationLifetime applicationLifetime, ILoggerFactory loggerFactory)
+    internal void Configure(WebApplication app, IHostApplicationLifetime applicationLifetime, ILoggerFactory loggerFactory)
     {
         var logger = loggerFactory.CreateLogger<Startup>();
         app.UseMiddleware<ExceptionHandlingMiddleware>();

@@ -58,7 +58,7 @@ internal sealed class CreateTenantCommandHandler(
             var features = await featureRepository.FindAll().ToListAsync(cancellationToken);
             foreach (var feature in features)
             {
-                tenant.AddTenantFeature(feature.Id, feature.DefaultStateForNewTenant ?? FeatureIds.InitialState, operationalUsername);
+                tenant.AddTenantFeature(feature.Id, feature.DefaultStateForNewTenant ?? FeatureConstants.InitialState, operationalUsername);
             }
 
             tenantRepository.Add(tenant);

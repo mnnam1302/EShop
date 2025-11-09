@@ -2,28 +2,28 @@
 
 public static class PermissionConstants
 {
-    public static class TenancyPermissions
+    public static class Tenancy
     {
-        public const string ViewSystemSettingsPermissionId = "Tenancy_ViewSystemSettings";
-        public const string ManageSystemSettingsPermissionId = "Tenancy_ManageSystemSettings";
+        public const string ViewSystemSettings = "Tenancy_ViewSystemSettings";
+        public const string ManageSystemSettings = "Tenancy_ManageSystemSettings";
     }
 
-    public static class IdentityPermissions
+    public static class Authorization
     {
-        public const string ViewOrganizationsPermissionId = "Identity_ViewOrganizations";
-        public const string ManageOrganizationsPermissionId = "Identity_ManageOrganizations";
+        public const string ViewOrganizations = "Authorization_ViewOrganizations";
+        public const string ManageOrganizations = "Authorization_ManageOrganizations";
 
-        public const string ViewUsersPermissionId = "Identity_ViewUsers";
-        public const string ManageUsersPermissionId = "Identity_ManageUsers";
+        public const string ViewUsers = "Authorization_ViewUsers";
+        public const string ManageUsers = "Authorization_ManageUsers";
 
-        public const string ViewRolesPermissionId = "Identity_ViewRoles";
-        public const string ManageRolesPermissionId = "Identity_ManageRoles";
+        public const string ViewRoles = "Authorization_ViewRoles";
+        public const string ManageRoles = "Authorization_ManageRoles";
 
-        public const string ViewCustomerUsersPermissionId = "Identity_ViewCustomerUsers";
-        public const string ManageCustomerUsersPermissionId = "Identity_ManageCustomerUsers";
+        public const string ViewCustomerUsers = "Authorization_ViewCustomerUsers";
+        public const string ManageCustomerUsers = "Authorization_ManageCustomerUsers";
 
-        public const string ViewPortalUserAccountsPermissionId = "Identity_ViewPortalUserAccounts";
-        public const string ManagePortalUserAccountsPermissionId = "Identity_ManagePortalUserAccounts";
+        public const string ViewPortalUserAccounts = "Authorization_ViewPortalUserAccounts";
+        public const string ManagePortalUserAccounts = "Authorization_ManagePortalUserAccounts";
     }
 
     public static class ConfigurationPermissions
@@ -32,9 +32,9 @@ public static class PermissionConstants
         public const string ManageProductsPermissionId = "Configuration_ManageProducts";
     }
 
-    public static class CatalogPermissions
+    public static class Catalog
     {
-        public const string ViewProductsPermissionId = "Catalog_ViewProducts";
-        public const string ManageProductsPermissionId = "Catalog_ManageProducts";
+        public const string ViewProducts = "Catalog_ViewProducts";
+        public const string ManageProducts = "Catalog_ManageProducts";
     }
 }

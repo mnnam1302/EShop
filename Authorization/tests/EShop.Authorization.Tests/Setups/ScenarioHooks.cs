@@ -69,10 +69,16 @@ public sealed class ScenarioHooks
     }
 
     [AfterStep]
-    public void AfterStep(ScenarioContext scenarioContext, ApiContext apiContext)
+    public async Task AfterStep(ScenarioContext scenarioContext, ApiContext apiContext)
     {
-        if (scenarioContext.StepContext.StepInfo.StepDefinitionType == StepDefinitionType.Given)
+        if (scenarioContext.StepContext.StepInfo.StepDefinitionType is StepDefinitionType.Given or StepDefinitionType.When)
         {
+            var publishedEvents = apiContext.EventTracker.GetPublishedEvents();
+            if (publishedEvents.Any())
+            {
+                await Task.Delay(2000); // Wait 2 seconds for asynchronous event processing
+            }
+
             apiContext.LastApiError.Should().BeNull();
             apiContext.EventTracker.ClearPublishedEvents();
         }

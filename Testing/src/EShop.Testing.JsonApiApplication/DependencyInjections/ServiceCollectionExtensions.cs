@@ -9,7 +9,7 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddPostgreSqlTestDbContext<TContext>(
         this IServiceCollection services,
         PostgreSqlTestDatabase testDatabase,
-        Action<IServiceProvider, DbContextOptionsBuilder> additionalDbContextConfig = null)
+        Action<IServiceProvider, DbContextOptionsBuilder>? additionalDbContextConfig = null)
         where TContext : DbContext
     {
         services.AddSingleton(testDatabase);
@@ -26,7 +26,7 @@ public static class ServiceCollectionExtensions
     private static void ConfigurePostgreSqlTestDbContext(
         IServiceProvider sp,
         DbContextOptionsBuilder builder,
-        Action<IServiceProvider, DbContextOptionsBuilder> additionalDbContextConfig)
+        Action<IServiceProvider, DbContextOptionsBuilder>? additionalDbContextConfig)
     {
         builder.EnableDetailedErrors()
             .EnableSensitiveDataLogging()
@@ -41,7 +41,7 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddPostgreSqlTestDbContextFactory<TContext>(
         this IServiceCollection services,
         PostgreSqlTestDatabase testDatabase,
-        Action<IServiceProvider, DbContextOptionsBuilder> additionalDbContextConfig = null)
+        Action<IServiceProvider, DbContextOptionsBuilder>? additionalDbContextConfig = null)
         where TContext : DbContext
     {
         services.AddSingleton(testDatabase);

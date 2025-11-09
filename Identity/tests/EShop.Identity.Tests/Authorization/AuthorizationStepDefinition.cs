@@ -10,8 +10,8 @@ namespace EShop.Identity.Tests.Authorization;
 public class AuthorizationStepDefinition
 {
     private static readonly string[] allPermissionIds = [
-        IdentityPermissions.ViewOrganizationsPermissionId,
-        IdentityPermissions.ManageOrganizationsPermissionId
+        Shared.Scoping.ResourceAccessControl.PermissionConstants.Authorization.ViewOrganizations,
+        Shared.Scoping.ResourceAccessControl.PermissionConstants.Authorization.ManageOrganizations
     ];
 
     private readonly ApiContext _apiContext;

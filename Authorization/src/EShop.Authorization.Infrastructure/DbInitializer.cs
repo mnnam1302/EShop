@@ -75,70 +75,70 @@ public sealed class DbInitializer(
         [
             new Permission
             {
-                Id = TenancyPermissions.ViewSystemSettingsPermissionId,
+                Id = Tenancy.ViewSystemSettings,
                 Name = "View system settings",
                 Description = "Allows users to view system settings",
                 RelatedTo = "System Settings",
             },
             new Permission
             {
-                Id = TenancyPermissions.ManageSystemSettingsPermissionId,
+                Id = Tenancy.ManageSystemSettings,
                 Name = "Manage system settings",
                 Description = "Allows users to view, edit system settings",
                 RelatedTo = "System Settings",
             },
             new Permission
             {
-                Id = IdentityPermissions.ViewOrganizationsPermissionId,
+                Id = Shared.Scoping.ResourceAccessControl.PermissionConstants.Authorization.ViewOrganizations,
                 Name = "View organizations",
                 Description = "Allows users to view organizations",
                 RelatedTo = "Organization Management",
             },
             new Permission
             {
-                Id = IdentityPermissions.ManageOrganizationsPermissionId,
+                Id = Shared.Scoping.ResourceAccessControl.PermissionConstants.Authorization.ManageOrganizations,
                 Name = "Manage organizations",
                 Description = "Allows users to view, edit, delete organizations",
                 RelatedTo = "Organization Management",
             },
             new Permission
             {
-                Id = IdentityPermissions.ViewRolesPermissionId,
+                Id = Shared.Scoping.ResourceAccessControl.PermissionConstants.Authorization.ViewRoles,
                 Name = "View roles",
                 Description = "Allows users viewing roles list and their details",
                 RelatedTo = "Role Management",
             },
             new Permission
             {
-                Id = IdentityPermissions.ManageRolesPermissionId,
+                Id = Shared.Scoping.ResourceAccessControl.PermissionConstants.Authorization.ManageRoles,
                 Name = "Manage roles",
                 Description = "Allows users to add, create and delete roles",
                 RelatedTo = "Role Management",
             },
             new Permission
             {
-                Id = IdentityPermissions.ViewUsersPermissionId,
+                Id = Shared.Scoping.ResourceAccessControl.PermissionConstants.Authorization.ViewUsers,
                 Name = "View users",
                 Description = "Allows listing of users and organizations currently registered in the system",
                 RelatedTo = "User Management",
             },
             new Permission
             {
-                Id = IdentityPermissions.ManageUsersPermissionId,
+                Id = Shared.Scoping.ResourceAccessControl.PermissionConstants.Authorization.ManageUsers,
                 Name = "Manage users",
                 Description = "Allows inviting new users, adding new organizations to the system and changing their details",
                 RelatedTo = "User Management",
             },
             new Permission
             {
-                Id = IdentityPermissions.ViewPortalUserAccountsPermissionId,
+                Id = Shared.Scoping.ResourceAccessControl.PermissionConstants.Authorization.ViewPortalUserAccounts,
                 Name = "View portal user accounts",
                 Description = "Allows viewing portal user accounts.",
                 RelatedTo = "User Management"
             },
             new Permission
             {
-                Id = IdentityPermissions.ManagePortalUserAccountsPermissionId,
+                Id = Shared.Scoping.ResourceAccessControl.PermissionConstants.Authorization.ManagePortalUserAccounts,
                 Name = "Manage portal user accounts",
                 Description = "Allows viewing, inviting, updating, and deleting portal user accounts.",
                 RelatedTo = "User Management"

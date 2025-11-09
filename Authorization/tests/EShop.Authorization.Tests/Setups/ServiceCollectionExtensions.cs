@@ -1,57 +1,109 @@
 ﻿using EShop.Authorization.API.Boostrapping;
+using EShop.Authorization.Application.Abstractions;
 using EShop.Authorization.Application.DependencyInjections;
 using EShop.Authorization.Infrastructure;
 using EShop.Authorization.Infrastructure.DependencyInjections;
+using EShop.Authorization.Tests.Fakes;
+using EShop.Shared.Authentication.DependencyInjections;
 using EShop.Shared.Cache.DependencyInejctions.Extensions;
 using EShop.Shared.Contracts.Services.Tenancy.Tenants;
 using EShop.Shared.CQRS;
 using EShop.Shared.DomainTools.DependencyInjections;
 using EShop.Shared.EventBus.JsonConverters;
+using EShop.Shared.JsonApi.Extensions;
+using EShop.Shared.Scoping.ResourceAccessControl;
+using EShop.Shared.Scoping.ResourceAccessControl.Providers.TenantFeaturesProvider;
+using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserPermissionProvider;
 using EShop.Testing.JsonApiApplication;
 using EShop.Testing.JsonApiApplication.DependencyInjections;
 using EShop.Testing.JsonApiApplication.EventBus;
+using EShop.Testing.JsonApiApplication.Providers;
 using MassTransit;
+using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace EShop.Authorization.Tests.Setups;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddTestShared(this IServiceCollection services, PostgreSqlTestDatabase testDatabase)
+    public static IServiceCollection AddTestBoostrapping(this IServiceCollection services, PostgreSqlTestDatabase testDatabase, IConfiguration configuration)
     {
-        services.AddResiliencePolicy();
-        services.AddMediator(Authorization.Application.AssemblyReference.Assembly);
-
-        services.AddMemoryCacheInfrastructure();
-
-        services.AddPostgreSqlTestDbContext<AuthorizationDbContext>(testDatabase);
+        services.AddTestAuthorizationAPI()
+            .AddTestAuthorizationApplication()
+            .AddTestAuthorizationPersistence(testDatabase)
+            .AddTestAuthorizationInfrastructure();
 
         return services;
     }
 
-    public static IServiceCollection AddTestBoostrapping(this IServiceCollection services)
+    private static IServiceCollection AddTestAuthorizationAPI(this IServiceCollection services)
     {
+        services.AddCors();
+        services.AddResiliencePolicy();
+        services.AddControllers().AddApplicationPart(API.AssemblyReference.Assembly);
+
+        services.AddSwaggerGenNewtonsoftSupport()
+            .AddFluentValidationRulesToSwagger()
+            .AddEndpointsApiExplorer()
+            .AddSwaggerAPI();
+
         services
-            .AddAuthorizationAPI()
-            .AddAuthorizationApplication()
-            .AddAuthorizationPersistence()
-            .AddTestAuthorizationInfrastructure();
+            .AddApiVersioning(options => options.ReportApiVersions = true)
+            .AddApiExplorer(options =>
+            {
+                options.GroupNameFormat = "'v'VVV";
+                options.SubstituteApiVersionInUrl = true;
+            });
+
+        services.AddOptions<JwtOptions>().BindConfiguration(nameof(JwtOptions));
+        services.AddTenantAuthenticationProvider();
+
+        return services;
+    }
+
+    private static IServiceCollection AddTestAuthorizationApplication(this IServiceCollection services)
+    {
+        services.AddMediator(Application.AssemblyReference.Assembly);
+        services.AddApplicationServices();
+
+        services.AddScoped<IPermissionValidator, CurrentUserPermissionsValidator>();
+        services.AddSingleton<IUserPermissionsProvider, TestUserPermissionProvider>();
+
+        services.AddScoped<IFeatureValidator, CurrentUserFeaturesValidator>();
+        services.AddSingleton<ITenantFeaturesProvider, TestTenantFeatureProvider>();
+
+        services.AddOwnerUserOrganizationContextProvider();
+
+        return services;
+    }
+
+    private static IServiceCollection AddTestAuthorizationPersistence(this IServiceCollection services, PostgreSqlTestDatabase testDatabase)
+    {
+        services.AddPostgreSqlTestDbContext<AuthorizationDbContext>(testDatabase)
+            .AddPersistenceServices();
 
         return services;
     }
 
     private static IServiceCollection AddTestAuthorizationInfrastructure(this IServiceCollection services)
     {
-        return services.AddEventBus()
-            .AddTestMasstransitMemmory();
+        services.AddEventBus()
+            .AddMassTransitMemory();
+
+        services.AddMemoryCacheInfrastructure();
+
+        services.AddScoped<IEmailService, TestEmailService>();
+
+        return services;
     }
 
-    private static IServiceCollection AddTestMasstransitMemmory(this IServiceCollection services)
+    private static IServiceCollection AddMassTransitMemory(this IServiceCollection services)
     {
         services.AddMassTransit(cfg =>
         {
             cfg.SetKebabCaseEndpointNameFormatter();
-            cfg.AddConsumers(Authorization.Infrastructure.AssemblyReference.Assembly);
+            cfg.AddConsumers(Infrastructure.AssemblyReference.Assembly);
 
             cfg.UsingInMemory((context, bus) =>
             {

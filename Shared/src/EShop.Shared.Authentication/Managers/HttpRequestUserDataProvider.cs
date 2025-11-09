@@ -216,9 +216,8 @@ public sealed class HttpRequestUserDataProvider : IUserDetailsProvider
         try
         {
             // We are using username as id for users stored in our local database (as it is unique across tenants anyway)
-            var userIdClaim = accessToken.Claims.FirstOrDefault(x => x.Type == EShopClaimTypes.UserId);
-
-            if (userIdClaim == null)
+            var username = accessToken.Claims.FirstOrDefault(x => x.Type == EShopClaimTypes.UserId)?.Value;
+            if (username == null)
             {
                 _logger.LogWarning("No user ID claim found in access token. Available claims: {Claims}",
                     string.Join(", ", accessToken.Claims.Select(c => $"{c.Type}={c.Value}")));
@@ -226,19 +225,22 @@ public sealed class HttpRequestUserDataProvider : IUserDetailsProvider
                 return false;
             }
 
-            var username = userIdClaim.Value;
+            var primaryTenantId = accessToken.Claims.FirstOrDefault(x => x.Type == EShopClaimTypes.TenantId)?.Value;
+            if (primaryTenantId == null)
+            {
+                _logger.LogWarning("No tenant ID claim found in access token. Available claims: {Claims}",
+                    string.Join(", ", accessToken.Claims.Select(c => $"{c.Type}={c.Value}")));
+                user = null;
+                return false;
+            }
+
             var tenantGroups = accessToken.Claims.Where(x => x.Type == EShopClaimTypes.TenantGroups).Select(x => x.Value).ToList();
-
-            var primaryTenantId = tenantGroups.Count > 1
-                ? tenantGroups.First(x => !x.Equals(UserData.EShopSupportGroup, StringComparison.OrdinalIgnoreCase))
-                : tenantGroups.FirstOrDefault();
-
             var isSupportUser = tenantGroups.Contains(UserData.EShopSupportGroup);
 
             user = new UserData(
                 username,
                 username,
-                primaryTenantId ?? string.Empty,
+                primaryTenantId,
                 isSupportUser,
                 username);
 

@@ -41,11 +41,13 @@ public abstract class ApiTestContextBase
     public const string DefaultUserEmail = "test_admin@test.com";
     public const string SourceSystem = "BddTest";
 
-    protected static readonly string[] AllFeatureIds = typeof(FeatureIds)
-        .GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy)
-        .Where(fi => fi.IsLiteral && !fi.IsInitOnly && fi.Name != nameof(FeatureIds.InitialState))
-        .Select(fi => fi.GetValue(null)?.ToString())
-        .Where(featureId => featureId is not null)
+    protected static readonly string[] AllFeatureIds = typeof(FeatureConstants)
+        .GetNestedTypes(BindingFlags.Public | BindingFlags.Static)
+        .SelectMany(nestedType => nestedType
+            .GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy)
+            .Where(fi => fi.IsLiteral && !fi.IsInitOnly)
+            .Select(fi => fi.GetValue(null)?.ToString())
+            .Where(featureId => featureId is not null))
         .ToArray()!;
 
     protected static readonly string[] StandardFeatureIds = [.. AllFeatureIds];
@@ -75,7 +77,7 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
 
     private UserData defaultUser = new("TEST_ADMIN", "TEST_ADMIN", DefaultTenantId, isSupportUser: true);
 
-    private string LoggedInUser;
+    private string LoggedInUser = string.Empty;
 
     protected ApiTestContextBase(Func<WebHostBuilderContext, TStartup> startupFactory)
     {
@@ -364,7 +366,8 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
         UserData? user,
         string httpMethod)
     {
-        var httpContent = CreateJsonHttpContent(request);
+        var serializedRequest = System.Text.Json.JsonSerializer.Serialize(request);
+        var httpContent = new StringContent(serializedRequest, Encoding.UTF8, JsonMediaType);
 
         return ExecuteHttpRequestAsync<TResult>(
             client => CreateHttpRequestWithBody(client, relativeUri, httpContent, httpMethod),
@@ -383,12 +386,6 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
             "PATCH" => client.PatchAsync(relativeUri, content),
             _ => throw new ArgumentException($"HTTP method '{method}' with body is not supported.", nameof(method))
         };
-    }
-
-    private static HttpContent CreateJsonHttpContent<TRequest>(TRequest request)
-    {
-        var serializedRequest = System.Text.Json.JsonSerializer.Serialize(request);
-        return new StringContent(serializedRequest, Encoding.UTF8, JsonMediaType);
     }
 
     private async Task<TResult> ExecuteHttpRequestAsync<TResult>(
@@ -490,13 +487,18 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
 
     #region Dispose
 
+    ~ApiTestContextBase()
+    {
+        Dispose(false);
+    }
+
     public void Dispose()
     {
         Dispose(true);
         GC.SuppressFinalize(this);
     }
 
-    public virtual void Dispose(bool disposing)
+    protected virtual void Dispose(bool disposing)
     {
         if (disposed)
         {
@@ -506,8 +508,6 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
         if (disposing)
         {
             serviceScope.Dispose();
-
-            // the factory tracks and disposes of any clients created
             server.Dispose();
         }
 

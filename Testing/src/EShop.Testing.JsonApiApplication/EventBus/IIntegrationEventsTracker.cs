@@ -8,6 +8,8 @@ public interface IIntegrationEventsTracker
     void Track(object eventMessage);
 
     void ClearPublishedEvents();
+
+    IReadOnlyList<PublishedEvent> GetPublishedEvents();
 }
 
 public class IntegrationEventsTracker : IIntegrationEventsTracker
@@ -33,5 +35,10 @@ public class IntegrationEventsTracker : IIntegrationEventsTracker
     {
         publishedEvents.Clear();
         _logger.LogDebug("Clearing Integration events - cleared items");
+    }
+
+    public IReadOnlyList<PublishedEvent> GetPublishedEvents()
+    {
+        return publishedEvents.ToList();
     }
 }
