@@ -67,11 +67,11 @@ public static class ServiceCollectionExtensions
         services.AddMediator(Application.AssemblyReference.Assembly);
         services.AddApplicationServices();
 
-        services.AddTransient<IPermissionValidator, CurrentUserPermissionsValidator>();
-        services.AddTransient<IUserPermissionsProvider, TestUserPermissionProvider>();
+        services.AddScoped<IPermissionValidator, CurrentUserPermissionsValidator>();
+        services.AddSingleton<IUserPermissionsProvider, TestUserPermissionProvider>();
 
         services.AddScoped<IFeatureValidator, CurrentUserFeaturesValidator>();
-        services.AddScoped<ITenantFeaturesProvider, TestTenantFeatureProvider>();
+        services.AddSingleton<ITenantFeaturesProvider, TestTenantFeatureProvider>();
 
         services.AddOwnerUserOrganizationContextProvider();
 

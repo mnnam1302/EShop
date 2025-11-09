@@ -38,7 +38,7 @@ public sealed class TestStartup : API.Startup
 
         app.UseEndpoints(endpoints =>
         {
-            endpoints.MapAuthEndpoints();
+            endpoints.MapAuthorizationEndpoints();
         });
     }
 }

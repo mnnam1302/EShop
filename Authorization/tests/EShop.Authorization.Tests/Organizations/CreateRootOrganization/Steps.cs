@@ -1,6 +1,6 @@
 ﻿using Reqnroll;
 
-namespace EShop.Authorization.Tests.Organizations.CreateRoot;
+namespace EShop.Authorization.Tests.Organizations.CreateRootOrganization;
 
 [Binding]
 internal sealed class Steps(StepContext stepContext)
@@ -11,9 +11,10 @@ internal sealed class Steps(StepContext stepContext)
         await stepContext.PublishTenantCreatedAsync(dataTable);
     }
 
-    [Then("there are following organizations created")]
-    public void ThenThereAreFollowingOrganizationsCreated(DataTable dataTable)
+    [Then("User {string} retrieves organizations")]
+    public async Task ThenUserRetrievesOrganizations(string username, DataTable dataTable)
     {
-        throw new PendingStepException();
+        var organizations = await stepContext.GetOrganizations(username);
+        dataTable.CompareToSet(organizations);
     }
 }

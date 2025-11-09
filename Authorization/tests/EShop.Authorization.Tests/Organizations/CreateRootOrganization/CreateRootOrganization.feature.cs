@@ -105,24 +105,6 @@ namespace EShop.Authorization.Tests.Organizations.CreateRootOrganization
             await testRunner.CollectScenarioErrorsAsync();
         }
         
-        public virtual async global::System.Threading.Tasks.Task FeatureBackgroundAsync()
-        {
-#line 6
-#line hidden
-            global::Reqnroll.Table table1 = new global::Reqnroll.Table(new string[] {
-                        "PermissionId"});
-            table1.AddRow(new string[] {
-                        "Users_ViewSystemSettings"});
-            table1.AddRow(new string[] {
-                        "Users_ManageSystemSettings"});
-#line 7
-    await testRunner.GivenAsync("System user with following permissions", ((string)(null)), table1, "Given ");
-#line hidden
-#line 11
-    await testRunner.AndAsync("all features are available for System User", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
-#line hidden
-        }
-        
         private static global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages InitializeCucumberMessages()
         {
             return new global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages("Organizations/CreateRootOrganization/CreateRootOrganization.feature.ndjson", 3);
@@ -164,7 +146,7 @@ namespace EShop.Authorization.Tests.Organizations.CreateRootOrganization
             global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("System creates a root organization", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
-#line 13
+#line 6
 this.ScenarioInitialize(scenarioInfo, ruleInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
@@ -174,40 +156,54 @@ this.ScenarioInitialize(scenarioInfo, ruleInfo);
             else
             {
                 await this.ScenarioStartAsync();
-#line 6
-await this.FeatureBackgroundAsync();
-#line hidden
-                global::Reqnroll.Table table2 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table1 = new global::Reqnroll.Table(new string[] {
                             "TenantId",
                             "TenantName",
                             "OwnerUsername",
                             "OwnerDisplayName",
                             "OwnerEmail"});
-                table2.AddRow(new string[] {
+                table1.AddRow(new string[] {
                             "test-tenant",
                             "Test Tenant",
-                            "test-owner",
+                            "test-owner@test-tenant",
                             "Test Owner",
                             "test-owner@test-tenant"});
-#line 14
-    await testRunner.WhenAsync("Tenancy service has provisioned a new tenant with following details", ((string)(null)), table2, "When ");
+#line 7
+    await testRunner.WhenAsync("Tenancy service has provisioned a new tenant with following details", ((string)(null)), table1, "When ");
+#line hidden
+                global::Reqnroll.Table table2 = new global::Reqnroll.Table(new string[] {
+                            "Username",
+                            "TenantId"});
+                table2.AddRow(new string[] {
+                            "test-owner@test-tenant",
+                            "test-tenant"});
+#line 10
+    await testRunner.ThenAsync("the following users are set up", ((string)(null)), table2, "Then ");
+#line hidden
+#line 13
+    await testRunner.AndAsync("User \'test-owner@test-tenant\' logs in", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
                 global::Reqnroll.Table table3 = new global::Reqnroll.Table(new string[] {
+                            "PermissionId"});
+                table3.AddRow(new string[] {
+                            "Authorization_ViewOrganizations"});
+                table3.AddRow(new string[] {
+                            "Authorization_ManageOrganizations"});
+#line 14
+    await testRunner.AndAsync("User \'test-owner@test-tenant\' has following permissions", ((string)(null)), table3, "And ");
+#line hidden
+                global::Reqnroll.Table table4 = new global::Reqnroll.Table(new string[] {
                             "Id",
                             "Name",
-                            "OrganizationNumber",
-                            "Email",
                             "Description",
-                            "ParentOrganizationId"});
-                table3.AddRow(new string[] {
-                            "root-org",
+                            "TenantId"});
+                table4.AddRow(new string[] {
+                            "test-tenant",
+                            "Test Tenant",
                             "Root Organization",
-                            "\'10000\'",
-                            "root-org@test-tenant",
-                            "Root organization",
-                            "<no value>"});
-#line 17
-    await testRunner.ThenAsync("there are following organizations created", ((string)(null)), table3, "Then ");
+                            "test-tenant"});
+#line 18
+    await testRunner.AndAsync("User \'test-owner\' retrieves organizations", ((string)(null)), table4, "And ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();

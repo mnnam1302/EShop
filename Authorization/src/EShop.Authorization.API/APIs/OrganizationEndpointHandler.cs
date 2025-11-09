@@ -24,23 +24,29 @@ public static class OrganizationEndpointHandler
             .RequireSystemUserFilter();
 
         group.MapGet("", GetOrganizationsAsync)
-            .RequireOneOfPermissionsFilter(PermissionConstants.Authorization.ViewOrganizations);
+            .RequireOneOfPermissionsFilter(
+                PermissionConstants.Authorization.ViewOrganizations,
+                PermissionConstants.Authorization.ManageOrganizations);
 
         return endpoints;
     }
 
-    private static async Task GetOrganizationsAsync(HttpContext context)
+    private static async Task<IResult> GetOrganizationsAsync([FromServices] IMediator mediator, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        var query = new GetOrganizationsQuery();
+        var result = await mediator.QueryAsync<GetOrganizationsQuery, List<OrganizationsResponse>>(query, cancellationToken);
+
+        if (result.IsFailure)
+        {
+            return ApiResultHandler.HandleFailure(result);
+        }
+
+        return Results.Ok(result);
     }
 
-    private static async Task<IResult> GetOrganizationContext(
-        [FromRoute] string organizationId,
-        [FromServices] IMediator mediator,
-        CancellationToken cancellationToken)
+    private static async Task<IResult> GetOrganizationContext([FromRoute] string organizationId, [FromServices] IMediator mediator, CancellationToken cancellationToken)
     {
         var query = new GetOrganizationContextQuery(organizationId);
-
         var result = await mediator.QueryAsync<GetOrganizationContextQuery, OrganizationContext>(query, cancellationToken);
 
         if (result.IsFailure)
