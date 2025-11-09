@@ -1,6 +1,6 @@
 ﻿namespace EShop.Authorization.API.Models;
 
-public sealed class CreateChildOrganizationRequest
+public sealed class AddChildOrganizationRequest
 {
     public required string Id { get; init; }
     public required string Name { get; init; }

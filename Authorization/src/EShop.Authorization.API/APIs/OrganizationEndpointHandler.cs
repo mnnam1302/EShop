@@ -30,7 +30,7 @@ public static class OrganizationEndpointHandler
                 PermissionConstants.Authorization.ViewOrganizations,
                 PermissionConstants.Authorization.ManageOrganizations);
 
-        group.MapPost("{organizationId}/createChildOrganization", CreateChildOrganization)
+        group.MapPost("{organizationId}/child-organizations", CreateChildOrganization)
             .RequirePermissionFilter(PermissionConstants.Authorization.ManageOrganizations);
 
         return endpoints;
@@ -64,10 +64,11 @@ public static class OrganizationEndpointHandler
 
     private static async Task<IResult> CreateChildOrganization(
         [FromRoute] string organizationId,
-        [FromBody] CreateChildOrganizationRequest request,
-        [FromServices] IMediator mediator, CancellationToken cancellationToken)
+        [FromBody] AddChildOrganizationRequest request,
+        [FromServices] IMediator mediator,
+        CancellationToken cancellationToken)
     {
-        var command = new CreateChildOrganizationCommand
+        var command = new AddChildOrganizationCommand
         {
             Id = request.Id,
             Name = request.Name,
@@ -83,12 +84,13 @@ public static class OrganizationEndpointHandler
             ParentOrganizationId = organizationId
         };
 
+
         var result = await mediator.SendAsync(command, cancellationToken);
         if (result.IsFailure)
         {
             return ApiResultHandler.HandleFailure(result);
         }
 
-        return Results.Created();
+        return Results.Created("", result);
     }
 }

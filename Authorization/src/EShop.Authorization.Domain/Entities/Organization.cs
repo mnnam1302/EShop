@@ -66,7 +66,7 @@ public class Organization : AggregateRoot<string>, IExcludedFromScoping
         return organization;
     }
 
-    public Organization CreateChildOrganization(
+    public Organization AddChildOrganization(
         string id,
         string name,
         string email,
@@ -79,7 +79,7 @@ public class Organization : AggregateRoot<string>, IExcludedFromScoping
         string? country = null,
         string? zipCode = null)
     {
-        var context = OrganisationContext.NewChild(Context);
+        var context = Context.AddChild(id);
 
         var childOrganization = new Organization
         {
@@ -99,7 +99,7 @@ public class Organization : AggregateRoot<string>, IExcludedFromScoping
             },
             ParentOrganizationId = this.Id,
             Context = context,
-            TenantId = this.TenantId,
+            TenantId = TenantId,
             Scope = context.Path
         };
 

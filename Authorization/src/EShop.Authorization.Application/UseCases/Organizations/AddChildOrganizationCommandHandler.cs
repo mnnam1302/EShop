@@ -8,7 +8,7 @@ using Microsoft.Extensions.Logging;
 
 namespace EShop.Authorization.Application.UseCases.Organizations;
 
-public sealed class CreateChildOrganizationCommand : ICommand
+public sealed class AddChildOrganizationCommand : ICommand
 {
     public required string Id { get; init; }
     public required string Name { get; init; }
@@ -26,12 +26,12 @@ public sealed class CreateChildOrganizationCommand : ICommand
     public required string ParentOrganizationId { get; init; }
 }
 
-internal sealed class CreateChildOrganizationCommandHandler(
+internal sealed class AddChildOrganizationCommandHandler(
     IOrganizationRepository organizationRepository,
     IUnitOfWork unitOfWork,
-    ILogger<CreateChildOrganizationCommandHandler> logger) : ICommandHandler<CreateChildOrganizationCommand>
+    ILogger<AddChildOrganizationCommandHandler> logger) : ICommandHandler<AddChildOrganizationCommand>
 {
-    public async Task<Result> HandleAsync(CreateChildOrganizationCommand command, CancellationToken cancellationToken)
+    public async Task<Result> HandleAsync(AddChildOrganizationCommand command, CancellationToken cancellationToken)
     {
         logger.LogInformation("Creating child organization with name: {Name}", command.Name);
 
@@ -43,7 +43,7 @@ internal sealed class CreateChildOrganizationCommandHandler(
 
         await AssertOrganizationHierarchy(parentOrganization);
 
-        var childOrganization = parentOrganization.CreateChildOrganization(
+        var childOrganization = parentOrganization.AddChildOrganization(
             command.Id, command.Name, command.Email,
             command.Description, command.OrganizationNumber, command.PhoneNumber, command.Street, command.City, command.State, command.Country, command.ZipCode);
 

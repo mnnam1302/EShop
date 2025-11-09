@@ -42,10 +42,12 @@ public abstract class ApiTestContextBase
     public const string SourceSystem = "BddTest";
 
     protected static readonly string[] AllFeatureIds = typeof(FeatureConstants)
-        .GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy)
-        .Where(fi => fi.IsLiteral && !fi.IsInitOnly && fi.Name != nameof(FeatureConstants.InitialState))
-        .Select(fi => fi.GetValue(null)?.ToString())
-        .Where(featureId => featureId is not null)
+        .GetNestedTypes(BindingFlags.Public | BindingFlags.Static)
+        .SelectMany(nestedType => nestedType
+            .GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy)
+            .Where(fi => fi.IsLiteral && !fi.IsInitOnly)
+            .Select(fi => fi.GetValue(null)?.ToString())
+            .Where(featureId => featureId is not null))
         .ToArray()!;
 
     protected static readonly string[] StandardFeatureIds = [.. AllFeatureIds];

@@ -2,7 +2,7 @@
 
 namespace EShop.Testing.JsonApiApplication.Providers;
 
-public class TestTenantFeatureProvider : ITenantFeaturesProvider
+public sealed class TestTenantFeatureProvider : ITenantFeaturesProvider
 {
     private readonly Dictionary<string, List<string>> tenantFeatures = new();
 

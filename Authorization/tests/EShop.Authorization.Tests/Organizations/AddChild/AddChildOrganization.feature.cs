@@ -11,29 +11,29 @@
 #region Designer generated code
 #pragma warning disable
 using Reqnroll;
-namespace EShop.Authorization.Tests.Organizations.CreateRootOrganization
+namespace EShop.Authorization.Tests.Organizations.AddChild
 {
     
     
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Reqnroll", "3.0.0.0")]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    public partial class CreateRootOrganizationFeature : object, global::Xunit.IClassFixture<CreateRootOrganizationFeature.FixtureData>, global::Xunit.IAsyncLifetime
+    public partial class AddChildOrganizationFeature : object, global::Xunit.IClassFixture<AddChildOrganizationFeature.FixtureData>, global::Xunit.IAsyncLifetime
     {
         
         private global::Reqnroll.ITestRunner testRunner;
         
         private static string[] featureTags = ((string[])(null));
         
-        private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new global::System.Globalization.CultureInfo("en-US"), "Organizations/CreateRootOrganization", "CreateRootOrganization", "    As an Admin User\r\n    I want to create a root organization when tenant provis" +
-                "ioned\r\n    So that I can reflect real world organization structure these employe" +
-                "es belong to and corresponding access level", global::Reqnroll.ProgrammingLanguage.CSharp, featureTags, InitializeCucumberMessages());
+        private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new global::System.Globalization.CultureInfo("en-US"), "Organizations/AddChild", "AddChildOrganization", "    As an Admin User\r\n    I want to group users\r\n    So that I can reflect real w" +
+                "orld organization structure these employees belong to and corresponding access l" +
+                "evel", global::Reqnroll.ProgrammingLanguage.CSharp, featureTags, InitializeCucumberMessages());
         
         private global::Xunit.Abstractions.ITestOutputHelper _testOutputHelper;
         
-#line 1 "CreateRootOrganization.feature"
+#line 1 "AddChildOrganization.feature"
 #line hidden
         
-        public CreateRootOrganizationFeature(CreateRootOrganizationFeature.FixtureData fixtureData, global::Xunit.Abstractions.ITestOutputHelper testOutputHelper)
+        public AddChildOrganizationFeature(AddChildOrganizationFeature.FixtureData fixtureData, global::Xunit.Abstractions.ITestOutputHelper testOutputHelper)
         {
             this._testOutputHelper = testOutputHelper;
         }
@@ -107,7 +107,7 @@ namespace EShop.Authorization.Tests.Organizations.CreateRootOrganization
         
         private static global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages InitializeCucumberMessages()
         {
-            return new global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages("Organizations/CreateRootOrganization/CreateRootOrganization.feature.ndjson", 3);
+            return new global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages("Organizations/AddChild/AddChildOrganization.feature.ndjson", 3);
         }
         
         async global::System.Threading.Tasks.Task global::Xunit.IAsyncLifetime.InitializeAsync()
@@ -135,15 +135,15 @@ namespace EShop.Authorization.Tests.Organizations.CreateRootOrganization
             await this.TestTearDownAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="System creates a root organization")]
-        [global::Xunit.TraitAttribute("FeatureTitle", "CreateRootOrganization")]
-        [global::Xunit.TraitAttribute("Description", "System creates a root organization")]
-        public async global::System.Threading.Tasks.Task SystemCreatesARootOrganization()
+        [global::Xunit.SkippableFactAttribute(DisplayName="Adding a child organization under the root organization")]
+        [global::Xunit.TraitAttribute("FeatureTitle", "AddChildOrganization")]
+        [global::Xunit.TraitAttribute("Description", "Adding a child organization under the root organization")]
+        public async global::System.Threading.Tasks.Task AddingAChildOrganizationUnderTheRootOrganization()
         {
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
             string pickleIndex = "0";
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("System creates a root organization", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Adding a child organization under the root organization", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
 #line 6
@@ -163,47 +163,75 @@ this.ScenarioInitialize(scenarioInfo, ruleInfo);
                             "OwnerDisplayName",
                             "OwnerEmail"});
                 table1.AddRow(new string[] {
-                            "test-tenant",
-                            "Test Tenant",
-                            "test-owner@test-tenant",
-                            "Test Owner",
-                            "test-owner@test-tenant"});
+                            "tenant-1",
+                            "Tenant 1",
+                            "ownerTenant1@tenant-1",
+                            "Owner Tenant1",
+                            "owner@tenant1.com"});
 #line 7
-    await testRunner.WhenAsync("Tenancy service has provisioned a new tenant with following details", ((string)(null)), table1, "When ");
+    await testRunner.GivenAsync("Tenancy service has provisioned a new tenant with following details", ((string)(null)), table1, "Given ");
+#line hidden
+#line 10
+    await testRunner.AndAsync("all standard features were turned on for \'tenant-1\'", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
                 global::Reqnroll.Table table2 = new global::Reqnroll.Table(new string[] {
                             "Username",
                             "TenantId"});
                 table2.AddRow(new string[] {
-                            "test-owner@test-tenant",
-                            "test-tenant"});
-#line 10
-    await testRunner.ThenAsync("the following users are set up", ((string)(null)), table2, "Then ");
-#line hidden
-#line 13
-    await testRunner.AndAsync("User \'test-owner@test-tenant\' logs in", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+                            "ownerTenant1@tenant-1",
+                            "tenant-1"});
+#line 11
+    await testRunner.AndAsync("the following users are set up", ((string)(null)), table2, "And ");
 #line hidden
                 global::Reqnroll.Table table3 = new global::Reqnroll.Table(new string[] {
                             "PermissionId"});
                 table3.AddRow(new string[] {
-                            "Authorization_ViewOrganizations"});
-                table3.AddRow(new string[] {
                             "Authorization_ManageOrganizations"});
 #line 14
-    await testRunner.AndAsync("User \'test-owner@test-tenant\' has following permissions", ((string)(null)), table3, "And ");
+    await testRunner.AndAsync("user \'ownerTenant1@tenant-1\' has the following permissions", ((string)(null)), table3, "And ");
+#line hidden
+#line 17
+    await testRunner.AndAsync("user \'ownerTenant1@tenant-1\' logs in to the system", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
                 global::Reqnroll.Table table4 = new global::Reqnroll.Table(new string[] {
                             "Id",
                             "Name",
-                            "Description",
-                            "TenantId"});
+                            "OrganizationNumber",
+                            "Email",
+                            "Description"});
                 table4.AddRow(new string[] {
-                            "test-tenant",
-                            "Test Tenant",
-                            "Root Organization",
-                            "test-tenant"});
+                            "child-org",
+                            "Organization child of root",
+                            "500000",
+                            "child-org@app.ecommerce",
+                            "Child organization"});
 #line 18
-    await testRunner.AndAsync("User \'test-owner\' retrieves organizations", ((string)(null)), table4, "And ");
+    await testRunner.WhenAsync("user \'ownerTenant1@tenant-1\' adds a child organization under the organization \'te" +
+                        "nant-1\' with the following details", ((string)(null)), table4, "When ");
+#line hidden
+                global::Reqnroll.Table table5 = new global::Reqnroll.Table(new string[] {
+                            "Id",
+                            "Name",
+                            "Description",
+                            "Email",
+                            "OrganizationNumber",
+                            "ParentOrganizationId"});
+                table5.AddRow(new string[] {
+                            "tenant-1",
+                            "Tenant 1",
+                            "Root Organization",
+                            "",
+                            "",
+                            ""});
+                table5.AddRow(new string[] {
+                            "child-org",
+                            "Organization child of root",
+                            "Child organization",
+                            "child-org@app.ecommerce",
+                            "500000",
+                            "tenant-1"});
+#line 21
+    await testRunner.ThenAsync("user \'ownerTenant1@tenant-1\' retrieves organizations", ((string)(null)), table5, "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
@@ -216,12 +244,12 @@ this.ScenarioInitialize(scenarioInfo, ruleInfo);
             
             async global::System.Threading.Tasks.Task global::Xunit.IAsyncLifetime.InitializeAsync()
             {
-                await CreateRootOrganizationFeature.FeatureSetupAsync();
+                await AddChildOrganizationFeature.FeatureSetupAsync();
             }
             
             async global::System.Threading.Tasks.Task global::Xunit.IAsyncLifetime.DisposeAsync()
             {
-                await CreateRootOrganizationFeature.FeatureTearDownAsync();
+                await AddChildOrganizationFeature.FeatureTearDownAsync();
             }
         }
     }

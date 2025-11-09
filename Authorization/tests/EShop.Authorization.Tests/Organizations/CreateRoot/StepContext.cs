@@ -1,9 +1,8 @@
-﻿using EShop.Authorization.Application.UseCases.Organizations;
-using EShop.Authorization.Tests.Setups;
+﻿using EShop.Authorization.Tests.Setups;
 using EShop.Shared.Contracts.Services.Tenancy.Tenants;
 using Reqnroll;
 
-namespace EShop.Authorization.Tests.Organizations.CreateRootOrganization;
+namespace EShop.Authorization.Tests.Organizations.CreateRoot;
 
 internal sealed class StepContext(ApiContext apiContext)
 {
@@ -21,15 +20,5 @@ internal sealed class StepContext(ApiContext apiContext)
             ActionUserId = operationalUser.Id,
             ActionUserType = operationalUser.UserType
         });
-    }
-
-    internal async Task<List<OrganizationsResponse>> GetOrganizations(string username)
-    {
-        var operationalUser = apiContext.GetUserByUsername(username);
-
-        var result = await apiContext
-            .GetAsync<List<OrganizationsResponse>>("api/v1/organizations", operationalUser);
-
-        return result.Value;
     }
 }

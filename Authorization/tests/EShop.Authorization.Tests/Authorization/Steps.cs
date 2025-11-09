@@ -7,8 +7,9 @@ namespace EShop.Authorization.Tests.Authorization;
 [Binding]
 internal sealed class Steps(ApiContext apiContext)
 {
+    [Given("the following users are set up")]
     [Then("the following users are set up")]
-    public void ThenTheFollowingUsersAreSetUp(DataTable dataTable)
+    public void GivenTheFollowingUsersAreSetUp(DataTable dataTable)
     {
         foreach (var row in dataTable.Rows)
         {
@@ -23,14 +24,16 @@ internal sealed class Steps(ApiContext apiContext)
         }
     }
 
-    [Then("User {string} logs in")]
-    public void ThenUserLogsIn(string username)
+    [Given("user {string} logs in to the system")]
+    [Then("user {string} logs in to the system")]
+    public void GivenUserLogsInToTheSystem(string username)
     {
         apiContext.SignIn(username);
     }
 
-    [Then("User {string} has following permissions")]
-    public void ThenUserHasFollowingPermissions(string username, DataTable dataTable)
+    [Given("user {string} has the following permissions")]
+    [Then("user {string} has following permissions")]
+    public void GivenUserHasTheFollowingPermissions(string username, DataTable dataTable)
     {
         var permissions = dataTable.Rows
             .Select(row => row["PermissionId"])
@@ -50,5 +53,35 @@ internal sealed class Steps(ApiContext apiContext)
     public void GivenAllFeaturesAreAvailableForSystemUser()
     {
         apiContext.SetupStandardFeaturesForDefaultTenant();
+    }
+
+    [Given("all standard features were turned on for {string}")]
+    [Then("all standard features were turned on for {string}")]
+    public void GivenAllStandardFeaturesWereTurnedOnFor(string tenantName)
+    {
+        apiContext.SetupStandardFeaturesForTenant(tenantName);
+    }
+
+    [Given("Tenancy service has provisioned a new tenant with following details")]
+    public async Task GivenTenancyServiceHasProvisionedANewTenantWithFollowingDetails(DataTable dataTable)
+    {
+        foreach (var row in dataTable.Rows)
+        {
+            var tenantId = row["TenantId"];
+            var tenantName = row["TenantName"];
+            var ownerUsername = row["OwnerUsername"];
+            var ownerDisplayName = row["OwnerDisplayName"];
+            var ownerEmail = row["OwnerEmail"];
+
+            // Simulate the TenantCreated event that would trigger root organization creation
+            await apiContext.PublishIntegrationEvent<EShop.Shared.Contracts.Services.Tenancy.Tenants.ITenantCreated>(new
+            {
+                TenantId = tenantId,
+                TenantName = tenantName,
+                OwnerUsername = ownerUsername,
+                OwnerDisplayName = ownerDisplayName,
+                OwnerEmail = ownerEmail
+            });
+        }
     }
 }
