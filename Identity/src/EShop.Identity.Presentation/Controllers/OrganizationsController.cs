@@ -5,7 +5,7 @@ using EShop.Shared.JsonApi.ResourceAccessControl;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using static EShop.Shared.Scoping.ResourceAccessControl.FeatureIds;
+using static EShop.Shared.Scoping.ResourceAccessControl.FeatureConstants;
 using static EShop.Shared.Scoping.ResourceAccessControl.PermissionConstants;
 
 namespace EShop.Identity.Presentation.Controllers;
@@ -23,7 +23,7 @@ public class OrganizationsController
     }
 
     [HttpPost]
-    [RequireFeature(Shared.Scoping.ResourceAccessControl.FeatureIds.Authorization.OrganisationRingFencing)]
+    [RequireFeature(Shared.Scoping.ResourceAccessControl.FeatureConstants.Authorization.OrganisationRingFencing)]
     [RequirePermission(Shared.Scoping.ResourceAccessControl.PermissionConstants.Authorization.ManageOrganizations)]
     public async Task<IResult> CreateOrganization([FromBody] Command.CreateOrganizationCommand request)
     {
@@ -38,7 +38,7 @@ public class OrganizationsController
     }
 
     [HttpPut("{id}")]
-    [RequireFeature(Shared.Scoping.ResourceAccessControl.FeatureIds.Authorization.OrganisationRingFencing)]
+    [RequireFeature(Shared.Scoping.ResourceAccessControl.FeatureConstants.Authorization.OrganisationRingFencing)]
     [RequireOneOfPermissions(Shared.Scoping.ResourceAccessControl.PermissionConstants.Authorization.ManageOrganizations)]
     public async Task<IResult> UpdateOrganization([FromRoute] string id, [FromBody] Command.UpdateOrganizationCommand request)
     {
@@ -54,7 +54,7 @@ public class OrganizationsController
     }
 
     [HttpGet("{id}")]
-    [RequireFeature(Shared.Scoping.ResourceAccessControl.FeatureIds.Authorization.OrganisationRingFencing)]
+    [RequireFeature(Shared.Scoping.ResourceAccessControl.FeatureConstants.Authorization.OrganisationRingFencing)]
     [RequireOneOfPermissions(
         Shared.Scoping.ResourceAccessControl.PermissionConstants.Authorization.ViewOrganizations,
         Shared.Scoping.ResourceAccessControl.PermissionConstants.Authorization.ManageOrganizations)]

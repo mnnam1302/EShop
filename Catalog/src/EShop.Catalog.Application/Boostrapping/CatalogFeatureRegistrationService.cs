@@ -3,7 +3,7 @@ using EShop.Shared.Contracts.Services.Tenancy.Features;
 using EShop.Shared.EventBus.Services;
 using EShop.Shared.Scoping;
 using EShop.Shared.Scoping.ResourceAccessControl;
-using static EShop.Shared.Scoping.ResourceAccessControl.FeatureIds;
+using static EShop.Shared.Scoping.ResourceAccessControl.FeatureConstants;
 
 namespace EShop.Catalog.Application.Boostrapping;
 
@@ -20,7 +20,7 @@ public sealed class CatalogFeatureRegistrationService : IFeatureRegistrationServ
     [
         new CatalogFeature()
         {
-            Id = FeatureIds.Catalog.ProductBuilder_FeatureId,
+            Id = FeatureConstants.Catalog.ProductBuilder_FeatureId,
             Name = "Product Builder",
             Description =  "Product Builder"
         }

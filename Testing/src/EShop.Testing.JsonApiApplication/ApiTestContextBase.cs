@@ -41,9 +41,9 @@ public abstract class ApiTestContextBase
     public const string DefaultUserEmail = "test_admin@test.com";
     public const string SourceSystem = "BddTest";
 
-    protected static readonly string[] AllFeatureIds = typeof(FeatureIds)
+    protected static readonly string[] AllFeatureIds = typeof(FeatureConstants)
         .GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy)
-        .Where(fi => fi.IsLiteral && !fi.IsInitOnly && fi.Name != nameof(FeatureIds.InitialState))
+        .Where(fi => fi.IsLiteral && !fi.IsInitOnly && fi.Name != nameof(FeatureConstants.InitialState))
         .Select(fi => fi.GetValue(null)?.ToString())
         .Where(featureId => featureId is not null)
         .ToArray()!;

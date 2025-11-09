@@ -11,25 +11,31 @@ internal sealed class AuthorizationFeatureRegistrationProducer : IFeatureRegistr
     [
         new()
         {
-            Id = FeatureIds.Authorization.OrganisationRingFencing,
+            Id = FeatureConstants.Authorization.OrganisationRingFencing,
             Name = "Organisation Ring Fencing",
             Description = "Organisation Ring Fencing"
         },
         new()
         {
-            Id = FeatureIds.Authorization.ExternalApplicationIntegration,
+            Id = FeatureConstants.Authorization.ExternalApplicationIntegration,
             Name = "External Application Integration",
             Description = "External Application Integration"
         },
         new()
         {
-            Id = FeatureIds.Authorization.CustomRoles,
+            Id = FeatureConstants.Authorization.OrganizationManagement,
+            Name = "Organization Management",
+            Description = "Organization Management"
+        },
+        new()
+        {
+            Id = FeatureConstants.Authorization.CustomRoles,
             Name = "Custom Roles",
             Description = "Custom Roles"
         },
         new()
         {
-            Id = FeatureIds.Authorization.UserInvites,
+            Id = FeatureConstants.Authorization.UserInvites,
             Name = "User Invites",
             Description = "User Invites"
         },

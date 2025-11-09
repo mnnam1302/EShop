@@ -1,6 +1,6 @@
 ﻿using EShop.Shared.Authentication.Abstractions;
 using EShop.Shared.Scoping.ResourceAccessControl;
-using static EShop.Shared.Scoping.ResourceAccessControl.FeatureIds;
+using static EShop.Shared.Scoping.ResourceAccessControl.FeatureConstants;
 
 namespace EShop.Shared.Sequences;
 

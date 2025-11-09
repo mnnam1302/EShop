@@ -1,5 +1,5 @@
 ﻿using EShop.Shared.Scoping.ResourceAccessControl;
-using static EShop.Shared.Scoping.ResourceAccessControl.FeatureIds;
+using static EShop.Shared.Scoping.ResourceAccessControl.FeatureConstants;
 using static EShop.Shared.Scoping.ResourceAccessControl.PermissionConstants;
 
 namespace EShop.Identity.Domain.ActionPopulators;
@@ -16,7 +16,7 @@ internal class UserActionPopulator : IActionPopulator
             {
                 nameof(UserActions.ViewUsers),
                 new ActionDefinition(
-                    await featureValidator.HasFeatureAsync(FeatureIds.Authorization.UserInvites) &&
+                    await featureValidator.HasFeatureAsync(FeatureConstants.Authorization.UserInvites) &&
                     await permissionValidator.HasAtLeastOneOfSpecificPermissionAsync(
                         PermissionConstants.Authorization.ViewUsers,
                         PermissionConstants.Authorization.ManageUsers))
@@ -24,25 +24,25 @@ internal class UserActionPopulator : IActionPopulator
             {
                 nameof(UserActions.InviteUser),
                 new ActionDefinition(
-                    await featureValidator.HasFeatureAsync(FeatureIds.Authorization.UserInvites) &&
+                    await featureValidator.HasFeatureAsync(FeatureConstants.Authorization.UserInvites) &&
                     await permissionValidator.HasPermissionAsync(PermissionConstants.Authorization.ManageUsers))
             },
             {
                 UserActions.EditUser.ToString(),
                 new ActionDefinition(
-                    await featureValidator.HasFeatureAsync(FeatureIds.Authorization.UserInvites) &&
+                    await featureValidator.HasFeatureAsync(FeatureConstants.Authorization.UserInvites) &&
                     await permissionValidator.HasPermissionAsync(PermissionConstants.Authorization.ManageUsers))
             },
             {
                 UserActions.DeleteUser.ToString(),
                 new ActionDefinition(
-                    await featureValidator.HasFeatureAsync(FeatureIds.Authorization.UserInvites) &&
+                    await featureValidator.HasFeatureAsync(FeatureConstants.Authorization.UserInvites) &&
                     await permissionValidator.HasPermissionAsync(PermissionConstants.Authorization.ManageUsers))
             },
             {
                 UserActions.AssignRoles.ToString(),
                 new ActionDefinition(
-                    await featureValidator.HasFeatureAsync(FeatureIds.Authorization.UserInvites) &&
+                    await featureValidator.HasFeatureAsync(FeatureConstants.Authorization.UserInvites) &&
                     await permissionValidator.HasPermissionAsync(PermissionConstants.Authorization.ManageUsers))
             },
         };
