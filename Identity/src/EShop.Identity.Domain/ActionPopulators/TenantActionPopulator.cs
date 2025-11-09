@@ -16,16 +16,16 @@ internal class TenantActionPopulator : IActionPopulator
             {
                 nameof(UserTenantActions.ViewSystemSettings),
                 new ActionDefinition(
-                    await featureValidator.HasFeatureAsync(Tenancy.SystemFormatConfiguration_FeatureId) &&
+                    await featureValidator.HasFeatureAsync(FeatureIds.Tenancy.SystemFormatConfiguration_FeatureId) &&
                     await permissionValidator.HasAtLeastOneOfSpecificPermissionAsync(
-                        TenancyPermissions.ViewSystemSettingsPermissionId,
-                        TenancyPermissions.ManageSystemSettingsPermissionId))
+                        PermissionConstants.Tenancy.ViewSystemSettings,
+                        PermissionConstants.Tenancy.ManageSystemSettings))
             },
             {
                 nameof(UserTenantActions.ManageSystemSettings),
                 new ActionDefinition(
-                    await featureValidator.HasFeatureAsync(Tenancy.SystemFormatConfiguration_FeatureId) &&
-                    await permissionValidator.HasPermissionAsync(TenancyPermissions.ManageSystemSettingsPermissionId))
+                    await featureValidator.HasFeatureAsync(FeatureIds.Tenancy.SystemFormatConfiguration_FeatureId) &&
+                    await permissionValidator.HasPermissionAsync(PermissionConstants.Tenancy.ManageSystemSettings))
             }
         };
     }

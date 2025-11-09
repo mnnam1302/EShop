@@ -17,8 +17,8 @@ public static class ServiceCollectionExtensions
         services.AddMediator(AssemblyReference.Assembly);
 
         services.AddApplicationServices();
-        services.AddUserPermissionsProvider();
-        services.AddUserOrganizationContextProvider();
+        services.AddOwnerUserPermissionsProvider();
+        services.AddOwnerUserOrganizationContextProvider();
 
         return services;
     }
@@ -29,7 +29,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IRootOrganizationService, RootOrganizationService>();
     }
 
-    public static void AddUserPermissionsProvider(this IServiceCollection services)
+    public static void AddOwnerUserPermissionsProvider(this IServiceCollection services)
     {
         services.AddTransient<IPermissionValidator, CurrentUserPermissionsValidator>();
         services.AddTransient<IUserPermissionsProvider, OwnerUserPermissionProvider>();
@@ -38,7 +38,7 @@ public static class ServiceCollectionExtensions
         services.AddTransient<IPermissionCalculator, PermissionCalculator>();
     }
 
-    public static void AddUserOrganizationContextProvider(this IServiceCollection services)
+    public static void AddOwnerUserOrganizationContextProvider(this IServiceCollection services)
     {
         services.AddScoped<IUserOrganizationContextProvider, OwnerUserOrganizationContextProvider>();
         services.AddScoped<IUserOrganizationContextCalculator, UserOrganizationContextCalculator>();

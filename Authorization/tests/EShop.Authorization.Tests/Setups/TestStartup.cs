@@ -24,7 +24,7 @@ public sealed class TestStartup : API.Startup
         services.AddTestBoostrapping(testDatabase, Configuration);
     }
 
-    public void Configure(WebApplication app, IHostApplicationLifetime applicationLifetime, ILoggerFactory loggerFactory)
+    public void Configure(IApplicationBuilder app, IHostApplicationLifetime applicationLifetime, ILoggerFactory loggerFactory)
     {
         if (Environment.IsDevelopment())
         {
@@ -36,6 +36,9 @@ public sealed class TestStartup : API.Startup
         app.UseAuthentication();
         app.UseAuthorization();
 
-        app.MapAuthEndpoints();
+        app.UseEndpoints(endpoints =>
+        {
+            endpoints.MapAuthEndpoints();
+        });
     }
 }

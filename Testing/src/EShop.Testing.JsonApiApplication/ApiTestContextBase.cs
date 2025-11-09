@@ -364,7 +364,8 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
         UserData? user,
         string httpMethod)
     {
-        var httpContent = CreateJsonHttpContent(request);
+        var serializedRequest = System.Text.Json.JsonSerializer.Serialize(request);
+        var httpContent = new StringContent(serializedRequest, Encoding.UTF8, JsonMediaType);
 
         return ExecuteHttpRequestAsync<TResult>(
             client => CreateHttpRequestWithBody(client, relativeUri, httpContent, httpMethod),
@@ -383,12 +384,6 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
             "PATCH" => client.PatchAsync(relativeUri, content),
             _ => throw new ArgumentException($"HTTP method '{method}' with body is not supported.", nameof(method))
         };
-    }
-
-    private static HttpContent CreateJsonHttpContent<TRequest>(TRequest request)
-    {
-        var serializedRequest = System.Text.Json.JsonSerializer.Serialize(request);
-        return new StringContent(serializedRequest, Encoding.UTF8, JsonMediaType);
     }
 
     private async Task<TResult> ExecuteHttpRequestAsync<TResult>(
@@ -490,13 +485,18 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
 
     #region Dispose
 
+    ~ApiTestContextBase()
+    {
+        Dispose(false);
+    }
+
     public void Dispose()
     {
         Dispose(true);
         GC.SuppressFinalize(this);
     }
 
-    public virtual void Dispose(bool disposing)
+    protected virtual void Dispose(bool disposing)
     {
         if (disposed)
         {
@@ -506,8 +506,6 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
         if (disposing)
         {
             serviceScope.Dispose();
-
-            // the factory tracks and disposes of any clients created
             server.Dispose();
         }
 

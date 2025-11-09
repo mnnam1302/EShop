@@ -24,8 +24,8 @@ public class RolesController
 
     [HttpGet]
     [RequireOneOfPermissions(
-        IdentityPermissions.ViewRolesPermissionId,
-        IdentityPermissions.ManageRolesPermissionId)]
+        Authorization.ViewRoles,
+        Authorization.ManageRoles)]
     public async Task<IResult> GetRoles(
         string? name = null,
         int pageIndex = 1,
@@ -45,8 +45,8 @@ public class RolesController
 
     [HttpGet("{id}")]
     [RequireOneOfPermissions(
-        IdentityPermissions.ViewRolesPermissionId,
-        IdentityPermissions.ManageRolesPermissionId)]
+        Authorization.ViewRoles,
+        Authorization.ManageRoles)]
     public async Task<IResult> GetRole(Guid id, CancellationToken cancellationToken)
     {
         var query = new Query.GetRoleById(id);
@@ -61,7 +61,7 @@ public class RolesController
     }
 
     [HttpPost]
-    [RequirePermission(IdentityPermissions.ManageRolesPermissionId)]
+    [RequirePermission(Authorization.ManageRoles)]
     public async Task<IResult> CreateRole([FromBody] Command.CreateRoleCommand request, CancellationToken cancellationToken)
     {
         var result = await _sender.Send(request, cancellationToken);
@@ -75,7 +75,7 @@ public class RolesController
     }
 
     [HttpPatch("{id}")]
-    [RequirePermission(IdentityPermissions.ManageRolesPermissionId)]
+    [RequirePermission(Authorization.ManageRoles)]
     public async Task<IResult> UpdateRole(Guid id, [FromBody] Command.UpdateRole request, CancellationToken cancellationToken)
     {
         var command = request with { Id = id };
@@ -90,7 +90,7 @@ public class RolesController
     }
 
     [HttpDelete("{id}")]
-    [RequirePermission(IdentityPermissions.ManageRolesPermissionId)]
+    [RequirePermission(Authorization.ManageRoles)]
     public async Task<IResult> DeleteRole(Guid id, CancellationToken cancellationToken)
     {
         var command = new Command.DeleteRole(id);

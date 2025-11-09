@@ -23,8 +23,8 @@ public class OrganizationsController
     }
 
     [HttpPost]
-    [RequireFeature(Authorization.OrganisationRingFencing)]
-    [RequirePermission(IdentityPermissions.ManageOrganizationsPermissionId)]
+    [RequireFeature(Shared.Scoping.ResourceAccessControl.FeatureIds.Authorization.OrganisationRingFencing)]
+    [RequirePermission(Shared.Scoping.ResourceAccessControl.PermissionConstants.Authorization.ManageOrganizations)]
     public async Task<IResult> CreateOrganization([FromBody] Command.CreateOrganizationCommand request)
     {
         var result = await _sender.Send(request);
@@ -38,8 +38,8 @@ public class OrganizationsController
     }
 
     [HttpPut("{id}")]
-    [RequireFeature(Authorization.OrganisationRingFencing)]
-    [RequireOneOfPermissions(IdentityPermissions.ManageOrganizationsPermissionId)]
+    [RequireFeature(Shared.Scoping.ResourceAccessControl.FeatureIds.Authorization.OrganisationRingFencing)]
+    [RequireOneOfPermissions(Shared.Scoping.ResourceAccessControl.PermissionConstants.Authorization.ManageOrganizations)]
     public async Task<IResult> UpdateOrganization([FromRoute] string id, [FromBody] Command.UpdateOrganizationCommand request)
     {
         var command = request with { Id = id };
@@ -54,10 +54,10 @@ public class OrganizationsController
     }
 
     [HttpGet("{id}")]
-    [RequireFeature(Authorization.OrganisationRingFencing)]
+    [RequireFeature(Shared.Scoping.ResourceAccessControl.FeatureIds.Authorization.OrganisationRingFencing)]
     [RequireOneOfPermissions(
-        IdentityPermissions.ViewOrganizationsPermissionId,
-        IdentityPermissions.ManageOrganizationsPermissionId)]
+        Shared.Scoping.ResourceAccessControl.PermissionConstants.Authorization.ViewOrganizations,
+        Shared.Scoping.ResourceAccessControl.PermissionConstants.Authorization.ManageOrganizations)]
     public async Task<IResult> GetOrganizationById([FromRoute] string id)
     {
         var result = await _sender.Send(new Query.GetOrganizationById(id));

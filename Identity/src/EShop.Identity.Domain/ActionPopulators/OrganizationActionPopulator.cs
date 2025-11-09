@@ -16,16 +16,16 @@ internal class OrganizationActionPopulator : IActionPopulator
             {
                 nameof(UserOrganizationActions.ViewOrganizations),
                 new ActionDefinition(
-                    await featureValidator.HasFeatureAsync(Authorization.OrganisationRingFencing) &&
+                    await featureValidator.HasFeatureAsync(FeatureIds.Authorization.OrganisationRingFencing) &&
                     await permissionValidator.HasAtLeastOneOfSpecificPermissionAsync(
-                        IdentityPermissions.ViewOrganizationsPermissionId,
-                        IdentityPermissions.ManageOrganizationsPermissionId))
+                        PermissionConstants.Authorization.ViewOrganizations,
+                        PermissionConstants.Authorization.ManageOrganizations))
             },
             {
                 UserOrganizationActions.ManageOrganizations.ToString(),
                 new ActionDefinition(
-                    await featureValidator.HasFeatureAsync(Authorization.OrganisationRingFencing) &&
-                    await permissionValidator.HasPermissionAsync(IdentityPermissions.ManageOrganizationsPermissionId))
+                    await featureValidator.HasFeatureAsync(FeatureIds.Authorization.OrganisationRingFencing) &&
+                    await permissionValidator.HasPermissionAsync(PermissionConstants.Authorization.ManageOrganizations))
             }
         };
     }

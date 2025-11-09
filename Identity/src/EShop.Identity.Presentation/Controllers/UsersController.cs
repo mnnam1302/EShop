@@ -26,7 +26,7 @@ public class UsersController
     }
 
     [HttpPost]
-    [RequirePermission(IdentityPermissions.ManageUsersPermissionId)]
+    [RequirePermission(Authorization.ManageUsers)]
     public async Task<IResult> CreateUser([FromBody] Command.CreateUserCommand request)
     {
         var result = await _sender.Send(request);
@@ -40,8 +40,8 @@ public class UsersController
 
     [HttpGet("{id}")]
     [RequireOneOfPermissions(
-        IdentityPermissions.ViewUsersPermissionId,
-        IdentityPermissions.ManageUsersPermissionId)]
+        Authorization.ViewUsers,
+        Authorization.ManageUsers)]
     public async Task<IResult> GetUser([FromRoute] string id)
     {
         var request = new Query.GetUserQuery(id);

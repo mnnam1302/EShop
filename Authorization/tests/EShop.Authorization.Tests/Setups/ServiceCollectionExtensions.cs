@@ -1,7 +1,9 @@
 ﻿using EShop.Authorization.API.Boostrapping;
+using EShop.Authorization.Application.Abstractions;
 using EShop.Authorization.Application.DependencyInjections;
 using EShop.Authorization.Infrastructure;
 using EShop.Authorization.Infrastructure.DependencyInjections;
+using EShop.Authorization.Tests.Fakes;
 using EShop.Shared.Authentication.DependencyInjections;
 using EShop.Shared.Cache.DependencyInejctions.Extensions;
 using EShop.Shared.Contracts.Services.Tenancy.Tenants;
@@ -30,7 +32,7 @@ public static class ServiceCollectionExtensions
         services.AddTestAuthorizationAPI()
             .AddTestAuthorizationApplication()
             .AddTestAuthorizationPersistence(testDatabase)
-            .AddTestAuthorizationInfrastructure(configuration);
+            .AddTestAuthorizationInfrastructure();
 
         return services;
     }
@@ -62,7 +64,7 @@ public static class ServiceCollectionExtensions
 
     private static IServiceCollection AddTestAuthorizationApplication(this IServiceCollection services)
     {
-        services.AddMediator(Authorization.Application.AssemblyReference.Assembly);
+        services.AddMediator(Application.AssemblyReference.Assembly);
         services.AddApplicationServices();
 
         services.AddTransient<IPermissionValidator, CurrentUserPermissionsValidator>();
@@ -70,6 +72,8 @@ public static class ServiceCollectionExtensions
 
         services.AddScoped<IFeatureValidator, CurrentUserFeaturesValidator>();
         services.AddScoped<ITenantFeaturesProvider, TestTenantFeatureProvider>();
+
+        services.AddOwnerUserOrganizationContextProvider();
 
         return services;
     }
@@ -82,14 +86,14 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    private static IServiceCollection AddTestAuthorizationInfrastructure(this IServiceCollection services, IConfiguration configuration)
+    private static IServiceCollection AddTestAuthorizationInfrastructure(this IServiceCollection services)
     {
         services.AddEventBus()
             .AddMassTransitMemory();
 
         services.AddMemoryCacheInfrastructure();
 
-        services.AddEmailServices(configuration);
+        services.AddScoped<IEmailService, TestEmailService>();
 
         return services;
     }
@@ -99,7 +103,7 @@ public static class ServiceCollectionExtensions
         services.AddMassTransit(cfg =>
         {
             cfg.SetKebabCaseEndpointNameFormatter();
-            cfg.AddConsumers(Authorization.Infrastructure.AssemblyReference.Assembly);
+            cfg.AddConsumers(Infrastructure.AssemblyReference.Assembly);
 
             cfg.UsingInMemory((context, bus) =>
             {

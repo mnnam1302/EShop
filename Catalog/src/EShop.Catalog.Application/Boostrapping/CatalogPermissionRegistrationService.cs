@@ -22,14 +22,14 @@ public sealed class CatalogPermissionRegistrationService : IPermissionRegistrati
     {
         new CatalogPermission()
         {
-            Id = CatalogPermissions.ViewProductsPermissionId,
+            Id = PermissionConstants.Catalog.ViewProducts,
             Name = "View products",
             Description = "Allows users viewing list products, all product versions, and product version details in read-only mode.",
             RelatedTo = ModuleName
         },
         new CatalogPermission()
         {
-            Id = CatalogPermissions.ManageProductsPermissionId,
+            Id = PermissionConstants.Catalog.ManageProducts,
             Name = "Manage products",
             Description = "Allows users adding new product, adding/editing/cloning product versions, publishing product, activating published product version",
             RelatedTo = ModuleName
