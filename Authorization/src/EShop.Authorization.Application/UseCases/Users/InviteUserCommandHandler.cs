@@ -49,6 +49,15 @@ internal sealed class InviteUserCommandHandler(
             return Result.Failure(new Error("Role.NotFound", $"The following roles were not found: {string.Join(", ", missingRoleIds)}"));
         }
 
+        var existingUser = await userRepository.FindSingleAsync(
+            u => u.Id == command.Username || u.Username == command.Username,
+            cancellationToken: cancellationToken);
+        if (existingUser is not null)
+        {
+            logger.LogWarning("User with username {Username} already exists", command.Username);
+            return Result.Failure(ErrorContants.User.AlreadyExists);
+        }
+
         var randomPassword = passwordHasher.GenerateRandomPassword();
         var user = User.Create(
             command.Username,

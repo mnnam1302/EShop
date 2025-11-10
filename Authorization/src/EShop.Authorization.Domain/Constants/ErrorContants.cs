@@ -22,5 +22,6 @@ public static class ErrorContants
     public static class User
     {
         public static readonly Error PermissionNotFound = new("User.PermissionNotFound", "The specified permission is not found.");
+        public static readonly Error AlreadyExists = new("User.AlreadyExists", "A user with this username already exists.");
     }
 }
