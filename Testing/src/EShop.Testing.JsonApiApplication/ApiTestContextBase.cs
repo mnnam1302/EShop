@@ -73,7 +73,7 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
     private readonly TestTenantFeatureProvider testTenantFeatureProvider;
     private readonly ISystemInternalJwtTokenFactory systemInternalJwtTokenFactory;
 
-    private readonly Dictionary<string, UserData> _users = [];
+    private readonly Dictionary<string, UserData> users = [];
 
     private UserData defaultUser = new("TEST_ADMIN", "TEST_ADMIN", DefaultTenantId, isSupportUser: true);
 
@@ -133,7 +133,7 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
 
     public void AddUser(UserData user, bool setAsDefault = false)
     {
-        _users.Add(user.Username.ToLower(), user);
+        users.Add(user.Username.ToLower(), user);
         if (setAsDefault)
         {
             defaultUser = user;
@@ -143,13 +143,13 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
 
     public void AddOrUpdateUser(UserData user, bool setAsDefault = false)
     {
-        if (_users.ContainsKey(user.Username))
+        if (users.ContainsKey(user.Username))
         {
-            _users[user.Username] = user;
+            users[user.Username] = user;
         }
         else
         {
-            _users.Add(user.Username.ToLower(), user);
+            users.Add(user.Username.ToLower(), user);
         }
         if (setAsDefault)
         {
@@ -162,20 +162,21 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
     {
         var operationalUsername = username ?? LoggedInUser;
         operationalUsername = operationalUsername?.ToLower();
+
         if (string.IsNullOrEmpty(operationalUsername) || string.Equals(username, defaultUser.Username, StringComparison.OrdinalIgnoreCase))
         {
             return defaultUser;
         }
         else
         {
-            if (_users.ContainsKey(operationalUsername))
+            if (users.TryGetValue(operationalUsername, out UserData? value))
             {
-                return _users[operationalUsername];
+                return value;
             }
 
-            if (_users.Keys.Count(x => x.StartsWith(operationalUsername)) == 1)
+            if (users.Keys.Count(x => x.StartsWith(operationalUsername)) == 1)
             {
-                return _users.Single(kv => kv.Key.StartsWith(operationalUsername)).Value;
+                return users.Single(kv => kv.Key.StartsWith(operationalUsername)).Value;
             }
 
             if (!operationalUsername.Contains('@'))
@@ -190,7 +191,7 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
     public bool CheckUserExists(string username)
     {
         var realUsername = GetUserByUsername(username).Username;
-        return _users.ContainsKey(realUsername);
+        return users.ContainsKey(realUsername);
     }
 
     public void SetupPermissionsForDefaultAdminUser(string[] permissionIds)

@@ -12,7 +12,7 @@ Scenario: Inviting a new user
         | Username               | TenantId    |
         | test-owner@test-tenant | test-tenant |
     And user 'test-owner@test-tenant' logs in to the system
-    When user 'test-owner@test-tenant' invites a new user with role 'Owner Role' the following details
+    When user invites a new user with role 'Owner Role' the following details
         | Username              | Email                 | DisplayName | PhoneNumber  | OrganizationId |
         | test-user@test-tenant | test-user@test-tenant | Test User   | '0969900212' | test-tenant    |
     Then user 'test-user@test-tenant' has following details

@@ -2,7 +2,7 @@
 using EShop.Authorization.Domain.Constants;
 using EShop.Authorization.Domain.Entities;
 using EShop.Authorization.Domain.Repositories;
-using EShop.Shared.Authentication;
+using EShop.Shared.Authentication.Abstractions;
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.CQRS.Command;
 using EShop.Shared.DomainTools.UnitOfWorks;
@@ -26,6 +26,7 @@ internal sealed class InviteUserCommandHandler(
     IRoleRepository roleRepository,
     IUnitOfWork unitOfWork,
     IPasswordHasher passwordHasher,
+    IUserDetailsProvider userDetailsProvider,
     ILogger<InviteUserCommandHandler> logger) : ICommandHandler<InviteUserCommand>
 {
     public async Task<Result> HandleAsync(InviteUserCommand command, CancellationToken cancellationToken)
@@ -59,14 +60,15 @@ internal sealed class InviteUserCommandHandler(
         }
 
         var randomPassword = passwordHasher.GenerateRandomPassword();
-        var user = User.Create(
+        var user = User.Invite(
             command.Username,
             randomPassword,
             passwordHasher.Hash(randomPassword),
             command.Email,
             command.DisplayName,
             command.OrganizationId,
-            UserData.SystemUsername);
+            organization.TenantId,
+            userDetailsProvider.AuthenticatedUser.Id);
 
         foreach (var roleId in command.RoleIds)
         {
