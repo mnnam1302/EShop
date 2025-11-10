@@ -4,7 +4,7 @@
     So that I can reflect real world organization structure these employees belong to and corresponding access level
 
 Scenario: Adding a child organization under the root organization
-    Given Tenancy service has provisioned a new tenant with following details
+    Given Tenancy service has provisied a new tenant with following details
         | TenantId | TenantName | OwnerUsername         | OwnerDisplayName | OwnerEmail        |
         | tenant-1 | Tenant 1   | ownerTenant1@tenant-1 | Owner Tenant1    | owner@tenant1.com |
     And all standard features were turned on for 'tenant-1'

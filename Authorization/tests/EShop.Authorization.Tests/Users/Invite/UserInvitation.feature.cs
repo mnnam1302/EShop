@@ -11,29 +11,28 @@
 #region Designer generated code
 #pragma warning disable
 using Reqnroll;
-namespace EShop.Authorization.Tests.Organizations.AddChild
+namespace EShop.Authorization.Tests.Users.Invite
 {
     
     
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Reqnroll", "3.0.0.0")]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    public partial class AddChildOrganizationFeature : object, global::Xunit.IClassFixture<AddChildOrganizationFeature.FixtureData>, global::Xunit.IAsyncLifetime
+    public partial class UserInvitationFeature : object, global::Xunit.IClassFixture<UserInvitationFeature.FixtureData>, global::Xunit.IAsyncLifetime
     {
         
         private global::Reqnroll.ITestRunner testRunner;
         
         private static string[] featureTags = ((string[])(null));
         
-        private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new global::System.Globalization.CultureInfo("en-US"), "Organizations/AddChild", "AddChildOrganization", "    As an Admin User\r\n    I want to group users\r\n    So that I can reflect real w" +
-                "orld organization structure these employees belong to and corresponding access l" +
-                "evel", global::Reqnroll.ProgrammingLanguage.CSharp, featureTags, InitializeCucumberMessages());
+        private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new global::System.Globalization.CultureInfo("en-US"), "Users/Invite", "UserInvitation", "    As a User management\r\n    I want to invite new users to the organization\r\n   " +
+                " So that I can access the application with appropriate permissions", global::Reqnroll.ProgrammingLanguage.CSharp, featureTags, InitializeCucumberMessages());
         
         private global::Xunit.Abstractions.ITestOutputHelper _testOutputHelper;
         
-#line 1 "AddChildOrganization.feature"
+#line 1 "UserInvitation.feature"
 #line hidden
         
-        public AddChildOrganizationFeature(AddChildOrganizationFeature.FixtureData fixtureData, global::Xunit.Abstractions.ITestOutputHelper testOutputHelper)
+        public UserInvitationFeature(UserInvitationFeature.FixtureData fixtureData, global::Xunit.Abstractions.ITestOutputHelper testOutputHelper)
         {
             this._testOutputHelper = testOutputHelper;
         }
@@ -107,7 +106,7 @@ namespace EShop.Authorization.Tests.Organizations.AddChild
         
         private static global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages InitializeCucumberMessages()
         {
-            return new global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages("Organizations/AddChild/AddChildOrganization.feature.ndjson", 3);
+            return new global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages("Users/Invite/UserInvitation.feature.ndjson", 3);
         }
         
         async global::System.Threading.Tasks.Task global::Xunit.IAsyncLifetime.InitializeAsync()
@@ -135,15 +134,15 @@ namespace EShop.Authorization.Tests.Organizations.AddChild
             await this.TestTearDownAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Adding a child organization under the root organization")]
-        [global::Xunit.TraitAttribute("FeatureTitle", "AddChildOrganization")]
-        [global::Xunit.TraitAttribute("Description", "Adding a child organization under the root organization")]
-        public async global::System.Threading.Tasks.Task AddingAChildOrganizationUnderTheRootOrganization()
+        [global::Xunit.SkippableFactAttribute(DisplayName="Inviting a new user")]
+        [global::Xunit.TraitAttribute("FeatureTitle", "UserInvitation")]
+        [global::Xunit.TraitAttribute("Description", "Inviting a new user")]
+        public async global::System.Threading.Tasks.Task InvitingANewUser()
         {
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
             string pickleIndex = "0";
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Adding a child organization under the root organization", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Inviting a new user", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
 #line 6
@@ -156,82 +155,68 @@ this.ScenarioInitialize(scenarioInfo, ruleInfo);
             else
             {
                 await this.ScenarioStartAsync();
-                global::Reqnroll.Table table1 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table10 = new global::Reqnroll.Table(new string[] {
                             "TenantId",
                             "TenantName",
                             "OwnerUsername",
                             "OwnerDisplayName",
                             "OwnerEmail"});
-                table1.AddRow(new string[] {
-                            "tenant-1",
-                            "Tenant 1",
-                            "ownerTenant1@tenant-1",
-                            "Owner Tenant1",
-                            "owner@tenant1.com"});
+                table10.AddRow(new string[] {
+                            "test-tenant",
+                            "Test Tenant",
+                            "test-owner@test-tenant",
+                            "Test Owner",
+                            "test-owner@test-tenant"});
 #line 7
-    await testRunner.GivenAsync("Tenancy service has provisied a new tenant with following details", ((string)(null)), table1, "Given ");
+    await testRunner.GivenAsync("Tenancy service has provisied a new tenant with following details", ((string)(null)), table10, "Given ");
 #line hidden
 #line 10
-    await testRunner.AndAsync("all standard features were turned on for \'tenant-1\'", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+    await testRunner.AndAsync("all standard features were turned on for \'test-tenant\'", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
-                global::Reqnroll.Table table2 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table11 = new global::Reqnroll.Table(new string[] {
                             "Username",
                             "TenantId"});
-                table2.AddRow(new string[] {
-                            "ownerTenant1@tenant-1",
-                            "tenant-1"});
+                table11.AddRow(new string[] {
+                            "test-owner@test-tenant",
+                            "test-tenant"});
 #line 11
-    await testRunner.AndAsync("the following users are set up", ((string)(null)), table2, "And ");
+    await testRunner.AndAsync("the following users are set up", ((string)(null)), table11, "And ");
 #line hidden
-                global::Reqnroll.Table table3 = new global::Reqnroll.Table(new string[] {
-                            "PermissionId"});
-                table3.AddRow(new string[] {
-                            "Authorization_ManageOrganizations"});
 #line 14
-    await testRunner.AndAsync("user \'ownerTenant1@tenant-1\' has the following permissions", ((string)(null)), table3, "And ");
+    await testRunner.AndAsync("user \'test-owner@test-tenant\' logs in to the system", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
-#line 17
-    await testRunner.AndAsync("user \'ownerTenant1@tenant-1\' logs in to the system", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
-#line hidden
-                global::Reqnroll.Table table4 = new global::Reqnroll.Table(new string[] {
-                            "Id",
-                            "Name",
-                            "OrganizationNumber",
+                global::Reqnroll.Table table12 = new global::Reqnroll.Table(new string[] {
+                            "Username",
                             "Email",
-                            "Description"});
-                table4.AddRow(new string[] {
-                            "child-org",
-                            "Organization child of root",
-                            "500000",
-                            "child-org@app.ecommerce",
-                            "Child organization"});
+                            "DisplayName",
+                            "PhoneNumber",
+                            "OrganizationId"});
+                table12.AddRow(new string[] {
+                            "test-user@test-tenant",
+                            "test-user@test-tenant",
+                            "Test User",
+                            "\'0969900212\'",
+                            "test-tenant"});
+#line 15
+    await testRunner.WhenAsync("user \'test-owner@test-tenant\' invites a new user with role \'Owner Role\' the follo" +
+                        "wing details", ((string)(null)), table12, "When ");
+#line hidden
+                global::Reqnroll.Table table13 = new global::Reqnroll.Table(new string[] {
+                            "Username",
+                            "Email",
+                            "DisplayName",
+                            "PhoneNumber",
+                            "OrganizationId",
+                            "TenantId"});
+                table13.AddRow(new string[] {
+                            "test-user@test-tenant",
+                            "test-user@test-tenant",
+                            "Test User",
+                            "\'0969900212\'",
+                            "test-tenant",
+                            "test-tenant"});
 #line 18
-    await testRunner.WhenAsync("user \'ownerTenant1@tenant-1\' adds a child organization under the organization \'te" +
-                        "nant-1\' with the following details", ((string)(null)), table4, "When ");
-#line hidden
-                global::Reqnroll.Table table5 = new global::Reqnroll.Table(new string[] {
-                            "Id",
-                            "Name",
-                            "Description",
-                            "Email",
-                            "OrganizationNumber",
-                            "ParentOrganizationId"});
-                table5.AddRow(new string[] {
-                            "tenant-1",
-                            "Tenant 1",
-                            "Root Organization",
-                            "",
-                            "",
-                            ""});
-                table5.AddRow(new string[] {
-                            "child-org",
-                            "Organization child of root",
-                            "Child organization",
-                            "child-org@app.ecommerce",
-                            "500000",
-                            "tenant-1"});
-#line 21
-    await testRunner.ThenAsync("user \'ownerTenant1@tenant-1\' retrieves organizations", ((string)(null)), table5, "Then ");
+    await testRunner.ThenAsync("user \'test-user@test-tenant\' has following details", ((string)(null)), table13, "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
@@ -244,12 +229,12 @@ this.ScenarioInitialize(scenarioInfo, ruleInfo);
             
             async global::System.Threading.Tasks.Task global::Xunit.IAsyncLifetime.InitializeAsync()
             {
-                await AddChildOrganizationFeature.FeatureSetupAsync();
+                await UserInvitationFeature.FeatureSetupAsync();
             }
             
             async global::System.Threading.Tasks.Task global::Xunit.IAsyncLifetime.DisposeAsync()
             {
-                await AddChildOrganizationFeature.FeatureTearDownAsync();
+                await UserInvitationFeature.FeatureTearDownAsync();
             }
         }
     }
