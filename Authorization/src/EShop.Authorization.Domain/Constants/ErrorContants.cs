@@ -7,6 +7,7 @@ public static class ErrorContants
     public static class Organization
     {
         public static readonly Error AlreadyExists = new("Organization.AlreadyExists", "An organization with this tenant ID already exists.");
+        public static readonly Error NotFound = new("Organization.NotFound", "The specified organization does not exist.");
     }
 
     public static class Authentication
