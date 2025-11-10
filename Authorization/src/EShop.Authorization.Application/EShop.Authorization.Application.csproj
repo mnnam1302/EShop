@@ -11,8 +11,4 @@
     <ProjectReference Include="..\EShop.Authorization.Domain\EShop.Authorization.Domain.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="UseCases\Roles\" />
-  </ItemGroup>
-
 </Project>
