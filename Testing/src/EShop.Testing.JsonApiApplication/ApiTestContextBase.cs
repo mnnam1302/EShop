@@ -17,6 +17,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Primitives;
 using Newtonsoft.Json;
 using Serilog;
+using Serilog.Events;
 using System.Net;
 using System.Reflection;
 using System.Text;
@@ -471,14 +472,19 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
 
     private static void SetupLogging(IServiceProvider serviceProvider, LoggerConfiguration loggerConfig)
     {
+        var testOutputTemplate = "[{Timestamp:HH:mm:ss.fff} {Level:u3}] (T={ThreadId}) {Message:lj} {Properties}{NewLine}{Exception}{NewLine}";
+
         loggerConfig
             .MinimumLevel.Debug()
+            .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
+            .MinimumLevel.Override("System", LogEventLevel.Warning)
+            .MinimumLevel.Override("Microsoft.Hosting.Lifetime", LogEventLevel.Information)
             .Enrich.FromLogContext()
             .Enrich.WithThreadId()
             .Enrich.WithThreadName()
             .ReadFrom.Configuration(serviceProvider.GetRequiredService<IConfiguration>())
-            .WriteTo.Debug(outputTemplate: "[{Timestamp:HH:mm:ss.fff} {Level:u3}] (T={ThreadId}) {Message:lj} {Properties}{NewLine}{Exception}{NewLine}")
-            .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss.fff} {Level:u3}] (T={ThreadId}) {Message:lj} {Properties}{NewLine}{Exception}{NewLine}");
+            .WriteTo.Debug(outputTemplate: testOutputTemplate)
+            .WriteTo.Console(outputTemplate: testOutputTemplate);
     }
 
     #endregion Logging
