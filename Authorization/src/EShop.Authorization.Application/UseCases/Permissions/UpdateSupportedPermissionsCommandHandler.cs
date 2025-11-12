@@ -1,7 +1,7 @@
 ﻿using EShop.Authorization.Domain.Entities;
 using EShop.Authorization.Domain.Repositories;
 using EShop.Shared.Contracts.Abstractions.Shared;
-using EShop.Shared.Contracts.Services.Identity.Permissions;
+using EShop.Shared.Contracts.IntegrationEvents.Authorization;
 using EShop.Shared.CQRS.Command;
 using EShop.Shared.DomainTools.UnitOfWorks;
 using Microsoft.Extensions.Logging;
@@ -12,7 +12,7 @@ namespace EShop.Authorization.Application.UseCases.Permissions;
 public sealed class UpdateSupportedPermissionsCommand : ICommand
 {
     public required string SourceSystemReference { get; init; }
-    public IPermission[] Permissions { get; init; } = [];
+    public Shared.Contracts.IntegrationEvents.Authorization.IPermission[] Permissions { get; init; } = [];
     public SupportedPermissionAction Action { get; init; }
 }
 
@@ -38,7 +38,7 @@ internal sealed class UpdateSupportedPermissionsCommandHandler : ICommandHandler
 
         foreach (var permission in command.Permissions)
         {
-            var permissionModel = Permission.Create(
+            var permissionModel = Domain.Entities.Permission.Create(
                 permission.Id,
                 permission.Name,
                 permission.Description,
@@ -59,7 +59,7 @@ internal sealed class UpdateSupportedPermissionsCommandHandler : ICommandHandler
         return Result.Success();
     }
 
-    private async Task CreateOrUpdatePermissionAsync(Permission permission, CancellationToken cancellationToken)
+    private async Task CreateOrUpdatePermissionAsync(Domain.Entities.Permission permission, CancellationToken cancellationToken)
     {
         var existingPermission = await _permissionRepository.FindByIdAsync(permission.Id);
         if (existingPermission is null)
@@ -75,7 +75,7 @@ internal sealed class UpdateSupportedPermissionsCommandHandler : ICommandHandler
         _logger.LogTrace("Permission '{PermissionId}' added to the system.", permission.Id);
     }
 
-    private async Task RemovePermissionAsync(Permission permission, CancellationToken cancellationToken)
+    private async Task RemovePermissionAsync(Domain.Entities.Permission permission, CancellationToken cancellationToken)
     {
         var existingPermission = await _permissionRepository.FindByIdAsync(permission.Id);
         if (existingPermission is not null)

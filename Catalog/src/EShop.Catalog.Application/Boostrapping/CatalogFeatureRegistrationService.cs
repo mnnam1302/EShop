@@ -28,7 +28,7 @@ public sealed class CatalogFeatureRegistrationService : IFeatureRegistrationServ
 
     public async Task RegisterFeatures()
     {
-        await eventBus.PublishAsync<ISupportedFeaturesUpdated>(new
+        await eventBus.PublishAsync<SupportedFeaturesUpdated>(new
         {
             SourceSystemReference = Program.ApplicationName,
             Features = Features,

@@ -1,6 +1,6 @@
 ﻿namespace EShop.Shared.Contracts.Services.Tenancy.Features;
 
-public interface ISupportedFeaturesUpdated : TenancyEvent
+public interface SupportedFeaturesUpdated : TenancyEvent
 {
     public string SourceSystemReference { get; }
     public IFeature[] Features { get; }

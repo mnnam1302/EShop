@@ -1,20 +1,13 @@
 ﻿using EShop.Authorization.Application.UseCases.Permissions;
-using EShop.Shared.Contracts.Services.Identity.Permissions;
+using EShop.Shared.Contracts.IntegrationEvents.Authorization;
 using EShop.Shared.CQRS;
 using MassTransit;
 
 namespace EShop.Authorization.Infrastructure.Consumers;
 
-public class SupportedPermissionsUpdatedConsumer : IConsumer<ISupportedPermissionsUpdated>
+public sealed class SupportedPermissionsUpdatedConsumer(IMediator mediator) : IConsumer<SupportedPermissionsUpdated>
 {
-    private readonly IMediator _mediator;
-
-    public SupportedPermissionsUpdatedConsumer(IMediator mediator)
-    {
-        _mediator = mediator;
-    }
-
-    public async Task Consume(ConsumeContext<ISupportedPermissionsUpdated> context)
+    public async Task Consume(ConsumeContext<SupportedPermissionsUpdated> context)
     {
         var command = new UpdateSupportedPermissionsCommand
         {
@@ -23,6 +16,6 @@ public class SupportedPermissionsUpdatedConsumer : IConsumer<ISupportedPermissio
             Action = context.Message.Action
         };
 
-        await _mediator.SendAsync(command, context.CancellationToken);
+        await mediator.SendAsync(command, context.CancellationToken);
     }
 }

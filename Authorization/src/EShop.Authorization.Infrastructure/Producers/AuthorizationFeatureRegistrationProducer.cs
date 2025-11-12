@@ -49,7 +49,7 @@ internal sealed class AuthorizationFeatureRegistrationProducer : IFeatureRegistr
 
     public async Task RegisterFeatures()
     {
-        await eventBusGateway.PublishAsync<ISupportedFeaturesUpdated>(new
+        await eventBusGateway.PublishAsync<SupportedFeaturesUpdated>(new
         {
             SourceSystemReference = ApplicationName,
             Features = features,

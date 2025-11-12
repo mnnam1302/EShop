@@ -1,25 +1,16 @@
 ﻿using EShop.Shared.Authentication;
-using EShop.Shared.Contracts.Services.Identity.Permissions;
+using EShop.Shared.Contracts.IntegrationEvents.Authorization;
 using EShop.Shared.EventBus.Services;
-using EShop.Shared.Scoping;
 using EShop.Shared.Scoping.ResourceAccessControl;
-using static EShop.Shared.Scoping.ResourceAccessControl.PermissionConstants;
 
 namespace EShop.Catalog.Application.Boostrapping;
 
-public sealed class CatalogPermissionRegistrationService : IPermissionRegistrationService
+public sealed class CatalogPermissionRegistrationService(IEventBusGateway eventBus) : IPermissionRegistrationService
 {
-    private readonly IEventBusGateway eventBus;
-
-    public CatalogPermissionRegistrationService(IEventBusGateway eventBus)
-    {
-        this.eventBus = eventBus;
-    }
-
     private const string ModuleName = "Product builder";
 
-    private static readonly CatalogPermission[] Permissions = new[]
-    {
+    private static readonly CatalogPermission[] Permissions =
+    [
         new CatalogPermission()
         {
             Id = PermissionConstants.Catalog.ViewProducts,
@@ -34,11 +25,11 @@ public sealed class CatalogPermissionRegistrationService : IPermissionRegistrati
             Description = "Allows users adding new product, adding/editing/cloning product versions, publishing product, activating published product version",
             RelatedTo = ModuleName
         }
-    };
+    ];
 
     public async Task RegisterPermissions()
     {
-        await eventBus.PublishAsync<ISupportedPermissionsUpdated>(new
+        await eventBus.PublishAsync<SupportedPermissionsUpdated>(new
         {
             SourceSystemReference = Program.ApplicationName,
             Permissions = Permissions,
