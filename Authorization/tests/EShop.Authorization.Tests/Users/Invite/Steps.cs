@@ -17,11 +17,10 @@ internal sealed class Steps(StepContext stepContext, Roles.Get.StepContext roleC
         await stepContext.InviteUserAsync(request);
     }
 
-
     [Then("user {string} has following details")]
     public async Task ThenUserHasFollowingDetails(string username, DataTable dataTable)
     {
-        var user = await stepContext.GetUserByUsernameAsync(username);
+        var user = await stepContext.GetUserByIdAsync(username);
         dataTable.CompareToInstance(user);
     }
 }

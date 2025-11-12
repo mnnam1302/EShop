@@ -15,7 +15,7 @@ public sealed class InviteUserCommand : ICommand
     public required string Username { get; init; }
     public required string Email { get; init; }
     public required string DisplayName { get; init; }
-    public string? PhoneNumber { get; init; }
+    public required string PhoneNumber { get; init; }
     public required string OrganizationId { get; init; }
     public required Guid[] RoleIds { get; init; } = [];
 }
@@ -66,6 +66,7 @@ internal sealed class InviteUserCommandHandler(
             passwordHasher.Hash(randomPassword),
             command.Email,
             command.DisplayName,
+            command.PhoneNumber,
             command.OrganizationId,
             organization.TenantId,
             userDetailsProvider.AuthenticatedUser.Id);

@@ -245,13 +245,10 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
 
     public void SignIn(string username)
     {
-        var user = GetUserByUsername(username);
-        if (user == null)
-        {
-            throw new ArgumentException($"User '{username}' is not found.");
-        }
+        var user = GetUserByUsername(username) ?? throw new ArgumentException($"User '{username}' is not found.");
 
         LoggedInUser = user.Username;
+
         logger.LogInformation("User '{username}' has logged in", LoggedInUser);
     }
 

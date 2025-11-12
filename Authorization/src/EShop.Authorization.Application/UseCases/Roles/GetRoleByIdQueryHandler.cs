@@ -5,7 +5,7 @@ using EShop.Shared.CQRS.Query;
 
 namespace EShop.Authorization.Application.UseCases.Roles;
 
-public sealed class GetRoleDetailsQuery(Guid roleId) : IQuery<RoleDetailsResponse>
+public sealed class GetRoleByIdQuery(Guid roleId) : IQuery<RoleDetailsResponse>
 {
     public Guid RoleId { get; init; } = roleId;
 }
@@ -27,9 +27,9 @@ public sealed class RolePermission
     public required string RelatedTo { get; init; }
 }
 
-internal class GetRoleDetailsQueryHandler(IRoleRepository roleRepository) : IQueryHandler<GetRoleDetailsQuery, RoleDetailsResponse>
+internal class GetRoleByIdQueryHandler(IRoleRepository roleRepository) : IQueryHandler<GetRoleByIdQuery, RoleDetailsResponse>
 {
-    public async Task<Result<RoleDetailsResponse>> HandleAsync(GetRoleDetailsQuery query, CancellationToken cancellationToken = default)
+    public async Task<Result<RoleDetailsResponse>> HandleAsync(GetRoleByIdQuery query, CancellationToken cancellationToken = default)
     {
         var role = await roleRepository.FindByIdAsync(
             query.RoleId,

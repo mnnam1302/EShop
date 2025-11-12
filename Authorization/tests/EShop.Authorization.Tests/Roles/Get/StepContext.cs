@@ -7,16 +7,17 @@ internal sealed class StepContext(ApiContext apiContext)
 {
     private const string BaseUrl = "api/v1/roles";
 
-    internal async Task<RoleDetailsResponse> GetByNameAsync(string roleName, string? operationalUsername = null)
+    internal async Task<RoleResponse> GetByNameAsync(string roleName, string? operationalUsername = null)
     {
         try
         {
             var operationalUser = apiContext.GetUserByUsername(operationalUsername);
-            var role = await apiContext.GetAsync<RoleDetailsResponse>(
+            var roles = await apiContext.GetAsync<List<RoleResponse>>(
                 $"{BaseUrl}?name={roleName}",
                 operationalUser);
 
-            return role.Value;
+            var role = roles.Value.FirstOrDefault(r => r.Name == roleName);
+            return role ?? throw new InvalidOperationException($"Role '{roleName}' not found");
         }
         catch (Exception ex)
         {

@@ -1,4 +1,5 @@
 ﻿using EShop.Authorization.API.Models;
+using EShop.Authorization.Application.UseCases.Users;
 using EShop.Authorization.Tests.Setups;
 
 namespace EShop.Authorization.Tests.Users.Invite;
@@ -20,8 +21,18 @@ internal sealed class StepContext(ApiContext apiContext)
         }
     }
 
-    internal async Task GetUserByUsernameAsync(string username)
+    internal async Task<UserDetailsResponse> GetUserByIdAsync(string username, string? operationalUsername = null)
     {
-        throw new NotImplementedException();
+        try
+        {
+            var operationalUser = apiContext.GetUserByUsername(operationalUsername);
+            var response = await apiContext.GetAsync<UserDetailsResponse>($"{BaseUrl}/{username}", operationalUser);
+            return response.Value;
+        }
+        catch (Exception ex)
+        {
+            apiContext.LastApiError = ex;
+            return null!;
+        }
     }
 }

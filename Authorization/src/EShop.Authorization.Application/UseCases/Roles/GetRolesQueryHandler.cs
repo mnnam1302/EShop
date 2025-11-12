@@ -17,15 +17,8 @@ public sealed class RoleResponse
     public string TenantId { get; init; } = null!;
 }
 
-internal sealed class GetRolesQueryHandler : IQueryHandler<GetRolesQuery, List<RoleResponse>>
+internal sealed class GetRolesQueryHandler(IRoleRepository roleRepository) : IQueryHandler<GetRolesQuery, List<RoleResponse>>
 {
-    private readonly IRoleRepository roleRepository;
-
-    public GetRolesQueryHandler(IRoleRepository roleRepository)
-    {
-        this.roleRepository = roleRepository;
-    }
-
     public async Task<Result<List<RoleResponse>>> HandleAsync(GetRolesQuery query, CancellationToken cancellationToken = default)
     {
         var roles = string.IsNullOrEmpty(query.Name)

@@ -186,36 +186,47 @@ this.ScenarioInitialize(scenarioInfo, ruleInfo);
     await testRunner.AndAsync("user \'test-owner@test-tenant\' logs in to the system", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
                 global::Reqnroll.Table table12 = new global::Reqnroll.Table(new string[] {
-                            "Username",
-                            "Email",
-                            "DisplayName",
-                            "PhoneNumber",
-                            "OrganizationId"});
+                            "PermissionId"});
                 table12.AddRow(new string[] {
-                            "test-user@test-tenant",
-                            "test-user@test-tenant",
-                            "Test User",
-                            "\'0969900212\'",
-                            "test-tenant"});
+                            "Authorization_ViewRoles"});
+                table12.AddRow(new string[] {
+                            "Authorization_ManageUsers"});
 #line 15
-    await testRunner.WhenAsync("user invites a new user with role \'Owner Role\' the following details", ((string)(null)), table12, "When ");
+    await testRunner.AndAsync("user \'test-owner@test-tenant\' has the following permissions", ((string)(null)), table12, "And ");
 #line hidden
                 global::Reqnroll.Table table13 = new global::Reqnroll.Table(new string[] {
                             "Username",
                             "Email",
                             "DisplayName",
                             "PhoneNumber",
-                            "OrganizationId",
-                            "TenantId"});
+                            "OrganizationId"});
                 table13.AddRow(new string[] {
                             "test-user@test-tenant",
                             "test-user@test-tenant",
                             "Test User",
-                            "\'0969900212\'",
-                            "test-tenant",
+                            "0969900212",
                             "test-tenant"});
-#line 18
-    await testRunner.ThenAsync("user \'test-user@test-tenant\' has following details", ((string)(null)), table13, "Then ");
+#line 19
+    await testRunner.WhenAsync("user invites a new user with role \'Role Owner\' the following details", ((string)(null)), table13, "When ");
+#line hidden
+                global::Reqnroll.Table table14 = new global::Reqnroll.Table(new string[] {
+                            "Username",
+                            "Email",
+                            "DisplayName",
+                            "PhoneNumber",
+                            "OrganizationId",
+                            "TenantId",
+                            "CreatedByUserId"});
+                table14.AddRow(new string[] {
+                            "test-user@test-tenant",
+                            "test-user@test-tenant",
+                            "Test User",
+                            "0969900212",
+                            "test-tenant",
+                            "test-tenant",
+                            "test-owner@test-tenant"});
+#line 22
+    await testRunner.ThenAsync("user \'test-user@test-tenant\' has following details", ((string)(null)), table14, "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();

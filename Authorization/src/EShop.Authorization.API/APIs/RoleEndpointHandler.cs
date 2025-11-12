@@ -28,7 +28,7 @@ public static class RoleEndpointHandler
         group.MapGet("", GetRolesAsync)
             .RequireOneOfPermissionsFilter(AuhthorizationPermissions.ManageRoles, AuhthorizationPermissions.ViewRoles);
 
-        group.MapGet("/{roleId}", GetRoleDetailsAsync)
+        group.MapGet("/{roleId}", GetRoleByIdAsync)
             .RequireOneOfPermissionsFilter(AuhthorizationPermissions.ManageRoles, AuhthorizationPermissions.ViewRoles);
 
         return endpoints;
@@ -67,11 +67,11 @@ public static class RoleEndpointHandler
         return Results.Ok(result);
     }
 
-    private static async Task<IResult> GetRoleDetailsAsync([FromRoute] Guid roleId, [FromServices] IMediator mediator, CancellationToken cancellationToken)
+    private static async Task<IResult> GetRoleByIdAsync([FromRoute] Guid roleId, [FromServices] IMediator mediator, CancellationToken cancellationToken)
     {
-        var query = new GetRoleDetailsQuery(roleId);
+        var query = new GetRoleByIdQuery(roleId);
 
-        var result = await mediator.QueryAsync<GetRoleDetailsQuery, RoleDetailsResponse>(query, cancellationToken);
+        var result = await mediator.QueryAsync<GetRoleByIdQuery, RoleDetailsResponse>(query, cancellationToken);
 
         if (result.IsFailure)
         {

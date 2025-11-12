@@ -80,22 +80,24 @@ public class User : AggregateRoot<string>, IExcludedFromScoping
     }
 
     public static User Invite(
-        string ownerUsername,
+        string username,
         string randomPassword,
         string hashedPassword,
-        string ownerEmail,
-        string ownerDisplayName,
+        string email,
+        string displayName,
+        string phoneNumber,
         string organizationId,
         string tenantId,
         string createdByUserId)
     {
         var user = new User
         {
-            Id = ownerUsername,
-            Username = ownerUsername,
+            Id = username,
+            Username = username,
             HashedPassword = hashedPassword,
-            Name = ownerDisplayName,
-            Email = ownerEmail,
+            Name = displayName,
+            Email = email,
+            PhoneNumber = phoneNumber,
             Status = nameof(UserStatus.Inactive),
             OrganizationId = organizationId,
             CreatedByUserId = createdByUserId,

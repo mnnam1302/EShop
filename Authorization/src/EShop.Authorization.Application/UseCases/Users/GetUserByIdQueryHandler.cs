@@ -15,20 +15,14 @@ public sealed class UserDetailsResponse
     public required string Username { get; init; }
     public required string Email { get; init; }
     public required string DisplayName { get; init; }
-    public string? PhoneNumber { get; init; }
+    public required string PhoneNumber { get; init; }
     public required string TenantId { get; init; }
+    public required string CreatedByUserId { get; init; }
     public required string OrganizationId { get; init; }
 }
 
-internal sealed class GetUserByIdQueryHandler : IQueryHandler<GetUserByIdQuery, UserDetailsResponse>
+internal sealed class GetUserByIdQueryHandler(IUserRepository userRepository) : IQueryHandler<GetUserByIdQuery, UserDetailsResponse>
 {
-    private readonly IUserRepository userRepository;
-
-    public GetUserByIdQueryHandler(IUserRepository userRepository)
-    {
-        this.userRepository = userRepository;
-    }
-
     public async Task<Result<UserDetailsResponse>> HandleAsync(GetUserByIdQuery query, CancellationToken cancellationToken = default)
     {
         var user = await userRepository.FindByIdAsync(query.UserId, cancellationToken: cancellationToken);
@@ -46,7 +40,8 @@ internal sealed class GetUserByIdQueryHandler : IQueryHandler<GetUserByIdQuery, 
             DisplayName = user.Name,
             PhoneNumber = user.PhoneNumber,
             TenantId = user.TenantId,
-            OrganizationId = user.OrganizationId!
+            OrganizationId = user.OrganizationId!,
+            CreatedByUserId = user.CreatedByUserId,
         };
 
         return Result.Success(response);

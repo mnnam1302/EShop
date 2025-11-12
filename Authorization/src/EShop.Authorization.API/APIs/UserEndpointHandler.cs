@@ -32,16 +32,13 @@ public static class UserEndpointHandler
         group.MapPost("", InviteUser)
             .RequirePermissionFilter(AuhthorizationPermissions.ManageUsers);
 
-        group.MapGet("/{userId}", GetUserDetailsAsync)
+        group.MapGet("/{userId}", GetUserByIdAsync)
             .RequireOneOfPermissionsFilter(AuhthorizationPermissions.ManageUsers, AuhthorizationPermissions.ViewUsers);
 
         return endpoints;
     }
 
-    private static async Task<IResult> GetUserPermissions(
-        [FromRoute] string userId,
-        [FromServices] IMediator mediator,
-        CancellationToken cancellationToken)
+    private static async Task<IResult> GetUserPermissions([FromRoute] string userId, [FromServices] IMediator mediator, CancellationToken cancellationToken)
     {
         var query = new GetUserPermissionsQuery(userId);
 
@@ -55,10 +52,7 @@ public static class UserEndpointHandler
         return Results.Ok(result);
     }
 
-    private static async Task<IResult> GetUserOrganizationContext(
-        [FromRoute] string userId,
-        [FromServices] IMediator mediator,
-        CancellationToken cancellationToken)
+    private static async Task<IResult> GetUserOrganizationContext([FromRoute] string userId, [FromServices] IMediator mediator, CancellationToken cancellationToken)
     {
         var query = new GetUserOrganizationContextQuery(userId);
 
@@ -72,10 +66,7 @@ public static class UserEndpointHandler
         return Results.Ok(result);
     }
 
-    private static async Task<IResult> InviteUser(
-        [FromBody] InviteUserRequest request,
-        [FromServices] IMediator mediator,
-        CancellationToken cancellationToken)
+    private static async Task<IResult> InviteUser([FromBody] InviteUserRequest request, [FromServices] IMediator mediator, CancellationToken cancellationToken)
     {
         var command = new InviteUserCommand
         {
@@ -97,7 +88,7 @@ public static class UserEndpointHandler
         return Results.Created("", result);
     }
 
-    private static async Task<IResult> GetUserDetailsAsync([FromRoute] string userId, [FromServices] Mediator mediator, CancellationToken cancellationToken)
+    private static async Task<IResult> GetUserByIdAsync([FromRoute] string userId, [FromServices] IMediator mediator, CancellationToken cancellationToken)
     {
         var query = new GetUserByIdQuery(userId);
 
