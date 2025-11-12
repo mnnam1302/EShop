@@ -1,4 +1,5 @@
-﻿using EShop.Authorization.Application.UseCases.Roles;
+﻿using EShop.Authorization.API.Models;
+using EShop.Authorization.Application.UseCases.Roles;
 using EShop.Shared.CQRS;
 using EShop.Shared.JsonApi.Abstractions;
 using EShop.Shared.JsonApi.ResourceAccessControl;
@@ -20,6 +21,9 @@ public static class RoleEndpointHandler
             .RequireAuthorization()
             .RequireFeatureFilter(FeatureConstants.Authorization.CustomRoles);
 
+        group.MapPost("", CreateRoleAsync)
+            .RequirePermissionFilter(PermissionConstants.Authorization.ManageRoles);
+
         group.MapGet("", GetRolesAsync)
             .RequireOneOfPermissionsFilter(PermissionConstants.Authorization.ManageRoles, PermissionConstants.Authorization.ViewRoles);
 
@@ -29,6 +33,24 @@ public static class RoleEndpointHandler
         return endpoints;
     }
 
+    private static async Task<IResult> CreateRoleAsync([FromBody] CreateRoleRequest request, [FromServices] IMediator mediator, CancellationToken cancellationToken)
+    {
+        var command = new CreateRoleCommand
+        {
+            Name = request.Name,
+            Description = request.Description,
+            PermissionIds = request.PermissionIds
+        };
+
+        var result = await mediator.SendAsync(command, cancellationToken);
+
+        if (result.IsFailure)
+        {
+            return ApiResultHandler.HandleFailure(result);
+        }
+
+        return Results.Created("", result);
+    }
 
     private static async Task<IResult> GetRolesAsync([FromQuery] string? name, [FromServices] IMediator mediator, CancellationToken cancellationToken)
     {
