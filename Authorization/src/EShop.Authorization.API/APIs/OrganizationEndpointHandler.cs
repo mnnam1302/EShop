@@ -6,6 +6,7 @@ using EShop.Shared.JsonApi.ResourceAccessControl;
 using EShop.Shared.Scoping.ResourceAccessControl;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserOrganizationContextProvider;
 using Microsoft.AspNetCore.Mvc;
+using AuhthorizationPermissions = EShop.Shared.Scoping.ResourceAccessControl.PermissionConstants.Authorization;
 
 namespace EShop.Authorization.API.APIs;
 
@@ -26,12 +27,10 @@ public static class OrganizationEndpointHandler
             .RequireSystemUserFilter();
 
         group.MapGet("", GetListOrganizations)
-            .RequireOneOfPermissionsFilter(
-                PermissionConstants.Authorization.ViewOrganizations,
-                PermissionConstants.Authorization.ManageOrganizations);
+            .RequireOneOfPermissionsFilter(AuhthorizationPermissions.ViewOrganizations, AuhthorizationPermissions.ManageOrganizations);
 
         group.MapPost("{organizationId}/child-organizations", CreateChildOrganization)
-            .RequirePermissionFilter(PermissionConstants.Authorization.ManageOrganizations);
+            .RequirePermissionFilter(AuhthorizationPermissions.ManageOrganizations);
 
         return endpoints;
     }

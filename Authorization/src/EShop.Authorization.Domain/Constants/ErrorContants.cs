@@ -4,11 +4,6 @@ namespace EShop.Authorization.Domain.Constants;
 
 public static class ErrorContants
 {
-    public static class Organization
-    {
-        public static readonly Error AlreadyExists = new("Organization.AlreadyExists", "An organization with this tenant ID already exists.");
-    }
-
     public static class Authentication
     {
         public static readonly Error UserNotFound = new("Authentication.UserNotFound", "The user is not found.");
@@ -18,8 +13,20 @@ public static class ErrorContants
         public static readonly Error TokenInvalidCache = new("Authentication.TokenInvalidCache", "The token is not found in cache or has been revoked");
     }
 
+    public static class Organization
+    {
+        public static readonly Error AlreadyExists = new("Organization.AlreadyExists", "An organization with this tenant ID already exists.");
+        public static readonly Error NotFound = new("Organization.NotFound", "The specified organization does not exist.");
+    }
+
     public static class User
     {
         public static readonly Error PermissionNotFound = new("User.PermissionNotFound", "The specified permission is not found.");
+        public static readonly Error AlreadyExists = new("User.AlreadyExists", "A user with this username already exists.");
+    }
+
+    public static class Role
+    {
+        public static readonly Error NotFound = new("Role.NotFound", "The specified role does not exist.");
     }
 }

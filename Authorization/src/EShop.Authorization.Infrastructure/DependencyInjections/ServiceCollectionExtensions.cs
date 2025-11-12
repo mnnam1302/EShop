@@ -5,7 +5,7 @@ using EShop.Authorization.Infrastructure.EmailServices;
 using EShop.Authorization.Infrastructure.Producers;
 using EShop.Authorization.Infrastructure.Repositories;
 using EShop.Shared.Cache.DependencyInejctions.Extensions;
-using EShop.Shared.Contracts.Services.Identity.Permissions;
+using EShop.Shared.Contracts.IntegrationEvents.Authorization;
 using EShop.Shared.Contracts.Services.Tenancy.Tenants;
 using EShop.Shared.DomainTools.UnitOfWorks;
 using EShop.Shared.EventBus.DependencyInjections.Extensions;
@@ -143,7 +143,7 @@ public static class ServiceCollectionExtensions
             context,
             environment.EnvironmentName,
             serviceName);
-        bus.ConfigureEventReceiveEndpoint<SupportedPermissionsUpdatedConsumer, ISupportedPermissionsUpdated>(
+        bus.ConfigureEventReceiveEndpoint<SupportedPermissionsUpdatedConsumer, SupportedPermissionsUpdated>(
             context,
             environment.EnvironmentName,
             serviceName);

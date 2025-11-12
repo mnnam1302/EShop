@@ -17,6 +17,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Primitives;
 using Newtonsoft.Json;
 using Serilog;
+using Serilog.Events;
 using System.Net;
 using System.Reflection;
 using System.Text;
@@ -73,7 +74,7 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
     private readonly TestTenantFeatureProvider testTenantFeatureProvider;
     private readonly ISystemInternalJwtTokenFactory systemInternalJwtTokenFactory;
 
-    private readonly Dictionary<string, UserData> _users = [];
+    private readonly Dictionary<string, UserData> users = [];
 
     private UserData defaultUser = new("TEST_ADMIN", "TEST_ADMIN", DefaultTenantId, isSupportUser: true);
 
@@ -133,7 +134,7 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
 
     public void AddUser(UserData user, bool setAsDefault = false)
     {
-        _users.Add(user.Username.ToLower(), user);
+        users.Add(user.Username.ToLower(), user);
         if (setAsDefault)
         {
             defaultUser = user;
@@ -143,13 +144,13 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
 
     public void AddOrUpdateUser(UserData user, bool setAsDefault = false)
     {
-        if (_users.ContainsKey(user.Username))
+        if (users.ContainsKey(user.Username))
         {
-            _users[user.Username] = user;
+            users[user.Username] = user;
         }
         else
         {
-            _users.Add(user.Username.ToLower(), user);
+            users.Add(user.Username.ToLower(), user);
         }
         if (setAsDefault)
         {
@@ -162,20 +163,21 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
     {
         var operationalUsername = username ?? LoggedInUser;
         operationalUsername = operationalUsername?.ToLower();
+
         if (string.IsNullOrEmpty(operationalUsername) || string.Equals(username, defaultUser.Username, StringComparison.OrdinalIgnoreCase))
         {
             return defaultUser;
         }
         else
         {
-            if (_users.ContainsKey(operationalUsername))
+            if (users.TryGetValue(operationalUsername, out UserData? value))
             {
-                return _users[operationalUsername];
+                return value;
             }
 
-            if (_users.Keys.Count(x => x.StartsWith(operationalUsername)) == 1)
+            if (users.Keys.Count(x => x.StartsWith(operationalUsername)) == 1)
             {
-                return _users.Single(kv => kv.Key.StartsWith(operationalUsername)).Value;
+                return users.Single(kv => kv.Key.StartsWith(operationalUsername)).Value;
             }
 
             if (!operationalUsername.Contains('@'))
@@ -190,7 +192,7 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
     public bool CheckUserExists(string username)
     {
         var realUsername = GetUserByUsername(username).Username;
-        return _users.ContainsKey(realUsername);
+        return users.ContainsKey(realUsername);
     }
 
     public void SetupPermissionsForDefaultAdminUser(string[] permissionIds)
@@ -244,13 +246,10 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
 
     public void SignIn(string username)
     {
-        var user = GetUserByUsername(username);
-        if (user == null)
-        {
-            throw new ArgumentException($"User '{username}' is not found.");
-        }
+        var user = GetUserByUsername(username) ?? throw new ArgumentException($"User '{username}' is not found.");
 
         LoggedInUser = user.Username;
+
         logger.LogInformation("User '{username}' has logged in", LoggedInUser);
     }
 
@@ -473,14 +472,19 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
 
     private static void SetupLogging(IServiceProvider serviceProvider, LoggerConfiguration loggerConfig)
     {
+        var testOutputTemplate = "[{Timestamp:HH:mm:ss.fff} {Level:u3}] (T={ThreadId}) {Message:lj} {Properties}{NewLine}{Exception}{NewLine}";
+
         loggerConfig
             .MinimumLevel.Debug()
+            .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
+            .MinimumLevel.Override("System", LogEventLevel.Warning)
+            .MinimumLevel.Override("Microsoft.Hosting.Lifetime", LogEventLevel.Information)
             .Enrich.FromLogContext()
             .Enrich.WithThreadId()
             .Enrich.WithThreadName()
             .ReadFrom.Configuration(serviceProvider.GetRequiredService<IConfiguration>())
-            .WriteTo.Debug(outputTemplate: "[{Timestamp:HH:mm:ss.fff} {Level:u3}] (T={ThreadId}) {Message:lj} {Properties}{NewLine}{Exception}{NewLine}")
-            .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss.fff} {Level:u3}] (T={ThreadId}) {Message:lj} {Properties}{NewLine}{Exception}{NewLine}");
+            .WriteTo.Debug(outputTemplate: testOutputTemplate)
+            .WriteTo.Console(outputTemplate: testOutputTemplate);
     }
 
     #endregion Logging

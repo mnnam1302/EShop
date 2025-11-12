@@ -4,6 +4,7 @@ using EShop.Shared.Authentication.Managers.RsaKey;
 using EShop.Shared.Authentication.Middlewares;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
 
 namespace EShop.Shared.Authentication.DependencyInjections;
 
@@ -31,11 +32,30 @@ public static class ServiceCollectionExtensions
             options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
             options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
             options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-        }).AddScheme<JwtBearerOptions, MultiTenantJwtBearerHandler>(JwtBearerDefaults.AuthenticationScheme, options => { });
+        }).AddScheme<JwtBearerOptions, MultiTenantJwtBearerHandler>(JwtBearerDefaults.AuthenticationScheme, options =>
+        {
+            options.Events = new JwtBearerEvents
+            {
+                OnAuthenticationFailed = context =>
+                {
+                    if (context.Exception?.GetType() == typeof(SecurityTokenExpiredException))
+                    {
+                        context.Response.Headers.TryAdd("IS-TOKEN-EXPIRED", "true");
+                    }
+
+                    return Task.CompletedTask;
+                }
+            };
+        });
 
         services.AddAuthorization();
-        services.AddAuthorizationBuilder()
-            .AddPolicy("authPolicy", policy => policy.RequireAuthenticatedUser());
+        services.AddAuthorization(options =>
+        {
+            options.AddPolicy("RequireAuthenticatedUser", policy =>
+            {
+                policy.RequireAuthenticatedUser();
+            });
+        });
 
         return services;
     }

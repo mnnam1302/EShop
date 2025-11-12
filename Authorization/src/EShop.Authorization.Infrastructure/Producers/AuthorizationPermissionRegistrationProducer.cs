@@ -1,4 +1,4 @@
-﻿using EShop.Shared.Contracts.Services.Identity.Permissions;
+﻿using EShop.Shared.Contracts.IntegrationEvents.Authorization;
 using EShop.Shared.EventBus.Services;
 using EShop.Shared.Scoping.ResourceAccessControl;
 
@@ -19,7 +19,7 @@ internal sealed class AuthorizationPermissionRegistrationProducer : IPermissionR
 
     public async Task RegisterPermissions()
     {
-        await eventBusGateway.PublishAsync<ISupportedPermissionsUpdated>(new
+        await eventBusGateway.PublishAsync<SupportedPermissionsUpdated>(new
         {
             SourceSystemReference = ModuleName,
             Permissions,

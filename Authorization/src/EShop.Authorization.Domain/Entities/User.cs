@@ -45,8 +45,14 @@ public class User : AggregateRoot<string>, IExcludedFromScoping
     [MaxLength(ModelConstants.VeryLongText)]
     public string Scope { get; private set; } = string.Empty;
 
-    public static User Create(
-        string ownerUsername, string randomPassword, string hashedPassword, string ownerEmail, string ownerDisplayName, string organizationId, string createdByUserId)
+    public static User CreateOwnerUser(
+        string ownerUsername,
+        string randomPassword,
+        string hashedPassword,
+        string ownerEmail,
+        string ownerDisplayName,
+        string organizationId,
+        string createdByUserId)
     {
         var user = new User
         {
@@ -60,6 +66,43 @@ public class User : AggregateRoot<string>, IExcludedFromScoping
             CreatedByUserId = createdByUserId,
             TenantId = organizationId,
             Scope = organizationId
+        };
+
+        user.RaiseDomainEvent(new DomainEvents.UserCreatedDomainEvent
+        {
+            UserId = user.Id,
+            Username = user.Username,
+            Email = user.Email,
+            RawPassword = randomPassword
+        });
+
+        return user;
+    }
+
+    public static User Invite(
+        string username,
+        string randomPassword,
+        string hashedPassword,
+        string email,
+        string displayName,
+        string phoneNumber,
+        string organizationId,
+        string tenantId,
+        string createdByUserId)
+    {
+        var user = new User
+        {
+            Id = username,
+            Username = username,
+            HashedPassword = hashedPassword,
+            Name = displayName,
+            Email = email,
+            PhoneNumber = phoneNumber,
+            Status = nameof(UserStatus.Inactive),
+            OrganizationId = organizationId,
+            CreatedByUserId = createdByUserId,
+            TenantId = tenantId,
+            Scope = tenantId
         };
 
         user.RaiseDomainEvent(new DomainEvents.UserCreatedDomainEvent

@@ -18,15 +18,13 @@ public class Role : EntityBase<Guid>, IScoped
     [MaxLength(ModelConstants.VeryLongText)]
     public string Scope { get; private set; } = string.Empty;
 
-    // Users relationship
     public virtual ICollection<User> Users { get; private set; } = new List<User>();
     public virtual ICollection<UserRole> UserRoles { get; private set; } = new List<UserRole>();
 
-    // Permissions relationship
     public virtual ICollection<Permission> Permissions { get; private set; } = new List<Permission>();
 
-    private readonly List<RolePermission> _rolePermissions = [];
-    public virtual IReadOnlyCollection<RolePermission> RolePermissions => _rolePermissions.AsReadOnly();
+    private readonly List<RolePermission> rolePermissions = [];
+    public virtual IReadOnlyCollection<RolePermission> RolePermissions => rolePermissions.AsReadOnly();
 
     public static Role CreateOwnerRole(string tenantId)
     {
@@ -42,14 +40,29 @@ public class Role : EntityBase<Guid>, IScoped
         return role;
     }
 
+    public static Role Create(string name, string? description, string tenantId)
+    {
+        var role = new Role
+        {
+            Id = Guid.NewGuid(),
+            Name = name,
+            Description = description,
+            TenantId = tenantId,
+            Scope = tenantId
+        };
+        return role;
+    }
+
     public void GrantPermissions(IEnumerable<string> enumerable)
     {
         foreach (var permissionId in enumerable)
         {
-            if (_rolePermissions.Any(rp => rp.PermissionId == permissionId))
+            if (rolePermissions.Any(rp => rp.PermissionId == permissionId))
+            {
                 continue;
+            }
 
-            _rolePermissions.Add(new RolePermission
+            rolePermissions.Add(new RolePermission
             {
                 RoleId = Id,
                 PermissionId = permissionId

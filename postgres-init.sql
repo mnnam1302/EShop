@@ -3,9 +3,7 @@ $do$
 DECLARE
    userpassword varchar[];
    users varchar[] := array[['authorization','authorization-password-dev'],
-							['users','users-password-dev'], 
                             ['tenancy','tenancy-password-dev'],
-                            ['configuration','configuration-password-dev'],
 							['catalog','catalog-password-dev']];
 BEGIN
    FOREACH userpassword SLICE 1 IN ARRAY users
@@ -18,29 +16,6 @@ BEGIN
    END LOOP;
 END $do$;
 
-CREATE DATABASE eshop_authorization;
-
-GRANT ALL PRIVILEGES ON DATABASE eshop_authorization TO authorization;
-\c eshop_authorization
-CREATE EXTENSION IF NOT EXISTS citext;
-\c eshop_authorization
-GRANT ALL PRIVILEGES ON SCHEMA public TO authorization;
-GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO authorization;
-GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO authorization;
-GRANT ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA public TO authorization;
-
-
-CREATE DATABASE eshop_users;
-
-GRANT ALL PRIVILEGES ON DATABASE eshop_users TO users;
-\c eshop_users
-CREATE EXTENSION IF NOT EXISTS citext;
-\c eshop_users
-GRANT ALL PRIVILEGES ON SCHEMA public TO users;
-GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO users;
-GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO users;
-GRANT ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA public TO users;
-
 
 CREATE DATABASE eshop_tenancy;
 
@@ -52,6 +27,17 @@ GRANT ALL PRIVILEGES ON SCHEMA public TO tenancy;
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO tenancy;
 GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO tenancy;
 GRANT ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA public TO tenancy;
+
+CREATE DATABASE eshop_authorization;
+
+GRANT ALL PRIVILEGES ON DATABASE eshop_authorization TO authorization;
+\c eshop_authorization
+CREATE EXTENSION IF NOT EXISTS citext;
+\c eshop_authorization
+GRANT ALL PRIVILEGES ON SCHEMA public TO authorization;
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO authorization;
+GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO authorization;
+GRANT ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA public TO authorization;
 
 CREATE DATABASE eshop_configuration;
 
