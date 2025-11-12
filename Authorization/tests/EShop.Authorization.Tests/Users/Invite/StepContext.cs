@@ -19,4 +19,9 @@ internal sealed class StepContext(ApiContext apiContext)
             apiContext.LastApiError = ex;
         }
     }
+
+    internal async Task GetUserByUsernameAsync(string username)
+    {
+        throw new NotImplementedException();
+    }
 }

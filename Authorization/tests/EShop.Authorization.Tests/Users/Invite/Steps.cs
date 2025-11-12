@@ -19,8 +19,9 @@ internal sealed class Steps(StepContext stepContext, Roles.Get.StepContext roleC
 
 
     [Then("user {string} has following details")]
-    public void ThenUserHasFollowingDetails(string username, DataTable dataTable)
+    public async Task ThenUserHasFollowingDetails(string username, DataTable dataTable)
     {
-        throw new PendingStepException();
+        var user = await stepContext.GetUserByUsernameAsync(username);
+        dataTable.CompareToInstance(user);
     }
 }

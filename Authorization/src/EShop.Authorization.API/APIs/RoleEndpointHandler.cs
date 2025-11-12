@@ -5,6 +5,7 @@ using EShop.Shared.JsonApi.Abstractions;
 using EShop.Shared.JsonApi.ResourceAccessControl;
 using EShop.Shared.Scoping.ResourceAccessControl;
 using Microsoft.AspNetCore.Mvc;
+using AuhthorizationPermissions = EShop.Shared.Scoping.ResourceAccessControl.PermissionConstants.Authorization;
 
 namespace EShop.Authorization.API.APIs;
 
@@ -22,13 +23,13 @@ public static class RoleEndpointHandler
             .RequireFeatureFilter(FeatureConstants.Authorization.CustomRoles);
 
         group.MapPost("", CreateRoleAsync)
-            .RequirePermissionFilter(PermissionConstants.Authorization.ManageRoles);
+            .RequirePermissionFilter(AuhthorizationPermissions.ManageRoles);
 
         group.MapGet("", GetRolesAsync)
-            .RequireOneOfPermissionsFilter(PermissionConstants.Authorization.ManageRoles, PermissionConstants.Authorization.ViewRoles);
+            .RequireOneOfPermissionsFilter(AuhthorizationPermissions.ManageRoles, AuhthorizationPermissions.ViewRoles);
 
         group.MapGet("/{roleId}", GetRoleDetailsAsync)
-            .RequireOneOfPermissionsFilter(PermissionConstants.Authorization.ManageRoles, PermissionConstants.Authorization.ViewRoles);
+            .RequireOneOfPermissionsFilter(AuhthorizationPermissions.ManageRoles, AuhthorizationPermissions.ViewRoles);
 
         return endpoints;
     }

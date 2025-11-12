@@ -6,6 +6,7 @@ using EShop.Shared.JsonApi.ResourceAccessControl;
 using EShop.Shared.Scoping.ResourceAccessControl;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserOrganizationContextProvider;
 using Microsoft.AspNetCore.Mvc;
+using AuhthorizationPermissions = EShop.Shared.Scoping.ResourceAccessControl.PermissionConstants.Authorization;
 
 namespace EShop.Authorization.API.APIs;
 
@@ -22,12 +23,17 @@ public static class UserEndpointHandler
             .RequireAuthorization()
             .RequireFeatureFilter(FeatureConstants.Authorization.UserInvites);
 
-        group.MapGet("/{userId}/permissions", GetUserPermissions);
+        group.MapGet("/{userId}/permissions", GetUserPermissions)
+            .RequireOneOfPermissionsFilter(AuhthorizationPermissions.ManageUsers, AuhthorizationPermissions.ViewUsers);
 
-        group.MapGet("/{userId}/organizationContext", GetUserOrganizationContext);
+        group.MapGet("/{userId}/organizationContext", GetUserOrganizationContext)
+            .RequireSystemUserFilter();
 
         group.MapPost("", InviteUser)
-            .RequirePermissionFilter(PermissionConstants.Authorization.ManageUsers);
+            .RequirePermissionFilter(AuhthorizationPermissions.ManageUsers);
+
+        group.MapGet("/{userId}", GetUserDetailsAsync)
+            .RequireOneOfPermissionsFilter(AuhthorizationPermissions.ManageUsers, AuhthorizationPermissions.ViewUsers);
 
         return endpoints;
     }
@@ -89,5 +95,19 @@ public static class UserEndpointHandler
         }
 
         return Results.Created("", result);
+    }
+
+    private static async Task<IResult> GetUserDetailsAsync([FromRoute] string userId, [FromServices] Mediator mediator, CancellationToken cancellationToken)
+    {
+        var query = new GetUserByIdQuery(userId);
+
+        var result = await mediator.QueryAsync<GetUserByIdQuery, UserDetailsResponse>(query, cancellationToken);
+
+        if (result.IsFailure)
+        {
+            ApiResultHandler.HandleFailure(result);
+        }
+
+        return Results.Ok(result);
     }
 }
