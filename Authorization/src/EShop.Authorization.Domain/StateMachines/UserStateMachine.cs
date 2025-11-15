@@ -18,7 +18,7 @@ public sealed class UserStateMachine : StateMachine<UserState, UserAction>
     public void Configure()
     {
         Configure(UserState.PendingVerification)
-            .Permit(UserAction.Activate, UserState.Active)
+            .Permit(UserAction.ConfirmInvitation, UserState.Active)
             .Permit(UserAction.Delete, UserState.Deleted);
 
         Configure(UserState.Active)
@@ -43,7 +43,7 @@ public enum UserState
 
 public enum UserAction
 {
-    Activate,
+    ConfirmInvitation,
     Deactivate,
     Lock,
     Unlock,

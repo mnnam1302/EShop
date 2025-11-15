@@ -68,13 +68,7 @@ public class User : AggregateRoot<string>, IExcludedFromScoping
     }
 
     public static User CreateOwnerUser(
-        string ownerUsername,
-        string randomPassword,
-        string hashedPassword,
-        string ownerEmail,
-        string ownerDisplayName,
-        string organizationId,
-        string createdByUserId)
+        string ownerUsername, string randomPassword, string hashedPassword, string ownerEmail, string ownerDisplayName, string organizationId, string createdByUserId)
     {
         var user = new User
         {
@@ -101,15 +95,7 @@ public class User : AggregateRoot<string>, IExcludedFromScoping
     }
 
     public static User Invite(
-        string username,
-        string randomPassword,
-        string hashedPassword,
-        string email,
-        string displayName,
-        string phoneNumber,
-        string organizationId,
-        string tenantId,
-        string createdByUserId)
+        string username, string randomPassword, string hashedPassword, string email, string displayName, string phoneNumber, string organizationId, string tenantId, string createdByUserId)
     {
         var user = new User
         {
@@ -150,5 +136,11 @@ public class User : AggregateRoot<string>, IExcludedFromScoping
         };
 
         userRoles.Add(userRole);
+    }
+
+    public void ConfirmInvitation(string password)
+    {
+        StateMachine.Fire(UserAction.ConfirmInvitation);
+        PasswordHash = password;
     }
 }
