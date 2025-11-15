@@ -1,4 +1,6 @@
-﻿using EShop.Shared.DomainTools.Aggregates;
+﻿using EShop.Authorization.Domain.StateMachines;
+using EShop.Shared.DomainTools.Aggregates;
+using EShop.Shared.DomainTools.DependencyInjections;
 using EShop.Shared.Scoping;
 using System.ComponentModel.DataAnnotations;
 
@@ -11,7 +13,7 @@ public class User : AggregateRoot<string>, IExcludedFromScoping
     public string Username { get; set; } = string.Empty;
 
     [MaxLength(ModelConstants.VeryLongText)]
-    public string HashedPassword { get; set; } = string.Empty;
+    public string PasswordHash { get; set; } = string.Empty;
 
     [MaxLength(ModelConstants.MediumText)]
     public string Name { get; set; } = string.Empty;
@@ -23,27 +25,47 @@ public class User : AggregateRoot<string>, IExcludedFromScoping
     public string PhoneNumber { get; set; } = string.Empty;
 
     [MaxLength(ModelConstants.ShortText)]
-    public string Status { get; set; } = nameof(UserStatus.Inactive);
+    public string Status { get; set; } = nameof(UserState.PendingVerification);
 
     [MaxLength(ModelConstants.ShortText)]
     public string CreatedByUserId { get; set; } = string.Empty;
 
-    // Organization relationship
     [MaxLength(ModelConstants.ShortText)]
     public string? OrganizationId { get; set; }
     public virtual Organization? Organization { get; set; }
 
-    // Roles relationship: https://learn.microsoft.com/en-us/ef/core/modeling/relationships/many-to-many#many-to-many-with-navigations-to-join-entity
-    public virtual ICollection<Role> Roles { get; set; } = new List<Role>();
+    public virtual ICollection<Role> Roles { get; set; } = [];
 
-    private readonly List<UserRole> _userRoles = [];
-    public virtual IReadOnlyCollection<UserRole> UserRoles => _userRoles.AsReadOnly();
+    private readonly List<UserRole> userRoles = [];
+    public virtual IReadOnlyCollection<UserRole> UserRoles => userRoles.AsReadOnly();
 
     [MaxLength(ModelConstants.ShortText)]
     public string TenantId { get; private set; } = string.Empty;
 
     [MaxLength(ModelConstants.VeryLongText)]
     public string Scope { get; private set; } = string.Empty;
+
+    /// <summary>
+    /// Used to record failures for the purposes of lockout
+    /// </summary>
+    public virtual int AccessFailedCount { get; set; }
+
+    /// <summary>
+    /// DateTime in UTC when lockout ends, any time in the past is considered not locked out.
+    /// </summary>
+    public virtual DateTimeOffset? LockoutEndDateUtc { get; set; }
+
+    /// <summary>
+    /// Is lockout enabled for this user
+    /// </summary>
+    public virtual bool LockoutEnabled { get; set; }
+
+    public UserStateMachine StateMachine => new(() => Enum.Parse<UserState>(Status), AfterStateUpdated);
+
+    private void AfterStateUpdated(UserState newState)
+    {
+        Status = Enum.GetName(newState).Require();
+    }
 
     public static User CreateOwnerUser(
         string ownerUsername,
@@ -58,10 +80,9 @@ public class User : AggregateRoot<string>, IExcludedFromScoping
         {
             Id = ownerUsername,
             Username = ownerUsername,
-            HashedPassword = hashedPassword,
+            PasswordHash = hashedPassword,
             Name = ownerDisplayName,
             Email = ownerEmail,
-            Status = nameof(UserStatus.Inactive),
             OrganizationId = organizationId,
             CreatedByUserId = createdByUserId,
             TenantId = organizationId,
@@ -94,11 +115,10 @@ public class User : AggregateRoot<string>, IExcludedFromScoping
         {
             Id = username,
             Username = username,
-            HashedPassword = hashedPassword,
+            PasswordHash = hashedPassword,
             Name = displayName,
             Email = email,
             PhoneNumber = phoneNumber,
-            Status = nameof(UserStatus.Inactive),
             OrganizationId = organizationId,
             CreatedByUserId = createdByUserId,
             TenantId = tenantId,
@@ -118,7 +138,7 @@ public class User : AggregateRoot<string>, IExcludedFromScoping
 
     public void AssignRole(Guid roleId)
     {
-        if (_userRoles.Any(ur => ur.RoleId == roleId))
+        if (userRoles.Any(ur => ur.RoleId == roleId))
         {
             return;
         }
@@ -129,12 +149,6 @@ public class User : AggregateRoot<string>, IExcludedFromScoping
             RoleId = roleId
         };
 
-        _userRoles.Add(userRole);
+        userRoles.Add(userRole);
     }
-}
-
-public enum UserStatus
-{
-    Inactive,
-    Active,
 }

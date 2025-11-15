@@ -90,7 +90,7 @@ internal sealed class LoginQueryHandler : IQueryHandler<LoginQuery, Authenticati
             return Result.Failure<User>(ErrorContants.Authentication.UserNotFound);
         }
 
-        var isPasswordValid = _passwordHasher.VerifyHashedPassword(user.HashedPassword, query.Password);
+        var isPasswordValid = _passwordHasher.VerifyHashedPassword(user.PasswordHash, query.Password);
         if (!isPasswordValid)
         {
             return Result.Failure<User>(ErrorContants.Authentication.InvalidPassword);
