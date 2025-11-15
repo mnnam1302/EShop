@@ -90,6 +90,11 @@ internal sealed class LoginQueryHandler : IQueryHandler<LoginQuery, Authenticati
             return Result.Failure<User>(ErrorContants.Authentication.UserNotFound);
         }
 
+        if (user.StateMachine.IsInState(Domain.StateMachines.UserState.PendingVerification))
+        {
+            return Result.Failure<User>(ErrorContants.Authentication.UserPendingVerification);
+        }
+
         var isPasswordValid = _passwordHasher.VerifyHashedPassword(user.PasswordHash, query.Password);
         if (!isPasswordValid)
         {

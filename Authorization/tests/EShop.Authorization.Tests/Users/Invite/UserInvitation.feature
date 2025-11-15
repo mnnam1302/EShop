@@ -16,7 +16,7 @@ Scenario: Inviting a new user
         | PermissionId              |
         | Authorization_ViewRoles   |
         | Authorization_ManageUsers |
-    When user invites a new user with role 'Role Owner' the following details
+    When user invites a new user with role 'Role owner system' the following details
         | Username              | Email                 | DisplayName | PhoneNumber | OrganizationId |
         | test-user@test-tenant | test-user@test-tenant | Test User   |  0969900212 | test-tenant    |
     Then user 'test-user@test-tenant' has following details

@@ -11,6 +11,7 @@ public static class ErrorContants
         public static readonly Error InvalidPassword = new("Authentication.InvalidPassword", "The provided password is incorrect.");
         public static readonly Error InvalidToken = new("Authentication.InvalidToken", "The provided token is invalid or malformed");
         public static readonly Error TokenInvalidCache = new("Authentication.TokenInvalidCache", "The token is not found in cache or has been revoked");
+        public static readonly Error UserPendingVerification = new("Authentication.UserPendingVerification", "The user account is pending verification.");
     }
 
     public static class Organization
