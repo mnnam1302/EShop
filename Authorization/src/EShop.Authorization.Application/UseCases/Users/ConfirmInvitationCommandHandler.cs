@@ -24,7 +24,10 @@ internal sealed class ConfirmInvitationCommandHandler(
     public async Task<Result> HandleAsync(ConfirmInvitationCommand command, CancellationToken cancellationToken)
     {
         // 1. check existing user with username
-        var user = await userRepository.FindSingleAsync(predicate: u => u.Username == command.Username, trackChanges: true, cancellationToken: cancellationToken);
+        var user = await userRepository.FindSingleAsync(
+            predicate: u => u.Username == command.Username,
+            trackChanges: true,
+            cancellationToken: cancellationToken);
 
         if (user is null)
         {

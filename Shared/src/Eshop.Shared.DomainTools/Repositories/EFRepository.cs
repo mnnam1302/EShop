@@ -15,6 +15,8 @@ public abstract class EFRepository<TDbContext, TEntity, TKey> : IRepository<TEnt
         _dbContext = dbContext;
     }
 
+    protected TDbContext DbContext => _dbContext;
+
     public void Dispose()
     {
         Dispose(disposing: true);
@@ -87,9 +89,9 @@ public abstract class EFRepository<TDbContext, TEntity, TKey> : IRepository<TEnt
     public IQueryable<TEntity> FindAll(bool trackChanges = false, params Expression<Func<TEntity, object>>[] includeProperties)
     {
         // Important to use AsNoTracking to improve performance - Always include AsNoTracking for Query Side
-        IQueryable<TEntity> items = !trackChanges
-            ? _dbContext.Set<TEntity>().AsNoTracking()
-            : _dbContext.Set<TEntity>();
+        IQueryable<TEntity> items = trackChanges
+            ? _dbContext.Set<TEntity>()
+            : _dbContext.Set<TEntity>().AsNoTracking();
 
         if (includeProperties != null)
         {
