@@ -16,8 +16,7 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddBoostrapping(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment)
     {
-        services
-            .AddCors()
+        services.AddCors()
             .AddSwagger()
             .AddApiVersioning()
             .AddMassTransitRabbitMQ(configuration, environment)
@@ -28,8 +27,7 @@ public static class ServiceCollectionExtensions
 
     private static IServiceCollection AddSwagger(this IServiceCollection services)
     {
-        services
-            .AddSwaggerGenNewtonsoftSupport()
+        services.AddSwaggerGenNewtonsoftSupport()
             .AddFluentValidationRulesToSwagger()
             .AddEndpointsApiExplorer()
             .AddSwaggerAPI();
@@ -39,8 +37,7 @@ public static class ServiceCollectionExtensions
 
     private static IServiceCollection AddApiVersioning(this IServiceCollection services)
     {
-        services
-            .AddApiVersioning(options => options.ReportApiVersions = true)
+        services.AddApiVersioning(options => options.ReportApiVersions = true)
             .AddApiExplorer(options =>
             {
                 options.GroupNameFormat = "'v'VVV";
@@ -71,11 +68,10 @@ public static class ServiceCollectionExtensions
                     h.Password(massTransitConfiguration.Password);
                 });
 
-                bus.UseMessageRetry(retry
-                    => retry.Incremental(
-                            retryLimit: messageBusOptions.RetryLimit,
-                            initialInterval: messageBusOptions.InitialInterval,
-                            intervalIncrement: messageBusOptions.IntervalIncrement));
+                bus.UseMessageRetry(retry => retry.Incremental(
+                    retryLimit: messageBusOptions.RetryLimit,
+                    initialInterval: messageBusOptions.InitialInterval,
+                    intervalIncrement: messageBusOptions.IntervalIncrement));
 
                 bus.UseNewtonsoftJsonSerializer();
                 bus.ConfigureNewtonsoftJsonSerializer(settings =>
@@ -116,6 +112,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IUnitOfWork, EFUnitOfWork<CatalogDbContext>>();
 
         services.AddScoped<IEventBusGateway, EventBusGateway>();
+
         services.AddScoped<IFeatureRegistrationService, CatalogFeatureRegistrationService>();
         services.AddScoped<IPermissionRegistrationService, CatalogPermissionRegistrationService>();
 

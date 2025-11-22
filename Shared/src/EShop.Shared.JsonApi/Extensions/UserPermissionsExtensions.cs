@@ -53,7 +53,7 @@ public static class UserPermissionsExtensions
         services
             .AddHttpClient<UserPermissionHttpClient>(client =>
             {
-                client.BaseAddress = new Uri("http://UsersServiceUrl");
+                client.BaseAddress = new Uri("http://AuthorizationServiceUrl");
             })
             .AddPolicyHandler(ResilientClientPolicies.GetRetryOnErrorAndNotFoundPolicy())
             .AddPolicyHandler(ResilientClientPolicies.GetCircuitBreakerPolicy());

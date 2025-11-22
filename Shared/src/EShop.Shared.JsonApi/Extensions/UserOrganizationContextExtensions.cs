@@ -39,7 +39,7 @@ public static class UserOrganizationContextExtensions
         services
             .AddHttpClient<UserOrganizationContextHttpClient>(client =>
             {
-                client.BaseAddress = new Uri("http://UsersServiceUrl");
+                client.BaseAddress = new Uri("http://AuthorizationServiceUrl");
             })
             .AddPolicyHandler(ResilientClientPolicies.GetRetryOnErrorAndNotFoundPolicy())
             .AddPolicyHandler(ResilientClientPolicies.GetCircuitBreakerPolicy());
