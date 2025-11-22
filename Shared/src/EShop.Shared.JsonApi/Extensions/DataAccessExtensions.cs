@@ -11,7 +11,7 @@ namespace EShop.Shared.JsonApi.Extensions;
 
 public static class DataAccessExtensions
 {
-    private static readonly string[] tags = new[] { "db", "postgresql", "sql" };
+    private static readonly string[] tags = ["db", "postgresql", "sql"];
 
     public static IServiceCollection AddPostgreSqlHealthCheck(this IServiceCollection services, IConfiguration configuration)
     {
@@ -44,9 +44,9 @@ public static class DataAccessExtensions
             var domainEventsDispatcherInterceptor = provider.GetRequiredService<IDispatchDomainEventsInterceptor>();
 
             builder
-                .EnableDetailedErrors(true)
-                .EnableSensitiveDataLogging(true)
-                .UseLazyLoadingProxies(true)
+                .EnableDetailedErrors()
+                .EnableSensitiveDataLogging()
+                .UseLazyLoadingProxies()
                 .UseNpgsql(
                     connectionString: configuration.GetConnectionString("DefaultConnection"),
                     npgsqlOptionsAction: optionsBuilder
@@ -118,8 +118,8 @@ public static class DataAccessExtensions
             var ngsqlVersionOptions = provider.GetRequiredService<IOptionsMonitor<NgSqlVersionOptions>>();
 
             builder
-                .EnableDetailedErrors(true)
-                .EnableSensitiveDataLogging(true)
+                .EnableDetailedErrors()
+                .EnableSensitiveDataLogging()
                 .UseNpgsql(
                     configuration.GetConnectionString("DefaultConnection"),
                     npgsqlOptionsAction: optionsBuilder => optionsBuilder
@@ -138,9 +138,9 @@ public static class DataAccessExtensions
             var multiTenantConnectionInterceptor = provider.GetRequiredService<IMultiTenantIsolationStrategy>();
 
             builder
-                .EnableDetailedErrors(true)
-                .EnableSensitiveDataLogging(true)
-                .UseLazyLoadingProxies(true)
+                .EnableDetailedErrors()
+                .EnableSensitiveDataLogging()
+                .UseLazyLoadingProxies()
                 .UseNpgsql(
                     connectionString: configuration.GetConnectionString("DefaultConnection"),
                     npgsqlOptionsAction: optionsBuilder => optionsBuilder

@@ -6,131 +6,108 @@ using EShop.Shared.Authentication;
 using EShop.Shared.Authentication.Abstractions;
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.CQRS.Query;
+using EShop.Shared.DomainTools.UnitOfWorks;
 
 namespace EShop.Authorization.Application.UseCases.Authentication;
 
 public sealed record LoginQuery(string Username, string Password) : IQuery<AuthenticationResponse>;
 
-public sealed record AuthenticationResponse
+public sealed class AuthenticationResponse
 {
     public required string UserId { get; init; }
     public required string AccessToken { get; init; }
     public required string RefreshToken { get; init; }
-    public DateTimeOffset RefreshTokenExpiryTime { get; init; }
+    public required DateTimeOffset RefreshTokenExpiryTime { get; init; }
 }
 
-internal sealed class LoginQueryHandler : IQueryHandler<LoginQuery, AuthenticationResponse>
+internal sealed class LoginQueryHandler(
+    IJwtTokenManager jwtTokenManager,
+    IUserRepository userRepository,
+    IUserTokenCachingService tokenCachingService,
+    IPasswordHasher passwordHasher,
+    IUnitOfWork unitOfWork) : IQueryHandler<LoginQuery, AuthenticationResponse>
 {
-    private readonly IUserRepository _userRepository;
-    private readonly IJwtTokenManager _jwtTokenManager;
-    private readonly IUserTokenCachingService _tokenCachingService;
-    private readonly IPasswordHasher _passwordHasher;
-
-    public LoginQueryHandler(
-        IJwtTokenManager jwtTokenManager,
-        IUserRepository userRepository,
-        IUserTokenCachingService tokenCachingService,
-        IPasswordHasher passwordHasher)
-    {
-        _jwtTokenManager = jwtTokenManager;
-        _userRepository = userRepository;
-        _tokenCachingService = tokenCachingService;
-        _passwordHasher = passwordHasher;
-    }
-
     public async Task<Result<AuthenticationResponse>> HandleAsync(LoginQuery query, CancellationToken cancellationToken = default)
     {
-        // 1. Validate input
-        var inputValidation = ValidateLoginInput(query);
-        if (inputValidation.IsFailure)
-        {
-            return Result.Failure<AuthenticationResponse>(inputValidation.Error);
-        }
+        // 1. Authenticate user credentials (returns unified errors)
+        var signIn = await PasswordSignInAsync(query, cancellationToken);
+        
+        if (signIn.IsFailure) 
+            return Result.Failure<AuthenticationResponse>(signIn.Error);
 
-        // 2. Authenticate user credentials
-        var userResult = await AuthenticateUserAsync(query, cancellationToken);
-        if (userResult.IsFailure)
-        {
-            return Result.Failure<AuthenticationResponse>(userResult.Error);
-        }
+        var user = signIn.Value;
 
-        var user = userResult.Value;
+        // 2. Generate tokens (use config)
+        var tokens = await GenerateTokensAsync(user, cancellationToken);
 
-        // 3. Generate RSA-signed JWT tokens
-        var tokenResult = await GenerateAuthenticationTokensAsync(user, cancellationToken);
-        if (tokenResult.IsFailure)
-        {
-            return Result.Failure<AuthenticationResponse>(tokenResult.Error);
-        }
+        // 3. Store auth session (cache)
+        await StoreSessionAsync(user.Username, tokens, cancellationToken);
 
-        // 4. Cache authentication tokens for session management
-        await StoreAuthenticatedResultAsync(tokenResult.Value, cancellationToken);
-
-        return Result.Success(tokenResult.Value);
+        return Result.Success(tokens);
     }
 
-    private static Result ValidateLoginInput(LoginQuery query)
+    private async Task<Result<User>> PasswordSignInAsync(LoginQuery query, CancellationToken cancellationToken)
     {
-        if (string.IsNullOrWhiteSpace(query.Username) || string.IsNullOrWhiteSpace(query.Password))
-        {
-            return Result.Failure(ErrorContants.Authentication.InvalidCredentials);
-        }
+        var user = await userRepository.FindSingleAsync(predicate: u => u.Username == query.Username, cancellationToken: cancellationToken);
 
-        return Result.Success();
-    }
-
-    private async Task<Result<User>> AuthenticateUserAsync(LoginQuery query, CancellationToken cancellationToken)
-    {
-        var user = await _userRepository.FindSingleAsync(
-            u => u.Id == query.Username || u.Username == query.Username,
-            cancellationToken: cancellationToken);
-
-        if (user is null)
-        {
-            return Result.Failure<User>(ErrorContants.Authentication.UserNotFound);
-        }
+        if (user == null)
+            return Result.Failure<User>(ErrorContants.Authentication.InvalidCredentials);
 
         if (user.StateMachine.IsInState(Domain.StateMachines.UserState.PendingVerification))
+            return Result.Failure<User>(ErrorContants.User.PendingVerification);
+
+        if (user.IsLockedOut())
+            return Result.Failure<User>(ErrorContants.User.LockedOut);
+
+        if (!passwordHasher.CheckPassword(user.PasswordHash, query.Password))
         {
-            return Result.Failure<User>(ErrorContants.Authentication.UserPendingVerification);
+            var failedCount = user.IncrementAccessFailedCount();
+
+            if (failedCount >= User.MaxFailedAccessAttemptsBeforeLockout)
+            {
+                user.SetLockout(DateTimeOffset.UtcNow.Add(User.DefaultAccountLockoutTimeSpan));
+                user.ResetAccessFailedCount();
+            }
+
+            userRepository.Update(user);
+            await unitOfWork.SaveChangesAsync(cancellationToken);
+
+            return Result.Failure<User>(ErrorContants.Authentication.InvalidCredentials);
         }
 
-        var isPasswordValid = _passwordHasher.VerifyHashedPassword(user.PasswordHash, query.Password);
-        if (!isPasswordValid)
-        {
-            return Result.Failure<User>(ErrorContants.Authentication.InvalidPassword);
-        }
+        user.ResetAccessFailedCount();
+        userRepository.Update(user);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Result.Success(user);
     }
 
-    private async Task<Result<AuthenticationResponse>> GenerateAuthenticationTokensAsync(User user, CancellationToken cancellationToken)
+    private async Task<AuthenticationResponse> GenerateTokensAsync(User user, CancellationToken cancellationToken)
     {
-        var accessToken = await _jwtTokenManager.GenerateAccessToken(user.Id, user.TenantId, cancellationToken: cancellationToken);
-        var refreshToken = _jwtTokenManager.GenerateRefreshToken();
+        var accessToken = await jwtTokenManager.GenerateAccessToken(user.Id, user.TenantId, cancellationToken: cancellationToken);
+        var refreshToken = jwtTokenManager.GenerateRefreshToken();
+        //var expiry = DateTimeOffset.UtcNow.Add(authSettings.RefreshTokenLifetime);
 
-        var result = new AuthenticationResponse
+        return new AuthenticationResponse
         {
             UserId = user.Id,
             AccessToken = accessToken,
             RefreshToken = refreshToken,
             RefreshTokenExpiryTime = DateTimeOffset.UtcNow.AddDays(7)
         };
-
-        return Result.Success(result);
     }
 
-    private async Task StoreAuthenticatedResultAsync(AuthenticationResponse result, CancellationToken cancellationToken)
+    private async Task StoreSessionAsync(string username, AuthenticationResponse result, CancellationToken cancellationToken)
     {
-        var authenticationCachedValue = new TokenAuthentication
+        var cachedValue = new TokenAuthentication
         {
             UserId = result.UserId,
-            UserName = result.UserId,
+            UserName = username,
             AccessToken = result.AccessToken,
             RefreshToken = result.RefreshToken,
             RefreshTokenExpiryTime = result.RefreshTokenExpiryTime
         };
 
-        await _tokenCachingService.AddAsync(result.UserId, authenticationCachedValue, cancellationToken);
+        await tokenCachingService.AddAsync(result.UserId, cachedValue, cancellationToken);
     }
 }

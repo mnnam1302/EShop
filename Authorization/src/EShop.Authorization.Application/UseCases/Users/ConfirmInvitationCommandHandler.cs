@@ -43,7 +43,7 @@ internal sealed class ConfirmInvitationCommandHandler(
         }
 
         // 3. verify temporary password
-        var tempPasswordVerificationResult = passwordHasher.VerifyHashedPassword(user.PasswordHash, command.TemporaryPassword);
+        var tempPasswordVerificationResult = passwordHasher.CheckPassword(user.PasswordHash, command.TemporaryPassword);
         if (!tempPasswordVerificationResult)
         {
             logger.LogWarning("Temporary password verification failed for user {Username}", command.Username);

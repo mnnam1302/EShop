@@ -8,9 +8,13 @@ namespace EShop.Authorization.Domain.Entities;
 
 public class User : AggregateRoot<string>, IExcludedFromScoping
 {
+    public const int MaxFailedAccessAttemptsBeforeLockout = 5;
+    public static readonly TimeSpan DefaultAccountLockoutTimeSpan = TimeSpan.FromMinutes(15);
 
     [MaxLength(ModelConstants.ShortText)]
     public string Username { get; set; } = string.Empty;
+
+    //public string UsernameNormalized { get; private set; } = string.Empty; // for index/search
 
     [MaxLength(ModelConstants.VeryLongText)]
     public string PasswordHash { get; set; } = string.Empty;
@@ -34,9 +38,9 @@ public class User : AggregateRoot<string>, IExcludedFromScoping
     public string? OrganizationId { get; set; }
     public virtual Organization? Organization { get; set; }
 
-    public virtual ICollection<Role> Roles { get; set; } = [];
+    public virtual ICollection<Role> Roles { get; set; } = new List<Role>();
 
-    private readonly List<UserRole> userRoles = [];
+    private readonly List<UserRole> userRoles = new List<UserRole>();
     public virtual IReadOnlyCollection<UserRole> UserRoles => userRoles.AsReadOnly();
 
     [MaxLength(ModelConstants.ShortText)]
@@ -45,30 +49,31 @@ public class User : AggregateRoot<string>, IExcludedFromScoping
     [MaxLength(ModelConstants.VeryLongText)]
     public string Scope { get; private set; } = string.Empty;
 
-    /// <summary>
-    /// Used to record failures for the purposes of lockout
-    /// </summary>
-    public virtual int AccessFailedCount { get; set; }
+    public int AccessFailedCount { get; private set; }
+    public DateTimeOffset? LockoutEndDateUtc { get; private set; }
+    public bool LockoutEnabled { get; private set; }
 
-    /// <summary>
-    /// DateTime in UTC when lockout ends, any time in the past is considered not locked out.
-    /// </summary>
-    public virtual DateTimeOffset? LockoutEndDateUtc { get; set; }
+    public UserStateMachine StateMachine => new(() => ParseStatusSafely(), AfterStateUpdated);
 
-    /// <summary>
-    /// Is lockout enabled for this user
-    /// </summary>
-    public virtual bool LockoutEnabled { get; set; }
-
-    public UserStateMachine StateMachine => new(() => Enum.Parse<UserState>(Status), AfterStateUpdated);
+    private UserState ParseStatusSafely()
+    {
+        if (Enum.TryParse<UserState>(Status, out var s)) return s;
+        return UserState.PendingVerification;
+    }
 
     private void AfterStateUpdated(UserState newState)
     {
-        Status = Enum.GetName(newState).Require();
+        Status = Enum.GetName(newState) ?? nameof(UserState.PendingVerification);
     }
 
     public static User CreateOwnerUser(
-        string ownerUsername, string randomPassword, string hashedPassword, string ownerEmail, string ownerDisplayName, string organizationId, string createdByUserId)
+        string ownerUsername,
+        string randomPassword, // for event only, not stored
+        string hashedPassword,
+        string ownerEmail,
+        string ownerDisplayName,
+        string organizationId,
+        string createdByUserId)
     {
         var user = new User
         {
@@ -95,7 +100,15 @@ public class User : AggregateRoot<string>, IExcludedFromScoping
     }
 
     public static User Invite(
-        string username, string randomPassword, string hashedPassword, string email, string displayName, string phoneNumber, string organizationId, string tenantId, string createdByUserId)
+        string username,
+        string randomPassword,
+        string hashedPassword,
+        string email,
+        string displayName,
+        string phoneNumber,
+        string organizationId,
+        string tenantId,
+        string createdByUserId)
     {
         var user = new User
         {
@@ -124,23 +137,48 @@ public class User : AggregateRoot<string>, IExcludedFromScoping
 
     public void AssignRole(Guid roleId)
     {
-        if (userRoles.Any(ur => ur.RoleId == roleId))
-        {
-            return;
-        }
+        if (userRoles.Any(x => x.RoleId == roleId)) return;
 
-        var userRole = new UserRole
+        userRoles.Add(new UserRole
         {
             UserId = Id,
             RoleId = roleId
-        };
-
-        userRoles.Add(userRole);
+        });
     }
 
-    public void ConfirmInvitation(string password)
+    public bool IsLockedOut()
     {
+        if (!LockoutEnabled) return false;
+        if (!LockoutEndDateUtc.HasValue) return false;
+
+        return LockoutEndDateUtc.Value > DateTimeOffset.UtcNow;
+    }
+
+    public int IncrementAccessFailedCount()
+    {
+        AccessFailedCount++;
+        return AccessFailedCount;
+    }
+
+    public void ResetAccessFailedCount()
+    {
+        AccessFailedCount = 0;
+    }
+
+    public void SetLockout(DateTimeOffset lockoutEnd)
+    {
+        LockoutEnabled = true;
+        LockoutEndDateUtc = lockoutEnd == DateTimeOffset.MinValue ? null : lockoutEnd;
+    }
+
+    public void ConfirmInvitation(string hashedPassword)
+    {
+        if (string.IsNullOrWhiteSpace(hashedPassword))
+        {
+            throw new ArgumentException("Hashed password required", nameof(hashedPassword));
+        }
+
         StateMachine.Fire(UserAction.ConfirmInvitation);
-        PasswordHash = password;
+        PasswordHash = hashedPassword;
     }
 }
