@@ -10,7 +10,7 @@ internal sealed class RoleEntityTypeConfiguration : IEntityTypeConfiguration<Rol
         builder.ToTable("Roles");
 
         builder.HasKey(r => r.Id);
-        builder.HasIndex(r => r.Name).IsUnique();
+        builder.HasIndex(r => r.Name);
         builder.HasIndex(r => r.TenantId);
 
         builder.HasMany(r => r.Permissions)

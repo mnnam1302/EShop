@@ -1,4 +1,6 @@
-﻿using EShop.Shared.DomainTools.Aggregates;
+﻿using EShop.Authorization.Domain.StateMachines;
+using EShop.Shared.DomainTools.Aggregates;
+using EShop.Shared.DomainTools.DependencyInjections;
 using EShop.Shared.Scoping;
 using System.ComponentModel.DataAnnotations;
 
@@ -6,12 +8,16 @@ namespace EShop.Authorization.Domain.Entities;
 
 public class User : AggregateRoot<string>, IExcludedFromScoping
 {
+    public const int MaxFailedAccessAttemptsBeforeLockout = 5;
+    public static readonly TimeSpan DefaultAccountLockoutTimeSpan = TimeSpan.FromMinutes(15);
 
     [MaxLength(ModelConstants.ShortText)]
     public string Username { get; set; } = string.Empty;
 
+    //public string UsernameNormalized { get; private set; } = string.Empty; // for index/search
+
     [MaxLength(ModelConstants.VeryLongText)]
-    public string HashedPassword { get; set; } = string.Empty;
+    public string PasswordHash { get; set; } = string.Empty;
 
     [MaxLength(ModelConstants.MediumText)]
     public string Name { get; set; } = string.Empty;
@@ -23,21 +29,19 @@ public class User : AggregateRoot<string>, IExcludedFromScoping
     public string PhoneNumber { get; set; } = string.Empty;
 
     [MaxLength(ModelConstants.ShortText)]
-    public string Status { get; set; } = nameof(UserStatus.Inactive);
+    public string Status { get; set; } = nameof(UserState.PendingVerification);
 
     [MaxLength(ModelConstants.ShortText)]
     public string CreatedByUserId { get; set; } = string.Empty;
 
-    // Organization relationship
     [MaxLength(ModelConstants.ShortText)]
     public string? OrganizationId { get; set; }
     public virtual Organization? Organization { get; set; }
 
-    // Roles relationship: https://learn.microsoft.com/en-us/ef/core/modeling/relationships/many-to-many#many-to-many-with-navigations-to-join-entity
     public virtual ICollection<Role> Roles { get; set; } = new List<Role>();
 
-    private readonly List<UserRole> _userRoles = [];
-    public virtual IReadOnlyCollection<UserRole> UserRoles => _userRoles.AsReadOnly();
+    private readonly List<UserRole> userRoles = new List<UserRole>();
+    public virtual IReadOnlyCollection<UserRole> UserRoles => userRoles.AsReadOnly();
 
     [MaxLength(ModelConstants.ShortText)]
     public string TenantId { get; private set; } = string.Empty;
@@ -45,9 +49,26 @@ public class User : AggregateRoot<string>, IExcludedFromScoping
     [MaxLength(ModelConstants.VeryLongText)]
     public string Scope { get; private set; } = string.Empty;
 
+    public int AccessFailedCount { get; private set; }
+    public DateTimeOffset? LockoutEndDateUtc { get; private set; }
+    public bool LockoutEnabled { get; private set; }
+
+    public UserStateMachine StateMachine => new(() => ParseStatusSafely(), AfterStateUpdated);
+
+    private UserState ParseStatusSafely()
+    {
+        if (Enum.TryParse<UserState>(Status, out var s)) return s;
+        return UserState.PendingVerification;
+    }
+
+    private void AfterStateUpdated(UserState newState)
+    {
+        Status = Enum.GetName(newState) ?? nameof(UserState.PendingVerification);
+    }
+
     public static User CreateOwnerUser(
         string ownerUsername,
-        string randomPassword,
+        string randomPassword, // for event only, not stored
         string hashedPassword,
         string ownerEmail,
         string ownerDisplayName,
@@ -58,10 +79,9 @@ public class User : AggregateRoot<string>, IExcludedFromScoping
         {
             Id = ownerUsername,
             Username = ownerUsername,
-            HashedPassword = hashedPassword,
+            PasswordHash = hashedPassword,
             Name = ownerDisplayName,
             Email = ownerEmail,
-            Status = nameof(UserStatus.Inactive),
             OrganizationId = organizationId,
             CreatedByUserId = createdByUserId,
             TenantId = organizationId,
@@ -94,11 +114,10 @@ public class User : AggregateRoot<string>, IExcludedFromScoping
         {
             Id = username,
             Username = username,
-            HashedPassword = hashedPassword,
+            PasswordHash = hashedPassword,
             Name = displayName,
             Email = email,
             PhoneNumber = phoneNumber,
-            Status = nameof(UserStatus.Inactive),
             OrganizationId = organizationId,
             CreatedByUserId = createdByUserId,
             TenantId = tenantId,
@@ -118,23 +137,48 @@ public class User : AggregateRoot<string>, IExcludedFromScoping
 
     public void AssignRole(Guid roleId)
     {
-        if (_userRoles.Any(ur => ur.RoleId == roleId))
-        {
-            return;
-        }
+        if (userRoles.Any(x => x.RoleId == roleId)) return;
 
-        var userRole = new UserRole
+        userRoles.Add(new UserRole
         {
             UserId = Id,
             RoleId = roleId
-        };
-
-        _userRoles.Add(userRole);
+        });
     }
-}
 
-public enum UserStatus
-{
-    Inactive,
-    Active,
+    public bool IsLockedOut()
+    {
+        if (!LockoutEnabled) return false;
+        if (!LockoutEndDateUtc.HasValue) return false;
+
+        return LockoutEndDateUtc.Value > DateTimeOffset.UtcNow;
+    }
+
+    public int IncrementAccessFailedCount()
+    {
+        AccessFailedCount++;
+        return AccessFailedCount;
+    }
+
+    public void ResetAccessFailedCount()
+    {
+        AccessFailedCount = 0;
+    }
+
+    public void SetLockout(DateTimeOffset lockoutEnd)
+    {
+        LockoutEnabled = true;
+        LockoutEndDateUtc = lockoutEnd == DateTimeOffset.MinValue ? null : lockoutEnd;
+    }
+
+    public void ConfirmInvitation(string hashedPassword)
+    {
+        if (string.IsNullOrWhiteSpace(hashedPassword))
+        {
+            throw new ArgumentException("Hashed password required", nameof(hashedPassword));
+        }
+
+        StateMachine.Fire(UserAction.ConfirmInvitation);
+        PasswordHash = hashedPassword;
+    }
 }

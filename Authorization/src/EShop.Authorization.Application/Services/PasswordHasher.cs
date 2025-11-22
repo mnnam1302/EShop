@@ -6,7 +6,7 @@ public interface IPasswordHasher
 {
     string GenerateRandomPassword(int length = 12);
     string Hash(string password);
-    bool VerifyHashedPassword(string hashedPassword, string providedPassword);
+    bool CheckPassword(string hashedPassword, string providedPassword);
 }
 
 public sealed class PasswordHasher : IPasswordHasher
@@ -49,7 +49,7 @@ public sealed class PasswordHasher : IPasswordHasher
         return string.Join(Delimeter, Convert.ToHexString(hash), Convert.ToHexString(salt));
     }
 
-    public bool VerifyHashedPassword(string hashedPassword, string providedPassword)
+    public bool CheckPassword(string hashedPassword, string providedPassword)
     {
         string[] parts = hashedPassword.Split(Delimeter);
         byte[] hash = Convert.FromHexString(parts[0]);

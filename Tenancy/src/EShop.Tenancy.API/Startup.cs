@@ -33,6 +33,10 @@ public class Startup
         }
 
         app.UseRouting();
+
+        app.UseAuthentication();
+        app.UseAuthorization();
+
         app.MapCarter();
 
         app.RegisterFeatures(applicationLifetime, logger);

@@ -20,7 +20,7 @@ public static class AuthEndpointHandler
             .RequireAuthorization();
 
         group.MapPost("login", LoginAsync).AllowAnonymous();
-        group.MapPost("refresh-token", RefreshTokenAsync).AllowAnonymous();
+        group.MapPost("refreshToken", RefreshTokenAsync).AllowAnonymous();
         group.MapPost("logout", LogoutAsync);
 
         return endpoints;

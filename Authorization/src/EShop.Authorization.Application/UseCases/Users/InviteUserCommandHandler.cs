@@ -59,11 +59,11 @@ internal sealed class InviteUserCommandHandler(
             return Result.Failure(ErrorContants.User.AlreadyExists);
         }
 
-        var randomPassword = passwordHasher.GenerateRandomPassword();
+        var temporaryPassword = passwordHasher.GenerateRandomPassword();
         var user = User.Invite(
             command.Username,
-            randomPassword,
-            passwordHasher.Hash(randomPassword),
+            temporaryPassword,
+            passwordHasher.Hash(temporaryPassword),
             command.Email,
             command.DisplayName,
             command.PhoneNumber,
@@ -78,6 +78,8 @@ internal sealed class InviteUserCommandHandler(
 
         userRepository.Add(user);
         await unitOfWork.SaveChangesAsync(cancellationToken);
+
+        logger.LogInformation("User {UserId} invited successfully", user.Id);
 
         return Result.Success();
     }

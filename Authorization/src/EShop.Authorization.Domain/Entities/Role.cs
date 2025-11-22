@@ -31,7 +31,7 @@ public class Role : EntityBase<Guid>, IScoped
         var role = new Role
         {
             Id = Guid.NewGuid(),
-            Name = $"Role Owner",
+            Name = $"Role owner {tenantId}",
             Description = "Owner role with all permissions",
             TenantId = tenantId,
             Scope = tenantId
