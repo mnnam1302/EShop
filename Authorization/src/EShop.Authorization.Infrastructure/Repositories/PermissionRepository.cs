@@ -4,7 +4,7 @@ using EShop.Shared.DomainTools.Repositories;
 
 namespace EShop.Authorization.Infrastructure.Repositories;
 
-public class PermissionRepository : EFRepository<AuthorizationDbContext, Permission, string>, IPermissionRepository
+public class PermissionRepository : RepositoryBase<AuthorizationDbContext, Permission, string>, IPermissionRepository
 {
     public PermissionRepository(AuthorizationDbContext dbContext) : base(dbContext)
     {

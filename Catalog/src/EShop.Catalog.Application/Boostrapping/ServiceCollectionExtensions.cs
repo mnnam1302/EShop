@@ -5,6 +5,7 @@ using EShop.Shared.EventBus.DependencyInjections.Options;
 using EShop.Shared.EventBus.JsonConverters;
 using EShop.Shared.EventBus.PipelineObservers;
 using EShop.Shared.EventBus.Services;
+using EShop.Shared.JsonApi.Extensions;
 using EShop.Shared.Scoping.ResourceAccessControl;
 using EShop.Shared.Sequences.DependencyInjections;
 using MassTransit;
@@ -20,7 +21,8 @@ public static class ServiceCollectionExtensions
             .AddSwagger()
             .AddApiVersioning()
             .AddMassTransitRabbitMQ(configuration, environment)
-            .AddServiceBootstrapping();
+            .AddServiceBootstrapping()
+            .AddTenantAuthenticationProvider();
 
         return services;
     }

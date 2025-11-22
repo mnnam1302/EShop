@@ -3,6 +3,6 @@ using EShop.Shared.DomainTools.Repositories;
 
 namespace EShop.Authorization.Domain.Repositories;
 
-public interface IPermissionRepository : IRepository<Permission, string>
+public interface IPermissionRepository : IRepositoryBase<Permission, string>
 {
 }
