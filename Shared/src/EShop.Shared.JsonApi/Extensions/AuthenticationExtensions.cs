@@ -6,7 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace EShop.Shared.JsonApi.Extensions;
 
-public static class ServiceCollectionExtensions
+public static class AuthenticationExtensions
 {
     public static IServiceCollection AddMultiTenantScoping(this IServiceCollection services)
     {
