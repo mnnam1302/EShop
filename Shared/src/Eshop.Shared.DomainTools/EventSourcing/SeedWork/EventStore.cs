@@ -8,9 +8,9 @@ public sealed class EventStore
     public Guid AggregateId { get; set; }
     public string AggregateType { get; set; } = string.Empty;
     public ulong Version { get; set; }
-    public IDomainEvent Event { get; set; }
+    public required IDomainEvent Event { get; set; }
     public string EventType { get; set; } = string.Empty;
-    public DateTimeOffset TimeStampUtc { get; set; }
+    public DateTimeOffset CreatedOnUtc { get; set; }
 
     public static EventStore Create(IAggregate aggregate, IDomainEvent @event)
     {
@@ -22,7 +22,7 @@ public sealed class EventStore
             Version = @event.Version,
             EventType = @event.GetType().Name,
             Event = @event,
-            TimeStampUtc = @event.TimeStampUtc
+            CreatedOnUtc = @event.TimeStampUtc
         };
 
         return eventStore;

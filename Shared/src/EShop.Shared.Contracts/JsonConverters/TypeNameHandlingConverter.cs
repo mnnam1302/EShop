@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace EShop.Shared.EventBus.JsonConverters;
+namespace EShop.Shared.Contracts.JsonConverters;
 
 public class TypeNameHandlingConverter : JsonConverter
 {

@@ -6,11 +6,11 @@ using EShop.Authorization.Infrastructure.Producers;
 using EShop.Authorization.Infrastructure.Repositories;
 using EShop.Shared.Cache.DependencyInejctions.Extensions;
 using EShop.Shared.Contracts.IntegrationEvents.Authorization;
+using EShop.Shared.Contracts.JsonConverters;
 using EShop.Shared.Contracts.Services.Tenancy.Tenants;
 using EShop.Shared.DomainTools.UnitOfWorks;
 using EShop.Shared.EventBus.DependencyInjections.Extensions;
 using EShop.Shared.EventBus.DependencyInjections.Options;
-using EShop.Shared.EventBus.JsonConverters;
 using EShop.Shared.EventBus.PipelineObservers;
 using EShop.Shared.EventBus.Services;
 using EShop.Shared.JsonApi.Extensions;
@@ -160,7 +160,6 @@ public static class ServiceCollectionExtensions
             .GetSection(EmailSettingOptions.SectionName)
             .Get<EmailSettingOptions>()
             ?? throw new InvalidOperationException("Email settings are not configured properly.");
-
 
         services.AddFluentEmail(emailSettings.DefaultFromEmail)
             .AddMailKitSender(new SmtpClientOptions

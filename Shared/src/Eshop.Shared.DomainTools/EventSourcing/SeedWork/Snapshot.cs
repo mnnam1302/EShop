@@ -5,9 +5,9 @@ public sealed class Snapshot
     public Guid Id { get; set; }
     public Guid AggregateId { get; set; }
     public string AggregateType { get; set; } = string.Empty;
-    public IAggregate Aggregate { get; set; }
+    public required IAggregate Aggregate { get; set; }
     public ulong Version { get; set; }
-    public DateTimeOffset TimeStampUtc { get; set; }
+    public DateTimeOffset CreatedOnUtc { get; set; }
 
     public static Snapshot Create(IAggregate aggregate, EventStore eventStore)
     {
@@ -18,7 +18,7 @@ public sealed class Snapshot
             AggregateType = aggregate.GetType().Name,
             Aggregate = aggregate,
             Version = eventStore.Version,
-            TimeStampUtc = eventStore.TimeStampUtc
+            CreatedOnUtc = eventStore.CreatedOnUtc
         };
 
         return snapshot;

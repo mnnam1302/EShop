@@ -1,9 +1,9 @@
 ﻿using Newtonsoft.Json;
 using System.Globalization;
 
-namespace EShop.Shared.EventBus.JsonConverters;
+namespace EShop.Shared.Contracts.JsonConverters;
 
-public class DateOnlyJsonConverter : JsonConverter<DateOnly>
+public class DateOnlyTextJsonConverter : JsonConverter<DateOnly>
 {
     private const string Format = "dd/MM/yyyy";
 
@@ -14,6 +14,6 @@ public class DateOnlyJsonConverter : JsonConverter<DateOnly>
 
     public override void WriteJson(JsonWriter writer, DateOnly value, JsonSerializer serializer)
     {
-        writer.WriteValue(value.ToString(Format, CultureInfo.InvariantCulture));
+        writer.WriteValue(value.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture));
     }
 }

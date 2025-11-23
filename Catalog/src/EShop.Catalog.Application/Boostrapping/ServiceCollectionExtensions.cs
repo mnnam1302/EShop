@@ -1,8 +1,8 @@
 ﻿using EShop.Catalog.Application.Shared;
+using EShop.Shared.Contracts.JsonConverters;
 using EShop.Shared.DomainTools.UnitOfWorks;
 using EShop.Shared.EventBus.DependencyInjections.Extensions;
 using EShop.Shared.EventBus.DependencyInjections.Options;
-using EShop.Shared.EventBus.JsonConverters;
 using EShop.Shared.EventBus.PipelineObservers;
 using EShop.Shared.EventBus.Services;
 using EShop.Shared.JsonApi.Extensions;

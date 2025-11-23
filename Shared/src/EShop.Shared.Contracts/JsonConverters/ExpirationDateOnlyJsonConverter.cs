@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System.Globalization;
 
-namespace EShop.Shared.EventBus.JsonConverters;
+namespace EShop.Shared.Contracts.JsonConverters;
 
 public class ExpirationDateOnlyJsonConverter : JsonConverter
 {
