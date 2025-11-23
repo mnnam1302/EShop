@@ -1,5 +1,5 @@
 ﻿using Carter;
-using EShop.Shared.DomainTools.DependencyInjections;
+using EShop.Shared.DomainTools.Extensions;
 using EShop.Shared.JsonApi.Extensions;
 using EShop.Shared.JsonApi.Middlewares;
 using EShop.Tenancy.Application.DependencyInjections;

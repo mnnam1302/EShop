@@ -1,8 +1,8 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 
-namespace EShop.Shared.DomainTools.DependencyInjections;
+namespace EShop.Shared.DomainTools.Extensions;
 
-public static class ServiceCollectionExtensions
+public static class ServiceCollectionExtensionss
 {
     public static IServiceCollection AddResiliencePolicy(this IServiceCollection services)
     {

@@ -57,7 +57,7 @@ public class Organization : AggregateRoot<string>, IExcludedFromScoping
         organization.RaiseDomainEvent(new OrganizationEvents.RootOrganizationCreated
         {
             EventId = Guid.NewGuid(),
-            TimeStamp = DateTimeOffset.UtcNow,
+            TimeStampUtc = DateTimeOffset.UtcNow,
             OrganizationId = organization.Id,
             Name = organization.Name,
             TenantId = tenantId

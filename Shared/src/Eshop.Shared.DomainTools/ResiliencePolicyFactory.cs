@@ -19,12 +19,13 @@ public class ResiliencePolicyFactory : IResiliencePolicyFactory
     {
         int retryCount = 5;
         return Policy
-            .Handle<DbUpdateException>()
+            .Handle<DbUpdateConcurrencyException>()
             .WaitAndRetry(retryCount, retryAttempt =>
                 GetExponentialBackOffPlusSomeJitter(retryAttempt),
                 (exception, timeSpan, retryAttempt, context) =>
                 {
-                    logger.LogDebug("DBUpdateException handled, Retry number {current}/{max} for exception '{exception}'", retryAttempt, retryCount, exception.Message);
+                    logger.LogDebug("DBUpdateException handled, Retry number {current}/{max} for exception '{exception}'", 
+                        retryAttempt, retryCount, exception.Message);
                 });
     }
 

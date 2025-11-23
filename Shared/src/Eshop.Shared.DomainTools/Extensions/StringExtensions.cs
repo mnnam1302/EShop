@@ -1,4 +1,4 @@
-﻿namespace EShop.Shared.DomainTools.DependencyInjections;
+﻿namespace EShop.Shared.DomainTools.Extensions;
 
 public static class StringExtensions
 {

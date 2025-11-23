@@ -2,7 +2,7 @@
 using EShop.Shared.Authentication.DependencyInjections;
 using EShop.Shared.Cache.DependencyInejctions.Extensions;
 using EShop.Shared.Contracts.Services.Tenancy.Tenants;
-using EShop.Shared.DomainTools.DependencyInjections;
+using EShop.Shared.DomainTools.Extensions;
 using EShop.Shared.EventBus.JsonConverters;
 using EShop.Shared.JsonApi.Extensions;
 using EShop.Shared.Scoping.ResourceAccessControl;

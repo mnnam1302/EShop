@@ -6,8 +6,10 @@ public static class OrganizationEvents
 {
     public sealed record RootOrganizationCreated : IDomainEvent
     {
-        public required Guid EventId { get; init; }
-        public required DateTimeOffset TimeStamp { get; init; }
+        public Guid EventId { get; set; }
+        public ulong Version { get; set; }
+        public DateTimeOffset TimeStampUtc { get; set; }
+
         public required string OrganizationId { get; init; }
         public required string Name { get; init; }
         public required string TenantId { get; init; }

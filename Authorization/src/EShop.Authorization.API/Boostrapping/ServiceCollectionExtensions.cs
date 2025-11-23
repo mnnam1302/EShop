@@ -1,6 +1,6 @@
 ﻿using EShop.Authorization.Application.DependencyInjections;
 using EShop.Authorization.Infrastructure.DependencyInjections;
-using EShop.Shared.DomainTools.DependencyInjections;
+using EShop.Shared.DomainTools.Extensions;
 using EShop.Shared.JsonApi.Extensions;
 using EShop.Shared.JsonApi.Middlewares;
 using MicroElements.Swashbuckle.FluentValidation.AspNetCore;

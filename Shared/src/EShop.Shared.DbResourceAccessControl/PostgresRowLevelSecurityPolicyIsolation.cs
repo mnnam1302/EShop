@@ -1,4 +1,4 @@
-﻿using EShop.Shared.DomainTools.DependencyInjections;
+﻿using EShop.Shared.DomainTools.Extensions;
 using EShop.Shared.Scoping;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
