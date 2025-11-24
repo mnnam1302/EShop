@@ -25,7 +25,7 @@ public sealed class EventStoreGatewayWithSnapshots : EventStoreGatewayBase
              * Ex: SnapshotInterval = 3 - Create a snapshot every 3 events
              * @event.Version = 3 => 3 % 3 = 0 => Create snapshot
              */
-            if ((long)@event.Version % Options.SnapshotInterval == 0)
+            if ((long)@event.Version % Options.SnapshotIntervalInEvents == 0)
             {
                 var snapshot = Snapshot.Create(aggregate, eventStore);
                 await snapshotRepository.AddSnapshotAsync(snapshot, cancellationToken);

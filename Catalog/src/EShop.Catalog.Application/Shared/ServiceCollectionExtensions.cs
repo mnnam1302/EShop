@@ -18,6 +18,8 @@ public static class ServiceCollectionExtensions
             .AddPostgreSqlHealthCheck(configuration)
             .AddDbContextPoolWithScoping<CatalogDbContext>(configuration);
 
+        services.AddPostgreSQLEventSourcing<CatalogDbContext>(configuration);
+
         services
             .AddRedisHealthCheck(configuration)
             .AddRedisCacheInfrastructure(configuration);
