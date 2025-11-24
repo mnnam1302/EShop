@@ -32,6 +32,7 @@ public static class EventSourcingExtensions
 
         // Register Event Store Repository and Gateway
         services.AddScoped<IEventStoreRepository, PostgresEventStoreRepository<TDbContext>>();
+        services.AddScoped<ISnapshotRepository, NullSnapshotRepository>();
         services.AddScoped<IEventStoreGateway, EventStoreGateway>();
 
         return services;
@@ -69,7 +70,7 @@ public static class EventSourcingExtensions
 
         services.AddScoped<IEventStoreRepository, PostgresEventStoreRepository<TDbContext>>();
         services.AddScoped<ISnapshotRepository, PostgresSnapshotRepository<TDbContext>>();
-        services.AddScoped<IEventStoreGateway, EventStoreGatewayWithSnapshots>();
+        services.AddScoped<IEventStoreGateway, EventStoreGateway>();
 
         return services;
     }

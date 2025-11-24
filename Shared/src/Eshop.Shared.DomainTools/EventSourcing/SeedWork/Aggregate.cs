@@ -8,7 +8,7 @@ public interface IAggregate : IEntityBase<Guid>
 {
     IEnumerable<IDomainEvent> UncommittedEvents { get; }
 
-    void LoadFromHistory(IEnumerable<IDomainEvent> events);
+    void Replay(IEnumerable<IDomainEvent> events);
 
     void MarkEventsAsCommitted();
 }
@@ -28,7 +28,7 @@ public abstract class Aggregate : IAggregate
         _uncommittedEvents.Clear();
     }
 
-    public void LoadFromHistory(IEnumerable<IDomainEvent> events)
+    public void Replay(IEnumerable<IDomainEvent> events)
     {
         foreach (var @event in events)
         {
