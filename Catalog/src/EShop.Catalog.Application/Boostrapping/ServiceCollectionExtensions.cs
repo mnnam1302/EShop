@@ -20,9 +20,10 @@ public static class ServiceCollectionExtensions
         services.AddCors()
             .AddSwagger()
             .AddApiVersioning()
-            .AddMassTransitRabbitMQ(configuration, environment)
             .AddServiceBootstrapping()
-            .AddTenantAuthenticationProvider();
+            .AddTenantAuthenticationProvider()
+            .AddMassTransitRabbitMQ(configuration, environment)
+            .AddPostgreSQLEventSourcing<CatalogDbContext>(configuration);
 
         return services;
     }
