@@ -4,18 +4,13 @@ using Microsoft.Extensions.Options;
 
 namespace EShop.Shared.DomainTools.EventSourcing;
 
-public sealed class EventStoreGateway : IEventStoreGateway
+public sealed class EventStoreGateway(
+    IOptions<EventStoreOptions> options,
+    IEventStoreRepository eventStoreRepository,
+    ISnapshotRepository? snapshotRepository) : IEventStoreGateway
 {
-    private readonly EventStoreOptions options;
-    private readonly IEventStoreRepository eventStoreRepository;
-    private readonly ISnapshotRepository snapshotRepository;
-
-    public EventStoreGateway(IOptions<EventStoreOptions> options, IEventStoreRepository eventStoreRepository, ISnapshotRepository? snapshotRepository)
-    {
-        this.options = options.Value;
-        this.eventStoreRepository = eventStoreRepository;
-        this.snapshotRepository = snapshotRepository ?? new NullSnapshotRepository();
-    }
+    private readonly EventStoreOptions options = options.Value;
+    private readonly ISnapshotRepository snapshotRepository = snapshotRepository ?? new NullSnapshotRepository();
 
     public async Task<TAggregate> LoadAggregateAsync<TAggregate>(Guid aggregateId, CancellationToken cancellationToken)
         where TAggregate : IAggregate, new()

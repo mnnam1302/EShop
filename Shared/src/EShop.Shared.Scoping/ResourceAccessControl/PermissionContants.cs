@@ -34,6 +34,9 @@ public static class PermissionConstants
 
     public static class Catalog
     {
+        public const string ManageCategories = "Catalog_ManageCategories";
+        public const string ViewCategories = "Catalog_ViewCategories";
+
         public const string ViewProducts = "Catalog_ViewProducts";
         public const string ManageProducts = "Catalog_ManageProducts";
     }

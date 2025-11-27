@@ -13,6 +13,20 @@ public sealed class CatalogPermissionRegistrationService(IEventBusGateway eventB
     [
         new CatalogPermission()
         {
+            Id = PermissionConstants.Catalog.ViewCategories,
+            Name = "View categories",
+            Description = "Allows users viewing list categories and category details in read-only mode.",
+            RelatedTo = ModuleName
+        },
+        new CatalogPermission()
+        {
+            Id = PermissionConstants.Catalog.ManageCategories,
+            Name = "Manage categories",
+            Description = "Allows users adding/editing/cloning/deleting categories.",
+            RelatedTo = ModuleName
+        },
+        new CatalogPermission()
+        {
             Id = PermissionConstants.Catalog.ViewProducts,
             Name = "View products",
             Description = "Allows users viewing list products, all product versions, and product version details in read-only mode.",

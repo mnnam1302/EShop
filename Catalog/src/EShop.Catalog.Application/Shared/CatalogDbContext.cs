@@ -21,13 +21,8 @@ public sealed class CatalogDbContext : DbContext, IInboxDbContext, ISequenceDbCo
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        // Apply configurations from current assembly (Catalog)
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(AssemblyReference).Assembly);
-
-        // Apply configurations from EventBus assembly
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(InboxMessage).Assembly);
-
-        // Apply configurations from DomainTools assembly (EventSourcing)
         modelBuilder.AddEventStoreEntity();
     }
 }
