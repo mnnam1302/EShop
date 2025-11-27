@@ -11,6 +11,9 @@ public sealed class Category : Aggregate, IScoped
     [MaxLength(ModelConstants.MediumText)]
     public string Name { get; set; } = string.Empty;
 
+    [MaxLength(ModelConstants.ShortMediumText)]
+    public string Reference { get; set; } = string.Empty;
+
     [MaxLength(ModelConstants.LongText)]
     public string Slug { get; set; } = string.Empty;
 
