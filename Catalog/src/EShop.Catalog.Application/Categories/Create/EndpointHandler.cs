@@ -10,8 +10,8 @@ public static class EndpointHandler
 {
     public static RouteGroupBuilder MapCreateCategory(this RouteGroupBuilder categoryEndpointBuilder)
     {
-        categoryEndpointBuilder.MapPost("/", CreateCategoryAsync);
-            //.RequirePermissionFilter(PermissionConstants.Catalog.ManageCategories);
+        categoryEndpointBuilder.MapPost("/", CreateCategoryAsync)
+            .RequirePermissionFilter(PermissionConstants.Catalog.ManageCategories);
 
         return categoryEndpointBuilder;
     }
