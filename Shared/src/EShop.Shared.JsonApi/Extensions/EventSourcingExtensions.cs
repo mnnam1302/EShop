@@ -1,4 +1,5 @@
 ﻿using EShop.Shared.DomainTools.EventSourcing;
+using EShop.Shared.DomainTools.EventSourcing.Configurations;
 using EShop.Shared.DomainTools.EventSourcing.SeedWork;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -73,5 +74,11 @@ public static class EventSourcingExtensions
         services.AddScoped<IEventStoreGateway, EventStoreGateway>();
 
         return services;
+    }
+
+    public static ModelBuilder AddEventStoreEntity(this ModelBuilder modelBuilder)
+    {
+        modelBuilder.ApplyConfiguration(new EventStoreEntityTypeConfiguration());
+        return modelBuilder;
     }
 }

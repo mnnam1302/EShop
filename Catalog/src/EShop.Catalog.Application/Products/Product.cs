@@ -1,7 +1,6 @@
 ﻿using EShop.Shared.Contracts.Shared;
 using EShop.Shared.DomainTools.Aggregates;
 using EShop.Shared.DomainTools.Entities;
-using EShop.Shared.Scoping;
 using System.ComponentModel.DataAnnotations;
 
 namespace EShop.Catalog.Application.Products;

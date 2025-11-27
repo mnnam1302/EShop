@@ -1,5 +1,5 @@
 ﻿using EShop.Shared.Contracts.Shared;
-using EShop.Shared.Scoping;
+using EShop.Shared.DomainTools.Entities;
 using System.ComponentModel.DataAnnotations;
 
 namespace EShop.Shared.EventBus;

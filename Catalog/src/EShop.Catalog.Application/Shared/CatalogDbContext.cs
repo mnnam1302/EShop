@@ -2,12 +2,13 @@
 using EShop.Shared.DomainTools.EventSourcing;
 using EShop.Shared.DomainTools.EventSourcing.SeedWork;
 using EShop.Shared.EventBus;
+using EShop.Shared.JsonApi.Extensions;
 using EShop.Shared.Sequences;
 using Microsoft.EntityFrameworkCore;
 
 namespace EShop.Catalog.Application.Shared;
 
-public class CatalogDbContext : DbContext, IInboxDbContext, ISequenceDbContextStore, IEventStoreDbContext
+public sealed class CatalogDbContext : DbContext, IInboxDbContext, ISequenceDbContextStore, IEventStoreDbContext
 {
     public CatalogDbContext(DbContextOptions<CatalogDbContext> options) : base(options)
     {
@@ -23,10 +24,10 @@ public class CatalogDbContext : DbContext, IInboxDbContext, ISequenceDbContextSt
         // Apply configurations from current assembly (Catalog)
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(AssemblyReference).Assembly);
 
-        // Apply configurations from DomainTools assembly (EventSourcing)
-        modelBuilder.ApplyConfigurationsFromAssembly(typeof(EventStore).Assembly);
-
         // Apply configurations from EventBus assembly
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(InboxMessage).Assembly);
+
+        // Apply configurations from DomainTools assembly (EventSourcing)
+        modelBuilder.AddEventStoreEntity();
     }
 }

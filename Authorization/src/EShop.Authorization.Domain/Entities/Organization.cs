@@ -1,6 +1,7 @@
 ﻿using EShop.Authorization.Domain.DomainEvents;
 using EShop.Authorization.Domain.ValueObjects;
 using EShop.Shared.DomainTools.Aggregates;
+using EShop.Shared.DomainTools.Entities;
 using EShop.Shared.Scoping;
 using System.ComponentModel.DataAnnotations;
 

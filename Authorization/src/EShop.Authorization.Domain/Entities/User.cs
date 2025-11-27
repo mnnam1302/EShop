@@ -1,5 +1,5 @@
 ﻿using EShop.Shared.DomainTools.Aggregates;
-using EShop.Shared.Scoping;
+using EShop.Shared.DomainTools.Entities;
 using System.ComponentModel.DataAnnotations;
 
 namespace EShop.Authorization.Domain.Entities;

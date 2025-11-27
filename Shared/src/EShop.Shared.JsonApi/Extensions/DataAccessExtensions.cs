@@ -58,9 +58,7 @@ public static class DataAccessExtensions
                                 maxRetryDelay: ngsqlRetryOptions.CurrentValue.MaxRetryDelay,
                                 errorCodesToAdd: ngsqlRetryOptions.CurrentValue.ErrorNumbersoAdd))
                             .MigrationsAssembly(typeof(TContext).Assembly.GetName().Name))
-                .AddInterceptors(
-                    tenantIsolationStrategy,
-                    domainEventsDispatcherInterceptor);
+                .AddInterceptors(tenantIsolationStrategy, domainEventsDispatcherInterceptor);
         });
 
         return services;

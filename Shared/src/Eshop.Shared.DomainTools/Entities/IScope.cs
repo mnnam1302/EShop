@@ -1,4 +1,4 @@
-﻿namespace EShop.Shared.Scoping;
+﻿namespace EShop.Shared.DomainTools.Entities;
 
 /// <summary>
 /// Describes owner and place in their organisation for an entity.

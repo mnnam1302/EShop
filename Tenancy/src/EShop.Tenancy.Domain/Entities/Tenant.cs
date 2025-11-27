@@ -1,8 +1,8 @@
 ﻿using EShop.Shared.Authentication;
 using EShop.Shared.Contracts.Services.Tenancy.Tenants;
 using EShop.Shared.DomainTools.Aggregates;
+using EShop.Shared.DomainTools.Entities;
 using EShop.Shared.DomainTools.Exceptions;
-using EShop.Shared.Scoping;
 using System.ComponentModel.DataAnnotations;
 
 namespace EShop.Tenancy.Domain.Entities;

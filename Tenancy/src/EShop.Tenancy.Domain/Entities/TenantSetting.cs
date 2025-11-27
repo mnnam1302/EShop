@@ -1,5 +1,4 @@
 ﻿using EShop.Shared.DomainTools.Entities;
-using EShop.Shared.Scoping;
 using System.ComponentModel.DataAnnotations;
 
 namespace EShop.Tenancy.Domain.Entities;

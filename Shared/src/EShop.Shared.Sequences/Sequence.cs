@@ -1,4 +1,4 @@
-﻿using EShop.Shared.Scoping;
+﻿using EShop.Shared.DomainTools.Entities;
 
 namespace EShop.Shared.Sequences;
 

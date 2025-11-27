@@ -1,8 +1,9 @@
 ﻿using EShop.Shared.Contracts.Abstractions.MessageBus;
+using EShop.Shared.DomainTools.Entities;
 
 namespace EShop.Shared.DomainTools.EventSourcing.SeedWork;
 
-public sealed class EventStore
+public class EventStore : IExcludedFromScoping
 {
     public Guid Id { get; set; }
     public Guid AggregateId { get; set; }

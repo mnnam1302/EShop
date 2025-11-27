@@ -14,8 +14,7 @@ public sealed class DbInitializer(
     CatalogDbContext dbContext,
     ISequenceRegistry sequenceRegistry,
     IUserDetailsProvider userDetailsProvider,
-    ITenantIsolationStrategy tenantIsolationStrategy,
-    IRingFencingIsolationStrategy ringFencingIsolationStrategy)
+    ITenantIsolationStrategy tenantIsolationStrategy)
 {
     public async Task Initialize(bool applyMigrations = true, bool applyTenantIsolation = true)
     {
@@ -34,7 +33,7 @@ public sealed class DbInitializer(
                 await dbContext.Database.EnsureCreatedAsync();
             }
 
-            ringFencingIsolationStrategy.AddRingFencingIsolation(dbContext);
+            //ringFencingIsolationStrategy.AddRingFencingIsolation(dbContext);
 
             tenantIsolationStrategy.AddTenantIsolation(dbContext, appliedRingFencing: true);
 

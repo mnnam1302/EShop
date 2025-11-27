@@ -1,6 +1,8 @@
-﻿namespace EShop.Shared.DomainTools.EventSourcing.SeedWork;
+﻿using EShop.Shared.DomainTools.Entities;
 
-public sealed class Snapshot
+namespace EShop.Shared.DomainTools.EventSourcing.SeedWork;
+
+public class Snapshot : IExcludedFromScoping
 {
     public Guid Id { get; set; }
     public Guid AggregateId { get; set; }
