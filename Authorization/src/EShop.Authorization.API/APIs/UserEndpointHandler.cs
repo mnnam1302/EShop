@@ -20,20 +20,26 @@ public static class UserEndpointHandler
             .NewVersionedApi("Users")
             .MapGroup(BaseUrl)
             .HasApiVersion(1)
-            .RequireAuthorization()
-            .RequireFeatureFilter(FeatureConstants.Authorization.UserInvites);
+            .RequireAuthorization();
 
         group.MapGet("/{userId}/permissions", GetUserPermissions)
+            .RequireFeatureFilter(FeatureConstants.Authorization.UserInvites)
             .RequireOneOfPermissionsFilter(AuhthorizationPermissions.ManageUsers, AuhthorizationPermissions.ViewUsers);
 
         group.MapGet("/{userId}/organizationContext", GetUserOrganizationContext)
+            .RequireFeatureFilter(FeatureConstants.Authorization.UserInvites)
             .RequireSystemUserFilter();
 
+        group.MapGet("/{userId}", GetUserByIdAsync)
+            .RequireFeatureFilter(FeatureConstants.Authorization.UserInvites)
+            .RequireOneOfPermissionsFilter(AuhthorizationPermissions.ManageUsers, AuhthorizationPermissions.ViewUsers);
+
         group.MapPost("", InviteUser)
+            .RequireFeatureFilter(FeatureConstants.Authorization.UserInvites)
             .RequirePermissionFilter(AuhthorizationPermissions.ManageUsers);
 
-        group.MapGet("/{userId}", GetUserByIdAsync)
-            .RequireOneOfPermissionsFilter(AuhthorizationPermissions.ManageUsers, AuhthorizationPermissions.ViewUsers);
+        group.MapPost("/{userId}/confirmInvitation", ConfirmInvitationAsync)
+            .AllowAnonymous();
 
         return endpoints;
     }
@@ -66,6 +72,21 @@ public static class UserEndpointHandler
         return Results.Ok(result);
     }
 
+
+    private static async Task<IResult> GetUserByIdAsync([FromRoute] string userId, [FromServices] IMediator mediator, CancellationToken cancellationToken)
+    {
+        var query = new GetUserByIdQuery(userId);
+
+        var result = await mediator.QueryAsync<GetUserByIdQuery, UserDetailsResponse>(query, cancellationToken);
+
+        if (result.IsFailure)
+        {
+            ApiResultHandler.HandleFailure(result);
+        }
+
+        return Results.Ok(result);
+    }
+
     private static async Task<IResult> InviteUser([FromBody] InviteUserRequest request, [FromServices] IMediator mediator, CancellationToken cancellationToken)
     {
         var command = new InviteUserCommand
@@ -88,17 +109,22 @@ public static class UserEndpointHandler
         return Results.Created("", result);
     }
 
-    private static async Task<IResult> GetUserByIdAsync([FromRoute] string userId, [FromServices] IMediator mediator, CancellationToken cancellationToken)
+    private static async Task<IResult> ConfirmInvitationAsync([FromRoute] string userId, [FromBody] ConfirmInvitationRequest request, [FromServices] IMediator mediator, CancellationToken cancellationToken)
     {
-        var query = new GetUserByIdQuery(userId);
+        var command = new ConfirmInvitationCommand
+        {
+            Username = userId, // userId is actually the username here
+            TemporaryPassword = request.TemporaryPassword,
+            NewPassword = request.NewPassword
+        };
 
-        var result = await mediator.QueryAsync<GetUserByIdQuery, UserDetailsResponse>(query, cancellationToken);
+        var result = await mediator.SendAsync(command, cancellationToken);
 
         if (result.IsFailure)
         {
-            ApiResultHandler.HandleFailure(result);
+            return ApiResultHandler.HandleFailure(result);
         }
 
-        return Results.Ok(result);
+        return Results.Ok();
     }
 }
