@@ -1,6 +1,6 @@
 ﻿namespace EShop.Catalog.Application.Categories.Create;
 
-public sealed class CategoryCreatedEvent : CategoryEvent
+public sealed class CategoryCreatedEvent : CategoryDomainEvent
 {
     public Guid? ParentId { get; set; }
     public string Name { get; set; } = string.Empty;

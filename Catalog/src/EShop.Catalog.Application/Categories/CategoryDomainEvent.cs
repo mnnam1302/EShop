@@ -3,7 +3,7 @@ using EShop.Shared.Contracts.Abstractions.MessageBus;
 
 namespace EShop.Catalog.Application.Categories;
 
-public abstract class CategoryEvent : ICatalogEvent
+public abstract class CategoryDomainEvent : ICatalogDomainEvent
 {
     public Guid EventId { get; set; } = Guid.NewGuid();
     public DateTimeOffset TimeStampUtc { get; set; } = DateTimeOffset.UtcNow;

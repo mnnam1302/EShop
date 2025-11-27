@@ -2,6 +2,6 @@
 
 namespace EShop.Catalog.Application.Shared;
 
-public interface ICatalogEvent : IDomainEvent
+public interface ICatalogDomainEvent : IDomainEvent
 {
 }
