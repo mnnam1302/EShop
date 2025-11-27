@@ -1,4 +1,5 @@
 ﻿using EShop.Catalog.Application.Categories.Create;
+using EShop.Shared.Authentication.Abstractions;
 using EShop.Shared.Contracts.Shared;
 using EShop.Shared.DomainTools.Aggregates;
 using EShop.Shared.DomainTools.Entities;
@@ -19,7 +20,7 @@ public sealed class Category : Aggregate, IScoped
     public string Scope { get; set; } = string.Empty;
     public CategoryStateMachine StateMachine { get; set; } = new CategoryStateMachine();
 
-    public static Category Create(Command command, EShop.Shared.Authentication.Abstractions.IUserDetailsProvider userDetailsProvider)
+    public static Category Create(Command command, IUserDetailsProvider userDetailsProvider)
     {
         var category = new Category();
         category.RaiseEvent(new CategoryCreatedEvent
