@@ -13,8 +13,6 @@ public class User : AggregateRoot<string>, IExcludedFromScoping
     [MaxLength(ModelConstants.ShortText)]
     public string Username { get; set; } = string.Empty;
 
-    //public string UsernameNormalized { get; private set; } = string.Empty; // for index/search
-
     [MaxLength(ModelConstants.VeryLongText)]
     public string PasswordHash { get; set; } = string.Empty;
 
