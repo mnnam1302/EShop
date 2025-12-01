@@ -11,7 +11,6 @@ public sealed class CreateCategoryCommand : ICommand
     public required string Reference { get; set; }
     public required string Slug { get; set; }
     public Guid? ParentId { get; set; }
-}
 
 public sealed class CreateCategoryCommandHandler : ICommandHandler<CreateCategoryCommand>
 {

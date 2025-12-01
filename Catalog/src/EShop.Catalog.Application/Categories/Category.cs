@@ -1,10 +1,7 @@
 ﻿using EShop.Catalog.Application.Categories.Create;
 using EShop.Shared.Authentication.Abstractions;
-using EShop.Shared.Contracts.Shared;
-using EShop.Shared.DomainTools.Aggregates;
 using EShop.Shared.DomainTools.Entities;
 using EShop.Shared.DomainTools.EventSourcing.SeedWork;
-using System.ComponentModel.DataAnnotations;
 
 namespace EShop.Catalog.Application.Categories;
 

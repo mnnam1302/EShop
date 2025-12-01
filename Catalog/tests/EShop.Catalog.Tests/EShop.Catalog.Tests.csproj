@@ -23,10 +23,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Categories\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\..\..\Testing\src\EShop.Testing.JsonApiApplication\EShop.Testing.JsonApiApplication.csproj" />
     <ProjectReference Include="..\..\src\EShop.Catalog.Application\EShop.Catalog.Application.csproj" />
   </ItemGroup>
