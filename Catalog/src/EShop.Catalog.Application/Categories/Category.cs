@@ -20,7 +20,7 @@ public sealed class Category : Aggregate, IScoped
     public string Scope { get; set; } = string.Empty;
     public CategoryStateMachine StateMachine { get; set; } = new CategoryStateMachine();
 
-    public static Category Create(Command command, IUserDetailsProvider userDetailsProvider)
+    public static Category Create(CreateCategoryCommand command, IUserDetailsProvider userDetailsProvider)
     {
         var category = new Category();
         category.RaiseEvent(new CategoryCreatedEvent

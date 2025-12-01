@@ -21,7 +21,7 @@ public static class EndpointHandler
         [FromServices] IMediator mediator,
         CancellationToken cancellationToken)
     {
-        var command = new Command
+        var command = new CreateCategoryCommand
         {
             Name = request.Name,
             Reference = request.Reference,
