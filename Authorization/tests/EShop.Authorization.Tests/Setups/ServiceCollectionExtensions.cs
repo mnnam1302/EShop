@@ -67,11 +67,9 @@ public static class ServiceCollectionExtensions
         services.AddMediator(Application.AssemblyReference.Assembly);
         services.AddApplicationServices();
 
-        services.AddScoped<IPermissionValidator, CurrentUserPermissionsValidator>();
-        services.AddSingleton<IUserPermissionsProvider, TestUserPermissionProvider>();
-
-        services.AddScoped<IFeatureValidator, CurrentUserFeaturesValidator>();
-        services.AddSingleton<ITenantFeaturesProvider, TestTenantFeatureProvider>();
+        services
+            .AddTestUserPermissions()
+            .AddTestTenantFeatures();
 
         services.AddOwnerUserOrganizationContextProvider();
 
@@ -80,7 +78,8 @@ public static class ServiceCollectionExtensions
 
     private static IServiceCollection AddTestAuthorizationPersistence(this IServiceCollection services, PostgreSqlTestDatabase testDatabase)
     {
-        services.AddPostgreSqlTestDbContext<AuthorizationDbContext>(testDatabase)
+        services
+            .AddPostgreSqlTestDbContext<AuthorizationDbContext>(testDatabase)
             .AddPersistenceServices();
 
         return services;

@@ -26,7 +26,7 @@ internal sealed class OwnerUserPermissionProvider : IUserPermissionsProvider
             return permissionsCache;
         }
 
-        var calculatedPermissions = await _permissionCalculator.CalculateFor(userId.ToLower());
+        var calculatedPermissions = await _permissionCalculator.CalculateFor(userId.ToLower(), cancellationToken);
 
         await _permissionCache.AddPermissionsAsync(userId, calculatedPermissions);
 

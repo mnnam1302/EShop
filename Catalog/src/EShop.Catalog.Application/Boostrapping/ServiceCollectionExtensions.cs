@@ -19,7 +19,7 @@ public static class ServiceCollectionExtensions
     {
         services.AddCors()
             .AddSwagger()
-            .AddApiVersioning()
+            .AddCatalogApiVersioning()
             .AddTenantAuthenticationProvider()
             .AddMassTransitRabbitMQ(configuration, environment)
             .AddServiceBootstrapping();
@@ -27,7 +27,7 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    private static IServiceCollection AddSwagger(this IServiceCollection services)
+    public static IServiceCollection AddSwagger(this IServiceCollection services)
     {
         services
             .AddSwaggerGenNewtonsoftSupport()
@@ -38,7 +38,7 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    private static IServiceCollection AddApiVersioning(this IServiceCollection services)
+    public static IServiceCollection AddCatalogApiVersioning(this IServiceCollection services)
     {
         services.AddApiVersioning(options => options.ReportApiVersions = true)
             .AddApiExplorer(options =>
@@ -49,6 +49,7 @@ public static class ServiceCollectionExtensions
 
         return services;
     }
+
     private static IServiceCollection AddMassTransitRabbitMQ(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment)
     {
         var massTransitConfiguration = new MasstransitConfiguration();
@@ -104,7 +105,7 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    private static IServiceCollection AddServiceBootstrapping(this IServiceCollection services)
+    public static IServiceCollection AddServiceBootstrapping(this IServiceCollection services)
     {
         services.AddTransient<DbInitializer>();
 

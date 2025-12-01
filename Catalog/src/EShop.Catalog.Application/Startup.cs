@@ -25,7 +25,7 @@ public class Startup
             .AddAgencies();
     }
 
-    public virtual void Configure(WebApplication app, IHostApplicationLifetime applicationLifetime, ILoggerFactory loggerFactory)
+    internal void Configure(WebApplication app, IHostApplicationLifetime applicationLifetime, ILoggerFactory loggerFactory)
     {
         var logger = loggerFactory.CreateLogger<Startup>();
         app.UseMiddleware<ExceptionHandlingMiddleware>();
@@ -37,7 +37,7 @@ public class Startup
         }
 
         app.UseRouting();
-        app.MapConfigurationEndpoints();
+        app.MapCatalogEndpoints();
 
         app.RegisterFeatures(applicationLifetime, logger);
         app.RegisterPermissions(applicationLifetime, logger);

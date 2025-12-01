@@ -32,6 +32,8 @@ public static class ServiceCollectionExtensions
             .AddDbContextWithScoping<AuthorizationDbContext>(configuration)
             .AddPersistenceServices();
 
+        services.AddMemoryCacheInfrastructure();
+
         return services;
     }
 
