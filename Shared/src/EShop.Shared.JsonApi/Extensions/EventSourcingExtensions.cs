@@ -19,7 +19,7 @@ public static class EventSourcingExtensions
     /// <param name="services">The service collection to which the event sourcing services will be added.</param>
     /// <param name="configuration">The application configuration containing the EventStore settings.</param>
     /// <returns>The same service collection instance, with event sourcing services registered.</returns>
-    public static IServiceCollection AddPostgreSQLEventSourcing<TDbContext>(
+    public static IServiceCollection AddDbContextEventSourcing<TDbContext>(
         this IServiceCollection services,
         IConfiguration configuration)
         where TDbContext : DbContext, IEventStoreDbContext
@@ -52,7 +52,7 @@ public static class EventSourcingExtensions
     /// <param name="configuration">The application configuration containing the "EventStore" section used to configure event store options.</param>
     /// <param name="configureOptions">An optional delegate to further configure event store options after binding from configuration.</param>
     /// <returns>The same <see cref="IServiceCollection"/> instance, enabling method chaining.</returns>
-    public static IServiceCollection AddPostgreSQLEventSourcingWithSnapshot<TDbContext>(
+    public static IServiceCollection AddDbContextEventSourcingWithSnapshot<TDbContext>(
         this IServiceCollection services,
         IConfiguration configuration,
         Action<EventStoreOptions>? configureOptions = null)
@@ -79,6 +79,12 @@ public static class EventSourcingExtensions
     public static ModelBuilder AddEventStoreEntity(this ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfiguration(new EventStoreEntityTypeConfiguration());
+        return modelBuilder;
+    }
+
+    public static ModelBuilder AddSnapshotEntity(this ModelBuilder modelBuilder)
+    {
+        modelBuilder.ApplyConfiguration(new SnapshotEntityTypeConfiguration());
         return modelBuilder;
     }
 }

@@ -20,4 +20,9 @@
     <Using Include="Xunit" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Categories\" />
+    <Folder Include="Setup\" />
+  </ItemGroup>
+
 </Project>

@@ -10,12 +10,12 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddShared(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddSingleton<ExceptionHandlingMiddleware>();
-
         services.AddMediator(AssemblyReference.Assembly);
 
         services
             .AddPostgreSqlHealthCheck(configuration)
-            .AddDbContextWithScoping<CatalogDbContext>(configuration);
+            .AddDbContextWithScoping<CatalogDbContext>(configuration)
+            .AddDbContextEventSourcing<CatalogDbContext>(configuration);
 
         services
             .AddRedisHealthCheck(configuration)

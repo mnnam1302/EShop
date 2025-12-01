@@ -20,17 +20,17 @@ public static class ServiceCollectionExtensions
         services.AddCors()
             .AddSwagger()
             .AddApiVersioning()
-            .AddServiceBootstrapping()
             .AddTenantAuthenticationProvider()
             .AddMassTransitRabbitMQ(configuration, environment)
-            .AddPostgreSQLEventSourcing<CatalogDbContext>(configuration);
+            .AddServiceBootstrapping();
 
         return services;
     }
 
     private static IServiceCollection AddSwagger(this IServiceCollection services)
     {
-        services.AddSwaggerGenNewtonsoftSupport()
+        services
+            .AddSwaggerGenNewtonsoftSupport()
             .AddFluentValidationRulesToSwagger()
             .AddEndpointsApiExplorer()
             .AddSwaggerAPI();
