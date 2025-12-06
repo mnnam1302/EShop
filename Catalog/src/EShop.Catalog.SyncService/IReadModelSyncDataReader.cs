@@ -1,4 +1,4 @@
-﻿namespace EShop.Catalog.SyncService.Abstractions;
+﻿namespace EShop.Catalog.SyncService;
 
 public interface IReadModelSyncDataReader<TEntityReadModel> where TEntityReadModel : class
 {
