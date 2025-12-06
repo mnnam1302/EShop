@@ -7,10 +7,11 @@ namespace EShop.Catalog.Application.Categories.Create;
 
 public sealed class CreateCategoryCommand : ICommand
 {
-    public required string Name { get; set; }
-    public required string Reference { get; set; }
-    public required string Slug { get; set; }
+    public string Name { get; set; }
+    public string Reference { get; set; }
+    public string Slug { get; set; }
     public Guid? ParentId { get; set; }
+}
 
 public sealed class CreateCategoryCommandHandler : ICommandHandler<CreateCategoryCommand>
 {

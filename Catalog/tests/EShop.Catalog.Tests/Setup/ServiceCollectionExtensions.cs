@@ -4,6 +4,7 @@ using EShop.Shared.Cache.DependencyInejctions.Extensions;
 using EShop.Shared.Contracts.JsonConverters;
 using EShop.Shared.CQRS;
 using EShop.Shared.DomainTools.UnitOfWorks;
+using EShop.Shared.EventBus.Abstractions;
 using EShop.Shared.EventBus.Services;
 using EShop.Shared.JsonApi.Extensions;
 using EShop.Shared.Scoping.ResourceAccessControl;

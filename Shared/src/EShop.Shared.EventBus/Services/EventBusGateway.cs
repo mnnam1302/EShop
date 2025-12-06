@@ -1,4 +1,5 @@
 ﻿using EShop.Shared.Contracts.Abstractions.MessageBus;
+using EShop.Shared.EventBus.Abstractions;
 using MassTransit;
 
 namespace EShop.Shared.EventBus.Services;

@@ -2,6 +2,7 @@
 using EShop.Shared.DomainTools.EventSourcing;
 using EShop.Shared.DomainTools.EventSourcing.SeedWork;
 using EShop.Shared.EventBus;
+using EShop.Shared.EventBus.DependencyInjections.Extensions;
 using EShop.Shared.JsonApi.Extensions;
 using EShop.Shared.Sequences;
 using Microsoft.EntityFrameworkCore;
@@ -22,7 +23,8 @@ public sealed class CatalogDbContext : DbContext, IInboxDbContext, ISequenceDbCo
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(AssemblyReference).Assembly);
-        modelBuilder.ApplyConfigurationsFromAssembly(typeof(InboxMessage).Assembly);
+
         modelBuilder.AddEventStoreEntity();
+        modelBuilder.AddInboxMessageEntity();
     }
 }

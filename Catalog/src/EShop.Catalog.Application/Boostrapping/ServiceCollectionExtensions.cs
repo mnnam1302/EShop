@@ -1,11 +1,11 @@
-﻿using EShop.Catalog.Application.Shared;
+﻿using EShop.Catalog.Application.Agencies.CreateAgency;
+using EShop.Catalog.Application.Shared;
 using EShop.Shared.Contracts.JsonConverters;
+using EShop.Shared.Contracts.Services.Authorization;
 using EShop.Shared.DomainTools.UnitOfWorks;
 using EShop.Shared.EventBus.DependencyInjections.Extensions;
 using EShop.Shared.EventBus.DependencyInjections.Options;
 using EShop.Shared.EventBus.PipelineObservers;
-using EShop.Shared.EventBus.Services;
-using EShop.Shared.JsonApi.Extensions;
 using EShop.Shared.Scoping.ResourceAccessControl;
 using EShop.Shared.Sequences.DependencyInjections;
 using MassTransit;
@@ -20,9 +20,10 @@ public static class ServiceCollectionExtensions
         services.AddCors()
             .AddSwagger()
             .AddCatalogApiVersioning()
-            .AddTenantAuthenticationProvider()
-            .AddMassTransitRabbitMQ(configuration, environment)
-            .AddServiceBootstrapping();
+            .AddCatalogServiceBootstrapping()
+            .AddCatalogMassTransitRabbitMQ(configuration, environment)
+            .AddEventBus()
+            .AddPostgreSqlIdempotentConsumer<CatalogDbContext>();
 
         return services;
     }
@@ -50,7 +51,7 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    private static IServiceCollection AddMassTransitRabbitMQ(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment)
+    private static IServiceCollection AddCatalogMassTransitRabbitMQ(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment)
     {
         var massTransitConfiguration = new MasstransitConfiguration();
         configuration.GetSection(nameof(MasstransitConfiguration)).Bind(massTransitConfiguration);
@@ -97,6 +98,7 @@ public static class ServiceCollectionExtensions
                 bus.ConnectConsumeObserver(new LoggingConsumeObserver());
 
                 bus.MessageTopology.SetEntityNameFormatter(new KebabCaseEntityNameFormatter());
+                bus.ConfigureCatalogRecieveEndpoints(context, environment, Program.ApplicationName);
 
                 bus.ConfigureEndpoints(context);
             });
@@ -105,7 +107,19 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    public static IServiceCollection AddServiceBootstrapping(this IServiceCollection services)
+    private static void ConfigureCatalogRecieveEndpoints(
+        this IRabbitMqBusFactoryConfigurator bus,
+        IRegistrationContext context,
+        IWebHostEnvironment environment,
+        string serviceName)
+    {
+        bus.ConfigureEventReceiveEndpoint<OrganizationCreateConsumer, OrganizationCreated>(
+            context,
+            environment.EnvironmentName,
+            serviceName);
+    }
+
+    public static IServiceCollection AddCatalogServiceBootstrapping(this IServiceCollection services)
     {
         services.AddTransient<DbInitializer>();
 
@@ -114,8 +128,6 @@ public static class ServiceCollectionExtensions
             .BindConfiguration(CatalogSequenceOptions.SectionName);
 
         services.AddScoped<IUnitOfWork, EFUnitOfWork<CatalogDbContext>>();
-
-        services.AddScoped<IEventBusGateway, EventBusGateway>();
 
         services.AddScoped<IFeatureRegistrationService, CatalogFeatureRegistrationService>();
         services.AddScoped<IPermissionRegistrationService, CatalogPermissionRegistrationService>();

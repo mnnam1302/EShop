@@ -1,6 +1,6 @@
 ﻿using EShop.Shared.Authentication;
 using EShop.Shared.Contracts.IntegrationEvents.Authorization;
-using EShop.Shared.EventBus.Services;
+using EShop.Shared.EventBus.Abstractions;
 using EShop.Shared.Scoping.ResourceAccessControl;
 
 namespace EShop.Catalog.Application.Boostrapping;

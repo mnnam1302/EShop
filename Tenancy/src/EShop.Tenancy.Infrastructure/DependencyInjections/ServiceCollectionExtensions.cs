@@ -1,6 +1,7 @@
 ﻿using EShop.Shared.Cache.DependencyInejctions.Extensions;
 using EShop.Shared.Contracts.JsonConverters;
 using EShop.Shared.Contracts.Services.Tenancy.Features;
+using EShop.Shared.EventBus.Abstractions;
 using EShop.Shared.EventBus.DependencyInjections.Extensions;
 using EShop.Shared.EventBus.DependencyInjections.Options;
 using EShop.Shared.EventBus.PipelineObservers;
@@ -11,6 +12,7 @@ using EShop.Tenancy.Application.Services;
 using EShop.Tenancy.Infrastructure.Consumers;
 using EShop.Tenancy.Infrastructure.Jobs;
 using EShop.Tenancy.Infrastructure.Producers;
+using EShop.Tenancy.Persistence;
 using MassTransit;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -25,7 +27,8 @@ public static class ServiceCollectionExtensions
     {
         services
             .AddMassTransitRabbitMQ(configuration, environment, serviceName)
-            .AddEventBusGateway()
+            .AddEventBus()
+            .AddPostgreSqlIdempotentConsumer<TenancyDbContext>()
             .AddRegistrationFeatures();
 
         services.AddRedisHealthCheck(configuration)
@@ -109,12 +112,6 @@ public static class ServiceCollectionExtensions
             context,
             environment.EnvironmentName,
             serviceName);
-    }
-
-    public static IServiceCollection AddEventBusGateway(this IServiceCollection services)
-    {
-        services.AddScoped<IEventBusGateway, EventBusGateway>();
-        return services;
     }
 
     private static void AddRegistrationFeatures(this IServiceCollection services)

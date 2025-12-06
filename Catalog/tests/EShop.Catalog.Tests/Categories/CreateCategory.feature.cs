@@ -156,13 +156,33 @@ this.ScenarioInitialize(scenarioInfo, ruleInfo);
             {
                 await this.ScenarioStartAsync();
 #line 7
- await testRunner.GivenAsync("the catalog manager is logged in", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+ await testRunner.GivenAsync("Authorizatin service has published organization created", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
+                global::Reqnroll.Table table1 = new global::Reqnroll.Table(new string[] {
+                            "Name",
+                            "Reference",
+                            "Slug",
+                            "ParentId"});
+                table1.AddRow(new string[] {
+                            "Electronics",
+                            "ELEC123",
+                            "electronics",
+                            ""});
 #line 8
- await testRunner.WhenAsync("[action]", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+ await testRunner.WhenAsync("system user creates a new category", ((string)(null)), table1, "When ");
 #line hidden
-#line 9
- await testRunner.ThenAsync("[outcome]", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+                global::Reqnroll.Table table2 = new global::Reqnroll.Table(new string[] {
+                            "Name",
+                            "Reference",
+                            "Slug",
+                            "ParentId"});
+                table2.AddRow(new string[] {
+                            "Electronics",
+                            "ELEC123",
+                            "electronics",
+                            ""});
+#line 11
+ await testRunner.ThenAsync("the category \'ELEC123\' has following details", ((string)(null)), table2, "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();

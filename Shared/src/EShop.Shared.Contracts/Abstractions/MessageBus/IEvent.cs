@@ -7,7 +7,11 @@ namespace EShop.Shared.Contracts.Abstractions.MessageBus
     /// (Keep this if your infrastructure relies on MassTransit topology conventions.)
     /// </summary>
     [ExcludeFromTopology]
-    public interface IEvent : IMessage;
+    public interface IEvent : IMessage
+    {
+        Guid EventId { get; }
+        DateTimeOffset TimeStampUtc { get; }
+    }
 
     [ExcludeFromTopology]
     public interface IIntegrationEvent : IEvent
@@ -17,11 +21,19 @@ namespace EShop.Shared.Contracts.Abstractions.MessageBus
         string ActionUserType { get; }
     }
 
+    public abstract class IntegrationEvent : IIntegrationEvent
+    {
+        public Guid EventId { get; } = Guid.NewGuid();
+        public DateTimeOffset TimeStampUtc { get; } = DateTimeOffset.UtcNow;
+
+        public required string TenantId { get; init; }
+        public required string ActionUserId { get; init; }
+        public required string ActionUserType { get; init; }
+    }
+
     [ExcludeFromTopology]
     public interface IDomainEvent : IEvent
     {
-        Guid EventId { get; set; }
         ulong Version { get; set; }
-        DateTimeOffset TimeStampUtc { get; set; }
     }
 }

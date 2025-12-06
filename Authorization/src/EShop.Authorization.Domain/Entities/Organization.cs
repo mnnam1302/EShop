@@ -54,14 +54,12 @@ public class Organization : AggregateRoot<string>, IExcludedFromScoping
             Scope = tenantId
         };
 
-        // Raise domain event
-        organization.RaiseDomainEvent(new OrganizationEvents.RootOrganizationCreated
+        organization.RaiseDomainEvent(new OrganizationCreatedEvent
         {
-            EventId = Guid.NewGuid(),
-            TimeStampUtc = DateTimeOffset.UtcNow,
             OrganizationId = organization.Id,
             Name = organization.Name,
-            TenantId = tenantId
+            TenantId = organization.TenantId,
+            Scope = organization.Scope
         });
 
         return organization;
@@ -103,8 +101,6 @@ public class Organization : AggregateRoot<string>, IExcludedFromScoping
             TenantId = TenantId,
             Scope = context.Path
         };
-
-        // Raise domain event
 
         return childOrganization;
     }

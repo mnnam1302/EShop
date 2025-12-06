@@ -45,7 +45,7 @@ internal sealed class CreateRootOrganizationCommandHandler : ICommandHandler<Cre
     {
         logger.LogInformation("Creating root organization for tenant {TenantId}", command.TenantId);
 
-        var setupResult = await rootOrganizationService.SetupRootOrganizationAsync(
+        var result = await rootOrganizationService.SetupRootOrganizationAsync(
             command.TenantId,
             command.TenantName,
             command.OwnerUsername,
@@ -53,13 +53,13 @@ internal sealed class CreateRootOrganizationCommandHandler : ICommandHandler<Cre
             command.OwnerDisplayName,
             cancellationToken);
 
-        if (setupResult.IsFailure)
+        if (result.IsFailure)
         {
-            logger.LogWarning("Failed to setup root organization: {Error}", setupResult.Error);
-            return Result.Failure(setupResult.Error);
+            logger.LogWarning("Failed to setup root organization: {Error}", result.Error);
+            return Result.Failure(result.Error);
         }
 
-        var setup = setupResult.Value;
+        var setup = result.Value;
 
         organizationRepository.Add(setup.Organization);
         roleRepository.Add(setup.OwnerRole);

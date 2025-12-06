@@ -4,6 +4,7 @@ using EShop.Shared.Cache.DependencyInejctions.Extensions;
 using EShop.Shared.Contracts.JsonConverters;
 using EShop.Shared.Contracts.Services.Tenancy.Tenants;
 using EShop.Shared.DomainTools.Extensions;
+using EShop.Shared.EventBus.DependencyInjections.Extensions;
 using EShop.Shared.JsonApi.Extensions;
 using EShop.Shared.Scoping.ResourceAccessControl;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers.TenantFeaturesProvider;
@@ -60,7 +61,6 @@ public static class ServiceCollectionExtensions
                 options.SubstituteApiVersionInUrl = true;
             });
 
-
         services.AddOptions<JwtOptions>().BindConfiguration(nameof(JwtOptions));
         services.AddTenantAuthenticationProvider();
 
@@ -93,7 +93,8 @@ public static class ServiceCollectionExtensions
     {
         services
             .AddMassTransitMemory()
-            .AddEventBusGateway();
+            .AddEventBus()
+            .AddPostgreSqlIdempotentConsumer<TenancyDbContext>();
 
         services.AddMemoryCacheInfrastructure();
 

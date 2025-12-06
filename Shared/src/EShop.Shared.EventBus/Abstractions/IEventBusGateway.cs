@@ -1,6 +1,6 @@
 ﻿using EShop.Shared.Contracts.Abstractions.MessageBus;
 
-namespace EShop.Shared.EventBus.Services;
+namespace EShop.Shared.EventBus.Abstractions;
 
 public interface IEventBusGateway
 {

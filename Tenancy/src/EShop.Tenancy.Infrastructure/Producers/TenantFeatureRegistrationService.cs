@@ -1,5 +1,5 @@
 ﻿using EShop.Shared.Contracts.Services.Tenancy.Features;
-using EShop.Shared.EventBus.Services;
+using EShop.Shared.EventBus.Abstractions;
 using EShop.Shared.Scoping.ResourceAccessControl;
 using static EShop.Shared.Scoping.ResourceAccessControl.FeatureConstants;
 

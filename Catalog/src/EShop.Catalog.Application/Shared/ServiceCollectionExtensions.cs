@@ -24,7 +24,8 @@ public static class ServiceCollectionExtensions
         services
             .AddUserPermissionsProvider()
             .AddUserOrganizationContextProvider()
-            .AddTenantFeaturesProvider();
+            .AddTenantFeaturesProvider()
+            .AddTenantAuthenticationProvider();
 
         return services;
     }
