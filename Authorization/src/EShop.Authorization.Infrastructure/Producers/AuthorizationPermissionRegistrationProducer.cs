@@ -21,6 +21,7 @@ internal sealed class AuthorizationPermissionRegistrationProducer : IPermissionR
     {
         await eventBusGateway.PublishAsync<SupportedPermissionsUpdated>(new
         {
+            EventId = Guid.NewGuid(),
             SourceSystemReference = ModuleName,
             Permissions,
             Action = SupportedPermissionAction.Added,

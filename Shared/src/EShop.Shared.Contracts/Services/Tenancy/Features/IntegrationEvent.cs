@@ -2,12 +2,13 @@
 
 public interface SupportedFeaturesUpdated : TenancyEvent
 {
-    public string SourceSystemReference { get; }
-    public IFeature[] Features { get; }
-    public SupportedFeaturesAction Action { get; }
+    string SourceSystemReference { get; }
+    IFeature[] Features { get; }
+    SupportedFeaturesAction Action { get; }
 }
 
-public interface ITenantFeaturesUpdated : TenancyEvent { }
+public interface ITenantFeaturesUpdated : TenancyEvent
+{ }
 
 public interface IFeature
 {
