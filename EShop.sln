@@ -14,8 +14,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.github\copilot-instructions.md = .github\copilot-instructions.md
 		delete-tables.sql = delete-tables.sql
 		Directory.Packages.props = Directory.Packages.props
-		docker-compose.Dev.Infrastructure.yml = docker-compose.Dev.Infrastructure.yml
 		postgres-init.sql = postgres-init.sql
+		docker-compose.Dev.Infrastructure.yaml = docker-compose.Dev.Infrastructure.yaml
 		README.md = README.md
 	EndProjectSection
 EndProject

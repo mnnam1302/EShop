@@ -7,12 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="MongoDB.Driver" />
     <PackageReference Include="Swashbuckle.AspNetCore" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Entities\" />
-    <Folder Include="Consumers\" />
+    <ProjectReference Include="..\..\..\Shared\src\EShop.Shared.EventBus\EShop.Shared.EventBus.csproj" />
   </ItemGroup>
 
 </Project>
