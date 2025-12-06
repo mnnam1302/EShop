@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 18
-VisualStudioVersion = 18.0.11217.181 d18.0
+VisualStudioVersion = 18.0.11217.181
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shared", "Shared", "{DDA5240E-D98D-46C2-A5F1-2A2E500F36D6}"
 EndProject
@@ -104,6 +104,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EShop.Shared.Authentication", "Shared\src\EShop.Shared.Authentication\EShop.Shared.Authentication.csproj", "{16AF590E-1687-4E0E-BA15-51F333E3BE11}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EShop.Tenancy.Tests", "Tenancy\tests\EShop.Tenancy.Tests\EShop.Tenancy.Tests.csproj", "{8E18FB73-87D0-47EA-A4F0-19390752B4DC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EShop.Catalog.SyncService", "Catalog\src\EShop.Catalog.SyncService\EShop.Catalog.SyncService.csproj", "{EA4CE904-B852-42AF-9BC9-5EF29C4437D7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -227,6 +229,10 @@ Global
 		{8E18FB73-87D0-47EA-A4F0-19390752B4DC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8E18FB73-87D0-47EA-A4F0-19390752B4DC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8E18FB73-87D0-47EA-A4F0-19390752B4DC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EA4CE904-B852-42AF-9BC9-5EF29C4437D7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EA4CE904-B852-42AF-9BC9-5EF29C4437D7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EA4CE904-B852-42AF-9BC9-5EF29C4437D7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EA4CE904-B852-42AF-9BC9-5EF29C4437D7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -271,6 +277,7 @@ Global
 		{8EA2945D-6008-4695-BBBA-08B904B4DDA0} = {9EA3DC81-E26A-677F-6A25-3A91573DF4FE}
 		{16AF590E-1687-4E0E-BA15-51F333E3BE11} = {DF247757-C88D-4BD6-9946-FDEAC84BF886}
 		{8E18FB73-87D0-47EA-A4F0-19390752B4DC} = {8BBFDBAB-6497-4B10-A539-A17ACA855A86}
+		{EA4CE904-B852-42AF-9BC9-5EF29C4437D7} = {D0916B7D-F7B6-7D7C-08CD-3AA4546D8309}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {BB890EFB-EE36-4A0E-A948-F28A53D375E6}

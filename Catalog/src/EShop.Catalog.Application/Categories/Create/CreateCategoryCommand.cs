@@ -28,14 +28,14 @@ public sealed class CreateCategoryCommandHandler : ICommandHandler<CreateCategor
     {
         if (command.ParentId.HasValue && command.ParentId != Guid.Empty)
         {
-            var parentCategory = await eventStore.LoadAggregateAsync<Category>(command.ParentId.Value, cancellationToken);
+            var parentCategory = await eventStore.LoadAggregateAsync<CategoryAggregate>(command.ParentId.Value, cancellationToken);
             if (parentCategory == null)
             {
                 return Result.Failure(new("ParentId", "Parent category not found"));
             }
         }
 
-        var category = Category.Create(command, userDetailsProvider);
+        var category = CategoryAggregate.Create(command, userDetailsProvider);
 
         await eventStore.AppendEventsAsync(category, cancellationToken);
 
