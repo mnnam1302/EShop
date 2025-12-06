@@ -7,16 +7,15 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Aggregates\" />
-    <Folder Include="Entities\" />
-  </ItemGroup>
-
-  <ItemGroup>
+    <PackageReference Include="JsonNet.ContractResolvers" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" />
     <PackageReference Include="Polly" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\EShop.Shared.Contracts\EShop.Shared.Contracts.csproj" />
+    <ProjectReference Include="..\EShop.Shared.CQRS\EShop.Shared.CQRS.csproj" />
   </ItemGroup>
 
 </Project>

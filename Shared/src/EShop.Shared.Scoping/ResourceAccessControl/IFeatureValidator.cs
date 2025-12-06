@@ -10,7 +10,7 @@ public interface IFeatureValidator
     Task<bool> HasAtLeastOneOfSpecifiedFeaturesEnabledAsync(params string[] featureIds);
 }
 
-public class CurrentUserFeaturesValidator : IFeatureValidator
+public sealed class CurrentUserFeaturesValidator : IFeatureValidator
 {
     private readonly IUserDetailsProvider _userDetailsProvider;
     private readonly ITenantFeaturesProvider _userFeaturesProvider;

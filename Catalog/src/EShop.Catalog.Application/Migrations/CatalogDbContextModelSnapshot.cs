@@ -18,6 +18,9 @@ namespace EShop.Catalog.Application.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("ProductVersion", "8.0.11")
+                .HasAnnotation("Proxies:ChangeTracking", false)
+                .HasAnnotation("Proxies:CheckEquality", false)
+                .HasAnnotation("Proxies:LazyLoading", true)
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -53,6 +56,43 @@ namespace EShop.Catalog.Application.Migrations
                     b.ToTable("Agencies", (string)null);
                 });
 
+            modelBuilder.Entity("EShop.Shared.DomainTools.EventSourcing.SeedWork.EventStore", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("AggregateId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("AggregateType")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)");
+
+                    b.Property<DateTimeOffset>("CreatedOnUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Event")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("EventType")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)");
+
+                    b.Property<decimal>("Version")
+                        .HasColumnType("numeric(20,0)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AggregateId", "Version")
+                        .IsUnique();
+
+                    b.ToTable("EventStores", (string)null);
+                });
+
             modelBuilder.Entity("EShop.Shared.EventBus.InboxMessage", b =>
                 {
                     b.Property<Guid>("Id")
@@ -66,6 +106,9 @@ namespace EShop.Catalog.Application.Migrations
 
                     b.Property<DateTimeOffset>("CreatedOnUtc")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("MessageId")
+                        .HasColumnType("uuid");
 
                     b.Property<string>("MessageType")
                         .IsRequired()
@@ -87,7 +130,10 @@ namespace EShop.Catalog.Application.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("InboxMessages");
+                    b.HasIndex("MessageId", "ConsumerId")
+                        .IsUnique();
+
+                    b.ToTable("InboxMessages", (string)null);
                 });
 
             modelBuilder.Entity("EShop.Shared.Sequences.Sequence", b =>
@@ -97,14 +143,15 @@ namespace EShop.Catalog.Application.Migrations
 
                     b.Property<string>("ConcurrencyToken")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
                     b.Property<int>("NextAvailableValue")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Sequences");
+                    b.ToTable("Sequences", (string)null);
                 });
 #pragma warning restore 612, 618
         }

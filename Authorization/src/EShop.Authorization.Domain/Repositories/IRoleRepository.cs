@@ -3,6 +3,6 @@ using EShop.Shared.DomainTools.Repositories;
 
 namespace EShop.Authorization.Domain.Repositories;
 
-public interface IRoleRepository : IRepository<Role, Guid>
+public interface IRoleRepository : IRepositoryBase<Role, Guid>
 {
 }

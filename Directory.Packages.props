@@ -23,6 +23,7 @@
     <PackageVersion Include="jcamp.FluentEmail.MailKit" Version="3.8.0" />
     <PackageVersion Include="FluentValidation" Version="11.11.0" />
     <PackageVersion Include="FluentValidation.DependencyInjectionExtensions" Version="11.10.0" />
+    <PackageVersion Include="JsonNet.ContractResolvers" Version="2.0.0" />
     <PackageVersion Include="MailKit" Version="4.14.1" />
     <PackageVersion Include="MassTransit" Version="8.3.6" />
     <PackageVersion Include="MassTransit.Newtonsoft" Version="8.3.6" />
@@ -68,8 +69,8 @@
     <PackageVersion Include="Nito.AsyncEx" Version="5.1.2" />
     <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.10" />
     <PackageVersion Include="Polly" Version="8.5.2" />
-    <PackageVersion Include="Reqnroll.Tools.MsBuild.Generation" Version="3.1.0" />
-    <PackageVersion Include="Reqnroll.xUnit" Version="3.1.0" />
+    <PackageVersion Include="Reqnroll.Tools.MsBuild.Generation" Version="3.2.1" />
+    <PackageVersion Include="Reqnroll.xUnit" Version="3.2.1" />
     <PackageVersion Include="Scrutor" Version="6.1.0" />
     <PackageVersion Include="Serilog" Version="4.2.0" />
     <PackageVersion Include="Serilog.AspNetCore" Version="8.0.3" />

@@ -1,6 +1,5 @@
 ﻿using EShop.Shared.Contracts.Shared;
 using EShop.Shared.DomainTools.Entities;
-using EShop.Shared.Scoping;
 using System.ComponentModel.DataAnnotations;
 
 namespace EShop.Catalog.Application.Agencies;
@@ -19,11 +18,11 @@ public class Agency : IEntityBase<Guid>, IScoped
     public Guid Id { get; set; }
 
     [MaxLength(ModelConstants.MediumText)]
-    public string Name { get; set; } = string.Empty;
+    public string Name { get; set; }
 
     [MaxLength(ModelConstants.ShortText)]
-    public string TenantId { get; set; } = string.Empty;
+    public string TenantId { get; set; }
 
     [MaxLength(ModelConstants.VeryLongText)]
-    public string Scope { get; set; } = string.Empty;
+    public string Scope { get; set; }
 }

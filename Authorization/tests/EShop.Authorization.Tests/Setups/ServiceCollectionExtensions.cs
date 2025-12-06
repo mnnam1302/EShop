@@ -6,10 +6,10 @@ using EShop.Authorization.Infrastructure.DependencyInjections;
 using EShop.Authorization.Tests.Fakes;
 using EShop.Shared.Authentication.DependencyInjections;
 using EShop.Shared.Cache.DependencyInejctions.Extensions;
+using EShop.Shared.Contracts.JsonConverters;
 using EShop.Shared.Contracts.Services.Tenancy.Tenants;
 using EShop.Shared.CQRS;
-using EShop.Shared.DomainTools.DependencyInjections;
-using EShop.Shared.EventBus.JsonConverters;
+using EShop.Shared.DomainTools.Extensions;
 using EShop.Shared.JsonApi.Extensions;
 using EShop.Shared.Scoping.ResourceAccessControl;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers.TenantFeaturesProvider;
@@ -67,11 +67,9 @@ public static class ServiceCollectionExtensions
         services.AddMediator(Application.AssemblyReference.Assembly);
         services.AddApplicationServices();
 
-        services.AddScoped<IPermissionValidator, CurrentUserPermissionsValidator>();
-        services.AddSingleton<IUserPermissionsProvider, TestUserPermissionProvider>();
-
-        services.AddScoped<IFeatureValidator, CurrentUserFeaturesValidator>();
-        services.AddSingleton<ITenantFeaturesProvider, TestTenantFeatureProvider>();
+        services
+            .AddTestUserPermissions()
+            .AddTestTenantFeatures();
 
         services.AddOwnerUserOrganizationContextProvider();
 
@@ -80,7 +78,8 @@ public static class ServiceCollectionExtensions
 
     private static IServiceCollection AddTestAuthorizationPersistence(this IServiceCollection services, PostgreSqlTestDatabase testDatabase)
     {
-        services.AddPostgreSqlTestDbContext<AuthorizationDbContext>(testDatabase)
+        services
+            .AddPostgreSqlTestDbContext<AuthorizationDbContext>(testDatabase)
             .AddPersistenceServices();
 
         return services;

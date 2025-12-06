@@ -1,5 +1,4 @@
 ﻿using EShop.Authorization.Application.Services;
-using EShop.Authorization.Domain.Constants;
 using EShop.Authorization.Domain.Entities;
 using EShop.Authorization.Domain.Repositories;
 using EShop.Shared.Authentication;
@@ -31,9 +30,10 @@ internal sealed class LoginQueryHandler(
     {
         // 1. Authenticate user credentials (returns unified errors)
         var signIn = await PasswordSignInAsync(query, cancellationToken);
-        
-        if (signIn.IsFailure) 
+        if (signIn.IsFailure)
+        {
             return Result.Failure<AuthenticationResponse>(signIn.Error);
+        }
 
         var user = signIn.Value;
 
@@ -49,15 +49,20 @@ internal sealed class LoginQueryHandler(
     private async Task<Result<User>> PasswordSignInAsync(LoginQuery query, CancellationToken cancellationToken)
     {
         var user = await userRepository.FindSingleAsync(predicate: u => u.Username == query.Username, cancellationToken: cancellationToken);
-
         if (user == null)
-            return Result.Failure<User>(ErrorContants.Authentication.InvalidCredentials);
+        {
+            return Result.Failure<User>(new("SignIn", "The provided credentials are invalid."));
+        }
 
         if (user.StateMachine.IsInState(Domain.StateMachines.UserState.PendingVerification))
-            return Result.Failure<User>(ErrorContants.User.PendingVerification);
+        {
+            return Result.Failure<User>(new("SignIn", "The user account is pending verification."));
+        }
 
         if (user.IsLockedOut())
-            return Result.Failure<User>(ErrorContants.User.LockedOut);
+        {
+            return Result.Failure<User>(new("SignIn", "The user account is locked out due to multiple failed login attempts."));
+        }
 
         if (!passwordHasher.CheckPassword(user.PasswordHash, query.Password))
         {
@@ -72,7 +77,7 @@ internal sealed class LoginQueryHandler(
             userRepository.Update(user);
             await unitOfWork.SaveChangesAsync(cancellationToken);
 
-            return Result.Failure<User>(ErrorContants.Authentication.InvalidCredentials);
+            return Result.Failure<User>(new("SignIn", "The provided credentials are invalid."));
         }
 
         user.ResetAccessFailedCount();
@@ -86,7 +91,6 @@ internal sealed class LoginQueryHandler(
     {
         var accessToken = await jwtTokenManager.GenerateAccessToken(user.Id, user.TenantId, cancellationToken: cancellationToken);
         var refreshToken = jwtTokenManager.GenerateRefreshToken();
-        //var expiry = DateTimeOffset.UtcNow.Add(authSettings.RefreshTokenLifetime);
 
         return new AuthenticationResponse
         {

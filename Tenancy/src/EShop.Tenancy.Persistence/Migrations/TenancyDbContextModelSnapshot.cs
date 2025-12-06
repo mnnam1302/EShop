@@ -39,6 +39,9 @@ namespace EShop.Tenancy.Persistence.Migrations
                     b.Property<DateTimeOffset>("CreatedOnUtc")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<Guid>("MessageId")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("MessageType")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -59,7 +62,10 @@ namespace EShop.Tenancy.Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("InboxMessages");
+                    b.HasIndex("MessageId", "ConsumerId")
+                        .IsUnique();
+
+                    b.ToTable("InboxMessages", (string)null);
                 });
 
             modelBuilder.Entity("EShop.Tenancy.Domain.Entities.Feature", b =>

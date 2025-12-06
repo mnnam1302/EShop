@@ -4,7 +4,9 @@ namespace EShop.Authorization.Domain.DomainEvents;
 
 public sealed class UserCreatedDomainEvent : IDomainEvent
 {
-    public DateTimeOffset TimeStamp => DateTimeOffset.UtcNow;
+    public Guid EventId { get; set; }
+    public ulong Version { get; set; }
+    public DateTimeOffset TimeStampUtc { get; set; }
 
     public required string UserId { get; init; }
     public required string Username { get; init; }

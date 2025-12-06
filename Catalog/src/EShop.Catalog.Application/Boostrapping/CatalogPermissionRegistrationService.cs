@@ -1,6 +1,6 @@
 ﻿using EShop.Shared.Authentication;
 using EShop.Shared.Contracts.IntegrationEvents.Authorization;
-using EShop.Shared.EventBus.Services;
+using EShop.Shared.EventBus.Abstractions;
 using EShop.Shared.Scoping.ResourceAccessControl;
 
 namespace EShop.Catalog.Application.Boostrapping;
@@ -11,6 +11,20 @@ public sealed class CatalogPermissionRegistrationService(IEventBusGateway eventB
 
     private static readonly CatalogPermission[] Permissions =
     [
+        new CatalogPermission()
+        {
+            Id = PermissionConstants.Catalog.ViewCategories,
+            Name = "View categories",
+            Description = "Allows users viewing list categories and category details in read-only mode.",
+            RelatedTo = ModuleName
+        },
+        new CatalogPermission()
+        {
+            Id = PermissionConstants.Catalog.ManageCategories,
+            Name = "Manage categories",
+            Description = "Allows users adding/editing/cloning/deleting categories.",
+            RelatedTo = ModuleName
+        },
         new CatalogPermission()
         {
             Id = PermissionConstants.Catalog.ViewProducts,

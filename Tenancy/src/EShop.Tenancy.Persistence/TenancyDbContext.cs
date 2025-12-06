@@ -1,4 +1,5 @@
 ﻿using EShop.Shared.EventBus;
+using EShop.Shared.EventBus.DependencyInjections.Extensions;
 using EShop.Tenancy.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -13,6 +14,7 @@ public class TenancyDbContext : DbContext, IInboxDbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(TenancyDbContext).Assembly);
+        modelBuilder.AddInboxMessageEntity();
     }
 
     public DbSet<Tenant> Tenants { get; set; }

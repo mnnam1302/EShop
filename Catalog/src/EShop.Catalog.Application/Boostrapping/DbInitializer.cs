@@ -8,68 +8,48 @@ using Microsoft.Extensions.Options;
 
 namespace EShop.Catalog.Application.Boostrapping;
 
-public sealed class DbInitializer
+public sealed class DbInitializer(
+    ILogger<DbInitializer> logger,
+    IOptions<CatalogSequenceOptions> options,
+    CatalogDbContext dbContext,
+    ISequenceRegistry sequenceRegistry,
+    IUserDetailsProvider userDetailsProvider,
+    ITenantIsolationStrategy tenantIsolationStrategy)
 {
-    private readonly ILogger<DbInitializer> _logger;
-    private readonly IOptions<CatalogSequenceOptions> _referenceOptions;
-    private readonly CatalogDbContext _dbContext;
-    private readonly ISequenceRegistry _sequenceRegistry;
-    private readonly IUserDetailsProvider _userDetailsProvider;
-    private readonly ITenantIsolationStrategy _tenantIsolationStrategy;
-    private readonly IRingFencingIsolationStrategy _ringFencingIsolationStrategy;
-
-    public DbInitializer(
-        ILogger<DbInitializer> logger,
-        IOptions<CatalogSequenceOptions> options,
-        CatalogDbContext dbContext,
-        ISequenceRegistry sequenceRegistry,
-        IUserDetailsProvider userDetailsProvider,
-        ITenantIsolationStrategy tenantIsolationStrategy,
-        IRingFencingIsolationStrategy ringFencingIsolationStrategy)
-    {
-        _logger = logger;
-        _referenceOptions = options;
-        _dbContext = dbContext;
-        _sequenceRegistry = sequenceRegistry;
-        _userDetailsProvider = userDetailsProvider;
-        _tenantIsolationStrategy = tenantIsolationStrategy;
-        _ringFencingIsolationStrategy = ringFencingIsolationStrategy;
-    }
-
     public async Task Initialize(bool applyMigrations = true, bool applyTenantIsolation = true)
     {
         try
         {
-            _userDetailsProvider.SetSystemUserContextWithEmptyScope();
+            userDetailsProvider.SetSystemUserContextWithEmptyScope();
 
             if (applyMigrations)
             {
-                _logger.LogDebug("Applying any pending migrations...");
-                await _dbContext.Database.MigrateAsync();
+                logger.LogDebug("Applying any pending migrations...");
+                await dbContext.Database.MigrateAsync();
             }
             else
             {
-                _logger.LogInformation("Ensuring database is created without running migrations...");
-                await _dbContext.Database.EnsureCreatedAsync();
+                logger.LogInformation("Ensuring database is created without running migrations...");
+                await dbContext.Database.EnsureCreatedAsync();
             }
 
-            _ringFencingIsolationStrategy.AddRingFencingIsolation(_dbContext);
+            //ringFencingIsolationStrategy.AddRingFencingIsolation(dbContext);
 
-            _tenantIsolationStrategy.AddTenantIsolation(_dbContext, appliedRingFencing: true);
+            tenantIsolationStrategy.AddTenantIsolation(dbContext, appliedRingFencing: true);
 
-            await _sequenceRegistry.RegisterSequences(
+            await sequenceRegistry.RegisterSequences(
                 Program.ApplicationName,
                 CatalogSequence.CategoryReference,
-                _referenceOptions.Value.CategoryReferenceSeed,
-                _referenceOptions.Value.TenantSequences);
+                options.Value.CategoryReferenceSeed,
+                options.Value.TenantSequences);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Database initialization error");
+            logger.LogError(ex, "Database initialization error");
         }
         finally
         {
-            _userDetailsProvider.ClearSystemUserContext();
+            userDetailsProvider.ClearSystemUserContext();
         }
     }
 }

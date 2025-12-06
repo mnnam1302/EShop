@@ -1,10 +1,11 @@
-﻿using EShop.Catalog.Application.Shared;
+﻿using EShop.Catalog.Application.Agencies.CreateAgency;
+using EShop.Catalog.Application.Shared;
+using EShop.Shared.Contracts.JsonConverters;
+using EShop.Shared.Contracts.Services.Authorization;
 using EShop.Shared.DomainTools.UnitOfWorks;
 using EShop.Shared.EventBus.DependencyInjections.Extensions;
 using EShop.Shared.EventBus.DependencyInjections.Options;
-using EShop.Shared.EventBus.JsonConverters;
 using EShop.Shared.EventBus.PipelineObservers;
-using EShop.Shared.EventBus.Services;
 using EShop.Shared.Scoping.ResourceAccessControl;
 using EShop.Shared.Sequences.DependencyInjections;
 using MassTransit;
@@ -16,17 +17,18 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddBoostrapping(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment)
     {
-        services
-            .AddCors()
+        services.AddCors()
             .AddSwagger()
-            .AddApiVersioning()
-            .AddMassTransitRabbitMQ(configuration, environment)
-            .AddServiceBootstrapping();
+            .AddCatalogApiVersioning()
+            .AddCatalogServiceBootstrapping()
+            .AddCatalogMassTransitRabbitMQ(configuration, environment)
+            .AddEventBus()
+            .AddPostgreSqlIdempotentConsumer<CatalogDbContext>();
 
         return services;
     }
 
-    private static IServiceCollection AddSwagger(this IServiceCollection services)
+    public static IServiceCollection AddSwagger(this IServiceCollection services)
     {
         services
             .AddSwaggerGenNewtonsoftSupport()
@@ -37,10 +39,9 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    private static IServiceCollection AddApiVersioning(this IServiceCollection services)
+    public static IServiceCollection AddCatalogApiVersioning(this IServiceCollection services)
     {
-        services
-            .AddApiVersioning(options => options.ReportApiVersions = true)
+        services.AddApiVersioning(options => options.ReportApiVersions = true)
             .AddApiExplorer(options =>
             {
                 options.GroupNameFormat = "'v'VVV";
@@ -49,7 +50,8 @@ public static class ServiceCollectionExtensions
 
         return services;
     }
-    private static IServiceCollection AddMassTransitRabbitMQ(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment)
+
+    private static IServiceCollection AddCatalogMassTransitRabbitMQ(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment)
     {
         var massTransitConfiguration = new MasstransitConfiguration();
         configuration.GetSection(nameof(MasstransitConfiguration)).Bind(massTransitConfiguration);
@@ -71,11 +73,10 @@ public static class ServiceCollectionExtensions
                     h.Password(massTransitConfiguration.Password);
                 });
 
-                bus.UseMessageRetry(retry
-                    => retry.Incremental(
-                            retryLimit: messageBusOptions.RetryLimit,
-                            initialInterval: messageBusOptions.InitialInterval,
-                            intervalIncrement: messageBusOptions.IntervalIncrement));
+                bus.UseMessageRetry(retry => retry.Incremental(
+                    retryLimit: messageBusOptions.RetryLimit,
+                    initialInterval: messageBusOptions.InitialInterval,
+                    intervalIncrement: messageBusOptions.IntervalIncrement));
 
                 bus.UseNewtonsoftJsonSerializer();
                 bus.ConfigureNewtonsoftJsonSerializer(settings =>
@@ -97,6 +98,7 @@ public static class ServiceCollectionExtensions
                 bus.ConnectConsumeObserver(new LoggingConsumeObserver());
 
                 bus.MessageTopology.SetEntityNameFormatter(new KebabCaseEntityNameFormatter());
+                bus.ConfigureCatalogRecieveEndpoints(context, environment, Program.ApplicationName);
 
                 bus.ConfigureEndpoints(context);
             });
@@ -105,7 +107,19 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    private static IServiceCollection AddServiceBootstrapping(this IServiceCollection services)
+    private static void ConfigureCatalogRecieveEndpoints(
+        this IRabbitMqBusFactoryConfigurator bus,
+        IRegistrationContext context,
+        IWebHostEnvironment environment,
+        string serviceName)
+    {
+        bus.ConfigureEventReceiveEndpoint<OrganizationCreateConsumer, OrganizationCreated>(
+            context,
+            environment.EnvironmentName,
+            serviceName);
+    }
+
+    public static IServiceCollection AddCatalogServiceBootstrapping(this IServiceCollection services)
     {
         services.AddTransient<DbInitializer>();
 
@@ -115,7 +129,6 @@ public static class ServiceCollectionExtensions
 
         services.AddScoped<IUnitOfWork, EFUnitOfWork<CatalogDbContext>>();
 
-        services.AddScoped<IEventBusGateway, EventBusGateway>();
         services.AddScoped<IFeatureRegistrationService, CatalogFeatureRegistrationService>();
         services.AddScoped<IPermissionRegistrationService, CatalogPermissionRegistrationService>();
 

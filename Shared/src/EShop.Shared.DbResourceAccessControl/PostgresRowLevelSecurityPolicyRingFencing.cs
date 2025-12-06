@@ -1,5 +1,5 @@
 ﻿using EShop.Shared.DbResourceAccessControl.Options;
-using EShop.Shared.Scoping;
+using EShop.Shared.DomainTools.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;

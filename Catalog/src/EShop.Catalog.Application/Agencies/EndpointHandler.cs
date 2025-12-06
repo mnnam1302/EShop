@@ -11,7 +11,7 @@ public static class EndpointHandler
     public static IEndpointRouteBuilder MapAgencyEndpoints(this IEndpointRouteBuilder routerBuilder)
     {
         var productEndpointsV1 = routerBuilder
-            .NewVersionedApi("Agencies")
+            .NewVersionedApi("Agency")
             .MapGroup(BaseUrl)
             .HasApiVersion(1)
             .RequireFeatureFilter(FeatureConstants.Catalog.ProductBuilder_FeatureId);

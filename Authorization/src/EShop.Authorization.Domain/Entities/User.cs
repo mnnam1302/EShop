@@ -1,7 +1,6 @@
 ﻿using EShop.Authorization.Domain.StateMachines;
 using EShop.Shared.DomainTools.Aggregates;
-using EShop.Shared.DomainTools.DependencyInjections;
-using EShop.Shared.Scoping;
+using EShop.Shared.DomainTools.Entities;
 using System.ComponentModel.DataAnnotations;
 
 namespace EShop.Authorization.Domain.Entities;
@@ -13,8 +12,6 @@ public class User : AggregateRoot<string>, IExcludedFromScoping
 
     [MaxLength(ModelConstants.ShortText)]
     public string Username { get; set; } = string.Empty;
-
-    //public string UsernameNormalized { get; private set; } = string.Empty; // for index/search
 
     [MaxLength(ModelConstants.VeryLongText)]
     public string PasswordHash { get; set; } = string.Empty;

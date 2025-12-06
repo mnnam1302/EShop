@@ -1,5 +1,5 @@
 ﻿using EShop.Shared.Authentication.Abstractions;
-using EShop.Shared.DomainTools.DependencyInjections;
+using EShop.Shared.DomainTools.Extensions;
 using EShop.Shared.Scoping.ResourceAccessControl;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;

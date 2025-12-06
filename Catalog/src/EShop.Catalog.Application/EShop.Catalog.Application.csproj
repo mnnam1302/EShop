@@ -14,6 +14,7 @@
         <PrivateAssets>all</PrivateAssets>
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Stateless" />
     <PackageReference Include="Swashbuckle.AspNetCore" />
     <PackageReference Include="Swashbuckle.AspNetCore.Newtonsoft" />
   </ItemGroup>
@@ -21,9 +22,12 @@
   <ItemGroup>
     <ProjectReference Include="..\..\..\Shared\src\EShop.Shared.CQRS\EShop.Shared.CQRS.csproj" />
     <ProjectReference Include="..\..\..\Shared\src\EShop.Shared.Diagnostics\EShop.Shared.Diagnostics.csproj" />
+    <ProjectReference Include="..\..\..\Shared\src\EShop.Shared.DomainTools\EShop.Shared.DomainTools.csproj" />
     <ProjectReference Include="..\..\..\Shared\src\EShop.Shared.EventBus\EShop.Shared.EventBus.csproj" />
     <ProjectReference Include="..\..\..\Shared\src\EShop.Shared.JsonApi\EShop.Shared.JsonApi.csproj" />
     <ProjectReference Include="..\..\..\Shared\src\EShop.Shared.Sequences\EShop.Shared.Sequences.csproj" />
   </ItemGroup>
+
+  <ProjectExtensions><VisualStudio><UserProperties appsettings_1development_1json__JsonSchema="https://www.schemastore.org/aspire-8.0.json" /></VisualStudio></ProjectExtensions>
 
 </Project>

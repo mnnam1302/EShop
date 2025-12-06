@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 namespace EShop.Shared.DomainTools.Repositories;
 
 public class AggregateRepository<TDbContext, TAggregateRoot, TKey>
-    : EFRepository<TDbContext, TAggregateRoot, TKey>, IAggregateRepository<TAggregateRoot, TKey>
+    : RepositoryBase<TDbContext, TAggregateRoot, TKey>, IAggregateRepository<TAggregateRoot, TKey>
     where TDbContext : DbContext
     where TAggregateRoot : class, IAggregateRoot<TKey>
 {

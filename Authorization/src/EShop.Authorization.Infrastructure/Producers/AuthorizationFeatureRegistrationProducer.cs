@@ -1,5 +1,5 @@
 ﻿using EShop.Shared.Contracts.Services.Tenancy.Features;
-using EShop.Shared.EventBus.Services;
+using EShop.Shared.EventBus.Abstractions;
 using EShop.Shared.Scoping.ResourceAccessControl;
 
 namespace EShop.Authorization.Infrastructure.Producers;
@@ -7,6 +7,7 @@ namespace EShop.Authorization.Infrastructure.Producers;
 internal sealed class AuthorizationFeatureRegistrationProducer : IFeatureRegistrationService
 {
     private readonly string ApplicationName = "Authorization";
+
     private static readonly AuthorizationFeature[] features =
     [
         new()
@@ -42,6 +43,7 @@ internal sealed class AuthorizationFeatureRegistrationProducer : IFeatureRegistr
     ];
 
     private readonly IEventBusGateway eventBusGateway;
+
     public AuthorizationFeatureRegistrationProducer(IEventBusGateway eventBusGateway)
     {
         this.eventBusGateway = eventBusGateway;
@@ -51,6 +53,7 @@ internal sealed class AuthorizationFeatureRegistrationProducer : IFeatureRegistr
     {
         await eventBusGateway.PublishAsync<SupportedFeaturesUpdated>(new
         {
+            EventId = Guid.NewGuid(),
             SourceSystemReference = ApplicationName,
             Features = features,
             Action = SupportedFeaturesAction.AddOrUpdate,

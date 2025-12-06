@@ -1,11 +1,10 @@
 ﻿using EShop.Shared.Contracts.Services.Tenancy.Features;
-using EShop.Shared.EventBus.Services;
+using EShop.Shared.EventBus.Abstractions;
 using EShop.Shared.Scoping.ResourceAccessControl;
-using static EShop.Shared.Scoping.ResourceAccessControl.FeatureConstants;
 
 namespace EShop.Tenancy.Infrastructure.Producers;
 
-public class TenantFeatureRegistrationService(IEventBusGateway eventBusGateway) : IFeatureRegistrationService
+public sealed class TenantFeatureRegistrationService(IEventBusGateway eventBusGateway) : IFeatureRegistrationService
 {
     private readonly string ApplicationName = nameof(FeatureModules.EShop_Tenancy);
 
@@ -22,6 +21,7 @@ public class TenantFeatureRegistrationService(IEventBusGateway eventBusGateway) 
     {
         await eventBusGateway.PublishAsync<SupportedFeaturesUpdated>(new
         {
+            EventId = Guid.NewGuid(),
             SourceSystemReference = ApplicationName,
             Features = features,
             Action = SupportedFeaturesAction.AddOrUpdate,

@@ -10,13 +10,12 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddShared(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddSingleton<ExceptionHandlingMiddleware>();
-
-        // Register CQRS services first before DbContext to ensure IDomainEventsDispatcher is available
         services.AddMediator(AssemblyReference.Assembly);
 
         services
             .AddPostgreSqlHealthCheck(configuration)
-            .AddDbContextPoolWithScoping<CatalogDbContext>(configuration);
+            .AddDbContextWithScoping<CatalogDbContext>(configuration)
+            .AddDbContextEventSourcing<CatalogDbContext>(configuration);
 
         services
             .AddRedisHealthCheck(configuration)
@@ -25,7 +24,8 @@ public static class ServiceCollectionExtensions
         services
             .AddUserPermissionsProvider()
             .AddUserOrganizationContextProvider()
-            .AddTenantFeaturesProvider();
+            .AddTenantFeaturesProvider()
+            .AddTenantAuthenticationProvider();
 
         return services;
     }
