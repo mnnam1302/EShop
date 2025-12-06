@@ -21,6 +21,7 @@ namespace EShop.Shared.Contracts.Abstractions.MessageBus
         string ActionUserType { get; }
     }
 
+    [ExcludeFromTopology]
     public abstract class IntegrationEvent : IIntegrationEvent
     {
         public Guid EventId { get; } = Guid.NewGuid();

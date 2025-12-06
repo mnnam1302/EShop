@@ -1,7 +1,7 @@
 ﻿using EShop.Authorization.Domain.Entities;
 using EShop.Authorization.Domain.Repositories;
 using EShop.Shared.Contracts.Abstractions.Shared;
-using EShop.Shared.Contracts.IntegrationEvents.Authorization;
+using EShop.Shared.Contracts.Services.Authorization;
 using EShop.Shared.CQRS.Command;
 using EShop.Shared.DomainTools.UnitOfWorks;
 using Microsoft.Extensions.Logging;
@@ -12,7 +12,7 @@ namespace EShop.Authorization.Application.UseCases.Permissions;
 public sealed class UpdateSupportedPermissionsCommand : ICommand
 {
     public required string SourceSystemReference { get; init; }
-    public Shared.Contracts.IntegrationEvents.Authorization.IPermission[] Permissions { get; init; } = [];
+    public IPermission[] Permissions { get; init; } = [];
     public SupportedPermissionAction Action { get; init; }
 }
 
