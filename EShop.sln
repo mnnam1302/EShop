@@ -15,7 +15,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		delete-tables.sql = delete-tables.sql
 		Directory.Packages.props = Directory.Packages.props
 		postgres-init.sql = postgres-init.sql
-		docker-compose.Dev.Infrastructure.yaml = docker-compose.Dev.Infrastructure.yaml
+		docker-compose.Development.Infrastructure.yaml = docker-compose.Development.Infrastructure.yaml
 		README.md = README.md
 	EndProjectSection
 EndProject

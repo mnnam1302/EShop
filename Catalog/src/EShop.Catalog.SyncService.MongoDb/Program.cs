@@ -7,7 +7,7 @@ namespace EShop.Catalog.SyncService.MongoDb;
 public static class Program
 {
     private const int ShutdownTimeoutInSeconds = 90;
-    internal const string ApplicationName = "CatalogReadService";
+    internal const string ApplicationName = "CatalogSyncServiceMongoDb";
 
     public static async Task<int> Main(string[] args)
     {

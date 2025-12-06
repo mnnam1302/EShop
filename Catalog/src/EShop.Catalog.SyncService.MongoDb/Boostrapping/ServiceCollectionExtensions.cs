@@ -9,12 +9,13 @@ namespace EShop.Catalog.SyncService.MongoDb.Boostrapping;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddBoostrapping(this IServiceCollection services)
+    public static IServiceCollection AddBoostrapping(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment webHostEnvironment)
     {
         services.AddCors()
             .AddMiddileware()
             .AddSwagger()
             .AddApiVersioning()
+            .AddMassTransitRabbitMQ(configuration, webHostEnvironment)
             .AddMongoDbPersistence();
 
         return services;

@@ -17,7 +17,7 @@ public class Startup
 
     public virtual void ConfigureServices(IServiceCollection services)
     {
-        services.AddBoostrapping();
+        services.AddBoostrapping(Configuration, Environment);
     }
 
     internal void Configure(WebApplication app, IHostApplicationLifetime applicationLifetime)
