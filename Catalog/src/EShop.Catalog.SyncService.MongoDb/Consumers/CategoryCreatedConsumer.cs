@@ -1,13 +1,18 @@
-﻿using EShop.Shared.Contracts.Abstractions.Shared;
+﻿using EShop.Catalog.SyncService.MongoDb.Abstractions;
+using EShop.Catalog.SyncService.MongoDb.Entities;
+using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.Contracts.Services.Catalog;
-using EShop.Shared.EventBus.Abstractions;
-using MassTransit;
 
 namespace EShop.Catalog.SyncService.MongoDb.Consumers;
 
-public sealed class CategoryCreatedConsumer : IConsumer<CategoryCreated>
+public sealed class CategoryCreatedConsumer : IdempotentConsumer<CategoryCreated>
 {
-    public Task Consume(ConsumeContext<CategoryCreated> context)
+    public CategoryCreatedConsumer(IMongoRepository<InboxMessageProjection> mongoRepository)
+        : base(mongoRepository)
+    {
+    }
+
+    protected override Task<Result> HandleMessageAsync(CategoryCreated message, CancellationToken cancellationToken)
     {
         throw new NotImplementedException();
     }

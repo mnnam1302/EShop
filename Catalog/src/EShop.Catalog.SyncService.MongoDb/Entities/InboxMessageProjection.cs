@@ -1,0 +1,46 @@
+﻿using EShop.Catalog.SyncService.MongoDb.Abstractions;
+using EShop.Catalog.SyncService.MongoDb.Attributes;
+using EShop.Shared.Contracts.Shared;
+using EShop.Shared.EventBus;
+using MongoDB.Bson;
+using System.ComponentModel.DataAnnotations;
+
+namespace EShop.Catalog.SyncService.MongoDb.Entities;
+
+[BsonCollection("InboxMessage")]
+public class InboxMessageProjection : Document
+{
+    public string ConsumerId { get; set; } = string.Empty;
+    public string MessageType { get; set; } = string.Empty;
+    public string State { get; set; } = InboxMessageStatus.Pending;
+    public string ReasonFailed { get; set; } = string.Empty;
+    public DateTimeOffset CreatedOnUtc { get; set; }
+    public DateTimeOffset UpdatedOnUtc { get; set; }
+
+    internal static InboxMessageProjection Create(string consumerId, Guid messageId, string messageType)
+    {
+        return new InboxMessageProjection
+        {
+            Id = ObjectId.GenerateNewId(),
+            ConsumerId = consumerId,
+            DocumentId = messageId, // documentId is EventId in event bus
+            MessageType = messageType,
+            State = InboxMessageStatus.Pending,
+            CreatedOnUtc = DateTimeOffset.UtcNow,
+            UpdatedOnUtc = DateTimeOffset.UtcNow
+        };
+    }
+
+    internal void MarkAsDone()
+    {
+        State = InboxMessageStatus.Done;
+        UpdatedOnUtc = DateTimeOffset.UtcNow;
+    }
+
+    internal void MarkAsFailed(string message)
+    {
+        State = InboxMessageStatus.Failed;
+        ReasonFailed = message;
+        UpdatedOnUtc = DateTimeOffset.UtcNow;
+    }
+}

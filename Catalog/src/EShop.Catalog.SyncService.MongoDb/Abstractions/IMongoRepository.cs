@@ -1,6 +1,4 @@
-﻿using EShop.Shared.DomainTools.Entities;
-using MongoDB.Driver.Linq;
-using System.Linq.Expressions;
+﻿using System.Linq.Expressions;
 
 namespace EShop.Catalog.SyncService.MongoDb.Abstractions;
 
