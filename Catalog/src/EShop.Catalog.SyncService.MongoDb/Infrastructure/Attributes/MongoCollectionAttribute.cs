@@ -1,11 +1,11 @@
 ﻿namespace EShop.Catalog.SyncService.MongoDb.Infrastructure.Attributes;
 
 [AttributeUsage(AttributeTargets.Class, Inherited = false)]
-public class BsonCollectionAttribute : Attribute
+public class MongoCollectionAttribute : Attribute
 {
     public string CollectionName { get; }
 
-    public BsonCollectionAttribute(string collectionName)
+    public MongoCollectionAttribute(string collectionName)
     {
         CollectionName = collectionName;
     }

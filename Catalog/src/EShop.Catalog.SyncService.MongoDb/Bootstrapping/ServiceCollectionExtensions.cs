@@ -3,7 +3,6 @@ using EShop.Catalog.SyncService.MongoDb.Infrastructure;
 using EShop.Catalog.SyncService.MongoDb.Infrastructure.Repository;
 using EShop.Shared.CQRS;
 using EShop.Shared.JsonApi.Extensions;
-using EShop.Shared.JsonApi.Middlewares;
 using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
 using Microsoft.Extensions.Options;
 

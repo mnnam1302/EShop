@@ -20,15 +20,15 @@ public sealed class MongoRepository<TDocument> : IMongoRepository<TDocument>
         BsonSerializer.TryRegisterSerializer(new GuidSerializer(GuidRepresentation.Standard));
     }
 
-    public MongoRepository(IMongoDbSettings mongoDbSettings)
+    public MongoRepository(IMongoClient mongoClient, IMongoDbSettings mongoDbSettings)
     {
-        var database = new MongoClient(mongoDbSettings.ConnectionString).GetDatabase(mongoDbSettings.DatabaseName);
+        var database = mongoClient.GetDatabase(mongoDbSettings.DatabaseName);
         _collection = database.GetCollection<TDocument>(GetCollectionName(typeof(TDocument)));
     }
 
     private static string GetCollectionName(Type documentType)
     {
-        return Attribute.GetCustomAttribute(documentType, typeof(BsonCollectionAttribute)) is BsonCollectionAttribute attribute
+        return Attribute.GetCustomAttribute(documentType, typeof(MongoCollectionAttribute)) is MongoCollectionAttribute attribute
             ? attribute.CollectionName
             : documentType.Name;
     }

@@ -1,13 +1,12 @@
 ﻿using EShop.Catalog.SyncService.MongoDb.Abstractions;
-using EShop.Catalog.SyncService.MongoDb.Attributes;
+using EShop.Catalog.SyncService.MongoDb.Infrastructure.Attributes;
 using EShop.Shared.Contracts.Shared;
 using EShop.Shared.EventBus;
 using MongoDB.Bson;
-using System.ComponentModel.DataAnnotations;
 
 namespace EShop.Catalog.SyncService.MongoDb.Infrastructure.Entities;
 
-[BsonCollection("InboxMessage")]
+[MongoCollection("InboxMessage")]
 public class InboxMessageProjection : Document
 {
     public string ConsumerId { get; set; } = string.Empty;
