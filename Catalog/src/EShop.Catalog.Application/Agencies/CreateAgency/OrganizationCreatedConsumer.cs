@@ -5,9 +5,10 @@ using EShop.Shared.EventBus.Abstractions;
 
 namespace EShop.Catalog.Application.Agencies.CreateAgency;
 
-public sealed class OrganizationCreateConsumer(
+public sealed class OrganizationCreatedConsumer(
     IMessageRepository messageRepository,
-    IMediator mediator) : IdempotentConsumer<OrganizationCreated>(messageRepository)
+    IMediator mediator) 
+    : IdempotentConsumer<OrganizationCreated>(messageRepository)
 {
     protected override Task<Result> HandleMessageAsync(OrganizationCreated message, CancellationToken cancellationToken)
     {

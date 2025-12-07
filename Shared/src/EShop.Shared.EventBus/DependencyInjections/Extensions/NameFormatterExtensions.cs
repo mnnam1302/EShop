@@ -17,6 +17,5 @@ public static class NameFormatterExtensions
 /// </summary>
 public class KebabCaseEntityNameFormatter : IEntityNameFormatter
 {
-    public string FormatEntityName<T>()
-        => typeof(T).ToKebabCaseString();
+    public string FormatEntityName<T>()  => typeof(T).ToKebabCaseString();
 }

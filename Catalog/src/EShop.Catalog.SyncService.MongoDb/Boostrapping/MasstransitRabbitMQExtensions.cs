@@ -57,8 +57,8 @@ public static class MasstransitRabbitMQExtensions
                 bus.ConnectConsumeObserver(new LoggingConsumeObserver());
 
                 bus.MessageTopology.SetEntityNameFormatter(new KebabCaseEntityNameFormatter());
-                bus.ConfigureRecieveEndpoints(context, environment, Program.ApplicationName);
 
+                bus.ConfigureRecieveEndpoints(context, environment, Program.ApplicationName);
                 bus.ConfigureEndpoints(context);
             });
         });

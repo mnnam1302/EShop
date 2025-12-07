@@ -11,8 +11,8 @@ public static class EndpointHandler
         var categoryEndpointsV1 = routerBuilder
             .NewVersionedApi("Category")
             .MapGroup("api/v{version:apiVersion}/categories")
-            .HasApiVersion(1)
-            .RequireFeatureFilter(FeatureConstants.Catalog.ProductBuilder_FeatureId);
+            .HasApiVersion(1);
+            //.RequireFeatureFilter(FeatureConstants.Catalog.ProductBuilder_FeatureId);
 
         categoryEndpointsV1.MapCreateCategory();
 

@@ -1,5 +1,6 @@
 ﻿using EShop.Catalog.SyncService.MongoDb.Abstractions;
 using EShop.Catalog.SyncService.MongoDb.Entities;
+using EShop.Shared.Contracts.Abstractions.MessageBus;
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.Contracts.Services.Catalog;
 using MassTransit;
@@ -7,7 +8,7 @@ using MassTransit;
 namespace EShop.Catalog.SyncService.MongoDb.Consumers;
 
 public abstract class IdempotentConsumer<TMessage> : IConsumer<TMessage>
-    where TMessage : CatalogIntegrationEvent
+    where TMessage : class, IIntegrationEvent
 {
     private readonly IMongoRepository<InboxMessageProjection> _mongoRepository;
 
