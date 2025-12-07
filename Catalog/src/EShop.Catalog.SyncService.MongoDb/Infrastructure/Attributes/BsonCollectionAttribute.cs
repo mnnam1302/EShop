@@ -1,4 +1,4 @@
-﻿namespace EShop.Catalog.SyncService.MongoDb.Attributes;
+﻿namespace EShop.Catalog.SyncService.MongoDb.Infrastructure.Attributes;
 
 [AttributeUsage(AttributeTargets.Class, Inherited = false)]
 public class BsonCollectionAttribute : Attribute

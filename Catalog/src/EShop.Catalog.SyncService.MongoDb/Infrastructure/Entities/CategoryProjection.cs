@@ -1,7 +1,7 @@
 ﻿using EShop.Catalog.SyncService.MongoDb.Abstractions;
 using EShop.Catalog.SyncService.MongoDb.Attributes;
 
-namespace EShop.Catalog.SyncService.MongoDb.Entities;
+namespace EShop.Catalog.SyncService.MongoDb.Infrastructure.Entities;
 
 [BsonCollection("Category")]
 public sealed class CategoryProjection : Document

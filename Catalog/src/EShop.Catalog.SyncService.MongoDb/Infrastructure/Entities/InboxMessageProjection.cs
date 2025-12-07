@@ -5,7 +5,7 @@ using EShop.Shared.EventBus;
 using MongoDB.Bson;
 using System.ComponentModel.DataAnnotations;
 
-namespace EShop.Catalog.SyncService.MongoDb.Entities;
+namespace EShop.Catalog.SyncService.MongoDb.Infrastructure.Entities;
 
 [BsonCollection("InboxMessage")]
 public class InboxMessageProjection : Document
