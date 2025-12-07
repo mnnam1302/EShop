@@ -13,8 +13,14 @@ internal sealed class RoleEntityTypeConfiguration : IEntityTypeConfiguration<Rol
         builder.HasIndex(r => r.Name);
         builder.HasIndex(r => r.TenantId);
 
-        builder.HasMany(r => r.Permissions)
-            .WithMany(p => p.Roles)
-            .UsingEntity<RolePermission>();
+        builder.HasMany(r => r.UserRoles)
+               .WithOne(ur => ur.Role)
+               .HasForeignKey(ur => ur.RoleId)
+               .IsRequired();
+
+        builder.HasMany(r => r.RolePermissions)
+               .WithOne(rp => rp.Role)
+               .HasForeignKey(rp => rp.RoleId)
+               .IsRequired();
     }
 }

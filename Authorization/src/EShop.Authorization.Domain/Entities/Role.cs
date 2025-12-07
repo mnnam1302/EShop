@@ -17,10 +17,7 @@ public class Role : EntityBase<Guid>, IScoped
     [MaxLength(ModelConstants.VeryLongText)]
     public string Scope { get; private set; } = string.Empty;
 
-    public virtual ICollection<User> Users { get; private set; } = [];
     public virtual ICollection<UserRole> UserRoles { get; set; } = [];
-
-    public virtual ICollection<Permission> Permissions { get; private set; } = [];
     public virtual ICollection<RolePermission> RolePermissions { get; set; } = [];
 
     public static Role CreateOwnerRole(string tenantId)

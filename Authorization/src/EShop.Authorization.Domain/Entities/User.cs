@@ -35,9 +35,6 @@ public class User : AggregateRoot<string>, IExcludedFromScoping
     public string? OrganizationId { get; set; }
     public virtual Organization? Organization { get; set; }
 
-    public virtual ICollection<Role> Roles { get; set; } = [];
-    public virtual ICollection<UserRole> UserRoles { get; set; } = [];
-
     [MaxLength(ModelConstants.ShortText)]
     public string TenantId { get; private set; } = string.Empty;
 
@@ -47,6 +44,8 @@ public class User : AggregateRoot<string>, IExcludedFromScoping
     public int AccessFailedCount { get; private set; }
     public DateTimeOffset? LockoutEndDateUtc { get; private set; }
     public bool LockoutEnabled { get; private set; }
+
+    public virtual ICollection<UserRole> UserRoles { get; set; } = [];
 
     public UserStateMachine StateMachine => new(() => ParseStatusSafely(), AfterStateUpdated);
 
