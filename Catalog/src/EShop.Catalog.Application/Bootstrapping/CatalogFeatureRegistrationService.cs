@@ -1,9 +1,7 @@
 ﻿using EShop.Shared.Authentication;
 using EShop.Shared.Contracts.Services.Tenancy.Features;
 using EShop.Shared.EventBus.Abstractions;
-using EShop.Shared.Scoping;
 using EShop.Shared.Scoping.ResourceAccessControl;
-using static EShop.Shared.Scoping.ResourceAccessControl.FeatureConstants;
 
 namespace EShop.Catalog.Application.Boostrapping;
 
@@ -23,6 +21,7 @@ public sealed class CatalogFeatureRegistrationService(IEventBusGateway eventBus)
     {
         await eventBus.PublishAsync<SupportedFeaturesUpdated>(new
         {
+            EventId = Guid.NewGuid(),
             SourceSystemReference = Program.ApplicationName,
             Features = Features,
             Action = SupportedFeaturesAction.AddOrUpdate,
@@ -37,7 +36,7 @@ public sealed class CatalogFeatureRegistrationService(IEventBusGateway eventBus)
         public required string Id { get; init; }
         public required string Name { get; init; }
         public required string Description { get; init; }
-        public string Module => nameof(FeatureModules.EShop_Configuration);
+        public string Module => nameof(FeatureModules.EShop_Catalog);
         public string State => nameof(FeatureState.Enabled);
     }
 }

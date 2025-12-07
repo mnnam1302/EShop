@@ -15,16 +15,16 @@ internal sealed class UserEntityTypeConfiguration : IEntityTypeConfiguration<Use
         builder.HasIndex(x => x.Username).IsUnique();
 
         builder.Property(x => x.Id)
-            .HasMaxLength(ModelConstants.MediumText)
-            .IsRequired();
+               .HasMaxLength(ModelConstants.MediumText)
+               .IsRequired();
 
         builder.HasOne(u => u.Organization)
-            .WithMany()
-            .HasForeignKey(u => u.OrganizationId)
-            .OnDelete(DeleteBehavior.Cascade);
+               .WithMany()
+               .HasForeignKey(u => u.OrganizationId)
+               .OnDelete(DeleteBehavior.Cascade);
 
-        builder.HasMany(u => u.Roles)
-            .WithMany(r => r.Users)
-            .UsingEntity<UserRole>();
+        builder.HasMany(u => u.UserRoles)
+               .WithOne(ur => ur.User)
+               .HasForeignKey(ur => ur.UserId);
     }
 }

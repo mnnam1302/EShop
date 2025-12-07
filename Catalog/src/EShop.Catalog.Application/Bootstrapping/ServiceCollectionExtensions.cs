@@ -2,6 +2,7 @@
 using EShop.Catalog.Application.Shared;
 using EShop.Shared.Contracts.JsonConverters;
 using EShop.Shared.Contracts.Services.Authorization;
+using EShop.Shared.Contracts.Services.Catalog;
 using EShop.Shared.DomainTools.UnitOfWorks;
 using EShop.Shared.EventBus.DependencyInjections.Extensions;
 using EShop.Shared.EventBus.DependencyInjections.Options;
@@ -98,8 +99,8 @@ public static class ServiceCollectionExtensions
                 bus.ConnectConsumeObserver(new LoggingConsumeObserver());
 
                 bus.MessageTopology.SetEntityNameFormatter(new KebabCaseEntityNameFormatter());
-                bus.ConfigureCatalogRecieveEndpoints(context, environment, Program.ApplicationName);
 
+                bus.ConfigureCatalogRecieveEndpoints(context, environment, Program.ApplicationName);
                 bus.ConfigureEndpoints(context);
             });
         });
@@ -113,10 +114,8 @@ public static class ServiceCollectionExtensions
         IWebHostEnvironment environment,
         string serviceName)
     {
-        bus.ConfigureEventReceiveEndpoint<OrganizationCreateConsumer, OrganizationCreated>(
-            context,
-            environment.EnvironmentName,
-            serviceName);
+        bus.ConfigureEventReceiveEndpoint<OrganizationCreatedConsumer, OrganizationCreated>(
+            context, environment.EnvironmentName, serviceName);
     }
 
     public static IServiceCollection AddCatalogServiceBootstrapping(this IServiceCollection services)

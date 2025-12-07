@@ -1,5 +1,5 @@
 ﻿using EShop.Authorization.Application.UseCases.Permissions;
-using EShop.Shared.Contracts.IntegrationEvents.Authorization;
+using EShop.Shared.Contracts.Services.Authorization;
 using EShop.Shared.CQRS;
 using MassTransit;
 

@@ -6,10 +6,6 @@ public interface SupportedFeaturesUpdated : TenancyEvent
     IFeature[] Features { get; }
     SupportedFeaturesAction Action { get; }
 }
-
-public interface ITenantFeaturesUpdated : TenancyEvent
-{ }
-
 public interface IFeature
 {
     string Id { get; }
@@ -24,3 +20,4 @@ public enum SupportedFeaturesAction
     AddOrUpdate,
     Delete
 }
+public interface ITenantFeaturesUpdated : TenancyEvent { }

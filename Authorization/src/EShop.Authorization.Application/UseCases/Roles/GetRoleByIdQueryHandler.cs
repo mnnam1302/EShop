@@ -16,10 +16,10 @@ public sealed class RoleDetailsResponse
     public required string Name { get; init; }
     public string? Description { get; init; }
     public string TenantId { get; init; } = null!;
-    public required List<RolePermission> Permissions { get; init; } = [];
+    public required List<RolePermissionResponse> Permissions { get; init; } = [];
 }
 
-public sealed class RolePermission
+public sealed class RolePermissionResponse
 {
     public required string PermissionId { get; init; }
     public required string PermissionName { get; init; }
@@ -33,29 +33,30 @@ internal class GetRoleByIdQueryHandler(IRoleRepository roleRepository) : IQueryH
     {
         var role = await roleRepository.FindByIdAsync(
             query.RoleId,
-            includeProperties: r => r.Permissions,
-            cancellationToken: cancellationToken);
+            cancellationToken: cancellationToken,
+            includeProperties: r => r.RolePermissions!.Select(rp => rp.Permission));
 
         if (role is null)
         {
             return Result.Failure<RoleDetailsResponse>(ErrorContants.Role.NotFound);
         }
 
-        var reponse = new RoleDetailsResponse
+        var response = new RoleDetailsResponse
         {
             Id = role.Id,
             Name = role.Name,
             Description = role.Description,
             TenantId = role.TenantId,
-            Permissions = role.Permissions.Select(p => new RolePermission
+            Permissions = role.RolePermissions.Select(rp => new RolePermissionResponse
             {
-                PermissionId = p.Id,
-                PermissionName = p.Name,
-                Description = p.Description,
-                RelatedTo = p.RelatedTo
-            }).ToList()
+                PermissionId = rp.PermissionId,
+                PermissionName = rp.Permission.Name,
+                Description = rp.Permission.Description,
+                RelatedTo = rp.Permission.RelatedTo
+            })
+            .ToList()
         };
 
-        return Result.Success(reponse);
+        return Result.Success(response);
     }
 }

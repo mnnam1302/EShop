@@ -1,5 +1,5 @@
 ﻿using EShop.Shared.Authentication;
-using EShop.Shared.Contracts.IntegrationEvents.Authorization;
+using EShop.Shared.Contracts.Services.Authorization;
 using EShop.Shared.EventBus.Abstractions;
 using EShop.Shared.Scoping.ResourceAccessControl;
 

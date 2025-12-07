@@ -5,7 +5,7 @@ using EShop.Shared.DomainTools.EventSourcing.SeedWork;
 
 namespace EShop.Catalog.Application.Categories;
 
-public sealed class Category : Aggregate, IScoped
+public sealed class CategoryAggregate : Aggregate, IScoped
 {
     public string Name { get; set; } = string.Empty;
     public string Reference { get; set; } = string.Empty;
@@ -17,9 +17,9 @@ public sealed class Category : Aggregate, IScoped
     public string Scope { get; set; } = string.Empty;
     public CategoryStateMachine StateMachine { get; set; } = new CategoryStateMachine();
 
-    public static Category Create(CreateCategoryCommand command, IUserDetailsProvider userDetailsProvider)
+    public static CategoryAggregate Create(CreateCategoryCommand command, IUserDetailsProvider userDetailsProvider)
     {
-        var category = new Category();
+        var category = new CategoryAggregate();
         category.RaiseEvent(new CategoryCreatedEvent
         {
             CategoryId = Guid.NewGuid(),

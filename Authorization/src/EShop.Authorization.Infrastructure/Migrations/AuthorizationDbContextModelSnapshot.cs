@@ -131,8 +131,7 @@ namespace EShop.Authorization.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Name")
-                        .IsUnique();
+                    b.HasIndex("Name");
 
                     b.HasIndex("TenantId");
 
@@ -141,17 +140,17 @@ namespace EShop.Authorization.Infrastructure.Migrations
 
             modelBuilder.Entity("EShop.Authorization.Domain.Entities.RolePermission", b =>
                 {
-                    b.Property<string>("PermissionId")
-                        .HasColumnType("character varying(50)");
-
                     b.Property<Guid>("RoleId")
                         .HasColumnType("uuid");
 
-                    b.HasKey("PermissionId", "RoleId");
+                    b.Property<string>("PermissionId")
+                        .HasColumnType("character varying(50)");
 
-                    b.HasIndex("RoleId");
+                    b.HasKey("RoleId", "PermissionId");
 
-                    b.ToTable("RolePermissions");
+                    b.HasIndex("PermissionId");
+
+                    b.ToTable("RolePermissions", (string)null);
                 });
 
             modelBuilder.Entity("EShop.Authorization.Domain.Entities.User", b =>
@@ -230,17 +229,17 @@ namespace EShop.Authorization.Infrastructure.Migrations
 
             modelBuilder.Entity("EShop.Authorization.Domain.Entities.UserRole", b =>
                 {
-                    b.Property<Guid>("RoleId")
-                        .HasColumnType("uuid");
-
                     b.Property<string>("UserId")
                         .HasColumnType("character varying(150)");
 
-                    b.HasKey("RoleId", "UserId");
+                    b.Property<Guid>("RoleId")
+                        .HasColumnType("uuid");
 
-                    b.HasIndex("UserId");
+                    b.HasKey("UserId", "RoleId");
 
-                    b.ToTable("UserRoles");
+                    b.HasIndex("RoleId");
+
+                    b.ToTable("UserRoles", (string)null);
                 });
 
             modelBuilder.Entity("EShop.Authorization.Domain.Entities.Organization", b =>
@@ -321,17 +320,21 @@ namespace EShop.Authorization.Infrastructure.Migrations
 
             modelBuilder.Entity("EShop.Authorization.Domain.Entities.RolePermission", b =>
                 {
-                    b.HasOne("EShop.Authorization.Domain.Entities.Permission", null)
+                    b.HasOne("EShop.Authorization.Domain.Entities.Permission", "Permission")
                         .WithMany("RolePermissions")
                         .HasForeignKey("PermissionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("EShop.Authorization.Domain.Entities.Role", null)
+                    b.HasOne("EShop.Authorization.Domain.Entities.Role", "Role")
                         .WithMany("RolePermissions")
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Permission");
+
+                    b.Navigation("Role");
                 });
 
             modelBuilder.Entity("EShop.Authorization.Domain.Entities.User", b =>

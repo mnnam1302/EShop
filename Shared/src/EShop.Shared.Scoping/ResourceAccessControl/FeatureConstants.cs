@@ -28,10 +28,9 @@ public static class FeatureConstants
 
 public enum FeatureModules
 {
-    EShop_Identity,
     EShop_Authorization,
     EShop_Tenancy,
-    EShop_Configuration,
+    EShop_Catalog,
 }
 
 public enum FeatureState

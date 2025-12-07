@@ -49,7 +49,10 @@ internal sealed class PostgresMultiTenantConnectionInterceptor : DbConnectionInt
             // Any calls without user in http context would crash but might be needed in some cases (e.g. VS debugger).
             // It is not responsibility of this class to make sure only authenticated users will get access
             // but if the connection doesn't have 'app.tenant_id' set the query will not return results anyway.
-            _logger.LogWarning("Opening db connection without tenant isolation. Scoped queries will not return any results! [{providerId}]", _userDetailsProvider.GetHashCode());
+            _logger.LogWarning(
+                "Opening db connection without tenant isolation. Scoped queries will not return any results! [{ProviderId}]",
+                _userDetailsProvider.GetHashCode());
+
             setContextCommand = null;
             return false;
         }
@@ -61,7 +64,7 @@ internal sealed class PostgresMultiTenantConnectionInterceptor : DbConnectionInt
             setContextCommand = dbConnection.CreateCommand()
                 .WithPostgreSqlCommandText($"SET app.tenant_id = '{tenantId}';");
 
-            _logger.LogTrace("Setting connection tenant context to '{id}'.", tenantId);
+            _logger.LogTrace("Setting connection tenant context to '{TenantId}'.", tenantId);
             return true;
         }
 

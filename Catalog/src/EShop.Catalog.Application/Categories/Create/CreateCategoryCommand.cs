@@ -1,43 +1,54 @@
 ﻿using EShop.Shared.Authentication.Abstractions;
 using EShop.Shared.Contracts.Abstractions.Shared;
+using EShop.Shared.Contracts.Services.Catalog;
 using EShop.Shared.CQRS.Command;
 using EShop.Shared.DomainTools.EventSourcing.SeedWork;
+using EShop.Shared.EventBus.Abstractions;
 
 namespace EShop.Catalog.Application.Categories.Create;
 
 public sealed class CreateCategoryCommand : ICommand
 {
-    public string Name { get; set; }
-    public string Reference { get; set; }
-    public string Slug { get; set; }
+    public required string Name { get; set; }
+    public required string Reference { get; set; }
+    public required string Slug { get; set; }
     public Guid? ParentId { get; set; }
 }
 
-public sealed class CreateCategoryCommandHandler : ICommandHandler<CreateCategoryCommand>
+public sealed class CreateCategoryCommandHandler(
+    IEventStoreGateway eventStore,
+    IUserDetailsProvider userDetailsProvider,
+    IEventBusGateway eventBus) : ICommandHandler<CreateCategoryCommand>
 {
-    private readonly IEventStoreGateway eventStore;
-    private readonly IUserDetailsProvider userDetailsProvider;
-
-    public CreateCategoryCommandHandler(IEventStoreGateway eventStore, IUserDetailsProvider userDetailsProvider)
-    {
-        this.eventStore = eventStore;
-        this.userDetailsProvider = userDetailsProvider;
-    }
-
     public async Task<Result> HandleAsync(CreateCategoryCommand command, CancellationToken cancellationToken)
     {
         if (command.ParentId.HasValue && command.ParentId != Guid.Empty)
         {
-            var parentCategory = await eventStore.LoadAggregateAsync<Category>(command.ParentId.Value, cancellationToken);
+            var parentCategory = await eventStore.LoadAggregateAsync<CategoryAggregate>(command.ParentId.Value, cancellationToken);
             if (parentCategory == null)
             {
                 return Result.Failure(new("ParentId", "Parent category not found"));
             }
         }
 
-        var category = Category.Create(command, userDetailsProvider);
+        var category = CategoryAggregate.Create(command, userDetailsProvider);
 
         await eventStore.AppendEventsAsync(category, cancellationToken);
+
+        await eventBus.PublishAsync<CategoryCreated>(new
+        {
+            CategoryId = category.Id,
+            Version = category.Version,
+            Name = category.Name,
+            Reference = category.Reference,
+            Slug = category.Slug,
+            ParentId = category.ParentId,
+            CreatedAtUtc = category.CreatedAtUtc,
+            UpdatedAtUtc = category.UpdatedAtUtc,
+            TenantId = userDetailsProvider.AuthenticatedUser.TenantId,
+            ActionUserId = userDetailsProvider.AuthenticatedUser.ActionUserId,
+            ActionUserType = userDetailsProvider.AuthenticatedUser.ActionUserType,
+        }, cancellationToken);
 
         return Result.Success();
     }
