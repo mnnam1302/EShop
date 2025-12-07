@@ -1,19 +1,36 @@
 ﻿using EShop.Catalog.SyncService.MongoDb.Abstractions;
 using EShop.Catalog.SyncService.MongoDb.Entities;
+using EShop.Catalog.SyncService.MongoDb.UseCases.Category;
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.Contracts.Services.Catalog;
+using EShop.Shared.CQRS;
 
 namespace EShop.Catalog.SyncService.MongoDb.Consumers;
 
 public sealed class CategoryCreatedConsumer : IdempotentConsumer<CategoryCreated>
 {
-    public CategoryCreatedConsumer(IMongoRepository<InboxMessageProjection> mongoRepository)
+    private readonly IMediator mediator;
+
+    public CategoryCreatedConsumer(IMongoRepository<InboxMessageProjection> mongoRepository, IMediator mediator)
         : base(mongoRepository)
     {
+        this.mediator = mediator;
     }
 
     protected override Task<Result> HandleMessageAsync(CategoryCreated message, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        var command = new CreateCategoryProjectionCommand
+        {
+            CategoryId = message.CategoryId,
+            Name = message.Name,
+            Reference = message.Reference,
+            Slug = message.Slug,
+            ParentId = message.ParentId,
+            CreatedAtUtc = message.CreatedAtUtc,
+            UpdatedAtUtc = message.UpdatedAtUtc,
+            TenantId = message.TenantId
+        };
+
+        return mediator.SendAsync(command, cancellationToken);
     }
 }

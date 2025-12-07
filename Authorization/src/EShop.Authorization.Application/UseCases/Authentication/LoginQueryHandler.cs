@@ -48,7 +48,12 @@ internal sealed class LoginQueryHandler(
 
     private async Task<Result<User>> PasswordSignInAsync(LoginQuery query, CancellationToken cancellationToken)
     {
-        var user = await userRepository.FindSingleAsync(predicate: u => u.Username == query.Username, cancellationToken: cancellationToken);
+        // Note: When debugging, avoid expanding the user variable in tooltips as it may trigger
+        // navigation property queries (e.g., roles) that can fail due to row-level security policies
+        var user = await userRepository.FindSingleAsync(
+            predicate: u => u.Username == query.Username,
+            cancellationToken: cancellationToken);
+
         if (user == null)
         {
             return Result.Failure<User>(new("SignIn", "The provided credentials are invalid."));

@@ -10,9 +10,9 @@ public class AuthorizationDbContext : DbContext
     {
     }
 
-    protected override void OnModelCreating(ModelBuilder builder)
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        builder.ApplyConfigurationsFromAssembly(AssemblyReference.Assembly);
+        modelBuilder.ApplyConfigurationsFromAssembly(AssemblyReference.Assembly);
     }
 
     public DbSet<Organization> Organizations { get; set; }

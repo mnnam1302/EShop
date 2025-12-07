@@ -17,13 +17,11 @@ public class Role : EntityBase<Guid>, IScoped
     [MaxLength(ModelConstants.VeryLongText)]
     public string Scope { get; private set; } = string.Empty;
 
-    public virtual ICollection<User> Users { get; private set; } = new List<User>();
-    public virtual ICollection<UserRole> UserRoles { get; private set; } = new List<UserRole>();
+    public virtual ICollection<User> Users { get; private set; } = [];
+    public virtual ICollection<UserRole> UserRoles { get; set; } = [];
 
-    public virtual ICollection<Permission> Permissions { get; private set; } = new List<Permission>();
-
-    private readonly List<RolePermission> rolePermissions = [];
-    public virtual IReadOnlyCollection<RolePermission> RolePermissions => rolePermissions.AsReadOnly();
+    public virtual ICollection<Permission> Permissions { get; private set; } = [];
+    public virtual ICollection<RolePermission> RolePermissions { get; set; } = [];
 
     public static Role CreateOwnerRole(string tenantId)
     {
@@ -56,12 +54,12 @@ public class Role : EntityBase<Guid>, IScoped
     {
         foreach (var permissionId in enumerable)
         {
-            if (rolePermissions.Any(rp => rp.PermissionId == permissionId))
+            if (RolePermissions.Any(rp => rp.PermissionId == permissionId))
             {
                 continue;
             }
 
-            rolePermissions.Add(new RolePermission
+            RolePermissions.Add(new RolePermission
             {
                 RoleId = Id,
                 PermissionId = permissionId

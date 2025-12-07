@@ -35,10 +35,8 @@ public class User : AggregateRoot<string>, IExcludedFromScoping
     public string? OrganizationId { get; set; }
     public virtual Organization? Organization { get; set; }
 
-    public virtual ICollection<Role> Roles { get; set; } = new List<Role>();
-
-    private readonly List<UserRole> userRoles = new List<UserRole>();
-    public virtual IReadOnlyCollection<UserRole> UserRoles => userRoles.AsReadOnly();
+    public virtual ICollection<Role> Roles { get; set; } = [];
+    public virtual ICollection<UserRole> UserRoles { get; set; } = [];
 
     [MaxLength(ModelConstants.ShortText)]
     public string TenantId { get; private set; } = string.Empty;
@@ -134,9 +132,9 @@ public class User : AggregateRoot<string>, IExcludedFromScoping
 
     public void AssignRole(Guid roleId)
     {
-        if (userRoles.Any(x => x.RoleId == roleId)) return;
+        if (UserRoles.Any(x => x.RoleId == roleId)) return;
 
-        userRoles.Add(new UserRole
+        UserRoles.Add(new UserRole
         {
             UserId = Id,
             RoleId = roleId

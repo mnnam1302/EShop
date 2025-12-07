@@ -1,6 +1,8 @@
 ﻿using EShop.Catalog.SyncService.MongoDb.Abstractions;
 using EShop.Catalog.SyncService.MongoDb.Infrastructure;
 using EShop.Catalog.SyncService.MongoDb.Infrastructure.Repository;
+using EShop.Shared.CQRS;
+using EShop.Shared.JsonApi.Extensions;
 using EShop.Shared.JsonApi.Middlewares;
 using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
 using Microsoft.Extensions.Options;
@@ -9,21 +11,22 @@ namespace EShop.Catalog.SyncService.MongoDb.Boostrapping;
 
 public static class ServiceCollectionExtensions
 {
+    public static IServiceCollection AddShared(this IServiceCollection services)
+    {
+        services
+            .GlobalExceptionHandlingMiddleware()
+            .AddMediator(AssemblyReference.Assembly);
+        return services;
+    }
+
     public static IServiceCollection AddBoostrapping(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment webHostEnvironment)
     {
         services.AddCors()
-            .AddMiddileware()
             .AddSwagger()
             .AddApiVersioning()
             .AddMassTransitRabbitMQ(configuration, webHostEnvironment)
             .AddMongoDbPersistence();
 
-        return services;
-    }
-
-    public static IServiceCollection AddMiddileware(this IServiceCollection services)
-    {
-        services.AddSingleton<ExceptionHandlingMiddleware>();
         return services;
     }
 
