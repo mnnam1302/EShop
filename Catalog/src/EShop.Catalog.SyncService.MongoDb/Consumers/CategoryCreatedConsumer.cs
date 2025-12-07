@@ -22,6 +22,7 @@ public sealed class CategoryCreatedConsumer : IdempotentConsumer<CategoryCreated
         var command = new CreateCategoryProjectionCommand
         {
             CategoryId = message.CategoryId,
+            Version = message.Version,
             Name = message.Name,
             Reference = message.Reference,
             Slug = message.Slug,

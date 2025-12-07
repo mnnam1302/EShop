@@ -3,6 +3,7 @@
 public sealed class CategoryCreated : CatalogIntegrationEvent
 {
     public required Guid CategoryId { get; init; }
+    public required ulong Version { get; init; }
     public required string Name { get; init; }
     public required string Reference { get; init; }
     public required string Slug { get; init; }

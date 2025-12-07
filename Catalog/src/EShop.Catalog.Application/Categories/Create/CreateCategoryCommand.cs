@@ -35,13 +35,16 @@ public sealed class CreateCategoryCommandHandler(
 
         await eventStore.AppendEventsAsync(category, cancellationToken);
 
-        await eventBus.PublishAsync(new CategoryCreated
+        await eventBus.PublishAsync<CategoryCreated>(new
         {
             CategoryId = category.Id,
+            Version = category.Version,
             Name = category.Name,
             Reference = category.Reference,
             Slug = category.Slug,
             ParentId = category.ParentId,
+            CreatedAtUtc = category.CreatedAtUtc,
+            UpdatedAtUtc = category.UpdatedAtUtc,
             TenantId = userDetailsProvider.AuthenticatedUser.TenantId,
             ActionUserId = userDetailsProvider.AuthenticatedUser.ActionUserId,
             ActionUserType = userDetailsProvider.AuthenticatedUser.ActionUserType,

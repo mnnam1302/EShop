@@ -55,7 +55,7 @@ public static class ServiceCollectionExtensions
 
     public static IServiceCollection AddMongoDbPersistence(this IServiceCollection services)
     {
-        services.AddOptions<MongoDbSettings>();
+        services.AddOptions<MongoDbSettings>().BindConfiguration(nameof(MongoDbSettings));
         services.AddSingleton<IMongoDbSettings>(sp => sp.GetRequiredService<IOptions<MongoDbSettings>>().Value);
 
         services.AddScoped(typeof(IMongoRepository<>), typeof(MongoRepository<>));

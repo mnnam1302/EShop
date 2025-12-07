@@ -8,6 +8,7 @@ namespace EShop.Catalog.SyncService.MongoDb.UseCases.Category;
 public sealed class CreateCategoryProjectionCommand : ICommand
 {
     public required Guid CategoryId { get; init; }
+    public ulong Version { get; init; }
     public required string Name { get; init; }
     public required string Reference { get; init; }
     public required string Slug { get; init; }
@@ -44,6 +45,7 @@ public sealed class CreateCategoryProjectionCommandHandler : ICommandHandler<Cre
         categoryProjection = new CategoryProjection
         {
             DocumentId = command.CategoryId,
+            Version = command.Version,
             Name = command.Name,
             Reference = command.Reference,
             Slug = command.Slug,

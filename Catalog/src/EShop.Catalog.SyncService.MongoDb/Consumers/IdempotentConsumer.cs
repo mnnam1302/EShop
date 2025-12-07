@@ -8,7 +8,7 @@ using MassTransit;
 namespace EShop.Catalog.SyncService.MongoDb.Consumers;
 
 public abstract class IdempotentConsumer<TMessage> : IConsumer<TMessage>
-    where TMessage : class, IIntegrationEvent
+    where TMessage : CatalogIntegrationEvent
 {
     private readonly IMongoRepository<InboxMessageProjection> _mongoRepository;
 
@@ -22,8 +22,8 @@ public abstract class IdempotentConsumer<TMessage> : IConsumer<TMessage>
     public async Task Consume(ConsumeContext<TMessage> context)
     {
         var message = context.Message;
-        var messageId = message.EventId;
         var consumerId = $"{GetType().Name}_{message.GetType().Name}";
+        var messageId = message.EventId;
 
         var alreadyProcessed = await _mongoRepository.FindOneAsync(
             inboxMessage => inboxMessage.DocumentId == messageId && inboxMessage.ConsumerId == consumerId,

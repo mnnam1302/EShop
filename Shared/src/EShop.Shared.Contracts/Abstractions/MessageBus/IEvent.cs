@@ -2,12 +2,14 @@
 
 namespace EShop.Shared.Contracts.Abstractions.MessageBus;
 
+[ExcludeFromTopology]
 public interface IEvent : IMessage
 {
     Guid EventId { get; }
     DateTimeOffset TimeStampUtc { get; }
 }
 
+[ExcludeFromTopology]
 public interface IIntegrationEvent : IEvent
 {
     string TenantId { get; }
@@ -15,6 +17,7 @@ public interface IIntegrationEvent : IEvent
     string ActionUserType { get; }
 }
 
+[ExcludeFromTopology]
 public abstract class IntegrationEvent : IIntegrationEvent
 {
     public Guid EventId { get; } = Guid.NewGuid();

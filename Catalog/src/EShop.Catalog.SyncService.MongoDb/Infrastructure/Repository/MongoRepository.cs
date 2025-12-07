@@ -2,6 +2,8 @@
 using EShop.Catalog.SyncService.MongoDb.Attributes;
 using EShop.Shared.DomainTools.Entities;
 using MongoDB.Bson;
+using MongoDB.Bson.Serialization;
+using MongoDB.Bson.Serialization.Serializers;
 using MongoDB.Driver;
 using System.Linq.Expressions;
 
@@ -11,6 +13,12 @@ public sealed class MongoRepository<TDocument> : IMongoRepository<TDocument>
     where TDocument : IDocument
 {
     private readonly IMongoCollection<TDocument> _collection;
+
+    static MongoRepository()
+    {
+        // Configure GUID serialization globally for MongoDB
+        BsonSerializer.TryRegisterSerializer(new GuidSerializer(GuidRepresentation.Standard));
+    }
 
     public MongoRepository(IMongoDbSettings mongoDbSettings)
     {

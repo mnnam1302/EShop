@@ -19,6 +19,7 @@ public static class RabbitMqBusFactoryConfiguratorExtensions
             queueName: sanitizedQueueName,
             configureEndpoint: endpoint =>
             {
+                endpoint.ConfigureConsumeTopology = false;
                 endpoint.Bind<TEvent>();
                 endpoint.ConfigureConsumer<TConsumer>(context);
             });
