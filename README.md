@@ -3,7 +3,7 @@
 ## Setup infrastructure local
 > Run docker-compose to build Infrastructure such as Redis, MSSQL Server, RabbitMQ, Seq for development environment.
 ```
-docker-compose -f docker-compose.Dev.Infrastructure.yml up -d
+docker-compose -f docker-compose.Development.Infrastructure.yaml up -d
 ```
 
 ## Design

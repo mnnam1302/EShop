@@ -23,6 +23,7 @@ public sealed class CatalogFeatureRegistrationService(IEventBusGateway eventBus)
     {
         await eventBus.PublishAsync<SupportedFeaturesUpdated>(new
         {
+            EventId = Guid.NewGuid(),
             SourceSystemReference = Program.ApplicationName,
             Features = Features,
             Action = SupportedFeaturesAction.AddOrUpdate,

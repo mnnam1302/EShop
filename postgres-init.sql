@@ -16,6 +16,7 @@ BEGIN
    END LOOP;
 END $do$;
 
+-- Tenancy database
 
 CREATE DATABASE eshop_tenancy;
 
@@ -28,6 +29,8 @@ GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO tenancy;
 GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO tenancy;
 GRANT ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA public TO tenancy;
 
+-- Authorization database
+
 CREATE DATABASE eshop_authorization;
 
 GRANT ALL PRIVILEGES ON DATABASE eshop_authorization TO authorization;
@@ -39,17 +42,7 @@ GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO authorization;
 GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO authorization;
 GRANT ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA public TO authorization;
 
-CREATE DATABASE eshop_configuration;
-
-GRANT ALL PRIVILEGES ON DATABASE eshop_configuration TO configuration;
-\c eshop_configuration
-CREATE EXTENSION IF NOT EXISTS citext;
-\c eshop_configuration
-GRANT ALL PRIVILEGES ON SCHEMA public TO configuration;
-GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO configuration;
-GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO configuration;
-GRANT ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA public TO configuration;
-
+-- Catalog database
 
 CREATE DATABASE eshop_catalog;
 
