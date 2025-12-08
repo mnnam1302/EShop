@@ -1,4 +1,6 @@
 ﻿using EShop.Catalog.Application.Categories.Create;
+using EShop.Catalog.Application.Categories.Publish;
+using EShop.Catalog.Application.Categories.Update;
 using EShop.Shared.JsonApi.ResourceAccessControl;
 using EShop.Shared.Scoping.ResourceAccessControl;
 
@@ -14,7 +16,10 @@ public static class EndpointHandler
             .HasApiVersion(1)
             .RequireFeatureFilter(FeatureConstants.Catalog.ProductBuilder_FeatureId);
 
-        categoryEndpointsV1.MapCreateCategory();
+        categoryEndpointsV1
+            .MapCreateCategory()
+            .MapUpdateCategory()
+            .MapPublishCategory();
 
         return routerBuilder;
     }

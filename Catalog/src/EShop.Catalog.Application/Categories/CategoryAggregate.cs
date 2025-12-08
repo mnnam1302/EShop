@@ -1,4 +1,5 @@
 ﻿using EShop.Catalog.Application.Categories.Create;
+using EShop.Catalog.Application.Categories.Publish;
 using EShop.Catalog.Application.Categories.Update;
 using EShop.Shared.Authentication.Abstractions;
 using EShop.Shared.DomainTools.Entities;
@@ -37,19 +38,6 @@ public sealed class CategoryAggregate : Aggregate, IScoped
         return category;
     }
 
-    public void Apply(CategoryCreatedEvent @event)
-    {
-        Id = @event.CategoryId;
-        Name = @event.Name;
-        Reference = @event.Reference;
-        Slug = @event.Slug;
-        ParentId = @event.ParentId;
-        CreatedAtUtc = @event.CreatedAtUtc;
-        UpdatedAtUtc = @event.UpdatedAtUtc;
-        TenantId = @event.TenantId;
-        Scope = @event.Scope;
-    }
-
     public void Update(UpdateCategoryCommand command)
     {
         RaiseEvent(new CategoryUpdatedEvent
@@ -63,6 +51,28 @@ public sealed class CategoryAggregate : Aggregate, IScoped
         });
     }
 
+    public void Publish()
+    {
+        RaiseEvent(new CategoryPublishedEvent
+        {
+            CategoryId = Id,
+            PublishedAtUtc = DateTimeOffset.UtcNow
+        });
+    }
+
+    public void Apply(CategoryCreatedEvent @event)
+    {
+        Id = @event.CategoryId;
+        Name = @event.Name;
+        Reference = @event.Reference;
+        Slug = @event.Slug;
+        ParentId = @event.ParentId;
+        CreatedAtUtc = @event.CreatedAtUtc;
+        UpdatedAtUtc = @event.UpdatedAtUtc;
+        TenantId = @event.TenantId;
+        Scope = @event.Scope;
+    }
+
     public void Apply(CategoryUpdatedEvent @event)
     {
         Name = @event.Name;
@@ -70,5 +80,11 @@ public sealed class CategoryAggregate : Aggregate, IScoped
         Slug = @event.Slug;
         ParentId = @event.ParentId;
         UpdatedAtUtc = @event.UpdatedAtUtc;
+    }
+
+    public void Apply(CategoryPublishedEvent @event)
+    {
+        StateMachine.Fire(CategoryAction.Publish);
+        UpdatedAtUtc = @event.PublishedAtUtc;
     }
 }

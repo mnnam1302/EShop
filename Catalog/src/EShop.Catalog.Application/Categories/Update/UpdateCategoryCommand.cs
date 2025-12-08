@@ -19,7 +19,6 @@ public sealed class UpdateCategoryCommandHandler(IEventStoreGateway eventStore) 
     public async Task<Result> HandleAsync(UpdateCategoryCommand command, CancellationToken cancellationToken)
     {
         var category = await eventStore.LoadAggregateAsync<CategoryAggregate>(command.Id, cancellationToken);
-
         if (category is null)
         {
             throw new NotFoundException($"Category {command.Id} is not found.");
@@ -28,7 +27,6 @@ public sealed class UpdateCategoryCommandHandler(IEventStoreGateway eventStore) 
         category.Update(command);
 
         await eventStore.AppendEventsAsync(category, cancellationToken);
-
         return Result.Success();
     }
 }
