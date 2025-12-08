@@ -52,7 +52,7 @@ public static class UserEndpointHandler
 
         if (result.IsFailure)
         {
-            return ApiResultHandler.HandleFailure(result);
+            return ApiEndpointHandler.Failure(result);
         }
 
         return Results.Ok(result);
@@ -66,7 +66,7 @@ public static class UserEndpointHandler
 
         if (result.IsFailure)
         {
-            return ApiResultHandler.HandleFailure(result);
+            return ApiEndpointHandler.Failure(result);
         }
 
         return Results.Ok(result);
@@ -81,7 +81,7 @@ public static class UserEndpointHandler
 
         if (result.IsFailure)
         {
-            ApiResultHandler.HandleFailure(result);
+            ApiEndpointHandler.Failure(result);
         }
 
         return Results.Ok(result);
@@ -103,7 +103,7 @@ public static class UserEndpointHandler
 
         if (result.IsFailure)
         {
-            return ApiResultHandler.HandleFailure(result);
+            return ApiEndpointHandler.Failure(result);
         }
 
         return Results.Created("", result);
@@ -122,7 +122,7 @@ public static class UserEndpointHandler
 
         if (result.IsFailure)
         {
-            return ApiResultHandler.HandleFailure(result);
+            return ApiEndpointHandler.Failure(result);
         }
 
         return Results.Ok();

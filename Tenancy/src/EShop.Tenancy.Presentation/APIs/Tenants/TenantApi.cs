@@ -39,7 +39,7 @@ public sealed class TenantApi : ICarterModule
 
         if (result.IsFailure)
         {
-            return ApiResultHandler.HandleFailure(result);
+            return ApiEndpointHandler.Failure(result);
         }
 
         return Results.Created("", result);
@@ -56,7 +56,7 @@ public sealed class TenantApi : ICarterModule
 
         if (result.IsFailure)
         {
-            return ApiResultHandler.HandleFailure(result);
+            return ApiEndpointHandler.Failure(result);
         }
 
         return Results.Ok(result);

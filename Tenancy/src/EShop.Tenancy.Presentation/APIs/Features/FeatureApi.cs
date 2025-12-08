@@ -31,7 +31,7 @@ namespace EShop.Tenancy.Presentation.APIs.Features
 
             if (result.IsFailure)
             {
-                return ApiResultHandler.HandleFailure(result);
+                return ApiEndpointHandler.Failure(result);
             }
 
             return Results.Ok(result);

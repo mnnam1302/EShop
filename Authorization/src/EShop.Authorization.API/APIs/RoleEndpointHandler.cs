@@ -47,7 +47,7 @@ public static class RoleEndpointHandler
 
         if (result.IsFailure)
         {
-            return ApiResultHandler.HandleFailure(result);
+            return ApiEndpointHandler.Failure(result);
         }
 
         return Results.Created("", result);
@@ -61,7 +61,7 @@ public static class RoleEndpointHandler
 
         if (result.IsFailure)
         {
-            return ApiResultHandler.HandleFailure(result);
+            return ApiEndpointHandler.Failure(result);
         }
 
         return Results.Ok(result);
@@ -75,7 +75,7 @@ public static class RoleEndpointHandler
 
         if (result.IsFailure)
         {
-            return ApiResultHandler.HandleFailure(result);
+            return ApiEndpointHandler.Failure(result);
         }
 
         return Results.Ok(result);

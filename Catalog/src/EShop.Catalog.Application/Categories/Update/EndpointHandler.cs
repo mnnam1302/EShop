@@ -35,7 +35,7 @@ public static class EndpointHandler
 
         if (result.IsFailure)
         {
-            return ApiResultHandler.HandleFailure(result);
+            return ApiEndpointHandler.Failure(result);
         }
 
         return Results.NoContent();

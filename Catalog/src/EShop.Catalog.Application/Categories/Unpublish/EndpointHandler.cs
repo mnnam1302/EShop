@@ -23,7 +23,7 @@ public static class EndpointHandler
         var result = await mediator.SendAsync(command, cancellationToken);
         if (result.IsFailure)
         {
-            return ApiResultHandler.HandleFailure(result);
+            return ApiEndpointHandler.Failure(result);
         }
 
         return Results.NoContent();

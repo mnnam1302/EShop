@@ -4,9 +4,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace EShop.Shared.JsonApi.Abstractions;
 
-public static class ApiResultHandler
+public static class ApiEndpointHandler
 {
-    public static IResult HandleFailure(Result result)
+    public static IResult Failure(Result result)
     {
         return result switch
         {
