@@ -1,5 +1,6 @@
 ﻿using EShop.Catalog.Application.Categories.Create;
 using EShop.Catalog.Application.Categories.Publish;
+using EShop.Catalog.Application.Categories.Unpublish;
 using EShop.Catalog.Application.Categories.Update;
 using EShop.Shared.Authentication.Abstractions;
 using EShop.Shared.DomainTools.Entities;
@@ -19,7 +20,7 @@ public sealed class CategoryAggregate : Aggregate, IScoped
     public string Scope { get; set; } = string.Empty;
     public CategoryStateMachine StateMachine { get; set; } = new CategoryStateMachine();
 
-    public static CategoryAggregate Create(CreateCategoryCommand command, IUserDetailsProvider userDetailsProvider)
+    internal static CategoryAggregate Create(CreateCategoryCommand command, IUserDetailsProvider userDetailsProvider)
     {
         var category = new CategoryAggregate();
         category.RaiseEvent(new CategoryCreatedEvent
@@ -38,7 +39,7 @@ public sealed class CategoryAggregate : Aggregate, IScoped
         return category;
     }
 
-    public void Update(UpdateCategoryCommand command)
+    internal void Update(UpdateCategoryCommand command)
     {
         RaiseEvent(new CategoryUpdatedEvent
         {
@@ -51,12 +52,21 @@ public sealed class CategoryAggregate : Aggregate, IScoped
         });
     }
 
-    public void Publish()
+    internal void Publish()
     {
         RaiseEvent(new CategoryPublishedEvent
         {
             CategoryId = Id,
             PublishedAtUtc = DateTimeOffset.UtcNow
+        });
+    }
+
+    internal void Unpublish()
+    {
+        RaiseEvent(new CategoryUnpublishedEvent
+        {
+            CategoryId = Id,
+            UnpublishedAtUtc = DateTimeOffset.UtcNow
         });
     }
 
@@ -86,5 +96,11 @@ public sealed class CategoryAggregate : Aggregate, IScoped
     {
         StateMachine.Fire(CategoryAction.Publish);
         UpdatedAtUtc = @event.PublishedAtUtc;
+    }
+
+    public void Apply(CategoryUnpublishedEvent @event)
+    {
+        StateMachine.Fire(CategoryAction.Unpublish);
+        UpdatedAtUtc = @event.UnpublishedAtUtc;
     }
 }
