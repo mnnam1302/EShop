@@ -10,21 +10,21 @@ public static class EndpointHandler
 {
     public static RouteGroupBuilder MapUpdateCategory(this RouteGroupBuilder categoryEndpointBuilder)
     {
-        categoryEndpointBuilder.MapPut("/{categoryId}", UpdateCategoryAsync)
+        categoryEndpointBuilder.MapPut("/{id}", UpdateCategoryAsync)
             .RequirePermissionFilter(PermissionConstants.Catalog.ManageCategories);
 
         return categoryEndpointBuilder;
     }
 
     private static async Task<IResult> UpdateCategoryAsync(
-        [FromRoute] Guid categoryId,
+        [FromRoute] Guid id,
         [FromBody] UpdateCategoryRequest request,
         [FromServices] IMediator mediator,
         CancellationToken cancellationToken)
     {
         var command = new UpdateCategoryCommand
         {
-            Id = categoryId,
+            Id = id,
             Name = request.Name,
             Reference = request.Reference,
             Slug = request.Slug,

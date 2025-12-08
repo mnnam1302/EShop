@@ -1,4 +1,5 @@
 ﻿using EShop.Shared.CQRS;
+using EShop.Shared.JsonApi.Abstractions;
 using EShop.Shared.JsonApi.ResourceAccessControl;
 using EShop.Shared.Scoping.ResourceAccessControl;
 using Microsoft.AspNetCore.Mvc;
@@ -9,14 +10,22 @@ public static class EndpointHandler
 {
     public static RouteGroupBuilder MapPublishCategory(this RouteGroupBuilder categoryEndpointBuilder)
     {
-        categoryEndpointBuilder.MapPut("/{categoryId}", PublishCategoryAsync)
+        categoryEndpointBuilder.MapPut("/{id}", PublishCategoryAsync)
             .RequirePermissionFilter(PermissionConstants.Catalog.ManageCategories);
 
         return categoryEndpointBuilder;
     }
 
-    private static async Task PublishCategoryAsync([FromRoute] Guid categoryId, [FromServices] IMediator mediator, CancellationToken cancellationToken)
+    private static async Task<IResult> PublishCategoryAsync([FromRoute] Guid id, [FromServices] IMediator mediator, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        var command = new PublishCategoryCommand(id);
+
+        var result = await mediator.SendAsync(command, cancellationToken);
+        if (result.IsFailure)
+        {
+            return ApiEndpointHandler.Failure(result);
+        }
+
+        return Results.NoContent();
     }
 }
