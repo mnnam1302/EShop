@@ -1,5 +1,6 @@
 ﻿using EShop.Catalog.Application.Categories.Create;
 using EShop.Catalog.Application.Categories.Publish;
+using EShop.Catalog.Application.Categories.Unpublish;
 using EShop.Catalog.Application.Categories.Update;
 using EShop.Shared.JsonApi.ResourceAccessControl;
 using EShop.Shared.Scoping.ResourceAccessControl;
@@ -19,7 +20,8 @@ public static class EndpointHandler
         categoryEndpointsV1
             .MapCreateCategory()
             .MapUpdateCategory()
-            .MapPublishCategory();
+            .MapPublishCategory()
+            .MapUnpublishCategory();
 
         return routerBuilder;
     }
