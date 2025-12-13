@@ -73,5 +73,6 @@ public static class MasstransitRabbitMQExtensions
         string serviceName)
     {
         bus.ConfigureEventReceiveEndpoint<CategoryCreatedConsumer, CategoryCreated>(context, environment.EnvironmentName, serviceName);
+        bus.ConfigureEventReceiveEndpoint<CategoryUpdatedConsumer, CategoryUpdated>(context, environment.EnvironmentName, serviceName);
     }
 }

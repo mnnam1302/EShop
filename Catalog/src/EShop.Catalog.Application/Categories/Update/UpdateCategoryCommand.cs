@@ -1,7 +1,10 @@
-﻿using EShop.Shared.Contracts.Abstractions.Shared;
+﻿using EShop.Shared.Authentication.Abstractions;
+using EShop.Shared.Contracts.Abstractions.Shared;
+using EShop.Shared.Contracts.Services.Catalog;
 using EShop.Shared.CQRS.Command;
 using EShop.Shared.DomainTools.EventSourcing.SeedWork;
 using EShop.Shared.DomainTools.Exceptions;
+using EShop.Shared.EventBus.Abstractions;
 
 namespace EShop.Catalog.Application.Categories.Update;
 
@@ -14,7 +17,10 @@ public sealed class UpdateCategoryCommand : ICommand
     public Guid? ParentId { get; set; }
 }
 
-public sealed class UpdateCategoryCommandHandler(IEventStoreGateway eventStore) : ICommandHandler<UpdateCategoryCommand>
+public sealed class UpdateCategoryCommandHandler(
+    IEventStoreGateway eventStore,
+    IEventBusGateway eventBus,
+    IUserDetailsProvider userDetailsProvider) : ICommandHandler<UpdateCategoryCommand>
 {
     public async Task<Result> HandleAsync(UpdateCategoryCommand command, CancellationToken cancellationToken)
     {
@@ -27,6 +33,22 @@ public sealed class UpdateCategoryCommandHandler(IEventStoreGateway eventStore) 
         category.Update(command);
 
         await eventStore.AppendEventsAsync(category, cancellationToken);
+
+        await eventBus.PublishAsync<CategoryUpdated>(new
+        {
+            CategoryId = category.Id,
+            Version = category.Version,
+            Name = category.Name,
+            Reference = category.Reference,
+            Slug = category.Slug,
+            ParentId = category.ParentId,
+            CreatedAtUtc = category.CreatedAtUtc,
+            UpdatedAtUtc = category.UpdatedAtUtc,
+            TenantId = userDetailsProvider.AuthenticatedUser.TenantId,
+            ActionUserId = userDetailsProvider.AuthenticatedUser.ActionUserId,
+            ActionUserType = userDetailsProvider.AuthenticatedUser.ActionUserType
+        }, cancellationToken);
+
         return Result.Success();
     }
 }

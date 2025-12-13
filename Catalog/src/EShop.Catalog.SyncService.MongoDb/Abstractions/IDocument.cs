@@ -15,8 +15,6 @@ public interface IDocument
 public abstract class Document : IDocument
 {
     public ObjectId Id { get; set; }
-
     public Guid DocumentId { get; set; }
-
     public ulong Version { get; set; }
 }
