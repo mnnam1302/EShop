@@ -1,6 +1,8 @@
 ﻿using EShop.Catalog.SyncService.MongoDb.Infrastructure.Attributes;
+using JsonApiDotNetCore.MongoDb.Resources;
+using MongoDB.Bson;
 
-namespace EShop.Catalog.SyncService.MongoDb.Entities;
+namespace EShop.Catalog.SyncService.MongoDb.Models;
 
 [MongoCollection("Category")]
 public sealed class CategoryProjection : Document

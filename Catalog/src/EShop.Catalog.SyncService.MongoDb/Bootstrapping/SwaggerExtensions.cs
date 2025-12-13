@@ -10,7 +10,7 @@ public static class SwaggerExtensions
     public static void AddSwaggerAPI(this IServiceCollection services)
     {
         services.AddSwaggerGen();
-        services.AddTransient<IConfigureOptions<SwaggerGenOptions>, CatalogReadServiceSwaggerOptions>();
+        services.AddTransient<IConfigureOptions<SwaggerGenOptions>, SwaggerOptions>();
     }
 
     public static void UseSwaggerAPI(this IApplicationBuilder app)

@@ -1,9 +1,8 @@
 ﻿using EShop.Catalog.SyncService.MongoDb.Infrastructure.Attributes;
-using EShop.Shared.Contracts.Shared;
 using EShop.Shared.EventBus;
 using MongoDB.Bson;
 
-namespace EShop.Catalog.SyncService.MongoDb.Entities;
+namespace EShop.Catalog.SyncService.MongoDb.Models;
 
 [MongoCollection("InboxMessage")]
 public class InboxMessageProjection : Document
@@ -19,7 +18,6 @@ public class InboxMessageProjection : Document
     {
         return new InboxMessageProjection
         {
-            Id = ObjectId.GenerateNewId(),
             ConsumerId = consumerId,
             DocumentId = messageId, // documentId is EventId in event bus
             MessageType = messageType,

@@ -9,6 +9,7 @@
   <ItemGroup>
 	<PackageReference Include="Asp.Versioning.Http" />
 	<PackageReference Include="Asp.Versioning.Mvc.ApiExplorer" />
+	<PackageReference Include="JsonApiDotNetCore.MongoDb" />
 	<PackageReference Include="MicroElements.Swashbuckle.FluentValidation" />
     <PackageReference Include="MongoDB.Driver" />
     <PackageReference Include="Swashbuckle.AspNetCore" />

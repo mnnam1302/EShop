@@ -1,5 +1,6 @@
 ﻿using EShop.Catalog.SyncService.MongoDb.Bootstrapping;
 using EShop.Shared.JsonApi.Middlewares;
+using JsonApiDotNetCore.Configuration;
 using Microsoft.AspNetCore.Builder;
 
 namespace EShop.Catalog.SyncService.MongoDb;
@@ -32,6 +33,8 @@ public class Startup
         }
 
         app.UseRouting();
+        app.UseJsonApi();
+        app.MapControllers();
     }
 }
 

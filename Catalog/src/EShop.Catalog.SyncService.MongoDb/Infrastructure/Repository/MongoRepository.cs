@@ -1,5 +1,5 @@
-﻿using EShop.Catalog.SyncService.MongoDb.Entities;
-using EShop.Catalog.SyncService.MongoDb.Infrastructure.Attributes;
+﻿using EShop.Catalog.SyncService.MongoDb.Infrastructure.Attributes;
+using EShop.Catalog.SyncService.MongoDb.Models;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Serializers;
@@ -34,30 +34,36 @@ public sealed class MongoRepository<TDocument> : IMongoRepository<TDocument>
 
     public IEnumerable<TDocument> FilterBy(Expression<Func<TDocument, bool>> filterExpression)
     {
-        return _collection.Find(filterExpression).ToEnumerable();
+        return _collection
+            .Find(filterExpression)
+            .ToEnumerable();
     }
 
     public IEnumerable<TProjected> FilterBy<TProjected>(
         Expression<Func<TDocument, bool>> filterExpression,
         Expression<Func<TDocument, TProjected>> projectedExpression)
     {
-        return _collection.Find(filterExpression).Project(projectedExpression).ToEnumerable();
+        return _collection
+            .Find(filterExpression)
+            .Project(projectedExpression)
+            .ToEnumerable();
     }
 
     public TDocument FindById(string id)
     {
-        var objectId = new ObjectId(id);
-        var filter = Builders<TDocument>.Filter.Eq(doc => doc.Id, objectId);
+        var filter = Builders<TDocument>.Filter.Eq(doc => doc.Id, id);
 
-        return _collection.Find(filter).SingleOrDefault();
+        return _collection
+            .Find(filter)
+            .SingleOrDefault();
     }
 
     public async Task<TDocument> FindByIdAsync(string id, CancellationToken cancellationToken)
     {
-        var objectId = new ObjectId(id);
-        var filter = Builders<TDocument>.Filter.Eq(doc => doc.Id, objectId);
+        var filter = Builders<TDocument>.Filter.Eq(doc => doc.Id, id);
 
-        return await _collection.Find(filter)
+        return await _collection
+            .Find(filter)
             .SingleOrDefaultAsync(cancellationToken);
     }
 
@@ -109,16 +115,14 @@ public sealed class MongoRepository<TDocument> : IMongoRepository<TDocument>
 
     public void DeleteById(string id)
     {
-        var objectId = new ObjectId(id);
-        var filter = Builders<TDocument>.Filter.Eq(doc => doc.Id, objectId);
+        var filter = Builders<TDocument>.Filter.Eq(doc => doc.Id, id);
 
         _collection.FindOneAndDelete(filter);
     }
 
     public async Task DeleteByIdAsync(string id, CancellationToken cancellationToken)
     {
-        var objectId = new ObjectId(id);
-        var filter = Builders<TDocument>.Filter.Eq(doc => doc.Id, objectId);
+        var filter = Builders<TDocument>.Filter.Eq(doc => doc.Id, id);
 
         await _collection.FindOneAndDeleteAsync(filter, cancellationToken: cancellationToken);
     }

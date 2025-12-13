@@ -1,20 +1,20 @@
-﻿using MongoDB.Bson;
-using MongoDB.Bson.Serialization.Attributes;
+﻿using JsonApiDotNetCore.MongoDb.Resources;
 
-namespace EShop.Catalog.SyncService.MongoDb.Entities;
+namespace EShop.Catalog.SyncService.MongoDb.Models;
 
-public interface IDocument
+public interface IDocument : IMongoIdentifiable
 {
-    [BsonId]
-    [BsonRepresentation(BsonType.String)]
-    ObjectId Id { get; set; }
-
+    Guid DocumentId { get; set; }
     ulong Version { get; }
 }
 
-public abstract class Document : IDocument
+public abstract class Document : HexStringMongoIdentifiable, IDocument
 {
-    public ObjectId Id { get; set; }
+    /// <summary>
+    /// Gets or sets the unique identifier for the document.
+    /// This value is used to link Aggregate's ID in write model.
+    /// </summary>
     public Guid DocumentId { get; set; }
+
     public ulong Version { get; set; }
 }

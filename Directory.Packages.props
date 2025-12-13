@@ -23,6 +23,7 @@
     <PackageVersion Include="jcamp.FluentEmail.MailKit" Version="3.8.0" />
     <PackageVersion Include="FluentValidation" Version="11.11.0" />
     <PackageVersion Include="FluentValidation.DependencyInjectionExtensions" Version="11.10.0" />
+    <PackageVersion Include="JsonApiDotNetCore.MongoDb" Version="5.10.0" />
     <PackageVersion Include="JsonNet.ContractResolvers" Version="2.0.0" />
     <PackageVersion Include="MailKit" Version="4.14.1" />
     <PackageVersion Include="MassTransit" Version="8.3.6" />
