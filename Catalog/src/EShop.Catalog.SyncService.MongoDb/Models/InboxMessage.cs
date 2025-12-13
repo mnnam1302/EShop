@@ -4,7 +4,7 @@ using EShop.Shared.EventBus;
 namespace EShop.Catalog.SyncService.MongoDb.Models;
 
 [MongoCollection("InboxMessage")]
-public class InboxMessageProjection : Document
+public sealed class InboxMessage : Document
 {
     public string ConsumerId { get; set; } = string.Empty;
     public string MessageType { get; set; } = string.Empty;
@@ -13,9 +13,9 @@ public class InboxMessageProjection : Document
     public DateTimeOffset CreatedOnUtc { get; set; }
     public DateTimeOffset UpdatedOnUtc { get; set; }
 
-    internal static InboxMessageProjection Create(string consumerId, Guid messageId, string messageType)
+    internal static InboxMessage Create(string consumerId, Guid messageId, string messageType)
     {
-        return new InboxMessageProjection
+        return new InboxMessage
         {
             ConsumerId = consumerId,
             DocumentId = messageId,

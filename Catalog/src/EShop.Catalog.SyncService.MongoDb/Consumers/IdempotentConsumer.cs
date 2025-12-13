@@ -10,9 +10,9 @@ namespace EShop.Catalog.SyncService.MongoDb.Consumers;
 public abstract class IdempotentConsumer<TMessage> : IConsumer<TMessage>
     where TMessage : CatalogIntegrationEvent
 {
-    private readonly IMongoRepositoryBase<InboxMessageProjection> _mongoRepository;
+    private readonly IMongoRepositoryBase<InboxMessage> _mongoRepository;
 
-    protected IdempotentConsumer(IMongoRepositoryBase<InboxMessageProjection> mongoRepository)
+    protected IdempotentConsumer(IMongoRepositoryBase<InboxMessage> mongoRepository)
     {
         _mongoRepository = mongoRepository;
     }
@@ -34,7 +34,7 @@ public abstract class IdempotentConsumer<TMessage> : IConsumer<TMessage>
             return;
         }
 
-        var inboxMessage = InboxMessageProjection.Create(consumerId, messageId, message.GetType().Name);
+        var inboxMessage = InboxMessage.Create(consumerId, messageId, message.GetType().Name);
 
         var result = await HandleMessageAsync(message, context.CancellationToken);
 

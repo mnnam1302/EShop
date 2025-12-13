@@ -1,4 +1,5 @@
 ﻿using JsonApiDotNetCore.MongoDb.Resources;
+using JsonApiDotNetCore.Resources.Annotations;
 
 namespace EShop.Catalog.SyncService.MongoDb.Models;
 
@@ -14,6 +15,7 @@ public abstract class Document : HexStringMongoIdentifiable, IDocument
     /// Gets or sets the unique identifier for the document.
     /// This is an Aggregate's ID in write model.
     /// </summary>
+    [Attr]
     public Guid DocumentId { get; set; }
 
     public ulong Version { get; set; }

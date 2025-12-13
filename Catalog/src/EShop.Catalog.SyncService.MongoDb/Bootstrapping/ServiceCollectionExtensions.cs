@@ -11,6 +11,9 @@ using JsonApiDotNetCore.Repositories;
 using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization;
+using MongoDB.Bson.Serialization.Serializers;
 using MongoDB.Driver;
 
 namespace EShop.Catalog.SyncService.MongoDb.Bootstrapping;
@@ -74,6 +77,8 @@ public static class ServiceCollectionExtensions
             return client.GetDatabase(settings.DatabaseName);
         });
 
+        BsonSerializer.RegisterSerializer(new GuidSerializer(GuidRepresentation.Standard));
+
         services.AddScoped(typeof(IMongoRepositoryBase<>), typeof(MongoRepositoryBase<>));
 
         return services;
@@ -94,7 +99,7 @@ public static class ServiceCollectionExtensions
 #endif
         }, resources: resourceGraphBuilder =>
         {
-            resourceGraphBuilder.Add<CategoryProjection, string?>();
+            resourceGraphBuilder.Add<Category, string?>();
         });
 
         //If your API project uses MongoDB only(so not in combination with EF Core),
