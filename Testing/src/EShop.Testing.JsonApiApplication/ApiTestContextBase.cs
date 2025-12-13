@@ -456,7 +456,7 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
     public async Task PublishIntegrationEvent<TEvent>(object eventData)
         where TEvent : class, IIntegrationEvent
     {
-        var eventBusGateway = ServiceProvider.GetRequiredService<IEventBusGateway>();
+        var eventBusGateway = ServiceProvider.GetRequiredService<IEventBus>();
         await eventBusGateway.PublishAsync<TEvent>(eventData);
     }
 

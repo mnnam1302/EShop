@@ -18,7 +18,7 @@ public sealed class CreateCategoryCommand : ICommand
 public sealed class CreateCategoryCommandHandler(
     IEventStoreGateway eventStore,
     IUserDetailsProvider userDetailsProvider,
-    IEventBusGateway eventBus) : ICommandHandler<CreateCategoryCommand>
+    IEventBus eventBus) : ICommandHandler<CreateCategoryCommand>
 {
     public async Task<Result> HandleAsync(CreateCategoryCommand command, CancellationToken cancellationToken)
     {

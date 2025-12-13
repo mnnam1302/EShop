@@ -2,7 +2,7 @@
 
 namespace EShop.Shared.EventBus.Abstractions;
 
-public interface IEventBusGateway
+public interface IEventBus
 {
     Task PublishAsync<TEvent>(object @event, CancellationToken cancellationToken = default) where TEvent : class, IIntegrationEvent;
 }

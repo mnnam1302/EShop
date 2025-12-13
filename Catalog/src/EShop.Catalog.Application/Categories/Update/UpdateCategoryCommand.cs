@@ -19,7 +19,7 @@ public sealed class UpdateCategoryCommand : ICommand
 
 public sealed class UpdateCategoryCommandHandler(
     IEventStoreGateway eventStore,
-    IEventBusGateway eventBus,
+    IEventBus eventBus,
     IUserDetailsProvider userDetailsProvider) : ICommandHandler<UpdateCategoryCommand>
 {
     public async Task<Result> HandleAsync(UpdateCategoryCommand command, CancellationToken cancellationToken)

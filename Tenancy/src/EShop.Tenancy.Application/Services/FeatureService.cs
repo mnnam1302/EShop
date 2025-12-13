@@ -26,7 +26,7 @@ public sealed class FeatureService : IFeatureService
     private readonly ITenantRepository _tenantRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IUserDetailsProvider _userDetailsProvider;
-    private readonly IEventBusGateway _eventBusGateway;
+    private readonly IEventBus _eventBusGateway;
     private readonly ILogger _logger;
 
     public FeatureService(
@@ -34,7 +34,7 @@ public sealed class FeatureService : IFeatureService
         ITenantRepository tenantRepository,
         IUnitOfWork unitOfWork,
         IUserDetailsProvider userDetailsProvider,
-        IEventBusGateway eventBusGateway,
+        IEventBus eventBusGateway,
         ILogger<FeatureService> logger)
     {
         _featureRepository = featureRepository;

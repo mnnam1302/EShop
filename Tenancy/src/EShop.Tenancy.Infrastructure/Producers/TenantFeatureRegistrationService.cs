@@ -4,7 +4,7 @@ using EShop.Shared.Scoping.ResourceAccessControl;
 
 namespace EShop.Tenancy.Infrastructure.Producers;
 
-public sealed class TenantFeatureRegistrationService(IEventBusGateway eventBusGateway) : IFeatureRegistrationService
+public sealed class TenantFeatureRegistrationService(IEventBus eventBusGateway) : IFeatureRegistrationService
 {
     private readonly string ApplicationName = nameof(FeatureModules.EShop_Tenancy);
 

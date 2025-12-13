@@ -5,7 +5,7 @@ using EShop.Shared.Scoping.ResourceAccessControl;
 
 namespace EShop.Catalog.Application.Bootstrapping;
 
-public sealed class CatalogPermissionRegistrationService(IEventBusGateway eventBus) : IPermissionRegistrationService
+public sealed class CatalogPermissionRegistrationService(IEventBus eventBus) : IPermissionRegistrationService
 {
     private const string ModuleName = "Product builder";
 

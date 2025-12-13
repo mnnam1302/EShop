@@ -42,9 +42,9 @@ internal sealed class AuthorizationFeatureRegistrationProducer : IFeatureRegistr
         },
     ];
 
-    private readonly IEventBusGateway eventBusGateway;
+    private readonly IEventBus eventBusGateway;
 
-    public AuthorizationFeatureRegistrationProducer(IEventBusGateway eventBusGateway)
+    public AuthorizationFeatureRegistrationProducer(IEventBus eventBusGateway)
     {
         this.eventBusGateway = eventBusGateway;
     }

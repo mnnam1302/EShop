@@ -5,7 +5,7 @@ using EShop.Shared.Scoping.ResourceAccessControl;
 
 namespace EShop.Catalog.Application.Bootstrapping;
 
-public sealed class CatalogFeatureRegistrationService(IEventBusGateway eventBus) : IFeatureRegistrationService
+public sealed class CatalogFeatureRegistrationService(IEventBus eventBus) : IFeatureRegistrationService
 {
     private static readonly CatalogFeature[] Features =
     [
