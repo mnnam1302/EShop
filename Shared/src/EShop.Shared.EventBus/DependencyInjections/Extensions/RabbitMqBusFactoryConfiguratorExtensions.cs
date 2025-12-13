@@ -13,7 +13,10 @@ public static class RabbitMqBusFactoryConfiguratorExtensions
         where TConsumer : class, IConsumer<TEvent>
         where TEvent : class, IEvent
     {
-        string sanitizedQueueName = $"eshop.{environment.Trim().ToLowerInvariant()}.{serviceName.Trim().ToLowerInvariant()}.{typeof(TEvent).ToKebabCaseString()}";
+        string normalizedEnvironment = NormalizeEnvironmentName(environment);
+        string normalizedServiceName = serviceName.Trim().ToLowerInvariant();
+
+        string sanitizedQueueName = $"eshop.{normalizedEnvironment}.{normalizedServiceName}.{typeof(TEvent).ToKebabCaseString()}";
 
         bus.ReceiveEndpoint(
             queueName: sanitizedQueueName,
@@ -23,5 +26,16 @@ public static class RabbitMqBusFactoryConfiguratorExtensions
                 endpoint.Bind<TEvent>();
                 endpoint.ConfigureConsumer<TConsumer>(context);
             });
+    }
+
+    private static string NormalizeEnvironmentName(string environment)
+    {
+        return environment.Trim().ToLowerInvariant() switch
+        {
+            "development" => "dev",
+            "staging" => "stag",
+            "production" => "prod",
+            _ => string.Empty,
+        };
     }
 }

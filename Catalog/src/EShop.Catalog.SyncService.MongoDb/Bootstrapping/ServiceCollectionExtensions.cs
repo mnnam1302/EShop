@@ -5,6 +5,7 @@ using EShop.Shared.CQRS;
 using EShop.Shared.JsonApi.Extensions;
 using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
 using Microsoft.Extensions.Options;
+using MongoDB.Driver;
 
 namespace EShop.Catalog.SyncService.MongoDb.Boostrapping;
 
@@ -56,6 +57,12 @@ public static class ServiceCollectionExtensions
     {
         services.AddOptions<MongoDbSettings>().BindConfiguration(nameof(MongoDbSettings));
         services.AddSingleton<IMongoDbSettings>(sp => sp.GetRequiredService<IOptions<MongoDbSettings>>().Value);
+
+        services.AddSingleton<IMongoClient>(sp =>
+        {
+            var settings = sp.GetRequiredService<IMongoDbSettings>();
+            return new MongoClient(settings.ConnectionString);
+        });
 
         services.AddScoped(typeof(IMongoRepository<>), typeof(MongoRepository<>));
 

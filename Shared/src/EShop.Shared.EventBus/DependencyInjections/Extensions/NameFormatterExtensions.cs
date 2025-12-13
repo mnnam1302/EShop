@@ -3,8 +3,16 @@ using System.Reflection;
 
 namespace EShop.Shared.EventBus.DependencyInjections.Extensions;
 
+/// <summary>
+/// Provides extension methods for formatting names using kebab-case convention.
+/// </summary>
 public static class NameFormatterExtensions
 {
+    /// <summary>
+    /// Converts a member name to kebab-case format using MassTransit's built-in formatter.
+    /// </summary>
+    /// <param name="member">The member whose name should be converted.</param>
+    /// <returns>A kebab-case formatted string representation of the member name.</returns>
     public static string ToKebabCaseString(this MemberInfo member)
     {
         return KebabCaseEndpointNameFormatter.Instance.SanitizeName(member.Name);
@@ -12,10 +20,14 @@ public static class NameFormatterExtensions
 }
 
 /// <summary>
-/// EntityName is an optional attribute used to override the default entity name for a message type.
-/// If present, the entity name will be used when creating the topic or exchange for the message.
+/// Implements IEntityNameFormatter to provide kebab-case formatting for entity names in MassTransit.
 /// </summary>
 public class KebabCaseEntityNameFormatter : IEntityNameFormatter
 {
-    public string FormatEntityName<T>()  => typeof(T).ToKebabCaseString();
+    /// <summary>
+    /// Formats an entity name using kebab-case convention.
+    /// </summary>
+    /// <typeparam name="T">The type to format the name for.</typeparam>
+    /// <returns>A kebab-case formatted entity name.</returns>
+    public string FormatEntityName<T>() => typeof(T).ToKebabCaseString();
 }
