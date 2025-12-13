@@ -1,6 +1,6 @@
 ﻿using EShop.Shared.Sequences;
 
-namespace EShop.Catalog.Application.Boostrapping;
+namespace EShop.Catalog.Application.Bootstrapping;
 
 public class CatalogSequenceOptions
 {

@@ -1,10 +1,11 @@
-﻿using EShop.Catalog.Application.Boostrapping;
+﻿using EShop.Catalog.Application.Bootstrapping;
 using EShop.Catalog.Application.Shared;
 using EShop.Shared.Cache.DependencyInejctions.Extensions;
 using EShop.Shared.Contracts.JsonConverters;
 using EShop.Shared.CQRS;
 using EShop.Shared.DomainTools.UnitOfWorks;
 using EShop.Shared.EventBus.Abstractions;
+using EShop.Shared.EventBus.DependencyInjections.Extensions;
 using EShop.Shared.EventBus.Services;
 using EShop.Shared.JsonApi.Extensions;
 using EShop.Shared.Scoping.ResourceAccessControl;
@@ -21,7 +22,7 @@ namespace EShop.Catalog.Tests.Setup;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddTestShared(this IServiceCollection services, IConfiguration configuration, PostgreSqlTestDatabase testDatabase)
+    public static IServiceCollection AddCatalogTestShared(this IServiceCollection services, IConfiguration configuration, PostgreSqlTestDatabase testDatabase)
     {
         services.AddMediator(Application.AssemblyReference.Assembly);
         services
@@ -31,27 +32,28 @@ public static class ServiceCollectionExtensions
         services.AddMemoryCacheInfrastructure();
 
         services
+            .AddTenantAuthenticationProvider()
             .AddTestTenantFeatures()
             .AddTestUserPermissions();
 
         return services;
     }
 
-    public static IServiceCollection AddTestBoostrapping(this IServiceCollection services)
+    public static IServiceCollection AddCatalogTestBoostrapping(this IServiceCollection services)
     {
         services
-            .AddTestAPI()
+            .AddCatalogTestApiVersioning()
+            .AddTestServiceBootstrapping()
             .AddMassTransitInMemory()
-            .AddTenantAuthenticationProvider()
-            .AddTestServiceBootstrapping();
+            .AddEventBus()
+            .AddPostgreSqlIdempotentConsumer<CatalogDbContext>();
 
         return services;
     }
 
-    public static IServiceCollection AddTestAPI(this IServiceCollection services)
+    public static IServiceCollection AddCatalogTestApiVersioning(this IServiceCollection services)
     {
-        services
-            .AddCors()
+        services.AddCors()
             .AddSwagger()
             .AddCatalogApiVersioning()
             .AddControllers()
@@ -102,8 +104,6 @@ public static class ServiceCollectionExtensions
             .BindConfiguration(CatalogSequenceOptions.SectionName);
 
         services.AddScoped<IUnitOfWork, EFUnitOfWork<CatalogDbContext>>();
-
-        services.AddScoped<IEventBusGateway, EventBusGateway>();
 
         return services;
     }

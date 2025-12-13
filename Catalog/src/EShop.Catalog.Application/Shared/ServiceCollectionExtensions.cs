@@ -22,10 +22,10 @@ public static class ServiceCollectionExtensions
             .AddRedisCacheInfrastructure(configuration);
 
         services
+            .AddTenantAuthenticationProvider()
             .AddUserPermissionsProvider()
             .AddUserOrganizationContextProvider()
-            .AddTenantFeaturesProvider()
-            .AddTenantAuthenticationProvider();
+            .AddTenantFeaturesProvider();
 
         return services;
     }

@@ -3,7 +3,7 @@ using EShop.Shared.Contracts.Services.Authorization;
 using EShop.Shared.EventBus.Abstractions;
 using EShop.Shared.Scoping.ResourceAccessControl;
 
-namespace EShop.Catalog.Application.Boostrapping;
+namespace EShop.Catalog.Application.Bootstrapping;
 
 public sealed class CatalogPermissionRegistrationService(IEventBusGateway eventBus) : IPermissionRegistrationService
 {

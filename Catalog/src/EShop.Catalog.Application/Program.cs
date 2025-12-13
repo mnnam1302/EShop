@@ -1,5 +1,4 @@
-
-using EShop.Catalog.Application.Boostrapping;
+using EShop.Catalog.Application.Bootstrapping;
 using EShop.Shared.Diagnostics;
 using Serilog;
 
