@@ -1,10 +1,11 @@
-﻿using EShop.Catalog.SyncService.MongoDb.Infrastructure.Entities;
+﻿using EShop.Catalog.SyncService.MongoDb.Entities;
+using EShop.Catalog.SyncService.MongoDb.Infrastructure;
 using EShop.Shared.Contracts.Abstractions.MessageBus;
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.Contracts.Services.Catalog;
 using MassTransit;
 
-namespace EShop.Catalog.SyncService.MongoDb.Abstractions;
+namespace EShop.Catalog.SyncService.MongoDb.Consumers;
 
 public abstract class IdempotentConsumer<TMessage> : IConsumer<TMessage>
     where TMessage : CatalogIntegrationEvent

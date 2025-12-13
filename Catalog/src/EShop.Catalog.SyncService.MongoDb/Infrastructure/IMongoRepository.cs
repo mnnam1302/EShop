@@ -1,6 +1,7 @@
-﻿using System.Linq.Expressions;
+﻿using EShop.Catalog.SyncService.MongoDb.Entities;
+using System.Linq.Expressions;
 
-namespace EShop.Catalog.SyncService.MongoDb.Abstractions;
+namespace EShop.Catalog.SyncService.MongoDb.Infrastructure;
 
 public interface IMongoRepository<TDocument>
     where TDocument : IDocument

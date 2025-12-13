@@ -3,7 +3,7 @@ using Microsoft.Extensions.Options;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using Swashbuckle.AspNetCore.SwaggerUI;
 
-namespace EShop.Catalog.SyncService.MongoDb.Boostrapping;
+namespace EShop.Catalog.SyncService.MongoDb.Bootstrapping;
 
 public static class SwaggerExtensions
 {

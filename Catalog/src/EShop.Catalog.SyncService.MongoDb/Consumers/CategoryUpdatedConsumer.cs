@@ -1,5 +1,5 @@
-﻿using EShop.Catalog.SyncService.MongoDb.Abstractions;
-using EShop.Catalog.SyncService.MongoDb.Infrastructure.Entities;
+﻿using EShop.Catalog.SyncService.MongoDb.Entities;
+using EShop.Catalog.SyncService.MongoDb.Infrastructure;
 using EShop.Catalog.SyncService.MongoDb.UseCases.Category;
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.Contracts.Services.Catalog;

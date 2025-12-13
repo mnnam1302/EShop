@@ -1,6 +1,5 @@
-﻿using EShop.Catalog.SyncService.MongoDb.Abstractions;
+﻿using EShop.Catalog.SyncService.MongoDb.Entities;
 using EShop.Catalog.SyncService.MongoDb.Infrastructure.Attributes;
-using EShop.Shared.DomainTools.Entities;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Serializers;

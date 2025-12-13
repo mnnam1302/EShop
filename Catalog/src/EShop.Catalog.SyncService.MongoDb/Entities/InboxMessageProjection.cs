@@ -1,10 +1,9 @@
-﻿using EShop.Catalog.SyncService.MongoDb.Abstractions;
-using EShop.Catalog.SyncService.MongoDb.Infrastructure.Attributes;
+﻿using EShop.Catalog.SyncService.MongoDb.Infrastructure.Attributes;
 using EShop.Shared.Contracts.Shared;
 using EShop.Shared.EventBus;
 using MongoDB.Bson;
 
-namespace EShop.Catalog.SyncService.MongoDb.Infrastructure.Entities;
+namespace EShop.Catalog.SyncService.MongoDb.Entities;
 
 [MongoCollection("InboxMessage")]
 public class InboxMessageProjection : Document

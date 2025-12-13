@@ -1,7 +1,7 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
-namespace EShop.Catalog.SyncService.MongoDb.Abstractions;
+namespace EShop.Catalog.SyncService.MongoDb.Entities;
 
 public interface IDocument
 {

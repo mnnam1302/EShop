@@ -1,4 +1,4 @@
-﻿using EShop.Catalog.SyncService.MongoDb.Abstractions;
+﻿using EShop.Catalog.SyncService.MongoDb.Bootstrapping;
 using EShop.Catalog.SyncService.MongoDb.Infrastructure;
 using EShop.Catalog.SyncService.MongoDb.Infrastructure.Repository;
 using EShop.Shared.CQRS;
@@ -7,7 +7,7 @@ using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 
-namespace EShop.Catalog.SyncService.MongoDb.Boostrapping;
+namespace EShop.Catalog.SyncService.MongoDb.Bootstrapping;
 
 public static class ServiceCollectionExtensions
 {

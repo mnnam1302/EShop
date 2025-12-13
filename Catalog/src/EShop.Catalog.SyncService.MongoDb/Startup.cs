@@ -1,4 +1,4 @@
-﻿using EShop.Catalog.SyncService.MongoDb.Boostrapping;
+﻿using EShop.Catalog.SyncService.MongoDb.Bootstrapping;
 using EShop.Shared.JsonApi.Middlewares;
 using Microsoft.AspNetCore.Builder;
 
