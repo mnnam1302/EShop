@@ -5,7 +5,7 @@ namespace EShop.Catalog.Tests.Categories.Create;
 
 internal sealed class StepContext(ApiContext apiContext)
 {
-    private const string BaseUrl = "/api/v1/catalog/categories";
+    private const string BaseUrl = "/api/v1/categories";
 
     public async Task CreateCategoryAsync(CreateCategoryRequest request, string? operationUsername = null)
     {

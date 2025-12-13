@@ -1,6 +1,4 @@
-﻿using EShop.Shared.DomainTools.EventSourcing.Configurations;
-using EShop.Shared.EventBus.Abstractions;
-using EShop.Shared.EventBus.Services;
+﻿using EShop.Shared.EventBus.Abstractions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -10,7 +8,7 @@ public static class EventBusExtensions
 {
     public static IServiceCollection AddEventBus(this IServiceCollection services)
     {
-        services.AddScoped<IEventBus, EventBus>();
+        services.AddScoped<IEventBus, Services.EventBus>();
         return services;
     }
 

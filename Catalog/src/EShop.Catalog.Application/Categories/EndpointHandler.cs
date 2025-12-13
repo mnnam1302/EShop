@@ -9,11 +9,13 @@ namespace EShop.Catalog.Application.Categories;
 
 public static class EndpointHandler
 {
+    private const string BaseUrl = "api/v{version:apiVersion}/categories";
+
     public static IEndpointRouteBuilder MapCategoryEndpoints(this IEndpointRouteBuilder routerBuilder)
     {
         var categoryEndpointsV1 = routerBuilder
             .NewVersionedApi("Category")
-            .MapGroup("api/v{version:apiVersion}/categories")
+            .MapGroup(BaseUrl)
             .HasApiVersion(1)
             .RequireFeatureFilter(FeatureConstants.Catalog.ProductBuilder_FeatureId);
 
