@@ -66,13 +66,15 @@ public static class ServiceCollectionExtensions
         services.AddOptions<MongoDbSettings>().BindConfiguration(nameof(MongoDbSettings));
         services.AddSingleton<IMongoDbSettings>(sp => sp.GetRequiredService<IOptions<MongoDbSettings>>().Value);
 
-        services.TryAddSingleton<IMongoClient>(sp =>
+        services.TryAddSingleton(sp =>
         {
             var settings = sp.GetRequiredService<IMongoDbSettings>();
-            return new MongoClient(settings.ConnectionString);
+            var client = new MongoClient(settings.ConnectionString);
+
+            return client.GetDatabase(settings.DatabaseName);
         });
 
-        services.AddScoped(typeof(IMongoRepository<>), typeof(MongoRepository<>));
+        services.AddScoped(typeof(IMongoRepositoryBase<>), typeof(MongoRepositoryBase<>));
 
         return services;
     }

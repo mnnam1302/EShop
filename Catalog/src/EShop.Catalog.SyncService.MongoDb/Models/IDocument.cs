@@ -12,7 +12,7 @@ public abstract class Document : HexStringMongoIdentifiable, IDocument
 {
     /// <summary>
     /// Gets or sets the unique identifier for the document.
-    /// This value is used to link Aggregate's ID in write model.
+    /// This is an Aggregate's ID in write model.
     /// </summary>
     public Guid DocumentId { get; set; }
 

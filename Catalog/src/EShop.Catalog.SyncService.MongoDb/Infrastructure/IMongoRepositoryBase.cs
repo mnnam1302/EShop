@@ -3,7 +3,7 @@ using System.Linq.Expressions;
 
 namespace EShop.Catalog.SyncService.MongoDb.Infrastructure;
 
-public interface IMongoRepository<TDocument> where TDocument : IDocument
+public interface IMongoRepositoryBase<TDocument> where TDocument : IDocument
 {
     IEnumerable<TDocument> FilterBy(Expression<Func<TDocument, bool>> filterExpression);
     IEnumerable<TProjected> FilterBy<TProjected>(Expression<Func<TDocument, bool>> filterExpression, Expression<Func<TDocument, TProjected>> projectedExpression);

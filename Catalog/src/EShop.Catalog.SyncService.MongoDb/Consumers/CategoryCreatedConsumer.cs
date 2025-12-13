@@ -11,7 +11,7 @@ public sealed class CategoryCreatedConsumer : IdempotentConsumer<CategoryCreated
 {
     private readonly IMediator mediator;
 
-    public CategoryCreatedConsumer(IMongoRepository<InboxMessageProjection> mongoRepository, IMediator mediator)
+    public CategoryCreatedConsumer(IMongoRepositoryBase<InboxMessageProjection> mongoRepository, IMediator mediator)
         : base(mongoRepository)
     {
         this.mediator = mediator;

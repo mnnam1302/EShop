@@ -20,11 +20,11 @@ public sealed class UpdateCategoryProjectionCommand : ICommand
 
 public sealed class UpdateCategoryProjectionCommandHandler : ICommandHandler<UpdateCategoryProjectionCommand>
 {
-    private readonly IMongoRepository<CategoryProjection> _mongoRepository;
+    private readonly IMongoRepositoryBase<CategoryProjection> _mongoRepository;
     private readonly ILogger<UpdateCategoryProjectionCommandHandler> _logger;
 
     public UpdateCategoryProjectionCommandHandler(
-        IMongoRepository<CategoryProjection> mongoRepository,
+        IMongoRepositoryBase<CategoryProjection> mongoRepository,
         ILogger<UpdateCategoryProjectionCommandHandler> logger)
     {
         _mongoRepository = mongoRepository;

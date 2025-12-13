@@ -10,9 +10,9 @@ namespace EShop.Catalog.SyncService.MongoDb.Consumers;
 public abstract class IdempotentConsumer<TMessage> : IConsumer<TMessage>
     where TMessage : CatalogIntegrationEvent
 {
-    private readonly IMongoRepository<InboxMessageProjection> _mongoRepository;
+    private readonly IMongoRepositoryBase<InboxMessageProjection> _mongoRepository;
 
-    protected IdempotentConsumer(IMongoRepository<InboxMessageProjection> mongoRepository)
+    protected IdempotentConsumer(IMongoRepositoryBase<InboxMessageProjection> mongoRepository)
     {
         _mongoRepository = mongoRepository;
     }

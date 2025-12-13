@@ -8,21 +8,13 @@ using System.Linq.Expressions;
 
 namespace EShop.Catalog.SyncService.MongoDb.Infrastructure.Repository;
 
-public sealed class MongoRepository<TDocument> : IMongoRepository<TDocument>
-    where TDocument : IDocument
+public sealed class MongoRepositoryBase<TDocument> : IMongoRepositoryBase<TDocument> where TDocument : IDocument
 {
     private readonly IMongoCollection<TDocument> _collection;
 
-    static MongoRepository()
+    public MongoRepositoryBase(IMongoDatabase mongoDatabase)
     {
-        // Configure GUID serialization globally for MongoDB
-        BsonSerializer.TryRegisterSerializer(new GuidSerializer(GuidRepresentation.Standard));
-    }
-
-    public MongoRepository(IMongoClient mongoClient, IMongoDbSettings mongoDbSettings)
-    {
-        var database = mongoClient.GetDatabase(mongoDbSettings.DatabaseName);
-        _collection = database.GetCollection<TDocument>(GetCollectionName(typeof(TDocument)));
+        _collection = mongoDatabase.GetCollection<TDocument>(GetCollectionName(typeof(TDocument)));
     }
 
     private static string GetCollectionName(Type documentType)
