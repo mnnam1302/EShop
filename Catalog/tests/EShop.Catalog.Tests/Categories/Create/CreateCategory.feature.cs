@@ -11,7 +11,7 @@
 #region Designer generated code
 #pragma warning disable
 using Reqnroll;
-namespace EShop.Catalog.Tests.Categories
+namespace EShop.Catalog.Tests.Categories.Create
 {
     
     
@@ -24,7 +24,7 @@ namespace EShop.Catalog.Tests.Categories
         
         private static string[] featureTags = ((string[])(null));
         
-        private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new global::System.Globalization.CultureInfo("en-US"), "Categories", "CreateCategory", "\tAs a catalog manager\r\n\tI want to create new categories in the catalog\r\n\tSo that " +
+        private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new global::System.Globalization.CultureInfo("en-US"), "Categories/Create", "CreateCategory", "\tAs a catalog manager\r\n\tI want to create new categories in the catalog\r\n\tSo that " +
                 "products can be organized effectively", global::Reqnroll.ProgrammingLanguage.CSharp, featureTags, InitializeCucumberMessages());
         
         private global::Xunit.Abstractions.ITestOutputHelper _testOutputHelper;
@@ -104,9 +104,27 @@ namespace EShop.Catalog.Tests.Categories
             await testRunner.CollectScenarioErrorsAsync();
         }
         
+        public virtual async global::System.Threading.Tasks.Task FeatureBackgroundAsync()
+        {
+#line 6
+#line hidden
+            global::Reqnroll.Table table1 = new global::Reqnroll.Table(new string[] {
+                        "PermissionId"});
+            table1.AddRow(new string[] {
+                        "Catalog_ManageCategories"});
+            table1.AddRow(new string[] {
+                        "Catalog_ViewCategories"});
+#line 7
+ await testRunner.GivenAsync("System user with following permissions", ((string)(null)), table1, "Given ");
+#line hidden
+#line 11
+ await testRunner.AndAsync("all features are available for System User", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+        }
+        
         private static global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages InitializeCucumberMessages()
         {
-            return new global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages("Categories/CreateCategory.feature.ndjson", 3);
+            return new global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages("Categories/Create/CreateCategory.feature.ndjson", 3);
         }
         
         async global::System.Threading.Tasks.Task global::Xunit.IAsyncLifetime.InitializeAsync()
@@ -134,18 +152,18 @@ namespace EShop.Catalog.Tests.Categories
             await this.TestTearDownAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Create a new category successfully")]
+        [global::Xunit.SkippableFactAttribute(DisplayName="Create a new category")]
         [global::Xunit.TraitAttribute("FeatureTitle", "CreateCategory")]
-        [global::Xunit.TraitAttribute("Description", "Create a new category successfully")]
-        public async global::System.Threading.Tasks.Task CreateANewCategorySuccessfully()
+        [global::Xunit.TraitAttribute("Description", "Create a new category")]
+        public async global::System.Threading.Tasks.Task CreateANewCategory()
         {
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
             string pickleIndex = "0";
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Create a new category successfully", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Create a new category", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
-#line 6
+#line 13
 this.ScenarioInitialize(scenarioInfo, ruleInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
@@ -155,21 +173,8 @@ this.ScenarioInitialize(scenarioInfo, ruleInfo);
             else
             {
                 await this.ScenarioStartAsync();
-#line 7
- await testRunner.GivenAsync("Authorizatin service has published organization created", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
-#line hidden
-                global::Reqnroll.Table table1 = new global::Reqnroll.Table(new string[] {
-                            "Name",
-                            "Reference",
-                            "Slug",
-                            "ParentId"});
-                table1.AddRow(new string[] {
-                            "Electronics",
-                            "ELEC123",
-                            "electronics",
-                            ""});
-#line 8
- await testRunner.WhenAsync("system user creates a new category", ((string)(null)), table1, "When ");
+#line 6
+await this.FeatureBackgroundAsync();
 #line hidden
                 global::Reqnroll.Table table2 = new global::Reqnroll.Table(new string[] {
                             "Name",
@@ -181,8 +186,21 @@ this.ScenarioInitialize(scenarioInfo, ruleInfo);
                             "ELEC123",
                             "electronics",
                             ""});
-#line 11
- await testRunner.ThenAsync("the category \'ELEC123\' has following details", ((string)(null)), table2, "Then ");
+#line 14
+ await testRunner.WhenAsync("System user creates a new category", ((string)(null)), table2, "When ");
+#line hidden
+                global::Reqnroll.Table table3 = new global::Reqnroll.Table(new string[] {
+                            "Name",
+                            "Reference",
+                            "Slug",
+                            "ParentId"});
+                table3.AddRow(new string[] {
+                            "Electronics",
+                            "ELEC123",
+                            "electronics",
+                            ""});
+#line 17
+ await testRunner.ThenAsync("the category \'ELEC123\' has following details", ((string)(null)), table3, "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();

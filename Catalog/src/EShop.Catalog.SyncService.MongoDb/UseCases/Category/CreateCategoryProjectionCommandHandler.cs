@@ -1,5 +1,5 @@
-﻿using EShop.Catalog.SyncService.MongoDb.Abstractions;
-using EShop.Catalog.SyncService.MongoDb.Infrastructure.Entities;
+﻿using EShop.Catalog.SyncService.MongoDb.Infrastructure;
+using EShop.Catalog.SyncService.MongoDb.Models;
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.CQRS.Command;
 
@@ -20,11 +20,11 @@ public sealed class CreateCategoryProjectionCommand : ICommand
 
 public sealed class CreateCategoryProjectionCommandHandler : ICommandHandler<CreateCategoryProjectionCommand>
 {
-    private readonly IMongoRepository<CategoryProjection> _mongoRepository;
+    private readonly IMongoRepositoryBase<Models.Category> _mongoRepository;
     private readonly ILogger<CreateCategoryProjectionCommandHandler> _logger;
 
     public CreateCategoryProjectionCommandHandler(
-        IMongoRepository<CategoryProjection> mongoRepository,
+        IMongoRepositoryBase<Models.Category> mongoRepository,
         ILogger<CreateCategoryProjectionCommandHandler> logger)
     {
         _mongoRepository = mongoRepository;
@@ -42,7 +42,7 @@ public sealed class CreateCategoryProjectionCommandHandler : ICommandHandler<Cre
 
         _logger.LogInformation("Creating category projection with ID '{CategoryId}'", command.CategoryId);
 
-        categoryProjection = new CategoryProjection
+        categoryProjection = new Models.Category
         {
             DocumentId = command.CategoryId,
             Version = command.Version,

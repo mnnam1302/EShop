@@ -1,5 +1,5 @@
-﻿using EShop.Catalog.SyncService.MongoDb.Abstractions;
-using EShop.Catalog.SyncService.MongoDb.Infrastructure.Entities;
+﻿using EShop.Catalog.SyncService.MongoDb.Infrastructure;
+using EShop.Catalog.SyncService.MongoDb.Models;
 using EShop.Catalog.SyncService.MongoDb.UseCases.Category;
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.Contracts.Services.Catalog;
@@ -11,7 +11,7 @@ public sealed class CategoryCreatedConsumer : IdempotentConsumer<CategoryCreated
 {
     private readonly IMediator mediator;
 
-    public CategoryCreatedConsumer(IMongoRepository<InboxMessageProjection> mongoRepository, IMediator mediator)
+    public CategoryCreatedConsumer(IMongoRepositoryBase<InboxMessage> mongoRepository, IMediator mediator)
         : base(mongoRepository)
     {
         this.mediator = mediator;

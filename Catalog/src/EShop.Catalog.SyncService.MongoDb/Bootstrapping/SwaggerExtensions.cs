@@ -3,14 +3,14 @@ using Microsoft.Extensions.Options;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using Swashbuckle.AspNetCore.SwaggerUI;
 
-namespace EShop.Catalog.SyncService.MongoDb.Boostrapping;
+namespace EShop.Catalog.SyncService.MongoDb.Bootstrapping;
 
 public static class SwaggerExtensions
 {
     public static void AddSwaggerAPI(this IServiceCollection services)
     {
         services.AddSwaggerGen();
-        services.AddTransient<IConfigureOptions<SwaggerGenOptions>, CatalogReadServiceSwaggerOptions>();
+        services.AddTransient<IConfigureOptions<SwaggerGenOptions>, SwaggerOptions>();
     }
 
     public static void UseSwaggerAPI(this IApplicationBuilder app)

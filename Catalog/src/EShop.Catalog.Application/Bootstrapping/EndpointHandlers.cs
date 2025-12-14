@@ -1,7 +1,7 @@
 ﻿using EShop.Catalog.Application.Agencies;
 using EShop.Catalog.Application.Categories;
 
-namespace EShop.Catalog.Application.Boostrapping;
+namespace EShop.Catalog.Application.Bootstrapping;
 
 public static class EndpointHandlers
 {

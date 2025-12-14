@@ -10,9 +10,9 @@ internal sealed class AuthorizationPermissionRegistrationProducer : IPermissionR
 
     private static readonly ReportPermission[] Permissions = [];
 
-    private readonly IEventBusGateway eventBusGateway;
+    private readonly IEventBus eventBusGateway;
 
-    public AuthorizationPermissionRegistrationProducer(IEventBusGateway eventBusGateway)
+    public AuthorizationPermissionRegistrationProducer(IEventBus eventBusGateway)
     {
         this.eventBusGateway = eventBusGateway;
     }

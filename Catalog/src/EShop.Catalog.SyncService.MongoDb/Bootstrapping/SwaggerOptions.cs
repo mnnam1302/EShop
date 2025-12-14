@@ -3,13 +3,13 @@ using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Any;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
-namespace EShop.Catalog.SyncService.MongoDb.Boostrapping;
+namespace EShop.Catalog.SyncService.MongoDb.Bootstrapping;
 
-public class CatalogReadServiceSwaggerOptions : IConfigureOptions<SwaggerGenOptions>
+public class SwaggerOptions : IConfigureOptions<SwaggerGenOptions>
 {
     private readonly IApiVersionDescriptionProvider _provider;
 
-    public CatalogReadServiceSwaggerOptions(IApiVersionDescriptionProvider provider)
+    public SwaggerOptions(IApiVersionDescriptionProvider provider)
     {
         _provider = provider;
     }

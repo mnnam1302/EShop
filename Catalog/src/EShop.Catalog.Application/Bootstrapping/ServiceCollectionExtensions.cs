@@ -12,7 +12,7 @@ using EShop.Shared.Sequences.DependencyInjections;
 using MassTransit;
 using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
 
-namespace EShop.Catalog.Application.Boostrapping;
+namespace EShop.Catalog.Application.Bootstrapping;
 
 public static class ServiceCollectionExtensions
 {
@@ -21,8 +21,8 @@ public static class ServiceCollectionExtensions
         services.AddCors()
             .AddSwagger()
             .AddCatalogApiVersioning()
-            .AddCatalogServiceBootstrapping()
-            .AddCatalogMassTransitRabbitMQ(configuration, environment)
+            .AddServiceBootstrapping()
+            .AddMassTransitRabbitMQ(configuration, environment)
             .AddEventBus()
             .AddPostgreSqlIdempotentConsumer<CatalogDbContext>();
 
@@ -52,7 +52,7 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    private static IServiceCollection AddCatalogMassTransitRabbitMQ(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment)
+    private static IServiceCollection AddMassTransitRabbitMQ(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment)
     {
         var massTransitConfiguration = new MasstransitConfiguration();
         configuration.GetSection(nameof(MasstransitConfiguration)).Bind(massTransitConfiguration);
@@ -118,7 +118,7 @@ public static class ServiceCollectionExtensions
             context, environment.EnvironmentName, serviceName);
     }
 
-    public static IServiceCollection AddCatalogServiceBootstrapping(this IServiceCollection services)
+    public static IServiceCollection AddServiceBootstrapping(this IServiceCollection services)
     {
         services.AddTransient<DbInitializer>();
 

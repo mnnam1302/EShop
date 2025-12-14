@@ -1,13 +1,10 @@
-﻿using EShop.Catalog.SyncService.MongoDb.Abstractions;
-using EShop.Catalog.SyncService.MongoDb.Infrastructure.Attributes;
-using EShop.Shared.Contracts.Shared;
+﻿using EShop.Catalog.SyncService.MongoDb.Infrastructure.Attributes;
 using EShop.Shared.EventBus;
-using MongoDB.Bson;
 
-namespace EShop.Catalog.SyncService.MongoDb.Infrastructure.Entities;
+namespace EShop.Catalog.SyncService.MongoDb.Models;
 
 [MongoCollection("InboxMessage")]
-public class InboxMessageProjection : Document
+public sealed class InboxMessage : Document
 {
     public string ConsumerId { get; set; } = string.Empty;
     public string MessageType { get; set; } = string.Empty;
@@ -16,13 +13,12 @@ public class InboxMessageProjection : Document
     public DateTimeOffset CreatedOnUtc { get; set; }
     public DateTimeOffset UpdatedOnUtc { get; set; }
 
-    internal static InboxMessageProjection Create(string consumerId, Guid messageId, string messageType)
+    internal static InboxMessage Create(string consumerId, Guid messageId, string messageType)
     {
-        return new InboxMessageProjection
+        return new InboxMessage
         {
-            Id = ObjectId.GenerateNewId(),
             ConsumerId = consumerId,
-            DocumentId = messageId, // documentId is EventId in event bus
+            DocumentId = messageId,
             MessageType = messageType,
             State = InboxMessageStatus.Pending,
             CreatedOnUtc = DateTimeOffset.UtcNow,

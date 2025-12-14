@@ -15,7 +15,7 @@ namespace EShop.Tenancy.Application.UseCases.V1.Commands.Tenants;
 internal sealed class CreateTenantCommandHandler(
     ITenantRepository tenantRepository,
     IUnitOfWork unitOfWork,
-    IEventBusGateway eventBusGateway,
+    IEventBus eventBusGateway,
     IUserDetailsProvider userDetailsProvider,
     IFeatureRepository featureRepository) : ICommandHandler<Command.CreateTenantCommand>
 {

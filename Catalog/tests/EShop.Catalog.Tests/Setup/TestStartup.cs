@@ -1,6 +1,5 @@
 ﻿using EShop.Catalog.Application.Agencies;
-using EShop.Catalog.Application.Boostrapping;
-using EShop.Catalog.Application.Categories;
+using EShop.Catalog.Application.Bootstrapping;
 using EShop.Testing.JsonApiApplication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -24,12 +23,12 @@ public sealed class TestStartup : Application.Startup
     public override void ConfigureServices(IServiceCollection services)
     {
         services
-            .AddTestShared(Configuration, testDatabase)
-            .AddTestBoostrapping()
+            .AddCatalogTestShared(Configuration, testDatabase)
+            .AddCatalogTestBoostrapping()
             .AddAgencies();
     }
 
-    public void Configure(WebApplication app, IHostApplicationLifetime applicationLifetime, ILoggerFactory loggerFactory)
+    public void Configure(IApplicationBuilder app, IHostApplicationLifetime applicationLifetime, ILoggerFactory loggerFactory)
     {
         if (Environment.IsDevelopment())
         {
@@ -40,6 +39,9 @@ public sealed class TestStartup : Application.Startup
         app.UseAuthentication();
         app.UseAuthorization();
 
-        app.MapCatalogEndpoints();
+        app.UseEndpoints(endpoints =>
+        {
+            endpoints.MapCatalogEndpoints();
+        });
     }
 }

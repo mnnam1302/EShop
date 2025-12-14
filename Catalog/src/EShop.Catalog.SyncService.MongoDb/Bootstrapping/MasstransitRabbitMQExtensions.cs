@@ -6,7 +6,7 @@ using EShop.Shared.EventBus.DependencyInjections.Options;
 using EShop.Shared.EventBus.PipelineObservers;
 using MassTransit;
 
-namespace EShop.Catalog.SyncService.MongoDb.Boostrapping;
+namespace EShop.Catalog.SyncService.MongoDb.Bootstrapping;
 
 public static class MasstransitRabbitMQExtensions
 {
@@ -73,5 +73,6 @@ public static class MasstransitRabbitMQExtensions
         string serviceName)
     {
         bus.ConfigureEventReceiveEndpoint<CategoryCreatedConsumer, CategoryCreated>(context, environment.EnvironmentName, serviceName);
+        bus.ConfigureEventReceiveEndpoint<CategoryUpdatedConsumer, CategoryUpdated>(context, environment.EnvironmentName, serviceName);
     }
 }

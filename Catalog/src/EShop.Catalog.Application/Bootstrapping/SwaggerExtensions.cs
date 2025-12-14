@@ -3,7 +3,7 @@ using Microsoft.Extensions.Options;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using Swashbuckle.AspNetCore.SwaggerUI;
 
-namespace EShop.Catalog.Application.Boostrapping;
+namespace EShop.Catalog.Application.Bootstrapping;
 
 public static class SwaggerExtensions
 {

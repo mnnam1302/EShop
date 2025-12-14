@@ -42,7 +42,7 @@ public static class OrganizationEndpointHandler
 
         if (result.IsFailure)
         {
-            return ApiResultHandler.HandleFailure(result);
+            return ApiEndpointHandler.Failure(result);
         }
 
         return Results.Ok(result);
@@ -55,7 +55,7 @@ public static class OrganizationEndpointHandler
 
         if (result.IsFailure)
         {
-            return ApiResultHandler.HandleFailure(result);
+            return ApiEndpointHandler.Failure(result);
         }
 
         return Results.Ok(result);
@@ -87,7 +87,7 @@ public static class OrganizationEndpointHandler
         var result = await mediator.SendAsync(command, cancellationToken);
         if (result.IsFailure)
         {
-            return ApiResultHandler.HandleFailure(result);
+            return ApiEndpointHandler.Failure(result);
         }
 
         return Results.Created("", result);

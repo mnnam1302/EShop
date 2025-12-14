@@ -64,7 +64,7 @@ public static class ServiceCollectionExtensions
 
     public static IServiceCollection AddEventBus(this IServiceCollection services)
     {
-        services.AddScoped<IEventBusGateway, EventBusGateway>();
+        services.AddScoped<IEventBus, EventBus>();
         return services;
     }
 

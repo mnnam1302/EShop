@@ -3,9 +3,9 @@ using EShop.Shared.Contracts.Services.Tenancy.Features;
 using EShop.Shared.EventBus.Abstractions;
 using EShop.Shared.Scoping.ResourceAccessControl;
 
-namespace EShop.Catalog.Application.Boostrapping;
+namespace EShop.Catalog.Application.Bootstrapping;
 
-public sealed class CatalogFeatureRegistrationService(IEventBusGateway eventBus) : IFeatureRegistrationService
+public sealed class CatalogFeatureRegistrationService(IEventBus eventBus) : IFeatureRegistrationService
 {
     private static readonly CatalogFeature[] Features =
     [

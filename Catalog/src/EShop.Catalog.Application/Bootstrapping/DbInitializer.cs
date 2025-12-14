@@ -6,7 +6,7 @@ using EShop.Shared.Sequences;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
-namespace EShop.Catalog.Application.Boostrapping;
+namespace EShop.Catalog.Application.Bootstrapping;
 
 public sealed class DbInitializer(
     ILogger<DbInitializer> logger,

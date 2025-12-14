@@ -14,7 +14,7 @@ namespace EShop.Tenancy.Application.Services;
 public sealed class SystemInitializationService(
     ILogger<SystemInitializationService> logger,
     IUserDetailsProvider userDetailsProvider,
-    IEventBusGateway eventBusGateway,
+    IEventBus eventBusGateway,
     ITenantRepository tenantRepository,
     IUnitOfWork unitOfWork,
     IConfiguration configuration) : ISystemInitializationService

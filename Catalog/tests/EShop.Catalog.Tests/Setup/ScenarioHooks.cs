@@ -1,4 +1,4 @@
-﻿using EShop.Catalog.Application.Boostrapping;
+﻿using EShop.Catalog.Application.Bootstrapping;
 using EShop.Catalog.Application.Shared;
 using EShop.Shared.Authentication.Abstractions;
 using EShop.Shared.DbResourceAccessControl;

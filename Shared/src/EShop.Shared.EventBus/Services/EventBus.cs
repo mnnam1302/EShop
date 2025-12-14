@@ -4,7 +4,7 @@ using MassTransit;
 
 namespace EShop.Shared.EventBus.Services;
 
-public sealed class EventBusGateway(IPublishEndpoint publishEndpoint) : IEventBusGateway
+public sealed class EventBus(IPublishEndpoint publishEndpoint) : IEventBus
 {
     public async Task PublishAsync<TEvent>(object @event, CancellationToken cancellationToken = default)
         where TEvent : class, IIntegrationEvent

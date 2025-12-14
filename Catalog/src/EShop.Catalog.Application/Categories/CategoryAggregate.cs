@@ -1,4 +1,7 @@
 ﻿using EShop.Catalog.Application.Categories.Create;
+using EShop.Catalog.Application.Categories.Publish;
+using EShop.Catalog.Application.Categories.Unpublish;
+using EShop.Catalog.Application.Categories.Update;
 using EShop.Shared.Authentication.Abstractions;
 using EShop.Shared.DomainTools.Entities;
 using EShop.Shared.DomainTools.EventSourcing.SeedWork;
@@ -17,7 +20,7 @@ public sealed class CategoryAggregate : Aggregate, IScoped
     public string Scope { get; set; } = string.Empty;
     public CategoryStateMachine StateMachine { get; set; } = new CategoryStateMachine();
 
-    public static CategoryAggregate Create(CreateCategoryCommand command, IUserDetailsProvider userDetailsProvider)
+    internal static CategoryAggregate Create(CreateCategoryCommand command, IUserDetailsProvider userDetailsProvider)
     {
         var category = new CategoryAggregate();
         category.RaiseEvent(new CategoryCreatedEvent
@@ -36,6 +39,37 @@ public sealed class CategoryAggregate : Aggregate, IScoped
         return category;
     }
 
+    internal void Update(UpdateCategoryCommand command)
+    {
+        RaiseEvent(new CategoryUpdatedEvent
+        {
+            CategoryId = command.Id,
+            Name = command.Name,
+            Reference = command.Reference,
+            Slug = command.Slug,
+            ParentId = command.ParentId,
+            UpdatedAtUtc = DateTimeOffset.UtcNow
+        });
+    }
+
+    internal void Publish()
+    {
+        RaiseEvent(new CategoryPublishedEvent
+        {
+            CategoryId = Id,
+            PublishedAtUtc = DateTimeOffset.UtcNow
+        });
+    }
+
+    internal void Unpublish()
+    {
+        RaiseEvent(new CategoryUnpublishedEvent
+        {
+            CategoryId = Id,
+            UnpublishedAtUtc = DateTimeOffset.UtcNow
+        });
+    }
+
     public void Apply(CategoryCreatedEvent @event)
     {
         Id = @event.CategoryId;
@@ -47,5 +81,26 @@ public sealed class CategoryAggregate : Aggregate, IScoped
         UpdatedAtUtc = @event.UpdatedAtUtc;
         TenantId = @event.TenantId;
         Scope = @event.Scope;
+    }
+
+    public void Apply(CategoryUpdatedEvent @event)
+    {
+        Name = @event.Name;
+        Reference = @event.Reference;
+        Slug = @event.Slug;
+        ParentId = @event.ParentId;
+        UpdatedAtUtc = @event.UpdatedAtUtc;
+    }
+
+    public void Apply(CategoryPublishedEvent @event)
+    {
+        StateMachine.Fire(CategoryAction.Publish);
+        UpdatedAtUtc = @event.PublishedAtUtc;
+    }
+
+    public void Apply(CategoryUnpublishedEvent @event)
+    {
+        StateMachine.Fire(CategoryAction.Unpublish);
+        UpdatedAtUtc = @event.UnpublishedAtUtc;
     }
 }

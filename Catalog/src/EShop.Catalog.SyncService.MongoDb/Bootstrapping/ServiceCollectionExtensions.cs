@@ -1,12 +1,22 @@
-﻿using EShop.Catalog.SyncService.MongoDb.Abstractions;
+﻿using EShop.Catalog.SyncService.MongoDb.Bootstrapping;
 using EShop.Catalog.SyncService.MongoDb.Infrastructure;
 using EShop.Catalog.SyncService.MongoDb.Infrastructure.Repository;
+using EShop.Catalog.SyncService.MongoDb.Models;
 using EShop.Shared.CQRS;
 using EShop.Shared.JsonApi.Extensions;
+using JsonApiDotNetCore.Configuration;
+using JsonApiDotNetCore.MongoDb.Configuration;
+using JsonApiDotNetCore.MongoDb.Repositories;
+using JsonApiDotNetCore.Repositories;
 using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization;
+using MongoDB.Bson.Serialization.Serializers;
+using MongoDB.Driver;
 
-namespace EShop.Catalog.SyncService.MongoDb.Boostrapping;
+namespace EShop.Catalog.SyncService.MongoDb.Bootstrapping;
 
 public static class ServiceCollectionExtensions
 {
@@ -15,6 +25,7 @@ public static class ServiceCollectionExtensions
         services
             .GlobalExceptionHandlingMiddleware()
             .AddMediator(AssemblyReference.Assembly);
+
         return services;
     }
 
@@ -24,7 +35,8 @@ public static class ServiceCollectionExtensions
             .AddSwagger()
             .AddApiVersioning()
             .AddMassTransitRabbitMQ(configuration, webHostEnvironment)
-            .AddMongoDbPersistence();
+            .AddMongoDbPersistence()
+            .AddJsonApiDotNet();
 
         return services;
     }
@@ -57,7 +69,46 @@ public static class ServiceCollectionExtensions
         services.AddOptions<MongoDbSettings>().BindConfiguration(nameof(MongoDbSettings));
         services.AddSingleton<IMongoDbSettings>(sp => sp.GetRequiredService<IOptions<MongoDbSettings>>().Value);
 
-        services.AddScoped(typeof(IMongoRepository<>), typeof(MongoRepository<>));
+        services.TryAddSingleton(sp =>
+        {
+            var settings = sp.GetRequiredService<IMongoDbSettings>();
+            var client = new MongoClient(settings.ConnectionString);
+
+            return client.GetDatabase(settings.DatabaseName);
+        });
+
+        BsonSerializer.RegisterSerializer(new GuidSerializer(GuidRepresentation.Standard));
+
+        services.AddScoped(typeof(IMongoRepositoryBase<>), typeof(MongoRepositoryBase<>));
+
+        return services;
+    }
+
+    public static IServiceCollection AddJsonApiDotNet(this IServiceCollection services)
+    {
+        services.AddJsonApi(options =>
+        {
+            options.Namespace = "api/v1";
+            options.UseRelativeLinks = true;
+            options.IncludeTotalResourceCount = true;
+
+#if DEBUG
+            options.IncludeExceptionStackTraceInErrors = true;
+            options.IncludeRequestBodyInErrors = true;
+            options.SerializerOptions.WriteIndented = true;
+#endif
+        }, resources: resourceGraphBuilder =>
+        {
+            resourceGraphBuilder.Add<Category, string?>();
+        });
+
+        //If your API project uses MongoDB only(so not in combination with EF Core),
+        //then instead of registering all MongoDB resources and repositories individually, you can use:
+        services.AddJsonApiMongoDb();
+
+        services.AddScoped(typeof(IResourceReadRepository<,>), typeof(MongoRepository<,>));
+        services.AddScoped(typeof(IResourceWriteRepository<,>), typeof(MongoRepository<,>));
+        services.AddScoped(typeof(IResourceRepository<,>), typeof(MongoRepository<,>));
 
         return services;
     }
