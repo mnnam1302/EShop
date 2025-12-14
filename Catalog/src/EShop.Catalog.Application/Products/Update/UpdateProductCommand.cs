@@ -1,5 +1,7 @@
-﻿using EShop.Shared.Contracts.Abstractions.Shared;
+﻿using EShop.Shared.Authentication.Abstractions;
+using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.CQRS.Command;
+using EShop.Shared.DomainTools.EventSourcing.SeedWork;
 
 namespace EShop.Catalog.Application.Products.Update;
 
@@ -17,8 +19,27 @@ public sealed class UpdateProductCommand : ICommand
 
 public sealed class UpdateProductCommandHandler : ICommandHandler<UpdateProductCommand>
 {
-    public Task<Result> HandleAsync(UpdateProductCommand command, CancellationToken cancellationToken)
+    private readonly IAggregateStore aggregateStore;
+    private readonly IUserDetailsProvider userDetailsProvider;
+
+    public UpdateProductCommandHandler(IAggregateStore aggregateStore, IUserDetailsProvider userDetailsProvider)
     {
-        throw new NotImplementedException();
+        this.aggregateStore = aggregateStore;
+        this.userDetailsProvider = userDetailsProvider;
+    }
+
+    public async Task<Result> HandleAsync(UpdateProductCommand command, CancellationToken cancellationToken)
+    {
+        var product = await aggregateStore.LoadAggregateAsync<ProductAggregate>(command.Id, cancellationToken);
+        if (product is null)
+        {
+            return Result.Failure(new Error("ProductNotFound", $"Product with Id '{command.Id}' was not found."));
+        }
+
+        product.Update(command, userDetailsProvider);
+
+        await aggregateStore.AppendEventsAsync(product, cancellationToken);
+
+        return Result.Success();
     }
 }

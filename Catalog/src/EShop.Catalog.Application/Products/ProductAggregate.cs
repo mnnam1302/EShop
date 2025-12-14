@@ -1,4 +1,5 @@
 ﻿using EShop.Catalog.Application.Products.Create;
+using EShop.Catalog.Application.Products.Update;
 using EShop.Shared.Authentication.Abstractions;
 using EShop.Shared.DomainTools.Entities;
 using EShop.Shared.DomainTools.EventSourcing.SeedWork;
@@ -55,7 +56,7 @@ public sealed class ProductAggregate : Aggregate, IAuditable, IScoped, IRingFenc
         return product;
     }
 
-    public void AddVariant(string name, string sku, double price, double discountPrice, IEnumerable<VariantDimensionValue> values, bool isDefault)
+    internal void AddVariant(string name, string sku, double price, double discountPrice, IEnumerable<VariantDimensionValue> values, bool isDefault)
     {
         ProductCanAddVariantSpecification.New(isDefault, values.ToList())
             .ThrowDomainErrorIfNotSatisfied(this);
@@ -70,6 +71,25 @@ public sealed class ProductAggregate : Aggregate, IAuditable, IScoped, IRingFenc
             DiscountPrice = discountPrice,
             VariantDimensionValues = values.ToList(),
             IsDefault = isDefault
+        });
+    }
+
+    internal void Update(UpdateProductCommand command, IUserDetailsProvider userDetailsProvider)
+    {
+        ProductCanUpdateSpecification.New().ThrowDomainErrorIfNotSatisfied(this);
+
+        RaiseEvent(new ProductUpdatedEvent
+        {
+            ProductId = command.Id,
+            Name = command.Name,
+            Description = command.Description,
+            CategoryId = command.CategoryId,
+            Tags = command.Tags.ToArray(),
+            Slug = command.Slug,
+            Images = command.Images.ToArray(),
+            Groups = command.Groups.ToArray(),
+            UpdatedAtUtc = DateTimeOffset.UtcNow,
+            UpdatedByUserId = userDetailsProvider.AuthenticatedUser.ActionUserId
         });
     }
 
@@ -89,9 +109,9 @@ public sealed class ProductAggregate : Aggregate, IAuditable, IScoped, IRingFenc
         Groups = @event.Groups;
         CreatedAtUtc = @event.CreatedAtUtc;
         CreatedByUserId = @event.CreatedByUserId;
+        LastModifiedAtUtc = @event.TimeStampUtc;
         TenantId = @event.TenantId;
         Scope = @event.Scope;
-        LastModifiedAtUtc = @event.TimeStampUtc;
     }
 
     internal void Apply(VariantAddedEvent @event)
@@ -110,6 +130,21 @@ public sealed class ProductAggregate : Aggregate, IAuditable, IScoped, IRingFenc
         };
 
         Variants.Add(variant);
+    }
+
+    internal void Apply(ProductUpdatedEvent @event)
+    {
+        State.Fire(ProductAction.Update);
+
+        Name = @event.Name;
+        Description = @event.Description;
+        CategoryId = @event.CategoryId;
+        Tags = @event.Tags;
+        Slug = @event.Slug;
+        Images = @event.Images;
+        Groups = @event.Groups;
+        LastModifiedAtUtc = @event.UpdatedAtUtc;
+        LastModifiedByUserId = @event.UpdatedByUserId;
     }
 
     #endregion Apply Domain Event (Replay technique in Domain-Driven Design)

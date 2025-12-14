@@ -18,6 +18,7 @@ public sealed class ProductStateMachine : StateMachine<ProductState, ProductActi
     public void Configure()
     {
         Configure(ProductState.Draft)
+            .Ignore(ProductAction.Update)
             .Permit(ProductAction.Publish, ProductState.Published)
             .Permit(ProductAction.Delete, ProductState.Deleted);
 
@@ -28,11 +29,6 @@ public sealed class ProductStateMachine : StateMachine<ProductState, ProductActi
         Configure(ProductState.Unpublished)
             .Permit(ProductAction.Publish, ProductState.Published)
             .Permit(ProductAction.Delete, ProductState.Deleted);
-
-        Configure(ProductState.Deleted)
-            .Ignore(ProductAction.Publish)
-            .Ignore(ProductAction.Unpublish)
-            .Ignore(ProductAction.Delete);
     }
 }
 
@@ -46,7 +42,8 @@ public enum ProductState
 
 public enum ProductAction
 {
-    Publish = 1,
-    Unpublish = 2,
-    Delete = 3
+    Update = 1,
+    Publish = 2,
+    Unpublish = 3,
+    Delete = 4
 }
