@@ -10,7 +10,7 @@ public sealed class PublishCategoryCommand(Guid categoryId) : ICommand
     public Guid Id { get; set; } = categoryId;
 }
 
-public sealed class PublishCategoryCommandHandler(IEventStoreGateway eventStore) : ICommandHandler<PublishCategoryCommand>
+public sealed class PublishCategoryCommandHandler(IAggregateStore eventStore) : ICommandHandler<PublishCategoryCommand>
 {
     public async Task<Result> HandleAsync(PublishCategoryCommand command, CancellationToken cancellationToken)
     {

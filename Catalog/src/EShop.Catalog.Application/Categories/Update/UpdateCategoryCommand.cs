@@ -18,7 +18,7 @@ public sealed class UpdateCategoryCommand : ICommand
 }
 
 public sealed class UpdateCategoryCommandHandler(
-    IEventStoreGateway eventStore,
+    IAggregateStore eventStore,
     IEventBus eventBus,
     IUserDetailsProvider userDetailsProvider) : ICommandHandler<UpdateCategoryCommand>
 {

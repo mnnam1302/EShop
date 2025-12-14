@@ -4,10 +4,10 @@ using Microsoft.Extensions.Options;
 
 namespace EShop.Shared.DomainTools.EventSourcing;
 
-public sealed class EventStoreGateway(
+public sealed class AggregateStore(
     IOptions<EventStoreOptions> options,
     IEventStoreRepository eventStoreRepository,
-    ISnapshotRepository? snapshotRepository) : IEventStoreGateway
+    ISnapshotRepository? snapshotRepository) : IAggregateStore
 {
     private readonly EventStoreOptions options = options.Value;
     private readonly ISnapshotRepository snapshotRepository = snapshotRepository ?? new NullSnapshotRepository();

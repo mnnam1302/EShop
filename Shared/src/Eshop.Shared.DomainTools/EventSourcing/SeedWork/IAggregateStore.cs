@@ -4,7 +4,7 @@ using Microsoft.Extensions.Options;
 
 namespace EShop.Shared.DomainTools.EventSourcing.SeedWork;
 
-public interface IEventStoreGateway
+public interface IAggregateStore
 {
     Task AppendEventsAsync(IAggregate aggregate, CancellationToken cancellationToken);
 

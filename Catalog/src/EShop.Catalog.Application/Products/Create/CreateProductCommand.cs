@@ -24,24 +24,24 @@ public sealed class CreateProductCommand : ICommand
 
 public sealed class CreateProductCommandHandler : ICommandHandler<CreateProductCommand>
 {
-    private readonly IEventStoreGateway eventStore;
+    private readonly IAggregateStore aggregateStore;
     private readonly IEventBus eventBus;
     private readonly IUserDetailsProvider userDetailsProvider;
 
     public CreateProductCommandHandler(
-        IEventStoreGateway eventStore,
+        IAggregateStore aggregateStore,
         IEventBus eventBus,
         ILogger<CreateProductCommandHandler> logger,
         IUserDetailsProvider userDetailsProvider)
     {
-        this.eventStore = eventStore;
+        this.aggregateStore = aggregateStore;
         this.eventBus = eventBus;
         this.userDetailsProvider = userDetailsProvider;
     }
 
     public async Task<Result> HandleAsync(CreateProductCommand command, CancellationToken cancellationToken)
     {
-        var category = await eventStore.LoadAggregateAsync<CategoryAggregate>(command.CategoryId, cancellationToken);
+        var category = await aggregateStore.LoadAggregateAsync<CategoryAggregate>(command.CategoryId, cancellationToken);
         if (category is null)
         {
             return ValidationResult.WithError(Error.Create("Category.NotFound", $"Category with ID '{command.CategoryId}' was not found."));
@@ -49,7 +49,7 @@ public sealed class CreateProductCommandHandler : ICommandHandler<CreateProductC
 
         var product = ProductAggregate.Create(command, userDetailsProvider);
 
-        await eventStore.AppendEventsAsync(product, cancellationToken);
+        await aggregateStore.AppendEventsAsync(product, cancellationToken);
 
         await eventBus.PublishAsync<ProductCreated>(new
         {
