@@ -1,7 +1,7 @@
-﻿using EShop.Catalog.SyncService.MongoDb.Infrastructure.Attributes;
+﻿using EShop.Catalog.ReadModels.MongoDb.Infrastructure.Attributes;
 using EShop.Shared.EventBus;
 
-namespace EShop.Catalog.SyncService.MongoDb.Models;
+namespace EShop.Catalog.ReadModels.MongoDb.Models;
 
 [MongoCollection("InboxMessage")]
 public sealed class InboxMessage : Document

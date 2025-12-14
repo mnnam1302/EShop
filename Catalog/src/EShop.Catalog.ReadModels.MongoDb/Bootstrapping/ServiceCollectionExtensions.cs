@@ -1,13 +1,20 @@
-﻿using EShop.Catalog.SyncService.MongoDb.Bootstrapping;
-using EShop.Catalog.SyncService.MongoDb.Infrastructure;
-using EShop.Catalog.SyncService.MongoDb.Infrastructure.Repository;
-using EShop.Catalog.SyncService.MongoDb.Models;
+﻿using EShop.Catalog.ReadModels.MongoDb.Bootstrapping;
+using EShop.Catalog.ReadModels.MongoDb.Consumers;
+using EShop.Catalog.ReadModels.MongoDb.Infrastructure;
+using EShop.Catalog.ReadModels.MongoDb.Infrastructure.Repository;
+using EShop.Catalog.ReadModels.MongoDb.Models;
+using EShop.Shared.Contracts.JsonConverters;
+using EShop.Shared.Contracts.Services.Catalog;
 using EShop.Shared.CQRS;
+using EShop.Shared.EventBus.DependencyInjections.Extensions;
+using EShop.Shared.EventBus.DependencyInjections.Options;
+using EShop.Shared.EventBus.PipelineObservers;
 using EShop.Shared.JsonApi.Extensions;
 using JsonApiDotNetCore.Configuration;
 using JsonApiDotNetCore.MongoDb.Configuration;
 using JsonApiDotNetCore.MongoDb.Repositories;
 using JsonApiDotNetCore.Repositories;
+using MassTransit;
 using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
@@ -16,7 +23,7 @@ using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Serializers;
 using MongoDB.Driver;
 
-namespace EShop.Catalog.SyncService.MongoDb.Bootstrapping;
+namespace EShop.Catalog.ReadModels.MongoDb.Bootstrapping;
 
 public static class ServiceCollectionExtensions
 {
@@ -111,5 +118,71 @@ public static class ServiceCollectionExtensions
         services.AddScoped(typeof(IResourceRepository<,>), typeof(MongoRepository<,>));
 
         return services;
+    }
+
+    public static IServiceCollection AddMassTransitRabbitMQ(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment)
+    {
+        var massTransitConfiguration = new MasstransitConfiguration();
+        configuration.GetSection(nameof(MasstransitConfiguration)).Bind(massTransitConfiguration);
+
+        var messageBusOptions = new MessageBusOptions();
+        configuration.GetSection(nameof(MessageBusOptions)).Bind(messageBusOptions);
+
+        services.AddMassTransit(cfg =>
+        {
+            cfg.SetKebabCaseEndpointNameFormatter();
+
+            cfg.AddConsumers(AssemblyReference.Assembly);
+
+            cfg.UsingRabbitMq((context, bus) =>
+            {
+                bus.Host(massTransitConfiguration.Host, massTransitConfiguration.Port, massTransitConfiguration.VHost, h =>
+                {
+                    h.Username(massTransitConfiguration.Username);
+                    h.Password(massTransitConfiguration.Password);
+                });
+
+                bus.UseMessageRetry(retry => retry.Incremental(
+                    retryLimit: messageBusOptions.RetryLimit,
+                    initialInterval: messageBusOptions.InitialInterval,
+                    intervalIncrement: messageBusOptions.IntervalIncrement));
+
+                bus.UseNewtonsoftJsonSerializer();
+                bus.ConfigureNewtonsoftJsonSerializer(settings =>
+                {
+                    settings.Converters.Add(new DateOnlyJsonConverter());
+                    settings.Converters.Add(new ExpirationDateOnlyJsonConverter());
+                    return settings;
+                });
+                bus.ConfigureNewtonsoftJsonDeserializer(settings =>
+                {
+                    settings.Converters.Add(new DateOnlyJsonConverter());
+                    settings.Converters.Add(new ExpirationDateOnlyJsonConverter());
+                    return settings;
+                });
+
+                bus.ConnectPublishObserver(new LoggingPublishObserver());
+                bus.ConnectSendObserver(new LoggingSendObserver());
+                bus.ConnectReceiveObserver(new LoggingReceiveObserver());
+                bus.ConnectConsumeObserver(new LoggingConsumeObserver());
+
+                bus.MessageTopology.SetEntityNameFormatter(new KebabCaseEntityNameFormatter());
+
+                bus.ConfigureRecieveEndpoints(context, environment, Program.ApplicationName);
+                bus.ConfigureEndpoints(context);
+            });
+        });
+
+        return services;
+    }
+
+    private static void ConfigureRecieveEndpoints(
+        this IRabbitMqBusFactoryConfigurator bus,
+        IRegistrationContext context,
+        IWebHostEnvironment environment,
+        string serviceName)
+    {
+        bus.ConfigureEventReceiveEndpoint<CategoryCreatedConsumer, CategoryCreated>(context, environment.EnvironmentName, serviceName);
+        bus.ConfigureEventReceiveEndpoint<CategoryUpdatedConsumer, CategoryUpdated>(context, environment.EnvironmentName, serviceName);
     }
 }

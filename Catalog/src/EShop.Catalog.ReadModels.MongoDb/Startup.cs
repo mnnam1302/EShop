@@ -1,9 +1,8 @@
-﻿using EShop.Catalog.SyncService.MongoDb.Bootstrapping;
+﻿using EShop.Catalog.ReadModels.MongoDb.Bootstrapping;
 using EShop.Shared.JsonApi.Middlewares;
 using JsonApiDotNetCore.Configuration;
-using Microsoft.AspNetCore.Builder;
 
-namespace EShop.Catalog.SyncService.MongoDb;
+namespace EShop.Catalog.ReadModels.MongoDb;
 
 public class Startup
 {
@@ -37,4 +36,3 @@ public class Startup
         app.MapControllers();
     }
 }
-

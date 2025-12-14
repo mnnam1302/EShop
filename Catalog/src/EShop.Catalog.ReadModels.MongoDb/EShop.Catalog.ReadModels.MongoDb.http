@@ -1,0 +1,6 @@
+@EShop.Catalog.ReadModels.MongoDb_HostAddress = http://localhost:5147
+
+GET {{EShop.Catalog.ReadModels.MongoDb_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

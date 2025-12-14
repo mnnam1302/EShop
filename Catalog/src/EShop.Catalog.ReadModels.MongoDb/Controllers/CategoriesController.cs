@@ -2,7 +2,7 @@
 using EShop.Shared.Scoping.ResourceAccessControl;
 using Microsoft.AspNetCore.Mvc;
 
-namespace EShop.Catalog.SyncService.MongoDb.Controllers;
+namespace EShop.Catalog.ReadModels.MongoDb.Controllers;
 
 [RequireFeature(FeatureConstants.Catalog.ProductBuilder_FeatureId)]
 [RequireOneOfPermissions(

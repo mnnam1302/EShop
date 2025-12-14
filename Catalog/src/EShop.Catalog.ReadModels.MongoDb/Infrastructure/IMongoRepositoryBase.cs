@@ -1,7 +1,7 @@
-﻿using EShop.Catalog.SyncService.MongoDb.Models;
+﻿using EShop.Catalog.ReadModels.MongoDb.Models;
 using System.Linq.Expressions;
 
-namespace EShop.Catalog.SyncService.MongoDb.Infrastructure;
+namespace EShop.Catalog.ReadModels.MongoDb.Infrastructure;
 
 public interface IMongoRepositoryBase<TDocument> where TDocument : IDocument
 {

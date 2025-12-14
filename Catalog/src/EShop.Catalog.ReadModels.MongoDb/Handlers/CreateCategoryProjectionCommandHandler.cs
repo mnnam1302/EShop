@@ -1,9 +1,9 @@
-﻿using EShop.Catalog.SyncService.MongoDb.Infrastructure;
+﻿using EShop.Catalog.ReadModels.MongoDb.Infrastructure;
 using EShop.Catalog.SyncService.MongoDb.Models;
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.CQRS.Command;
 
-namespace EShop.Catalog.SyncService.MongoDb.UseCases.Category;
+namespace EShop.Catalog.ReadModels.MongoDb.Handlers;
 
 public sealed class CreateCategoryProjectionCommand : ICommand
 {

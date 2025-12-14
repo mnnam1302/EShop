@@ -1,11 +1,11 @@
-﻿using EShop.Catalog.SyncService.MongoDb.Infrastructure;
-using EShop.Catalog.SyncService.MongoDb.Models;
-using EShop.Catalog.SyncService.MongoDb.UseCases.Category;
+﻿using EShop.Catalog.ReadModels.MongoDb.Infrastructure;
+using EShop.Catalog.ReadModels.MongoDb.Models;
+using EShop.Catalog.ReadModels.MongoDb.UseCases.Category;
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.Contracts.Services.Catalog;
 using EShop.Shared.CQRS;
 
-namespace EShop.Catalog.SyncService.MongoDb.Consumers;
+namespace EShop.Catalog.ReadModels.MongoDb.Consumers;
 
 public sealed class CategoryCreatedConsumer : IdempotentConsumer<CategoryCreated>
 {

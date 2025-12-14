@@ -1,4 +1,4 @@
-﻿namespace EShop.Catalog.SyncService.MongoDb.Infrastructure.Attributes;
+﻿namespace EShop.Catalog.ReadModels.MongoDb.Infrastructure.Attributes;
 
 [AttributeUsage(AttributeTargets.Class, Inherited = false)]
 public class MongoCollectionAttribute : Attribute

@@ -1,4 +1,4 @@
-﻿namespace EShop.Catalog.SyncService.MongoDb.Infrastructure;
+﻿namespace EShop.Catalog.ReadModels.MongoDb.Infrastructure;
 
 public interface IMongoDbSettings
 {

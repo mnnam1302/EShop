@@ -1,12 +1,9 @@
-﻿using EShop.Catalog.SyncService.MongoDb.Infrastructure.Attributes;
-using EShop.Catalog.SyncService.MongoDb.Models;
-using MongoDB.Bson;
-using MongoDB.Bson.Serialization;
-using MongoDB.Bson.Serialization.Serializers;
+﻿using EShop.Catalog.ReadModels.MongoDb.Infrastructure.Attributes;
+using EShop.Catalog.ReadModels.MongoDb.Models;
 using MongoDB.Driver;
 using System.Linq.Expressions;
 
-namespace EShop.Catalog.SyncService.MongoDb.Infrastructure.Repository;
+namespace EShop.Catalog.ReadModels.MongoDb.Infrastructure.Repository;
 
 public sealed class MongoRepositoryBase<TDocument> : IMongoRepositoryBase<TDocument> where TDocument : IDocument
 {

@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
 
-namespace EShop.Catalog.SyncService.MongoDb;
+namespace EShop.Catalog.ReadModels.MongoDb;
 
 public static class AssemblyReference
 {

@@ -1,7 +1,7 @@
 ﻿using JsonApiDotNetCore.MongoDb.Resources;
 using JsonApiDotNetCore.Resources.Annotations;
 
-namespace EShop.Catalog.SyncService.MongoDb.Models;
+namespace EShop.Catalog.ReadModels.MongoDb.Models;
 
 public interface IDocument : IMongoIdentifiable
 {

@@ -1,8 +1,8 @@
-﻿using EShop.Catalog.SyncService.MongoDb.Infrastructure.Attributes;
+﻿using EShop.Catalog.ReadModels.MongoDb.Infrastructure.Attributes;
 using JsonApiDotNetCore.Controllers;
 using JsonApiDotNetCore.Resources.Annotations;
 
-namespace EShop.Catalog.SyncService.MongoDb.Models;
+namespace EShop.Catalog.ReadModels.MongoDb.Models;
 
 [MongoCollection("Category")]
 [Resource(GenerateControllerEndpoints = JsonApiEndpoints.Query)]

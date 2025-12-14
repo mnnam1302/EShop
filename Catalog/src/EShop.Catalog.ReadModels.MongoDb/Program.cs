@@ -1,13 +1,12 @@
-using EShop.Catalog.SyncService.MongoDb;
 using EShop.Shared.Diagnostics;
 using Serilog;
 
-namespace EShop.Catalog.SyncService.MongoDb;
+namespace EShop.Catalog.ReadModels.MongoDb;
 
 public static class Program
 {
     private const int ShutdownTimeoutInSeconds = 90;
-    internal const string ApplicationName = "CatalogSyncServiceMongoDb";
+    internal const string ApplicationName = "CatalogReadModelsMongoDb";
 
     public static async Task<int> Main(string[] args)
     {
@@ -22,7 +21,7 @@ public static class Program
             Log.Information("Starting up {ApplicationName}...", ApplicationName);
             await app.RunAsync();
             Log.Information("Stop {ApplicationName}...", ApplicationName);
-            
+
             return 0;
         }
         catch (Exception ex)
