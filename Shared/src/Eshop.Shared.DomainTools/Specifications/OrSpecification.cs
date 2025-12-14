@@ -1,18 +1,26 @@
 ﻿namespace EShop.Shared.DomainTools.Specifications;
 
-public class OrSpecification<T> : CompositeSpecification<T>
+public class OrSpecification<T> : Specification<T>
 {
-    ISpecification<T> leftSpecification;
-    ISpecification<T> rightSpecification;
+    private readonly ISpecification<T> _specification1;
+    private readonly ISpecification<T> _specification2;
 
     public OrSpecification(ISpecification<T> leftSpecification, ISpecification<T> rightSpecification)
     {
-        this.leftSpecification = leftSpecification;
-        this.rightSpecification = rightSpecification;
+        _specification1 = leftSpecification;
+        _specification2 = rightSpecification;
     }
 
-    public override bool IsSatisfiedBy(T o)
+    protected override IEnumerable<string> IsNotSatisfiedBecause(T obj)
     {
-        return leftSpecification.IsSatisfiedBy(o) || rightSpecification.IsSatisfiedBy(o);
+        var reason1 = _specification1.WhyIsNotSatisfiedBy(obj);
+        var reason2 = _specification2.WhyIsNotSatisfiedBy(obj);
+
+        if (!reason1.Any() || !reason2.Any())
+        {
+            return Enumerable.Empty<string>();
+        }
+
+        return reason1.Concat(reason2);
     }
 }

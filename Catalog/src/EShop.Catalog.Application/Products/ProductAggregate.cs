@@ -2,6 +2,7 @@
 using EShop.Shared.Authentication.Abstractions;
 using EShop.Shared.DomainTools.Entities;
 using EShop.Shared.DomainTools.EventSourcing.SeedWork;
+using EShop.Shared.DomainTools.Specifications;
 
 namespace EShop.Catalog.Application.Products;
 
@@ -52,6 +53,9 @@ public sealed class ProductAggregate : Aggregate, IAuditable, IScoped, IRingFenc
 
     public void AddVariant(string name, string sku, double price, double discountPrice, IEnumerable<VariantDimensionValue> values, bool isDefault)
     {
+        ProductCanAddVariantSpecification.New(isDefault, values.ToList())
+            .ThrowDomainErrorIfNotSatisfied(this);
+
         RaiseEvent(new VariantAddedEvent
         {
             ProductId = Id,
@@ -67,7 +71,8 @@ public sealed class ProductAggregate : Aggregate, IAuditable, IScoped, IRingFenc
 
     #endregion
 
-    #region Apply Domain Event
+    #region Apply Domain Event (Replay technique in Domain-Driven Design)
+
     internal void Apply(ProductCreatedEvent @event)
     {
         Id = @event.ProductId;
@@ -87,34 +92,6 @@ public sealed class ProductAggregate : Aggregate, IAuditable, IScoped, IRingFenc
 
     internal void Apply(VariantAddedEvent @event)
     {
-        if (@event.IsDefault)
-        {
-            if (@event.VariantDimensionValues.Count != 0)
-            {
-                throw new InvalidOperationException("Default variant must not have dimension values");
-            }
-
-            if (Variants.Any(x => x.IsDefault))
-            {
-                throw new InvalidOperationException("Default variant already exists");
-            }
-        }
-        else
-        {
-            if (VariationDimensions.Count != @event.VariantDimensionValues.Count)
-            {
-                throw new InvalidOperationException("Too many or not enough values provided to dimensions");
-            }
-
-            foreach (var dimension in VariationDimensions)
-            {
-                if (!@event.VariantDimensionValues.Any(x => x.Name == dimension.Name))
-                {
-                    throw new InvalidOperationException($"Dimension value not provided for {dimension.Name}");
-                }
-            }
-        }
-
         var variant = new Variant
         {
             Id = @event.VariantId,
