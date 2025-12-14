@@ -29,9 +29,11 @@ public sealed class ProductAggregate : Aggregate, IAuditable, IScoped, IRingFenc
     public string Scope { get; set; } = string.Empty;
 
     #region Behaviors
+
     internal static ProductAggregate Create(CreateProductCommand command, IUserDetailsProvider userDetailsProvider)
     {
         var product = new ProductAggregate();
+
         product.RaiseEvent(new ProductCreatedEvent
         {
             ProductId = Guid.NewGuid(),
@@ -47,6 +49,8 @@ public sealed class ProductAggregate : Aggregate, IAuditable, IScoped, IRingFenc
             TenantId = userDetailsProvider.AuthenticatedUser.TenantId,
             Scope = userDetailsProvider.AuthenticatedUser.TenantId
         });
+
+        product.AddVariant(string.Empty, string.Empty, command.Price, command.DiscountPrice, [], true);
 
         return product;
     }
@@ -69,7 +73,7 @@ public sealed class ProductAggregate : Aggregate, IAuditable, IScoped, IRingFenc
         });
     }
 
-    #endregion
+    #endregion Behaviors
 
     #region Apply Domain Event (Replay technique in Domain-Driven Design)
 
@@ -108,5 +112,5 @@ public sealed class ProductAggregate : Aggregate, IAuditable, IScoped, IRingFenc
         Variants.Add(variant);
     }
 
-    #endregion
+    #endregion Apply Domain Event (Replay technique in Domain-Driven Design)
 }

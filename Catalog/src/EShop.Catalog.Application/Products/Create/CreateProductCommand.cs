@@ -49,8 +49,6 @@ public sealed class CreateProductCommandHandler : ICommandHandler<CreateProductC
 
         var product = ProductAggregate.Create(command, userDetailsProvider);
 
-        product.AddVariant(string.Empty, string.Empty, command.Price, command.DiscountPrice, [], true);
-
         await eventStore.AppendEventsAsync(product, cancellationToken);
 
         await eventBus.PublishAsync<ProductCreated>(new
