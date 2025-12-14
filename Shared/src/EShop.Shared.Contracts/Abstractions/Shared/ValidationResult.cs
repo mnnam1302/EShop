@@ -10,5 +10,7 @@ public class ValidationResult : Result, IValidationResult
 
     public Error[] Errors { get; set; }
 
+    public static ValidationResult WithError(Error error) => new([error]);
+
     public static ValidationResult WithErrors(Error[] errors) => new(errors);
 }

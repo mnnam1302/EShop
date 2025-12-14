@@ -1,4 +1,6 @@
-﻿using EShop.Shared.DomainTools.Entities;
+﻿using EShop.Catalog.Application.Products.Create;
+using EShop.Shared.Authentication.Abstractions;
+using EShop.Shared.DomainTools.Entities;
 using EShop.Shared.DomainTools.EventSourcing.SeedWork;
 
 namespace EShop.Catalog.Application.Products;
@@ -22,6 +24,112 @@ public sealed class ProductAggregate : Aggregate, IAuditable, IScoped, IRingFenc
     public List<Variant> Variants { get; private set; } = [];
     public List<VariationDimension> VariationDimensions { get; private set; } = [];
 
-    public required string TenantId { get; set; }
-    public required string Scope { get; set; }
+    public string TenantId { get; set; } = string.Empty;
+    public string Scope { get; set; } = string.Empty;
+
+    #region Behaviors
+    internal static ProductAggregate Create(CreateProductCommand command, IUserDetailsProvider userDetailsProvider)
+    {
+        var product = new ProductAggregate();
+        product.RaiseEvent(new ProductCreatedEvent
+        {
+            ProductId = Guid.NewGuid(),
+            Name = command.Name,
+            Description = command.Description,
+            CategoryId = command.CategoryId,
+            Tags = command.Tags.ToArray(),
+            Slug = command.Slug,
+            Images = command.Images.ToArray(),
+            Groups = command.Groups.ToArray(),
+            CreatedAtUtc = DateTimeOffset.UtcNow,
+            CreatedByUserId = userDetailsProvider.AuthenticatedUser.ActionUserId,
+            TenantId = userDetailsProvider.AuthenticatedUser.TenantId,
+            Scope = userDetailsProvider.AuthenticatedUser.TenantId
+        });
+
+        return product;
+    }
+
+    public void AddVariant(string name, string sku, double price, double discountPrice, IEnumerable<VariantDimensionValue> values, bool isDefault)
+    {
+        RaiseEvent(new VariantAddedEvent
+        {
+            ProductId = Id,
+            VariantId = Guid.NewGuid(),
+            Name = name,
+            Sku = sku,
+            Price = price,
+            DiscountPrice = discountPrice,
+            VariantDimensionValues = values.ToList(),
+            IsDefault = isDefault
+        });
+    }
+
+    #endregion
+
+    #region Apply Domain Event
+    internal void Apply(ProductCreatedEvent @event)
+    {
+        Id = @event.ProductId;
+        Name = @event.Name;
+        Description = @event.Description;
+        CategoryId = @event.CategoryId;
+        Tags = @event.Tags;
+        Slug = @event.Slug;
+        Images = @event.Images;
+        Groups = @event.Groups;
+        CreatedAtUtc = @event.CreatedAtUtc;
+        CreatedByUserId = @event.CreatedByUserId;
+        TenantId = @event.TenantId;
+        Scope = @event.Scope;
+        LastModifiedAtUtc = @event.TimeStampUtc;
+    }
+
+    internal void Apply(VariantAddedEvent @event)
+    {
+        if (@event.IsDefault)
+        {
+            if (@event.VariantDimensionValues.Count != 0)
+            {
+                throw new InvalidOperationException("Default variant must not have dimension values");
+            }
+
+            if (Variants.Any(x => x.IsDefault))
+            {
+                throw new InvalidOperationException("Default variant already exists");
+            }
+        }
+        else
+        {
+            if (VariationDimensions.Count != @event.VariantDimensionValues.Count)
+            {
+                throw new InvalidOperationException("Too many or not enough values provided to dimensions");
+            }
+
+            foreach (var dimension in VariationDimensions)
+            {
+                if (!@event.VariantDimensionValues.Any(x => x.Name == dimension.Name))
+                {
+                    throw new InvalidOperationException($"Dimension value not provided for {dimension.Name}");
+                }
+            }
+        }
+
+        var variant = new Variant
+        {
+            Id = @event.VariantId,
+            ProductId = @event.ProductId,
+            Name = @event.Name,
+            Sku = @event.Sku,
+            Price = @event.Price,
+            DiscountPrice = @event.DiscountPrice,
+            IsDefault = @event.IsDefault,
+            State = VariantState.Unpublished,
+            VariantDimensionValues = @event.VariantDimensionValues,
+        };
+
+        Variants.Add(variant);
+    }
+
+    #endregion
 }
