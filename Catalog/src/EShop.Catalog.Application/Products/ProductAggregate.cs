@@ -93,7 +93,7 @@ public sealed class ProductAggregate : Aggregate, IAuditable, IScoped, IRingFenc
         });
     }
 
-    #endregion Behaviors
+    #endregion
 
     #region Apply Domain Event (Replay technique in Domain-Driven Design)
 
@@ -147,5 +147,5 @@ public sealed class ProductAggregate : Aggregate, IAuditable, IScoped, IRingFenc
         LastModifiedByUserId = @event.UpdatedByUserId;
     }
 
-    #endregion Apply Domain Event (Replay technique in Domain-Driven Design)
+    #endregion
 }
