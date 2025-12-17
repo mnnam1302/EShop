@@ -1,6 +1,6 @@
-﻿using EShop.Catalog.ReadModels.MongoDb.Infrastructure;
+﻿using EShop.Catalog.ReadModels.MongoDb.Handlers;
+using EShop.Catalog.ReadModels.MongoDb.Infrastructure;
 using EShop.Catalog.ReadModels.MongoDb.Models;
-using EShop.Catalog.ReadModels.MongoDb.UseCases.Category;
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.Contracts.Services.Catalog;
 using EShop.Shared.CQRS;
