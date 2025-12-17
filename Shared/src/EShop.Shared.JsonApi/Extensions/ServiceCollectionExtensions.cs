@@ -10,4 +10,20 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<ExceptionHandlingMiddleware>();
         return services;
     }
+
+    public static IServiceCollection AddEshopCors(this IServiceCollection services)
+    {
+        services.AddCors(options =>
+        {
+            options.AddPolicy("CorsPolicy", builder =>
+            {
+                builder
+                    .AllowAnyHeader()
+                    .AllowAnyMethod()
+                    .AllowAnyOrigin();
+            });
+        });
+
+        return services;
+    }
 }

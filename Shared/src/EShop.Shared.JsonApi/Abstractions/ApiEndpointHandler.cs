@@ -11,16 +11,13 @@ public static class ApiEndpointHandler
         return result switch
         {
             { IsSuccess: true } => throw new InvalidOperationException(),
-            IValidationResult validationResult =>
-                Results.BadRequest(CreateProblemDetails(
+            IValidationResult validationResult => Results.BadRequest(
+                CreateProblemDetails(
                     "Validation Error",
                     StatusCodes.Status400BadRequest,
                     result.Error,
                     validationResult.Errors)),
-            _ => Results.BadRequest(CreateProblemDetails(
-                "Bad Request",
-                StatusCodes.Status400BadRequest,
-                result.Error))
+            _ => Results.BadRequest(CreateProblemDetails("Bad Request", StatusCodes.Status400BadRequest, result.Error))
         };
     }
 

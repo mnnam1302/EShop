@@ -1,6 +1,5 @@
 ﻿using EShop.Shared.Cache.DependencyInejctions.Extensions;
 using EShop.Shared.JsonApi.Extensions;
-using EShop.Shared.JsonApi.Middlewares;
 
 namespace EShop.ApiGateway.Extensions;
 
@@ -12,32 +11,18 @@ public static class ServiceCollectionExtensions
             .AddRedisHealthCheck(configuration)
             .AddRedisCacheInfrastructure(configuration);
 
-        return services;
-    }
-
-    public static IServiceCollection AddBoostrapping(this IServiceCollection services, IConfiguration configuration)
-    {
-        services.AddSingleton<ExceptionHandlingMiddleware>();
-        services.AddCorsApiGateway();
-        services.AddYarpReverseProxy(configuration);
-
         services.AddTenantAuthenticationProvider();
 
         return services;
     }
 
-    private static IServiceCollection AddCorsApiGateway(this IServiceCollection services)
+    public static IServiceCollection AddBoostrapping(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddCors(options =>
-        {
-            options.AddPolicy("CorsPolicy", builder =>
-            {
-                builder
-                    .AllowAnyHeader()
-                    .AllowAnyMethod()
-                    .AllowAnyOrigin();
-            });
-        });
+        services
+            .GlobalExceptionHandlingMiddleware()
+            .AddEshopCors()
+            .AddYarpReverseProxy(configuration);
+
         return services;
     }
 

@@ -40,4 +40,12 @@ public class Error : IEquatable<Error>
     public override bool Equals(object? obj) => obj is Error error && Equals(error);
 
     public override int GetHashCode() => HashCode.Combine(Code, Message);
+
+    public static Error Create(string code, string message)
+    {
+        ArgumentNullException.ThrowIfNull(code);
+        ArgumentNullException.ThrowIfNull(message);
+
+        return new Error(code, message);
+    }
 }

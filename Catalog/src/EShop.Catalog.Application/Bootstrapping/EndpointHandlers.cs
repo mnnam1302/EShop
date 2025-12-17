@@ -1,5 +1,6 @@
 ﻿using EShop.Catalog.Application.Agencies;
 using EShop.Catalog.Application.Categories;
+using EShop.Catalog.Application.Products;
 
 namespace EShop.Catalog.Application.Bootstrapping;
 
@@ -10,7 +11,8 @@ public static class EndpointHandlers
         endpoints.MapControllers();
         endpoints
             .MapAgencyEndpoints()
-            .MapCategoryEndpoints();
+            .MapCategoryEndpoints()
+            .MapProductEndpoints();
 
         return endpoints;
     }

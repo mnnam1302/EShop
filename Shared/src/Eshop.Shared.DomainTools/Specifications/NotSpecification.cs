@@ -1,16 +1,20 @@
-﻿namespace EShop.Shared.DomainTools.Specifications;
+﻿
+namespace EShop.Shared.DomainTools.Specifications;
 
-public class NotSpecification<T> : CompositeSpecification<T>
+public class NotSpecification<T> : Specification<T>
 {
-    ISpecification<T> specification;
+    private readonly ISpecification<T> _specification;
 
     public NotSpecification(ISpecification<T> specification)
     {
-        this.specification = specification;
+        _specification = specification;
     }
 
-    public override bool IsSatisfiedBy(T o)
+    protected override IEnumerable<string> IsNotSatisfiedBecause(T obj)
     {
-        return !specification.IsSatisfiedBy(o);
+        if (_specification.IsSatisfiedBy(obj))
+        {
+            yield return $"Specification '{_specification.GetType().Name}' should not be satisfied";
+        }
     }
 }

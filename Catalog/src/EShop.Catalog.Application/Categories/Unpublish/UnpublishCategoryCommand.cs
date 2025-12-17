@@ -12,9 +12,9 @@ namespace EShop.Catalog.Application.Categories.Unpublish
 
     public sealed class UnpublishCategoryCommandHandler : ICommandHandler<UnpublishCategoryCommand>
     {
-        private readonly IEventStoreGateway eventStore;
+        private readonly IAggregateStore eventStore;
 
-        public UnpublishCategoryCommandHandler(IEventStoreGateway eventStore)
+        public UnpublishCategoryCommandHandler(IAggregateStore eventStore)
         {
             this.eventStore = eventStore;
         }

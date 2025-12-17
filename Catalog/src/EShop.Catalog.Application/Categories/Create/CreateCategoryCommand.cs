@@ -16,7 +16,7 @@ public sealed class CreateCategoryCommand : ICommand
 }
 
 public sealed class CreateCategoryCommandHandler(
-    IEventStoreGateway eventStore,
+    IAggregateStore eventStore,
     IUserDetailsProvider userDetailsProvider,
     IEventBus eventBus) : ICommandHandler<CreateCategoryCommand>
 {

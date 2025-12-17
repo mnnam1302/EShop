@@ -69,8 +69,7 @@ internal static class ValidationDecorator
 
         var context = new ValidationContext<TCommand>(command);
 
-        var validationResults = await Task.WhenAll(
-            validators.Select(v => v.ValidateAsync(context)));
+        var validationResults = await Task.WhenAll(validators.Select(v => v.ValidateAsync(context)));
 
         return validationResults
             .SelectMany(r => r.Errors)

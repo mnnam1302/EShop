@@ -1,18 +1,19 @@
 ﻿namespace EShop.Shared.DomainTools.Specifications;
 
-public class AndSpecification<T> : CompositeSpecification<T>
+public class AndSpecification<T> : Specification<T>
 {
-    ISpecification<T> leftSpecification;
-    ISpecification<T> rightSpecification;
+    private readonly ISpecification<T> _specification1;
+    private readonly ISpecification<T> _specification2;
 
     public AndSpecification(ISpecification<T> leftSpecification, ISpecification<T> rightSpecification)
     {
-        this.leftSpecification = leftSpecification;
-        this.rightSpecification = rightSpecification;
+        _specification1 = leftSpecification;
+        _specification2 = rightSpecification;
     }
 
-    public override bool IsSatisfiedBy(T o)
+    protected override IEnumerable<string> IsNotSatisfiedBecause(T obj)
     {
-        return leftSpecification.IsSatisfiedBy(o) && rightSpecification.IsSatisfiedBy(o);
+        return _specification1.WhyIsNotSatisfiedBy(obj)
+            .Concat(_specification2.WhyIsNotSatisfiedBy(obj));
     }
 }
