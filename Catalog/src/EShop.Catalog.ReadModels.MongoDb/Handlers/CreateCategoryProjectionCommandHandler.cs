@@ -1,5 +1,4 @@
 ﻿using EShop.Catalog.ReadModels.MongoDb.Infrastructure;
-using EShop.Catalog.SyncService.MongoDb.Models;
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.CQRS.Command;
 

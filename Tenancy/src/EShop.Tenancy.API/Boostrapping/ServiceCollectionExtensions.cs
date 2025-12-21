@@ -1,7 +1,6 @@
 ﻿using Carter;
 using EShop.Shared.DomainTools.Extensions;
 using EShop.Shared.JsonApi.Extensions;
-using EShop.Shared.JsonApi.Middlewares;
 using EShop.Tenancy.Application.DependencyInjections;
 using EShop.Tenancy.Infrastructure.DependencyInjections;
 using EShop.Tenancy.Persistence.DependencyInjections;
@@ -18,15 +17,20 @@ public static class ServiceCollectionExtensions
             .AddTenancyPersistence(configuration)
             .AddTenancyInfrastructure(configuration, environment, Program.ApplicationName);
 
+        services
+            .AddTenantAuthenticationProvider()
+            .AddUserPermissionsProvider()
+            .AddUserOrganizationContextProvider();
+
         return services;
     }
 
     public static IServiceCollection AddTenancyAPI(this IServiceCollection services)
     {
-        services.AddCors();
+        services.AddEshopCors();
         services.AddResiliencePolicy();
+        services.AddGlobalExceptionMiddleware();
 
-        services.AddSingleton<ExceptionHandlingMiddleware>();
         services.AddTransient<DbInitializer>();
 
         services.AddCarter();
@@ -44,8 +48,6 @@ public static class ServiceCollectionExtensions
                 options.GroupNameFormat = "'v'VVV";
                 options.SubstituteApiVersionInUrl = true;
             });
-
-        services.AddTenantAuthenticationProvider();
 
         return services;
     }

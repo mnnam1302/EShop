@@ -3,9 +3,9 @@
 public class TenantFeaturesProvider : ITenantFeaturesProvider
 {
     private readonly ITenantFeaturesCachingService _tenantFeaturesCachingService;
-    private readonly TenantFeaturesHttpClient _tenantFeatureHttpClient;
+    private readonly TenancyHttpClient _tenantFeatureHttpClient;
 
-    public TenantFeaturesProvider(ITenantFeaturesCachingService tenantFeaturesCachingService, TenantFeaturesHttpClient tenantFeatureHttpClient)
+    public TenantFeaturesProvider(ITenantFeaturesCachingService tenantFeaturesCachingService, TenancyHttpClient tenantFeatureHttpClient)
     {
         _tenantFeaturesCachingService = tenantFeaturesCachingService;
         _tenantFeatureHttpClient = tenantFeatureHttpClient;

@@ -35,31 +35,40 @@ public static class UserPermissionsExtensions
 
     public static IServiceCollection AddUserPermissionsProvider(this IServiceCollection services)
     {
-        services.AddScoped<IPermissionValidator, CurrentUserPermissionsValidator>();
-        AddPermissionCachingService(services);
+        services
+            .AddScoped<IPermissionValidator, CurrentUserPermissionsValidator>()
+            .AddPermissionCachingService()
+            .AddUserPermissionHttpClient();
 
         return services;
     }
 
-    private static void AddPermissionCachingService(IServiceCollection services)
+    private static IServiceCollection AddPermissionCachingService(this IServiceCollection services)
     {
+        services.AddScoped<IUserPermissionsProvider, UserPermissionProvider>();
+        services.AddScoped<IPermissionCachingService, PermissionRedisCachingService>();
+        services.AddScoped<IRedisCachingProvider<string[]>, RedisCachingProvider<string[]>>();
+
+        return services;
+    }
+
+    private static IServiceCollection AddUserPermissionHttpClient(this IServiceCollection services)
+    {
+        services.AddServiceDiscovery();
         services.ConfigureHttpClientDefaults(options =>
         {
+            // Turn on service discovery
             options.AddServiceDiscovery();
         });
 
-        services.AddServiceDiscovery();
-
         services
-            .AddHttpClient<UserPermissionHttpClient>(client =>
+            .AddHttpClient<UserPermisssionHttpClient>(httpClient =>
             {
-                client.BaseAddress = new Uri("http://AuthorizationServiceUrl");
+                httpClient.BaseAddress = new Uri("http://authorization-service");
             })
             .AddPolicyHandler(ResilientClientPolicies.GetRetryOnErrorAndNotFoundPolicy())
             .AddPolicyHandler(ResilientClientPolicies.GetCircuitBreakerPolicy());
 
-        services.AddScoped<IUserPermissionsProvider, UserPermissionProvider>();
-        services.AddScoped<IPermissionCachingService, PermissionRedisCachingService>();
-        services.AddScoped<IRedisCachingProvider<string[]>, RedisCachingProvider<string[]>>();
+        return services;
     }
 }

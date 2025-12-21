@@ -36,29 +36,40 @@ public static class TenantFeaturesExtensions
 
     public static IServiceCollection AddTenantFeaturesProvider(this IServiceCollection services)
     {
-        services.AddScoped<IFeatureValidator, CurrentUserFeaturesValidator>();
-        AddTenantFeatureCachingService(services);
+        services
+            .AddScoped<IFeatureValidator, CurrentUserFeaturesValidator>()
+            .AddTenantFeatureCachingService()
+            .AddTenantFeaturesHttpClient();
 
         return services;
     }
 
-    private static void AddTenantFeatureCachingService(IServiceCollection services)
+    private static IServiceCollection AddTenantFeatureCachingService(this IServiceCollection services)
     {
-        services.AddServiceDiscovery();
-        services.ConfigureHttpClientDefaults(options =>
-        {
-            options.AddServiceDiscovery();
-        });
-
-        services.AddHttpClient<TenantFeaturesHttpClient>(client =>
-        {
-            client.BaseAddress = new Uri("http://TenancyServiceUrl");
-        })
-            .AddPolicyHandler(ResilientClientPolicies.GetRetryOnErrorAndNotFoundPolicy())
-            .AddPolicyHandler(ResilientClientPolicies.GetCircuitBreakerPolicy());
-
         services.AddScoped<ITenantFeaturesProvider, TenantFeaturesProvider>();
         services.AddScoped<ITenantFeaturesCachingService, TenantFeaturesRedisCachingService>();
         services.AddScoped<IRedisCachingProvider<string[]>, RedisCachingProvider<string[]>>();
+
+        return services;
+    }
+
+    private static IServiceCollection AddTenantFeaturesHttpClient(this IServiceCollection services)
+    {
+        services.AddServiceDiscovery();
+        services.ConfigureHttpClientDefaults(configure =>
+        {
+            // Turn on service discovery
+            configure.AddServiceDiscovery();
+        });
+
+        services
+            .AddHttpClient<TenancyHttpClient>(httpClient =>
+            {
+                httpClient.BaseAddress = new Uri("http://tenancy-api");
+            })
+            .AddPolicyHandler(ResilientClientPolicies.GetRetryOnErrorAndNotFoundPolicy())
+            .AddPolicyHandler(ResilientClientPolicies.GetCircuitBreakerPolicy());
+
+        return services;
     }
 }

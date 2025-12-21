@@ -8,28 +8,28 @@ namespace EShop.Shared.Scoping.ResourceAccessControl.Providers.UserOrganizationC
 
 public sealed class UserOrganizationContextHttpClient
 {
-    private readonly HttpClient _httpClient;
-    private readonly IUserDetailsProvider _userDetailsProvider;
-    private readonly ISystemInternalJwtTokenFactory _systemInternalJwtTokenFactory;
+    private readonly HttpClient httpClient;
+    private readonly IUserDetailsProvider userDetailsProvider;
+    private readonly ISystemInternalJwtTokenFactory systemInternalJwtTokenFactory;
 
     public UserOrganizationContextHttpClient(
         HttpClient httpClient,
         IUserDetailsProvider userDetailsProvider,
         ISystemInternalJwtTokenFactory systemInternalJwtTokenFactory)
     {
-        _httpClient = httpClient;
-        _userDetailsProvider = userDetailsProvider;
-        _systemInternalJwtTokenFactory = systemInternalJwtTokenFactory;
+        this.httpClient = httpClient;
+        this.userDetailsProvider = userDetailsProvider;
+        this.systemInternalJwtTokenFactory = systemInternalJwtTokenFactory;
     }
 
     public async Task<UserOrganizationContext> GetUserOrganizationContextAsync(string userId, CancellationToken cancellationToken)
     {
-        if (!_userDetailsProvider.IsAuthenticatedUser)
+        if (!userDetailsProvider.IsAuthenticatedUser)
         {
             return new UserOrganizationContext();
         }
 
-        var authenticatedClient = await _systemInternalJwtTokenFactory.AddUserContext(_httpClient, _userDetailsProvider.AuthenticatedUser);
+        var authenticatedClient = await systemInternalJwtTokenFactory.AddUserContext(httpClient, userDetailsProvider.AuthenticatedUser);
         var response = await authenticatedClient.GetStringAsync($"api/v1/users/{userId}/organizationContext", cancellationToken);
 
         var result = JsonConvert.DeserializeObject<Result<UserOrganizationContext>>(response);
@@ -43,10 +43,10 @@ public sealed class UserOrganizationContextHttpClient
 
     public async Task<UserOrganizationContext> GetUserOrganizationContextAsync(string userId, string userType = UserTypes.TenantUsers, CancellationToken cancellationToken = default)
     {
-        var tenantId = _userDetailsProvider.AuthenticatedUser.TenantId;
+        var tenantId = userDetailsProvider.AuthenticatedUser.TenantId;
         var operationalUser = new UserData(userId, userId, tenantId, false, null, userType);
 
-        var authenticatedClient = await _systemInternalJwtTokenFactory.AddUserContext(_httpClient, operationalUser, cancellationToken);
+        var authenticatedClient = await systemInternalJwtTokenFactory.AddUserContext(httpClient, operationalUser, cancellationToken);
         var response = await authenticatedClient.GetStringAsync($"api/v1/users/{operationalUser.Id}/organizationContext", cancellationToken);
 
         var result = JsonConvert.DeserializeObject<Result<UserOrganizationContext>>(response);
@@ -60,10 +60,10 @@ public sealed class UserOrganizationContextHttpClient
 
     public async Task<OrganizationContext> GetOrganizationContextForSpecificOrganizationAsync(string organizationId, CancellationToken cancellationToken)
     {
-        var operationalUser = _userDetailsProvider.AuthenticatedUser;
+        var operationalUser = userDetailsProvider.AuthenticatedUser;
         var systemUser = UserData.GetSystemUser(operationalUser.TenantId, operationalUser.Id);
 
-        var authenticatedClient = await _systemInternalJwtTokenFactory.AddUserContext(_httpClient, systemUser, cancellationToken);
+        var authenticatedClient = await systemInternalJwtTokenFactory.AddUserContext(httpClient, systemUser, cancellationToken);
         var response = await authenticatedClient.GetStringAsync($"api/v1/organizations/{organizationId}/organizationContext", cancellationToken);
 
         var result = JsonConvert.DeserializeObject<Result<OrganizationContext>>(response);
@@ -77,10 +77,10 @@ public sealed class UserOrganizationContextHttpClient
 
     public async Task<OrganizationContext> GetOrganizationContextByPathAsync(string organizationContextPath, CancellationToken cancellationToken)
     {
-        var operationalUser = _userDetailsProvider.AuthenticatedUser;
+        var operationalUser = userDetailsProvider.AuthenticatedUser;
         var systemUser = UserData.GetSystemUser(operationalUser.TenantId, operationalUser.Id);
 
-        var authenticatedClient = await _systemInternalJwtTokenFactory.AddUserContext(_httpClient, systemUser, cancellationToken);
+        var authenticatedClient = await systemInternalJwtTokenFactory.AddUserContext(httpClient, systemUser, cancellationToken);
         var response = await authenticatedClient.GetStringAsync($"api/v1/organizations?organizationContextPath={organizationContextPath}", cancellationToken);
 
         var result = JsonConvert.DeserializeObject<Result<OrganizationContext>>(response);

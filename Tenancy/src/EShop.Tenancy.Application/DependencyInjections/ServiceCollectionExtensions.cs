@@ -20,9 +20,7 @@ public static class ServiceCollectionExtensions
         services.AddMediatR();
         services.AddMediator(AssemblyReference.Assembly);
 
-        services.AddUserPermissionsProvider();
-        services.AddUserOrganizationContextProvider();
-        services.AddTenantFeaturesProvider();
+        services.AddOwnerTenantFeaturesProvider();
 
         return services;
     }
@@ -37,7 +35,7 @@ public static class ServiceCollectionExtensions
                 .AddValidatorsFromAssembly(Shared.Contracts.AssemblyReference.Assembly, includeInternalTypes: true);
     }
 
-    public static void AddTenantFeaturesProvider(this IServiceCollection services)
+    public static void AddOwnerTenantFeaturesProvider(this IServiceCollection services)
     {
         services.AddScoped<IFeatureValidator, CurrentUserFeaturesValidator>();
         services.AddScoped<ITenantFeaturesProvider, OwnerTenantFeaturesProvider>();

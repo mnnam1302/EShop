@@ -16,6 +16,8 @@ public static class ServiceCollectionExtensions
             .AddAuthorizationPersistence(configuration)
             .AddAuthorizationInfrastructure(configuration, environment);
 
+        services.AddTenantAuthenticationProvider();
+
         return services;
     }
 
@@ -37,8 +39,6 @@ public static class ServiceCollectionExtensions
                 options.GroupNameFormat = "'v'VVV";
                 options.SubstituteApiVersionInUrl = true;
             });
-
-        services.AddTenantAuthenticationProvider();
 
         return services;
     }
