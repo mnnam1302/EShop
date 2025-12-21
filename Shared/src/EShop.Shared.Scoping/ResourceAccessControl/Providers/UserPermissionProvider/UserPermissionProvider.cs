@@ -8,9 +8,9 @@
 public class UserPermissionProvider : IUserPermissionsProvider
 {
     private readonly IPermissionCachingService _permissionCache;
-    private readonly UserPermissionHttpClient _userPermissionHttpClient;
+    private readonly UserPermisssionHttpClient _userPermissionHttpClient;
 
-    public UserPermissionProvider(IPermissionCachingService permissionCache, UserPermissionHttpClient userPermissionHttpClient)
+    public UserPermissionProvider(IPermissionCachingService permissionCache, UserPermisssionHttpClient userPermissionHttpClient)
     {
         _permissionCache = permissionCache;
         _userPermissionHttpClient = userPermissionHttpClient;
@@ -19,7 +19,7 @@ public class UserPermissionProvider : IUserPermissionsProvider
     {
         if (string.IsNullOrEmpty(userId))
         {
-            throw new ArgumentException("User Id is required", nameof(userId));
+            throw new ArgumentNullException(nameof(userId), "User ID is required");
         }
 
         var permissionsCache = await _permissionCache.GetPermissionsAsync(userId);

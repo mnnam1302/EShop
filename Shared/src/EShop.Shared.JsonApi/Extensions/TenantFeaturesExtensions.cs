@@ -45,15 +45,17 @@ public static class TenantFeaturesExtensions
     private static void AddTenantFeatureCachingService(IServiceCollection services)
     {
         services.AddServiceDiscovery();
-        services.ConfigureHttpClientDefaults(options =>
+        services.ConfigureHttpClientDefaults(configure =>
         {
-            options.AddServiceDiscovery();
+            // Turn on service discovery
+            configure.AddServiceDiscovery();
         });
 
-        services.AddHttpClient<TenantFeaturesHttpClient>(client =>
-        {
-            client.BaseAddress = new Uri("http://TenancyServiceUrl");
-        })
+        services
+            .AddHttpClient<TenancyHttpClient>(httpClient =>
+            {
+                httpClient.BaseAddress = new Uri("http://tenancy-api");
+            })
             .AddPolicyHandler(ResilientClientPolicies.GetRetryOnErrorAndNotFoundPolicy())
             .AddPolicyHandler(ResilientClientPolicies.GetCircuitBreakerPolicy());
 

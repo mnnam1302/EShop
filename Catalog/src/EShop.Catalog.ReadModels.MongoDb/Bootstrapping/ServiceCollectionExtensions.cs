@@ -30,7 +30,7 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddShared(this IServiceCollection services)
     {
         services
-            .GlobalExceptionHandlingMiddleware()
+            .AddGlobalExceptionMiddleware()
             .AddMediator(AssemblyReference.Assembly);
 
         return services;

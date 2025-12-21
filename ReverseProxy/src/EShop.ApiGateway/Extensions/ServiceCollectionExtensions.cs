@@ -19,7 +19,7 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddBoostrapping(this IServiceCollection services, IConfiguration configuration)
     {
         services
-            .GlobalExceptionHandlingMiddleware()
+            .AddGlobalExceptionMiddleware()
             .AddEshopCors()
             .AddYarpReverseProxy(configuration);
 

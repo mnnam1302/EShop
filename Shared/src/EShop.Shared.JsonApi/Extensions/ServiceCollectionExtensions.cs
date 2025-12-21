@@ -5,7 +5,7 @@ namespace EShop.Shared.JsonApi.Extensions;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection GlobalExceptionHandlingMiddleware(this IServiceCollection services)
+    public static IServiceCollection AddGlobalExceptionMiddleware(this IServiceCollection services)
     {
         services.AddSingleton<ExceptionHandlingMiddleware>();
         return services;

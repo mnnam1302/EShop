@@ -43,17 +43,17 @@ public static class UserPermissionsExtensions
 
     private static void AddPermissionCachingService(IServiceCollection services)
     {
+        services.AddServiceDiscovery();
         services.ConfigureHttpClientDefaults(options =>
         {
+            // Turn on service discovery
             options.AddServiceDiscovery();
         });
 
-        services.AddServiceDiscovery();
-
         services
-            .AddHttpClient<UserPermissionHttpClient>(client =>
+            .AddHttpClient<UserPermisssionHttpClient>(httpClient =>
             {
-                client.BaseAddress = new Uri("http://AuthorizationServiceUrl");
+                httpClient.BaseAddress = new Uri("http://authorization-service");
             })
             .AddPolicyHandler(ResilientClientPolicies.GetRetryOnErrorAndNotFoundPolicy())
             .AddPolicyHandler(ResilientClientPolicies.GetCircuitBreakerPolicy());
