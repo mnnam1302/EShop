@@ -16,7 +16,9 @@ public static class ServiceCollectionExtensions
             .AddAuthorizationPersistence(configuration)
             .AddAuthorizationInfrastructure(configuration, environment);
 
-        services.AddTenantAuthenticationProvider();
+        services
+            .AddTenantAuthenticationProvider()
+            .AddTenantFeaturesProvider();
 
         return services;
     }

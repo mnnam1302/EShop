@@ -65,7 +65,7 @@ public static class TenantFeaturesExtensions
         services
             .AddHttpClient<TenancyHttpClient>(httpClient =>
             {
-                httpClient.BaseAddress = new Uri("http://tenancy-api");
+                httpClient.BaseAddress = new Uri("http://tenancy");
             })
             .AddPolicyHandler(ResilientClientPolicies.GetRetryOnErrorAndNotFoundPolicy())
             .AddPolicyHandler(ResilientClientPolicies.GetCircuitBreakerPolicy());
