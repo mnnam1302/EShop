@@ -4,8 +4,8 @@
       "commandName": "DockerCompose",
       "commandVersion": "1.0",
       "serviceActions": {
-        "apigateway": "StartDebugging",
-        "eshop.identity.api": "StartDebugging"
+        "eshop.tenancy.api": "StartDebugging",
+        "eshop.authorization.api": "StartDebugging"
       }
     }
   }

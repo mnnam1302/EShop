@@ -55,7 +55,7 @@ services:
     environment:
       RABBITMQ_DEFAULT_USER: "guest"
       RABBITMQ_DEFAULT_PASS: "guest"
-      RABBITMQ_DEFAULT_VHOST: "nhatnam1302"
+      RABBITMQ_DEFAULT_VHOST: "eshop01012025"
     networks:
       - eshop
 

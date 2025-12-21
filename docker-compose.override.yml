@@ -1,0 +1,50 @@
+services:
+  tenancy:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Username=tenancy;Password=tenancy-password-dev;Server=postgres;Port=5432;Database=eshop_tenancy
+      - RedisOptions__Enabled=true
+      - RedisOptions__ConnectionString=redis:6379
+      - MasstransitConfiguration__Host=rabbitmq
+      - MasstransitConfiguration__Port=5672
+      - MasstransitConfiguration__VirtualHost=eshop01012025
+      - MasstransitConfiguration__Username=guest
+      - MasstransitConfiguration__Password=guest
+      - Services__Authorization=http://authorization/
+    ports:
+      - "5001:8080"
+    # healthcheck:
+    #   test: ["CMD", "curl", "-f", "http://localhost/health/ready"]
+    #   start_period: 10s
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
+      - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
+    depends_on:
+      - postgres
+      - redis
+      - rabbitmq
+  
+  authorization:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Username=authorization;Password=authorization-password-dev;Server=postgres;Port=5432;Database=eshop_authorization
+      - RedisOptions__Enabled=true
+      - RedisOptions__ConnectionString=redis:6379
+      - MasstransitConfiguration__Host=rabbitmq
+      - MasstransitConfiguration__Port=5672
+      - MasstransitConfiguration__VirtualHost=eshop01012025
+      - MasstransitConfiguration__Username=guest
+      - MasstransitConfiguration__Password=guest
+      - Services__Tenancy=http://tenancy/
+    ports:
+      - "5002:8080"
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
+      - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
+    # healthcheck:
+    #   test: ["CMD", "curl", "-f", "http://localhost/health/ready"]
+    #   start_period: 10s
+    depends_on:
+      - postgres
+      - redis
+      - rabbitmq

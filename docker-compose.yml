@@ -1,0 +1,62 @@
+services:
+  postgres:
+    image: postgres:17.0
+    container_name: postgres
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    command: postgres -c 'max_connections=200'
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Passw0rd
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./postgres-init.sql:/docker-entrypoint-initdb.d/1-init.sql
+      - eshop-data:/var/lib/postgresql/data
+  
+  redis:
+    image: redis:7.4.7
+    container_name: redis
+    ports:
+      - 6379:6379
+    volumes:
+      - eshop_redis:/data
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: rabbitmq
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 30s
+      timeout: 30s
+      retries: 3
+    ports:
+      - 5672:5672
+      - 15672:15672
+    environment:
+      RABBITMQ_DEFAULT_USER: "guest"
+      RABBITMQ_DEFAULT_PASS: "guest"
+      RABBITMQ_DEFAULT_VHOST: "eshop01012025"
+
+  tenancy:
+    image: ${DOCKER_REGISTRY-}eshoptenancyapi
+    build:
+      context: .
+      args:
+        ENVIRONMENT: dev
+      dockerfile: Tenancy/src/EShop.Tenancy.API/Dockerfile
+
+  authorization:
+    image: ${DOCKER_REGISTRY-}eshopauthorizationapi
+    build:
+      context: .
+      args:
+        ENVIRONMENT: dev
+      dockerfile: Authorization/src/EShop.Authorization.API/Dockerfile
+
+volumes:
+  eshop-data:
+  eshop_redis:
