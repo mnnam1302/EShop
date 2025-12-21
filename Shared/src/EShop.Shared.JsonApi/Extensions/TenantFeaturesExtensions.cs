@@ -36,13 +36,24 @@ public static class TenantFeaturesExtensions
 
     public static IServiceCollection AddTenantFeaturesProvider(this IServiceCollection services)
     {
-        services.AddScoped<IFeatureValidator, CurrentUserFeaturesValidator>();
-        AddTenantFeatureCachingService(services);
+        services
+            .AddScoped<IFeatureValidator, CurrentUserFeaturesValidator>()
+            .AddTenantFeatureCachingService()
+            .AddTenantFeaturesHttpClient();
 
         return services;
     }
 
-    private static void AddTenantFeatureCachingService(IServiceCollection services)
+    private static IServiceCollection AddTenantFeatureCachingService(this IServiceCollection services)
+    {
+        services.AddScoped<ITenantFeaturesProvider, TenantFeaturesProvider>();
+        services.AddScoped<ITenantFeaturesCachingService, TenantFeaturesRedisCachingService>();
+        services.AddScoped<IRedisCachingProvider<string[]>, RedisCachingProvider<string[]>>();
+
+        return services;
+    }
+
+    private static IServiceCollection AddTenantFeaturesHttpClient(this IServiceCollection services)
     {
         services.AddServiceDiscovery();
         services.ConfigureHttpClientDefaults(configure =>
@@ -59,8 +70,6 @@ public static class TenantFeaturesExtensions
             .AddPolicyHandler(ResilientClientPolicies.GetRetryOnErrorAndNotFoundPolicy())
             .AddPolicyHandler(ResilientClientPolicies.GetCircuitBreakerPolicy());
 
-        services.AddScoped<ITenantFeaturesProvider, TenantFeaturesProvider>();
-        services.AddScoped<ITenantFeaturesCachingService, TenantFeaturesRedisCachingService>();
-        services.AddScoped<IRedisCachingProvider<string[]>, RedisCachingProvider<string[]>>();
+        return services;
     }
 }
