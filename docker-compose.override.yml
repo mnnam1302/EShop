@@ -10,7 +10,7 @@ services:
       - MasstransitConfiguration__VirtualHost=eshop01012025
       - MasstransitConfiguration__Username=guest
       - MasstransitConfiguration__Password=guest
-      - Services__authorization=http://authorization/
+      - Services__Authorization=http://authorization:5002
     ports:
       - "5001:8080"
     # healthcheck:
@@ -39,7 +39,7 @@ services:
       - MasstransitConfiguration__VirtualHost=eshop01012025
       - MasstransitConfiguration__Username=guest
       - MasstransitConfiguration__Password=guest
-      - Services__tenancy=http://tenancy/
+      - Services__Tenancy=http://tenancy:5001
     ports:
       - "5002:8080"
     volumes:

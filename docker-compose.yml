@@ -16,6 +16,8 @@ services:
     volumes:
       - ./postgres-init.sql:/docker-entrypoint-initdb.d/1-init.sql
       - eshop-data:/var/lib/postgresql/data
+    networks:
+      - eshop
   
   redis:
     image: redis:7.4.7
@@ -24,6 +26,8 @@ services:
       - 6379:6379
     volumes:
       - eshop_redis:/data
+    networks:
+      - eshop
 
   rabbitmq:
     image: rabbitmq:3-management-alpine
@@ -43,6 +47,8 @@ services:
       RABBITMQ_DEFAULT_VHOST: "eshop01012025"
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - eshop
 
   tenancy:
     image: ${DOCKER_REGISTRY-}eshop/tenancy
@@ -52,6 +58,8 @@ services:
       args:
         ENVIRONMENT: dev
       dockerfile: Tenancy/src/EShop.Tenancy.API/Dockerfile
+    networks:
+      - eshop
 
   authorization:
     image: ${DOCKER_REGISTRY-}eshop/authorization
@@ -61,8 +69,15 @@ services:
       args:
         ENVIRONMENT: dev
       dockerfile: Authorization/src/EShop.Authorization.API/Dockerfile
+    networks:
+      - eshop
 
 volumes:
   eshop-data:
   eshop_redis:
   rabbitmq_data:
+
+networks:
+  eshop:
+    name: eshop
+    driver: bridge
