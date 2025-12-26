@@ -1,6 +1,8 @@
 ﻿using EShop.Shared.Cache.Providers;
 using EShop.Shared.Cache.Services;
+using EShop.Shared.DomainTools.Extensions;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserOrganizationContextProvider;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace EShop.Shared.JsonApi.Extensions;
@@ -37,9 +39,11 @@ public static class UserOrganizationContextExtensions
             .AddServiceDiscovery();
 
         services
-            .AddHttpClient<UserOrganizationContextHttpClient>(client =>
+            .AddHttpClient<UserOrganizationContextHttpClient>((serviceProvider, client) =>
             {
-                client.BaseAddress = new Uri("http://authorization");
+                var configuration = serviceProvider.GetRequiredService<IConfiguration>();
+                var authorizationServiceUrl = configuration["Services:Authorization"].Require();
+                client.BaseAddress = new Uri(authorizationServiceUrl);
             })
             .AddPolicyHandler(ResilientClientPolicies.GetRetryOnErrorAndNotFoundPolicy())
             .AddPolicyHandler(ResilientClientPolicies.GetCircuitBreakerPolicy());
