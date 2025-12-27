@@ -27,7 +27,8 @@ public static class ServiceCollectionExtensions
     {
         services.AddCors();
         services.AddResiliencePolicy();
-        services.AddSingleton<ExceptionHandlingMiddleware>();
+        services.AddGlobalExceptionMiddleware();
+        services.AddHealthChecks();
 
         services.AddSwaggerGenNewtonsoftSupport()
             .AddFluentValidationRulesToSwagger()

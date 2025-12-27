@@ -3,27 +3,25 @@ using EShop.Shared.Cache.Providers;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 namespace EShop.Shared.Cache.DependencyInejctions.Extensions;
 
 public static class ServiceCollectionExtensions
 {
-    private static readonly string[] tags = new[] { "cache", "redis" };
-
     public static IServiceCollection AddRedisHealthCheck(this IServiceCollection services, IConfiguration configuration)
     {
         var redisOptions = new RedisOptions();
         configuration.GetSection(nameof(RedisOptions)).Bind(redisOptions);
 
         if (!redisOptions.Enabled)
+        {
             return services;
+        }
 
-        services.AddHealthChecks()
-            .AddRedis(
-                redisConnectionString: redisOptions.ConnectionString,
-                name: "redis",
-                failureStatus: Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus.Degraded,
-                tags: tags);
+        services
+            .AddHealthChecks()
+            .AddRedis(redisOptions.ConnectionString, "redis", HealthStatus.Degraded, ["cache", "redis"]);
 
         return services;
     }

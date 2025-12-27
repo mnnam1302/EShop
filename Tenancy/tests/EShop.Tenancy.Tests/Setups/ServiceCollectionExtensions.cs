@@ -13,7 +13,6 @@ using EShop.Tenancy.API;
 using EShop.Tenancy.API.Boostrapping;
 using EShop.Tenancy.Application.DependencyInjections;
 using EShop.Tenancy.Application.Services;
-using EShop.Tenancy.Infrastructure.DependencyInjections;
 using EShop.Tenancy.Persistence;
 using EShop.Tenancy.Persistence.DependencyInjections;
 using EShop.Testing.JsonApiApplication;

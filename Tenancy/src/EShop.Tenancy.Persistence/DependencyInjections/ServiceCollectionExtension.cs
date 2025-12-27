@@ -11,7 +11,8 @@ public static class ServiceCollectionExtension
 {
     public static IServiceCollection AddTenancyPersistence(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddPostgreSqlHealthCheck(configuration)
+        services
+            .AddPostgreSqlHealthCheck(configuration)
             .AddDbContextWithScoping<TenancyDbContext>(configuration)
             .AddPersistenceServices();
 
