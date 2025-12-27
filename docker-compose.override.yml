@@ -13,9 +13,9 @@ services:
       - Services__Authorization=http://authorization:8080
     ports:
       - "5001:8080"
-    # healthcheck:
-    #   test: ["CMD", "curl", "-f", "http://localhost/health/ready"]
-    #   start_period: 10s
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      start_period: 10s
     volumes:
       - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
       - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
@@ -45,9 +45,9 @@ services:
     volumes:
       - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
       - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
-    # healthcheck:
-    #   test: ["CMD", "curl", "-f", "http://localhost/health/ready"]
-    #   start_period: 10s
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      start_period: 10s
     depends_on:
       postgres:
         condition: service_healthy
