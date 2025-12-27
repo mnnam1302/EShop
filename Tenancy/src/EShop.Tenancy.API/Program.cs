@@ -15,7 +15,7 @@ public class Program
 
         try
         {
-            var app = BuidlWebApp(args);
+            var app = BuildWebApp(args);
 
             await using (var scope = app.Services.CreateAsyncScope())
             {
@@ -40,7 +40,7 @@ public class Program
         }
     }
 
-    private static WebApplication BuidlWebApp(string[] args)
+    private static WebApplication BuildWebApp(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
 
