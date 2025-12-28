@@ -1,4 +1,4 @@
-﻿using EShop.AppHost.Bootstrapping;
+using EShop.AppHost.Bootstrapping;
 
 var builder = DistributedApplication.CreateBuilder(args);
 

@@ -55,13 +55,12 @@ public static class ServiceCollectionExtensions
                 {
                     var connectionString = configuration.GetConnectionString("rabbitmq");
                     bus.Host(connectionString);
-
                 }
                 else
                 {
                     var massTransitConfiguration = new MasstransitConfiguration();
                     configuration.GetSection(nameof(MasstransitConfiguration)).Bind(massTransitConfiguration);
-                    
+
                     bus.Host(massTransitConfiguration.Host, massTransitConfiguration.Port, massTransitConfiguration.VHost, h =>
                     {
                         h.Username(massTransitConfiguration.Username);

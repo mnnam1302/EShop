@@ -60,6 +60,22 @@ public static class ExternalServiceRegistrationExtensions
                 .WaitFor(rabbitmq);
         }
 
+        // Authorization Microservice
+        var authorizationDatabase = postgres.AddDatabase("authorizationDatabase", "eshop_authorization");
+        var authrorization = builder.AddProject<Projects.EShop_Authorization_API>("eshop-authorization-api")
+            .WithExternalServiceMode(useExternalService)
+            .WithReference(authorizationDatabase)
+            .WithReference(redis)
+            .WithReference(rabbitmq);
+
+        if (!useExternalService)
+        {
+            authrorization
+                .WaitFor(authorizationDatabase)
+                .WaitFor(redis)
+                .WaitFor(rabbitmq);
+        }
+
         return builder;
     }
 
