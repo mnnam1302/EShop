@@ -18,34 +18,52 @@ public static class ExternalServiceRegistrationExtensions
 
     private static IDistributedApplicationBuilder AddServices(IDistributedApplicationBuilder builder, bool useExternalService)
     {
+        // Infrastructure resources
+        var pathToDbInitDirectory = Path.GetFullPath(Path.Combine(Environment.CurrentDirectory, @"..\Deployment\Scripts\"));
+        var postgres = builder.AddPostgres(ServiceConnectionNames.PostgreSql)
+                .WithImageTag("17.0")
+                .WithDataVolume("ehop-data")
+                .WithInitFiles(pathToDbInitDirectory)
+                .WithArgs("-c", "max_connections=200")
+                .WithPgAdmin(rb =>
+                {
+                    rb.WithLifetime(ContainerLifetime.Persistent);
+                    rb.WithHostPort(5442);
+                })
+                .WithLifetime(ContainerLifetime.Persistent);
+
         var redis = useExternalService
             ? builder.AddConnectionString(ServiceConnectionNames.Redis)
-            : builder
-                .AddRedis(ServiceConnectionNames.Redis)
-                .WithImageTag("latest")
-                .WithLifetime(ContainerLifetime.Persistent)
-                .WithRedisInsight();
-
-        var postgresql = useExternalService
-            ? builder.AddConnectionString(ServiceConnectionNames.PostgreSql)
-            : builder
-                .AddPostgres(ServiceConnectionNames.PostgreSql)
-                .WithLifetime(ContainerLifetime.Persistent)
-                .WithPgAdmin()
-                .WithDataVolume();
+            : builder.AddRedis(ServiceConnectionNames.Redis)
+                .WithRedisInsight(rb =>
+                {
+                    rb.WithLifetime(ContainerLifetime.Persistent);
+                    rb.WithHostPort(6389);
+                })
+                .WithLifetime(ContainerLifetime.Persistent);
 
         var rabbitmq = useExternalService
             ? builder.AddConnectionString(ServiceConnectionNames.RabbitMq)
             : builder
                 .AddRabbitMQ(ServiceConnectionNames.RabbitMq)
                 .WithLifetime(ContainerLifetime.Persistent)
-                .WithManagementPlugin();
+                .WithManagementPlugin(port: 15672);
 
-        builder.AddProject<Projects.EShop_Tenancy_API>(ServiceConnectionNames.TenancyApi)
+        // Tenancy Microservice
+        var tenancyDatabase = postgres.AddDatabase("tenancyDatabase", "eshop_tenancy");
+        var tenancy = builder.AddProject<Projects.EShop_Tenancy_API>(ServiceConnectionNames.TenancyApi)
             .WithExternalServiceMode(useExternalService)
-            .WithReference(postgresql)
+            .WithReference(postgres)
             .WithReference(redis)
             .WithReference(rabbitmq);
+
+        if (!useExternalService)
+        {
+            tenancy
+                .WaitFor(tenancyDatabase)
+                .WaitFor(redis)
+                .WaitFor(rabbitmq);
+        }
 
         return builder;
     }

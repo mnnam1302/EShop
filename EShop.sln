@@ -14,7 +14,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.github\copilot-instructions.md = .github\copilot-instructions.md
 		delete-tables.sql = delete-tables.sql
 		Directory.Packages.props = Directory.Packages.props
-		postgres-init.sql = postgres-init.sql
 		README.md = README.md
 	EndProjectSection
 EndProject
@@ -113,6 +112,14 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EShop.ServiceDefaults", "EShop.ServiceDefaults\EShop.ServiceDefaults.csproj", "{3941E297-4449-5207-EC32-3679FF14F902}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Aspire", "Aspire", "{31242E98-E92A-4500-8463-9CDA3627C571}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Deployment", "Deployment", "{645D1914-2B57-4FF2-85EC-2D25E851A35C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Scripts", "Scripts", "{EBD46815-F3D7-4179-A308-766644D0DE61}"
+	ProjectSection(SolutionItems) = preProject
+		Deployment\Scripts\delete-tables.sql = Deployment\Scripts\delete-tables.sql
+		Deployment\Scripts\postgres-init.sql = Deployment\Scripts\postgres-init.sql
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -299,6 +306,7 @@ Global
 		{012E1CBC-EBC5-45FE-8AE7-30D29FF97B35} = {D0916B7D-F7B6-7D7C-08CD-3AA4546D8309}
 		{D94B4208-4422-4BC0-BF0C-9976A78194A1} = {31242E98-E92A-4500-8463-9CDA3627C571}
 		{3941E297-4449-5207-EC32-3679FF14F902} = {31242E98-E92A-4500-8463-9CDA3627C571}
+		{EBD46815-F3D7-4179-A308-766644D0DE61} = {645D1914-2B57-4FF2-85EC-2D25E851A35C}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {BB890EFB-EE36-4A0E-A948-F28A53D375E6}

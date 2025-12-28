@@ -14,7 +14,7 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - ./postgres-init.sql:/docker-entrypoint-initdb.d/1-init.sql
+      - ./Deployment/Scripts/postgres-init.sql:/docker-entrypoint-initdb.d/1-init.sql
       - eshop-data:/var/lib/postgresql/data
     networks:
       - eshop
