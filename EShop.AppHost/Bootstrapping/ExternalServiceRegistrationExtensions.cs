@@ -48,7 +48,7 @@ public static class ExternalServiceRegistrationExtensions
         var tenancyDatabase = postgres.AddDatabase("tenancyDatabase", "eshop_tenancy");
         var tenancy = builder.AddProject<Projects.EShop_Tenancy_API>(ServiceConnectionNames.TenancyApi)
             .WithExternalServiceMode(useExternalService)
-            .WithReference(postgres)
+            .WithReference(tenancyDatabase)
             .WithReference(redis)
             .WithReference(rabbitmq);
 
