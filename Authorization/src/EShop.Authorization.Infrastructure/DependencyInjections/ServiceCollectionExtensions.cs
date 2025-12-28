@@ -85,9 +85,6 @@ public static class ServiceCollectionExtensions
         IConfiguration configuration,
         IWebHostEnvironment environment)
     {
-        var massTransitConfiguration = new MasstransitConfiguration();
-        configuration.GetSection(nameof(MasstransitConfiguration)).Bind(massTransitConfiguration);
-
         var messageBusOptions = new MessageBusOptions();
         configuration.GetSection(nameof(MessageBusOptions)).Bind(messageBusOptions);
 
@@ -99,17 +96,27 @@ public static class ServiceCollectionExtensions
 
             cfg.UsingRabbitMq((context, bus) =>
             {
-                bus.Host(massTransitConfiguration.Host, massTransitConfiguration.Port, massTransitConfiguration.VHost, h =>
+                if (configuration.IsRunningInAspire())
                 {
-                    h.Username(massTransitConfiguration.Username);
-                    h.Password(massTransitConfiguration.Password);
-                });
+                    var connectionString = configuration.GetConnectionString("rabbitmq");
+                    bus.Host(connectionString);
+                }
+                else
+                {
+                    var massTransitConfiguration = new MasstransitConfiguration();
+                    configuration.GetSection(nameof(MasstransitConfiguration)).Bind(massTransitConfiguration);
 
-                bus.UseMessageRetry(retry
-                    => retry.Incremental(
-                            retryLimit: messageBusOptions.RetryLimit,
-                            initialInterval: messageBusOptions.InitialInterval,
-                            intervalIncrement: messageBusOptions.IntervalIncrement));
+                    bus.Host(massTransitConfiguration.Host, massTransitConfiguration.Port, massTransitConfiguration.VHost, h =>
+                    {
+                        h.Username(massTransitConfiguration.Username);
+                        h.Password(massTransitConfiguration.Password);
+                    });
+                }
+
+                bus.UseMessageRetry(retry=> retry.Incremental(
+                    retryLimit: messageBusOptions.RetryLimit,
+                    initialInterval: messageBusOptions.InitialInterval,
+                    intervalIncrement: messageBusOptions.IntervalIncrement));
 
                 bus.UseNewtonsoftJsonSerializer();
                 bus.ConfigureNewtonsoftJsonSerializer(settings =>

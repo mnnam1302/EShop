@@ -45,12 +45,12 @@ public static class Program
     private static WebApplication BuidlWebApp(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
+        builder.AddServiceDefaults();
 
         var startup = new Startup(builder.Configuration, builder.Environment);
         startup.ConfigureServices(builder.Services);
 
-        builder.Host
-            .UseSerilog();
+        builder.Host.UseSerilog();
 
         builder.WebHost
             .UseShutdownTimeout(TimeSpan.FromSeconds(ShutdownTimeoutInSeconds));

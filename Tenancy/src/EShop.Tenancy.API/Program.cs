@@ -43,15 +43,12 @@ public class Program
     private static WebApplication BuildWebApp(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
-
-        // Add Aspire service defaults (service discovery, resilience, health checks, and OpenTelemetry)
         builder.AddServiceDefaults();
 
         var startup = new Startup(builder.Configuration, builder.Environment);
         startup.ConfigureServices(builder.Services);
 
-        builder.Host
-            .UseSerilog();
+        builder.Host.UseSerilog();
 
         builder.WebHost
             .UseShutdownTimeout(TimeSpan.FromSeconds(ShutdownTimeoutInSeconds));

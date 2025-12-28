@@ -19,9 +19,15 @@ public static class ServiceCollectionExtensions
             return services;
         }
 
+        // Check if running with .NET Aspire (connection name from service discovery)
+        var aspireRedisConnectionString = configuration.GetConnectionString("redis");
+        var connectionString = !string.IsNullOrEmpty(aspireRedisConnectionString) 
+            ? aspireRedisConnectionString 
+            : redisOptions.ConnectionString;
+
         services
             .AddHealthChecks()
-            .AddRedis(redisOptions.ConnectionString, "redis", HealthStatus.Degraded, ["cache", "redis"]);
+            .AddRedis(connectionString, "redis", HealthStatus.Degraded, ["cache", "redis"]);
 
         return services;
     }
@@ -35,11 +41,24 @@ public static class ServiceCollectionExtensions
         if (!redisOptions.Enabled)
             return services;
 
-        services.AddStackExchangeRedisCache(options =>
+        // Check if running with .NET Aspire (connection name from service discovery)
+        var aspireRedisConnectionString = configuration.GetConnectionString("redis");
+        if (!string.IsNullOrEmpty(aspireRedisConnectionString))
         {
-            var connectionString = redisOptions.ConnectionString;
-            options.Configuration = connectionString;
-        });
+            services.AddStackExchangeRedisCache(options =>
+            {
+                options.Configuration = aspireRedisConnectionString;
+            });
+        }
+        else
+        {
+            // Fallback to manual configuration
+            services.AddStackExchangeRedisCache(options =>
+            {
+                var connectionString = redisOptions.ConnectionString;
+                options.Configuration = connectionString;
+            });
+        }
 
         services.AddScoped(typeof(CachedRemoteConfiguration));
         services.AddScoped<IRedisResiliencePolicyProvider, RedisResiliencePolicyProvider>();
