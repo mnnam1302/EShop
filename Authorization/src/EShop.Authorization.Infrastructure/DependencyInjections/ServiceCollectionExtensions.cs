@@ -8,6 +8,7 @@ using EShop.Shared.Cache.DependencyInejctions.Extensions;
 using EShop.Shared.Contracts.JsonConverters;
 using EShop.Shared.Contracts.Services.Authorization;
 using EShop.Shared.Contracts.Services.Tenancy.Tenants;
+using EShop.Shared.Diagnostics;
 using EShop.Shared.DomainTools.UnitOfWorks;
 using EShop.Shared.EventBus.Abstractions;
 using EShop.Shared.EventBus.DependencyInjections.Extensions;
@@ -22,15 +23,18 @@ using MassTransit;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 namespace EShop.Authorization.Infrastructure.DependencyInjections;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddAuthorizationPersistence(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddAuthorizationPersistence(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment)
     {
-        services.AddPostgreSqlHealthCheck(configuration)
-            .AddDbContextWithScoping<AuthorizationDbContext>(configuration)
+        var connectionString = configuration.GetConnectionString(environment);
+
+        services.AddPostgreSqlHealthCheck(configuration, connectionString)
+            .AddDbContextWithScoping<AuthorizationDbContext>(configuration, connectionString, useRingFencedScoping: false)
             .AddPersistenceServices();
 
         services.AddMemoryCacheInfrastructure();
@@ -179,5 +183,18 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IEmailService, EmailService>();
 
         return services;
+    }
+}
+
+internal static class ConnectionStringExtensions
+{
+    internal static string GetConnectionString(this IConfiguration configuration, IHostEnvironment environment)
+    {
+        return configuration.GetRlsConnectionString(configuration.GetConnectionStringName(), environment);
+    }
+
+    internal static string GetConnectionStringName(this IConfiguration configuration)
+    {
+        return configuration.IsRunningInAspire() ? "authorizationDatabase" : "DefaultConnection";
     }
 }

@@ -13,7 +13,7 @@ public static class ServiceCollectionExtensions
     {
         services.AddAuthorizationAPI()
             .AddAuthorizationApplication()
-            .AddAuthorizationPersistence(configuration)
+            .AddAuthorizationPersistence(configuration, environment)
             .AddAuthorizationInfrastructure(configuration, environment);
 
         services

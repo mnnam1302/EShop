@@ -44,6 +44,9 @@ public class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
+        // Add Aspire service defaults (service discovery, resilience, health checks, and OpenTelemetry)
+        builder.AddServiceDefaults();
+
         var startup = new Startup(builder.Configuration, builder.Environment);
         startup.ConfigureServices(builder.Services);
 
@@ -54,6 +57,9 @@ public class Program
             .UseShutdownTimeout(TimeSpan.FromSeconds(ShutdownTimeoutInSeconds));
 
         var app = builder.Build();
+
+        // Map Aspire default endpoints (health checks, etc.)
+        app.MapDefaultEndpoints();
 
         var loggerFactory = app.Services.GetRequiredService<ILoggerFactory>();
         startup.Configure(app, app.Lifetime, loggerFactory);

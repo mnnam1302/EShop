@@ -15,7 +15,7 @@ public static class ServiceCollectionExtensions
         services
             .AddTenancyAPI()
             .AddTenancyApplication()
-            .AddTenancyPersistence(configuration)
+            .AddTenancyPersistence(configuration, environment)
             .AddTenancyInfrastructure(configuration, environment, Program.ApplicationName);
 
         services
