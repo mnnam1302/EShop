@@ -1,9 +1,11 @@
 ﻿using EShop.Shared.Cache.Providers;
 using EShop.Shared.Cache.Services;
+using EShop.Shared.DomainTools.Extensions;
 using EShop.Shared.HealthChecks;
 using EShop.Shared.Scoping.ResourceAccessControl;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers.TenantFeaturesProvider;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
@@ -63,9 +65,11 @@ public static class TenantFeaturesExtensions
         });
 
         services
-            .AddHttpClient<TenancyHttpClient>(httpClient =>
+            .AddHttpClient<TenancyHttpClient>((serviceProvider, httpClient) =>
             {
-                httpClient.BaseAddress = new Uri("http://tenancy-api");
+                var configuration = serviceProvider.GetRequiredService<IConfiguration>();
+                var tenancyServiceUrl = configuration["Services:Tenancy"].Require();
+                httpClient.BaseAddress = new Uri(tenancyServiceUrl);
             })
             .AddPolicyHandler(ResilientClientPolicies.GetRetryOnErrorAndNotFoundPolicy())
             .AddPolicyHandler(ResilientClientPolicies.GetCircuitBreakerPolicy());

@@ -1,7 +1,10 @@
 ﻿using Carter;
+using EShop.Shared.Diagnostics;
 using EShop.Shared.JsonApi.Extensions;
 using EShop.Shared.JsonApi.Middlewares;
 using EShop.Tenancy.API.Boostrapping;
+using HealthChecks.UI.Client;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 
 namespace EShop.Tenancy.API;
 
@@ -37,6 +40,10 @@ public class Startup
         app.UseAuthentication();
         app.UseAuthorization();
 
+        app.MapHealthChecks("/health", new HealthCheckOptions
+        {
+            ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+        });
         app.MapCarter();
 
         app.RegisterFeatures(applicationLifetime, logger);

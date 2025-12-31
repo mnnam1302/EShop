@@ -1,9 +1,12 @@
 ﻿using EShop.Shared.DbResourceAccessControl.Extensions;
 using EShop.Shared.DbResourceAccessControl.Interceptors;
 using EShop.Shared.DbResourceAccessControl.Options;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Npgsql.EntityFrameworkCore.PostgreSQL;
 
@@ -11,17 +14,15 @@ namespace EShop.Shared.JsonApi.Extensions;
 
 public static class DataAccessExtensions
 {
-    private static readonly string[] tags = ["db", "postgresql", "sql"];
-
-    public static IServiceCollection AddPostgreSqlHealthCheck(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddPostgreSqlHealthCheck(this IServiceCollection services, IConfiguration configuration, string connectionString)
     {
         services
             .AddHealthChecks()
             .AddNpgSql(
-                connectionString: configuration.GetConnectionString("DefaultConnection") ?? string.Empty,
+                connectionString: connectionString,
                 name: "postgresql",
-                failureStatus: Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus.Degraded,
-                tags: tags);
+                failureStatus: HealthStatus.Degraded,
+                tags: ["db", "postgresql", "sql"]);
 
         return services;
     }
@@ -29,57 +30,46 @@ public static class DataAccessExtensions
     public static IServiceCollection AddDbContextWithScoping<TContext>(
         this IServiceCollection services,
         IConfiguration configuration,
-        bool useRingFencedScoping = false)
+        string connectionString,
+        bool useRingFencedScoping = false,
+         Action<IServiceProvider, DbContextOptionsBuilder>? additionalDbContextConfig = null)
         where TContext : DbContext
     {
         services.AddDatabaseOptions(configuration);
         services.AddMultiTenantScoping();
         services.AddDomainEventsDispatcherInterceptor();
 
-        services.AddDbContext<DbContext, TContext>((provider, builder) =>
+        services.AddDbContext<TContext>((serviceProvider, options) =>
         {
-            var ngsqlRetryOptions = provider.GetRequiredService<IOptionsMonitor<NgSqlRetryOptions>>();
-            var ngsqlVersionOptions = provider.GetRequiredService<IOptionsMonitor<NgSqlVersionOptions>>();
-            var tenantIsolationStrategy = provider.GetRequiredService<IMultiTenantIsolationStrategy>();
-            var domainEventsDispatcherInterceptor = provider.GetRequiredService<IDispatchDomainEventsInterceptor>();
+            var retryOptions = serviceProvider.GetRequiredService<IOptionsMonitor<NgSqlRetryOptions>>();
+            var versionOptions = serviceProvider.GetRequiredService<IOptionsMonitor<NgSqlVersionOptions>>();
 
-            builder
+            var tenantIsolationStrategy = serviceProvider.GetRequiredService<IMultiTenantIsolationStrategy>();
+            var domainEventsDispatcherInterceptor = serviceProvider.GetRequiredService<IDispatchDomainEventsInterceptor>();
+
+            options
                 .EnableDetailedErrors()
                 .EnableSensitiveDataLogging()
                 .UseLazyLoadingProxies()
                 .UseNpgsql(
-                    connectionString: configuration.GetConnectionString("DefaultConnection"),
-                    npgsqlOptionsAction: optionsBuilder
-                        => optionsBuilder
-                            .SetPostgresVersion(ngsqlVersionOptions.CurrentValue.Major, ngsqlVersionOptions.CurrentValue.Minor)
-                            .ExecutionStrategy(dependencies => new NpgsqlRetryingExecutionStrategy(
-                                dependencies: dependencies,
-                                maxRetryCount: ngsqlRetryOptions.CurrentValue.MaxRetryCount,
-                                maxRetryDelay: ngsqlRetryOptions.CurrentValue.MaxRetryDelay,
-                                errorCodesToAdd: ngsqlRetryOptions.CurrentValue.ErrorNumbersoAdd))
-                            .MigrationsAssembly(typeof(TContext).Assembly.GetName().Name))
+                    //connectionString: configuration.GetConnectionString("DefaultConnection"),
+                    connectionString: connectionString,
+                    npgsqlOptionsAction: optionsBuilder => optionsBuilder
+                        .SetPostgresVersion(versionOptions.CurrentValue.Major, versionOptions.CurrentValue.Minor)
+                        .ExecutionStrategy(dependencies => new NpgsqlRetryingExecutionStrategy(
+                            dependencies: dependencies,
+                            maxRetryCount: retryOptions.CurrentValue.MaxRetryCount,
+                            maxRetryDelay: retryOptions.CurrentValue.MaxRetryDelay,
+                            errorCodesToAdd: retryOptions.CurrentValue.ErrorNumbersoAdd))
+                        .MigrationsAssembly(typeof(TContext).Assembly.GetName().Name))
                 .AddInterceptors(tenantIsolationStrategy, domainEventsDispatcherInterceptor);
+
+            additionalDbContextConfig?.Invoke(serviceProvider, options);
         });
 
-        return services;
-    }
-
-    public static IServiceCollection AddDbContextPoolWithScoping<TDbContext>(
-        this IServiceCollection services,
-        IConfiguration configuration,
-        bool useRingFencedScoping = false)
-        where TDbContext : DbContext
-    {
-        services.AddDatabaseOptions(configuration);
-        services.AddMultiTenantScoping();
-
-        if (IsDesignTime())
+        if (useRingFencedScoping)
         {
-            services.AddDesignTimeDbContext<TDbContext>(configuration);
-        }
-        else
-        {
-            services.AddRuntimeDbContext<TDbContext>(configuration);
+            services.AddRingFencedScoping();
         }
 
         return services;
@@ -100,56 +90,5 @@ public static class DataAccessExtensions
             .ValidateOnStart();
 
         return services;
-    }
-
-    private static bool IsDesignTime()
-    {
-        return AppDomain.CurrentDomain.GetAssemblies()
-            .Any(assembly => assembly.FullName?.StartsWith("Microsoft.EntityFrameworkCore.Design") == true);
-    }
-
-    private static void AddDesignTimeDbContext<TDbContext>(this IServiceCollection services, IConfiguration configuration)
-        where TDbContext : DbContext
-    {
-        services.AddDbContext<TDbContext>((provider, builder) =>
-        {
-            var ngsqlVersionOptions = provider.GetRequiredService<IOptionsMonitor<NgSqlVersionOptions>>();
-
-            builder
-                .EnableDetailedErrors()
-                .EnableSensitiveDataLogging()
-                .UseNpgsql(
-                    configuration.GetConnectionString("DefaultConnection"),
-                    npgsqlOptionsAction: optionsBuilder => optionsBuilder
-                        .SetPostgresVersion(ngsqlVersionOptions.CurrentValue.Major, ngsqlVersionOptions.CurrentValue.Minor)
-                        .MigrationsAssembly(typeof(TDbContext).Assembly.GetName().Name));
-        });
-    }
-
-    private static void AddRuntimeDbContext<TDbContext>(this IServiceCollection services, IConfiguration configuration)
-        where TDbContext : DbContext
-    {
-        services.AddDbContextPool<TDbContext>((provider, builder) =>
-        {
-            var ngsqlRetryOptions = provider.GetRequiredService<IOptionsMonitor<NgSqlRetryOptions>>();
-            var ngsqlVersionOptions = provider.GetRequiredService<IOptionsMonitor<NgSqlVersionOptions>>();
-            var multiTenantConnectionInterceptor = provider.GetRequiredService<IMultiTenantIsolationStrategy>();
-
-            builder
-                .EnableDetailedErrors()
-                .EnableSensitiveDataLogging()
-                .UseLazyLoadingProxies()
-                .UseNpgsql(
-                    connectionString: configuration.GetConnectionString("DefaultConnection"),
-                    npgsqlOptionsAction: optionsBuilder => optionsBuilder
-                        .SetPostgresVersion(ngsqlVersionOptions.CurrentValue.Major, ngsqlVersionOptions.CurrentValue.Minor)
-                        .ExecutionStrategy(dependencies => new NpgsqlRetryingExecutionStrategy(
-                            dependencies: dependencies,
-                            maxRetryCount: ngsqlRetryOptions.CurrentValue.MaxRetryCount,
-                            maxRetryDelay: ngsqlRetryOptions.CurrentValue.MaxRetryDelay,
-                            errorCodesToAdd: ngsqlRetryOptions.CurrentValue.ErrorNumbersoAdd))
-                        .MigrationsAssembly(typeof(TDbContext).Assembly.GetName().Name))
-                .AddInterceptors(multiTenantConnectionInterceptor);
-        });
     }
 }

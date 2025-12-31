@@ -34,7 +34,7 @@ public sealed class TenancyHttpClient(
 
             return content?.Value.FeatureIds ?? [];
         }
-        catch (Exception)
+        catch (Exception ex)
         {
             return [];
         }

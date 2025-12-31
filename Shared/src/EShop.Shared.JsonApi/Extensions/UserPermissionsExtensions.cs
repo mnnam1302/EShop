@@ -1,14 +1,17 @@
 ﻿using EShop.Shared.Cache.Providers;
 using EShop.Shared.Cache.Services;
+using EShop.Shared.DomainTools.Extensions;
 using EShop.Shared.HealthChecks;
 using EShop.Shared.Scoping.ResourceAccessControl;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserPermissionProvider;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Nito.AsyncEx;
+using System;
 
 namespace EShop.Shared.JsonApi.Extensions;
 
@@ -62,9 +65,11 @@ public static class UserPermissionsExtensions
         });
 
         services
-            .AddHttpClient<UserPermisssionHttpClient>(httpClient =>
+            .AddHttpClient<UserPermisssionHttpClient>((serviceProvider, httpClient) =>
             {
-                httpClient.BaseAddress = new Uri("http://authorization-service");
+                var configuration = serviceProvider.GetRequiredService<IConfiguration>();
+                var authorizationServiceUrl = configuration["Services:Authorization"].Require();
+                httpClient.BaseAddress = new Uri(authorizationServiceUrl);
             })
             .AddPolicyHandler(ResilientClientPolicies.GetRetryOnErrorAndNotFoundPolicy())
             .AddPolicyHandler(ResilientClientPolicies.GetCircuitBreakerPolicy());

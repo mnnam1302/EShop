@@ -12,9 +12,10 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddBoostrapping(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment)
     {
-        services.AddTenancyAPI()
+        services
+            .AddTenancyAPI()
             .AddTenancyApplication()
-            .AddTenancyPersistence(configuration)
+            .AddTenancyPersistence(configuration, environment)
             .AddTenancyInfrastructure(configuration, environment, Program.ApplicationName);
 
         services
@@ -27,9 +28,10 @@ public static class ServiceCollectionExtensions
 
     public static IServiceCollection AddTenancyAPI(this IServiceCollection services)
     {
+        services.AddGlobalExceptionMiddleware();
         services.AddEshopCors();
         services.AddResiliencePolicy();
-        services.AddGlobalExceptionMiddleware();
+        services.AddHealthChecks();
 
         services.AddTransient<DbInitializer>();
 

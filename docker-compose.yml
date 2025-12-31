@@ -1,0 +1,83 @@
+services:
+  postgres:
+    image: postgres:17.0
+    container_name: postgres
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    command: postgres -c 'max_connections=200'
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Passw0rd
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./Deployment/Scripts/postgres-init.sql:/docker-entrypoint-initdb.d/1-init.sql
+      - eshop-data:/var/lib/postgresql/data
+    networks:
+      - eshop
+  
+  redis:
+    image: redis:7.4.7
+    container_name: redis
+    ports:
+      - 6379:6379
+    volumes:
+      - eshop_redis:/data
+    networks:
+      - eshop
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "check_port_connectivity"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+    ports:
+      - 5672:5672
+      - 15672:15672
+    environment:
+      RABBITMQ_DEFAULT_USER: "guest"
+      RABBITMQ_DEFAULT_PASS: "guest" 
+      RABBITMQ_DEFAULT_VHOST: "eshop01012025"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - eshop
+
+  tenancy:
+    image: ${DOCKER_REGISTRY-}eshop/tenancy
+    container_name: tenancy
+    build:
+      context: .
+      args:
+        ENVIRONMENT: dev
+      dockerfile: Tenancy/src/EShop.Tenancy.API/Dockerfile
+    networks:
+      - eshop
+
+  authorization:
+    image: ${DOCKER_REGISTRY-}eshop/authorization
+    container_name: authorization
+    build:
+      context: .
+      args:
+        ENVIRONMENT: dev
+      dockerfile: Authorization/src/EShop.Authorization.API/Dockerfile
+    networks:
+      - eshop
+
+volumes:
+  eshop-data:
+  eshop_redis:
+  rabbitmq_data:
+
+networks:
+  eshop:
+    name: eshop
+    driver: bridge

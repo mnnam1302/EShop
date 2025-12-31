@@ -9,13 +9,11 @@ namespace EShop.Authorization.API.APIs;
 
 public static class AuthEndpointHandler
 {
-    private const string BaseUrl = "api/v{version:apiVersion}/auth";
-
     public static IEndpointRouteBuilder MapAuthEndpoints(this IEndpointRouteBuilder endpoints)
     {
         var group = endpoints
             .NewVersionedApi("Auth")
-            .MapGroup(BaseUrl)
+            .MapGroup("api/v{version:apiVersion}/auth")
             .HasApiVersion(1)
             .RequireAuthorization();
 

@@ -1,11 +1,10 @@
 ﻿using EShop.Shared.Cache.DependencyInejctions.Extensions;
 using EShop.Shared.Contracts.JsonConverters;
 using EShop.Shared.Contracts.Services.Tenancy.Features;
-using EShop.Shared.EventBus.Abstractions;
+using EShop.Shared.Diagnostics;
 using EShop.Shared.EventBus.DependencyInjections.Extensions;
 using EShop.Shared.EventBus.DependencyInjections.Options;
 using EShop.Shared.EventBus.PipelineObservers;
-using EShop.Shared.EventBus.Services;
 using EShop.Shared.Scoping.ResourceAccessControl;
 using EShop.Tenancy.Application.Abstractions;
 using EShop.Tenancy.Application.Services;
@@ -39,12 +38,8 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    private static IServiceCollection AddMassTransitRabbitMQ(
-        this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment, string serviceName)
+    private static IServiceCollection AddMassTransitRabbitMQ(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment, string serviceName)
     {
-        var massTransitConfiguration = new MasstransitConfiguration();
-        configuration.GetSection(nameof(MasstransitConfiguration)).Bind(massTransitConfiguration);
-
         var messageBusOptions = new MessageBusOptions();
         configuration.GetSection(nameof(MessageBusOptions)).Bind(messageBusOptions);
 
@@ -56,17 +51,27 @@ public static class ServiceCollectionExtensions
 
             cfg.UsingRabbitMq((context, bus) =>
             {
-                bus.Host(massTransitConfiguration.Host, massTransitConfiguration.Port, massTransitConfiguration.VHost, h =>
+                if (configuration.IsRunningInAspire())
                 {
-                    h.Username(massTransitConfiguration.Username);
-                    h.Password(massTransitConfiguration.Password);
-                });
+                    var connectionString = configuration.GetConnectionString("rabbitmq");
+                    bus.Host(connectionString);
+                }
+                else
+                {
+                    var massTransitConfiguration = new MasstransitConfiguration();
+                    configuration.GetSection(nameof(MasstransitConfiguration)).Bind(massTransitConfiguration);
 
-                bus.UseMessageRetry(retry
-                    => retry.Incremental(
-                            retryLimit: messageBusOptions.RetryLimit,
-                            initialInterval: messageBusOptions.InitialInterval,
-                            intervalIncrement: messageBusOptions.IntervalIncrement));
+                    bus.Host(massTransitConfiguration.Host, massTransitConfiguration.Port, massTransitConfiguration.VHost, h =>
+                    {
+                        h.Username(massTransitConfiguration.Username);
+                        h.Password(massTransitConfiguration.Password);
+                    });
+                }
+
+                bus.UseMessageRetry(retry => retry.Incremental(
+                    retryLimit: messageBusOptions.RetryLimit,
+                    initialInterval: messageBusOptions.InitialInterval,
+                    intervalIncrement: messageBusOptions.IntervalIncrement));
 
                 bus.UseNewtonsoftJsonSerializer();
                 bus.ConfigureNewtonsoftJsonSerializer(settings =>

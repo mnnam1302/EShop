@@ -4,9 +4,7 @@ using Microsoft.Extensions.Logging;
 
 namespace EShop.Authorization.Infrastructure.EmailServices;
 
-internal sealed class EmailService(
-    IFluentEmail fluentEmail,
-    ILogger<EmailService> logger) : IEmailService
+internal sealed class EmailService(IFluentEmail fluentEmail, ILogger<EmailService> logger) : IEmailService
 {
     public async Task SendAsync(EmailMetaData emailMetadata, CancellationToken cancellationToken)
     {
@@ -29,12 +27,10 @@ internal sealed class EmailService(
             logger.LogError(smtpEx,
                 "SMTP Protocol Error while sending email to {EmailToId}. StatusCode: {StatusCode}, InnerException: {InnerException}",
                 emailMetadata.ToAddress, smtpEx.StatusCode, smtpEx.InnerException?.Message);
-            throw;
         }
         catch (Exception ex)
         {
             logger.LogError(ex, "Unexpected error occurred while sending email to {EmailToId}", emailMetadata.ToAddress);
-            throw;
         }
     }
 
