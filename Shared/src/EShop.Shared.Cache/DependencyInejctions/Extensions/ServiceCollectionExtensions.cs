@@ -1,5 +1,7 @@
 ﻿using EShop.Shared.Cache.DependencyInejctions.Options;
 using EShop.Shared.Cache.Providers;
+using EShop.Shared.Diagnostics;
+using EShop.Shared.DomainTools.Extensions;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -19,10 +21,8 @@ public static class ServiceCollectionExtensions
             return services;
         }
 
-        // Check if running with .NET Aspire (connection name from service discovery)
-        var aspireRedisConnectionString = configuration.GetConnectionString("redis");
-        var connectionString = !string.IsNullOrEmpty(aspireRedisConnectionString) 
-            ? aspireRedisConnectionString 
+        var connectionString = configuration.IsRunningInAspire()
+            ? configuration.GetConnectionString("redis").Require()
             : redisOptions.ConnectionString;
 
         services
@@ -34,30 +34,23 @@ public static class ServiceCollectionExtensions
 
     public static IServiceCollection AddRedisCacheInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
-        var redisOptions = new RedisOptions();
-        configuration.GetSection(nameof(RedisOptions)).Bind(redisOptions);
-        services.AddSingleton(redisOptions);
+        services.Configure<RedisOptions>(configuration.GetSection(nameof(RedisOptions)));
+
+        var redisOptions = configuration
+            .GetSection(nameof(RedisOptions))
+            .Get<RedisOptions>()
+            .Require();
 
         if (!redisOptions.Enabled)
             return services;
 
-        // Check if running with .NET Aspire (connection name from service discovery)
-        var aspireRedisConnectionString = configuration.GetConnectionString("redis");
-        if (!string.IsNullOrEmpty(aspireRedisConnectionString))
+        if (configuration.IsRunningInAspire())
         {
-            services.AddStackExchangeRedisCache(options =>
-            {
-                options.Configuration = aspireRedisConnectionString;
-            });
+            services.AddStackExchangeRedisCache(options => options.Configuration = configuration.GetConnectionString("redis"));
         }
         else
         {
-            // Fallback to manual configuration
-            services.AddStackExchangeRedisCache(options =>
-            {
-                var connectionString = redisOptions.ConnectionString;
-                options.Configuration = connectionString;
-            });
+            services.AddStackExchangeRedisCache(options => options.Configuration = redisOptions.ConnectionString);
         }
 
         services.AddScoped(typeof(CachedRemoteConfiguration));

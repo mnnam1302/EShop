@@ -62,7 +62,7 @@ public static class ExternalServiceRegistrationExtensions
 
         // Authorization Microservice
         var authorizationDatabase = postgres.AddDatabase("authorizationDatabase", "eshop_authorization");
-        var authrorization = builder.AddProject<Projects.EShop_Authorization_API>("eshop-authorization-api")
+        var authrorization = builder.AddProject<Projects.EShop_Authorization_API>(ServiceConnectionNames.AuthorizationApi)
             .WithExternalServiceMode(useExternalService)
             .WithReference(authorizationDatabase)
             .WithReference(redis)

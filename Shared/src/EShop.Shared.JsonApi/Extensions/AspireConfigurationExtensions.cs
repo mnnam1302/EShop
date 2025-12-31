@@ -16,10 +16,7 @@ public static class AspireConfigurationExtensions
     /// <param name="aspireConnectionStringName"></param>
     /// <param name="environment"></param>
     /// <returns></returns>
-    public static string GetRlsConnectionString(
-        this IConfiguration configuration,
-        string aspireConnectionStringName,
-        IHostEnvironment environment)
+    public static string GetRlsConnectionString(this IConfiguration configuration, string aspireConnectionStringName, IHostEnvironment environment)
     {
         if (configuration.IsRunningInAspire() && environment.IsDevelopment())
         {

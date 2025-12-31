@@ -80,10 +80,7 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    private static IServiceCollection AddMasstransitRabbitMQ(
-        this IServiceCollection services,
-        IConfiguration configuration,
-        IWebHostEnvironment environment)
+    private static IServiceCollection AddMasstransitRabbitMQ(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment)
     {
         var messageBusOptions = new MessageBusOptions();
         configuration.GetSection(nameof(MessageBusOptions)).Bind(messageBusOptions);
