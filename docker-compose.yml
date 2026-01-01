@@ -1,4 +1,15 @@
 services:
+  dashboard:
+    image: mcr.microsoft.com/dotnet/aspire-dashboard:9.0
+    container_name: dashboard
+    environment:
+      - DASHBOARD__OTLP__AUTHMODE=ApiKey
+      - DASHBOARD__OTLP__PRIMARYAPIKEY=104293fef88930cf3c41f27f762d58f5
+    ports:
+      - 18888:18888
+    networks:
+      - eshop
+
   postgres:
     image: postgres:17.0
     container_name: postgres
@@ -70,6 +81,7 @@ services:
       - MasstransitConfiguration__Username=guest
       - MasstransitConfiguration__Password=guest
       - Services__Authorization=http://authorization:8080
+      - OTEL_SERVICE_NAME=tenancy-api
     ports:
       - "5001:8080"
     healthcheck:
@@ -85,8 +97,11 @@ services:
         condition: service_started
       rabbitmq:
         condition: service_healthy
+      dashboard:
+        condition: service_started
     env_file:
       - ./common.env
+      - ./open-telemetry.env
     networks:
       - eshop
 
@@ -108,6 +123,7 @@ services:
       - MasstransitConfiguration__Username=guest
       - MasstransitConfiguration__Password=guest
       - Services__Tenancy=http://tenancy:8080
+      - OTEL_SERVICE_NAME=authorization-api
     ports:
       - "5002:8080"
     volumes:
@@ -123,8 +139,11 @@ services:
         condition: service_started
       rabbitmq:
         condition: service_healthy
+      dashboard:
+        condition: service_started
     env_file:
       - ./common.env
+      - ./open-telemetry.env
     networks:
       - eshop
 

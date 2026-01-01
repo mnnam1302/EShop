@@ -113,6 +113,7 @@
     <PackageVersion Include="Serilog.Enrichers.Process" Version="3.0.0" />
     <PackageVersion Include="Serilog.Enrichers.Thread" Version="4.0.0" />
     <PackageVersion Include="Serilog.Sinks.File" Version="6.0.0" />
+    <PackageVersion Include="Serilog.Sinks.OpenTelemetry" Version="4.1.1" />
     <PackageVersion Include="Serilog.Sinks.Seq" Version="8.0.0" />
     <!-- ================================================================ -->
     <!-- Communication and Email                                          -->
