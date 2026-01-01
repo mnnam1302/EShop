@@ -55,11 +55,36 @@ services:
   tenancy:
     image: ${DOCKER_REGISTRY-}eshop/tenancy
     container_name: tenancy
+    restart: on-failure
     build:
       context: .
-      args:
-        ENVIRONMENT: dev
       dockerfile: Tenancy/src/EShop.Tenancy.API/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Username=tenancy;Password=tenancy-password-dev;Server=postgres;Port=5432;Database=eshop_tenancy
+      - RedisOptions__Enabled=true
+      - RedisOptions__ConnectionString=redis:6379
+      - MasstransitConfiguration__Host=rabbitmq
+      - MasstransitConfiguration__Port=5672
+      - MasstransitConfiguration__VirtualHost=eshop01012025
+      - MasstransitConfiguration__Username=guest
+      - MasstransitConfiguration__Password=guest
+      - Services__Authorization=http://authorization:8080
+    ports:
+      - "5001:8080"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      start_period: 10s
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
+      - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
     env_file:
       - ./common.env
     networks:
@@ -68,11 +93,36 @@ services:
   authorization:
     image: ${DOCKER_REGISTRY-}eshop/authorization
     container_name: authorization
+    restart: on-failure
     build:
       context: .
-      args:
-        ENVIRONMENT: dev
       dockerfile: Authorization/src/EShop.Authorization.API/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Username=authorization;Password=authorization-password-dev;Server=postgres;Port=5432;Database=eshop_authorization
+      - RedisOptions__Enabled=true
+      - RedisOptions__ConnectionString=redis:6379
+      - MasstransitConfiguration__Host=rabbitmq
+      - MasstransitConfiguration__Port=5672
+      - MasstransitConfiguration__VirtualHost=eshop01012025
+      - MasstransitConfiguration__Username=guest
+      - MasstransitConfiguration__Password=guest
+      - Services__Tenancy=http://tenancy:8080
+    ports:
+      - "5002:8080"
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
+      - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      start_period: 10s
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
     env_file:
       - ./common.env
     networks:
