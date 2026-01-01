@@ -10,12 +10,14 @@ services:
     command: postgres -c 'max_connections=200'
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: Passw0rd
+      POSTGRES_PASSWORD: /run/secrets/postgres_password
     ports:
       - "5432:5432"
     volumes:
       - ./Deployment/Scripts/postgres-init.sql:/docker-entrypoint-initdb.d/1-init.sql
       - eshop-data:/var/lib/postgresql/data
+    secrets:
+      - postgres_password
     networks:
       - eshop
   
@@ -58,6 +60,8 @@ services:
       args:
         ENVIRONMENT: dev
       dockerfile: Tenancy/src/EShop.Tenancy.API/Dockerfile
+    env_file:
+      - ./common.env
     networks:
       - eshop
 
@@ -69,6 +73,8 @@ services:
       args:
         ENVIRONMENT: dev
       dockerfile: Authorization/src/EShop.Authorization.API/Dockerfile
+    env_file:
+      - ./common.env
     networks:
       - eshop
 
@@ -76,6 +82,10 @@ volumes:
   eshop-data:
   eshop_redis:
   rabbitmq_data:
+
+secrets:
+  postgres_password:
+    file: ./Deployment/postgres_password.txt
 
 networks:
   eshop:
