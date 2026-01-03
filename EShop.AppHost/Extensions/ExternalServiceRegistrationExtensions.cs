@@ -29,7 +29,7 @@ public static class ExternalServiceRegistrationExtensions
             .WithHttpEndpoint(targetPort: 3000, name: "http");
 
         builder.AddOpenTelemetryCollector(ResourceNames.OpenTelemetryCollector, @"..\Deployment\config\otelcollector\config.yaml")
-               .WithEnvironment("PROMETHEUS_ENDPOINT", $"{prometheus.GetEndpoint("http")}/api/v1/otlp"); ;
+               .WithEnvironment("PROMETHEUS_ENDPOINT", $"{prometheus.GetEndpoint("http")}/api/v1/otlp");
 
         #endregion
 
@@ -69,6 +69,7 @@ public static class ExternalServiceRegistrationExtensions
         var tenancyDatabase = postgres.AddDatabase("tenancyDatabase", "eshop_tenancy");
         var tenancy = builder.AddProject<Projects.EShop_Tenancy_API>(ResourceNames.TenancyApi)
             .WithExternalServiceMode(useExternalService)
+            .WithEnvironment("GRAFANA_URL", grafana.GetEndpoint("http"))
             .WithReference(tenancyDatabase)
             .WithReference(redis)
             .WithReference(rabbitmq);
@@ -84,6 +85,7 @@ public static class ExternalServiceRegistrationExtensions
         var authorizationDatabase = postgres.AddDatabase("authorizationDatabase", "eshop_authorization");
         var authrorization = builder.AddProject<Projects.EShop_Authorization_API>(ResourceNames.AuthorizationApi)
             .WithExternalServiceMode(useExternalService)
+            .WithEnvironment("GRAFANA_URL", grafana.GetEndpoint("http"))
             .WithReference(authorizationDatabase)
             .WithReference(redis)
             .WithReference(rabbitmq);
