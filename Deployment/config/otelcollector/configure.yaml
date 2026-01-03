@@ -19,10 +19,10 @@ exporters:
     tls:
         insecure: ${env:ASPIRE_INSECURE}
         insecure_skip_verify: true # Required in local development because cert is localhost and the endpoint is host.docker.internal
-  # otlphttp/prometheus:
-  #   endpoint: ${env:PROMETHEUS_ENDPOINT}
-  #   tls:
-  #       insecure: true
+  otlphttp/prometheus:
+    endpoint: ${env:PROMETHEUS_ENDPOINT}
+    tls:
+        insecure: true
 
 service:
   pipelines:
@@ -39,4 +39,4 @@ service:
       processors: [batch]
       exporters:
         - otlp/aspire
-        # - otlphttp/prometheus
+        - otlphttp/prometheus

@@ -135,6 +135,31 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "prometheus", "prometheus", 
 		Deployment\config\prometheus\prometheus.yml = Deployment\config\prometheus\prometheus.yml
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "grafana", "grafana", "{E557D7C1-2308-4B6C-8445-978FB85AD3DF}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "config", "config", "{7CBB3ED0-73EA-4991-8D1E-807195E5F44B}"
+	ProjectSection(SolutionItems) = preProject
+		Deployment\config\grafana\config\grafana.ini = Deployment\config\grafana\config\grafana.ini
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "dashboards", "dashboards", "{79AAF616-02BE-451F-98E2-792EBA87F479}"
+	ProjectSection(SolutionItems) = preProject
+		Deployment\config\grafana\dashboards\aspnetcore-endpoint.json = Deployment\config\grafana\dashboards\aspnetcore-endpoint.json
+		Deployment\config\grafana\dashboards\aspnetcore.json = Deployment\config\grafana\dashboards\aspnetcore.json
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "provisioning", "provisioning", "{13EC8C82-2325-4D0E-BE52-9DEBA3FB5030}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "dashboards", "dashboards", "{06139DD8-DD58-42ED-9629-0461B34C82AC}"
+	ProjectSection(SolutionItems) = preProject
+		Deployment\config\grafana\config\provisioning\dashboards\default.yaml = Deployment\config\grafana\config\provisioning\dashboards\default.yaml
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "datasources", "datasources", "{C768983A-8003-479D-8D18-897EA5A19B43}"
+	ProjectSection(SolutionItems) = preProject
+		Deployment\config\grafana\config\provisioning\datasources\default.yaml = Deployment\config\grafana\config\provisioning\datasources\default.yaml
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -324,6 +349,12 @@ Global
 		{1097CEB2-31DF-41CF-858A-7F45E466E0E4} = {645D1914-2B57-4FF2-85EC-2D25E851A35C}
 		{5FADD516-2E42-4F15-8AF2-4FFC8EFA5EEC} = {1097CEB2-31DF-41CF-858A-7F45E466E0E4}
 		{0D4D5188-2103-4258-AB55-899D3609E2A1} = {1097CEB2-31DF-41CF-858A-7F45E466E0E4}
+		{E557D7C1-2308-4B6C-8445-978FB85AD3DF} = {1097CEB2-31DF-41CF-858A-7F45E466E0E4}
+		{7CBB3ED0-73EA-4991-8D1E-807195E5F44B} = {E557D7C1-2308-4B6C-8445-978FB85AD3DF}
+		{79AAF616-02BE-451F-98E2-792EBA87F479} = {E557D7C1-2308-4B6C-8445-978FB85AD3DF}
+		{13EC8C82-2325-4D0E-BE52-9DEBA3FB5030} = {7CBB3ED0-73EA-4991-8D1E-807195E5F44B}
+		{06139DD8-DD58-42ED-9629-0461B34C82AC} = {13EC8C82-2325-4D0E-BE52-9DEBA3FB5030}
+		{C768983A-8003-479D-8D18-897EA5A19B43} = {13EC8C82-2325-4D0E-BE52-9DEBA3FB5030}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {BB890EFB-EE36-4A0E-A948-F28A53D375E6}
