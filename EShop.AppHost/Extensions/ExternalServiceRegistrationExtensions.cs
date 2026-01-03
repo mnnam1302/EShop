@@ -22,7 +22,7 @@ public static class ExternalServiceRegistrationExtensions
                                 .WithArgs("--web.enable-otlp-receiver", "--config.file=/etc/prometheus/prometheus.yml")
                                 .WithHttpEndpoint(targetPort: 9090, name: "http");
 
-        var grafana = builder.AddContainer("grafana", "grafana/grafana")
+        var grafana = builder.AddContainer(ResourceNames.Grafana, "grafana/grafana")
                              .WithBindMount("../Deployment/config/grafana/config", "/etc/grafana", isReadOnly: true)
                              .WithBindMount("../Deployment/config/grafana/dashboards", "/var/lib/grafana/dashboards", isReadOnly: true)
                              .WithEnvironment("PROMETHEUS_ENDPOINT", prometheus.GetEndpoint("http"))

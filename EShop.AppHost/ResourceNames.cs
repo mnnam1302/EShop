@@ -4,7 +4,8 @@ public static class ResourceNames
 {
     // observability
     public const string OpenTelemetryCollector = "otel-collector";
-    public static string Prometheus = "prometheus";
+    public const string Prometheus = "prometheus";
+    public const string Grafana = "grafana";
 
     // infrastructure
     public const string PostgreSql = "postgres";
@@ -15,5 +16,4 @@ public static class ResourceNames
     // microservices
     public const string TenancyApi = "tenancy";
     public const string AuthorizationApi = "authorization";
-
 }
