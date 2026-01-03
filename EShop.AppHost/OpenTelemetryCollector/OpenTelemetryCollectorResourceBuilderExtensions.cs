@@ -1,0 +1,51 @@
+﻿using EShop.AppHost.Extensions;
+using Microsoft.Extensions.Hosting;
+
+namespace EShop.AppHost.OpenTelemetryCollector;
+
+internal static class OpenTelemetryCollectorResourceBuilderExtensions
+{
+    private const string DashboardOtlpUrlVariableName = "ASPIRE_DASHBOARD_OTLP_ENDPOINT_URL";
+    private const string OTelCollectorImageName = "ghcr.io/open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-contrib";
+    private const string OTelCollectorImageTag = "0.135.0";
+    private const string DashboardOtlpApiKeyVariableName = "AppHost:OtlpApiKey";
+
+    public static IResourceBuilder<OpenTelemetryCollectorResource> AddOpenTelemetryCollector(
+        this IDistributedApplicationBuilder builder, string name, string configureFileLocaltion)
+    {
+        builder.AddOpenTelemetryCollectorInfrastructure();
+
+        var url = builder.Configuration[DashboardOtlpUrlVariableName] ?? throw new InvalidOperationException($"Environment variable '{DashboardOtlpUrlVariableName}' is not set.");
+        var isHttpsEnabled = url.StartsWith("https", StringComparison.OrdinalIgnoreCase);
+
+        var dashboardOtlpEndpoint = new HostUrl(url);
+
+        var resource = new OpenTelemetryCollectorResource(name);
+        var resourceBuilder = builder.AddResource(resource)
+            .WithImage(OTelCollectorImageName, OTelCollectorImageTag)
+            .WithEndpoint(targetPort: 4317, name: OpenTelemetryCollectorResource.OtlpGrpcEndpointName, scheme: isHttpsEnabled ? "https" : "http")
+            .WithEndpoint(targetPort: 4318, name: OpenTelemetryCollectorResource.OtlpHttpEndpointName, scheme: isHttpsEnabled ? "https" : "http")
+            .WithBindMount(configureFileLocaltion, "/etc/otel-collector-config.yaml")
+            .WithEnvironment("ASPIRE_ENDPOINT", $"{dashboardOtlpEndpoint}")
+            .WithEnvironment("ASPIRE_API_KEY", builder.Configuration[DashboardOtlpApiKeyVariableName])
+            .WithEnvironment("ASPIRE_INSECURE", isHttpsEnabled ? "false" : "true");
+
+        if (isHttpsEnabled && builder.ExecutionContext.IsRunMode && builder.Environment.IsDevelopment())
+        {
+            resourceBuilder.RunWithHttpsDevCerttificate(
+                certFileEnv: "HTTPS_CERT_FILE",
+                certKeyFileEnv: "HTTPS_CERT_KEY_FILE",
+                onSuccessfulExport: (_, __) =>
+                {
+                    // Set TLS details using YAML path via the command line. This allows the values to be added to the existing config file.
+                    // Setting the values in the config file doesn't work because adding the "tls" section always enables TLS, even if there is no cert provided.
+                    resourceBuilder.WithArgs(
+                        @"--config=yaml:receivers::otlp::protocols::grpc::tls::cert_file: ""dev-certs/dev-cert.pem""",
+                        @"--config=yaml:receivers::otlp::protocols::grpc::tls::key_file: ""dev-certs/dev-cert.key""",
+                        @"--config=/etc/otelcol-contrib/config.yaml");
+                });
+        }
+
+        return resourceBuilder;
+    }
+}

@@ -1,4 +1,6 @@
-﻿namespace EShop.AppHost.Bootstrapping;
+﻿using EShop.AppHost.OpenTelemetryCollector;
+
+namespace EShop.AppHost.Extensions;
 
 public static class ExternalServiceRegistrationExtensions
 {
@@ -14,9 +16,12 @@ public static class ExternalServiceRegistrationExtensions
 
     private static IDistributedApplicationBuilder AddServices(IDistributedApplicationBuilder builder, bool useExternalService)
     {
+        // Observability
+        builder.AddOpenTelemetryCollector(ResourceNames.OpenTelemetryCollector, @"..\Deploment\config\otelcollector\config.yaml");
+
         // Infrastructure resources
         var pathToDbInitDirectory = Path.GetFullPath(Path.Combine(Environment.CurrentDirectory, @"..\Deployment\Scripts\"));
-        var postgres = builder.AddPostgres(ServiceConnectionNames.PostgreSql, port: 5432)
+        var postgres = builder.AddPostgres(ResourceNames.PostgreSql, port: 5432)
                 .WithImageTag("17.0")
                 .WithDataVolume("ehop-data")
                 .WithInitFiles(pathToDbInitDirectory)
@@ -29,24 +34,24 @@ public static class ExternalServiceRegistrationExtensions
                 .WithLifetime(ContainerLifetime.Persistent);
 
         var redis = useExternalService
-            ? builder.AddConnectionString(ServiceConnectionNames.Redis)
+            ? builder.AddConnectionString(ResourceNames.Redis)
             : builder
-                .AddRedis(ServiceConnectionNames.Redis)
+                .AddRedis(ResourceNames.Redis)
                 .WithDataVolume("eshop-redis-data")
                 .WithRedisInsight()
                 .WithLifetime(ContainerLifetime.Persistent);
 
         var rabbitmq = useExternalService
-            ? builder.AddConnectionString(ServiceConnectionNames.RabbitMq)
+            ? builder.AddConnectionString(ResourceNames.RabbitMq)
             : builder
-                .AddRabbitMQ(ServiceConnectionNames.RabbitMq)
+                .AddRabbitMQ(ResourceNames.RabbitMq)
                 .WithDataVolume("eshop-rabbitmq-data")
                 .WithLifetime(ContainerLifetime.Persistent)
                 .WithManagementPlugin();
 
         // Tenancy Microservice
         var tenancyDatabase = postgres.AddDatabase("tenancyDatabase", "eshop_tenancy");
-        var tenancy = builder.AddProject<Projects.EShop_Tenancy_API>(ServiceConnectionNames.TenancyApi)
+        var tenancy = builder.AddProject<Projects.EShop_Tenancy_API>(ResourceNames.TenancyApi)
             .WithExternalServiceMode(useExternalService)
             .WithReference(tenancyDatabase)
             .WithReference(redis)
@@ -62,7 +67,7 @@ public static class ExternalServiceRegistrationExtensions
 
         // Authorization Microservice
         var authorizationDatabase = postgres.AddDatabase("authorizationDatabase", "eshop_authorization");
-        var authrorization = builder.AddProject<Projects.EShop_Authorization_API>(ServiceConnectionNames.AuthorizationApi)
+        var authrorization = builder.AddProject<Projects.EShop_Authorization_API>(ResourceNames.AuthorizationApi)
             .WithExternalServiceMode(useExternalService)
             .WithReference(authorizationDatabase)
             .WithReference(redis)

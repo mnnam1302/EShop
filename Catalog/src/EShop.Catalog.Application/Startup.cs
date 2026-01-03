@@ -20,7 +20,7 @@ public class Startup
     public virtual void ConfigureServices(IServiceCollection services)
     {
         services
-            .AddShared(Configuration)
+            .AddShared(Configuration, Environment)
             .AddBoostrapping(Configuration, Environment)
             .AddAgencies();
     }

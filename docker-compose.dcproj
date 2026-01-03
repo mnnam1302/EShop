@@ -7,7 +7,9 @@
   </PropertyGroup>
   <ItemGroup>
     <None Include=".env" />
+    <None Include="common.env" />
     <None Include="docker-compose.yml" />
     <None Include=".dockerignore" />
+    <None Include="open-telemetry.env" />
   </ItemGroup>
 </Project>
