@@ -16,10 +16,18 @@ public static class ExternalServiceRegistrationExtensions
 
     private static IDistributedApplicationBuilder AddServices(IDistributedApplicationBuilder builder, bool useExternalService)
     {
-        // Observability
-        builder.AddOpenTelemetryCollector(ResourceNames.OpenTelemetryCollector, @"..\Deploment\config\otelcollector\config.yaml");
+        #region Observability
+        var prometheus = builder.AddContainer(ResourceNames.Prometheus, "prom/prometheus", "v3.5.0")
+            .WithBindMount("../Deployment/config/prometheus/prometheus.yml", "/etc/prometheus/prometheus.yml")
+            .WithArgs("--web.enable-otlp-receiver", "--config.file=/etc/prometheus/prometheus.yml")
+            .WithHttpEndpoint(targetPort: 9090, name: "http");
 
-        // Infrastructure resources
+        builder.AddOpenTelemetryCollector(ResourceNames.OpenTelemetryCollector, @"..\Deployment\config\otelcollector\config.yaml")
+               .WithEnvironment("PROMETHEUS_ENDPOINT", $"{prometheus.GetEndpoint("http")}/api/v1/otlp"); ;
+
+        #endregion
+
+        #region Infrastructure resources
         var pathToDbInitDirectory = Path.GetFullPath(Path.Combine(Environment.CurrentDirectory, @"..\Deployment\Scripts\"));
         var postgres = builder.AddPostgres(ResourceNames.PostgreSql, port: 5432)
                 .WithImageTag("17.0")
@@ -49,7 +57,9 @@ public static class ExternalServiceRegistrationExtensions
                 .WithLifetime(ContainerLifetime.Persistent)
                 .WithManagementPlugin();
 
-        // Tenancy Microservice
+        #endregion
+
+        #region Microservices
         var tenancyDatabase = postgres.AddDatabase("tenancyDatabase", "eshop_tenancy");
         var tenancy = builder.AddProject<Projects.EShop_Tenancy_API>(ResourceNames.TenancyApi)
             .WithExternalServiceMode(useExternalService)
@@ -65,7 +75,6 @@ public static class ExternalServiceRegistrationExtensions
                 .WaitFor(rabbitmq);
         }
 
-        // Authorization Microservice
         var authorizationDatabase = postgres.AddDatabase("authorizationDatabase", "eshop_authorization");
         var authrorization = builder.AddProject<Projects.EShop_Authorization_API>(ResourceNames.AuthorizationApi)
             .WithExternalServiceMode(useExternalService)
@@ -80,6 +89,8 @@ public static class ExternalServiceRegistrationExtensions
                 .WaitFor(redis)
                 .WaitFor(rabbitmq);
         }
+
+        #endregion
 
         return builder;
     }

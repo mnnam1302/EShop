@@ -130,6 +130,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "otelcollector", "otelcollec
 		Deployment\config\otelcollector\configure.yaml = Deployment\config\otelcollector\configure.yaml
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "prometheus", "prometheus", "{0D4D5188-2103-4258-AB55-899D3609E2A1}"
+	ProjectSection(SolutionItems) = preProject
+		Deployment\config\prometheus\prometheus.yml = Deployment\config\prometheus\prometheus.yml
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -318,6 +323,7 @@ Global
 		{3941E297-4449-5207-EC32-3679FF14F902} = {31242E98-E92A-4500-8463-9CDA3627C571}
 		{1097CEB2-31DF-41CF-858A-7F45E466E0E4} = {645D1914-2B57-4FF2-85EC-2D25E851A35C}
 		{5FADD516-2E42-4F15-8AF2-4FFC8EFA5EEC} = {1097CEB2-31DF-41CF-858A-7F45E466E0E4}
+		{0D4D5188-2103-4258-AB55-899D3609E2A1} = {1097CEB2-31DF-41CF-858A-7F45E466E0E4}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {BB890EFB-EE36-4A0E-A948-F28A53D375E6}
