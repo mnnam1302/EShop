@@ -127,7 +127,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "config", "config", "{1097CE
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "otelcollector", "otelcollector", "{5FADD516-2E42-4F15-8AF2-4FFC8EFA5EEC}"
 	ProjectSection(SolutionItems) = preProject
-		Deployment\config\otelcollector\configure.yaml = Deployment\config\otelcollector\configure.yaml
+		Deployment\config\otelcollector\config.yaml = Deployment\config\otelcollector\config.yaml
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "prometheus", "prometheus", "{0D4D5188-2103-4258-AB55-899D3609E2A1}"

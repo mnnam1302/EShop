@@ -50,13 +50,9 @@ public class Program
 
         builder.Host.UseSerilog();
 
-        builder.WebHost
-            .UseShutdownTimeout(TimeSpan.FromSeconds(ShutdownTimeoutInSeconds));
+        builder.WebHost.UseShutdownTimeout(TimeSpan.FromSeconds(ShutdownTimeoutInSeconds));
 
         var app = builder.Build();
-
-        // Map Aspire default endpoints (health checks, etc.)
-        app.MapDefaultEndpoints();
 
         var loggerFactory = app.Services.GetRequiredService<ILoggerFactory>();
         startup.Configure(app, app.Lifetime, loggerFactory);

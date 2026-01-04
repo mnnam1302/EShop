@@ -25,7 +25,7 @@ internal static class OpenTelemetryCollectorResourceBuilderExtensions
             .WithImage(OTelCollectorImageName, OTelCollectorImageTag)
             .WithEndpoint(targetPort: 4317, name: OpenTelemetryCollectorResource.OtlpGrpcEndpointName, scheme: isHttpsEnabled ? "https" : "http")
             .WithEndpoint(targetPort: 4318, name: OpenTelemetryCollectorResource.OtlpHttpEndpointName, scheme: isHttpsEnabled ? "https" : "http")
-            .WithBindMount(configureFileLocaltion, "/etc/otel-collector-config.yaml")
+            .WithBindMount(configureFileLocaltion, "/etc/otelcol-contrib/config.yaml")
             .WithEnvironment("ASPIRE_ENDPOINT", $"{dashboardOtlpEndpoint}")
             .WithEnvironment("ASPIRE_API_KEY", builder.Configuration[DashboardOtlpApiKeyVariableName])
             .WithEnvironment("ASPIRE_INSECURE", isHttpsEnabled ? "false" : "true");
