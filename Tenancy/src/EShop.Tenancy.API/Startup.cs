@@ -36,10 +36,11 @@ public class Startup
         }
 
         app.UseRouting();
-
         app.UseAuthentication();
         app.UseAuthorization();
 
+        // Map Aspire default endpoints (health checks, etc.)
+        app.MapDefaultEndpoints();
         app.MapHealthChecks("/health", new HealthCheckOptions
         {
             ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse

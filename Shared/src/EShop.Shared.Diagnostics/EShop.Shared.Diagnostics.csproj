@@ -13,6 +13,7 @@
     <PackageReference Include="Serilog.Enrichers.Process" />
     <PackageReference Include="Serilog.Enrichers.Thread"  />
     <PackageReference Include="Serilog.Sinks.File"  />
+    <PackageReference Include="Serilog.Sinks.OpenTelemetry" />
     <PackageReference Include="Serilog.Sinks.Seq" />
   </ItemGroup>
 

@@ -52,8 +52,7 @@ public static class Program
 
         builder.Host.UseSerilog();
 
-        builder.WebHost
-            .UseShutdownTimeout(TimeSpan.FromSeconds(ShutdownTimeoutInSeconds));
+        builder.WebHost.UseShutdownTimeout(TimeSpan.FromSeconds(ShutdownTimeoutInSeconds));
 
         var app = builder.Build();
 
