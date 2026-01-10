@@ -5,6 +5,9 @@ using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Cofigures the service discovery services
+builder.Services.AddServiceDiscovery();
+
 Logging.SetSerilog("ApiGateway");
 builder.Host.UseSerilog();
 
@@ -29,6 +32,7 @@ if (app.Environment.IsDevelopment())
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.MapDefaultEndpoints();
 app.MapReverseProxy();
 
 try

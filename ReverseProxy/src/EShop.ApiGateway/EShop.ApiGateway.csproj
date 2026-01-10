@@ -14,6 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\EShop.ServiceDefaults\EShop.ServiceDefaults.csproj" />
     <ProjectReference Include="..\..\..\Shared\src\EShop.Shared.Cache\EShop.Shared.Cache.csproj" />
     <ProjectReference Include="..\..\..\Shared\src\EShop.Shared.Diagnostics\EShop.Shared.Diagnostics.csproj" />
     <ProjectReference Include="..\..\..\Shared\src\EShop.Shared.JsonApi\EShop.Shared.JsonApi.csproj" />

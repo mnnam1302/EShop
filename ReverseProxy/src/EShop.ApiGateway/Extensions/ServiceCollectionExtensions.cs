@@ -7,8 +7,7 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddShared(this IServiceCollection services, IConfiguration configuration)
     {
-        services
-            .AddRedisHealthCheck(configuration)
+        services.AddRedisHealthCheck(configuration)
             .AddRedisCacheInfrastructure(configuration);
 
         services.AddTenantAuthenticationProvider();
@@ -28,9 +27,7 @@ public static class ServiceCollectionExtensions
 
     private static IServiceCollection AddYarpReverseProxy(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddServiceDiscovery();
-        services
-            .AddReverseProxy()
+        services.AddReverseProxy()
             .LoadFromConfig(configuration.GetSection("ReverseProxy"))
             .AddServiceDiscoveryDestinationResolver();
 
