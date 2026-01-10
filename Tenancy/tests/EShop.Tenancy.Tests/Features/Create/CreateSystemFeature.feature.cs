@@ -11,28 +11,28 @@
 #region Designer generated code
 #pragma warning disable
 using Reqnroll;
-namespace EShop.Tenancy.Tests.Tenants.Create
+namespace EShop.Tenancy.Tests.Features.Create
 {
     
     
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Reqnroll", "3.0.0.0")]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    public partial class TenantCreationFeature : object, global::Xunit.IClassFixture<TenantCreationFeature.FixtureData>, global::Xunit.IAsyncLifetime
+    public partial class CreateSystemFeatureFeature : object, global::Xunit.IClassFixture<CreateSystemFeatureFeature.FixtureData>, global::Xunit.IAsyncLifetime
     {
         
         private global::Reqnroll.ITestRunner testRunner;
         
         private static string[] featureTags = ((string[])(null));
         
-        private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new global::System.Globalization.CultureInfo("en-US"), "Tenants/Create", "TenantCreation", "\tAs a System user \r\n\tI want to configure some settings at the tenant level\r\n\tSo t" +
-                "hat users with permission can view and edit tenant settings", global::Reqnroll.ProgrammingLanguage.CSharp, featureTags, InitializeCucumberMessages());
+        private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new global::System.Globalization.CultureInfo("en-US"), "Features/Create", "CreateSystemFeature", "\tAs an Admin User\r\n\tI want to create a new system feature\r\n\tSo that I can manage " +
+                "system functionalities effectively", global::Reqnroll.ProgrammingLanguage.CSharp, featureTags, InitializeCucumberMessages());
         
         private global::Xunit.Abstractions.ITestOutputHelper _testOutputHelper;
         
-#line 1 "TenantCreation.feature"
+#line 1 "CreateSystemFeature.feature"
 #line hidden
         
-        public TenantCreationFeature(TenantCreationFeature.FixtureData fixtureData, global::Xunit.Abstractions.ITestOutputHelper testOutputHelper)
+        public CreateSystemFeatureFeature(CreateSystemFeatureFeature.FixtureData fixtureData, global::Xunit.Abstractions.ITestOutputHelper testOutputHelper)
         {
             this._testOutputHelper = testOutputHelper;
         }
@@ -108,14 +108,14 @@ namespace EShop.Tenancy.Tests.Tenants.Create
         {
 #line 6
 #line hidden
-            global::Reqnroll.Table table5 = new global::Reqnroll.Table(new string[] {
+            global::Reqnroll.Table table1 = new global::Reqnroll.Table(new string[] {
                         "PermissionId"});
-            table5.AddRow(new string[] {
+            table1.AddRow(new string[] {
                         "Users_ViewSystemSettings"});
-            table5.AddRow(new string[] {
+            table1.AddRow(new string[] {
                         "Users_ManageSystemSettings"});
 #line 7
- await testRunner.GivenAsync("System user with following permissions", ((string)(null)), table5, "Given ");
+ await testRunner.GivenAsync("System user with following permissions", ((string)(null)), table1, "Given ");
 #line hidden
 #line 11
  await testRunner.AndAsync("all features are available for System User", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
@@ -124,7 +124,7 @@ namespace EShop.Tenancy.Tests.Tenants.Create
         
         private static global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages InitializeCucumberMessages()
         {
-            return new global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages("Tenants/Create/TenantCreation.feature.ndjson", 3);
+            return new global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages("Features/Create/CreateSystemFeature.feature.ndjson", 3);
         }
         
         async global::System.Threading.Tasks.Task global::Xunit.IAsyncLifetime.InitializeAsync()
@@ -152,15 +152,15 @@ namespace EShop.Tenancy.Tests.Tenants.Create
             await this.TestTearDownAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="System user register a new tenant successfully")]
-        [global::Xunit.TraitAttribute("FeatureTitle", "TenantCreation")]
-        [global::Xunit.TraitAttribute("Description", "System user register a new tenant successfully")]
-        public async global::System.Threading.Tasks.Task SystemUserRegisterANewTenantSuccessfully()
+        [global::Xunit.SkippableFactAttribute(DisplayName="System User creates a new system feature with state Enabled")]
+        [global::Xunit.TraitAttribute("FeatureTitle", "CreateSystemFeature")]
+        [global::Xunit.TraitAttribute("Description", "System User creates a new system feature with state Enabled")]
+        public async global::System.Threading.Tasks.Task SystemUserCreatesANewSystemFeatureWithStateEnabled()
         {
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
             string pickleIndex = "0";
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("System user register a new tenant successfully", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("System User creates a new system feature with state Enabled", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
 #line 13
@@ -176,44 +176,50 @@ this.ScenarioInitialize(scenarioInfo, ruleInfo);
 #line 6
 await this.FeatureBackgroundAsync();
 #line hidden
-#line 14
- await testRunner.GivenAsync("user of group \'eshop-support\' logged in", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
-#line hidden
-                global::Reqnroll.Table table6 = new global::Reqnroll.Table(new string[] {
-                            "Attribute",
-                            "Value"});
-                table6.AddRow(new string[] {
-                            "Id",
-                            "test-tenant"});
-                table6.AddRow(new string[] {
-                            "Name",
-                            "Test Owner"});
-                table6.AddRow(new string[] {
-                            "OwnerUsername",
-                            "test-owner"});
-                table6.AddRow(new string[] {
-                            "OwnerEmail",
-                            "test-owner@eshop.com"});
-                table6.AddRow(new string[] {
-                            "PhoneNumber",
-                            "\'123456789\'"});
-#line 15
- await testRunner.WhenAsync("System user registers a new tenant with following details", ((string)(null)), table6, "When ");
-#line hidden
-                global::Reqnroll.Table table7 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table2 = new global::Reqnroll.Table(new string[] {
                             "Id",
                             "Name",
-                            "OwnerUsername",
+                            "OwnerUserName",
                             "OwnerEmail",
                             "PhoneNumber"});
-                table7.AddRow(new string[] {
+                table2.AddRow(new string[] {
                             "test-tenant",
                             "Test Owner",
-                            "test-owner@test-tenant",
+                            "test-owner",
                             "test-owner@eshop.com",
                             "\'123456789\'"});
-#line 22
- await testRunner.ThenAsync("the tenant \'test-tenant\' has following details", ((string)(null)), table7, "Then ");
+#line 14
+ await testRunner.GivenAsync("System User has registered tenants with following details", ((string)(null)), table2, "Given ");
+#line hidden
+                global::Reqnroll.Table table3 = new global::Reqnroll.Table(new string[] {
+                            "Id",
+                            "Name",
+                            "Description",
+                            "State",
+                            "Module"});
+                table3.AddRow(new string[] {
+                            "test-feature",
+                            "NewFeature",
+                            "A new feature for testing",
+                            "Enabled",
+                            "Core"});
+#line 17
+ await testRunner.WhenAsync("System User creates a new system feature with following details", ((string)(null)), table3, "When ");
+#line hidden
+                global::Reqnroll.Table table4 = new global::Reqnroll.Table(new string[] {
+                            "Id",
+                            "Name",
+                            "Description",
+                            "State",
+                            "Module"});
+                table4.AddRow(new string[] {
+                            "test-feature",
+                            "NewFeature",
+                            "A new feature for testing",
+                            "Enabled",
+                            "Core"});
+#line 20
+ await testRunner.ThenAsync("the system feature \'NewFeature\' has following details", ((string)(null)), table4, "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
@@ -226,12 +232,12 @@ await this.FeatureBackgroundAsync();
             
             async global::System.Threading.Tasks.Task global::Xunit.IAsyncLifetime.InitializeAsync()
             {
-                await TenantCreationFeature.FeatureSetupAsync();
+                await CreateSystemFeatureFeature.FeatureSetupAsync();
             }
             
             async global::System.Threading.Tasks.Task global::Xunit.IAsyncLifetime.DisposeAsync()
             {
-                await TenantCreationFeature.FeatureTearDownAsync();
+                await CreateSystemFeatureFeature.FeatureTearDownAsync();
             }
         }
     }

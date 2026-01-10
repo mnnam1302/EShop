@@ -17,8 +17,4 @@
     <ProjectReference Include="..\EShop.Tenancy.Domain\EShop.Tenancy.Domain.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="UseCases\V1\Queries\Features\" />
-  </ItemGroup>
-
 </Project>

@@ -3,6 +3,7 @@ using EShop.Shared.CQRS;
 using EShop.Shared.JsonApi.Abstractions;
 using EShop.Shared.JsonApi.ResourceAccessControl;
 using EShop.Tenancy.Application.UseCases.V1.Commands.Features;
+using EShop.Tenancy.Application.UseCases.V1.Queries.Features;
 using EShop.Tenancy.Presentation.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -23,7 +24,22 @@ public sealed class FeatureApi : ICarterModule
             .RequireAuthorization()
             .RequireSystemUserFilter();
 
+        group.MapGet("{featureId}", GetFeatureByIdAsync);
         group.MapPost("", CreateSystemFeatureAsync);
+    }
+
+    private async Task<IResult> GetFeatureByIdAsync([FromRoute] string featureId, [FromServices] IMediator mediator, CancellationToken cancellationToken)
+    {
+        var query = new GetFeatureByIdQuery(featureId);
+
+        var result = await mediator.QueryAsync<GetFeatureByIdQuery, FeatureResponse>(query, cancellationToken);
+
+        if (result.IsFailure)
+        {
+            return ApiEndpointHandler.Failure(result);
+        }
+
+        return Results.Ok(result);
     }
 
     private static async Task<IResult> CreateSystemFeatureAsync(

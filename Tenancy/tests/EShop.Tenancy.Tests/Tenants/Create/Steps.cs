@@ -12,6 +12,7 @@ internal class Steps(StepContext stepContext)
         stepContext.LoggedInGroup = group;
     }
 
+    [Given("System User has registered tenants with following details")]
     [When("System user registers a new tenant with following details")]
     public async Task WhenSystemUserRegistersANewTenantWithFollowingDetails(DataTable dataTable)
     {
