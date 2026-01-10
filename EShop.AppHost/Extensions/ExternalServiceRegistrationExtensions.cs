@@ -105,9 +105,18 @@ public static class ExternalServiceRegistrationExtensions
 
         #region Api Gateway
 
-        builder.AddProject<Projects.EShop_ApiGateway>(ResourceNames.ApiGateway)
+        var apiGateway = builder.AddProject<Projects.EShop_ApiGateway>(ResourceNames.ApiGateway)
+            .WithReference(redis)
             .WithReference(tenancy)
             .WithReference(authorization);
+
+        if (!useExternalService)
+        {
+            apiGateway
+                .WaitFor(redis)
+                .WaitFor(tenancy)
+                .WaitFor(authorization);
+        }
 
         #endregion Api Gateway
 
