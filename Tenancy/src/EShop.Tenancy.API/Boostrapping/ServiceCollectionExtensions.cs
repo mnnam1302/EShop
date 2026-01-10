@@ -10,18 +10,21 @@ namespace EShop.Tenancy.API.Boostrapping;
 
 public static class ServiceCollectionExtensions
 {
+    public static IServiceCollection AddShared(this IServiceCollection services)
+    {
+        services.AddTenantAuthenticationProvider()
+            .AddUserPermissionsProvider()
+            .AddUserOrganizationContextProvider();
+
+        return services;
+    }
+
     public static IServiceCollection AddBoostrapping(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment)
     {
-        services
-            .AddTenancyAPI()
+        services.AddTenancyAPI()
             .AddTenancyApplication()
             .AddTenancyPersistence(configuration, environment)
             .AddTenancyInfrastructure(configuration, environment, Program.ApplicationName);
-
-        services
-            .AddTenantAuthenticationProvider()
-            .AddUserPermissionsProvider()
-            .AddUserOrganizationContextProvider();
 
         return services;
     }

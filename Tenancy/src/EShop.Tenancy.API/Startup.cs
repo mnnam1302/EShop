@@ -21,7 +21,9 @@ public class Startup
 
     public virtual void ConfigureServices(IServiceCollection services)
     {
-        services.AddBoostrapping(Configuration, Environment);
+        services
+            .AddBoostrapping(Configuration, Environment)
+            .AddShared();
     }
 
     internal void Configure(WebApplication app, IHostApplicationLifetime applicationLifetime, ILoggerFactory loggerFactory)
