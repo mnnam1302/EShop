@@ -2,49 +2,48 @@
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Tenancy.Domain.Repositories;
 
-namespace EShop.Tenancy.Application.UseCases.V1.Queries.Tenants
-{
-    public sealed record GetTenantDetailsQuery(string TenantId) : IQuery<TenantDetailsResponse>;
+namespace EShop.Tenancy.Application.UseCases.V1.Queries.Tenants;
 
-    public sealed class TenantDetailsResponse
+public sealed record GetTenantDetailsQuery(string TenantId) : IQuery<TenantDetailsResponse>;
+
+public sealed class TenantDetailsResponse
+{
+    public string Id { get; init; } = string.Empty;
+    public string Name { get; init; } = string.Empty;
+    public string OwnerUsername { get; init; } = string.Empty;
+    public string OwnerEmail { get; init; } = string.Empty;
+    public string? PhoneNumber { get; init; }
+    public string? Description { get; init; }
+}
+
+internal sealed class GetTenantDetailsQueryHandler : IQueryHandler<GetTenantDetailsQuery, TenantDetailsResponse>
+{
+    private readonly ITenantRepository tenantRepository;
+
+    public GetTenantDetailsQueryHandler(ITenantRepository tenantRepository)
     {
-        public string Id { get; init; } = string.Empty;
-        public string Name { get; init; } = string.Empty;
-        public string OwnerUsername { get; init; } = string.Empty;
-        public string OwnerEmail { get; init; } = string.Empty;
-        public string? PhoneNumber { get; init; }
-        public string? Description { get; init; }
+        this.tenantRepository = tenantRepository;
     }
 
-    internal class GetTenantDetailsQueryHandler : IQueryHandler<GetTenantDetailsQuery, TenantDetailsResponse>
+    public async Task<Result<TenantDetailsResponse>> Handle(GetTenantDetailsQuery request, CancellationToken cancellationToken)
     {
-        private readonly ITenantRepository tenantRepository;
+        var tenant = await tenantRepository.FindByIdAsync(request.TenantId, cancellationToken: cancellationToken);
 
-        public GetTenantDetailsQueryHandler(ITenantRepository tenantRepository)
+        if (tenant is null)
         {
-            this.tenantRepository = tenantRepository;
+            return Result.Failure<TenantDetailsResponse>(new("Tenant.NotFound", $"Tenant with ID '{request.TenantId}' not found."));
         }
 
-        public async Task<Result<TenantDetailsResponse>> Handle(GetTenantDetailsQuery request, CancellationToken cancellationToken)
+        var response = new TenantDetailsResponse
         {
-            var tenant = await tenantRepository.FindByIdAsync(request.TenantId, cancellationToken: cancellationToken);
+            Id = tenant.Id,
+            Name = tenant.Name,
+            OwnerUsername = tenant.OwnerUsername ?? string.Empty,
+            OwnerEmail = tenant.Email ?? string.Empty,
+            PhoneNumber = tenant.PhoneNumber,
+            Description = tenant.Description
+        };
 
-            if (tenant is null)
-            {
-                return Result.Failure<TenantDetailsResponse>(new("Tenant.NotFound", $"Tenant with ID '{request.TenantId}' not found."));
-            }
-
-            var response = new TenantDetailsResponse
-            {
-                Id = tenant.Id,
-                Name = tenant.Name,
-                OwnerUsername = tenant.OwnerUsername ?? string.Empty,
-                OwnerEmail = tenant.Email ?? string.Empty,
-                PhoneNumber = tenant.PhoneNumber,
-                Description = tenant.Description
-            };
-
-            return Result.Success(response);
-        }
+        return Result.Success(response);
     }
 }

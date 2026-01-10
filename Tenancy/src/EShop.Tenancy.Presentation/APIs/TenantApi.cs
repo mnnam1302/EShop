@@ -8,8 +8,9 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using static EShop.Shared.Contracts.Services.Tenancy.Features.Query;
 
-namespace EShop.Tenancy.Presentation.APIs.Tenants;
+namespace EShop.Tenancy.Presentation.APIs;
 
 public sealed class TenantApi : ICarterModule
 {
@@ -23,14 +24,17 @@ public sealed class TenantApi : ICarterModule
             .HasApiVersion(1)
             .RequireAuthorization();
 
-        group.MapPost("", CreateTenantV1Async)
+        group.MapPost("", CreateTenantAsync)
             .RequireSystemUserFilter();
 
         group.MapGet("{tenantId}", GetTenantDetailsAsync)
             .RequireSystemUserFilter();
+
+        group.MapGet("{tenantId}/features", GetTenantFeaturesAsync)
+            .RequireSystemUserFilter();
     }
 
-    private static async Task<IResult> CreateTenantV1Async(
+    private static async Task<IResult> CreateTenantAsync(
         [FromServices] ISender sender,
         [FromBody] Command.CreateTenantCommand request,
         CancellationToken cancellationToken)
@@ -57,6 +61,22 @@ public sealed class TenantApi : ICarterModule
         if (result.IsFailure)
         {
             return ApiEndpointHandler.Failure(result);
+        }
+
+        return Results.Ok(result);
+    }
+
+    private static async Task<IResult> GetTenantFeaturesAsync(
+        [FromRoute] string tenantId,
+        [FromServices] ISender sender,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(new GetTenantFeaturesQuery(tenantId), cancellationToken);
+
+        if (result.IsFailure)
+        {
+            ApiEndpointHandler.Failure(result);
+
         }
 
         return Results.Ok(result);
