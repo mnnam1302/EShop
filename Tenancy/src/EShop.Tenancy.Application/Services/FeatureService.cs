@@ -15,7 +15,7 @@ public interface IFeatureService
 {
     Task<IEnumerable<TenantFeature>> GetTenantFeaturesByTenantIdAsync(string tenantId, string? state = null, CancellationToken cancellationToken = default);
 
-    Task AddOrUpdateFeatureAsync(Feature feature, string? state, CancellationToken cancellationToken);
+    Task AddOrUpdateFeatureAsync(Feature feature, CancellationToken cancellationToken);
 
     Task DeleteFeatureAsync(Feature feature, CancellationToken cancellationToken);
 }
@@ -45,12 +45,12 @@ public sealed class FeatureService : IFeatureService
         _logger = logger;
     }
 
-    public async Task AddOrUpdateFeatureAsync(Feature feature, string? state, CancellationToken cancellationToken)
+    public async Task AddOrUpdateFeatureAsync(Feature feature, CancellationToken cancellationToken)
     {
         var entityState = await AddOrUpdateFeatureInternalAsync(feature, cancellationToken);
         if (entityState == EntityState.Added)
         {
-            await RegisterTenantFeature(feature, state, cancellationToken);
+            await RegisterTenantFeature(feature, cancellationToken);
         }
     }
 
@@ -75,11 +75,11 @@ public sealed class FeatureService : IFeatureService
         var entityState = await _featureRepository.GetEntityStateAsync(feature, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        _logger.LogTrace("Feature '{FeatureId}' added to system", feature.Id);
+        _logger.LogInformation("Feature {FeatureId} added to system", feature.Id);
         return entityState;
     }
 
-    private async Task RegisterTenantFeature(Feature feature, string? state, CancellationToken cancellationToken)
+    private async Task RegisterTenantFeature(Feature feature, CancellationToken cancellationToken)
     {
         var tenantIds = await _tenantRepository
             .FindAll()
@@ -88,9 +88,10 @@ public sealed class FeatureService : IFeatureService
 
         foreach (var tenantId in tenantIds)
         {
-            _userDetailsProvider.SetSystemUserContext(tenantId);
             try
             {
+                _userDetailsProvider.SetSystemUserContext(tenantId);
+
                 var tenant = await _tenantRepository.FindByIdAsync(
                     tenantId,
                     trackChanges: true,
@@ -98,7 +99,7 @@ public sealed class FeatureService : IFeatureService
                     includeProperties: t => t.TenantFeatures);
                 if (tenant != null)
                 {
-                    tenant.AddTenantFeature(feature.Id, state ?? feature.DefaultStateForNewTenant, _userDetailsProvider.AuthenticatedUser.ActionUserId);
+                    tenant.AddTenantFeature(feature.Id, feature.DefaultStateForNewTenant, _userDetailsProvider.AuthenticatedUser.ActionUserId);
 
                     _tenantRepository.Update(tenant);
                     await _unitOfWork.SaveChangesAsync(cancellationToken);

@@ -35,18 +35,12 @@ public class UpdateSupportedFeaturesInternalCommandHandler : ICommandHandler<Upd
         {
             _logger.LogDebug("Processing feature '{Action}' (ID='{Id}')", request.Action, feature.Id);
 
-            var dbFeature = new Domain.Entities.Feature
-            {
-                Id = feature.Id,
-                Name = feature.Name,
-                Description = feature.Description,
-                Module = feature.Module,
-                State = feature.State,
-
-                // Adding DefaultStateForNewTenant to Feature interface will cause changes to all microservices. Assuming that DefaultStateForNewTenant
-                // should be initialized with the same value as State.
-                DefaultStateForNewTenant = feature.State
-            };
+            var dbFeature = Domain.Entities.Feature.Create(
+                feature.Id,
+                feature.Name,
+                feature.Description,
+                feature.Module,
+                feature.State);
 
             await _resiliencePolicyFactory
                 .CreateDbUpdateHandlingAsyncPolly(_logger)
@@ -54,7 +48,7 @@ public class UpdateSupportedFeaturesInternalCommandHandler : ICommandHandler<Upd
                 {
                     if (request.Action == SupportedFeaturesAction.AddOrUpdate)
                     {
-                        await _featureService.AddOrUpdateFeatureAsync(dbFeature, feature.State, cancellationToken);
+                        await _featureService.AddOrUpdateFeatureAsync(dbFeature, cancellationToken);
                     }
                     else
                     {
