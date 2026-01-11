@@ -84,7 +84,6 @@ public sealed class FeatureService : IFeatureService
 
     private async Task RegisterTenantFeature(Feature feature, CancellationToken cancellationToken)
     {
-        // Get tenant IDs without tracking to avoid RLS context conflicts
         var tenantIds = await _tenantRepository
             .FindAll(trackChanges: false)
             .Select(t => t.Id)
@@ -94,10 +93,8 @@ public sealed class FeatureService : IFeatureService
         {
             try
             {
-                // Set tenant context to establish proper RLS context
                 _userDetailsProvider.SetSystemUserContext(tenantId);
 
-                // Create TenantFeature directly using DbContext without loading Tenant aggregate
                 var tenantFeature = new TenantFeature(
                     Guid.NewGuid(),
                     tenantId,

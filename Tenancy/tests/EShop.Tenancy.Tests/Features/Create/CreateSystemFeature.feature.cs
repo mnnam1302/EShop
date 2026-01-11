@@ -124,7 +124,7 @@ namespace EShop.Tenancy.Tests.Features.Create
         
         private static global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages InitializeCucumberMessages()
         {
-            return new global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages("Features/Create/CreateSystemFeature.feature.ndjson", 3);
+            return new global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages("Features/Create/CreateSystemFeature.feature.ndjson", 4);
         }
         
         async global::System.Threading.Tasks.Task global::Xunit.IAsyncLifetime.InitializeAsync()
@@ -152,15 +152,19 @@ namespace EShop.Tenancy.Tests.Features.Create
             await this.TestTearDownAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="System User creates a new system feature with state Enabled")]
+        [global::Xunit.SkippableTheoryAttribute(DisplayName="System User creates a new system feature")]
         [global::Xunit.TraitAttribute("FeatureTitle", "CreateSystemFeature")]
-        [global::Xunit.TraitAttribute("Description", "System User creates a new system feature with state Enabled")]
-        public async global::System.Threading.Tasks.Task SystemUserCreatesANewSystemFeatureWithStateEnabled()
+        [global::Xunit.TraitAttribute("Description", "System User creates a new system feature")]
+        [global::Xunit.InlineDataAttribute("feature enabled", "Enabled", "0", new string[0])]
+        [global::Xunit.InlineDataAttribute("feature disabled", "Disabled", "1", new string[0])]
+        public async global::System.Threading.Tasks.Task SystemUserCreatesANewSystemFeature(string @case, string state, string @__pickleIndex, string[] exampleTags)
         {
-            string[] tagsOfScenario = ((string[])(null));
+            string[] tagsOfScenario = exampleTags;
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
-            string pickleIndex = "0";
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("System User creates a new system feature with state Enabled", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            argumentsOfScenario.Add("case", @case);
+            argumentsOfScenario.Add("state", state);
+            string pickleIndex = @__pickleIndex;
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("System User creates a new system feature", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
 #line 13
@@ -199,9 +203,9 @@ await this.FeatureBackgroundAsync();
                             "Module"});
                 table3.AddRow(new string[] {
                             "feature-id",
-                            "NewFeature",
+                            "Test Feature",
                             "A new feature for testing",
-                            "Enabled",
+                            string.Format("{0}", state),
                             "Core"});
 #line 17
  await testRunner.WhenAsync("System User creates a new system feature with following details", ((string)(null)), table3, "When ");
@@ -214,9 +218,9 @@ await this.FeatureBackgroundAsync();
                             "Module"});
                 table4.AddRow(new string[] {
                             "feature-id",
-                            "NewFeature",
+                            "Test Feature",
                             "A new feature for testing",
-                            "Enabled",
+                            string.Format("{0}", state),
                             "Core"});
 #line 20
  await testRunner.ThenAsync("the feature \'feature-id\' has following details", ((string)(null)), table4, "Then ");
@@ -226,7 +230,7 @@ await this.FeatureBackgroundAsync();
                             "State"});
                 table5.AddRow(new string[] {
                             "feature-id",
-                            "Enabled"});
+                            string.Format("{0}", state)});
 #line 23
  await testRunner.AndAsync("the tenant \'test-tenant\' has following features", ((string)(null)), table5, "And ");
 #line hidden
