@@ -219,7 +219,16 @@ await this.FeatureBackgroundAsync();
                             "Enabled",
                             "Core"});
 #line 20
- await testRunner.ThenAsync("the system feature \'feature-id\' has following details", ((string)(null)), table4, "Then ");
+ await testRunner.ThenAsync("the feature \'feature-id\' has following details", ((string)(null)), table4, "Then ");
+#line hidden
+                global::Reqnroll.Table table5 = new global::Reqnroll.Table(new string[] {
+                            "FeatureId",
+                            "State"});
+                table5.AddRow(new string[] {
+                            "feature-id",
+                            "Enabled"});
+#line 23
+ await testRunner.AndAsync("the tenant \'test-tenant\' has following features", ((string)(null)), table5, "And ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();

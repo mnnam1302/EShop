@@ -14,8 +14,8 @@ internal sealed class Steps(StepContext stepContext)
         await stepContext.CreateSystemFeature(request);
     }
 
-    [Then("the system feature {string} has following details")]
-    public async Task ThenTheSystemFeatureHasFollowingDetails(string featureId, DataTable dataTable)
+    [Then("the feature {string} has following details")]
+    public async Task ThenTheFeatureHasFollowingDetails(string featureId, DataTable dataTable)
     {
         var feature = await stepContext.GetSystemFeature(featureId);
         dataTable.CompareToInstance(feature);

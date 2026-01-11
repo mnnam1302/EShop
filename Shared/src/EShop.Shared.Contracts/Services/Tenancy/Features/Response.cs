@@ -2,7 +2,7 @@
 
 public static class Response
 {
-    public record TenantFeaturesResponse
+    public sealed record TenantFeaturesResponse
     {
         public string[] FeatureIds { get; set; } = Array.Empty<string>();
     }

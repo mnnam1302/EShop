@@ -13,13 +13,13 @@ internal class StepContext(ApiContext apiContext)
 
     internal async Task CreateTenantAsync(Command.CreateTenantCommand request)
     {
-        var systemUser = UserData.GetSystemUser(ApiTestContextBase.DefaultTenantId);
+        var systemUser = UserData.GetSystemUser(request.Id);
         await apiContext.PostAsync($"{BaseUrl}", request, systemUser);
     }
 
     internal async Task<TenantDetailsResponse> GetTenantAsync(string tenantId)
     {
-        var systemUser = UserData.GetSystemUser(ApiTestContextBase.DefaultTenantId);
+        var systemUser = UserData.GetSystemUser(tenantId);
         var result = await apiContext.GetAsync<TenantDetailsResponse>($"{BaseUrl}/{tenantId}", systemUser);
 
         return result.Value;

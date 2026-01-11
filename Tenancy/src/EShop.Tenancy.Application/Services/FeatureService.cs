@@ -81,35 +81,33 @@ public sealed class FeatureService : IFeatureService
 
     private async Task RegisterTenantFeature(Feature feature, CancellationToken cancellationToken)
     {
-        var tenantIds = await _tenantRepository
-            .FindAll()
-            .Select(t => t.Id)
+        var existingTenants = await _tenantRepository
+            .FindAll(trackChanges: true)
+            .Include(t => t.TenantFeatures)
             .ToListAsync(cancellationToken);
 
-        foreach (var tenantId in tenantIds)
+        foreach (var tenant in existingTenants)
         {
+            _userDetailsProvider.SetSystemUserContext(tenant.Id);
+
             try
             {
-                _userDetailsProvider.SetSystemUserContext(tenantId);
+                tenant.AddTenantFeature(feature.Id, feature.DefaultStateForNewTenant, _userDetailsProvider.AuthenticatedUser.ActionUserId);
 
-                var tenant = await _tenantRepository.FindByIdAsync(
-                    tenantId,
-                    trackChanges: true,
-                    cancellationToken: cancellationToken,
-                    includeProperties: t => t.TenantFeatures);
-                if (tenant != null)
-                {
-                    tenant.AddTenantFeature(feature.Id, feature.DefaultStateForNewTenant, _userDetailsProvider.AuthenticatedUser.ActionUserId);
+                _tenantRepository.Update(tenant);
 
-                    _tenantRepository.Update(tenant);
-                    await _unitOfWork.SaveChangesAsync(cancellationToken);
-
-                    await PublishTenantFeaturesUpdatedAsync(tenantId);
-                }
+                await _unitOfWork.SaveChangesAsync(cancellationToken);
+                await PublishTenantFeaturesUpdatedAsync(tenant.Id);
+            }
+            catch (DbUpdateConcurrencyException ex)
+            {
+                _logger.LogWarning(ex,
+                    "Concurrency conflict when registering TenantFeature - tenant: '{TenantId}', feature: '{FeatureId}'. This may indicate the tenant was modified concurrently.",
+                    tenant.Id, feature.Id);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Register TenantFeature error - tenant: '{TenantId}', feature: '{FeatureId}'", tenantId, feature.Id);
+                _logger.LogError(ex, "Register TenantFeature error - tenant: '{TenantId}', feature: '{FeatureId}'", tenant.Id, feature.Id);
             }
             finally
             {
