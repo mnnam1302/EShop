@@ -198,7 +198,7 @@ await this.FeatureBackgroundAsync();
                             "State",
                             "Module"});
                 table3.AddRow(new string[] {
-                            "test-feature",
+                            "feature-id",
                             "NewFeature",
                             "A new feature for testing",
                             "Enabled",
@@ -213,13 +213,13 @@ await this.FeatureBackgroundAsync();
                             "State",
                             "Module"});
                 table4.AddRow(new string[] {
-                            "test-feature",
+                            "feature-id",
                             "NewFeature",
                             "A new feature for testing",
                             "Enabled",
                             "Core"});
 #line 20
- await testRunner.ThenAsync("the system feature \'NewFeature\' has following details", ((string)(null)), table4, "Then ");
+ await testRunner.ThenAsync("the system feature \'feature-id\' has following details", ((string)(null)), table4, "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();

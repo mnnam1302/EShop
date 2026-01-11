@@ -25,7 +25,7 @@ public sealed class TenantApi : ICarterModule
             .RequireAuthorization();
 
         group.MapPost("", CreateTenantAsync)
-            .RequireSystemUserFilter();
+            .RequireSupportUserFilter();
 
         group.MapGet("{tenantId}", GetTenantDetailsAsync)
             .RequireSystemUserFilter();

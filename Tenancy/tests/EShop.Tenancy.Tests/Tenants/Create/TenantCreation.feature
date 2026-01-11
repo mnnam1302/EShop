@@ -11,7 +11,6 @@ Background:
 	And all features are available for System User
 
 Scenario: System user register a new tenant successfully
-	Given user of group 'eshop-support' logged in
 	When System user registers a new tenant with following details
 		| Attribute     | Value                |
 		| Id            | test-tenant          |

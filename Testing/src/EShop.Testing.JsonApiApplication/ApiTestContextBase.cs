@@ -182,10 +182,10 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
 
             if (!operationalUsername.Contains('@'))
             {
-                operationalUsername = $"{operationalUsername}@{ApiTestContextBase.DefaultTenantId}";
+                operationalUsername = $"{operationalUsername}@{DefaultTenantId}";
             }
 
-            return new UserData(operationalUsername, operationalUsername, ApiTestContextBase.DefaultTenantId);
+            return new UserData(operationalUsername, operationalUsername, DefaultTenantId);
         }
     }
 

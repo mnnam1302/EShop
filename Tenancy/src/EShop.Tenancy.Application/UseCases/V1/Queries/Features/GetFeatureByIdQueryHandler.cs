@@ -5,14 +5,14 @@ using EShop.Tenancy.Domain.Repositories;
 
 namespace EShop.Tenancy.Application.UseCases.V1.Queries.Features
 {
-    public sealed class GetFeatureByIdQuery(string featureId) : IQuery<FeatureResponse>
+    public sealed class GetFeatureByIdQuery(string id) : IQuery<FeatureResponse>
     {
-        public string FeatureId { get; } = featureId;
+        public string Id { get; } = id;
     }
 
     public sealed class FeatureResponse
     {
-        public required string FeatureId { get; init; }
+        public required string Id { get; init; }
         public required string Name { get; init; }
         public string? Description { get; init; }
         public required string State { get; init; }
@@ -32,16 +32,16 @@ namespace EShop.Tenancy.Application.UseCases.V1.Queries.Features
 
         public async Task<Result<FeatureResponse>> HandleAsync(GetFeatureByIdQuery query, CancellationToken cancellationToken = default)
         {
-            var feature = await _featureRepository.FindByIdAsync(query.FeatureId, cancellationToken: cancellationToken);
+            var feature = await _featureRepository.FindByIdAsync(query.Id, cancellationToken: cancellationToken);
 
             if (feature is null)
             {
-                throw new NotFoundException($"Feature with id '{query.FeatureId}' was not found.");
+                throw new NotFoundException($"Feature with id '{query.Id}' was not found.");
             }
 
             var response = new FeatureResponse
             {
-                FeatureId = feature.Id,
+                Id = feature.Id,
                 Name = feature.Name,
                 Description = feature.Description,
                 State = feature.State,

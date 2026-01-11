@@ -3,6 +3,7 @@ using EShop.Shared.Authentication.DependencyInjections;
 using EShop.Shared.Cache.DependencyInejctions.Extensions;
 using EShop.Shared.Contracts.JsonConverters;
 using EShop.Shared.Contracts.Services.Tenancy.Tenants;
+using EShop.Shared.CQRS;
 using EShop.Shared.DomainTools.Extensions;
 using EShop.Shared.EventBus.DependencyInjections.Extensions;
 using EShop.Shared.JsonApi.Extensions;
@@ -69,6 +70,7 @@ public static class ServiceCollectionExtensions
     private static IServiceCollection AddTestTenancyApplication(this IServiceCollection services)
     {
         services.AddMediatR();
+        services.AddMediator(Application.AssemblyReference.Assembly);
 
         services.AddScoped<IPermissionValidator, CurrentUserPermissionsValidator>();
         services.AddSingleton<IUserPermissionsProvider, TestUserPermissionProvider>();

@@ -6,12 +6,6 @@ namespace EShop.Tenancy.Tests.Tenants.Create;
 [Binding]
 internal class Steps(StepContext stepContext)
 {
-    [Given("user of group {string} logged in")]
-    public void GivenUserOfGroupLoggedIn(string group)
-    {
-        stepContext.LoggedInGroup = group;
-    }
-
     [Given("System User has registered tenants with following details")]
     [When("System user registers a new tenant with following details")]
     public async Task WhenSystemUserRegistersANewTenantWithFollowingDetails(DataTable dataTable)
