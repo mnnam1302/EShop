@@ -24,6 +24,7 @@ public sealed class FeatureService : IFeatureService
 {
     private readonly IFeatureRepository _featureRepository;
     private readonly ITenantRepository _tenantRepository;
+    private readonly ITenantFeatureRepository _tenantFeatureRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IUserDetailsProvider _userDetailsProvider;
     private readonly IEventBus _eventBusGateway;
@@ -32,6 +33,7 @@ public sealed class FeatureService : IFeatureService
     public FeatureService(
         IFeatureRepository featureRepository,
         ITenantRepository tenantRepository,
+        ITenantFeatureRepository tenantFeatureRepository,
         IUnitOfWork unitOfWork,
         IUserDetailsProvider userDetailsProvider,
         IEventBus eventBusGateway,
@@ -39,6 +41,7 @@ public sealed class FeatureService : IFeatureService
     {
         _featureRepository = featureRepository;
         _tenantRepository = tenantRepository;
+        _tenantFeatureRepository = tenantFeatureRepository;
         _unitOfWork = unitOfWork;
         _userDetailsProvider = userDetailsProvider;
         _eventBusGateway = eventBusGateway;
@@ -81,33 +84,42 @@ public sealed class FeatureService : IFeatureService
 
     private async Task RegisterTenantFeature(Feature feature, CancellationToken cancellationToken)
     {
-        var existingTenants = await _tenantRepository
-            .FindAll(trackChanges: true)
-            .Include(t => t.TenantFeatures)
+        // Get tenant IDs without tracking to avoid RLS context conflicts
+        var tenantIds = await _tenantRepository
+            .FindAll(trackChanges: false)
+            .Select(t => t.Id)
             .ToListAsync(cancellationToken);
 
-        foreach (var tenant in existingTenants)
+        foreach (var tenantId in tenantIds)
         {
-            _userDetailsProvider.SetSystemUserContext(tenant.Id);
-
             try
             {
-                tenant.AddTenantFeature(feature.Id, feature.DefaultStateForNewTenant, _userDetailsProvider.AuthenticatedUser.ActionUserId);
+                // Set tenant context to establish proper RLS context
+                _userDetailsProvider.SetSystemUserContext(tenantId);
 
-                _tenantRepository.Update(tenant);
+                // Create TenantFeature directly using DbContext without loading Tenant aggregate
+                var tenantFeature = new TenantFeature(
+                    Guid.NewGuid(),
+                    tenantId,
+                    feature.Id,
+                    feature.State,
+                    tenantId,
+                    _userDetailsProvider.AuthenticatedUser.ActionUserId);
 
+                _tenantFeatureRepository.Add(tenantFeature);
                 await _unitOfWork.SaveChangesAsync(cancellationToken);
-                await PublishTenantFeaturesUpdatedAsync(tenant.Id);
+
+                await PublishTenantFeaturesUpdatedAsync(tenantId);
             }
             catch (DbUpdateConcurrencyException ex)
             {
                 _logger.LogWarning(ex,
                     "Concurrency conflict when registering TenantFeature - tenant: '{TenantId}', feature: '{FeatureId}'. This may indicate the tenant was modified concurrently.",
-                    tenant.Id, feature.Id);
+                    tenantId, feature.Id);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Register TenantFeature error - tenant: '{TenantId}', feature: '{FeatureId}'", tenant.Id, feature.Id);
+                _logger.LogError(ex, "Register TenantFeature error - tenant: '{TenantId}', feature: '{FeatureId}'", tenantId, feature.Id);
             }
             finally
             {

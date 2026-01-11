@@ -26,8 +26,9 @@ public static class ServiceCollectionExtension
 
     public static void AddPersistenceServices(this IServiceCollection services)
     {
-        services.AddScoped<ITenantRepository, TenantRepository>();
         services.AddScoped<IFeatureRepository, FeatureRepository>();
+        services.AddScoped<ITenantRepository, TenantRepository>();
+        services.AddScoped<ITenantFeatureRepository, TenantFeatureRepository>();
         services.AddScoped<IUnitOfWork, EFUnitOfWork<TenancyDbContext>>();
     }
 }

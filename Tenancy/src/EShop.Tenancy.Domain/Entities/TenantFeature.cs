@@ -9,7 +9,7 @@ public class TenantFeature : EntityBase<Guid>, IScoped, IUserTracking, IDateTrac
     // Using EF Core
     public TenantFeature() { }
 
-    internal TenantFeature(Guid id, string tenantId, string featureId, string state, string scope, string createdBy)
+    public TenantFeature(Guid id, string tenantId, string featureId, string state, string scope, string createdBy)
     {
         Id = id;
         TenantId = tenantId;
