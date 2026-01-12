@@ -15,7 +15,7 @@ Scenario Outline: System User creates a new system feature
 		| Id          | Name       | OwnerUserName | OwnerEmail           | PhoneNumber |
 		| test-tenant | Test Owner | test-owner    | test-owner@eshop.com | '123456789' |
 	When System User creates a new system feature with following details
-		| Id         | Name         | Description                  | State   | Module |
+		| Id         | Name         | Description               | State   | Module |
 		| feature-id | Test Feature | A new feature for testing | <state> | Core   |
 	Then the feature 'feature-id' has following details
 		| Id         | Name         | Description               | State   | Module |

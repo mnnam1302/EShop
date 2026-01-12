@@ -45,4 +45,15 @@ public class TenantFeature : EntityBase<Guid>, IScoped, IUserTracking, IDateTrac
 
     [MaxLength(ModelConstants.VeryLongText)]
     public string Scope { get; private set; } = string.Empty;
+
+    public bool IsEnabled()
+    {
+        return State == nameof(StateFeature.Enabled);
+    }
+
+    public void Enable()
+    {
+        State = nameof(StateFeature.Enabled);
+        LastModifiedAtUtc = DateTime.UtcNow;
+    }
 }

@@ -1,7 +1,9 @@
 ﻿using Carter;
 using EShop.Shared.Contracts.Services.Tenancy.Tenants;
+using EShop.Shared.CQRS;
 using EShop.Shared.JsonApi.Abstractions;
 using EShop.Shared.JsonApi.ResourceAccessControl;
+using EShop.Tenancy.Application.UseCases.V1.Commands.Tenants;
 using EShop.Tenancy.Application.UseCases.V1.Queries.Tenants;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
@@ -31,6 +33,9 @@ public sealed class TenantApi : ICarterModule
             .RequireSystemUserFilter();
 
         group.MapGet("{tenantId}/features", GetTenantFeaturesAsync)
+            .RequireSystemUserFilter();
+
+        group.MapPatch("{tenantId}/features/{featureId}/enable", EnableTenantFeatureAsync)
             .RequireSystemUserFilter();
     }
 
@@ -76,9 +81,30 @@ public sealed class TenantApi : ICarterModule
         if (result.IsFailure)
         {
             ApiEndpointHandler.Failure(result);
-
         }
 
         return Results.Ok(result);
+    }
+
+    private static async Task<IResult> EnableTenantFeatureAsync(
+        [FromRoute] string tenantId,
+        [FromRoute] string featureId,
+        [FromServices] Shared.CQRS.IMediator mediator,
+        CancellationToken cancellationToken)
+    {
+        var command = new EnableTenantFeatureCommand
+        {
+            TenantId = tenantId,
+            FeatureId = featureId
+        };
+
+        var result = await mediator.SendAsync(command, cancellationToken);
+
+        if (result.IsFailure)
+        {
+            return ApiEndpointHandler.Failure(result);
+        }
+
+        return Results.NoContent();
     }
 }

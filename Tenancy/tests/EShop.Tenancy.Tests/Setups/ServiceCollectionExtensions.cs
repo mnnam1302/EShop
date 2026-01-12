@@ -43,6 +43,7 @@ public static class ServiceCollectionExtensions
     {
         services.AddCors();
         services.AddResiliencePolicy();
+        services.AddGlobalExceptionMiddleware();
         services.AddTransient<DbInitializer>();
 
         services.AddControllers().AddApplicationPart(Presentation.AssemblyReference.Assembly);

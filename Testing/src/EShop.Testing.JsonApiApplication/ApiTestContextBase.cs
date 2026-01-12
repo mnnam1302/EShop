@@ -287,79 +287,88 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
 
     #region Http Action Methods
 
-    public Task<Result<TResponse>> GetAsync<TResponse>(string relativeUri, UserData? user = null)
+    public async Task<Result<TResponse>> GetAsync<TResponse>(string relativeUri, UserData? user = null)
     {
-        return ExecuteHttpRequestAsync<Result<TResponse>>(
+        return await ExecuteHttpRequestAsync<Result<TResponse>>(
             client => client.GetAsync(relativeUri),
             relativeUri,
             user,
             HttpMethod.Get.Method);
     }
 
-    public Task<Result> PostAsync<TRequest>(string relativeUri, TRequest request, UserData? user = null)
+    public async Task<Result> PostAsync<TRequest>(string relativeUri, TRequest request, UserData? user = null)
     {
-        return ExecuteHttpRequestWithBodyAsync<TRequest, Result>(
+        return await ExecuteHttpRequestWithBodyAsync<TRequest, Result>(
             relativeUri,
             request,
             user,
             HttpMethod.Post.Method);
     }
 
-    public Task<Result<TResponse>> PostAsync<TRequest, TResponse>(string relativeUri, TRequest request, UserData? user = null)
+    public async Task<Result<TResponse>> PostAsync<TRequest, TResponse>(string relativeUri, TRequest request, UserData? user = null)
     {
-        return ExecuteHttpRequestWithBodyAsync<TRequest, Result<TResponse>>(
+        return await ExecuteHttpRequestWithBodyAsync<TRequest, Result<TResponse>>(
             relativeUri,
             request,
             user,
             HttpMethod.Post.Method);
     }
 
-    public Task<Result> PutAsync<TRequest>(string relativeUri, TRequest request, UserData? user = null)
+    public async Task<Result> PutAsync<TRequest>(string relativeUri, TRequest request, UserData? user = null)
     {
-        return ExecuteHttpRequestWithBodyAsync<TRequest, Result>(
+        return await ExecuteHttpRequestWithBodyAsync<TRequest, Result>(
             relativeUri,
             request,
             user,
             HttpMethod.Put.Method);
     }
 
-    public Task<Result<TResponse>> PutAsync<TRequest, TResponse>(string relativeUri, TRequest request, UserData? user = null)
+    public async Task<Result<TResponse>> PutAsync<TRequest, TResponse>(string relativeUri, TRequest request, UserData? user = null)
     {
-        return ExecuteHttpRequestWithBodyAsync<TRequest, Result<TResponse>>(
+        return await ExecuteHttpRequestWithBodyAsync<TRequest, Result<TResponse>>(
             relativeUri,
             request,
             user,
             HttpMethod.Put.Method);
     }
 
-    public Task<Result> PatchAsync<TRequest>(string relativeUri, TRequest request, UserData? user = null)
+    public async Task<Result> PatchAsync(string relativeUri, UserData? user = null)
     {
-        return ExecuteHttpRequestWithBodyAsync<TRequest, Result>(
+        return await ExecuteHttpRequestAsync<Result>(
+            client => client.PatchAsync(relativeUri, null),
+            relativeUri,
+            user,
+            HttpMethod.Patch.Method);
+    }
+
+    public async Task<Result> PatchAsync<TRequest>(string relativeUri, TRequest request, UserData? user = null)
+    {
+        return await ExecuteHttpRequestWithBodyAsync<TRequest, Result>(
             relativeUri,
             request,
             user,
             HttpMethod.Patch.Method);
     }
 
-    public Task<Result<TResponse>> PatchAsync<TRequest, TResponse>(string relativeUri, TRequest request, UserData? user = null)
+    public async Task<Result<TResponse>> PatchAsync<TRequest, TResponse>(string relativeUri, TRequest request, UserData? user = null)
     {
-        return ExecuteHttpRequestWithBodyAsync<TRequest, Result<TResponse>>(
+        return await ExecuteHttpRequestWithBodyAsync<TRequest, Result<TResponse>>(
             relativeUri,
             request,
             user,
             HttpMethod.Patch.Method);
     }
 
-    public Task<Result> DeleteAsync(string relativeUri, UserData? user = null)
+    public async Task<Result> DeleteAsync(string relativeUri, UserData? user = null)
     {
-        return ExecuteHttpRequestAsync<Result>(
+        return await ExecuteHttpRequestAsync<Result>(
             client => client.DeleteAsync(relativeUri),
             relativeUri,
             user,
             HttpMethod.Delete.Method);
     }
 
-    private Task<TResult> ExecuteHttpRequestWithBodyAsync<TRequest, TResult>(
+    private async Task<TResult> ExecuteHttpRequestWithBodyAsync<TRequest, TResult>(
         string relativeUri,
         TRequest request,
         UserData? user,
@@ -368,7 +377,7 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
         var serializedRequest = System.Text.Json.JsonSerializer.Serialize(request);
         var httpContent = new StringContent(serializedRequest, Encoding.UTF8, JsonMediaType);
 
-        return ExecuteHttpRequestAsync<TResult>(
+        return await ExecuteHttpRequestAsync<TResult>(
             client => CreateHttpRequestWithBody(client, relativeUri, httpContent, httpMethod),
             relativeUri,
             user,
@@ -413,6 +422,17 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
             }
 
             using var response = await httpRequestFactory(client);
+            LastStatusCode = response.StatusCode;
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                logger.LogWarning(
+                    "HTTP request failed with status {StatusCode}. Response: {Content}",
+                    response.StatusCode,
+                    string.IsNullOrWhiteSpace(errorContent) ? "<empty>" : errorContent);
+            }
+
             return await ProcessHttpResponse<TResult>(response);
         }
         catch (Exception ex)
@@ -438,15 +458,93 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
     private static async Task<Result> DeserializeResultResponse(HttpResponseMessage response)
     {
         var responseContent = await response.Content.ReadAsStringAsync();
-        var result = JsonConvert.DeserializeObject<Result>(responseContent);
-        return result ?? throw new InvalidOperationException("Failed to deserialize API response to Result.");
+
+        if (string.IsNullOrWhiteSpace(responseContent))
+        {
+            return response.IsSuccessStatusCode
+                ? Result.Success()
+                : Result.Failure(new Error(
+                    "HTTP_ERROR",
+                    $"Request failed with status code {(int)response.StatusCode} ({response.StatusCode})"));
+        }
+
+        Result? result = null;
+        try
+        {
+            result = JsonConvert.DeserializeObject<Result>(responseContent);
+        }
+        catch (JsonException jsonEx)
+        {
+            throw new InvalidOperationException(
+                $"Failed to deserialize API response to Result. Status: {response.StatusCode}, " +
+                $"Content: {TruncateContent(responseContent)}, Error: {jsonEx.Message}",
+                jsonEx);
+        }
+
+        if (result is null)
+        {
+            throw new InvalidOperationException(
+                $"Deserialization returned null for Result. Status: {response.StatusCode}, " +
+                $"Content: {TruncateContent(responseContent)}");
+        }
+
+        return result;
     }
 
     private static async Task<TValue> DeserializeGenericResponse<TValue>(HttpResponseMessage response)
     {
         var responseContent = await response.Content.ReadAsStringAsync();
-        var result = JsonConvert.DeserializeObject<TValue>(responseContent);
-        return result ?? throw new InvalidOperationException($"Failed to deserialize API response to {typeof(TValue).Name}.");
+
+        if (string.IsNullOrWhiteSpace(responseContent))
+        {
+            var typeName = typeof(TValue).Name;
+            var isResultType = typeof(TValue).IsGenericType &&
+                               typeof(TValue).GetGenericTypeDefinition() == typeof(Result<>);
+
+            if (response.IsSuccessStatusCode && isResultType)
+            {
+                throw new InvalidOperationException(
+                    $"Expected response body for {typeName} but received empty response with status {response.StatusCode}. " +
+                    "The endpoint returned no data. Use the non-generic PostAsync<TRequest>()/PutAsync<TRequest>() method instead, " +
+                    "which returns Result without a value.");
+            }
+
+            throw new InvalidOperationException(
+                $"Failed to deserialize API response to {typeName}. Status: {response.StatusCode}, " +
+                "Content is empty or whitespace.");
+        }
+
+        TValue? result = default;
+        try
+        {
+            result = JsonConvert.DeserializeObject<TValue>(responseContent);
+        }
+        catch (JsonException jsonEx)
+        {
+            throw new InvalidOperationException(
+                $"Failed to deserialize API response to {typeof(TValue).Name}. Status: {response.StatusCode}, " +
+                $"Content: {TruncateContent(responseContent)}, Error: {jsonEx.Message}",
+                jsonEx);
+        }
+
+        if (result is null)
+        {
+            throw new InvalidOperationException(
+                $"Deserialization returned null for {typeof(TValue).Name}. Status: {response.StatusCode}, " +
+                $"Content: {TruncateContent(responseContent)}");
+        }
+
+        return result;
+    }
+
+    private static string TruncateContent(string content, int maxLength = 500)
+    {
+        if (content.Length <= maxLength)
+        {
+            return content;
+        }
+
+        return content[..maxLength] + $"... (truncated, total length: {content.Length})";
     }
 
     #endregion Http Action Methods

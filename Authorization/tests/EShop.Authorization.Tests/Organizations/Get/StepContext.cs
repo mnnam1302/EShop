@@ -9,9 +9,7 @@ internal sealed class StepContext(ApiContext apiContext)
     {
         var operationalUser = apiContext.GetUserByUsername(username);
 
-        var result = await apiContext
-            .GetAsync<List<OrganizationsResponse>>("api/v1/organizations", operationalUser);
-
+        var result = await apiContext.GetAsync<List<OrganizationsResponse>>("api/v1/organizations", operationalUser);
         return result.Value;
     }
 }
