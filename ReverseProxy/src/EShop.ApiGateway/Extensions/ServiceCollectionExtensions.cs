@@ -7,10 +7,10 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddShared(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddRedisHealthCheck(configuration)
-            .AddRedisCacheInfrastructure(configuration);
-
-        services.AddTenantAuthenticationProvider();
+        services
+            .AddRedisHealthCheck(configuration)
+            .AddRedisCacheInfrastructure(configuration)
+            .AddTenantAuthenticationProvider();
 
         return services;
     }
@@ -18,8 +18,8 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddBoostrapping(this IServiceCollection services, IConfiguration configuration)
     {
         services
-            .AddGlobalExceptionMiddleware()
             .AddEshopCors()
+            .AddGlobalExceptionMiddleware()
             .AddYarpReverseProxy(configuration);
 
         return services;
