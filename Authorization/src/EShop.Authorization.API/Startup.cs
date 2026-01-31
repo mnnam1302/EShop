@@ -26,10 +26,14 @@ public class Startup
         var logger = loggerFactory.CreateLogger<Startup>();
         app.UseMiddleware<ExceptionHandlingMiddleware>();
 
-        if (Environment.IsDevelopment() || Environment.IsStaging())
+        if (app.Environment.IsDevelopment())
         {
-            app.UseCors(x => x.AllowAnyMethod());
+            app.UseCors(CorsConstants.DevelopmentCorsPolicy);
             app.UseSwaggerAPI();
+        }
+        else
+        {
+            app.UseCors(CorsConstants.ProductionCorsPolicy);
         }
 
         app.UseRouting();

@@ -20,7 +20,7 @@ public static class ServiceCollectionExtensions
     {
         services
             .AddGlobalExceptionMiddleware()
-            .AddEshopCors()
+            .ConfigureCors(configuration)
             .ConfigureRateLimiters()
             .AddServiceDiscovery()
             .AddEndpointsApiExplorer()

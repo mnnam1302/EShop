@@ -1,5 +1,6 @@
 using EShop.ApiGateway.Extensions;
 using EShop.Shared.Diagnostics;
+using EShop.Shared.JsonApi.Extensions;
 using EShop.Shared.JsonApi.Middlewares;
 using Serilog;
 
@@ -19,7 +20,11 @@ app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 if (app.Environment.IsDevelopment())
 {
-    app.UseCors("CorsPolicy");
+    app.UseCors(CorsConstants.DevelopmentCorsPolicy);
+}
+else
+{
+    app.UseCors(CorsConstants.ProductionCorsPolicy);
 }
 
 // Enable in production

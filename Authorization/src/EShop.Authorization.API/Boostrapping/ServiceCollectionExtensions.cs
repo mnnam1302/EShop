@@ -11,7 +11,7 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddBoostrapping(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment)
     {
-        services.AddAuthorizationAPI()
+        services.AddAuthorizationAPI(configuration)
             .AddAuthorizationApplication()
             .AddAuthorizationPersistence(configuration, environment)
             .AddAuthorizationInfrastructure(configuration, environment);
@@ -23,9 +23,9 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    public static IServiceCollection AddAuthorizationAPI(this IServiceCollection services)
+    public static IServiceCollection AddAuthorizationAPI(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddCors();
+        services.ConfigureCors(configuration);
         services.AddResiliencePolicy();
         services.AddGlobalExceptionMiddleware();
         services.AddHealthChecks();
