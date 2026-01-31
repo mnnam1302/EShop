@@ -5,33 +5,30 @@ using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Cofigures the service discovery services
-builder.Services.AddServiceDiscovery();
-
 Logging.SetSerilog("ApiGateway");
 builder.Host.UseSerilog();
 
 builder.Services
-    .AddBoostrapping(builder.Configuration)
-    .AddShared(builder.Configuration);
-
-builder.Services.AddEndpointsApiExplorer();
+    .AddShared(builder.Configuration)
+    .AddBoostrapping(builder.Configuration);
 
 var app = builder.Build();
 
-app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseSerilogRequestLogging();
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 if (app.Environment.IsDevelopment())
 {
     app.UseCors("CorsPolicy");
 }
 
+// Enable in production
 //app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.UseRateLimiter();
 app.MapDefaultEndpoints();
 app.MapReverseProxy();
 

@@ -1,5 +1,6 @@
 ﻿using EShop.Shared.Cache.DependencyInejctions.Extensions;
 using EShop.Shared.JsonApi.Extensions;
+using EShop.Shared.JsonApi.RateLimiting;
 
 namespace EShop.ApiGateway.Extensions;
 
@@ -18,8 +19,11 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddBoostrapping(this IServiceCollection services, IConfiguration configuration)
     {
         services
-            .AddEshopCors()
             .AddGlobalExceptionMiddleware()
+            .AddEshopCors()
+            .ConfigureRateLimiters()
+            .AddServiceDiscovery()
+            .AddEndpointsApiExplorer()
             .AddYarpReverseProxy(configuration);
 
         return services;
