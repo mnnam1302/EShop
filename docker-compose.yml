@@ -147,6 +147,12 @@ services:
     networks:
       - eshop
 
+  eshop.apigateway:
+    image: ${DOCKER_REGISTRY-}eshopapigateway
+    build:
+      context: .
+      dockerfile: ReverseProxy/src/EShop.ApiGateway/Dockerfile
+
 volumes:
   eshop-data:
   eshop_redis:
@@ -160,3 +166,4 @@ networks:
   eshop:
     name: eshop
     driver: bridge
+
