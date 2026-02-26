@@ -1,0 +1,46 @@
+services:
+  dashboard:
+    ports:
+      - 18888:18888
+
+  postgres:
+    ports:
+      - "5432:5432"
+
+  redis:
+    ports:
+      - 6379:6379
+
+  rabbitmq:
+    ports:
+      - 5672:5672
+      - 15672:15672
+
+  tenancy:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    ports:
+      - "5001:8080"
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
+      - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
+
+  authorization:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    ports:
+      - "5002:8080"
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
+      - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
+
+  eshop.apigateway:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - Services__tenancy__http__0=http://tenancy:8080
+      - Services__authorization__http__0=http://authorization:8080
+    ports:
+      - "5000:8080"
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
+      - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro

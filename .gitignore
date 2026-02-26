@@ -359,3 +359,7 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 *.env
+
+# Docker secrets - sensitive data
+Deployment/secrets/*.txt
+!Deployment/secrets/*.txt.example

@@ -4,6 +4,10 @@
 # Stage 1: Base runtime - Use Alpine for smaller image size
 # ============================================================
 FROM mcr.microsoft.com/dotnet/aspnet:8.0-alpine AS base
+
+# Install wget for healthcheck support
+RUN apk add --no-cache wget
+
 USER $APP_UID
 WORKDIR /app
 EXPOSE 8080
