@@ -1,5 +1,4 @@
 ﻿using Carter;
-using EShop.Shared.Diagnostics;
 using EShop.Shared.JsonApi.Extensions;
 using EShop.Shared.JsonApi.Middlewares;
 using EShop.Tenancy.API.Boostrapping;
@@ -21,7 +20,9 @@ public class Startup
 
     public virtual void ConfigureServices(IServiceCollection services)
     {
-        services.AddBoostrapping(Configuration, Environment);
+        services
+            .AddBoostrapping(Configuration, Environment)
+            .AddShared();
     }
 
     internal void Configure(WebApplication app, IHostApplicationLifetime applicationLifetime, ILoggerFactory loggerFactory)
@@ -29,17 +30,20 @@ public class Startup
         var logger = loggerFactory.CreateLogger<Startup>();
         app.UseMiddleware<ExceptionHandlingMiddleware>();
 
-        if (Environment.IsDevelopment() || Environment.IsStaging())
+        if (Environment.IsDevelopment())
         {
-            app.UseCors(x => x.AllowAnyMethod());
+            app.UseCors(CorsConstants.DevelopmentCorsPolicy);
             app.UseSwaggerAPI();
+        }
+        else
+        {
+            app.UseCors(CorsConstants.ProductionCorsPolicy);
         }
 
         app.UseRouting();
         app.UseAuthentication();
         app.UseAuthorization();
 
-        // Map Aspire default endpoints (health checks, etc.)
         app.MapDefaultEndpoints();
         app.MapHealthChecks("/health", new HealthCheckOptions
         {

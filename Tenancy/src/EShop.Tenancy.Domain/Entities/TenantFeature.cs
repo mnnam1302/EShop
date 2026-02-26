@@ -9,7 +9,7 @@ public class TenantFeature : EntityBase<Guid>, IScoped, IUserTracking, IDateTrac
     // Using EF Core
     public TenantFeature() { }
 
-    internal TenantFeature(Guid id, string tenantId, string featureId, string state, string scope, string createdBy)
+    public TenantFeature(Guid id, string tenantId, string featureId, string state, string scope, string createdBy)
     {
         Id = id;
         TenantId = tenantId;
@@ -45,4 +45,15 @@ public class TenantFeature : EntityBase<Guid>, IScoped, IUserTracking, IDateTrac
 
     [MaxLength(ModelConstants.VeryLongText)]
     public string Scope { get; private set; } = string.Empty;
+
+    public bool IsEnabled()
+    {
+        return State == nameof(StateFeature.Enabled);
+    }
+
+    public void Enable()
+    {
+        State = nameof(StateFeature.Enabled);
+        LastModifiedAtUtc = DateTime.UtcNow;
+    }
 }

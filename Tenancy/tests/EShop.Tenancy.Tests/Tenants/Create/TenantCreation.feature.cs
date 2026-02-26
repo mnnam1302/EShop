@@ -108,14 +108,14 @@ namespace EShop.Tenancy.Tests.Tenants.Create
         {
 #line 6
 #line hidden
-            global::Reqnroll.Table table1 = new global::Reqnroll.Table(new string[] {
+            global::Reqnroll.Table table6 = new global::Reqnroll.Table(new string[] {
                         "PermissionId"});
-            table1.AddRow(new string[] {
+            table6.AddRow(new string[] {
                         "Users_ViewSystemSettings"});
-            table1.AddRow(new string[] {
+            table6.AddRow(new string[] {
                         "Users_ManageSystemSettings"});
 #line 7
- await testRunner.GivenAsync("System user with following permissions", ((string)(null)), table1, "Given ");
+ await testRunner.GivenAsync("System user with following permissions", ((string)(null)), table6, "Given ");
 #line hidden
 #line 11
  await testRunner.AndAsync("all features are available for System User", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
@@ -176,44 +176,41 @@ this.ScenarioInitialize(scenarioInfo, ruleInfo);
 #line 6
 await this.FeatureBackgroundAsync();
 #line hidden
-#line 14
- await testRunner.GivenAsync("user of group \'eshop-support\' logged in", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
-#line hidden
-                global::Reqnroll.Table table2 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table7 = new global::Reqnroll.Table(new string[] {
                             "Attribute",
                             "Value"});
-                table2.AddRow(new string[] {
+                table7.AddRow(new string[] {
                             "Id",
                             "test-tenant"});
-                table2.AddRow(new string[] {
+                table7.AddRow(new string[] {
                             "Name",
                             "Test Owner"});
-                table2.AddRow(new string[] {
+                table7.AddRow(new string[] {
                             "OwnerUsername",
                             "test-owner"});
-                table2.AddRow(new string[] {
+                table7.AddRow(new string[] {
                             "OwnerEmail",
                             "test-owner@eshop.com"});
-                table2.AddRow(new string[] {
+                table7.AddRow(new string[] {
                             "PhoneNumber",
                             "\'123456789\'"});
-#line 15
- await testRunner.WhenAsync("System user registers a new tenant with following details", ((string)(null)), table2, "When ");
+#line 14
+ await testRunner.WhenAsync("System user registers a new tenant with following details", ((string)(null)), table7, "When ");
 #line hidden
-                global::Reqnroll.Table table3 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table8 = new global::Reqnroll.Table(new string[] {
                             "Id",
                             "Name",
                             "OwnerUsername",
                             "OwnerEmail",
                             "PhoneNumber"});
-                table3.AddRow(new string[] {
+                table8.AddRow(new string[] {
                             "test-tenant",
                             "Test Owner",
                             "test-owner@test-tenant",
                             "test-owner@eshop.com",
                             "\'123456789\'"});
-#line 22
- await testRunner.ThenAsync("the tenant \'test-tenant\' has following details", ((string)(null)), table3, "Then ");
+#line 21
+ await testRunner.ThenAsync("the tenant \'test-tenant\' has following details", ((string)(null)), table8, "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();

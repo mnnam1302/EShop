@@ -70,14 +70,6 @@ public abstract class RepositoryBase<TDbContext, TEntity, TKey> : IRepositoryBas
     {
         var items = FindAll(trackChanges, includeProperties);
 
-        if (includeProperties != null)
-        {
-            foreach (var includeProperty in includeProperties)
-            {
-                items = items.Include(includeProperty);
-            }
-        }
-
         if (predicate != null)
         {
             items = items.Where(predicate);

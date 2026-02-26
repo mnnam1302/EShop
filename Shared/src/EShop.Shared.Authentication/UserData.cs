@@ -34,7 +34,9 @@ public sealed class UserData : ValueObject
     public string ActionUserType { get; }
 
     public static UserData GetSystemUser(string? tenantId)
-        => new UserData(SystemUsername, SystemUsername, tenantId ?? string.Empty);
+    {
+        return new UserData(SystemUsername, SystemUsername, tenantId ?? string.Empty);
+    }
 
     public static UserData GetSystemUser(string? tenantId, string actionUserId, string? actionUserType = null)
     {

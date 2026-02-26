@@ -15,7 +15,7 @@ public interface IFeatureService
 {
     Task<IEnumerable<TenantFeature>> GetTenantFeaturesByTenantIdAsync(string tenantId, string? state = null, CancellationToken cancellationToken = default);
 
-    Task AddOrUpdateFeatureAsync(Feature feature, string? state, CancellationToken cancellationToken);
+    Task AddOrUpdateFeatureAsync(Feature feature, CancellationToken cancellationToken);
 
     Task DeleteFeatureAsync(Feature feature, CancellationToken cancellationToken);
 }
@@ -24,6 +24,7 @@ public sealed class FeatureService : IFeatureService
 {
     private readonly IFeatureRepository _featureRepository;
     private readonly ITenantRepository _tenantRepository;
+    private readonly ITenantFeatureRepository _tenantFeatureRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IUserDetailsProvider _userDetailsProvider;
     private readonly IEventBus _eventBusGateway;
@@ -32,6 +33,7 @@ public sealed class FeatureService : IFeatureService
     public FeatureService(
         IFeatureRepository featureRepository,
         ITenantRepository tenantRepository,
+        ITenantFeatureRepository tenantFeatureRepository,
         IUnitOfWork unitOfWork,
         IUserDetailsProvider userDetailsProvider,
         IEventBus eventBusGateway,
@@ -39,18 +41,19 @@ public sealed class FeatureService : IFeatureService
     {
         _featureRepository = featureRepository;
         _tenantRepository = tenantRepository;
+        _tenantFeatureRepository = tenantFeatureRepository;
         _unitOfWork = unitOfWork;
         _userDetailsProvider = userDetailsProvider;
         _eventBusGateway = eventBusGateway;
         _logger = logger;
     }
 
-    public async Task AddOrUpdateFeatureAsync(Feature feature, string? state, CancellationToken cancellationToken)
+    public async Task AddOrUpdateFeatureAsync(Feature feature, CancellationToken cancellationToken)
     {
         var entityState = await AddOrUpdateFeatureInternalAsync(feature, cancellationToken);
         if (entityState == EntityState.Added)
         {
-            await RegisterTenantFeature(feature, state, cancellationToken);
+            await RegisterTenantFeature(feature, cancellationToken);
         }
     }
 
@@ -75,36 +78,41 @@ public sealed class FeatureService : IFeatureService
         var entityState = await _featureRepository.GetEntityStateAsync(feature, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        _logger.LogTrace("Feature '{FeatureId}' added to system", feature.Id);
+        _logger.LogInformation("Feature {FeatureId} added to system", feature.Id);
         return entityState;
     }
 
-    private async Task RegisterTenantFeature(Feature feature, string? state, CancellationToken cancellationToken)
+    private async Task RegisterTenantFeature(Feature feature, CancellationToken cancellationToken)
     {
         var tenantIds = await _tenantRepository
-            .FindAll()
+            .FindAll(trackChanges: false)
             .Select(t => t.Id)
             .ToListAsync(cancellationToken);
 
         foreach (var tenantId in tenantIds)
         {
-            _userDetailsProvider.SetSystemUserContext(tenantId);
             try
             {
-                var tenant = await _tenantRepository.FindByIdAsync(
+                _userDetailsProvider.SetSystemUserContext(tenantId);
+
+                var tenantFeature = new TenantFeature(
+                    Guid.NewGuid(),
                     tenantId,
-                    trackChanges: true,
-                    cancellationToken: cancellationToken,
-                    includeProperties: t => t.TenantFeatures);
-                if (tenant != null)
-                {
-                    tenant.AddTenantFeature(feature.Id, state ?? feature.DefaultStateForNewTenant, _userDetailsProvider.AuthenticatedUser.ActionUserId);
+                    feature.Id,
+                    feature.State,
+                    tenantId,
+                    _userDetailsProvider.AuthenticatedUser.ActionUserId);
 
-                    _tenantRepository.Update(tenant);
-                    await _unitOfWork.SaveChangesAsync(cancellationToken);
+                _tenantFeatureRepository.Add(tenantFeature);
+                await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-                    await PublishTenantFeaturesUpdatedAsync(tenantId);
-                }
+                await PublishTenantFeaturesUpdatedAsync(tenantId);
+            }
+            catch (DbUpdateConcurrencyException ex)
+            {
+                _logger.LogWarning(ex,
+                    "Concurrency conflict when registering TenantFeature - tenant: '{TenantId}', feature: '{FeatureId}'. This may indicate the tenant was modified concurrently.",
+                    tenantId, feature.Id);
             }
             catch (Exception ex)
             {

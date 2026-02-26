@@ -19,8 +19,7 @@ public interface ITestDatabaseConnectionInterceptor : IDbConnectionInterceptor
 /// <summary>
 /// Implemented with SqlLite connection later
 /// </summary>
-public sealed class TestDatabaseConnectionInterceptor 
-    : DbConnectionInterceptor, ITestDatabaseConnectionInterceptor
+public sealed class TestDatabaseConnectionInterceptor : DbConnectionInterceptor, ITestDatabaseConnectionInterceptor
 {
 
 }

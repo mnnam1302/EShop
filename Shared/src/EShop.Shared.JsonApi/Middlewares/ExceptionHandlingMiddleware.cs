@@ -6,7 +6,7 @@ using System.Text.Json;
 
 namespace EShop.Shared.JsonApi.Middlewares;
 
-public class ExceptionHandlingMiddleware : IMiddleware
+public sealed class ExceptionHandlingMiddleware : IMiddleware
 {
     private readonly ILogger _logger;
 

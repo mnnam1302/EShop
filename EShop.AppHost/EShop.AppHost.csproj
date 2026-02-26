@@ -19,6 +19,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Authorization\src\EShop.Authorization.API\EShop.Authorization.API.csproj" />
+    <ProjectReference Include="..\ReverseProxy\src\EShop.ApiGateway\EShop.ApiGateway.csproj" />
     <ProjectReference Include="..\Tenancy\src\EShop.Tenancy.API\EShop.Tenancy.API.csproj" />
   </ItemGroup>
 

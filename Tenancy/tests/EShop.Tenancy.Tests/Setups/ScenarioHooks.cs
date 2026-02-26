@@ -35,14 +35,16 @@ public sealed class ScenarioHooks
     }
 
     [BeforeScenario]
-    public async Task BeforeScenario(IObjectContainer objectContainer)
+    public async Task BeforeScenario(IObjectContainer objectContainer, ScenarioContext scenarioContext)
     {
         var testDatabase = new PostgreSqlTestDatabase()
         {
             PostgreSqlContainer = PostgreSqlContainer
         };
 
-        await testDatabase.CreateSharedDatabaseAsync("tenancy_database");
+        // Generate unique database name per scenario to prevent conflicts when running multiple tests
+        var uniqueDatabaseName = $"tenancy_test_{Guid.NewGuid():N}";
+        await testDatabase.CreateSharedDatabaseAsync(uniqueDatabaseName);
         objectContainer.RegisterInstanceAs(testDatabase);
 
         var apiContext = new ApiContext(testDatabase);

@@ -17,6 +17,7 @@ public static class ExternalServiceRegistrationExtensions
     private static IDistributedApplicationBuilder AddServices(IDistributedApplicationBuilder builder, bool useExternalService)
     {
         #region Observability
+
         var prometheus = builder.AddContainer(ResourceNames.Prometheus, "prom/prometheus", "v3.5.0")
             .WithBindMount("../Deployment/config/prometheus/prometheus.yml", "/etc/prometheus/prometheus.yml", isReadOnly: true)
             .WithArgs("--web.enable-otlp-receiver", "--config.file=/etc/prometheus/prometheus.yml")
@@ -31,9 +32,10 @@ public static class ExternalServiceRegistrationExtensions
         builder.AddOpenTelemetryCollector(ResourceNames.OpenTelemetryCollector, @"..\Deployment\config\otelcollector\config.yaml")
                .WithEnvironment("PROMETHEUS_ENDPOINT", $"{prometheus.GetEndpoint("http")}/api/v1/otlp");
 
-        #endregion
+        #endregion Observability
 
         #region Infrastructure resources
+
         var pathToDbInitDirectory = Path.GetFullPath(Path.Combine(Environment.CurrentDirectory, @"..\Deployment\Scripts\"));
         var postgres = builder.AddPostgres(ResourceNames.PostgreSql, port: 5432)
                 .WithImageTag("17.0")
@@ -63,9 +65,10 @@ public static class ExternalServiceRegistrationExtensions
                 .WithLifetime(ContainerLifetime.Persistent)
                 .WithManagementPlugin();
 
-        #endregion
+        #endregion Infrastructure resources
 
         #region Microservices
+
         var tenancyDatabase = postgres.AddDatabase("tenancyDatabase", "eshop_tenancy");
         var tenancy = builder.AddProject<Projects.EShop_Tenancy_API>(ResourceNames.TenancyApi)
             .WithExternalServiceMode(useExternalService)
@@ -83,7 +86,7 @@ public static class ExternalServiceRegistrationExtensions
         }
 
         var authorizationDatabase = postgres.AddDatabase("authorizationDatabase", "eshop_authorization");
-        var authrorization = builder.AddProject<Projects.EShop_Authorization_API>(ResourceNames.AuthorizationApi)
+        var authorization = builder.AddProject<Projects.EShop_Authorization_API>(ResourceNames.AuthorizationApi)
             .WithExternalServiceMode(useExternalService)
             .WithEnvironment("GRAFANA_URL", grafana.GetEndpoint("http"))
             .WithReference(authorizationDatabase)
@@ -92,13 +95,30 @@ public static class ExternalServiceRegistrationExtensions
 
         if (!useExternalService)
         {
-            authrorization
+            authorization
                 .WaitFor(authorizationDatabase)
                 .WaitFor(redis)
                 .WaitFor(rabbitmq);
         }
 
-        #endregion
+        #endregion Microservices
+
+        #region Api Gateway
+
+        var apiGateway = builder.AddProject<Projects.EShop_ApiGateway>(ResourceNames.ApiGateway)
+            .WithReference(redis)
+            .WithReference(tenancy)
+            .WithReference(authorization);
+
+        if (!useExternalService)
+        {
+            apiGateway
+                .WaitFor(redis)
+                .WaitFor(tenancy)
+                .WaitFor(authorization);
+        }
+
+        #endregion Api Gateway
 
         return builder;
     }

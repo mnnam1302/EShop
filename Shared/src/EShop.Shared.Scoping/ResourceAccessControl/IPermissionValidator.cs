@@ -76,7 +76,7 @@ public class CurrentUserPermissionsValidator : IPermissionValidator
             return Task.FromResult(true);
         }
 
-        var authenticatedUser = this._userDetailsProvider.AuthenticatedUser;
+        var authenticatedUser = _userDetailsProvider.AuthenticatedUser;
         return Task.FromResult(authenticatedUser.IsSupportUser);
     }
 }

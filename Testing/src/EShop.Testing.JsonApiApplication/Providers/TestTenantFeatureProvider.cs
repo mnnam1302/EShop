@@ -4,7 +4,7 @@ namespace EShop.Testing.JsonApiApplication.Providers;
 
 public sealed class TestTenantFeatureProvider : ITenantFeaturesProvider
 {
-    private readonly Dictionary<string, List<string>> tenantFeatures = new();
+    private readonly Dictionary<string, List<string>> tenantFeatures = [];
 
     public void AddTenantFeature(string tenantId, string featureId)
     {

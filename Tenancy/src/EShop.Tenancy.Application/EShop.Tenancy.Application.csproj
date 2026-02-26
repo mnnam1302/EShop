@@ -7,12 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="UseCases\V1\Commands\Features\**" />
-    <EmbeddedResource Remove="UseCases\V1\Commands\Features\**" />
-    <None Remove="UseCases\V1\Commands\Features\**" />
-  </ItemGroup>
-
-  <ItemGroup>
   	<PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
   </ItemGroup>
 

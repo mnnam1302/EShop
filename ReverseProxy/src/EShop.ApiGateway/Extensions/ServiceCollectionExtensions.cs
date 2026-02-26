@@ -1,5 +1,6 @@
 ﻿using EShop.Shared.Cache.DependencyInejctions.Extensions;
 using EShop.Shared.JsonApi.Extensions;
+using EShop.Shared.JsonApi.RateLimiting;
 
 namespace EShop.ApiGateway.Extensions;
 
@@ -9,9 +10,8 @@ public static class ServiceCollectionExtensions
     {
         services
             .AddRedisHealthCheck(configuration)
-            .AddRedisCacheInfrastructure(configuration);
-
-        services.AddTenantAuthenticationProvider();
+            .AddRedisCacheInfrastructure(configuration)
+            .AddTenantAuthenticationProvider();
 
         return services;
     }
@@ -20,7 +20,10 @@ public static class ServiceCollectionExtensions
     {
         services
             .AddGlobalExceptionMiddleware()
-            .AddEshopCors()
+            .ConfigureCors(configuration)
+            .ConfigureRateLimiters()
+            .AddServiceDiscovery()
+            .AddEndpointsApiExplorer()
             .AddYarpReverseProxy(configuration);
 
         return services;
@@ -28,9 +31,7 @@ public static class ServiceCollectionExtensions
 
     private static IServiceCollection AddYarpReverseProxy(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddServiceDiscovery();
-        services
-            .AddReverseProxy()
+        services.AddReverseProxy()
             .LoadFromConfig(configuration.GetSection("ReverseProxy"))
             .AddServiceDiscoveryDestinationResolver();
 

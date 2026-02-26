@@ -1,5 +1,6 @@
 using EShop.ApiGateway.Extensions;
 using EShop.Shared.Diagnostics;
+using EShop.Shared.JsonApi.Extensions;
 using EShop.Shared.JsonApi.Middlewares;
 using Serilog;
 
@@ -9,26 +10,31 @@ Logging.SetSerilog("ApiGateway");
 builder.Host.UseSerilog();
 
 builder.Services
-    .AddBoostrapping(builder.Configuration)
-    .AddShared(builder.Configuration);
-
-builder.Services.AddEndpointsApiExplorer();
+    .AddShared(builder.Configuration)
+    .AddBoostrapping(builder.Configuration);
 
 var app = builder.Build();
 
-app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseSerilogRequestLogging();
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 if (app.Environment.IsDevelopment())
 {
-    app.UseCors("CorsPolicy");
+    app.UseCors(CorsConstants.DevelopmentCorsPolicy);
+}
+else
+{
+    app.UseCors(CorsConstants.ProductionCorsPolicy);
 }
 
+// Enable in production
 //app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.UseRateLimiter();
+app.MapDefaultEndpoints();
 app.MapReverseProxy();
 
 try

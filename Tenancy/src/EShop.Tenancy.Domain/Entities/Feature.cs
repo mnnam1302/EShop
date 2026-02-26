@@ -23,4 +23,22 @@ public class Feature : EntityBase<string>, IExcludedFromScoping
 
     [MaxLength(ModelConstants.MediumText)]
     public string? Category { get; set; }
+
+    public static Feature Create(string id, string name, string? description, string module, string state)
+    {
+        if (state is not (nameof(StateFeature.Enabled)) and not (nameof(StateFeature.Disabled)))
+        {
+            throw new ArgumentException("Invalid state value", nameof(state));
+        }
+
+        return new Feature
+        {
+            Id = id,
+            Name = name,
+            Description = description,
+            Module = module,
+            State = state,
+            DefaultStateForNewTenant = state
+        };
+    }
 }

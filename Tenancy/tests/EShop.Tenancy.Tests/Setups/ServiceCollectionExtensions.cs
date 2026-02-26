@@ -1,8 +1,10 @@
 ﻿using Carter;
 using EShop.Shared.Authentication.DependencyInjections;
 using EShop.Shared.Cache.DependencyInejctions.Extensions;
+using EShop.Shared.Cache.Services;
 using EShop.Shared.Contracts.JsonConverters;
 using EShop.Shared.Contracts.Services.Tenancy.Tenants;
+using EShop.Shared.CQRS;
 using EShop.Shared.DomainTools.Extensions;
 using EShop.Shared.EventBus.DependencyInjections.Extensions;
 using EShop.Shared.JsonApi.Extensions;
@@ -41,6 +43,7 @@ public static class ServiceCollectionExtensions
     {
         services.AddCors();
         services.AddResiliencePolicy();
+        services.AddGlobalExceptionMiddleware();
         services.AddTransient<DbInitializer>();
 
         services.AddControllers().AddApplicationPart(Presentation.AssemblyReference.Assembly);
@@ -69,14 +72,13 @@ public static class ServiceCollectionExtensions
     private static IServiceCollection AddTestTenancyApplication(this IServiceCollection services)
     {
         services.AddMediatR();
+        services.AddMediator(Application.AssemblyReference.Assembly);
 
         services.AddScoped<IPermissionValidator, CurrentUserPermissionsValidator>();
         services.AddSingleton<IUserPermissionsProvider, TestUserPermissionProvider>();
 
-        services.AddScoped<IFeatureValidator, CurrentUserFeaturesValidator>();
-        services.AddScoped<ITenantFeaturesProvider, TestTenantFeatureProvider>();
-        services.AddSingleton<ITenantFeaturesCachingService, TestTenantFeaturesCachingService>();
-        services.AddScoped<IFeatureService, FeatureService>();
+        services.AddOwnerTenantFeaturesProvider();
+        services.AddSingleton<ITenantFeaturesProvider, TestTenantFeatureProvider>();
 
         return services;
     }

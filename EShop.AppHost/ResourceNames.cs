@@ -16,4 +16,6 @@ public static class ResourceNames
     // microservices
     public const string TenancyApi = "tenancy";
     public const string AuthorizationApi = "authorization";
+
+    public const string ApiGateway = "api-gateway";
 }
