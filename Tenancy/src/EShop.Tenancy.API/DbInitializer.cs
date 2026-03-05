@@ -15,10 +15,10 @@ public sealed class DbInitializer(
 {
     public async Task Initialize(bool applyMigrations = true, bool applyTenantIsolation = true)
     {
+        using var scope = userDetailsProvider.CreateSystemUserScope(tenantId: null);
+
         try
         {
-            userDetailsProvider.SetSystemUserContextWithEmptyScope();
-
             if (applyMigrations)
             {
                 logger.LogDebug("Applying any pending migrations...");
@@ -40,10 +40,6 @@ public sealed class DbInitializer(
         catch (Exception ex)
         {
             logger.LogError(ex, "Database initialization error");
-        }
-        finally
-        {
-            userDetailsProvider.ClearSystemUserContext();
         }
     }
 }

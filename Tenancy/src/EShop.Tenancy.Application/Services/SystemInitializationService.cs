@@ -21,25 +21,20 @@ public sealed class SystemInitializationService(
 {
     public async Task InitializeSystemAsync(CancellationToken cancellationToken = default)
     {
-        userDetailsProvider.SetSystemUserContext(UserData.SystemTenantId);
+        using var scope = userDetailsProvider.CreateSystemUserScope(UserData.SystemTenantId);
 
-        try
+        if (await IsSystemInitializedAsync(cancellationToken))
         {
-            if (await IsSystemInitializedAsync(cancellationToken))
-                return;
-
-            logger.LogInformation("System not initialized yet, creating Super Admin...");
-
-            var systemTenant = await CreateSystemTenantAsync(cancellationToken);
-
-            await PublishTenantCreatedEventAsync(systemTenant, cancellationToken);
-
-            logger.LogInformation("Super Admin initialized successfully");
+            return;
         }
-        finally
-        {
-            userDetailsProvider.ClearSystemUserContext();
-        }
+
+        logger.LogInformation("System not initialized yet, creating Super Admin...");
+
+        var systemTenant = await CreateSystemTenantAsync(cancellationToken);
+
+        await PublishTenantCreatedEventAsync(systemTenant, cancellationToken);
+
+        logger.LogInformation("Super Admin initialized successfully");
     }
 
     private async Task<bool> IsSystemInitializedAsync(CancellationToken cancellationToken = default)

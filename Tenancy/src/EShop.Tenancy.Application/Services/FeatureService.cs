@@ -91,10 +91,10 @@ public sealed class FeatureService : IFeatureService
 
         foreach (var tenantId in tenantIds)
         {
+            using var scope = _userDetailsProvider.CreateSystemUserScope(tenantId);
+
             try
             {
-                _userDetailsProvider.SetSystemUserContext(tenantId);
-
                 var tenantFeature = new TenantFeature(
                     Guid.NewGuid(),
                     tenantId,
@@ -117,10 +117,6 @@ public sealed class FeatureService : IFeatureService
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Register TenantFeature error - tenant: '{TenantId}', feature: '{FeatureId}'", tenantId, feature.Id);
-            }
-            finally
-            {
-                _userDetailsProvider.ClearSystemUserContext();
             }
         }
     }
@@ -151,7 +147,8 @@ public sealed class FeatureService : IFeatureService
 
             foreach (var tenantId in tenantIds)
             {
-                _userDetailsProvider.SetSystemUserContext(tenantId);
+                using var scope = _userDetailsProvider.CreateSystemUserScope(tenantId);
+
                 try
                 {
                     var tenant = await _tenantRepository.FindByIdAsync(tenantId, cancellationToken: cancellationToken, includeProperties: t => t.TenantFeatures);
@@ -168,10 +165,6 @@ public sealed class FeatureService : IFeatureService
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "Delete TenantFeature error - tenant: '{TenantId}', feature: '{FeatureId}'", tenantId, featureId);
-                }
-                finally
-                {
-                    _userDetailsProvider.ClearSystemUserContext();
                 }
             }
 
@@ -209,52 +202,38 @@ public sealed class FeatureService : IFeatureService
 
         foreach (var tenantId in tenantIds)
         {
-            _userDetailsProvider.SetSystemUserContext(tenantId);
-            try
-            {
-                var tenantUsingFeature = await _tenantRepository.FindByConditionAsync(
-                    x => x.Id == tenantId && x.TenantFeatures.Any(
-                        tf => tf.FeatureId == featureId && tf.State == FeatureState.Enabled.ToString()),
-                    cancellationToken: cancellationToken);
+            using var scope = _userDetailsProvider.CreateSystemUserScope(tenantId);
 
-                if (tenantUsingFeature != null)
-                {
-                    throw new UnprocessableEntityException($"Cannot delete feature id {featureId} because tenant {tenantId} is still using it");
-                }
-            }
-            finally
+            var tenantUsingFeature = await _tenantRepository.FindByConditionAsync(
+                x => x.Id == tenantId && x.TenantFeatures.Any(
+                    tf => tf.FeatureId == featureId && tf.State == FeatureState.Enabled.ToString()),
+                cancellationToken: cancellationToken);
+
+            if (tenantUsingFeature != null)
             {
-                _userDetailsProvider.ClearSystemUserContext();
+                throw new UnprocessableEntityException($"Cannot delete feature id {featureId} because tenant {tenantId} is still using it");
             }
         }
     }
 
     public async Task<IEnumerable<TenantFeature>> GetTenantFeaturesByTenantIdAsync(string tenantId, string? state = null, CancellationToken cancellationToken = default)
     {
-        try
+        using var scope = _userDetailsProvider.CreateSystemUserScope(tenantId.ToLower());
+
+        var query = _tenantRepository.FindAll(false, t => t.TenantFeatures)
+            .Where(t => t.Id == tenantId)
+            .SelectMany(t => t.TenantFeatures);
+
+        if (!string.IsNullOrEmpty(state))
         {
-            tenantId = tenantId.ToLower();
-            _userDetailsProvider.SetSystemUserContext(tenantId);
-
-            var query = _tenantRepository.FindAll(false, t => t.TenantFeatures)
-                .Where(t => t.Id == tenantId)
-                .SelectMany(t => t.TenantFeatures);
-
-            if (!string.IsNullOrEmpty(state))
-            {
-                query = query.Where(tf => tf.State == state);
-            }
-
-            var tenantFeatures = await query
-                .ToListAsync(cancellationToken);
-
-            _logger.LogDebug("Get features for tenant '{Id}' stored in the database. Result: {Count} features available", tenantId, tenantFeatures.Count);
-
-            return tenantFeatures;
+            query = query.Where(tf => tf.State == state);
         }
-        finally
-        {
-            _userDetailsProvider.ClearSystemUserContext();
-        }
+
+        var tenantFeatures = await query
+            .ToListAsync(cancellationToken);
+
+        _logger.LogDebug("Get features for tenant '{Id}' stored in the database. Result: {Count} features available", tenantId, tenantFeatures.Count);
+
+        return tenantFeatures;
     }
 }

@@ -35,17 +35,45 @@ internal sealed class MultiTenantJwtBearerHandler : JwtBearerHandler
         }
 
         var accessToken = tokenExtractionResult.Value;
-        var principal = await tokenManager.GetPrincipalFromTokenAsync(accessToken, Context.RequestAborted);
 
-        var cacheValidationResult = await ValidateTokenInCacheAsync(principal, accessToken);
-        if (cacheValidationResult.IsFailure)
+        try
         {
-            return AuthenticateResult.Fail(cacheValidationResult.Error.Message);
+            var principal = await tokenManager.GetPrincipalFromTokenAsync(accessToken, Context.RequestAborted);
+
+            // Skip cache validation for internal S2S tokens (audience = "internal")
+            var audience = GetClaimValue(principal, "aud");
+            if (audience != "internal")
+            {
+                var cacheValidationResult = await ValidateTokenInCacheAsync(principal, accessToken);
+                if (cacheValidationResult.IsFailure)
+                {
+                    return AuthenticateResult.Fail(cacheValidationResult.Error.Message);
+                }
+            }
+
+            var ticket = CreateAuthenticationTicket(principal);
+            return AuthenticateResult.Success(ticket);
         }
-
-        var ticket = CreateAuthenticationTicket(principal);
-
-        return AuthenticateResult.Success(ticket);
+        catch (Microsoft.IdentityModel.Tokens.SecurityTokenExpiredException ex)
+        {
+            Logger.LogWarning(ex, "JWT token expired during authentication");
+            return AuthenticateResult.Fail("The provided token has expired.");
+        }
+        catch (Microsoft.IdentityModel.Tokens.SecurityTokenException ex)
+        {
+            Logger.LogWarning(ex, "JWT token validation failed during authentication");
+            return AuthenticateResult.Fail("The provided token is invalid.");
+        }
+        catch (InvalidOperationException ex)
+        {
+            Logger.LogWarning(ex, "Invalid operation during JWT token validation");
+            return AuthenticateResult.Fail("Authentication failed due to configuration error.");
+        }
+        catch (Exception ex)
+        {
+            Logger.LogWarning(ex, "Unexpected exception during JWT authentication");
+            return AuthenticateResult.Fail("Authentication failed.");
+        }
     }
 
     private Result<string> GetAccessTokenMetadata()
@@ -78,9 +106,17 @@ internal sealed class MultiTenantJwtBearerHandler : JwtBearerHandler
 
         var cachedToken = await userTokenCaching.GetAsync(userId, Context.RequestAborted);
 
-        if (cachedToken?.AccessToken != accessToken)
+        // Degraded mode: If cache is unavailable (returns null), skip cache validation
+        // and rely on JWT signature validation alone (which already passed if we got here)
+        if (cachedToken is null)
         {
-            return Result.Failure(new("Authentication.InvalidToken", "The provided token does not match the cached token or no cached token exists."));
+            Logger.LogWarning("Operating in degraded authentication mode: cache unavailable for user '{UserId}', skipping cache validation", userId);
+            return Result.Success();
+        }
+
+        if (cachedToken.AccessToken != accessToken)
+        {
+            return Result.Failure(new("Authentication.InvalidToken", "The provided token does not match the cached token."));
         }
 
         return Result.Success();

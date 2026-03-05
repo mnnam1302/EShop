@@ -6,12 +6,10 @@ namespace EShop.Shared.Authentication.Managers.JwtTokens;
 public sealed class SystemInternalJwtTokenFactory : ISystemInternalJwtTokenFactory
 {
     private readonly IJwtTokenManager jwtTokenManager;
-    private readonly IUserTokenCachingService userTokenCachingService;
 
-    public SystemInternalJwtTokenFactory(IJwtTokenManager jwtTokenManager, IUserTokenCachingService userTokenCachingService)
+    public SystemInternalJwtTokenFactory(IJwtTokenManager jwtTokenManager)
     {
         this.jwtTokenManager = jwtTokenManager;
-        this.userTokenCachingService = userTokenCachingService;
     }
 
     public async Task<HttpClient> AddUserContext(HttpClient client, UserData operationalUser, CancellationToken cancellationToken = default)
@@ -41,19 +39,15 @@ public sealed class SystemInternalJwtTokenFactory : ISystemInternalJwtTokenFacto
 
     private async Task<string> GenerateToken(UserData user, List<string> tenantGroups, IDictionary<string, object>? additionalClaims = null)
     {
-        var accessToken = await jwtTokenManager.GenerateAccessToken(user.Id, user.TenantId, additionalClaims, CancellationToken.None);
-        var refreshToken = jwtTokenManager.GenerateRefreshToken();
-
-        var authenticationValue = new TokenAuthentication
-        {
-            UserId = user.Id,
-            UserName = user.Username,
-            AccessToken = accessToken,
-            RefreshToken = refreshToken,
-            RefreshTokenExpiryTime = DateTimeOffset.UtcNow.AddDays(7)
-        };
-
-        await userTokenCachingService.AddAsync(user.Id, authenticationValue, CancellationToken.None);
+        // Generate short-lived internal JWT with 30-second expiry
+        // No cache write or refresh token for S2S calls
+        var accessToken = await jwtTokenManager.GenerateAccessToken(
+            user.Id,
+            user.TenantId,
+            additionalClaims,
+            audienceOverride: "internal",
+            expiryMinutes: 0.5, // 30 seconds
+            CancellationToken.None);
 
         return accessToken;
     }
