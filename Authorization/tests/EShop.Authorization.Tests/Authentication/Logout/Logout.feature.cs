@@ -11,29 +11,28 @@
 #region Designer generated code
 #pragma warning disable
 using Reqnroll;
-namespace EShop.Authorization.Tests.Organizations.CreateRoot
+namespace EShop.Authorization.Tests.Authentication.Logout
 {
     
     
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Reqnroll", "3.0.0.0")]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    public partial class CreateRootOrganizationFeature : object, global::Xunit.IClassFixture<CreateRootOrganizationFeature.FixtureData>, global::Xunit.IAsyncLifetime
+    public partial class UserLogoutFeature : object, global::Xunit.IClassFixture<UserLogoutFeature.FixtureData>, global::Xunit.IAsyncLifetime
     {
         
         private global::Reqnroll.ITestRunner testRunner;
         
         private static string[] featureTags = ((string[])(null));
         
-        private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new global::System.Globalization.CultureInfo("en-US"), "Organizations/CreateRoot", "CreateRootOrganization", "    As an Admin User\r\n    I want to create a root organization when tenant provis" +
-                "ioned\r\n    So that I can reflect real world organization structure these employe" +
-                "es belong to and corresponding access level", global::Reqnroll.ProgrammingLanguage.CSharp, featureTags, InitializeCucumberMessages());
+        private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new global::System.Globalization.CultureInfo("en-US"), "Authentication/Logout", "User Logout", "    As an authenticated user\r\n    I want to log out of the system\r\n    So that my" +
+                " session is terminated and tokens are invalidated", global::Reqnroll.ProgrammingLanguage.CSharp, featureTags, InitializeCucumberMessages());
         
         private global::Xunit.Abstractions.ITestOutputHelper _testOutputHelper;
         
-#line 1 "CreateRootOrganization.feature"
+#line 1 "Logout.feature"
 #line hidden
         
-        public CreateRootOrganizationFeature(CreateRootOrganizationFeature.FixtureData fixtureData, global::Xunit.Abstractions.ITestOutputHelper testOutputHelper)
+        public UserLogoutFeature(UserLogoutFeature.FixtureData fixtureData, global::Xunit.Abstractions.ITestOutputHelper testOutputHelper)
         {
             this._testOutputHelper = testOutputHelper;
         }
@@ -105,9 +104,36 @@ namespace EShop.Authorization.Tests.Organizations.CreateRoot
             await testRunner.CollectScenarioErrorsAsync();
         }
         
+        public virtual async global::System.Threading.Tasks.Task FeatureBackgroundAsync()
+        {
+#line 6
+#line hidden
+            global::Reqnroll.Table table2 = new global::Reqnroll.Table(new string[] {
+                        "TenantId",
+                        "TenantName",
+                        "OwnerUsername",
+                        "OwnerDisplayName",
+                        "OwnerEmail"});
+            table2.AddRow(new string[] {
+                        "test-tenant",
+                        "Test Tenant",
+                        "test-owner@test-tenant",
+                        "Test Owner",
+                        "test-owner@test-tenant"});
+#line 7
+    await testRunner.GivenAsync("Tenancy service has provisioned a new tenant with following details", ((string)(null)), table2, "Given ");
+#line hidden
+#line 10
+    await testRunner.AndAsync("all standard features were turned on for \'test-tenant\'", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 11
+    await testRunner.AndAsync("user \'test-owner@test-tenant\' has password \'Password123!\'", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+        }
+        
         private static global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages InitializeCucumberMessages()
         {
-            return new global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages("Organizations/CreateRoot/CreateRootOrganization.feature.ndjson", 3);
+            return new global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages("Authentication/Logout/Logout.feature.ndjson", 4);
         }
         
         async global::System.Threading.Tasks.Task global::Xunit.IAsyncLifetime.InitializeAsync()
@@ -135,18 +161,18 @@ namespace EShop.Authorization.Tests.Organizations.CreateRoot
             await this.TestTearDownAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="System creates a root organization")]
-        [global::Xunit.TraitAttribute("FeatureTitle", "CreateRootOrganization")]
-        [global::Xunit.TraitAttribute("Description", "System creates a root organization")]
-        public async global::System.Threading.Tasks.Task SystemCreatesARootOrganization()
+        [global::Xunit.SkippableFactAttribute(DisplayName="Successfully logout")]
+        [global::Xunit.TraitAttribute("FeatureTitle", "User Logout")]
+        [global::Xunit.TraitAttribute("Description", "Successfully logout")]
+        public async global::System.Threading.Tasks.Task SuccessfullyLogout()
         {
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
             string pickleIndex = "0";
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("System creates a root organization", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Successfully logout", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
-#line 6
+#line 13
 this.ScenarioInitialize(scenarioInfo, ruleInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
@@ -156,57 +182,57 @@ this.ScenarioInitialize(scenarioInfo, ruleInfo);
             else
             {
                 await this.ScenarioStartAsync();
-                global::Reqnroll.Table table9 = new global::Reqnroll.Table(new string[] {
-                            "TenantId",
-                            "TenantName",
-                            "OwnerUsername",
-                            "OwnerDisplayName",
-                            "OwnerEmail"});
-                table9.AddRow(new string[] {
-                            "test-tenant",
-                            "Test Tenant",
-                            "test-owner@test-tenant",
-                            "Test Owner",
-                            "test-owner@test-tenant"});
-#line 7
-    await testRunner.WhenAsync("Tenancy service provision a new tenant with following details", ((string)(null)), table9, "When ");
-#line hidden
-#line 10
-    await testRunner.ThenAsync("all standard features were turned on for \'test-tenant\'", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
-#line hidden
-                global::Reqnroll.Table table10 = new global::Reqnroll.Table(new string[] {
-                            "Username",
-                            "TenantId"});
-                table10.AddRow(new string[] {
-                            "test-owner@test-tenant",
-                            "test-tenant"});
-#line 11
-    await testRunner.AndAsync("the following users are set up", ((string)(null)), table10, "And ");
+#line 6
+await this.FeatureBackgroundAsync();
 #line hidden
 #line 14
-    await testRunner.AndAsync("user \'test-owner@test-tenant\' logs in to the system", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+    await testRunner.GivenAsync("user \'test-owner@test-tenant\' has logged in successfully", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
-                global::Reqnroll.Table table11 = new global::Reqnroll.Table(new string[] {
-                            "PermissionId"});
-                table11.AddRow(new string[] {
-                            "Authorization_ViewOrganizations"});
-                table11.AddRow(new string[] {
-                            "Authorization_ManageOrganizations"});
 #line 15
-    await testRunner.AndAsync("user \'test-owner@test-tenant\' has following permissions", ((string)(null)), table11, "And ");
+    await testRunner.WhenAsync("user \'test-owner@test-tenant\' logs out", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
-                global::Reqnroll.Table table12 = new global::Reqnroll.Table(new string[] {
-                            "Id",
-                            "Name",
-                            "Description",
-                            "TenantId"});
-                table12.AddRow(new string[] {
-                            "test-tenant",
-                            "Test Tenant",
-                            "Root Organization",
-                            "test-tenant"});
+#line 16
+    await testRunner.ThenAsync("the logout should succeed", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+            }
+            await this.ScenarioCleanupAsync();
+        }
+        
+        [global::Xunit.SkippableFactAttribute(DisplayName="Tokens are invalidated after logout")]
+        [global::Xunit.TraitAttribute("FeatureTitle", "User Logout")]
+        [global::Xunit.TraitAttribute("Description", "Tokens are invalidated after logout")]
+        public async global::System.Threading.Tasks.Task TokensAreInvalidatedAfterLogout()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
+            string pickleIndex = "1";
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Tokens are invalidated after logout", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            string[] tagsOfRule = ((string[])(null));
+            global::Reqnroll.RuleInfo ruleInfo = null;
+#line 18
+this.ScenarioInitialize(scenarioInfo, ruleInfo);
+#line hidden
+            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
+            {
+                await testRunner.SkipScenarioAsync();
+            }
+            else
+            {
+                await this.ScenarioStartAsync();
+#line 6
+await this.FeatureBackgroundAsync();
+#line hidden
 #line 19
-    await testRunner.AndAsync("user \'test-owner\' retrieves organizations", ((string)(null)), table12, "And ");
+    await testRunner.GivenAsync("user \'test-owner@test-tenant\' has logged in successfully", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line hidden
+#line 20
+    await testRunner.WhenAsync("user \'test-owner@test-tenant\' logs out", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 21
+    await testRunner.ThenAsync("the user\'s refresh token should be invalidated", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+#line 22
+    await testRunner.AndAsync("user \'test-owner@test-tenant\' cannot use the previous refresh token", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
@@ -219,12 +245,12 @@ this.ScenarioInitialize(scenarioInfo, ruleInfo);
             
             async global::System.Threading.Tasks.Task global::Xunit.IAsyncLifetime.InitializeAsync()
             {
-                await CreateRootOrganizationFeature.FeatureSetupAsync();
+                await UserLogoutFeature.FeatureSetupAsync();
             }
             
             async global::System.Threading.Tasks.Task global::Xunit.IAsyncLifetime.DisposeAsync()
             {
-                await CreateRootOrganizationFeature.FeatureTearDownAsync();
+                await UserLogoutFeature.FeatureTearDownAsync();
             }
         }
     }

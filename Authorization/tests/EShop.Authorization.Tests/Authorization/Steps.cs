@@ -1,5 +1,6 @@
 ﻿using EShop.Authorization.Tests.Setups;
 using EShop.Shared.Authentication;
+using EShop.Shared.Contracts.Services.Tenancy.Tenants;
 using Reqnroll;
 
 namespace EShop.Authorization.Tests.Authorization;
@@ -74,7 +75,7 @@ internal sealed class Steps(ApiContext apiContext)
             var ownerEmail = row["OwnerEmail"];
 
             // Simulate the TenantCreated event that would trigger root organization creation
-            await apiContext.PublishIntegrationEvent<EShop.Shared.Contracts.Services.Tenancy.Tenants.ITenantCreated>(new
+            await apiContext.PublishIntegrationEvent<ITenantCreated>(new
             {
                 TenantId = tenantId,
                 TenantName = tenantName,

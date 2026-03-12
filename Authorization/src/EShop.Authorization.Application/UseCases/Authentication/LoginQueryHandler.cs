@@ -77,6 +77,11 @@ internal sealed class LoginQueryHandler(
             {
                 user.SetLockout(DateTimeOffset.UtcNow.Add(User.DefaultAccountLockoutTimeSpan));
                 user.ResetAccessFailedCount();
+
+                userRepository.Update(user);
+                await unitOfWork.SaveChangesAsync(cancellationToken);
+
+                return Result.Failure<User>(new("SignIn", "The user account is locked out due to multiple failed login attempts."));
             }
 
             userRepository.Update(user);
