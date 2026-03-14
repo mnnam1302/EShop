@@ -13,17 +13,19 @@ namespace EShop.Catalog.Tests.Setup;
 public sealed class TestStartup : Application.Startup
 {
     private readonly PostgreSqlTestDatabase testDatabase;
+    private readonly MongoDbTestDatabase mongoDatabase;
 
-    public TestStartup(IConfiguration configuration, IWebHostEnvironment environment, PostgreSqlTestDatabase testDatabase)
+    public TestStartup(IConfiguration configuration, IWebHostEnvironment environment, PostgreSqlTestDatabase testDatabase, MongoDbTestDatabase mongoDatabase)
         : base(configuration, environment)
     {
         this.testDatabase = testDatabase;
+        this.mongoDatabase = mongoDatabase;
     }
 
     public override void ConfigureServices(IServiceCollection services)
     {
         services
-            .AddCatalogTestShared(Configuration, testDatabase)
+            .AddCatalogTestShared(Configuration, testDatabase, mongoDatabase)
             .AddCatalogTestBoostrapping()
             .AddAgencies();
     }

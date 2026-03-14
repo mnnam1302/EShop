@@ -14,6 +14,7 @@
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
     <PackageReference Include="Reqnroll.Tools.MsBuild.Generation" />
     <PackageReference Include="Reqnroll.xUnit" />
+    <PackageReference Include="Testcontainers.MongoDb" />
     <PackageReference Include="xunit" />
     <PackageReference Include="xunit.runner.visualstudio" />
   </ItemGroup>
@@ -25,6 +26,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\..\Testing\src\EShop.Testing.JsonApiApplication\EShop.Testing.JsonApiApplication.csproj" />
     <ProjectReference Include="..\..\src\EShop.Catalog.Application\EShop.Catalog.Application.csproj" />
+    <ProjectReference Include="..\..\src\EShop.Catalog.ReadModels.MongoDb\EShop.Catalog.ReadModels.MongoDb.csproj" />
   </ItemGroup>
 
 </Project>

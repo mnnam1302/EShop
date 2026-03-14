@@ -13,6 +13,7 @@ using Npgsql;
 using Reqnroll;
 using Reqnroll.Bindings;
 using Reqnroll.BoDi;
+using Testcontainers.MongoDb;
 using Testcontainers.PostgreSql;
 
 namespace EShop.Catalog.Tests.Setup;
@@ -21,6 +22,7 @@ namespace EShop.Catalog.Tests.Setup;
 public sealed class ScenarioHooks
 {
     private static PostgreSqlContainer PostgreSqlContainer = null!;
+    private static MongoDbContainer MongoDbContainer = null!;
 
     [BeforeTestRun]
     public static async Task BeforeTestRun()
@@ -32,7 +34,12 @@ public sealed class ScenarioHooks
                 .WithImage("postgres:17.0")
                 .Build();
 
-        await PostgreSqlContainer.StartAsync();
+        MongoDbContainer = new MongoDbBuilder()
+                .Build();
+
+        await Task.WhenAll(
+            PostgreSqlContainer.StartAsync(),
+            MongoDbContainer.StartAsync());
     }
 
     [BeforeScenario]
@@ -46,7 +53,15 @@ public sealed class ScenarioHooks
         await testDatabase.CreateSharedDatabaseAsync();
         objectContainer.RegisterInstanceAs<PostgreSqlTestDatabase>(testDatabase);
 
-        var apiContext = new ApiContext(testDatabase);
+        var mongoDatabase = new MongoDbTestDatabase()
+        {
+            MongoDbContainer = MongoDbContainer
+        };
+
+        mongoDatabase.CreateDatabase();
+        objectContainer.RegisterInstanceAs(mongoDatabase);
+
+        var apiContext = new ApiContext(testDatabase, mongoDatabase);
         objectContainer.RegisterInstanceAs(apiContext);
 
         await InitializeDatabase(apiContext, testDatabase);
@@ -84,10 +99,11 @@ public sealed class ScenarioHooks
     }
 
     [AfterScenario]
-    public async Task AfterScenario(PostgreSqlTestDatabase testDatabase, ApiContext apiContext)
+    public async Task AfterScenario(PostgreSqlTestDatabase testDatabase, MongoDbTestDatabase mongoDatabase, ApiContext apiContext)
     {
         await apiContext.DisposeAsync();
         await testDatabase.DropAsync();
+        await mongoDatabase.DropAsync();
     }
 
     [AfterTestRun]
@@ -97,6 +113,12 @@ public sealed class ScenarioHooks
         {
             await PostgreSqlContainer.StopAsync();
             await PostgreSqlContainer.DisposeAsync();
+        }
+
+        if (MongoDbContainer is not null)
+        {
+            await MongoDbContainer.StopAsync();
+            await MongoDbContainer.DisposeAsync();
         }
     }
 }

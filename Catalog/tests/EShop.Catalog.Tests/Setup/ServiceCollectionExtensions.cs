@@ -1,5 +1,7 @@
 ﻿using EShop.Catalog.Application.Bootstrapping;
 using EShop.Catalog.Application.Shared;
+using EShop.Catalog.ReadModels.MongoDb.Infrastructure;
+using EShop.Catalog.ReadModels.MongoDb.Infrastructure.Repository;
 using EShop.Shared.Cache.DependencyInejctions.Extensions;
 using EShop.Shared.Contracts.JsonConverters;
 using EShop.Shared.CQRS;
@@ -13,14 +15,19 @@ using EShop.Testing.JsonApiApplication.EventBus;
 using MassTransit;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization;
+using MongoDB.Bson.Serialization.Serializers;
+using MongoDB.Driver;
 
 namespace EShop.Catalog.Tests.Setup;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddCatalogTestShared(this IServiceCollection services, IConfiguration configuration, PostgreSqlTestDatabase testDatabase)
+    public static IServiceCollection AddCatalogTestShared(this IServiceCollection services, IConfiguration configuration, PostgreSqlTestDatabase testDatabase, MongoDbTestDatabase mongoDatabase)
     {
         services.AddMediator(Application.AssemblyReference.Assembly);
+        services.AddMediator(ReadModels.MongoDb.AssemblyReference.Assembly);
         services
             .AddPostgreSqlTestDbContext<CatalogDbContext>(testDatabase)
             .AddDbContextEventSourcing<CatalogDbContext>(configuration);
@@ -31,6 +38,8 @@ public static class ServiceCollectionExtensions
             .AddTenantAuthenticationProvider()
             .AddTestTenantFeatures()
             .AddTestUserPermissions();
+
+        services.AddCatalogReadModelTestServices(mongoDatabase);
 
         return services;
     }
@@ -64,6 +73,7 @@ public static class ServiceCollectionExtensions
         {
             cfg.SetKebabCaseEndpointNameFormatter();
             cfg.AddConsumers(Application.AssemblyReference.Assembly);
+            cfg.AddConsumers(ReadModels.MongoDb.AssemblyReference.Assembly);
 
             cfg.UsingInMemory((context, bus) =>
             {
@@ -89,6 +99,25 @@ public static class ServiceCollectionExtensions
                 });
             });
         });
+
+        return services;
+    }
+
+    public static IServiceCollection AddCatalogReadModelTestServices(this IServiceCollection services, MongoDbTestDatabase mongoDatabase)
+    {
+        BsonSerializer.RegisterSerializer(new GuidSerializer(GuidRepresentation.Standard));
+
+        services.AddSingleton<IMongoDbSettings>(_ =>
+            new TestMongoDbSettings(mongoDatabase.ConnectionString, mongoDatabase.DatabaseName));
+
+        services.AddSingleton<IMongoDatabase>(sp =>
+        {
+            var settings = sp.GetRequiredService<IMongoDbSettings>();
+            var client = new MongoClient(settings.ConnectionString);
+            return client.GetDatabase(settings.DatabaseName);
+        });
+
+        services.AddScoped(typeof(IMongoRepositoryBase<>), typeof(MongoRepositoryBase<>));
 
         return services;
     }

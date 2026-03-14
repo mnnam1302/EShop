@@ -51,20 +51,18 @@ public sealed class ProductAggregate : Aggregate, IAuditable, IScoped, IRingFenc
             Scope = userDetailsProvider.AuthenticatedUser.TenantId
         });
 
-        product.AddVariant(string.Empty, string.Empty, command.Price, command.DiscountPrice, [], true);
-
         return product;
     }
 
-    internal void AddVariant(string name, string sku, double price, double discountPrice, IEnumerable<VariantDimensionValue> values, bool isDefault)
+    internal void AddVariant(Guid variantId, string name, string sku, double price, double discountPrice, IEnumerable<VariantDimensionValue> values, bool isDefault)
     {
         ProductCanAddVariantSpecification.New(isDefault, values.ToList())
             .ThrowDomainErrorIfNotSatisfied(this);
 
         RaiseEvent(new VariantAddedEvent
         {
+            VariantId = variantId,
             ProductId = Id,
-            VariantId = Guid.NewGuid(),
             Name = name,
             Sku = sku,
             Price = price,
