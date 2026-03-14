@@ -11,6 +11,6 @@ internal class Steps(ApiContext apiContext)
     public void ThenTheSystemRaiseAnErrorWithMessage(string errorMessage)
     {
         apiContext.LastApiError.Should().NotBeNull();
-        apiContext.LastApiError!.Message.Contains(errorMessage);
+        apiContext.LastApiError!.Message.Should().Contain(errorMessage);
     }
 }

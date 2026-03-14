@@ -30,7 +30,7 @@ Scenario: System User cannot enable a non-existing feature
 		| Id         | Name         | Description               | State   | Module |
 		| feature-id | Test Feature | A new feature for testing | Enabled | Core   |
 	When System User enables the feature 'test-feature-id' for tenant 'test-tenant'
-	Then the system raise an error with message 'Feature is already enabled for the tenant.'
+	Then the system raise an error with message 'Feature is not found for the tenant.'
 
 Scenario: System User cannot enable an enabled feature
 	Given System User has registered tenants with following details

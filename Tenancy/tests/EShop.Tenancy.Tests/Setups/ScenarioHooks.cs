@@ -77,9 +77,12 @@ public sealed class ScenarioHooks
         if (scenarioContext.StepContext.StepInfo.StepDefinitionType is StepDefinitionType.Given or StepDefinitionType.When)
         {
             await apiContext.ConsumeObserver.WaitForQuietAsync();
-
-            apiContext.LastApiError.Should().BeNull();
             apiContext.EventTracker.ClearPublishedEvents();
+        }
+
+        if (scenarioContext.StepContext.StepInfo.StepDefinitionType is StepDefinitionType.Given)
+        {
+            apiContext.LastApiError.Should().BeNull();
         }
     }
 

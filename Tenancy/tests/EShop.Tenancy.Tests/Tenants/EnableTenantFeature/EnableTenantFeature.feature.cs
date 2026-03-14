@@ -280,8 +280,7 @@ await this.FeatureBackgroundAsync();
  await testRunner.WhenAsync("System User enables the feature \'test-feature-id\' for tenant \'test-tenant\'", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
 #line 33
- await testRunner.ThenAsync("the system raise an error with message \'Feature is already enabled for the tenant" +
-                        ".\'", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+ await testRunner.ThenAsync("the system raise an error with message \'Feature is not found for the tenant.\'", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
