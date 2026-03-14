@@ -1,9 +1,7 @@
 ﻿using Carter;
 using EShop.Shared.Authentication.DependencyInjections;
 using EShop.Shared.Cache.DependencyInejctions.Extensions;
-using EShop.Shared.Cache.Services;
 using EShop.Shared.Contracts.JsonConverters;
-using EShop.Shared.Contracts.Services.Tenancy.Tenants;
 using EShop.Shared.CQRS;
 using EShop.Shared.DomainTools.Extensions;
 using EShop.Shared.EventBus.DependencyInjections.Extensions;
@@ -14,7 +12,6 @@ using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserPermissionProvide
 using EShop.Tenancy.API;
 using EShop.Tenancy.API.Boostrapping;
 using EShop.Tenancy.Application.DependencyInjections;
-using EShop.Tenancy.Application.Services;
 using EShop.Tenancy.Persistence;
 using EShop.Tenancy.Persistence.DependencyInjections;
 using EShop.Testing.JsonApiApplication;
@@ -125,10 +122,11 @@ public static class ServiceCollectionExtensions
                     return settings;
                 });
 
+                bus.ConnectConsumeObserver(context.GetRequiredService<TestConsumeObserver>());
+
                 bus.ReceiveEndpoint("test_queue", configureEndpoint =>
                 {
                     configureEndpoint.ConfigureConsumers(context);
-                    configureEndpoint.Observer(new EventObserver<ITenantCreated>(context.GetRequiredService<IIntegrationEventsTracker>()));
                 });
             });
         });

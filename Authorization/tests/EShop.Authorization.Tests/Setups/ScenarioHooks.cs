@@ -73,11 +73,7 @@ public sealed class ScenarioHooks
     {
         if (scenarioContext.StepContext.StepInfo.StepDefinitionType is StepDefinitionType.Given or StepDefinitionType.When)
         {
-            var publishedEvents = apiContext.EventTracker.GetPublishedEvents();
-            if (publishedEvents.Any())
-            {
-                await Task.Delay(2000); // Wait 2 seconds for asynchronous event processing
-            }
+            await apiContext.ConsumeObserver.WaitForQuietAsync();
 
             apiContext.LastApiError.Should().BeNull();
             apiContext.EventTracker.ClearPublishedEvents();
@@ -85,8 +81,9 @@ public sealed class ScenarioHooks
     }
 
     [AfterScenario]
-    public async Task AfterScenario(PostgreSqlTestDatabase testDatabase)
+    public async Task AfterScenario(PostgreSqlTestDatabase testDatabase, ApiContext apiContext)
     {
+        await apiContext.DisposeAsync();
         await testDatabase.DropAsync();
     }
 

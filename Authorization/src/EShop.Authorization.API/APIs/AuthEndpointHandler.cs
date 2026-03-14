@@ -52,7 +52,7 @@ public static class AuthEndpointHandler
 
         if (result.IsFailure)
         {
-            ApiEndpointHandler.Failure(result);
+            return ApiEndpointHandler.Failure(result);
         }
 
         return Results.Ok();
@@ -70,7 +70,7 @@ public static class AuthEndpointHandler
 
         if (result.IsFailure)
         {
-            ApiEndpointHandler.Failure(result);
+            return ApiEndpointHandler.Failure(result);
         }
 
         return Results.Ok(result);

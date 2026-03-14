@@ -103,7 +103,7 @@ internal sealed class JwtTokenManager : IJwtTokenManager
             ValidateLifetime = true, // CRITICAL: Validate token expiration
             ValidateIssuerSigningKey = true,
             ValidIssuer = _jwtOptions.Issuer,
-            ValidAudience = _jwtOptions.Audience,
+            ValidAudiences = [_jwtOptions.Audience, "internal"],
             IssuerSigningKey = new RsaSecurityKey(rsaKeyPair.GetPublicKey()) { KeyId = rsaKeyPair.KeyId },
             ClockSkew = TimeSpan.Zero,
         };
@@ -158,7 +158,7 @@ internal sealed class JwtTokenManager : IJwtTokenManager
             ValidateLifetime = false,
             ValidateIssuerSigningKey = true,
             ValidIssuer = _jwtOptions.Issuer,
-            ValidAudience = _jwtOptions.Audience,
+            ValidAudiences = [_jwtOptions.Audience, "internal"],
             IssuerSigningKey = new RsaSecurityKey(rsaKeyPair.GetPublicKey()) { KeyId = rsaKeyPair.KeyId },
             ClockSkew = TimeSpan.Zero
         };

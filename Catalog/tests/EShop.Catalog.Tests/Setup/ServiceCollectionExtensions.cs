@@ -9,6 +9,7 @@ using EShop.Shared.JsonApi.Extensions;
 using EShop.Shared.Sequences.DependencyInjections;
 using EShop.Testing.JsonApiApplication;
 using EShop.Testing.JsonApiApplication.DependencyInjections;
+using EShop.Testing.JsonApiApplication.EventBus;
 using MassTransit;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -79,6 +80,8 @@ public static class ServiceCollectionExtensions
                     settings.Converters.Add(new ExpirationDateOnlyJsonConverter());
                     return settings;
                 });
+
+                bus.ConnectConsumeObserver(context.GetRequiredService<TestConsumeObserver>());
 
                 bus.ReceiveEndpoint("test_queue", configureEndpoint =>
                 {

@@ -14,16 +14,14 @@ public class EventObserver<TEvent> : IObserver<ConsumeContext<TEvent>>
 
     public void OnCompleted()
     {
-        throw new NotImplementedException();
     }
 
     public void OnError(Exception error)
     {
-        throw new NotImplementedException();
     }
 
     public void OnNext(ConsumeContext<TEvent> value)
     {
-        _tracker.Track(value.Message);
+        _tracker.TrackConsumerCompleted(value.Message);
     }
 }
