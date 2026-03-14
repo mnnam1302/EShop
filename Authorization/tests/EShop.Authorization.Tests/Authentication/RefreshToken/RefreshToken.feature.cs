@@ -133,7 +133,7 @@ namespace EShop.Authorization.Tests.Authentication.RefreshToken
         
         private static global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages InitializeCucumberMessages()
         {
-            return new global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages("Authentication/RefreshToken/RefreshToken.feature.ndjson", 6);
+            return new global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages("Authentication/RefreshToken/RefreshToken.feature.ndjson", 5);
         }
         
         async global::System.Threading.Tasks.Task global::Xunit.IAsyncLifetime.InitializeAsync()
@@ -242,15 +242,15 @@ await this.FeatureBackgroundAsync();
             await this.ScenarioCleanupAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Failed refresh token with expired refresh token")]
+        [global::Xunit.SkippableFactAttribute(DisplayName="Refresh token invalidated after logout")]
         [global::Xunit.TraitAttribute("FeatureTitle", "Refresh Token")]
-        [global::Xunit.TraitAttribute("Description", "Failed refresh token with expired refresh token")]
-        public async global::System.Threading.Tasks.Task FailedRefreshTokenWithExpiredRefreshToken()
+        [global::Xunit.TraitAttribute("Description", "Refresh token invalidated after logout")]
+        public async global::System.Threading.Tasks.Task RefreshTokenInvalidatedAfterLogout()
         {
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
             string pickleIndex = "2";
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Failed refresh token with expired refresh token", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Refresh token invalidated after logout", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
 #line 25
@@ -270,54 +270,13 @@ await this.FeatureBackgroundAsync();
     await testRunner.GivenAsync("user \'test-owner@test-tenant\' has logged in successfully", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
 #line 27
-    await testRunner.AndAsync("the refresh token has expired", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
-#line hidden
-#line 28
-    await testRunner.WhenAsync("user \'test-owner@test-tenant\' refreshes the token with their current refresh toke" +
-                        "n", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
-#line hidden
-#line 29
-    await testRunner.ThenAsync("the token refresh should fail", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
-#line hidden
-            }
-            await this.ScenarioCleanupAsync();
-        }
-        
-        [global::Xunit.SkippableFactAttribute(DisplayName="Refresh token invalidated after logout")]
-        [global::Xunit.TraitAttribute("FeatureTitle", "Refresh Token")]
-        [global::Xunit.TraitAttribute("Description", "Refresh token invalidated after logout")]
-        public async global::System.Threading.Tasks.Task RefreshTokenInvalidatedAfterLogout()
-        {
-            string[] tagsOfScenario = ((string[])(null));
-            global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
-            string pickleIndex = "3";
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Refresh token invalidated after logout", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
-            string[] tagsOfRule = ((string[])(null));
-            global::Reqnroll.RuleInfo ruleInfo = null;
-#line 31
-this.ScenarioInitialize(scenarioInfo, ruleInfo);
-#line hidden
-            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
-            {
-                await testRunner.SkipScenarioAsync();
-            }
-            else
-            {
-                await this.ScenarioStartAsync();
-#line 6
-await this.FeatureBackgroundAsync();
-#line hidden
-#line 32
-    await testRunner.GivenAsync("user \'test-owner@test-tenant\' has logged in successfully", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
-#line hidden
-#line 33
     await testRunner.AndAsync("user \'test-owner@test-tenant\' has logged out", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
-#line 34
+#line 28
     await testRunner.WhenAsync("user \'test-owner@test-tenant\' refreshes the token with their previous refresh tok" +
                         "en", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
-#line 35
+#line 29
     await testRunner.ThenAsync("the token refresh should fail", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
             }

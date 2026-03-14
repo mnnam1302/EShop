@@ -63,9 +63,8 @@ internal sealed class AuthenticationStepContext(ApiContext apiContext)
                 RefreshToken = refreshToken
             };
 
-            // For refresh token, we need to pass the access token in the Authorization header
-            // The ApiContext should handle this via the user context
-            _lastAuthResult = await apiContext.PostAsync<RefreshTokenRequest, AuthenticationResponse>($"{BaseUrl}/refreshToken", request);
+
+            _lastAuthResult = await apiContext.PostWithBearerTokenAsync<RefreshTokenRequest, AuthenticationResponse>($"{BaseUrl}/refreshToken", request, accessToken);
 
             if (_lastAuthResult.IsSuccess)
             {
@@ -85,16 +84,11 @@ internal sealed class AuthenticationStepContext(ApiContext apiContext)
     {
         try
         {
-            // Store the refresh token before logout so we can test it's invalidated
-            _previousRefreshToken = _lastAuthResponse?.RefreshToken;
-
             var request = new LogoutRequest
             {
                 UserId = userId
             };
 
-            // Use the username (not userId) to look up the user for authorization,
-            // since users are registered in the test context by username
             var user = apiContext.GetUserByUsername(_lastLoggedInUsername ?? userId);
             _lastLogoutResult = await apiContext.PostAsync($"{BaseUrl}/logout", request, user);
 

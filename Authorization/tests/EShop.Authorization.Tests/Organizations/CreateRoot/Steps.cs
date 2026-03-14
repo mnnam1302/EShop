@@ -6,6 +6,7 @@ namespace EShop.Authorization.Tests.Organizations.CreateRoot;
 internal sealed class Steps(StepContext stepContext)
 {
     [Given("Tenancy service has provisied a new tenant with following details")]
+    [When("Tenancy service provision a new tenant with following details")]
     public async Task GivenTenancyServiceHasProvisiedANewTenantWithFollowingDetails(DataTable dataTable)
     {
         await stepContext.PublishTenantCreatedAsync(dataTable);

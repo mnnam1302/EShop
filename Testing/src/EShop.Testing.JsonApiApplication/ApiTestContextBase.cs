@@ -287,9 +287,52 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
         return await systemInternalJwtTokenFactory.AddUserContext(client, user);
     }
 
+    public HttpClient GetClientWithBearerToken(string bearerToken, string acceptHeader = "application/json")
+    {
+        var client = server.CreateClient();
+        client.DefaultRequestHeaders.Accept.Clear();
+        client.DefaultRequestHeaders.Accept.ParseAdd(acceptHeader);
+        client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", bearerToken);
+        return client;
+    }
+
     #endregion HTTP Client Management
 
     #region Http Action Methods
+
+    public async Task<Result<TResponse>> PostWithBearerTokenAsync<TRequest, TResponse>(string relativeUri, TRequest request, string bearerToken)
+    {
+        try
+        {
+            ArgumentException.ThrowIfNullOrEmpty(relativeUri);
+
+            var client = GetClientWithBearerToken(bearerToken);
+            var serializedRequest = System.Text.Json.JsonSerializer.Serialize(request);
+            var httpContent = new StringContent(serializedRequest, Encoding.UTF8, JsonMediaType);
+
+            logger.LogInformation("Sending POST request to {RelativeUri} with bearer token", relativeUri);
+
+            using var response = await client.PostAsync(relativeUri, httpContent);
+            LastStatusCode = response.StatusCode;
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                logger.LogWarning(
+                    "HTTP request failed with status {StatusCode}. Response: {Content}",
+                    response.StatusCode,
+                    string.IsNullOrWhiteSpace(errorContent) ? "<empty>" : errorContent);
+            }
+
+            return await ProcessHttpResponse<Result<TResponse>>(response);
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "Error during POST request to {RelativeUri}", relativeUri);
+            LastApiError = ex;
+            throw;
+        }
+    }
 
     public async Task<Result<TResponse>> GetAsync<TResponse>(string relativeUri, UserData? user = null)
     {

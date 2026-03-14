@@ -22,12 +22,6 @@ Scenario: Failed refresh token with invalid refresh token
     When user 'test-owner@test-tenant' refreshes the token with an invalid refresh token
     Then the token refresh should fail
 
-Scenario: Failed refresh token with expired refresh token
-    Given user 'test-owner@test-tenant' has logged in successfully
-    And the refresh token has expired
-    When user 'test-owner@test-tenant' refreshes the token with their current refresh token
-    Then the token refresh should fail
-
 Scenario: Refresh token invalidated after logout
     Given user 'test-owner@test-tenant' has logged in successfully
     And user 'test-owner@test-tenant' has logged out

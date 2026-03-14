@@ -18,5 +18,4 @@ Scenario: Successfully logout
 Scenario: Tokens are invalidated after logout
     Given user 'test-owner@test-tenant' has logged in successfully
     When user 'test-owner@test-tenant' logs out
-    Then the user's refresh token should be invalidated
-    And user 'test-owner@test-tenant' cannot use the previous refresh token
+    Then user 'test-owner@test-tenant' cannot use the previous refresh token

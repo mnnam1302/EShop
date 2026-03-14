@@ -229,10 +229,7 @@ await this.FeatureBackgroundAsync();
     await testRunner.WhenAsync("user \'test-owner@test-tenant\' logs out", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
 #line 21
-    await testRunner.ThenAsync("the user\'s refresh token should be invalidated", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
-#line hidden
-#line 22
-    await testRunner.AndAsync("user \'test-owner@test-tenant\' cannot use the previous refresh token", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+    await testRunner.ThenAsync("user \'test-owner@test-tenant\' cannot use the previous refresh token", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();

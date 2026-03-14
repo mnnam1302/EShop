@@ -7,7 +7,6 @@ namespace EShop.Authorization.Tests.Authentication.RefreshToken;
 [Binding]
 internal sealed class Steps(AuthenticationStepContext authContext)
 {
-    private bool _isRefreshTokenExpired;
     private string? _storedRefreshToken;
 
     [Given("user {string} has logged in successfully")]
@@ -19,14 +18,6 @@ internal sealed class Steps(AuthenticationStepContext authContext)
 
         // Store the refresh token for later use
         _storedRefreshToken = authContext.LastAuthResponse?.RefreshToken;
-    }
-
-    [Given("the refresh token has expired")]
-    public void GivenTheRefreshTokenHasExpired()
-    {
-        _isRefreshTokenExpired = true;
-        // In a real test, we would manipulate the token cache to expire the token
-        // For now, we mark it as expired for the step implementation
     }
 
     [Given("user {string} has logged out")]

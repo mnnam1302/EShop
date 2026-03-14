@@ -207,7 +207,7 @@ this.ScenarioInitialize(scenarioInfo, ruleInfo);
                             "0969900212",
                             "test-tenant"});
 #line 19
-    await testRunner.WhenAsync("user invites a new user with role \'Role owner system\' the following details", ((string)(null)), table16, "When ");
+    await testRunner.WhenAsync("user invites a new user with role \'Role owner test-tenant\' the following details", ((string)(null)), table16, "When ");
 #line hidden
                 global::Reqnroll.Table table17 = new global::Reqnroll.Table(new string[] {
                             "Username",
