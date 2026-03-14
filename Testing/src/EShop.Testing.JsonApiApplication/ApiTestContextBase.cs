@@ -16,6 +16,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Primitives;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Serilog;
 using Serilog.Events;
 using System.Net;
@@ -61,7 +62,7 @@ public abstract class ApiTestContextBase
         .ToArray()!;
 }
 
-public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTestContextBase, IDisposable
+public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTestContextBase, IAsyncDisposable, IDisposable
     where TStartup : class
 {
     private const string JsonMediaType = "application/json";
@@ -92,6 +93,7 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
             {
                 services.AddTransient<HttpClient>(sp => this.GetClientWithHeaderPropagation());
                 services.AddSingleton<IIntegrationEventsTracker, IntegrationEventsTracker>();
+                services.AddSingleton<TestConsumeObserver>();
                 services.AddSerilog(SetupLogging);
             })
             .ConfigureAppConfiguration((hostingContext, config) =>
@@ -121,12 +123,14 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
         systemInternalJwtTokenFactory = ServiceProvider.GetRequiredService<ISystemInternalJwtTokenFactory>();
 
         EventTracker = ServiceProvider.GetRequiredService<IIntegrationEventsTracker>();
+        ConsumeObserver = ServiceProvider.GetRequiredService<TestConsumeObserver>();
     }
 
     public Microsoft.Extensions.Logging.ILogger Logger => logger;
     public ILoggerFactory LoggerFactory => ServiceProvider.GetRequiredService<ILoggerFactory>();
     public IServiceProvider ServiceProvider => serviceScope.ServiceProvider;
     public IIntegrationEventsTracker EventTracker { get; private set; }
+    public TestConsumeObserver ConsumeObserver { get; private set; }
     public Exception LastApiError { get; set; }
     public HttpStatusCode LastStatusCode { get; set; }
 
@@ -283,9 +287,52 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
         return await systemInternalJwtTokenFactory.AddUserContext(client, user);
     }
 
+    public HttpClient GetClientWithBearerToken(string bearerToken, string acceptHeader = "application/json")
+    {
+        var client = server.CreateClient();
+        client.DefaultRequestHeaders.Accept.Clear();
+        client.DefaultRequestHeaders.Accept.ParseAdd(acceptHeader);
+        client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", bearerToken);
+        return client;
+    }
+
     #endregion HTTP Client Management
 
     #region Http Action Methods
+
+    public async Task<Result<TResponse>> PostWithBearerTokenAsync<TRequest, TResponse>(string relativeUri, TRequest request, string bearerToken)
+    {
+        try
+        {
+            ArgumentException.ThrowIfNullOrEmpty(relativeUri);
+
+            var client = GetClientWithBearerToken(bearerToken);
+            var serializedRequest = System.Text.Json.JsonSerializer.Serialize(request);
+            var httpContent = new StringContent(serializedRequest, Encoding.UTF8, JsonMediaType);
+
+            logger.LogInformation("Sending POST request to {RelativeUri} with bearer token", relativeUri);
+
+            using var response = await client.PostAsync(relativeUri, httpContent);
+            LastStatusCode = response.StatusCode;
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                logger.LogWarning(
+                    "HTTP request failed with status {StatusCode}. Response: {Content}",
+                    response.StatusCode,
+                    string.IsNullOrWhiteSpace(errorContent) ? "<empty>" : errorContent);
+            }
+
+            return await ProcessHttpResponse<Result<TResponse>>(response);
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "Error during POST request to {RelativeUri}", relativeUri);
+            LastApiError = ex;
+            throw;
+        }
+    }
 
     public async Task<Result<TResponse>> GetAsync<TResponse>(string relativeUri, UserData? user = null)
     {
@@ -451,8 +498,59 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
             return (TResult)(object)result;
         }
 
+        // Handle error responses that return ProblemDetails instead of the expected Result<T>
+        if (!response.IsSuccessStatusCode && IsResultType(typeof(TResult)))
+        {
+            var failureResult = await DeserializeProblemDetailsAsResult<TResult>(response);
+            if (failureResult is not null)
+            {
+                return failureResult;
+            }
+        }
+
         var genericResult = await DeserializeGenericResponse<TResult>(response);
         return genericResult;
+    }
+
+    private static bool IsResultType(Type type)
+    {
+        return type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Result<>);
+    }
+
+    private static async Task<TResult?> DeserializeProblemDetailsAsResult<TResult>(HttpResponseMessage response)
+    {
+        var responseContent = await response.Content.ReadAsStringAsync();
+        if (string.IsNullOrWhiteSpace(responseContent))
+        {
+            return default;
+        }
+
+        try
+        {
+            var json = JObject.Parse(responseContent);
+
+            // ProblemDetails has "type", "title", "detail", "status" fields
+            if (json.ContainsKey("status") && (json.ContainsKey("detail") || json.ContainsKey("title")))
+            {
+                var errorCode = json.Value<string>("type") ?? "HTTP_ERROR";
+                var errorMessage = json.Value<string>("detail") ?? json.Value<string>("title") ?? "Unknown error";
+                var error = new Error(errorCode, errorMessage);
+
+                // Use reflection to call Result.Failure<TValue>(error) for the inner type
+                var innerType = typeof(TResult).GetGenericArguments()[0];
+                var failureMethod = typeof(Result)
+                    .GetMethod(nameof(Result.Failure), 1, [typeof(Error)])!
+                    .MakeGenericMethod(innerType);
+
+                return (TResult)failureMethod.Invoke(null, [error])!;
+            }
+        }
+        catch (JsonReaderException)
+        {
+            // Not valid JSON or not ProblemDetails — fall through to generic deserialization
+        }
+
+        return default;
     }
 
     private static async Task<Result> DeserializeResultResponse(HttpResponseMessage response)
@@ -463,12 +561,10 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
         {
             return response.IsSuccessStatusCode
                 ? Result.Success()
-                : Result.Failure(new Error(
-                    "HTTP_ERROR",
-                    $"Request failed with status code {(int)response.StatusCode} ({response.StatusCode})"));
+                : Result.Failure(new Error("HTTP_ERROR", $"Request failed with status code {(int)response.StatusCode} ({response.StatusCode})"));
         }
 
-        Result? result = null;
+        Result? result;
         try
         {
             result = JsonConvert.DeserializeObject<Result>(responseContent);
@@ -586,6 +682,28 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
     ~ApiTestContextBase()
     {
         Dispose(false);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (disposed)
+        {
+            return;
+        }
+
+        if (serviceScope is IAsyncDisposable asyncScope)
+        {
+            await asyncScope.DisposeAsync();
+        }
+        else
+        {
+            serviceScope.Dispose();
+        }
+
+        server.Dispose();
+        disposed = true;
+
+        GC.SuppressFinalize(this);
     }
 
     public void Dispose()

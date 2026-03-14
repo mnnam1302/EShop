@@ -51,7 +51,7 @@ internal sealed class CreateTenantCommandHandler(
 
     private async Task EnsureTenantAvailableFeatures(Tenant tenant, string operationalUsername, CancellationToken cancellationToken)
     {
-        userDetailsProvider.SetSystemUserContext(tenant.Id);
+        using var scope = userDetailsProvider.CreateSystemUserScope(tenant.Id);
 
         try
         {
@@ -67,10 +67,6 @@ internal sealed class CreateTenantCommandHandler(
         catch (Exception ex)
         {
             throw new BadRequestException(ex.Message);
-        }
-        finally
-        {
-            userDetailsProvider.ClearSystemUserContext();
         }
     }
 }

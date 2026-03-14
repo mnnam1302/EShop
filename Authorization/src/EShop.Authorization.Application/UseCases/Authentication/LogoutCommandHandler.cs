@@ -2,7 +2,6 @@
 using EShop.Shared.Authentication.Abstractions;
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.CQRS.Command;
-using EShop.Shared.Scoping;
 using Microsoft.Extensions.Logging;
 
 namespace EShop.Authorization.Application.UseCases.Authentication;

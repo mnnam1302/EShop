@@ -5,7 +5,6 @@ using EShop.Shared.CQRS.Command;
 using EShop.Shared.DomainTools.Exceptions;
 using EShop.Shared.DomainTools.UnitOfWorks;
 using EShop.Shared.EventBus.Abstractions;
-using EShop.Tenancy.Domain.Entities;
 using EShop.Tenancy.Domain.Repositories;
 
 namespace EShop.Tenancy.Application.UseCases.V1.Commands.Tenants;
@@ -37,44 +36,36 @@ internal sealed class EnableTenantFeatureCommandHandler : ICommandHandler<Enable
 
     public async Task<Result> HandleAsync(EnableTenantFeatureCommand command, CancellationToken cancellationToken)
     {
-        try
+        using var scope = _userDetailsProvider.CreateSystemUserScope(command.TenantId);
+
+        var tenantFeature = await _tenantFeatureRepository.FindSingleAsync(
+            predicate: tf => tf.FeatureId == command.FeatureId,
+            trackChanges: true,
+            cancellationToken: cancellationToken);
+
+        if (tenantFeature is null)
         {
-            _userDetailsProvider.SetSystemUserContext(command.TenantId);
-
-            var tenantFeature = await _tenantFeatureRepository.FindSingleAsync(
-                predicate: tf => tf.FeatureId == command.FeatureId,
-                trackChanges: true,
-                cancellationToken: cancellationToken);
-
-            if (tenantFeature is null)
-            {
-                throw new BadRequestException("Feature is not found for the tenant.");
-            }
-
-            if (tenantFeature.IsEnabled())
-            {
-                throw new BadRequestException("Feature is already enabled for the tenant.");
-            }
-
-            tenantFeature.Enable();
-
-            _tenantFeatureRepository.Update(tenantFeature);
-            await _unitOfWork.SaveChangesAsync(cancellationToken);
-
-            await _eventBus.PublishAsync<ITenantFeaturesUpdated>(new
-            {
-                EventId = Guid.NewGuid(),
-                TenantId = command.TenantId,
-                ActionUserId = _userDetailsProvider.AuthenticatedUser.ActionUserId,
-                ActionUserType = _userDetailsProvider.AuthenticatedUser.ActionUserType,
-            });
-
-            return Result.Success();
-
+            throw new BadRequestException("Feature is not found for the tenant.");
         }
-        finally
+
+        if (tenantFeature.IsEnabled())
         {
-            _userDetailsProvider.ClearSystemUserContext();
+            throw new BadRequestException("Feature is already enabled for the tenant.");
         }
+
+        tenantFeature.Enable();
+
+        _tenantFeatureRepository.Update(tenantFeature);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        await _eventBus.PublishAsync<ITenantFeaturesUpdated>(new
+        {
+            EventId = Guid.NewGuid(),
+            TenantId = command.TenantId,
+            ActionUserId = _userDetailsProvider.AuthenticatedUser.ActionUserId,
+            ActionUserType = _userDetailsProvider.AuthenticatedUser.ActionUserType,
+        }, cancellationToken);
+
+        return Result.Success();
     }
 }

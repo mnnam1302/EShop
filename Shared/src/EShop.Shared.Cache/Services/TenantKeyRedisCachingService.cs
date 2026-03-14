@@ -17,7 +17,45 @@ internal sealed class TenantKeyRedisCachingService : ITenantKeyCachingService
 
     public async Task AddAsync(string tenantId, RsaKeyPair keyPair, CancellationToken cancellationToken)
     {
+        // Use active key cache key by default for backward compatibility
+        await SetActiveKeyAsync(tenantId, keyPair, cancellationToken);
+    }
+
+    public async Task<RsaKeyPair?> GetAsync(string tenantId, CancellationToken cancellationToken)
+    {
+        // Try new active key first, then fall back to legacy key for migration
+        var activeKey = await GetActiveKeyAsync(tenantId, cancellationToken);
+        if (activeKey != null)
+        {
+            return activeKey;
+        }
+
+#pragma warning disable CS0618 // Type or member is obsolete
         var cacheKey = RsaCacheKeyProvider.GetRsaKeyPairCacheKey(tenantId);
+#pragma warning restore CS0618 // Type or member is obsolete
+        return await _redisCachingProvider.GetAsync(cacheKey, cancellationToken);
+    }
+
+    public Task RemoveAsync(string tenantId, CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task<RsaKeyPair?> GetActiveKeyAsync(string tenantId, CancellationToken cancellationToken)
+    {
+        var cacheKey = RsaCacheKeyProvider.GetActiveKeyCacheKey(tenantId);
+        return await _redisCachingProvider.GetAsync(cacheKey, cancellationToken);
+    }
+
+    public async Task<RsaKeyPair?> GetPreviousKeyAsync(string tenantId, CancellationToken cancellationToken)
+    {
+        var cacheKey = RsaCacheKeyProvider.GetPreviousKeyCacheKey(tenantId);
+        return await _redisCachingProvider.GetAsync(cacheKey, cancellationToken);
+    }
+
+    public async Task SetActiveKeyAsync(string tenantId, RsaKeyPair keyPair, CancellationToken cancellationToken)
+    {
+        var cacheKey = RsaCacheKeyProvider.GetActiveKeyCacheKey(tenantId);
         var options = new DistributedCacheEntryOptions
         {
             AbsoluteExpiration = keyPair.ExpiresAt
@@ -26,14 +64,14 @@ internal sealed class TenantKeyRedisCachingService : ITenantKeyCachingService
         await _redisCachingProvider.AddAsync(cacheKey, keyPair, options, cancellationToken);
     }
 
-    public async Task<RsaKeyPair?> GetAsync(string tenantId, CancellationToken cancellationToken)
+    public async Task SetPreviousKeyAsync(string tenantId, RsaKeyPair keyPair, TimeSpan ttl, CancellationToken cancellationToken)
     {
-        var cacheKey = RsaCacheKeyProvider.GetRsaKeyPairCacheKey(tenantId);
-        return await _redisCachingProvider.GetAsync(cacheKey, cancellationToken);
-    }
+        var cacheKey = RsaCacheKeyProvider.GetPreviousKeyCacheKey(tenantId);
+        var options = new DistributedCacheEntryOptions
+        {
+            AbsoluteExpirationRelativeToNow = ttl
+        };
 
-    public Task RemoveAsync(string tenantId, CancellationToken cancellationToken)
-    {
-        throw new NotImplementedException();
+        await _redisCachingProvider.AddAsync(cacheKey, keyPair, options, cancellationToken);
     }
 }

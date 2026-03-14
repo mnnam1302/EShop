@@ -156,57 +156,57 @@ this.ScenarioInitialize(scenarioInfo, ruleInfo);
             else
             {
                 await this.ScenarioStartAsync();
-                global::Reqnroll.Table table6 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table9 = new global::Reqnroll.Table(new string[] {
                             "TenantId",
                             "TenantName",
                             "OwnerUsername",
                             "OwnerDisplayName",
                             "OwnerEmail"});
-                table6.AddRow(new string[] {
+                table9.AddRow(new string[] {
                             "test-tenant",
                             "Test Tenant",
                             "test-owner@test-tenant",
                             "Test Owner",
                             "test-owner@test-tenant"});
 #line 7
-    await testRunner.WhenAsync("Tenancy service provision a new tenant with following details", ((string)(null)), table6, "When ");
+    await testRunner.WhenAsync("Tenancy service provision a new tenant with following details", ((string)(null)), table9, "When ");
 #line hidden
 #line 10
     await testRunner.ThenAsync("all standard features were turned on for \'test-tenant\'", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
-                global::Reqnroll.Table table7 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table10 = new global::Reqnroll.Table(new string[] {
                             "Username",
                             "TenantId"});
-                table7.AddRow(new string[] {
+                table10.AddRow(new string[] {
                             "test-owner@test-tenant",
                             "test-tenant"});
 #line 11
-    await testRunner.AndAsync("the following users are set up", ((string)(null)), table7, "And ");
+    await testRunner.AndAsync("the following users are set up", ((string)(null)), table10, "And ");
 #line hidden
 #line 14
     await testRunner.AndAsync("user \'test-owner@test-tenant\' logs in to the system", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
-                global::Reqnroll.Table table8 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table11 = new global::Reqnroll.Table(new string[] {
                             "PermissionId"});
-                table8.AddRow(new string[] {
+                table11.AddRow(new string[] {
                             "Authorization_ViewOrganizations"});
-                table8.AddRow(new string[] {
+                table11.AddRow(new string[] {
                             "Authorization_ManageOrganizations"});
 #line 15
-    await testRunner.AndAsync("user \'test-owner@test-tenant\' has following permissions", ((string)(null)), table8, "And ");
+    await testRunner.AndAsync("user \'test-owner@test-tenant\' has following permissions", ((string)(null)), table11, "And ");
 #line hidden
-                global::Reqnroll.Table table9 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table12 = new global::Reqnroll.Table(new string[] {
                             "Id",
                             "Name",
                             "Description",
                             "TenantId"});
-                table9.AddRow(new string[] {
+                table12.AddRow(new string[] {
                             "test-tenant",
                             "Test Tenant",
                             "Root Organization",
                             "test-tenant"});
 #line 19
-    await testRunner.AndAsync("user \'test-owner\' retrieves organizations", ((string)(null)), table9, "And ");
+    await testRunner.AndAsync("user \'test-owner\' retrieves organizations", ((string)(null)), table12, "And ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();

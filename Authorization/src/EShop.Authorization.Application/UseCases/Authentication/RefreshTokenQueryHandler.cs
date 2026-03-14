@@ -77,7 +77,7 @@ internal sealed class RefreshTokenQueryHandler : IQueryHandler<RefreshTokenQuery
 
     private static TokenClaims GetTokenMetadata(ClaimsPrincipal principal)
     {
-        var userId = principal.FindFirst(EShopClaimTypes.UserId)?.Value;
+        var userId = principal.FindFirst(EShopClaimTypes.UserId)?.Value ?? principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         var tenantId = principal.FindFirst(EShopClaimTypes.TenantId)?.Value;
 
         if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(tenantId))

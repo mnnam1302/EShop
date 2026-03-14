@@ -4,6 +4,7 @@ using EShop.Authorization.Infrastructure.Consumers;
 using EShop.Authorization.Infrastructure.EmailServices;
 using EShop.Authorization.Infrastructure.Producers;
 using EShop.Authorization.Infrastructure.Repositories;
+using EShop.Shared.Authentication.Filters;
 using EShop.Shared.Cache.DependencyInejctions.Extensions;
 using EShop.Shared.Contracts.JsonConverters;
 using EShop.Shared.Contracts.Services.Authorization;
@@ -91,6 +92,8 @@ public static class ServiceCollectionExtensions
 
             cfg.AddConsumers(AssemblyReference.Assembly);
 
+            // Register SystemUserContextConsumeFilter for automatic auth context management
+
             cfg.UsingRabbitMq((context, bus) =>
             {
                 if (configuration.IsRunningInAspire())
@@ -110,7 +113,9 @@ public static class ServiceCollectionExtensions
                     });
                 }
 
-                bus.UseMessageRetry(retry=> retry.Incremental(
+                bus.UseConsumeFilter(typeof(SystemUserContextConsumeFilter<>), context);
+
+                bus.UseMessageRetry(retry => retry.Incremental(
                     retryLimit: messageBusOptions.RetryLimit,
                     initialInterval: messageBusOptions.InitialInterval,
                     intervalIncrement: messageBusOptions.IntervalIncrement));

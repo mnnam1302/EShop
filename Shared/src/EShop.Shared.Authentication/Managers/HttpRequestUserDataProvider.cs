@@ -1,5 +1,6 @@
 ﻿using EShop.Shared.Authentication.Abstractions;
 using EShop.Shared.Authentication.Managers.JwtTokens;
+using EShop.Shared.Authentication.Scopes;
 using EShop.Shared.DomainTools.Exceptions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
@@ -112,6 +113,11 @@ public sealed class HttpRequestUserDataProvider : IUserDetailsProvider
 
         userLogContext?.Dispose();
         tenantLogContext?.Dispose();
+    }
+
+    public IDisposable CreateSystemUserScope(string? tenantId, string? userId = null, string? userType = null)
+    {
+        return new SystemUserScope(this, tenantId, userId, userType);
     }
 
     public bool IsCurrentUser(string userId)

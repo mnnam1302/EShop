@@ -30,4 +30,9 @@ public sealed class TestUserPermissionProvider : IUserPermissionsProvider
 
         return await Task.FromResult(permissions);
     }
+
+    public void ClearAll()
+    {
+        userPermissions.Clear();
+    }
 }

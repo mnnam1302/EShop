@@ -1,4 +1,5 @@
-﻿using EShop.Shared.Cache.DependencyInejctions.Extensions;
+﻿using EShop.Shared.Authentication.Filters;
+using EShop.Shared.Cache.DependencyInejctions.Extensions;
 using EShop.Shared.Contracts.JsonConverters;
 using EShop.Shared.Contracts.Services.Tenancy.Features;
 using EShop.Shared.Diagnostics;
@@ -67,6 +68,8 @@ public static class ServiceCollectionExtensions
                         h.Password(massTransitConfiguration.Password);
                     });
                 }
+
+                bus.UseConsumeFilter(typeof(SystemUserContextConsumeFilter<>), context);
 
                 bus.UseMessageRetry(retry => retry.Incremental(
                     retryLimit: messageBusOptions.RetryLimit,

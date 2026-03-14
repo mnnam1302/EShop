@@ -19,10 +19,15 @@ internal sealed class JwtTokenManager : IJwtTokenManager
         _jwtOptions = jwtOptions.CurrentValue;
     }
 
-    public async Task<string> GenerateAccessToken(string userId, string tenantId, IDictionary<string, object>? additionalClaims = null, CancellationToken cancellationToken = default)
+    public async Task<string> GenerateAccessToken(
+        string userId,
+        string tenantId,
+        IDictionary<string, object>? additionalClaims = null,
+        string? audienceOverride = null,
+        double? expiryMinutes = null,
+        CancellationToken cancellationToken = default)
     {
-        var keyPair = await _rsaKeyManager.GetOrCreateKeyPairAsync(tenantId, cancellationToken)
-            ?? throw new InvalidOperationException($"RSA key pair for tenant '{tenantId}' is not found.");
+        var keyPair = await _rsaKeyManager.GetOrCreateKeyPairAsync(tenantId, cancellationToken);
 
         var rsaSecurityKey = new RsaSecurityKey(keyPair.GetPrivateKey())
         {
@@ -33,9 +38,9 @@ internal sealed class JwtTokenManager : IJwtTokenManager
         var tokenDescriptor = new SecurityTokenDescriptor
         {
             Subject = new ClaimsIdentity(claims),
-            Expires = DateTime.UtcNow.AddMinutes(_jwtOptions.AccessTokenExpiryMinutes),
+            Expires = DateTime.UtcNow.AddMinutes(expiryMinutes ?? _jwtOptions.AccessTokenExpiryMinutes),
             Issuer = _jwtOptions.Issuer,
-            Audience = _jwtOptions.Audience,
+            Audience = audienceOverride ?? _jwtOptions.Audience,
             SigningCredentials = new SigningCredentials(rsaSecurityKey, SecurityAlgorithms.RsaSha256)
         };
 
@@ -64,9 +69,33 @@ internal sealed class JwtTokenManager : IJwtTokenManager
         var tokenHandler = new JwtSecurityTokenHandler();
         var jsonToken = tokenHandler.ReadJwtToken(token);
 
-        var tenantId = GetTokenMetadata(jsonToken);
-        var rsaKeyPair = await GetRsaKeyPairAsync(tenantId, cancellationToken);
+        var tenantId = GetTenantIdFromClaims(jsonToken);
+        var tokenKid = jsonToken.Header.Kid;
 
+        // Try validating with active key first
+        var activeKeyPair = await _rsaKeyManager.GetKeyPairAsync(tenantId, cancellationToken);
+
+        try
+        {
+            return ValidateTokenWithKey(token, activeKeyPair, tokenHandler);
+        }
+        catch (SecurityTokenSignatureKeyNotFoundException)
+        {
+            // Active key didn't work - try previous key if kid matches
+            var previousKeyPair = await _rsaKeyManager.GetPreviousKeyPairAsync(tenantId, cancellationToken);
+
+            if (previousKeyPair != null && previousKeyPair.KeyId == tokenKid)
+            {
+                return ValidateTokenWithKey(token, previousKeyPair, tokenHandler);
+            }
+
+            // No matching previous key or kid doesn't match
+            throw;
+        }
+    }
+
+    private ClaimsPrincipal ValidateTokenWithKey(string token, RsaKeyPair rsaKeyPair, JwtSecurityTokenHandler tokenHandler)
+    {
         var tokenValidationParameters = new TokenValidationParameters
         {
             ValidateAudience = true,
@@ -74,7 +103,7 @@ internal sealed class JwtTokenManager : IJwtTokenManager
             ValidateLifetime = true, // CRITICAL: Validate token expiration
             ValidateIssuerSigningKey = true,
             ValidIssuer = _jwtOptions.Issuer,
-            ValidAudience = _jwtOptions.Audience,
+            ValidAudiences = [_jwtOptions.Audience, "internal"],
             IssuerSigningKey = new RsaSecurityKey(rsaKeyPair.GetPublicKey()) { KeyId = rsaKeyPair.KeyId },
             ClockSkew = TimeSpan.Zero,
         };
@@ -95,9 +124,33 @@ internal sealed class JwtTokenManager : IJwtTokenManager
         var tokenHandler = new JwtSecurityTokenHandler();
         var jsonToken = tokenHandler.ReadJwtToken(token);
 
-        var tenantId = GetTokenMetadata(jsonToken);
-        var rsaKeyPair = await GetRsaKeyPairAsync(tenantId, cancellationToken);
+        var tenantId = GetTenantIdFromClaims(jsonToken);
+        var tokenKid = jsonToken.Header.Kid;
 
+        // Try validating with active key first
+        var activeKeyPair = await _rsaKeyManager.GetKeyPairAsync(tenantId, cancellationToken);
+
+        try
+        {
+            return ValidateExpiredTokenWithKey(token, activeKeyPair, tokenHandler);
+        }
+        catch (SecurityTokenSignatureKeyNotFoundException)
+        {
+            // Active key didn't work - try previous key if kid matches
+            var previousKeyPair = await _rsaKeyManager.GetPreviousKeyPairAsync(tenantId, cancellationToken);
+
+            if (previousKeyPair != null && previousKeyPair.KeyId == tokenKid)
+            {
+                return ValidateExpiredTokenWithKey(token, previousKeyPair, tokenHandler);
+            }
+
+            // No matching previous key or kid doesn't match
+            throw;
+        }
+    }
+
+    private ClaimsPrincipal ValidateExpiredTokenWithKey(string token, RsaKeyPair rsaKeyPair, JwtSecurityTokenHandler tokenHandler)
+    {
         var tokenValidationParameters = new TokenValidationParameters
         {
             ValidateAudience = true,
@@ -105,7 +158,7 @@ internal sealed class JwtTokenManager : IJwtTokenManager
             ValidateLifetime = false,
             ValidateIssuerSigningKey = true,
             ValidIssuer = _jwtOptions.Issuer,
-            ValidAudience = _jwtOptions.Audience,
+            ValidAudiences = [_jwtOptions.Audience, "internal"],
             IssuerSigningKey = new RsaSecurityKey(rsaKeyPair.GetPublicKey()) { KeyId = rsaKeyPair.KeyId },
             ClockSkew = TimeSpan.Zero
         };
@@ -121,7 +174,7 @@ internal sealed class JwtTokenManager : IJwtTokenManager
         return principal;
     }
 
-    private static string GetTokenMetadata(JwtSecurityToken jsonToken)
+    private static string GetTenantIdFromClaims(JwtSecurityToken jsonToken)
     {
         var tenantId = jsonToken.Claims.FirstOrDefault(x => x.Type == EShopClaimTypes.TenantId)?.Value;
 
@@ -131,10 +184,5 @@ internal sealed class JwtTokenManager : IJwtTokenManager
         }
 
         return tenantId;
-    }
-
-    private async Task<RsaKeyPair> GetRsaKeyPairAsync(string tenantId, CancellationToken cancellationToken)
-    {
-        return await _rsaKeyManager.GetKeyPairAsync(tenantId, cancellationToken);
     }
 }

@@ -6,5 +6,7 @@ public interface ITenantKeyProvider
 
     Task<RsaKeyPair> GetKeyPairAsync(string tenantId, CancellationToken cancellationToken);
 
+    Task<RsaKeyPair?> GetPreviousKeyPairAsync(string tenantId, CancellationToken cancellationToken);
+
     Task RotateKeyPairAsync(string tenantId, CancellationToken cancellationToken);
 }

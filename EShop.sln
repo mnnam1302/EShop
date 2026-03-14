@@ -162,6 +162,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "datasources", "datasources"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EShop.Shared.SystemClock", "Shared\src\EShop.Shared.SystemClock\EShop.Shared.SystemClock.csproj", "{20828C5E-7ED3-4059-BD1F-F6B7E4639596}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{12C2DC6C-D649-42DE-8CCF-15F73FCCC530}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EShop.Shared.Authentication.Tests", "Shared\test\EShop.Shared.Authentication.Tests\EShop.Shared.Authentication.Tests.csproj", "{97F2BA4F-D31C-E389-82EC-771FA6189AA2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -304,6 +308,10 @@ Global
 		{20828C5E-7ED3-4059-BD1F-F6B7E4639596}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{20828C5E-7ED3-4059-BD1F-F6B7E4639596}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{20828C5E-7ED3-4059-BD1F-F6B7E4639596}.Release|Any CPU.Build.0 = Release|Any CPU
+		{97F2BA4F-D31C-E389-82EC-771FA6189AA2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{97F2BA4F-D31C-E389-82EC-771FA6189AA2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{97F2BA4F-D31C-E389-82EC-771FA6189AA2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{97F2BA4F-D31C-E389-82EC-771FA6189AA2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -362,6 +370,8 @@ Global
 		{06139DD8-DD58-42ED-9629-0461B34C82AC} = {13EC8C82-2325-4D0E-BE52-9DEBA3FB5030}
 		{C768983A-8003-479D-8D18-897EA5A19B43} = {13EC8C82-2325-4D0E-BE52-9DEBA3FB5030}
 		{20828C5E-7ED3-4059-BD1F-F6B7E4639596} = {DF247757-C88D-4BD6-9946-FDEAC84BF886}
+		{12C2DC6C-D649-42DE-8CCF-15F73FCCC530} = {DDA5240E-D98D-46C2-A5F1-2A2E500F36D6}
+		{97F2BA4F-D31C-E389-82EC-771FA6189AA2} = {12C2DC6C-D649-42DE-8CCF-15F73FCCC530}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {BB890EFB-EE36-4A0E-A948-F28A53D375E6}

@@ -1,5 +1,6 @@
 ﻿using EShop.Catalog.Application.Agencies.CreateAgency;
 using EShop.Catalog.Application.Shared;
+using EShop.Shared.Authentication.Filters;
 using EShop.Shared.Contracts.JsonConverters;
 using EShop.Shared.Contracts.Services.Authorization;
 using EShop.Shared.Contracts.Services.Catalog;
@@ -73,6 +74,8 @@ public static class ServiceCollectionExtensions
                     h.Username(massTransitConfiguration.Username);
                     h.Password(massTransitConfiguration.Password);
                 });
+
+                bus.UseConsumeFilter(typeof(SystemUserContextConsumeFilter<>), context);
 
                 bus.UseMessageRetry(retry => retry.Incremental(
                     retryLimit: messageBusOptions.RetryLimit,

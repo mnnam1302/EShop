@@ -156,50 +156,50 @@ this.ScenarioInitialize(scenarioInfo, ruleInfo);
             else
             {
                 await this.ScenarioStartAsync();
-                global::Reqnroll.Table table1 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table4 = new global::Reqnroll.Table(new string[] {
                             "TenantId",
                             "TenantName",
                             "OwnerUsername",
                             "OwnerDisplayName",
                             "OwnerEmail"});
-                table1.AddRow(new string[] {
+                table4.AddRow(new string[] {
                             "tenant-1",
                             "Tenant 1",
                             "ownerTenant1@tenant-1",
                             "Owner Tenant1",
                             "owner@tenant1.com"});
 #line 7
-    await testRunner.GivenAsync("Tenancy service has provisied a new tenant with following details", ((string)(null)), table1, "Given ");
+    await testRunner.GivenAsync("Tenancy service has provisied a new tenant with following details", ((string)(null)), table4, "Given ");
 #line hidden
 #line 10
     await testRunner.AndAsync("all standard features were turned on for \'tenant-1\'", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
-                global::Reqnroll.Table table2 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table5 = new global::Reqnroll.Table(new string[] {
                             "Username",
                             "TenantId"});
-                table2.AddRow(new string[] {
+                table5.AddRow(new string[] {
                             "ownerTenant1@tenant-1",
                             "tenant-1"});
 #line 11
-    await testRunner.AndAsync("the following users are set up", ((string)(null)), table2, "And ");
+    await testRunner.AndAsync("the following users are set up", ((string)(null)), table5, "And ");
 #line hidden
-                global::Reqnroll.Table table3 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table6 = new global::Reqnroll.Table(new string[] {
                             "PermissionId"});
-                table3.AddRow(new string[] {
+                table6.AddRow(new string[] {
                             "Authorization_ManageOrganizations"});
 #line 14
-    await testRunner.AndAsync("user \'ownerTenant1@tenant-1\' has the following permissions", ((string)(null)), table3, "And ");
+    await testRunner.AndAsync("user \'ownerTenant1@tenant-1\' has the following permissions", ((string)(null)), table6, "And ");
 #line hidden
 #line 17
     await testRunner.AndAsync("user \'ownerTenant1@tenant-1\' logs in to the system", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
-                global::Reqnroll.Table table4 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table7 = new global::Reqnroll.Table(new string[] {
                             "Id",
                             "Name",
                             "OrganizationNumber",
                             "Email",
                             "Description"});
-                table4.AddRow(new string[] {
+                table7.AddRow(new string[] {
                             "child-org",
                             "Organization child of root",
                             "500000",
@@ -207,23 +207,23 @@ this.ScenarioInitialize(scenarioInfo, ruleInfo);
                             "Child organization"});
 #line 18
     await testRunner.WhenAsync("user \'ownerTenant1@tenant-1\' adds a child organization under the organization \'te" +
-                        "nant-1\' with the following details", ((string)(null)), table4, "When ");
+                        "nant-1\' with the following details", ((string)(null)), table7, "When ");
 #line hidden
-                global::Reqnroll.Table table5 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table8 = new global::Reqnroll.Table(new string[] {
                             "Id",
                             "Name",
                             "Description",
                             "Email",
                             "OrganizationNumber",
                             "ParentOrganizationId"});
-                table5.AddRow(new string[] {
+                table8.AddRow(new string[] {
                             "tenant-1",
                             "Tenant 1",
                             "Root Organization",
                             "",
                             "",
                             ""});
-                table5.AddRow(new string[] {
+                table8.AddRow(new string[] {
                             "child-org",
                             "Organization child of root",
                             "Child organization",
@@ -231,7 +231,7 @@ this.ScenarioInitialize(scenarioInfo, ruleInfo);
                             "500000",
                             "tenant-1"});
 #line 21
-    await testRunner.ThenAsync("user \'ownerTenant1@tenant-1\' retrieves organizations", ((string)(null)), table5, "Then ");
+    await testRunner.ThenAsync("user \'ownerTenant1@tenant-1\' retrieves organizations", ((string)(null)), table8, "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();

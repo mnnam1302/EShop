@@ -72,18 +72,24 @@ public sealed class ScenarioHooks
     }
 
     [AfterStep]
-    public void AfterStep(ScenarioContext scenarioContext, ApiContext apiContext)
+    public async Task AfterStep(ScenarioContext scenarioContext, ApiContext apiContext)
     {
-        if (scenarioContext.StepContext.StepInfo.StepDefinitionType == StepDefinitionType.Given)
+        if (scenarioContext.StepContext.StepInfo.StepDefinitionType is StepDefinitionType.Given or StepDefinitionType.When)
+        {
+            await apiContext.ConsumeObserver.WaitForQuietAsync();
+            apiContext.EventTracker.ClearPublishedEvents();
+        }
+
+        if (scenarioContext.StepContext.StepInfo.StepDefinitionType is StepDefinitionType.Given)
         {
             apiContext.LastApiError.Should().BeNull();
-            apiContext.EventTracker.ClearPublishedEvents();
         }
     }
 
     [AfterScenario]
-    public async Task AfterScenario(PostgreSqlTestDatabase testDatabase)
+    public async Task AfterScenario(PostgreSqlTestDatabase testDatabase, ApiContext apiContext)
     {
+        await apiContext.DisposeAsync();
         await testDatabase.DropAsync();
     }
 
