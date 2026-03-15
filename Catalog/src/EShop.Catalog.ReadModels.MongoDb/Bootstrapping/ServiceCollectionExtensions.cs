@@ -1,8 +1,8 @@
 ﻿using EShop.Catalog.ReadModels.MongoDb.Bootstrapping;
 using EShop.Catalog.ReadModels.MongoDb.Consumers;
-using EShop.Catalog.ReadModels.MongoDb.Infrastructure;
-using EShop.Catalog.ReadModels.MongoDb.Infrastructure.Repository;
 using EShop.Catalog.ReadModels.MongoDb.Models;
+using EShop.Catalog.ReadModels.MongoDb.Persistence;
+using EShop.Shared.Authentication.Filters;
 using EShop.Shared.Contracts.JsonConverters;
 using EShop.Shared.Contracts.Services.Catalog;
 using EShop.Shared.CQRS;
@@ -11,17 +11,11 @@ using EShop.Shared.EventBus.DependencyInjections.Options;
 using EShop.Shared.EventBus.PipelineObservers;
 using EShop.Shared.JsonApi.Extensions;
 using JsonApiDotNetCore.Configuration;
-using JsonApiDotNetCore.MongoDb.Configuration;
-using JsonApiDotNetCore.MongoDb.Repositories;
 using JsonApiDotNetCore.Repositories;
 using MassTransit;
 using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
-using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using MongoDB.Bson;
-using MongoDB.Bson.Serialization;
-using MongoDB.Bson.Serialization.Serializers;
-using MongoDB.Driver;
 
 namespace EShop.Catalog.ReadModels.MongoDb.Bootstrapping;
 
@@ -42,7 +36,7 @@ public static class ServiceCollectionExtensions
             .AddSwagger()
             .AddApiVersioning()
             .AddMassTransitRabbitMQ(configuration, webHostEnvironment)
-            .AddMongoDbPersistence()
+            .AddMongoDbPersistence(configuration)
             .AddJsonApiDotNet();
 
         return services;
@@ -71,22 +65,23 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    public static IServiceCollection AddMongoDbPersistence(this IServiceCollection services)
+    public static IServiceCollection AddMongoDbPersistence(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddOptions<MongoDbSettings>().BindConfiguration(nameof(MongoDbSettings));
-        services.AddSingleton<IMongoDbSettings>(sp => sp.GetRequiredService<IOptions<MongoDbSettings>>().Value);
+        services.AddOptions<MongoDbSettings>()
+            .Bind(configuration.GetSection(MongoDbSettings.SectionName))
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
 
-        services.TryAddSingleton(sp =>
+        services.AddScoped<ITenantProvider, TenantProvider>();
+        services.AddMultiTenantScoping();
+
+        services.AddDbContext<CatalogReadDbContext>((serviceProvider, options) =>
         {
-            var settings = sp.GetRequiredService<IMongoDbSettings>();
-            var client = new MongoClient(settings.ConnectionString);
-
-            return client.GetDatabase(settings.DatabaseName);
+            var mongoSettings = serviceProvider.GetRequiredService<IOptions<MongoDbSettings>>().Value;
+            options.UseMongoDB(mongoSettings.ConnectionString, mongoSettings.DatabaseName);
         });
 
-        BsonSerializer.RegisterSerializer(new GuidSerializer(GuidRepresentation.Standard));
-
-        services.AddScoped(typeof(IMongoRepositoryBase<>), typeof(MongoRepositoryBase<>));
+        services.AddScoped<ICategoryReadRepository, CategoryReadRepository>();
 
         return services;
     }
@@ -106,16 +101,12 @@ public static class ServiceCollectionExtensions
 #endif
         }, resources: resourceGraphBuilder =>
         {
-            resourceGraphBuilder.Add<Category, string?>();
+            resourceGraphBuilder.Add<Category, string>();
         });
 
-        //If your API project uses MongoDB only(so not in combination with EF Core),
-        //then instead of registering all MongoDB resources and repositories individually, you can use:
-        services.AddJsonApiMongoDb();
-
-        services.AddScoped(typeof(IResourceReadRepository<,>), typeof(MongoRepository<,>));
-        services.AddScoped(typeof(IResourceWriteRepository<,>), typeof(MongoRepository<,>));
-        services.AddScoped(typeof(IResourceRepository<,>), typeof(MongoRepository<,>));
+        services.AddScoped(typeof(IResourceReadRepository<,>), typeof(EntityFrameworkCoreRepository<,>));
+        services.AddScoped(typeof(IResourceWriteRepository<,>), typeof(EntityFrameworkCoreRepository<,>));
+        services.AddScoped(typeof(IResourceRepository<,>), typeof(EntityFrameworkCoreRepository<,>));
 
         return services;
     }
@@ -141,6 +132,8 @@ public static class ServiceCollectionExtensions
                     h.Username(massTransitConfiguration.Username);
                     h.Password(massTransitConfiguration.Password);
                 });
+
+                bus.UseConsumeFilter(typeof(SystemUserContextConsumeFilter<>), context);
 
                 bus.UseMessageRetry(retry => retry.Incremental(
                     retryLimit: messageBusOptions.RetryLimit,

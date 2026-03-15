@@ -1,20 +1,20 @@
-﻿using EShop.Catalog.ReadModels.MongoDb.Infrastructure;
-using EShop.Catalog.ReadModels.MongoDb.Models;
+﻿using EShop.Catalog.ReadModels.MongoDb.Persistence;
 using EShop.Shared.Contracts.Abstractions.MessageBus;
 using EShop.Shared.Contracts.Abstractions.Shared;
-using EShop.Shared.Contracts.Services.Catalog;
+using EShop.Shared.EventBus;
 using MassTransit;
+using Microsoft.EntityFrameworkCore;
 
 namespace EShop.Catalog.ReadModels.MongoDb.Consumers;
 
 public abstract class IdempotentConsumer<TMessage> : IConsumer<TMessage>
-    where TMessage : CatalogIntegrationEvent
+    where TMessage : IntegrationEvent
 {
-    private readonly IMongoRepositoryBase<InboxMessage> _mongoRepository;
+    private readonly CatalogReadDbContext _dbContext;
 
-    protected IdempotentConsumer(IMongoRepositoryBase<InboxMessage> mongoRepository)
+    protected IdempotentConsumer(CatalogReadDbContext dbContext)
     {
-        _mongoRepository = mongoRepository;
+        _dbContext = dbContext;
     }
 
     protected abstract Task<Result> HandleMessageAsync(TMessage message, CancellationToken cancellationToken);
@@ -25,11 +25,13 @@ public abstract class IdempotentConsumer<TMessage> : IConsumer<TMessage>
         var consumerId = $"{GetType().Name}_{message.GetType().Name}";
         var messageId = message.EventId;
 
-        var alreadyProcessed = await _mongoRepository.FindOneAsync(
-            inboxMessage => inboxMessage.DocumentId == messageId && inboxMessage.ConsumerId == consumerId,
-            context.CancellationToken);
+        var alreadyProcessed = await _dbContext.InboxMessages
+            .IgnoreQueryFilters()
+            .AnyAsync(
+                m => m.MessageId == messageId && m.ConsumerId == consumerId,
+                context.CancellationToken);
 
-        if (alreadyProcessed is not null)
+        if (alreadyProcessed)
         {
             return;
         }
@@ -47,6 +49,7 @@ public abstract class IdempotentConsumer<TMessage> : IConsumer<TMessage>
             inboxMessage.MarkAsFailed(result.Error.Message);
         }
 
-        await _mongoRepository.InsertOneAsync(inboxMessage, context.CancellationToken);
+        _dbContext.InboxMessages.Add(inboxMessage);
+        await _dbContext.SaveChangesAsync(context.CancellationToken);
     }
 }

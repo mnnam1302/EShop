@@ -193,12 +193,14 @@ await this.FeatureBackgroundAsync();
                             "Name",
                             "Reference",
                             "Slug",
-                            "ParentId"});
+                            "ParentId",
+                            "TenantId"});
                 table3.AddRow(new string[] {
                             "Electronics",
                             "ELEC123",
                             "electronics",
-                            ""});
+                            "",
+                            "TEST-TENANT"});
 #line 17
     await testRunner.ThenAsync("the category \'ELEC123\' has following details", ((string)(null)), table3, "Then ");
 #line hidden
@@ -246,11 +248,13 @@ await this.FeatureBackgroundAsync();
                 global::Reqnroll.Table table5 = new global::Reqnroll.Table(new string[] {
                             "Name",
                             "Reference",
-                            "Slug"});
+                            "Slug",
+                            "TenantId"});
                 table5.AddRow(new string[] {
                             "Laptops",
                             "LAP123",
-                            "laptops"});
+                            "laptops",
+                            "TEST-TENANT"});
 #line 25
     await testRunner.AndAsync("System user creates a child category with parent reference \'ELEC123\'", ((string)(null)), table5, "And ");
 #line hidden

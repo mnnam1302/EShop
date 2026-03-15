@@ -1,4 +1,5 @@
-﻿using EShop.Catalog.ReadModels.MongoDb.Infrastructure;
+﻿using EShop.Catalog.ReadModels.MongoDb.Models;
+using EShop.Catalog.ReadModels.MongoDb.Persistence;
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.CQRS.Command;
 
@@ -19,20 +20,25 @@ public sealed class CreateCategoryProjectionCommand : ICommand
 
 public sealed class CreateCategoryProjectionCommandHandler : ICommandHandler<CreateCategoryProjectionCommand>
 {
-    private readonly IMongoRepositoryBase<Models.Category> _mongoRepository;
+    private readonly ICategoryReadRepository _categoryRepository;
+    private readonly CatalogReadDbContext _dbContext;
     private readonly ILogger<CreateCategoryProjectionCommandHandler> _logger;
 
     public CreateCategoryProjectionCommandHandler(
-        IMongoRepositoryBase<Models.Category> mongoRepository,
+        ICategoryReadRepository categoryRepository,
+        CatalogReadDbContext dbContext,
         ILogger<CreateCategoryProjectionCommandHandler> logger)
     {
-        _mongoRepository = mongoRepository;
+        _categoryRepository = categoryRepository;
+        _dbContext = dbContext;
         _logger = logger;
     }
 
     public async Task<Result> HandleAsync(CreateCategoryProjectionCommand command, CancellationToken cancellationToken)
     {
-        var categoryProjection = await _mongoRepository.FindOneAsync(cp => cp.DocumentId == command.CategoryId, cancellationToken: cancellationToken);
+        var categoryProjection = await _categoryRepository.FindSingleAsync(
+            c => c.Id == command.CategoryId.ToString(),
+            cancellationToken: cancellationToken);
 
         if (categoryProjection is not null)
         {
@@ -41,9 +47,9 @@ public sealed class CreateCategoryProjectionCommandHandler : ICommandHandler<Cre
 
         _logger.LogInformation("Creating category projection with ID '{CategoryId}'", command.CategoryId);
 
-        categoryProjection = new Models.Category
+        categoryProjection = new Category
         {
-            DocumentId = command.CategoryId,
+            Id = command.CategoryId.ToString(),
             Version = command.Version,
             Name = command.Name,
             Reference = command.Reference,
@@ -52,9 +58,11 @@ public sealed class CreateCategoryProjectionCommandHandler : ICommandHandler<Cre
             CreatedAtUtc = command.CreatedAtUtc,
             UpdatedAtUtc = command.UpdatedAtUtc,
             TenantId = command.TenantId,
+            Scope = command.TenantId
         };
 
-        await _mongoRepository.InsertOneAsync(categoryProjection, cancellationToken);
+        _categoryRepository.Add(categoryProjection);
+        await _dbContext.SaveChangesAsync(cancellationToken);
 
         _logger.LogInformation("Category projection with ID '{CategoryId}' created successfully", command.CategoryId);
 

@@ -18,5 +18,5 @@ Scenario: Update an existing category's details
 		| Name                 | Reference | Slug                 |
 		| Consumer Electronics | ELEC123   | consumer-electronics |
 	Then the category 'ELEC123' has following details
-		| Name                 | Reference | Slug                 | ParentId |
-		| Consumer Electronics | ELEC123   | consumer-electronics |          |
+		| Name                 | Reference | Slug                 | ParentId | TenantId    |
+		| Consumer Electronics | ELEC123   | consumer-electronics |          | TEST-TENANT |

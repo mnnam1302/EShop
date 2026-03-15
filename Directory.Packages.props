@@ -67,6 +67,8 @@
     <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.10" />
     <PackageVersion Include="MongoDB.Bson" Version="3.3.0" />
     <PackageVersion Include="MongoDB.Driver" Version="3.3.0" />
+    <PackageVersion Include="MongoDB.EntityFrameworkCore" Version="8.2.1" />
+    <PackageVersion Include="JsonApiDotNetCore" Version="5.10.0" />
     <PackageVersion Include="JsonApiDotNetCore.MongoDb" Version="5.10.0" />
     <!-- ================================================================ -->
     <!-- Application Architecture and Patterns                            -->

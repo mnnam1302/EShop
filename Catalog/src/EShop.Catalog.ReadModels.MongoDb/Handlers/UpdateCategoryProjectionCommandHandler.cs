@@ -1,4 +1,5 @@
-﻿using EShop.Catalog.ReadModels.MongoDb.Infrastructure;
+﻿using EShop.Catalog.ReadModels.MongoDb.Models;
+using EShop.Catalog.ReadModels.MongoDb.Persistence;
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.CQRS.Command;
 
@@ -19,22 +20,25 @@ public sealed class UpdateCategoryProjectionCommand : ICommand
 
 public sealed class UpdateCategoryProjectionCommandHandler : ICommandHandler<UpdateCategoryProjectionCommand>
 {
-    private readonly IMongoRepositoryBase<Models.Category> _mongoRepository;
+    private readonly ICategoryReadRepository _categoryRepository;
+    private readonly CatalogReadDbContext _dbContext;
     private readonly ILogger<UpdateCategoryProjectionCommandHandler> _logger;
 
     public UpdateCategoryProjectionCommandHandler(
-        IMongoRepositoryBase<Models.Category> mongoRepository,
+        ICategoryReadRepository categoryRepository,
+        CatalogReadDbContext dbContext,
         ILogger<UpdateCategoryProjectionCommandHandler> logger)
     {
-        _mongoRepository = mongoRepository;
+        _categoryRepository = categoryRepository;
+        _dbContext = dbContext;
         _logger = logger;
     }
 
     public async Task<Result> HandleAsync(UpdateCategoryProjectionCommand command, CancellationToken cancellationToken)
     {
-        var category = await _mongoRepository.FindOneAsync(
-            filterExpression: c => c.DocumentId == command.CategoryId && c.TenantId == command.TenantId,
-            cancellationToken);
+        var category = await _categoryRepository.FindSingleAsync(
+            c => c.Id == command.CategoryId.ToString() && c.TenantId == command.TenantId,
+            cancellationToken: cancellationToken);
 
         if (category is null)
         {
@@ -52,7 +56,8 @@ public sealed class UpdateCategoryProjectionCommandHandler : ICommandHandler<Upd
         category.CreatedAtUtc = command.CreatedAtUtc;
         category.UpdatedAtUtc = command.UpdatedAtUtc;
 
-        await _mongoRepository.ReplaceOneAsync(category, cancellationToken);
+        _categoryRepository.Update(category);
+        await _dbContext.SaveChangesAsync(cancellationToken);
 
         _logger.LogInformation("Category projection with ID {CategoryId} for Tenant ID {TenantId} updated successfully.",
             command.CategoryId, command.TenantId);

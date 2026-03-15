@@ -204,12 +204,14 @@ await this.FeatureBackgroundAsync();
                             "Name",
                             "Reference",
                             "Slug",
-                            "ParentId"});
+                            "ParentId",
+                            "TenantId"});
                 table9.AddRow(new string[] {
                             "Consumer Electronics",
                             "ELEC123",
                             "consumer-electronics",
-                            ""});
+                            "",
+                            "TEST-TENANT"});
 #line 20
  await testRunner.ThenAsync("the category \'ELEC123\' has following details", ((string)(null)), table9, "Then ");
 #line hidden
