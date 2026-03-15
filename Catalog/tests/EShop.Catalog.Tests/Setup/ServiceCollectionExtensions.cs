@@ -1,7 +1,8 @@
 ﻿using EShop.Catalog.Application.Bootstrapping;
 using EShop.Catalog.Application.Shared;
-using EShop.Catalog.ReadModels.MongoDb.Infrastructure;
-using EShop.Catalog.ReadModels.MongoDb.Infrastructure.Repository;
+using EShop.Catalog.ReadModels.MongoDb.Models;
+using EShop.Catalog.ReadModels.MongoDb.Persistence;
+using EShop.Shared.Authentication.Filters;
 using EShop.Shared.Cache.DependencyInejctions.Extensions;
 using EShop.Shared.Contracts.JsonConverters;
 using EShop.Shared.CQRS;
@@ -13,12 +14,9 @@ using EShop.Testing.JsonApiApplication;
 using EShop.Testing.JsonApiApplication.DependencyInjections;
 using EShop.Testing.JsonApiApplication.EventBus;
 using MassTransit;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using MongoDB.Bson;
-using MongoDB.Bson.Serialization;
-using MongoDB.Bson.Serialization.Serializers;
-using MongoDB.Driver;
 
 namespace EShop.Catalog.Tests.Setup;
 
@@ -76,6 +74,8 @@ public static class ServiceCollectionExtensions
 
             cfg.UsingInMemory((context, bus) =>
             {
+                bus.UseConsumeFilter(typeof(SystemUserContextConsumeFilter<>), context);
+
                 bus.UseNewtonsoftJsonSerializer();
                 bus.ConfigureNewtonsoftJsonSerializer(settings =>
                 {
@@ -104,19 +104,15 @@ public static class ServiceCollectionExtensions
 
     public static IServiceCollection AddCatalogReadModelTestServices(this IServiceCollection services, MongoDbTestDatabase mongoDatabase)
     {
-        BsonSerializer.RegisterSerializer(new GuidSerializer(GuidRepresentation.Standard));
+        services.AddScoped<ITenantProvider, TenantProvider>();
+        services.AddMultiTenantScoping();
 
-        services.AddSingleton<IMongoDbSettings>(_ =>
-            new TestMongoDbSettings(mongoDatabase.ConnectionString, mongoDatabase.DatabaseName));
-
-        services.AddSingleton<IMongoDatabase>(sp =>
+        services.AddDbContext<CatalogReadDbContext>(options =>
         {
-            var settings = sp.GetRequiredService<IMongoDbSettings>();
-            var client = new MongoClient(settings.ConnectionString);
-            return client.GetDatabase(settings.DatabaseName);
+            options.UseMongoDB(mongoDatabase.ConnectionString, mongoDatabase.DatabaseName);
         });
 
-        services.AddScoped(typeof(IMongoRepositoryBase<>), typeof(MongoRepositoryBase<>));
+        services.AddScoped<ICategoryReadRepository, CategoryReadRepository>();
 
         return services;
     }

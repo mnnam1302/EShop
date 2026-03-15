@@ -1,6 +1,5 @@
 ﻿using EShop.Catalog.ReadModels.MongoDb.Handlers;
-using EShop.Catalog.ReadModels.MongoDb.Infrastructure;
-using EShop.Catalog.ReadModels.MongoDb.Models;
+using EShop.Catalog.ReadModels.MongoDb.Persistence;
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.Contracts.Services.Catalog;
 using EShop.Shared.CQRS;
@@ -11,8 +10,8 @@ public sealed class CategoryCreatedConsumer : IdempotentConsumer<CategoryCreated
 {
     private readonly IMediator mediator;
 
-    public CategoryCreatedConsumer(IMongoRepositoryBase<InboxMessage> mongoRepository, IMediator mediator)
-        : base(mongoRepository)
+    public CategoryCreatedConsumer(CatalogReadDbContext dbContext, IMediator mediator)
+        : base(dbContext)
     {
         this.mediator = mediator;
     }

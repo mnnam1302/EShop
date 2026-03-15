@@ -35,6 +35,6 @@ internal sealed class Steps(StepContext stepContext)
         var child = await stepContext.GetCategoryAsync(childReference);
         var parent = await stepContext.GetCategoryAsync(parentReference);
 
-        child.ParentId.Should().Be(parent.DocumentId);
+        child.ParentId.Should().Be(Guid.Parse(parent.Id));
     }
 }

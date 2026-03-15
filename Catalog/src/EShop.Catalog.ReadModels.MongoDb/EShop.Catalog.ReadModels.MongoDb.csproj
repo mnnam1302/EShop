@@ -9,15 +9,17 @@
   <ItemGroup>
   	<PackageReference Include="Asp.Versioning.Http" />
   	<PackageReference Include="Asp.Versioning.Mvc.ApiExplorer" />
-  	<PackageReference Include="JsonApiDotNetCore.MongoDb" />
+  	<PackageReference Include="JsonApiDotNetCore" />
   	<PackageReference Include="MicroElements.Swashbuckle.FluentValidation" />
-  	<PackageReference Include="MongoDB.Driver" />
+  	<PackageReference Include="Microsoft.EntityFrameworkCore" />
+  	<PackageReference Include="MongoDB.EntityFrameworkCore" />
   	<PackageReference Include="Swashbuckle.AspNetCore" />
   	<PackageReference Include="Swashbuckle.AspNetCore.Newtonsoft" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\Shared\src\EShop.Shared.CQRS\EShop.Shared.CQRS.csproj" />
+    <ProjectReference Include="..\..\..\Shared\src\EShop.Shared.DomainTools\EShop.Shared.DomainTools.csproj" />
     <ProjectReference Include="..\..\..\Shared\src\EShop.Shared.EventBus\EShop.Shared.EventBus.csproj" />
     <ProjectReference Include="..\..\..\Shared\src\EShop.Shared.JsonApi\EShop.Shared.JsonApi.csproj" />
   </ItemGroup>

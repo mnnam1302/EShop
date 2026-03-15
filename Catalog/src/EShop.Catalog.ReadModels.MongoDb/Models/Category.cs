@@ -1,14 +1,16 @@
-﻿using EShop.Catalog.ReadModels.MongoDb.Infrastructure.Attributes;
+﻿using EShop.Shared.DomainTools.Entities;
 using JsonApiDotNetCore.Controllers;
+using JsonApiDotNetCore.Resources;
 using JsonApiDotNetCore.Resources.Annotations;
 using static JsonApiDotNetCore.Resources.Annotations.AttrCapabilities;
 
 namespace EShop.Catalog.ReadModels.MongoDb.Models;
 
-[MongoCollection("Category")]
 [Resource(GenerateControllerEndpoints = JsonApiEndpoints.Query)]
-public sealed class Category : Document
+public sealed class Category : Identifiable<string>, IEntityBase<string>, IScoped
 {
+    public ulong Version { get; set; }
+
     [Attr(Capabilities = AllowView | AllowFilter)]
     public string Name { get; set; } = string.Empty;
 
@@ -29,4 +31,6 @@ public sealed class Category : Document
 
     [Attr(Capabilities = AllowView)]
     public string TenantId { get; set; } = string.Empty;
+
+    public string Scope { get; set; } = string.Empty;
 }
