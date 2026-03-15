@@ -1,9 +1,8 @@
-﻿namespace EShop.Catalog.Application.Products
+﻿namespace EShop.Catalog.Application.Products;
+
+public enum VariantState
 {
-    public enum VariantState
-    {
-        Published = 1,
-        Unpublished = 2,
-        Deleted = 3
-    }
+    Published = 1,
+    Unpublished = 2,
+    Deleted = 3
 }

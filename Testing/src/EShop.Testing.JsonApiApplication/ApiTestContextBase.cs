@@ -8,6 +8,7 @@ using EShop.Shared.Scoping.ResourceAccessControl.Providers.TenantFeaturesProvide
 using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserPermissionProvider;
 using EShop.Testing.JsonApiApplication.EventBus;
 using EShop.Testing.JsonApiApplication.Providers;
+using EShop.Testing.JsonApiApplication.Query;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.TestHost;
@@ -66,6 +67,7 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
     where TStartup : class
 {
     private const string JsonMediaType = "application/json";
+    private const string JsonApiMediaType = "application/vnd.api+json";
 
     private bool disposed = false;
     private readonly TestServer server;
@@ -343,6 +345,46 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
             HttpMethod.Get.Method);
     }
 
+    // ── JSON:API read methods ────────────────────────────────────────────────
+
+    /// <summary>
+    /// Sends a JSON:API compliant GET request to a collection endpoint and deserializes
+    /// the response as <see cref="JsonApiCollectionDocument{TAttributes}"/>.
+    /// Use <see cref="JsonApiQueryBuilder"/> and <see cref="JsonApiFilter"/> to build
+    /// filter, sort, page and sparse-fieldset parameters before calling this method.
+    /// </summary>
+    public async Task<JsonApiCollectionDocument<TAttributes>> GetJsonApiCollectionAsync<TAttributes>(
+        string baseUrl,
+        JsonApiQueryBuilder? query = null,
+        UserData? user = null)
+    {
+        var url = query?.ApplyTo(baseUrl) ?? baseUrl;
+        return await ExecuteHttpRequestAsync<JsonApiCollectionDocument<TAttributes>>(
+            client => client.GetAsync(url),
+            url,
+            user,
+            HttpMethod.Get.Method,
+            acceptHeader: JsonApiMediaType);
+    }
+
+    /// <summary>
+    /// Sends a JSON:API compliant GET request to a single-resource endpoint and deserializes
+    /// the response as <see cref="JsonApiSingleDocument{TAttributes}"/>.
+    /// </summary>
+    public async Task<JsonApiSingleDocument<TAttributes>> GetJsonApiSingleAsync<TAttributes>(
+        string resourceUrl,
+        UserData? user = null)
+    {
+        return await ExecuteHttpRequestAsync<JsonApiSingleDocument<TAttributes>>(
+            client => client.GetAsync(resourceUrl),
+            resourceUrl,
+            user,
+            HttpMethod.Get.Method,
+            acceptHeader: JsonApiMediaType);
+    }
+
+    // ────────────────────────────────────────────────────────────────────────
+
     public async Task<Result> PostAsync<TRequest>(string relativeUri, TRequest request, UserData? user = null)
     {
         return await ExecuteHttpRequestWithBodyAsync<TRequest, Result>(
@@ -448,13 +490,14 @@ public abstract class ApiTestContextBase<TStartup> : ApiTestContextBase, IApiTes
         string relativeUri,
         UserData? user = null,
         string httpMethod = "",
-        object? requestBody = null)
+        object? requestBody = null,
+        string acceptHeader = JsonMediaType)
     {
         try
         {
             ArgumentException.ThrowIfNullOrEmpty(relativeUri);
 
-            var client = await GetAuthorizedClient(user);
+            var client = await GetAuthorizedClient(user, acceptHeader);
             var operationalUser = user ?? defaultUser;
 
             if (requestBody != null)
