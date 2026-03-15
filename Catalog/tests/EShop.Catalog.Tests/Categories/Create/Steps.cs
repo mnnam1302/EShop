@@ -1,4 +1,6 @@
 ﻿using EShop.Catalog.Application.Categories.Create;
+using EShop.Catalog.Tests.Categories;
+using FluentAssertions;
 using Reqnroll;
 
 namespace EShop.Catalog.Tests.Categories.Create;
@@ -13,9 +15,26 @@ internal sealed class Steps(StepContext stepContext)
         await stepContext.CreateCategoryAsync(request);
     }
 
-    [Then("the category {string} has following details")]
-    public void ThenTheCategoryHasFollowingDetails(string p0, DataTable dataTable)
+    [When("System user creates a child category with parent reference {string}")]
+    public async Task WhenSystemUserCreatesAChildCategoryWithParentReference(string parentReference, DataTable dataTable)
     {
-        throw new PendingStepException();
+        var request = dataTable.CreateInstance<CreateCategoryRequest>();
+        await stepContext.CreateChildCategoryAsync(request, parentReference);
+    }
+
+    [Then("the category {string} has following details")]
+    public async Task ThenTheCategoryHasFollowingDetails(string reference, DataTable dataTable)
+    {
+        var category = await stepContext.GetCategoryAsync(reference);
+        dataTable.CompareToInstance(category);
+    }
+
+    [Then("the category {string} has parent {string}")]
+    public async Task ThenTheCategoryHasParent(string childReference, string parentReference)
+    {
+        var child = await stepContext.GetCategoryAsync(childReference);
+        var parent = await stepContext.GetCategoryAsync(parentReference);
+
+        child.ParentId.Should().Be(parent.DocumentId);
     }
 }

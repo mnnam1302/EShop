@@ -59,7 +59,6 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddCatalogTestApiVersioning(this IServiceCollection services)
     {
         services.AddCors()
-            .AddSwagger()
             .AddCatalogApiVersioning()
             .AddControllers()
             .AddApplicationPart(Application.AssemblyReference.Assembly);
