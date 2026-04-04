@@ -4,7 +4,7 @@ DECLARE
    userpassword varchar[];
    users varchar[] := array[['authorization','authorization-password-dev'],
                             ['tenancy','tenancy-password-dev'],
-							['catalog','catalog-password-dev']];
+							       ['catalog','catalog-password-dev']];
 BEGIN
    FOREACH userpassword SLICE 1 IN ARRAY users
    LOOP

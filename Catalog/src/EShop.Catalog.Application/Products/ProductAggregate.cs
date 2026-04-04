@@ -54,24 +54,6 @@ public sealed class ProductAggregate : Aggregate, IAuditable, IScoped, IRingFenc
         return product;
     }
 
-    internal void AddVariant(Guid variantId, string name, string sku, double price, double discountPrice, IEnumerable<VariantDimensionValue> values, bool isDefault)
-    {
-        ProductCanAddVariantSpecification.New(isDefault, values.ToList())
-            .ThrowDomainErrorIfNotSatisfied(this);
-
-        RaiseEvent(new VariantAddedEvent
-        {
-            VariantId = variantId,
-            ProductId = Id,
-            Name = name,
-            Sku = sku,
-            Price = price,
-            DiscountPrice = discountPrice,
-            VariantDimensionValues = values.ToList(),
-            IsDefault = isDefault
-        });
-    }
-
     internal void Update(UpdateProductCommand command, IUserDetailsProvider userDetailsProvider)
     {
         ProductCanUpdateSpecification.New().ThrowDomainErrorIfNotSatisfied(this);
@@ -88,6 +70,24 @@ public sealed class ProductAggregate : Aggregate, IAuditable, IScoped, IRingFenc
             Groups = command.Groups.ToArray(),
             UpdatedAtUtc = DateTimeOffset.UtcNow,
             UpdatedByUserId = userDetailsProvider.AuthenticatedUser.ActionUserId
+        });
+    }
+
+    internal void AddVariant(Guid variantId, string name, string sku, double price, double discountPrice, IEnumerable<VariantDimensionValue> values, bool isDefault)
+    {
+        ProductCanAddVariantSpecification.New(isDefault, values.ToList())
+            .ThrowDomainErrorIfNotSatisfied(this);
+
+        RaiseEvent(new VariantAddedEvent
+        {
+            VariantId = variantId,
+            ProductId = Id,
+            Name = name,
+            Sku = sku,
+            Price = price,
+            DiscountPrice = discountPrice,
+            VariantDimensionValues = values.ToList(),
+            IsDefault = isDefault
         });
     }
 
@@ -112,6 +112,22 @@ public sealed class ProductAggregate : Aggregate, IAuditable, IScoped, IRingFenc
         Scope = @event.Scope;
     }
 
+    internal void Apply(ProductUpdatedEvent @event)
+    {
+        State.Fire(ProductAction.Update);
+
+        Name = @event.Name;
+        Description = @event.Description;
+        CategoryId = @event.CategoryId;
+        Tags = @event.Tags;
+        Slug = @event.Slug;
+        Images = @event.Images;
+        Groups = @event.Groups;
+        LastModifiedAtUtc = @event.UpdatedAtUtc;
+        LastModifiedByUserId = @event.UpdatedByUserId;
+    }
+
+
     internal void Apply(VariantAddedEvent @event)
     {
         var variant = new Variant
@@ -128,21 +144,6 @@ public sealed class ProductAggregate : Aggregate, IAuditable, IScoped, IRingFenc
         };
 
         Variants.Add(variant);
-    }
-
-    internal void Apply(ProductUpdatedEvent @event)
-    {
-        State.Fire(ProductAction.Update);
-
-        Name = @event.Name;
-        Description = @event.Description;
-        CategoryId = @event.CategoryId;
-        Tags = @event.Tags;
-        Slug = @event.Slug;
-        Images = @event.Images;
-        Groups = @event.Groups;
-        LastModifiedAtUtc = @event.UpdatedAtUtc;
-        LastModifiedByUserId = @event.UpdatedByUserId;
     }
 
     #endregion

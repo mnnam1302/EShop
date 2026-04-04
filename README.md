@@ -310,7 +310,7 @@ dotnet run
 
 ## 📄 License
 
-This project is for educational and portfolio demonstration purposes.
+Practice project demonstrating production-grade distributed system patterns and cloud-native architecture.
 
 ---
 
