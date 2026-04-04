@@ -7,9 +7,9 @@
 /// </summary>
 public interface IScoped
 {
-    public string TenantId { get; }
+    string TenantId { get; }
 
-    public string Scope { get; }
+    string Scope { get; }
 }
 
 /// <summary>
