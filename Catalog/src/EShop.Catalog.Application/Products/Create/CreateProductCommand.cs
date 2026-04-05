@@ -5,21 +5,20 @@ using EShop.Shared.Contracts.Services.Catalog;
 using EShop.Shared.CQRS.Command;
 using EShop.Shared.DomainTools.EventSourcing.SeedWork;
 using EShop.Shared.EventBus.Abstractions;
-using Microsoft.IdentityModel.Tokens.Experimental;
 
 namespace EShop.Catalog.Application.Products.Create;
 
 public sealed class CreateProductCommand : ICommand
 {
-    public string Name { get; set; } = string.Empty;
-    public string Description { get; set; } = string.Empty;
-    public Guid CategoryId { get; set; }
-    public double Price { get; set; }
-    public double DiscountPrice { get; set; }
-    public IEnumerable<string> Tags { get; set; } = [];
-    public string Slug { get; set; } = string.Empty;
-    public IEnumerable<string> Images { get; set; } = [];
-    public IEnumerable<Guid> Groups { get; set; } = [];
+    public string Name { get; init; } = string.Empty;
+    public string Description { get; init; } = string.Empty;
+    public Guid CategoryId { get; init; }
+    public decimal Price { get; init; }
+    public decimal DiscountPrice { get; init; }
+    public IEnumerable<string> Tags { get; init; } = [];
+    public string Slug { get; init; } = string.Empty;
+    public IEnumerable<string> Images { get; init; } = [];
+    public IEnumerable<Guid> Groups { get; init; } = [];
 }
 
 public sealed class CreateProductCommandHandler : ICommandHandler<CreateProductCommand>
@@ -44,7 +43,7 @@ public sealed class CreateProductCommandHandler : ICommandHandler<CreateProductC
         var category = await aggregateStore.LoadAggregateAsync<CategoryAggregate>(command.CategoryId, cancellationToken);
         if (category is null)
         {
-            return ValidationResult.WithError(Error.Create("Category.NotFound", $"Category with ID '{command.CategoryId}' was not found."));
+            return ValidationResult.WithError(Error.Create("Category.NotFound", $"Category {command.CategoryId}' is not found."));
         }
 
         var product = ProductAggregate.Create(command, userDetailsProvider);
@@ -52,7 +51,8 @@ public sealed class CreateProductCommandHandler : ICommandHandler<CreateProductC
 
         await aggregateStore.AppendEventsAsync(product, cancellationToken);
 
-        await eventBus.PublishAsync<ProductCreated>(new
+        var defaultVariant = product.Variants.First(variant => variant.IsDefault);
+        await eventBus.PublishAsync(new ProductCreated
         {
             ProductId = product.Id,
             Name = product.Name,
@@ -62,8 +62,12 @@ public sealed class CreateProductCommandHandler : ICommandHandler<CreateProductC
             Slug = product.Slug,
             Images = product.Images,
             Groups = product.Groups,
-            CreatedByUserId = product.CreatedByUserId,
-            CreatedAtUtc = product.CreatedAtUtc,
+            DefaultVariant = new ProductDefaultVariant
+            {
+                VariantId = defaultVariant.Id,
+                Price = defaultVariant.Price,
+                DiscountPrice = defaultVariant.DiscountPrice
+            },
             TenantId = userDetailsProvider.AuthenticatedUser.TenantId,
             ActionUserId = userDetailsProvider.AuthenticatedUser.ActionUserId,
             ActionUserType = userDetailsProvider.AuthenticatedUser.ActionUserType
