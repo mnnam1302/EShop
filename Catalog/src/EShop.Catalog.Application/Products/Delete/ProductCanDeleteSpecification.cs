@@ -10,11 +10,11 @@ public sealed class ProductCanDeleteSpecification : Specification<ProductAggrega
 
     public static ProductCanDeleteSpecification New() => new();
 
-    protected override IEnumerable<string> IsNotSatisfiedBecause(ProductAggregate obj)
+    protected override IEnumerable<string> IsNotSatisfiedBecause(ProductAggregate product)
     {
-        if (!obj.State.CanFire(ProductAction.Delete))
+        if (!product.State.CanFire(ProductAction.Delete))
         {
-            yield return $"product {obj.Id} in state '{obj.State.State}' cannot be deleted";
+            yield return $"product {product.Id} in state '{product.State.State}' cannot be deleted";
         }
     }
 }

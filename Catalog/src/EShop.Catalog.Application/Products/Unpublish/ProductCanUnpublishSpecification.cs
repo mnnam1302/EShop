@@ -10,11 +10,11 @@ public sealed class ProductCanUnpublishSpecification : Specification<ProductAggr
 
     public static ProductCanUnpublishSpecification New() => new();
 
-    protected override IEnumerable<string> IsNotSatisfiedBecause(ProductAggregate obj)
+    protected override IEnumerable<string> IsNotSatisfiedBecause(ProductAggregate product)
     {
-        if (!obj.State.CanFire(ProductAction.Unpublish))
+        if (!product.State.CanFire(ProductAction.Unpublish))
         {
-            yield return $"product {obj.Id} in state '{obj.State.State}' cannot be unpublished";
+            yield return $"product {product.Id} in state '{product.State.State}' cannot be unpublished";
         }
     }
 }

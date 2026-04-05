@@ -26,7 +26,7 @@ public sealed class PublishVariantCommandHandler(
             return Result.Failure(new Error("ProductNotFound", $"Product with Id '{command.ProductId}' was not found."));
         }
 
-        product.PublishVariant(command.VariantId, userDetailsProvider);
+        product.PublishVariant(command, userDetailsProvider);
 
         await aggregateStore.AppendEventsAsync(product, cancellationToken);
 

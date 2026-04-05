@@ -28,7 +28,7 @@ public sealed class UpdateVariantCommandHandler(
             return Result.Failure(new Error("ProductNotFound", $"Product with Id '{command.ProductId}' was not found."));
         }
 
-        product.UpdateVariant(command.VariantId, command.Name, command.Sku, userDetailsProvider);
+        product.UpdateVariant(command, userDetailsProvider);
 
         await aggregateStore.AppendEventsAsync(product, cancellationToken);
 

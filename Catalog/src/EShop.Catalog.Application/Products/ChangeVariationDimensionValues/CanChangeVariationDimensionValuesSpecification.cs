@@ -16,14 +16,15 @@ public sealed class CanChangeVariationDimensionValuesSpecification : Specificati
     public static CanChangeVariationDimensionValuesSpecification New(string dimensionName, string[] newValues)
         => new(dimensionName, newValues);
 
-    protected override IEnumerable<string> IsNotSatisfiedBecause(ProductAggregate obj)
+    protected override IEnumerable<string> IsNotSatisfiedBecause(ProductAggregate product)
     {
-        if (obj.State.IsInState(ProductState.Deleted))
+        if (!product.State.CanFire(ProductAction.ChangeVariationDimensionValues))
         {
-            yield return $"product {obj.Id} is in Deleted state";
+            yield return $"product {product.Id} in state '{product.State.State}' cannot change variation dimension values";
+            yield break;
         }
 
-        var dimension = obj.VariationDimensions.FirstOrDefault(d =>
+        var dimension = product.VariationDimensions.FirstOrDefault(d =>
             string.Equals(d.Name, _dimensionName, StringComparison.OrdinalIgnoreCase));
 
         if (dimension is null)
@@ -47,7 +48,7 @@ public sealed class CanChangeVariationDimensionValuesSpecification : Specificati
 
         foreach (var removedValue in removedValues)
         {
-            var isReferenced = obj.Variants
+            var isReferenced = product.Variants
                 .Where(v => v.State != VariantState.Deleted)
                 .Any(v => v.VariantDimensionValues
                     .Any(dv => string.Equals(dv.Name, _dimensionName, StringComparison.OrdinalIgnoreCase)

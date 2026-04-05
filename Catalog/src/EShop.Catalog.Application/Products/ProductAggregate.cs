@@ -18,29 +18,10 @@ using EShop.Shared.DomainTools.Specifications;
 
 namespace EShop.Catalog.Application.Products;
 
-public sealed class ProductAggregate : Aggregate, IAuditable, IScoped, IRingFenced
+public sealed partial class ProductAggregate : Aggregate, IAuditable, IScoped, IRingFenced
 {
-    public string Name { get; private set; } = string.Empty;
-    public string Description { get; private set; } = string.Empty;
-    public Guid CategoryId { get; set; }
-    public string[] Tags { get; private set; } = [];
-    public string Slug { get; private set; } = string.Empty;
-    public string[] Images { get; private set; } = [];
-    public Guid[] Groups { get; private set; } = [];
-    public ProductStateMachine State { get; private set; } = new();
-
-    public string CreatedByUserId { get; set; } = string.Empty;
-    public DateTimeOffset CreatedAtUtc { get; set; }
-    public string? LastModifiedByUserId { get; set; }
-    public DateTimeOffset? LastModifiedAtUtc { get; set; }
-
-    public List<Variant> Variants { get; private set; } = [];
-    public List<VariationDimension> VariationDimensions { get; private set; } = [];
-
     public string TenantId { get; set; } = string.Empty;
     public string Scope { get; set; } = string.Empty;
-
-    #region Behaviors
 
     internal static ProductAggregate Create(CreateProductCommand command, IUserDetailsProvider userDetailsProvider)
     {
@@ -120,247 +101,142 @@ public sealed class ProductAggregate : Aggregate, IAuditable, IScoped, IRingFenc
         });
     }
 
-    internal void AddVariant(Guid variantId, string name, string sku, decimal price, decimal discountPrice, VariantDimensionValue[] values, bool isDefault)
+    internal void AddDefaultVariant(decimal price, decimal discountPrice)
     {
-        ProductCanAddVariantSpecification.New(isDefault, values.ToList())
+        ProductCanAddVariantSpecification.New(true, [])
             .ThrowDomainErrorIfNotSatisfied(this);
 
         RaiseEvent(new VariantCreatedEvent
         {
-            VariantId = variantId,
+            VariantId = Guid.NewGuid(),
             ProductId = Id,
-            Name = name,
-            Sku = sku,
+            Name = string.Empty,
+            Sku = string.Empty,
             Price = price,
             DiscountPrice = discountPrice,
-            VariantDimensionValues = values.ToList(),
-            IsDefault = isDefault
+            VariantDimensionValues = [],
+            IsDefault = true
         });
     }
 
-    internal void AddVariationDimension(string name, string displayName, string[] values, string displayStyle)
+    internal void AddVariant(AddVariantCommand command)
     {
-        CanAddVariationDimensionSpecification.New(name, values).ThrowDomainErrorIfNotSatisfied(this);
+        var dimensionValues = command.DimensionValues
+            .Select(dv => new VariantDimensionValue { Name = dv.Name, Value = dv.Value })
+            .ToList();
+
+        ProductCanAddVariantSpecification.New(false, dimensionValues)
+            .ThrowDomainErrorIfNotSatisfied(this);
+
+        RaiseEvent(new VariantCreatedEvent
+        {
+            VariantId = Guid.NewGuid(),
+            ProductId = Id,
+            Name = command.Name,
+            Sku = command.Sku,
+            Price = command.Price,
+            DiscountPrice = command.DiscountPrice,
+            VariantDimensionValues = dimensionValues,
+            IsDefault = false
+        });
+    }
+
+    internal void AddVariationDimension(AddVariationDimensionCommand command)
+    {
+        CanAddVariationDimensionSpecification.New(command.Name, command.Values).ThrowDomainErrorIfNotSatisfied(this);
 
         RaiseEvent(new VariationDimensionAddedEvent
         {
             ProductId = Id,
-            Name = name,
-            DisplayName = displayName,
-            Values = values,
-            DisplayStyle = displayStyle
+            Name = command.Name,
+            DisplayName = command.DisplayName,
+            Values = command.Values,
+            DisplayStyle = command.DisplayStyle
         });
     }
 
-    internal void UpdateVariationDimension(string name, string displayName, string displayStyle)
+    internal void UpdateVariationDimension(UpdateVariationDimensionCommand command)
     {
-        CanUpdateVariationDimensionSpecification.New(name).ThrowDomainErrorIfNotSatisfied(this);
+        CanUpdateVariationDimensionSpecification.New(command.Name).ThrowDomainErrorIfNotSatisfied(this);
 
         RaiseEvent(new VariationDimensionUpdatedEvent
         {
             ProductId = Id,
-            Name = name,
-            DisplayName = displayName,
-            DisplayStyle = displayStyle
+            Name = command.Name,
+            DisplayName = command.DisplayName,
+            DisplayStyle = command.DisplayStyle
         });
     }
 
-    internal void ChangeVariationDimensionValues(string dimensionName, string[] values)
+    internal void ChangeVariationDimensionValues(ChangeVariationDimensionValuesCommand command)
     {
-        CanChangeVariationDimensionValuesSpecification.New(dimensionName, values).ThrowDomainErrorIfNotSatisfied(this);
+        CanChangeVariationDimensionValuesSpecification.New(command.DimensionName, command.Values).ThrowDomainErrorIfNotSatisfied(this);
 
         RaiseEvent(new VariationDimensionValuesChangedEvent
         {
             ProductId = Id,
-            DimensionName = dimensionName,
-            Values = values
+            DimensionName = command.DimensionName,
+            Values = command.Values
         });
     }
 
-    internal void UpdateVariant(Guid variantId, string name, string sku, IUserDetailsProvider userDetailsProvider)
+    internal void UpdateVariant(UpdateVariantCommand command, IUserDetailsProvider userDetailsProvider)
     {
-        CanUpdateVariantSpecification.New(variantId).ThrowDomainErrorIfNotSatisfied(this);
+        CanUpdateVariantSpecification.New(command.VariantId).ThrowDomainErrorIfNotSatisfied(this);
 
         RaiseEvent(new VariantUpdatedEvent
         {
             ProductId = Id,
-            VariantId = variantId,
-            Name = name,
-            Sku = sku,
+            VariantId = command.VariantId,
+            Name = command.Name,
+            Sku = command.Sku,
             UpdatedAtUtc = DateTimeOffset.UtcNow,
             UpdatedByUserId = userDetailsProvider.AuthenticatedUser.ActionUserId
         });
     }
 
-    internal void ChangeVariantPrice(Guid variantId, decimal price, decimal discountPrice, IUserDetailsProvider userDetailsProvider)
+    internal void ChangeVariantPrice(ChangeVariantPriceCommand command, IUserDetailsProvider userDetailsProvider)
     {
-        CanChangeVariantPriceSpecification.New(variantId, price, discountPrice).ThrowDomainErrorIfNotSatisfied(this);
+        CanChangeVariantPriceSpecification.New(command.VariantId, command.Price, command.DiscountPrice).ThrowDomainErrorIfNotSatisfied(this);
 
-        var variant = Variants.First(v => v.Id == variantId);
+        var variant = Variants.First(v => v.Id == command.VariantId);
 
         RaiseEvent(new VariantPriceChangedEvent
         {
             ProductId = Id,
-            VariantId = variantId,
+            VariantId = command.VariantId,
             OldPrice = variant.Price,
-            NewPrice = price,
+            NewPrice = command.Price,
             OldDiscountPrice = variant.DiscountPrice,
-            NewDiscountPrice = discountPrice,
+            NewDiscountPrice = command.DiscountPrice,
             ChangedAtUtc = DateTimeOffset.UtcNow,
             ChangedByUserId = userDetailsProvider.AuthenticatedUser.ActionUserId
         });
     }
 
-    internal void PublishVariant(Guid variantId, IUserDetailsProvider userDetailsProvider)
+    internal void PublishVariant(PublishVariantCommand command, IUserDetailsProvider userDetailsProvider)
     {
-        CanPublishVariantSpecification.New(variantId).ThrowDomainErrorIfNotSatisfied(this);
+        CanPublishVariantSpecification.New(command.VariantId).ThrowDomainErrorIfNotSatisfied(this);
 
         RaiseEvent(new VariantPublishedEvent
         {
             ProductId = Id,
-            VariantId = variantId,
+            VariantId = command.VariantId,
             PublishedAtUtc = DateTimeOffset.UtcNow,
             PublishedByUserId = userDetailsProvider.AuthenticatedUser.ActionUserId
         });
     }
 
-    internal void UnpublishVariant(Guid variantId, IUserDetailsProvider userDetailsProvider)
+    internal void UnpublishVariant(UnpublishVariantCommand command, IUserDetailsProvider userDetailsProvider)
     {
-        CanUnpublishVariantSpecification.New(variantId).ThrowDomainErrorIfNotSatisfied(this);
+        CanUnpublishVariantSpecification.New(command.VariantId).ThrowDomainErrorIfNotSatisfied(this);
 
         RaiseEvent(new VariantUnpublishedEvent
         {
             ProductId = Id,
-            VariantId = variantId,
+            VariantId = command.VariantId,
             UnpublishedAtUtc = DateTimeOffset.UtcNow,
             UnpublishedByUserId = userDetailsProvider.AuthenticatedUser.ActionUserId
         });
     }
-
-    #endregion Behaviors
-
-    #region Apply Domain Event (Replay technique in Domain-Driven Design)
-
-    internal void Apply(ProductCreatedEvent @event)
-    {
-        Id = @event.ProductId;
-        Name = @event.Name;
-        Description = @event.Description;
-        CategoryId = @event.CategoryId;
-        Tags = @event.Tags;
-        Slug = @event.Slug;
-        Images = @event.Images;
-        Groups = @event.Groups;
-        CreatedAtUtc = @event.CreatedAtUtc;
-        CreatedByUserId = @event.CreatedByUserId;
-        LastModifiedAtUtc = @event.TimeStampUtc;
-        TenantId = @event.TenantId;
-        Scope = @event.Scope;
-    }
-
-    internal void Apply(ProductUpdatedEvent @event)
-    {
-        State.Fire(ProductAction.Update);
-
-        Name = @event.Name;
-        Description = @event.Description;
-        CategoryId = @event.CategoryId;
-        Tags = @event.Tags;
-        Slug = @event.Slug;
-        Images = @event.Images;
-        Groups = @event.Groups;
-        LastModifiedAtUtc = @event.UpdatedAtUtc;
-        LastModifiedByUserId = @event.UpdatedByUserId;
-    }
-
-    internal void Apply(VariantCreatedEvent @event)
-    {
-        var variant = new Variant
-        {
-            Id = @event.VariantId,
-            ProductId = @event.ProductId,
-            Name = @event.Name,
-            Sku = @event.Sku,
-            Price = @event.Price,
-            DiscountPrice = @event.DiscountPrice,
-            IsDefault = @event.IsDefault,
-            State = VariantState.Unpublished,
-            VariantDimensionValues = @event.VariantDimensionValues,
-        };
-
-        Variants.Add(variant);
-    }
-
-    internal void Apply(ProductPublishedEvent @event)
-    {
-        State.Fire(ProductAction.Publish);
-        LastModifiedAtUtc = @event.PublishedAtUtc;
-        LastModifiedByUserId = @event.PublishedByUserId;
-    }
-
-    internal void Apply(ProductUnpublishedEvent @event)
-    {
-        State.Fire(ProductAction.Unpublish);
-        LastModifiedAtUtc = @event.UnpublishedAtUtc;
-        LastModifiedByUserId = @event.UnpublishedByUserId;
-    }
-
-    internal void Apply(ProductDeletedEvent @event)
-    {
-        State.Fire(ProductAction.Delete);
-        LastModifiedAtUtc = @event.DeletedAtUtc;
-        LastModifiedByUserId = @event.DeletedByUserId;
-    }
-
-    internal void Apply(VariationDimensionAddedEvent @event)
-    {
-        VariationDimensions.Add(new VariationDimension
-        {
-            Name = @event.Name,
-            DisplayName = @event.DisplayName,
-            Values = @event.Values,
-            DisplayStyle = Enum.Parse<VariationDisplayStyles>(@event.DisplayStyle)
-        });
-    }
-
-    internal void Apply(VariationDimensionUpdatedEvent @event)
-    {
-        var dimension = VariationDimensions.First(d => string.Equals(d.Name, @event.Name, StringComparison.OrdinalIgnoreCase));
-        dimension.DisplayName = @event.DisplayName;
-        dimension.DisplayStyle = Enum.Parse<VariationDisplayStyles>(@event.DisplayStyle);
-    }
-
-    internal void Apply(VariationDimensionValuesChangedEvent @event)
-    {
-        var dimension = VariationDimensions.First(d => string.Equals(d.Name, @event.DimensionName, StringComparison.OrdinalIgnoreCase));
-        dimension.Values = @event.Values;
-    }
-
-    internal void Apply(VariantUpdatedEvent @event)
-    {
-        var variant = Variants.First(v => v.Id == @event.VariantId);
-        variant.Name = @event.Name;
-        variant.Sku = @event.Sku;
-    }
-
-    internal void Apply(VariantPriceChangedEvent @event)
-    {
-        var variant = Variants.First(v => v.Id == @event.VariantId);
-        variant.Price = @event.NewPrice;
-        variant.DiscountPrice = @event.NewDiscountPrice;
-    }
-
-    internal void Apply(VariantPublishedEvent @event)
-    {
-        var variant = Variants.First(v => v.Id == @event.VariantId);
-        variant.State = VariantState.Published;
-    }
-
-    internal void Apply(VariantUnpublishedEvent @event)
-    {
-        var variant = Variants.First(v => v.Id == @event.VariantId);
-        variant.State = VariantState.Unpublished;
-    }
-
-    #endregion Apply Domain Event (Replay technique in Domain-Driven Design)
 }

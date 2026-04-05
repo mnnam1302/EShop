@@ -10,33 +10,33 @@ public sealed class ProductCanPublishSpecification : Specification<ProductAggreg
 
     public static ProductCanPublishSpecification New() => new();
 
-    protected override IEnumerable<string> IsNotSatisfiedBecause(ProductAggregate obj)
+    protected override IEnumerable<string> IsNotSatisfiedBecause(ProductAggregate product)
     {
-        if (!obj.State.CanFire(ProductAction.Publish))
+        if (!product.State.CanFire(ProductAction.Publish))
         {
-            yield return $"product {obj.Id} in state '{obj.State.State}' cannot be published";
+            yield return $"product {product.Id} in state '{product.State.State}' cannot be published";
         }
 
-        if (obj.Variants.Count == 0)
+        if (product.Variants.Count == 0)
         {
             yield return "at least one variant is required";
         }
-        else if (!obj.Variants.Any(v => v.Price > 0))
+        else if (!product.Variants.Any(v => v.Price > 0))
         {
             yield return "at least one variant must have a price greater than zero";
         }
 
-        if (string.IsNullOrEmpty(obj.Name))
+        if (string.IsNullOrEmpty(product.Name))
         {
             yield return "Name is required";
         }
 
-        if (string.IsNullOrEmpty(obj.Slug))
+        if (string.IsNullOrEmpty(product.Slug))
         {
             yield return "Slug is required";
         }
 
-        if (obj.CategoryId == Guid.Empty)
+        if (product.CategoryId == Guid.Empty)
         {
             yield return "CategoryId is required";
         }

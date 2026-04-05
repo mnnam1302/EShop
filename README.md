@@ -1,6 +1,6 @@
 # 🛒 EShop SaaS Platform
 
-[![.NET](https://img.shields.io/badge/.NET-10.0-512BD4?logo=dotnet)](https://dotnet.microsoft.com/)
+[![.NET](https://img.shields.io/badge/.NET-8.0-512BD4?logo=dotnet)](https://dotnet.microsoft.com/)
 [![Architecture](https://img.shields.io/badge/Architecture-Microservices-blue)](/)
 [![Pattern](https://img.shields.io/badge/Pattern-CQRS%20%2B%20Event%20Sourcing-green)](/)
 [![Observability](https://img.shields.io/badge/Observability-OpenTelemetry-orange)](https://opentelemetry.io/)
@@ -59,19 +59,20 @@
 ┌────────────────────────────────────────────┼────────────────────────────────────────────┐
 │                                    MICROSERVICES                                        │
 │                                                                                         │
-│    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐             │
-│    │   TENANCY   │    │    AUTH     │    │   CATALOG   │    │  IDENTITY   │             │
-│    │             │    │             │    │             │    │             │             │
-│    │  • Tenants  │    │  • Users    │    │  • Products │    │  • Login    │             │
-│    │  • Settings │    │  • Roles    │    │  • Stock    │    │  • Tokens   │             │
-│    │  • Features │    │  • Perms    │    │  • Category │    │  • SSO      │             │
-│    └──────┬──────┘    └──────┬──────┘    └──────┬──────┘    └──────┬──────┘             │
-│           │                  │                  │                  │                    │
-└───────────┼──────────────────┼──────────────────┼──────────────────┼────────────────────┘
-            │                  │                  │                  │
-┌───────────┼──────────────────┼──────────────────┼──────────────────┼────────────────────┐
-│           │                  │     INFRASTRUCTURE                  │                    │
-│           ▼                  ▼                  ▼                  ▼                    │
+│    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐                               │
+│    │   TENANCY   │    │    AUTH     │    │  CATALOG*   │                               │
+│    │             │    │             │    │             │                               │
+│    │  • Tenants  │    │  • Users    │    │  • Products │                               │
+│    │  • Settings │    │  • Roles    │    │  • Variants │                               │
+│    │  • Features │    │  • Perms    │    │  • Category │                               │
+│    └──────┬──────┘    └──────┬──────┘    └──────┬──────┘                               │
+│           │                  │                  │                                      │
+└───────────┼──────────────────┼──────────────────┼──────────────────────────────────────-┘
+            │                  │                  │
+            │                  │                  │  * In development
+┌───────────┼──────────────────┼──────────────────┼──────────────────────────────────────-┐
+│           │                  │     INFRASTRUCTURE                                      │
+│           ▼                  ▼                  ▼                                      │
 │    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐             │
 │    │ PostgreSQL  │    │    Redis    │    │   MongoDB   │    │  RabbitMQ   │             │
 │    │   Events    │    │    Cache    │    │ Read Models │    │  Messaging  │             │
@@ -118,9 +119,9 @@
 
 | Category | Technology | Version | Purpose |
 |:---------|:-----------|:--------|:--------|
-| **Platform** | .NET | 10.0 | Runtime framework |
+| **Platform** | .NET | 8.0 | Runtime framework |
 | **Orchestration** | .NET Aspire | 9.x | Service orchestration & local dev |
-| **API** | ASP.NET Core | 10.0 | Web API framework |
+| **API** | ASP.NET Core | 8.0 | Web API framework |
 | **Specification** | JSON:API | - | RESTful API standard |
 
 ### Architecture & Patterns
@@ -153,7 +154,7 @@
 | Category | Technology | Purpose |
 |:---------|:-----------|:--------|
 | **Unit Testing** | xUnit | Test framework |
-| **Mocking** | FakeItEasy | Test doubles |
+| **Mocking** | Moq | Test doubles |
 | **BDD** | Reqnroll | Behavior-driven development |
 
 ---
@@ -210,12 +211,43 @@ EShop/
 │       └── EShop.Tenancy.Tests/       #    Unit & BDD Tests
 │
 ├── 📂 Authorization/                  # ── User & Permission Context ──
-├── 📂 Catalog/                        # ── Product Catalog Context ──
-├── 📂 Identity/                       # ── Identity Context ──
+│   ├── src/
+│   │   ├── EShop.Authorization.API/
+│   │   ├── EShop.Authorization.Application/
+│   │   ├── EShop.Authorization.Domain/
+│   │   └── EShop.Authorization.Infrastructure/
+│   └── tests/
+│       └── EShop.Authorization.Tests/
+│
+├── 📂 Catalog/                        # ── Product Catalog Context (🚧 In Development) ──
+│   ├── src/
+│   │   ├── EShop.Catalog.Application/       # Domain + CQRS (Event Sourced, self-hosted)
+│   │   └── EShop.Catalog.ReadModels.MongoDb/ # Read model projections
+│   └── tests/
+│       └── EShop.Catalog.Tests/
+│
+├── 📂 Configuration/                  # ── Configuration Context ──
+│   ├── src/
+│   │   ├── EShop.Configuration.Application/
+│   │   └── EShop.Configuration.IntegrationEvent/
+│   └── test/
+│       └── EShop.Configuration.Tests/
+│
+├── 📂 ReverseProxy/                   # ── API Gateway ──
+│   └── src/
+│       └── EShop.ApiGateway/
 │
 ├── 📂 Shared/                         # ── Cross-Cutting Libraries ──
-│   └── src/
-│       └── EShop.Shared.Diagnostics/  #    Logging & Telemetry
+│   ├── src/
+│   │   ├── EShop.Shared.Authentication/
+│   │   ├── EShop.Shared.Cache/
+│   │   ├── EShop.Shared.Contracts/
+│   │   ├── EShop.Shared.DomainTools/
+│   │   ├── EShop.Shared.EventBus/
+│   │   └── EShop.Shared.JsonApi/
+│   └── test/
+│
+├── 📂 Testing/                        # ── Shared Test Utilities ──
 │
 └── 📂 Deployment/
     └── config/
@@ -271,7 +303,7 @@ EShop/
 
 ```bash
 # Required
-✅ .NET 10 SDK
+✅ .NET 8 SDK
 ✅ Docker Desktop
 ```
 

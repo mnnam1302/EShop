@@ -20,6 +20,12 @@ public sealed class ProductCanAddVariantSpecification : Specification<ProductAgg
 
     protected override IEnumerable<string> IsNotSatisfiedBecause(ProductAggregate product)
     {
+        if (!product.State.CanFire(ProductAction.AddVariant))
+        {
+            yield return $"product {product.Id} in state '{product.State.State}' cannot add variant";
+            yield break;
+        }
+
         if (_isDefault)
         {
             if (_variantDimensionValues.Any())

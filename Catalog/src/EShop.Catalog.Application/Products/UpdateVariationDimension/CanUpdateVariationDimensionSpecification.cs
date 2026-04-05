@@ -13,14 +13,15 @@ public sealed class CanUpdateVariationDimensionSpecification : Specification<Pro
 
     public static CanUpdateVariationDimensionSpecification New(string name) => new(name);
 
-    protected override IEnumerable<string> IsNotSatisfiedBecause(ProductAggregate obj)
+    protected override IEnumerable<string> IsNotSatisfiedBecause(ProductAggregate product)
     {
-        if (obj.State.IsInState(ProductState.Deleted))
+        if (!product.State.CanFire(ProductAction.UpdateVariationDimension))
         {
-            yield return $"product {obj.Id} is in Deleted state";
+            yield return $"product {product.Id} in state '{product.State.State}' cannot update variation dimension";
+            yield break;
         }
 
-        if (!obj.VariationDimensions.Any(d => string.Equals(d.Name, _name, StringComparison.OrdinalIgnoreCase)))
+        if (!product.VariationDimensions.Any(d => string.Equals(d.Name, _name, StringComparison.OrdinalIgnoreCase)))
         {
             yield return $"dimension '{_name}' does not exist";
         }

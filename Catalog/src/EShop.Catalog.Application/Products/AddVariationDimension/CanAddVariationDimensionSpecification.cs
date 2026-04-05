@@ -15,14 +15,15 @@ public sealed class CanAddVariationDimensionSpecification : Specification<Produc
 
     public static CanAddVariationDimensionSpecification New(string name, string[] values) => new(name, values);
 
-    protected override IEnumerable<string> IsNotSatisfiedBecause(ProductAggregate obj)
+    protected override IEnumerable<string> IsNotSatisfiedBecause(ProductAggregate product)
     {
-        if (obj.State.IsInState(ProductState.Deleted))
+        if (!product.State.CanFire(ProductAction.AddVariationDimension))
         {
-            yield return $"product {obj.Id} is in Deleted state";
+            yield return $"product {product.Id} in state '{product.State.State}' cannot add variation dimension";
+            yield break;
         }
 
-        if (obj.VariationDimensions.Any(d => string.Equals(d.Name, _name, StringComparison.OrdinalIgnoreCase)))
+        if (product.VariationDimensions.Any(d => string.Equals(d.Name, _name, StringComparison.OrdinalIgnoreCase)))
         {
             yield return $"a dimension with name '{_name}' already exists";
         }
@@ -36,7 +37,7 @@ public sealed class CanAddVariationDimensionSpecification : Specification<Produc
             yield return "dimension values must be unique";
         }
 
-        if (obj.Variants.Any(v => !v.IsDefault && v.State != VariantState.Deleted))
+        if (product.Variants.Any(v => !v.IsDefault && v.State != VariantState.Deleted))
         {
             yield return "dimensions cannot be added when non-default variants exist";
         }

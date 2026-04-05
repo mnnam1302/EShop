@@ -29,7 +29,7 @@ public sealed class AddVariationDimensionCommandHandler(
             return Result.Failure(new Error("ProductNotFound", $"Product with Id '{command.ProductId}' was not found."));
         }
 
-        product.AddVariationDimension(command.Name, command.DisplayName, command.Values, command.DisplayStyle);
+        product.AddVariationDimension(command);
 
         await aggregateStore.AppendEventsAsync(product, cancellationToken);
 

@@ -47,7 +47,7 @@ public sealed class CreateProductCommandHandler : ICommandHandler<CreateProductC
         }
 
         var product = ProductAggregate.Create(command, userDetailsProvider);
-        product.AddVariant(Guid.NewGuid(), string.Empty, string.Empty, command.Price, command.DiscountPrice, [], true);
+        product.AddDefaultVariant(command.Price, command.DiscountPrice);
 
         await aggregateStore.AppendEventsAsync(product, cancellationToken);
 

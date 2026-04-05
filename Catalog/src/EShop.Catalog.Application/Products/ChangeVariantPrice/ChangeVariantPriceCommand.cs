@@ -32,7 +32,7 @@ public sealed class ChangeVariantPriceCommandHandler(
         var oldPrice = variant.Price;
         var oldDiscountPrice = variant.DiscountPrice;
 
-        product.ChangeVariantPrice(command.VariantId, command.Price, command.DiscountPrice, userDetailsProvider);
+        product.ChangeVariantPrice(command, userDetailsProvider);
 
         await aggregateStore.AppendEventsAsync(product, cancellationToken);
 

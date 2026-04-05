@@ -36,11 +36,7 @@ public sealed class AddVariantCommandHandler(
             return Result.Failure(new Error("ProductNotFound", $"Product with Id '{command.ProductId}' was not found."));
         }
 
-        var dimensionValues = command.DimensionValues
-            .Select(dv => new VariantDimensionValue { Name = dv.Name, Value = dv.Value })
-            .ToArray();
-
-        product.AddVariant(Guid.NewGuid(), command.Name, command.Sku, command.Price, command.DiscountPrice, dimensionValues, false);
+        product.AddVariant(command);
 
         await aggregateStore.AppendEventsAsync(product, cancellationToken);
 

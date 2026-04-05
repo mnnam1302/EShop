@@ -13,14 +13,15 @@ public sealed class CanUpdateVariantSpecification : Specification<ProductAggrega
 
     public static CanUpdateVariantSpecification New(Guid variantId) => new(variantId);
 
-    protected override IEnumerable<string> IsNotSatisfiedBecause(ProductAggregate obj)
+    protected override IEnumerable<string> IsNotSatisfiedBecause(ProductAggregate product)
     {
-        if (obj.State.IsInState(ProductState.Deleted))
+        if (!product.State.CanFire(ProductAction.UpdateVariant))
         {
-            yield return $"product {obj.Id} is in Deleted state";
+            yield return $"product {product.Id} in state '{product.State.State}' cannot update variant";
+            yield break;
         }
 
-        var variant = obj.Variants.FirstOrDefault(v => v.Id == _variantId);
+        var variant = product.Variants.FirstOrDefault(v => v.Id == _variantId);
         if (variant is null)
         {
             yield return $"variant '{_variantId}' does not exist";

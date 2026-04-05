@@ -28,7 +28,7 @@ public sealed class UpdateVariationDimensionCommandHandler(
             return Result.Failure(new Error("ProductNotFound", $"Product with Id '{command.ProductId}' was not found."));
         }
 
-        product.UpdateVariationDimension(command.Name, command.DisplayName, command.DisplayStyle);
+        product.UpdateVariationDimension(command);
 
         await aggregateStore.AppendEventsAsync(product, cancellationToken);
 

@@ -13,14 +13,15 @@ public sealed class CanUnpublishVariantSpecification : Specification<ProductAggr
 
     public static CanUnpublishVariantSpecification New(Guid variantId) => new(variantId);
 
-    protected override IEnumerable<string> IsNotSatisfiedBecause(ProductAggregate obj)
+    protected override IEnumerable<string> IsNotSatisfiedBecause(ProductAggregate product)
     {
-        if (obj.State.IsInState(ProductState.Deleted))
+        if (!product.State.CanFire(ProductAction.UnpublishVariant))
         {
-            yield return $"product {obj.Id} is in Deleted state";
+            yield return $"product {product.Id} in state '{product.State.State}' cannot unpublish variant";
+            yield break;
         }
 
-        var variant = obj.Variants.FirstOrDefault(v => v.Id == _variantId);
+        var variant = product.Variants.FirstOrDefault(v => v.Id == _variantId);
         if (variant is null)
         {
             yield return $"variant '{_variantId}' does not exist";
@@ -39,9 +40,9 @@ public sealed class CanUnpublishVariantSpecification : Specification<ProductAggr
             yield break;
         }
 
-        if (obj.State.State == ProductState.Published)
+        if (product.State.IsInState(ProductState.Published))
         {
-            var publishedVariantCount = obj.Variants.Count(v => v.State == VariantState.Published);
+            var publishedVariantCount = product.Variants.Count(v => v.State == VariantState.Published);
             if (publishedVariantCount <= 1)
             {
                 yield return "the last published variant cannot be unpublished while the product is published";

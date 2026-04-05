@@ -18,14 +18,15 @@ public sealed class CanChangeVariantPriceSpecification : Specification<ProductAg
     public static CanChangeVariantPriceSpecification New(Guid variantId, decimal price, decimal discountPrice)
         => new(variantId, price, discountPrice);
 
-    protected override IEnumerable<string> IsNotSatisfiedBecause(ProductAggregate obj)
+    protected override IEnumerable<string> IsNotSatisfiedBecause(ProductAggregate product)
     {
-        if (obj.State.State == ProductState.Deleted)
+        if (!product.State.CanFire(ProductAction.ChangeVariantPrice))
         {
-            yield return $"product {obj.Id} is in Deleted state";
+            yield return $"product {product.Id} in state '{product.State.State}' cannot change variant price";
+            yield break;
         }
 
-        var variant = obj.Variants.FirstOrDefault(v => v.Id == _variantId);
+        var variant = product.Variants.FirstOrDefault(v => v.Id == _variantId);
         if (variant is null)
         {
             yield return $"variant '{_variantId}' does not exist";
