@@ -18,15 +18,16 @@ public sealed class ProductStateMachine : StateMachine<ProductState, ProductActi
     public void Configure()
     {
         Configure(ProductState.Draft)
-            .Ignore(ProductAction.Update)
+            .PermitReentry(ProductAction.Update)
             .Permit(ProductAction.Publish, ProductState.Published)
             .Permit(ProductAction.Delete, ProductState.Deleted);
 
         Configure(ProductState.Published)
-            .Permit(ProductAction.Unpublish, ProductState.Unpublished)
-            .Permit(ProductAction.Delete, ProductState.Deleted);
+            .PermitReentry(ProductAction.Update)
+            .Permit(ProductAction.Unpublish, ProductState.Unpublished);
 
         Configure(ProductState.Unpublished)
+            .PermitReentry(ProductAction.Update)
             .Permit(ProductAction.Publish, ProductState.Published)
             .Permit(ProductAction.Delete, ProductState.Deleted);
     }
