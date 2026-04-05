@@ -18,6 +18,8 @@ public sealed class CatalogReadDbContext : DbContext, IInboxDbContext
 
     public DbSet<Category> Categories { get; set; } = null!;
 
+    public DbSet<Product> Products { get; set; } = null!;
+
     public DbSet<InboxMessage> InboxMessages { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

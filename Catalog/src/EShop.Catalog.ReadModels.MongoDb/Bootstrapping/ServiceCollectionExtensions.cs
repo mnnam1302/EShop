@@ -82,6 +82,7 @@ public static class ServiceCollectionExtensions
         });
 
         services.AddScoped<ICategoryReadRepository, CategoryReadRepository>();
+        services.AddScoped<IProductReadRepository, ProductReadRepository>();
 
         return services;
     }
@@ -102,6 +103,7 @@ public static class ServiceCollectionExtensions
         }, resources: resourceGraphBuilder =>
         {
             resourceGraphBuilder.Add<Category, string>();
+            resourceGraphBuilder.Add<Product, string>();
         });
 
         services.AddScoped(typeof(IResourceReadRepository<,>), typeof(EntityFrameworkCoreRepository<,>));
