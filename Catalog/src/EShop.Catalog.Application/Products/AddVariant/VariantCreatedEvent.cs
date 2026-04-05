@@ -1,4 +1,4 @@
-﻿namespace EShop.Catalog.Application.Products.Create;
+﻿namespace EShop.Catalog.Application.Products.AddVariant;
 
 public sealed class VariantCreatedEvent : ProductDomainEvent
 {

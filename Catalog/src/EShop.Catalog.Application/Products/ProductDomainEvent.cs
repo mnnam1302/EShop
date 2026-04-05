@@ -6,6 +6,6 @@ public abstract class ProductDomainEvent : ICatalogDomainEvent
 {
     public Guid EventId { get; set; } = Guid.NewGuid();
     public DateTimeOffset TimeStampUtc { get; set; } = DateTimeOffset.UtcNow;
-    public Guid ProductId { get; set; }
+    public required Guid ProductId { get; init; }
     public ulong Version { get; set; }
 }

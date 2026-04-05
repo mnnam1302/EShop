@@ -1,6 +1,6 @@
 ﻿using EShop.Shared.DomainTools.Specifications;
 
-namespace EShop.Catalog.Application.Products.Create;
+namespace EShop.Catalog.Application.Products.AddVariant;
 
 public sealed class ProductCanAddVariantSpecification : Specification<ProductAggregate>
 {
