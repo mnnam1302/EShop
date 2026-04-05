@@ -1,4 +1,5 @@
 using EShop.Shared.DomainTools.Entities;
+using EShop.Shared.ReadModel;
 using JsonApiDotNetCore.Resources;
 using JsonApiDotNetCore.Resources.Annotations;
 using static JsonApiDotNetCore.Resources.Annotations.AttrCapabilities;
@@ -6,7 +7,7 @@ using static JsonApiDotNetCore.Resources.Annotations.AttrCapabilities;
 namespace EShop.Catalog.ReadModels.MongoDb.Models;
 
 [Resource(GenerateControllerEndpoints = JsonApiDotNetCore.Controllers.JsonApiEndpoints.Query)]
-public sealed class Product : Identifiable<string>, IEntityBase<string>, IScoped
+public sealed partial class Product : Identifiable<string>, IEntityBase<string>, IScoped, IReadModel
 {
     [Attr(Capabilities = AllowView)]
     public Guid DocumentId { get; set; }

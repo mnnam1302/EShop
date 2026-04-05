@@ -10,6 +10,7 @@ using EShop.Shared.EventBus.DependencyInjections.Extensions;
 using EShop.Shared.EventBus.DependencyInjections.Options;
 using EShop.Shared.EventBus.PipelineObservers;
 using EShop.Shared.JsonApi.Extensions;
+using EShop.Shared.ReadModel.EfCore;
 using JsonApiDotNetCore.Configuration;
 using JsonApiDotNetCore.Repositories;
 using MassTransit;
@@ -83,6 +84,9 @@ public static class ServiceCollectionExtensions
 
         services.AddScoped<ICategoryReadRepository, CategoryReadRepository>();
         services.AddScoped<IProductReadRepository, ProductReadRepository>();
+
+        // Read model projection infrastructure
+        services.UseEfCoreReadModelStore<Product, CatalogReadDbContext>("ProductId");
 
         return services;
     }
@@ -179,5 +183,24 @@ public static class ServiceCollectionExtensions
     {
         bus.ConfigureEventReceiveEndpoint<CategoryCreatedConsumer, CategoryCreated>(context, environment.EnvironmentName, serviceName);
         bus.ConfigureEventReceiveEndpoint<CategoryUpdatedConsumer, CategoryUpdated>(context, environment.EnvironmentName, serviceName);
+
+        // Product projection consumers
+        bus.ConfigureEventReceiveEndpoint<ProductCreatedConsumer, ProductCreated>(context, environment.EnvironmentName, serviceName);
+        bus.ConfigureEventReceiveEndpoint<ProductUpdatedConsumer, ProductUpdated>(context, environment.EnvironmentName, serviceName);
+        bus.ConfigureEventReceiveEndpoint<ProductPublishedConsumer, ProductPublished>(context, environment.EnvironmentName, serviceName);
+        bus.ConfigureEventReceiveEndpoint<ProductUnpublishedConsumer, ProductUnpublished>(context, environment.EnvironmentName, serviceName);
+        bus.ConfigureEventReceiveEndpoint<ProductDeletedConsumer, ProductDeleted>(context, environment.EnvironmentName, serviceName);
+
+        // Variation dimension projection consumers
+        bus.ConfigureEventReceiveEndpoint<VariationDimensionAddedConsumer, VariationDimensionAdded>(context, environment.EnvironmentName, serviceName);
+        bus.ConfigureEventReceiveEndpoint<VariationDimensionUpdatedConsumer, VariationDimensionUpdated>(context, environment.EnvironmentName, serviceName);
+        bus.ConfigureEventReceiveEndpoint<VariationDimensionValuesChangedConsumer, VariationDimensionValuesChanged>(context, environment.EnvironmentName, serviceName);
+
+        // Variant projection consumers
+        bus.ConfigureEventReceiveEndpoint<VariantCreatedConsumer, VariantCreated>(context, environment.EnvironmentName, serviceName);
+        bus.ConfigureEventReceiveEndpoint<VariantUpdatedConsumer, VariantUpdated>(context, environment.EnvironmentName, serviceName);
+        bus.ConfigureEventReceiveEndpoint<VariantPriceChangedConsumer, VariantPriceChanged>(context, environment.EnvironmentName, serviceName);
+        bus.ConfigureEventReceiveEndpoint<VariantPublishedConsumer, VariantPublished>(context, environment.EnvironmentName, serviceName);
+        bus.ConfigureEventReceiveEndpoint<VariantUnpublishedConsumer, VariantUnpublished>(context, environment.EnvironmentName, serviceName);
     }
 }
