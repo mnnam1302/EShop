@@ -118,9 +118,9 @@ The `ProductAggregate` SHALL expose a `Delete()` behavior method that validates 
 - **WHEN** the Product is in Draft state and `Delete()` is called
 - **THEN** a `ProductDeletedEvent` SHALL be raised and the Product state SHALL transition to Deleted
 
-#### Scenario: Delete a Published product
+#### Scenario: Delete fails when Product is Published
 - **WHEN** the Product is in Published state and `Delete()` is called
-- **THEN** a `ProductDeletedEvent` SHALL be raised and the Product state SHALL transition to Deleted
+- **THEN** a domain error SHALL be thrown because the state machine does not permit Delete from Published
 
 #### Scenario: Delete an Unpublished product
 - **WHEN** the Product is in Unpublished state and `Delete()` is called
@@ -134,9 +134,13 @@ The `ProductAggregate` SHALL expose a `Delete()` behavior method that validates 
 
 The `ProductCanDeleteSpecification` SHALL validate that the state machine allows the Delete action (`State.CanFire(ProductAction.Delete)`).
 
-#### Scenario: Non-deleted product passes specification
-- **WHEN** the Product is in Draft, Published, or Unpublished state
+#### Scenario: Draft or Unpublished product passes specification
+- **WHEN** the Product is in Draft or Unpublished state
 - **THEN** the specification SHALL be satisfied
+
+#### Scenario: Published product fails specification
+- **WHEN** the Product is in Published state
+- **THEN** the specification SHALL report that the Product cannot be deleted in its current state
 
 #### Scenario: Deleted product fails specification
 - **WHEN** the Product is in Deleted state
