@@ -4,7 +4,7 @@ using EShop.Catalog.Application.Products.ChangeVariationDimensionValues;
 using EShop.Catalog.Application.Products.UpdateVariationDimension;
 using EShop.Shared.DomainTools.Exceptions;
 
-namespace EShop.Catalog.Tests.Products;
+namespace EShop.Catalog.Tests.Products.WriteModel;
 
 public class ProductVariationDimensionTests
 {

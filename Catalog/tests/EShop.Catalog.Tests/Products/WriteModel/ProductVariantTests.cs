@@ -7,7 +7,7 @@ using EShop.Catalog.Application.Products.UnpublishVariant;
 using EShop.Catalog.Application.Products.UpdateVariant;
 using EShop.Shared.DomainTools.Exceptions;
 
-namespace EShop.Catalog.Tests.Products;
+namespace EShop.Catalog.Tests.Products.WriteModel;
 
 public class ProductVariantTests
 {

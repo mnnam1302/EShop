@@ -6,8 +6,9 @@ using Reqnroll;
 namespace EShop.Catalog.Tests.Categories.Create;
 
 [Binding]
-internal sealed class Steps(StepContext stepContext)
+internal sealed class Steps(StepContext stepContext, Get.StepContext getStepContext)
 {
+    [Given("System User has created the following category")]
     [When("System user creates a new category")]
     public async Task WhenSystemUserCreatesANewCategory(DataTable dataTable)
     {
@@ -18,23 +19,11 @@ internal sealed class Steps(StepContext stepContext)
     [When("System user creates a child category with parent reference {string}")]
     public async Task WhenSystemUserCreatesAChildCategoryWithParentReference(string parentReference, DataTable dataTable)
     {
+        var parent = await getStepContext.GetCategoryAsync(parentReference);
+
         var request = dataTable.CreateInstance<CreateCategoryRequest>();
-        await stepContext.CreateChildCategoryAsync(request, parentReference);
-    }
+        request.ParentId = Guid.Parse(parent.Id);
 
-    [Then("the category {string} has following details")]
-    public async Task ThenTheCategoryHasFollowingDetails(string reference, DataTable dataTable)
-    {
-        var category = await stepContext.GetCategoryAsync(reference);
-        dataTable.CompareToInstance(category);
-    }
-
-    [Then("the category {string} has parent {string}")]
-    public async Task ThenTheCategoryHasParent(string childReference, string parentReference)
-    {
-        var child = await stepContext.GetCategoryAsync(childReference);
-        var parent = await stepContext.GetCategoryAsync(parentReference);
-
-        child.ParentId.Should().Be(Guid.Parse(parent.Id));
+        await stepContext.CreateCategoryAsync(request);
     }
 }

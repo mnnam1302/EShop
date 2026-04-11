@@ -7,7 +7,7 @@ using EShop.Shared.Authentication;
 using EShop.Shared.Authentication.Abstractions;
 using Moq;
 
-namespace EShop.Catalog.Tests.Products;
+namespace EShop.Catalog.Tests.Products.WriteModel;
 
 internal static class ProductAggregateBuilder
 {

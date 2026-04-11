@@ -3,7 +3,7 @@ using EShop.Catalog.Application.Products.Create;
 using EShop.Catalog.Application.Products.Update;
 using EShop.Shared.DomainTools.Exceptions;
 
-namespace EShop.Catalog.Tests.Products;
+namespace EShop.Catalog.Tests.Products.WriteModel;
 
 public class ProductTests
 {
