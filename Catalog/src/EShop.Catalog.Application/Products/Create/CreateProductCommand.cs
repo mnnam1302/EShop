@@ -65,8 +65,12 @@ public sealed class CreateProductCommandHandler : ICommandHandler<CreateProductC
             DefaultVariant = new ProductDefaultVariant
             {
                 VariantId = defaultVariant.Id,
+                Name = defaultVariant.Name,
+                Sku = defaultVariant.Sku,
                 Price = defaultVariant.Price,
-                DiscountPrice = defaultVariant.DiscountPrice
+                DiscountPrice = defaultVariant.DiscountPrice,
+                IsDefault = defaultVariant.IsDefault,
+                State = nameof(defaultVariant.State)
             },
             TenantId = userDetailsProvider.AuthenticatedUser.TenantId,
             ActionUserId = userDetailsProvider.AuthenticatedUser.ActionUserId,
