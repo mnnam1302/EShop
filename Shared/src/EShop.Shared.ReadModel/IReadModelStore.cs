@@ -9,9 +9,9 @@ public interface IReadModelStore<TReadModel> where TReadModel : class, IReadMode
 {
     Task<TReadModel?> GetByIdAsync(string id, CancellationToken cancellationToken = default);
 
-    Task Insert(TReadModel readModel, CancellationToken cancellationToken = default);
+    Task InsertAsync(TReadModel readModel, CancellationToken cancellationToken = default);
 
-    Task Update(TReadModel readModel, CancellationToken cancellationToken = default);
+    Task UpdateAsync(TReadModel readModel, CancellationToken cancellationToken = default);
 
-    Task Delete(string id, CancellationToken cancellationToken = default);
+    Task DeleteAsync(string id, CancellationToken cancellationToken = default);
 }

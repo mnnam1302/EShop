@@ -4,9 +4,7 @@ namespace EShop.Shared.ReadModel.EfCore;
 
 /// <summary>
 /// EF Core implementation of <see cref="IReadModelStore{TReadModel}"/>.
-/// Tracks changes via the <see cref="DbContext"/> change tracker without calling
-/// <see cref="DbContext.SaveChangesAsync(CancellationToken)"/>, allowing the caller
-/// to batch persistence within a unit of work.
+/// Each write operation persists changes immediately via <see cref="DbContext.SaveChangesAsync(CancellationToken)"/>.
 /// </summary>
 /// <typeparam name="TReadModel">The read model entity type.</typeparam>
 /// <typeparam name="TDbContext">The EF Core DbContext type.</typeparam>
@@ -27,25 +25,26 @@ public sealed class EfCoreReadModelStore<TReadModel, TDbContext> : IReadModelSto
             .FirstOrDefaultAsync(e => e.Id == id, cancellationToken);
     }
 
-    public async Task Insert(TReadModel readModel, CancellationToken cancellationToken = default)
+    public async Task InsertAsync(TReadModel readModel, CancellationToken cancellationToken = default)
     {
         _dbContext.Add(readModel);
-        await Task.CompletedTask;
+        await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task Update(TReadModel readModel, CancellationToken cancellationToken = default)
+    public async Task UpdateAsync(TReadModel readModel, CancellationToken cancellationToken = default)
     {
         _dbContext.Update(readModel);
-        await Task.CompletedTask;
+        await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task Delete(string id, CancellationToken cancellationToken = default)
+    public async Task DeleteAsync(string id, CancellationToken cancellationToken = default)
     {
         var entity = await GetByIdAsync(id, cancellationToken);
 
         if (entity is not null)
         {
             _dbContext.Remove(entity);
+            await _dbContext.SaveChangesAsync(cancellationToken);
         }
     }
 }

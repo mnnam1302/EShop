@@ -3,14 +3,12 @@ namespace EShop.Shared.ReadModel;
 public sealed class ReadModelProjector<TReadModel> : IReadModelProjector<TReadModel>
     where TReadModel : class, IReadModel, new()
 {
-    private readonly IReadModelStore<TReadModel> _store;
+    private readonly IReadModelStore<TReadModel> _readModelStore;
     private readonly IReadModelLocator<TReadModel> _locator;
 
-    public ReadModelProjector(
-        IReadModelStore<TReadModel> store,
-        IReadModelLocator<TReadModel> locator)
+    public ReadModelProjector(IReadModelStore<TReadModel> readModelStore, IReadModelLocator<TReadModel> locator)
     {
-        _store = store;
+        _readModelStore = readModelStore;
         _locator = locator;
     }
 
@@ -19,7 +17,7 @@ public sealed class ReadModelProjector<TReadModel> : IReadModelProjector<TReadMo
         ArgumentNullException.ThrowIfNull(@event);
 
         var id = _locator.GetReadModelId(@event);
-        var readModel = await _store.GetByIdAsync(id, cancellationToken);
+        var readModel = await _readModelStore.GetByIdAsync(id, cancellationToken);
         var isNew = readModel is null;
 
         readModel ??= new TReadModel();
@@ -38,16 +36,16 @@ public sealed class ReadModelProjector<TReadModel> : IReadModelProjector<TReadMo
         {
             if (!isNew)
             {
-                await _store.Delete(id, cancellationToken);
+                await _readModelStore.DeleteAsync(id, cancellationToken);
             }
         }
         else if (isNew)
         {
-            await _store.Insert(readModel, cancellationToken);
+            await _readModelStore.InsertAsync(readModel, cancellationToken);
         }
         else
         {
-            await _store.Update(readModel, cancellationToken);
+            await _readModelStore.UpdateAsync(readModel, cancellationToken);
         }
     }
 }
