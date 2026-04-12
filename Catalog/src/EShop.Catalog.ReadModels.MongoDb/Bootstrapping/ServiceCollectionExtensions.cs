@@ -4,6 +4,7 @@ using EShop.Catalog.ReadModels.MongoDb.Persistence;
 using EShop.Shared.Authentication.Filters;
 using EShop.Shared.Contracts.JsonConverters;
 using EShop.Shared.CQRS;
+using EShop.Shared.Diagnostics;
 using EShop.Shared.EventBus.DependencyInjections.Extensions;
 using EShop.Shared.EventBus.DependencyInjections.Options;
 using EShop.Shared.EventBus.PipelineObservers;
@@ -15,6 +16,7 @@ using MassTransit;
 using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using MongoDB.Driver;
 
 namespace EShop.Catalog.ReadModels.MongoDb.Bootstrapping;
 
@@ -67,18 +69,34 @@ public static class ServiceCollectionExtensions
 
     public static IServiceCollection AddMongoDbPersistence(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddOptions<MongoDbSettings>()
-            .Bind(configuration.GetSection(MongoDbSettings.SectionName))
-            .ValidateDataAnnotations()
-            .ValidateOnStart();
-
         services.AddMultiTenantScoping();
 
-        services.AddDbContext<CatalogReadDbContext>((serviceProvider, options) =>
+        if (configuration.IsRunningInAspire())
         {
-            var mongoSettings = serviceProvider.GetRequiredService<IOptions<MongoDbSettings>>().Value;
-            options.UseMongoDB(mongoSettings.ConnectionString, mongoSettings.DatabaseName);
-        });
+            services.AddDbContext<CatalogReadDbContext>((serviceProvider, options) =>
+            {
+                var connectionString = configuration.GetConnectionString("catalogMongoDatabase")
+                    ?? throw new InvalidOperationException("Aspire connection string 'catalogMongoDatabase' not found.");
+
+                var mongoUrl = new MongoUrl(connectionString);
+                var databaseName = mongoUrl.DatabaseName ?? "eshop-catalog";
+
+                options.UseMongoDB(connectionString, databaseName);
+            });
+        }
+        else
+        {
+            services.AddOptions<MongoDbSettings>()
+                .Bind(configuration.GetSection(MongoDbSettings.SectionName))
+                .ValidateDataAnnotations()
+                .ValidateOnStart();
+
+            services.AddDbContext<CatalogReadDbContext>((serviceProvider, options) =>
+            {
+                var mongoSettings = serviceProvider.GetRequiredService<IOptions<MongoDbSettings>>().Value;
+                options.UseMongoDB(mongoSettings.ConnectionString, mongoSettings.DatabaseName);
+            });
+        }
 
         services.AddScoped<ICategoryReadRepository, CategoryReadRepository>();
         services.AddScoped<IProductReadRepository, ProductReadRepository>();
@@ -130,11 +148,19 @@ public static class ServiceCollectionExtensions
 
             cfg.UsingRabbitMq((context, bus) =>
             {
-                bus.Host(massTransitConfiguration.Host, massTransitConfiguration.Port, massTransitConfiguration.VHost, h =>
+                if (configuration.IsRunningInAspire())
                 {
-                    h.Username(massTransitConfiguration.Username);
-                    h.Password(massTransitConfiguration.Password);
-                });
+                    var connectionString = configuration.GetConnectionString("rabbitmq");
+                    bus.Host(connectionString);
+                }
+                else
+                {
+                    bus.Host(massTransitConfiguration.Host, massTransitConfiguration.Port, massTransitConfiguration.VHost, h =>
+                    {
+                        h.Username(massTransitConfiguration.Username);
+                        h.Password(massTransitConfiguration.Password);
+                    });
+                }
 
                 bus.UseConsumeFilter(typeof(SystemUserContextConsumeFilter<>), context);
 
