@@ -9,16 +9,12 @@ internal sealed class StepContext(ApiContext apiContext)
 {
     private const string BaseUrl = "/api/v1/categories";
 
-    public async Task UpdateCategoryAsync(string reference, UpdateCategoryRequest request)
+    public async Task UpdateCategoryAsync(string categoryId, UpdateCategoryRequest request)
     {
-        var repository = apiContext.ServiceProvider.GetRequiredService<ICategoryReadRepository>();
-        var category = await repository.FindSingleAsync(c => c.Reference == reference, cancellationToken: CancellationToken.None)
-            ?? throw new InvalidOperationException($"Category with reference '{reference}' not found.");
-
         try
         {
             var operationUser = apiContext.GetUserByUsername(null);
-            var response = await apiContext.PutAsync($"{BaseUrl}/{category.Id}", request, operationUser);
+            var response = await apiContext.PutAsync($"{BaseUrl}/{categoryId}", request, operationUser);
 
             if (response.IsFailure)
             {

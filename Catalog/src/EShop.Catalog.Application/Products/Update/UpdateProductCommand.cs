@@ -1,33 +1,29 @@
 ﻿using EShop.Shared.Authentication.Abstractions;
 using EShop.Shared.Contracts.Abstractions.Shared;
+using EShop.Shared.Contracts.Services.Catalog;
 using EShop.Shared.CQRS.Command;
 using EShop.Shared.DomainTools.EventSourcing.SeedWork;
+using EShop.Shared.EventBus.Abstractions;
 
 namespace EShop.Catalog.Application.Products.Update;
 
 public sealed class UpdateProductCommand : ICommand
 {
-    public Guid Id { get; set; }
-    public string Name { get; set; } = string.Empty;
-    public string Description { get; set; } = string.Empty;
-    public Guid CategoryId { get; set; }
-    public string[] Tags { get; set; } = [];
-    public string Slug { get; set; } = string.Empty;
-    public string[] Images { get; set; } = [];
-    public Guid[] Groups { get; set; } = [];
+    public Guid Id { get; init; }
+    public string Name { get; init; } = string.Empty;
+    public string Description { get; init; } = string.Empty;
+    public Guid CategoryId { get; init; }
+    public string[] Tags { get; init; } = [];
+    public string Slug { get; init; } = string.Empty;
+    public string[] Images { get; init; } = [];
+    public Guid[] Groups { get; init; } = [];
 }
 
-public sealed class UpdateProductCommandHandler : ICommandHandler<UpdateProductCommand>
+public sealed class UpdateProductCommandHandler(
+    IAggregateStore aggregateStore,
+    IEventBus eventBus,
+    IUserDetailsProvider userDetailsProvider) : ICommandHandler<UpdateProductCommand>
 {
-    private readonly IAggregateStore aggregateStore;
-    private readonly IUserDetailsProvider userDetailsProvider;
-
-    public UpdateProductCommandHandler(IAggregateStore aggregateStore, IUserDetailsProvider userDetailsProvider)
-    {
-        this.aggregateStore = aggregateStore;
-        this.userDetailsProvider = userDetailsProvider;
-    }
-
     public async Task<Result> HandleAsync(UpdateProductCommand command, CancellationToken cancellationToken)
     {
         var product = await aggregateStore.LoadAggregateAsync<ProductAggregate>(command.Id, cancellationToken);
@@ -39,6 +35,21 @@ public sealed class UpdateProductCommandHandler : ICommandHandler<UpdateProductC
         product.Update(command, userDetailsProvider);
 
         await aggregateStore.AppendEventsAsync(product, cancellationToken);
+
+        await eventBus.PublishAsync(new ProductUpdated
+        {
+            ProductId = product.Id,
+            Name = product.Name,
+            Description = product.Description,
+            CategoryId = product.CategoryId,
+            Tags = product.Tags,
+            Slug = product.Slug,
+            Images = product.Images,
+            Groups = product.Groups,
+            TenantId = userDetailsProvider.AuthenticatedUser.TenantId,
+            ActionUserId = userDetailsProvider.AuthenticatedUser.ActionUserId,
+            ActionUserType = userDetailsProvider.AuthenticatedUser.ActionUserType
+        }, cancellationToken);
 
         return Result.Success();
     }

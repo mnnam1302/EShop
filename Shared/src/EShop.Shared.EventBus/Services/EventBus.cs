@@ -11,4 +11,10 @@ public sealed class EventBus(IPublishEndpoint publishEndpoint) : IEventBus
     {
         await publishEndpoint.Publish<TEvent>(@event, cancellationToken);
     }
+
+    public async Task PublishAsync<TEvent>(TEvent @event, CancellationToken cancellationToken = default)
+        where TEvent : IntegrationEvent
+    {
+        await publishEndpoint.Publish(@event, cancellationToken);
+    }
 }

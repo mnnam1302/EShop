@@ -27,19 +27,27 @@ public sealed class ScenarioHooks
     [BeforeTestRun]
     public static async Task BeforeTestRun()
     {
-        PostgreSqlContainer = new PostgreSqlBuilder()
-                .WithPortBinding(36200, 5432)
-                .WithUsername("postgres")
-                .WithPassword("postgres")
-                .WithImage("postgres:17.0")
-                .Build();
+        try
+        {
+            PostgreSqlContainer = new PostgreSqlBuilder()
+                    .WithPortBinding(36200, 5432)
+                    .WithUsername("postgres")
+                    .WithPassword("postgres")
+                    .WithImage("postgres:17.0")
+                    .Build();
 
-        MongoDbContainer = new MongoDbBuilder()
-                .Build();
+            MongoDbContainer = new MongoDbBuilder()
+                    .Build();
 
-        await Task.WhenAll(
-            PostgreSqlContainer.StartAsync(),
-            MongoDbContainer.StartAsync());
+            await Task.WhenAll(
+                PostgreSqlContainer.StartAsync(),
+                MongoDbContainer.StartAsync());
+        }
+        catch (ArgumentException)
+        {
+            // Docker is not available — BDD scenario tests will fail individually,
+            // but pure unit tests in the assembly should not be blocked.
+        }
     }
 
     [BeforeScenario]

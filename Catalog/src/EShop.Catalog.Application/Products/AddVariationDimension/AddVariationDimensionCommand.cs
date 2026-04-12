@@ -1,0 +1,50 @@
+using EShop.Shared.Authentication.Abstractions;
+using EShop.Shared.Contracts.Abstractions.Shared;
+using EShop.Shared.Contracts.Services.Catalog;
+using EShop.Shared.CQRS.Command;
+using EShop.Shared.DomainTools.EventSourcing.SeedWork;
+using EShop.Shared.EventBus.Abstractions;
+
+namespace EShop.Catalog.Application.Products.AddVariationDimension;
+
+public sealed class AddVariationDimensionCommand : ICommand
+{
+    public required Guid ProductId { get; init; }
+    public required string Name { get; init; }
+    public required string DisplayName { get; init; }
+    public required string[] Values { get; init; }
+    public required string DisplayStyle { get; init; }
+}
+
+public sealed class AddVariationDimensionCommandHandler(
+    IAggregateStore aggregateStore,
+    IEventBus eventBus,
+    IUserDetailsProvider userDetailsProvider) : ICommandHandler<AddVariationDimensionCommand>
+{
+    public async Task<Result> HandleAsync(AddVariationDimensionCommand command, CancellationToken cancellationToken)
+    {
+        var product = await aggregateStore.LoadAggregateAsync<ProductAggregate>(command.ProductId, cancellationToken);
+        if (product is null)
+        {
+            return Result.Failure(new Error("ProductNotFound", $"Product with Id '{command.ProductId}' was not found."));
+        }
+
+        product.AddVariationDimension(command);
+
+        await aggregateStore.AppendEventsAsync(product, cancellationToken);
+
+        await eventBus.PublishAsync(new VariationDimensionAdded
+        {
+            ProductId = product.Id,
+            Name = command.Name,
+            DisplayName = command.DisplayName,
+            Values = command.Values,
+            DisplayStyle = command.DisplayStyle,
+            TenantId = userDetailsProvider.AuthenticatedUser.TenantId,
+            ActionUserId = userDetailsProvider.AuthenticatedUser.ActionUserId,
+            ActionUserType = userDetailsProvider.AuthenticatedUser.ActionUserType
+        }, cancellationToken);
+
+        return Result.Success();
+    }
+}

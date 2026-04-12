@@ -11,7 +11,7 @@ public sealed class CatalogFeatureRegistrationService(IEventBus eventBus) : IFea
     [
         new CatalogFeature()
         {
-            Id = FeatureConstants.Catalog.ProductBuilder_FeatureId,
+            Id = FeatureConstants.Catalog.Product_FeatureId,
             Name = "Product Builder",
             Description = "Product Builder"
         }
@@ -25,9 +25,9 @@ public sealed class CatalogFeatureRegistrationService(IEventBus eventBus) : IFea
             SourceSystemReference = Program.ApplicationName,
             Features = Features,
             Action = SupportedFeaturesAction.AddOrUpdate,
-            TenantId = string.Empty,
+            TenantId = UserData.SystemTenantId,
             ActionUserId = UserData.SystemUsername,
-            ActionUserType = string.Empty
+            ActionUserType = UserTypes.SystemUsers
         });
     }
 

@@ -10,7 +10,7 @@ public static class EndpointHandler
 {
     public static RouteGroupBuilder MapPublishCategory(this RouteGroupBuilder categoryEndpointBuilder)
     {
-        categoryEndpointBuilder.MapPut("/{id}", PublishCategoryAsync)
+        categoryEndpointBuilder.MapPost("/{id}/publish", PublishCategoryAsync)
             .RequirePermissionFilter(PermissionConstants.Catalog.ManageCategories);
 
         return categoryEndpointBuilder;

@@ -10,11 +10,11 @@ public sealed class ProductCanUpdateSpecification : Specification<ProductAggrega
 
     public static ProductCanUpdateSpecification New() => new ProductCanUpdateSpecification();
 
-    protected override IEnumerable<string> IsNotSatisfiedBecause(ProductAggregate obj)
+    protected override IEnumerable<string> IsNotSatisfiedBecause(ProductAggregate product)
     {
-        if (!obj.State.CanFire(ProductAction.Update))
+        if (!product.State.CanFire(ProductAction.Update))
         {
-            yield return $"product {obj.Id} in state '{obj.State}' cannot be updated";
+            yield return $"product {product.Id} in state '{product.State}' cannot be updated";
         }
     }
 }

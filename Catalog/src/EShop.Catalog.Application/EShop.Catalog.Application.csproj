@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <InternalsVisibleTo Include="EShop.Catalog.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Asp.Versioning.Http" />
     <PackageReference Include="Asp.Versioning.Mvc.ApiExplorer" />
     <PackageReference Include="MicroElements.Swashbuckle.FluentValidation" />
@@ -20,6 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\EShop.ServiceDefaults\EShop.ServiceDefaults.csproj" />
     <ProjectReference Include="..\..\..\Shared\src\EShop.Shared.CQRS\EShop.Shared.CQRS.csproj" />
     <ProjectReference Include="..\..\..\Shared\src\EShop.Shared.Diagnostics\EShop.Shared.Diagnostics.csproj" />
     <ProjectReference Include="..\..\..\Shared\src\EShop.Shared.DomainTools\EShop.Shared.DomainTools.csproj" />

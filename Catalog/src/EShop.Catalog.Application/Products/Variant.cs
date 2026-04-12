@@ -9,8 +9,8 @@ public sealed class Variant : IEntityBase<Guid>
     public string Name { get; set; } = string.Empty;
     public string Sku { get; set; } = string.Empty;
     public bool IsDefault { get; set; }
-    public double Price { get; set; }
-    public double DiscountPrice { get; set; }
+    public decimal Price { get; set; }
+    public decimal DiscountPrice { get; set; }
     public VariantState State { get; set; }
     public List<VariantDimensionValue> VariantDimensionValues { get; set; } = [];
 }

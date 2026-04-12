@@ -47,7 +47,10 @@ public abstract class Aggregate : IAggregate
 
     protected void Apply(IDomainEvent @event)
     {
-        var method = this.GetType().GetMethod("Apply", [@event.GetType()]);
+        var method = this.GetType().GetMethod(
+            "Apply",
+            System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic,
+            [@event.GetType()]);
         if (method == null)
         {
             throw new InvalidOperationException($"Method Apply for {@event.GetType()} not found");

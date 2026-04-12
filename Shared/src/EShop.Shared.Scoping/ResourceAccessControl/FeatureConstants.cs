@@ -22,7 +22,7 @@ public static class FeatureConstants
 
     public static class Catalog
     {
-        public const string ProductBuilder_FeatureId = "Catalog_ProductBuilder";
+        public const string Product_FeatureId = "Catalog_ProductBuilder";
     }
 }
 

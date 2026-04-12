@@ -20,15 +20,15 @@ public sealed class SystemUserContextConsumeFilter<TMessage> : IFilter<ConsumeCo
 
     public async Task Send(ConsumeContext<TMessage> context, IPipe<ConsumeContext<TMessage>> next)
     {
-        // Extract auth context from integration event message
-        var message = context.Message;
-        _userDetailsProvider.SetSystemUserContext(
-            message.TenantId,
-            message.ActionUserId,
-            message.ActionUserType);
-
         try
         {
+            // Extract auth context from integration event message
+            var message = context.Message;
+            _userDetailsProvider.SetSystemUserContext(
+                message.TenantId,
+                message.ActionUserId,
+                message.ActionUserType);
+
             // Delegate to next pipe (the actual consumer)
             await next.Send(context);
         }

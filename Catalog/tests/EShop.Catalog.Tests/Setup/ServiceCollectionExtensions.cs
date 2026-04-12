@@ -9,6 +9,7 @@ using EShop.Shared.CQRS;
 using EShop.Shared.DomainTools.UnitOfWorks;
 using EShop.Shared.EventBus.DependencyInjections.Extensions;
 using EShop.Shared.JsonApi.Extensions;
+using EShop.Shared.ReadModel.EfCore;
 using EShop.Shared.Sequences.DependencyInjections;
 using EShop.Testing.JsonApiApplication;
 using EShop.Testing.JsonApiApplication.DependencyInjections;
@@ -102,21 +103,6 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    public static IServiceCollection AddCatalogReadModelTestServices(this IServiceCollection services, MongoDbTestDatabase mongoDatabase)
-    {
-        services.AddScoped<ITenantProvider, TenantProvider>();
-        services.AddMultiTenantScoping();
-
-        services.AddDbContext<CatalogReadDbContext>(options =>
-        {
-            options.UseMongoDB(mongoDatabase.ConnectionString, mongoDatabase.DatabaseName);
-        });
-
-        services.AddScoped<ICategoryReadRepository, CategoryReadRepository>();
-
-        return services;
-    }
-
     public static IServiceCollection AddTestServiceBootstrapping(this IServiceCollection services)
     {
         services.AddTransient<DbInitializer>();
@@ -126,6 +112,23 @@ public static class ServiceCollectionExtensions
             .BindConfiguration(CatalogSequenceOptions.SectionName);
 
         services.AddScoped<IUnitOfWork, EFUnitOfWork<CatalogDbContext>>();
+
+        return services;
+    }
+
+    public static IServiceCollection AddCatalogReadModelTestServices(this IServiceCollection services, MongoDbTestDatabase mongoDatabase)
+    {
+        services.AddMultiTenantScoping();
+        services.AddDbContext<CatalogReadDbContext>(options =>
+        {
+            options.UseMongoDB(mongoDatabase.ConnectionString, mongoDatabase.DatabaseName);
+        });
+
+        services.AddScoped<ICategoryReadRepository, CategoryReadRepository>();
+        services.AddScoped<IProductReadRepository, ProductReadRepository>();
+
+        // Read model projection infrastructure
+        services.UseEfCoreReadModelStore<Product, CatalogReadDbContext>("ProductId");
 
         return services;
     }

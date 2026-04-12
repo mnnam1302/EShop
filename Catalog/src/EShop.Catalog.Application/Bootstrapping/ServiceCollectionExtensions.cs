@@ -4,6 +4,7 @@ using EShop.Shared.Authentication.Filters;
 using EShop.Shared.Contracts.JsonConverters;
 using EShop.Shared.Contracts.Services.Authorization;
 using EShop.Shared.Contracts.Services.Catalog;
+using EShop.Shared.Diagnostics;
 using EShop.Shared.DomainTools.UnitOfWorks;
 using EShop.Shared.EventBus.DependencyInjections.Extensions;
 using EShop.Shared.EventBus.DependencyInjections.Options;
@@ -30,7 +31,7 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    public static IServiceCollection AddSwagger(this IServiceCollection services)
+    private static IServiceCollection AddSwagger(this IServiceCollection services)
     {
         services
             .AddSwaggerGenNewtonsoftSupport()
@@ -69,11 +70,19 @@ public static class ServiceCollectionExtensions
 
             cfg.UsingRabbitMq((context, bus) =>
             {
-                bus.Host(massTransitConfiguration.Host, massTransitConfiguration.Port, massTransitConfiguration.VHost, h =>
+                if (configuration.IsRunningInAspire())
                 {
-                    h.Username(massTransitConfiguration.Username);
-                    h.Password(massTransitConfiguration.Password);
-                });
+                    var connectionString = configuration.GetConnectionString("rabbitmq");
+                    bus.Host(connectionString);
+                }
+                else
+                {
+                    bus.Host(massTransitConfiguration.Host, massTransitConfiguration.Port, massTransitConfiguration.VHost, h =>
+                    {
+                        h.Username(massTransitConfiguration.Username);
+                        h.Password(massTransitConfiguration.Password);
+                    });
+                }
 
                 bus.UseConsumeFilter(typeof(SystemUserContextConsumeFilter<>), context);
 
@@ -117,11 +126,10 @@ public static class ServiceCollectionExtensions
         IWebHostEnvironment environment,
         string serviceName)
     {
-        bus.ConfigureEventReceiveEndpoint<OrganizationCreatedConsumer, OrganizationCreated>(
-            context, environment.EnvironmentName, serviceName);
+        bus.ConfigureEventReceiveEndpoint<OrganizationCreatedConsumer, OrganizationCreated>(context, environment.EnvironmentName, serviceName);
     }
 
-    public static IServiceCollection AddServiceBootstrapping(this IServiceCollection services)
+    private static IServiceCollection AddServiceBootstrapping(this IServiceCollection services)
     {
         services.AddTransient<DbInitializer>();
 

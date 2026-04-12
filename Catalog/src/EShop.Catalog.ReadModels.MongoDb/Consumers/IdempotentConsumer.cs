@@ -22,16 +22,14 @@ public abstract class IdempotentConsumer<TMessage> : IConsumer<TMessage>
     public async Task Consume(ConsumeContext<TMessage> context)
     {
         var message = context.Message;
-        var consumerId = $"{GetType().Name}_{message.GetType().Name}";
         var messageId = message.EventId;
+        var consumerId = $"{GetType().Name}_{message.GetType().Name}";
 
-        var alreadyProcessed = await _dbContext.InboxMessages
+        var existingMessage = await _dbContext.InboxMessages
             .IgnoreQueryFilters()
-            .AnyAsync(
-                m => m.MessageId == messageId && m.ConsumerId == consumerId,
-                context.CancellationToken);
+            .AnyAsync(m => m.MessageId == messageId && m.ConsumerId == consumerId, context.CancellationToken);
 
-        if (alreadyProcessed)
+        if (existingMessage)
         {
             return;
         }

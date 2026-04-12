@@ -11,28 +11,28 @@ public sealed class CatalogPermissionRegistrationService(IEventBus eventBus) : I
 
     private static readonly CatalogPermission[] Permissions =
     [
-        new CatalogPermission()
+        new CatalogPermission
         {
             Id = PermissionConstants.Catalog.ViewCategories,
             Name = "View categories",
             Description = "Allows users viewing list categories and category details in read-only mode.",
             RelatedTo = ModuleName
         },
-        new CatalogPermission()
+        new CatalogPermission
         {
             Id = PermissionConstants.Catalog.ManageCategories,
             Name = "Manage categories",
             Description = "Allows users adding/editing/cloning/deleting categories.",
             RelatedTo = ModuleName
         },
-        new CatalogPermission()
+        new CatalogPermission
         {
             Id = PermissionConstants.Catalog.ViewProducts,
             Name = "View products",
             Description = "Allows users viewing list products, all product versions, and product version details in read-only mode.",
             RelatedTo = ModuleName
         },
-        new CatalogPermission()
+        new CatalogPermission
         {
             Id = PermissionConstants.Catalog.ManageProducts,
             Name = "Manage products",
@@ -48,9 +48,9 @@ public sealed class CatalogPermissionRegistrationService(IEventBus eventBus) : I
             SourceSystemReference = Program.ApplicationName,
             Permissions = Permissions,
             Action = SupportedPermissionAction.Added,
-            TenantId = string.Empty,
+            TenantId = UserData.SystemTenantId,
             ActionUserId = UserData.SystemUsername,
-            ActionUserType = string.Empty
+            ActionUserType = UserTypes.SystemUsers
         });
     }
 

@@ -1,31 +1,42 @@
 ﻿using EShop.Catalog.ReadModels.MongoDb.Bootstrapping;
-using EShop.Catalog.ReadModels.MongoDb.Consumers;
 using EShop.Catalog.ReadModels.MongoDb.Models;
 using EShop.Catalog.ReadModels.MongoDb.Persistence;
 using EShop.Shared.Authentication.Filters;
+using EShop.Shared.Cache.DependencyInejctions.Extensions;
 using EShop.Shared.Contracts.JsonConverters;
-using EShop.Shared.Contracts.Services.Catalog;
 using EShop.Shared.CQRS;
+using EShop.Shared.Diagnostics;
 using EShop.Shared.EventBus.DependencyInjections.Extensions;
 using EShop.Shared.EventBus.DependencyInjections.Options;
 using EShop.Shared.EventBus.PipelineObservers;
 using EShop.Shared.JsonApi.Extensions;
+using EShop.Shared.ReadModel.EfCore;
 using JsonApiDotNetCore.Configuration;
-using JsonApiDotNetCore.Repositories;
 using MassTransit;
 using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using MongoDB.Driver;
 
 namespace EShop.Catalog.ReadModels.MongoDb.Bootstrapping;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddShared(this IServiceCollection services)
+    public static IServiceCollection AddShared(this IServiceCollection services, IConfiguration configuration)
     {
         services
             .AddGlobalExceptionMiddleware()
             .AddMediator(AssemblyReference.Assembly);
+
+        services
+            .AddRedisHealthCheck(configuration)
+            .AddRedisCacheInfrastructure(configuration);
+
+        services
+            .AddTenantAuthenticationProvider()
+            .AddUserPermissionsProvider()
+            .AddUserOrganizationContextProvider()
+            .AddTenantFeaturesProvider();
 
         return services;
     }
@@ -35,9 +46,10 @@ public static class ServiceCollectionExtensions
         services.AddCors()
             .AddSwagger()
             .AddApiVersioning()
-            .AddMassTransitRabbitMQ(configuration, webHostEnvironment)
-            .AddMongoDbPersistence(configuration)
             .AddJsonApiDotNet();
+
+        services.AddMongoDbPersistence(configuration);
+        services.AddMassTransitRabbitMQ(configuration, webHostEnvironment);
 
         return services;
     }
@@ -67,28 +79,46 @@ public static class ServiceCollectionExtensions
 
     public static IServiceCollection AddMongoDbPersistence(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddOptions<MongoDbSettings>()
-            .Bind(configuration.GetSection(MongoDbSettings.SectionName))
-            .ValidateDataAnnotations()
-            .ValidateOnStart();
-
-        services.AddScoped<ITenantProvider, TenantProvider>();
         services.AddMultiTenantScoping();
 
-        services.AddDbContext<CatalogReadDbContext>((serviceProvider, options) =>
+        if (configuration.IsRunningInAspire())
         {
-            var mongoSettings = serviceProvider.GetRequiredService<IOptions<MongoDbSettings>>().Value;
-            options.UseMongoDB(mongoSettings.ConnectionString, mongoSettings.DatabaseName);
-        });
+            services.AddDbContext<CatalogReadDbContext>((serviceProvider, options) =>
+            {
+                var connectionString = configuration.GetConnectionString("catalogMongoDatabase")
+                    ?? throw new InvalidOperationException("Aspire connection string 'catalogMongoDatabase' not found.");
+
+                var mongoUrl = new MongoUrl(connectionString);
+                var databaseName = mongoUrl.DatabaseName ?? "eshop-catalog";
+
+                options.UseMongoDB(connectionString, databaseName);
+            });
+        }
+        else
+        {
+            services.AddOptions<MongoDbSettings>()
+                .Bind(configuration.GetSection(MongoDbSettings.SectionName))
+                .ValidateDataAnnotations()
+                .ValidateOnStart();
+
+            services.AddDbContext<CatalogReadDbContext>((serviceProvider, options) =>
+            {
+                var mongoSettings = serviceProvider.GetRequiredService<IOptions<MongoDbSettings>>().Value;
+                options.UseMongoDB(mongoSettings.ConnectionString, mongoSettings.DatabaseName);
+            });
+        }
 
         services.AddScoped<ICategoryReadRepository, CategoryReadRepository>();
+        services.AddScoped<IProductReadRepository, ProductReadRepository>();
+
+        services.UseEfCoreReadModelStore<Product, CatalogReadDbContext>("ProductId");
 
         return services;
     }
 
     public static IServiceCollection AddJsonApiDotNet(this IServiceCollection services)
     {
-        services.AddJsonApi(options =>
+        services.AddJsonApi<CatalogReadDbContext>(options =>
         {
             options.Namespace = "api/v1";
             options.UseRelativeLinks = true;
@@ -102,11 +132,8 @@ public static class ServiceCollectionExtensions
         }, resources: resourceGraphBuilder =>
         {
             resourceGraphBuilder.Add<Category, string>();
+            resourceGraphBuilder.Add<Product, string>();
         });
-
-        services.AddScoped(typeof(IResourceReadRepository<,>), typeof(EntityFrameworkCoreRepository<,>));
-        services.AddScoped(typeof(IResourceWriteRepository<,>), typeof(EntityFrameworkCoreRepository<,>));
-        services.AddScoped(typeof(IResourceRepository<,>), typeof(EntityFrameworkCoreRepository<,>));
 
         return services;
     }
@@ -127,11 +154,19 @@ public static class ServiceCollectionExtensions
 
             cfg.UsingRabbitMq((context, bus) =>
             {
-                bus.Host(massTransitConfiguration.Host, massTransitConfiguration.Port, massTransitConfiguration.VHost, h =>
+                if (configuration.IsRunningInAspire())
                 {
-                    h.Username(massTransitConfiguration.Username);
-                    h.Password(massTransitConfiguration.Password);
-                });
+                    var connectionString = configuration.GetConnectionString("rabbitmq");
+                    bus.Host(connectionString);
+                }
+                else
+                {
+                    bus.Host(massTransitConfiguration.Host, massTransitConfiguration.Port, massTransitConfiguration.VHost, h =>
+                    {
+                        h.Username(massTransitConfiguration.Username);
+                        h.Password(massTransitConfiguration.Password);
+                    });
+                }
 
                 bus.UseConsumeFilter(typeof(SystemUserContextConsumeFilter<>), context);
 
@@ -175,7 +210,6 @@ public static class ServiceCollectionExtensions
         IWebHostEnvironment environment,
         string serviceName)
     {
-        bus.ConfigureEventReceiveEndpoint<CategoryCreatedConsumer, CategoryCreated>(context, environment.EnvironmentName, serviceName);
-        bus.ConfigureEventReceiveEndpoint<CategoryUpdatedConsumer, CategoryUpdated>(context, environment.EnvironmentName, serviceName);
+        bus.ConfigureEventReceiveEndpoints(context, environment.EnvironmentName, serviceName, AssemblyReference.Assembly);
     }
 }

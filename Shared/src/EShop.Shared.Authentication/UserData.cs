@@ -14,7 +14,13 @@ public sealed class UserData : ValueObject
     }
 
     public UserData(
-        string id, string username, string tenantId, bool isSupportUser, string? actionUserId = null, string userType = UserTypes.TenantUsers, string? actionUserType = null)
+        string id,
+        string username,
+        string tenantId,
+        bool isSupportUser,
+        string? actionUserId = null,
+        string userType = UserTypes.TenantUsers,
+        string? actionUserType = null)
     {
         Id = id.ToLower();
         Username = username.ToLower();

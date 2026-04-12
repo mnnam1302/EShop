@@ -2,6 +2,7 @@
 using EShop.Shared.Authentication.Abstractions;
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.Contracts.Services.Tenancy.Features;
+using Microsoft.AspNetCore.WebUtilities;
 using System.Net.Http.Json;
 
 namespace EShop.Shared.Scoping.ResourceAccessControl.Providers.TenantFeaturesProvider;
@@ -20,8 +21,9 @@ public sealed class TenancyHttpClient(
         }
 
         var authenticatedClient = await systemInternalJwtTokenFactory.AddUserContext(httpClient, UserData.GetSystemUser(tenantId));
+        var url = QueryHelpers.AddQueryString($"api/v1/features", "tenantId", tenantId);
 
-        var response = await authenticatedClient.GetAsync($"api/v1/{tenantId}/features");
+        var response = await authenticatedClient.GetAsync(url);
 
         response.EnsureSuccessStatusCode();
 

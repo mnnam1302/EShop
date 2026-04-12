@@ -11,7 +11,7 @@ public static class EndpointHandler
 {
     public static RouteGroupBuilder MapUpdateProduct(this RouteGroupBuilder categoryEndpointBuilder)
     {
-        categoryEndpointBuilder.MapPost("/{id}", UpdateProductAsync)
+        categoryEndpointBuilder.MapPut("/{id}", UpdateProductAsync)
             .RequirePermissionFilter(PermissionConstants.Catalog.ManageProducts);
 
         return categoryEndpointBuilder;

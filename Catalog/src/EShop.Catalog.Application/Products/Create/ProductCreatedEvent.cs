@@ -2,15 +2,15 @@
 
 public sealed class ProductCreatedEvent : ProductDomainEvent
 {
-    public string Name { get; set; } = string.Empty;
-    public string Description { get; set; } = string.Empty;
-    public Guid CategoryId { get; set; }
-    public string[] Tags { get; set; } = [];
-    public string Slug { get; set; } = string.Empty;
-    public string[] Images { get; set; } = [];
-    public Guid[] Groups { get; set; } = [];
-    public DateTimeOffset CreatedAtUtc { get; set; }
-    public string CreatedByUserId { get; set; } = string.Empty;
-    public string TenantId { get; set; } = string.Empty;
-    public string Scope { get; set; } = string.Empty;
+    public string Name { get; init; } = string.Empty;
+    public string Description { get; init; } = string.Empty;
+    public Guid CategoryId { get; init; }
+    public string[] Tags { get; init; } = [];
+    public string Slug { get; init; } = string.Empty;
+    public string[] Images { get; init; } = [];
+    public Guid[] Groups { get; init; } = [];
+    public DateTimeOffset CreatedAtUtc { get; init; }
+    public string CreatedByUserId { get; init; } = string.Empty;
+    public string TenantId { get; init; } = string.Empty;
+    public string Scope { get; init; } = string.Empty;
 }
