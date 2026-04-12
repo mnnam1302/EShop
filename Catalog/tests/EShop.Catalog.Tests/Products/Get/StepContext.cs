@@ -6,26 +6,14 @@ namespace EShop.Catalog.Tests.Products.Get;
 
 internal sealed class StepContext(ApiContext apiContext)
 {
-    public Product? LastProduct { get; private set; }
-
-    public async Task<Category> GetCategoryAsync(string reference)
-    {
-        return await apiContext.QueryReadModelAsync(async sp =>
-        {
-            var repository = sp.GetRequiredService<ICategoryReadRepository>();
-            return await repository.FindSingleAsync(c => c.Reference == reference, cancellationToken: CancellationToken.None)
-                ?? throw new InvalidOperationException($"Category with reference '{reference}' not found.");
-        });
-    }
-
     public async Task<Product?> GetProductAsync(string name)
     {
-        LastProduct = await apiContext.QueryReadModelAsync(async sp =>
+        var product = await apiContext.QueryReadModelAsync(async sp =>
         {
             var repository = sp.GetRequiredService<IProductReadRepository>();
             return await repository.FindSingleAsync(p => p.Name == name, cancellationToken: CancellationToken.None);
         });
 
-        return LastProduct;
+        return product;
     }
 }
