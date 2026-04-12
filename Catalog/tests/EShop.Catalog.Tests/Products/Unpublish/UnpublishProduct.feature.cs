@@ -11,28 +11,28 @@
 #region Designer generated code
 #pragma warning disable
 using Reqnroll;
-namespace EShop.Catalog.Tests.Products.Create
+namespace EShop.Catalog.Tests.Products.Unpublish
 {
     
     
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Reqnroll", "3.0.0.0")]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    public partial class CreateProductFeature : object, global::Xunit.IClassFixture<CreateProductFeature.FixtureData>, global::Xunit.IAsyncLifetime
+    public partial class UnpublishProductFeature : object, global::Xunit.IClassFixture<UnpublishProductFeature.FixtureData>, global::Xunit.IAsyncLifetime
     {
         
         private global::Reqnroll.ITestRunner testRunner;
         
         private static string[] featureTags = ((string[])(null));
         
-        private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new global::System.Globalization.CultureInfo("en-US"), "Products/Create", "CreateProduct", "\tAs a catalog manager\r\n\tI want to create new products in the catalog\r\n\tSo that cu" +
-                "stomers can browse and purchase items", global::Reqnroll.ProgrammingLanguage.CSharp, featureTags, InitializeCucumberMessages());
+        private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new global::System.Globalization.CultureInfo("en-US"), "Products/Unpublish", "UnpublishProduct", "    As a catalog manager\r\n    I want to unpublish a product\r\n    So that it is no" +
+                " longer visible to customers", global::Reqnroll.ProgrammingLanguage.CSharp, featureTags, InitializeCucumberMessages());
         
         private global::Xunit.Abstractions.ITestOutputHelper _testOutputHelper;
         
-#line 1 "CreateProduct.feature"
+#line 1 "UnpublishProduct.feature"
 #line hidden
         
-        public CreateProductFeature(CreateProductFeature.FixtureData fixtureData, global::Xunit.Abstractions.ITestOutputHelper testOutputHelper)
+        public UnpublishProductFeature(UnpublishProductFeature.FixtureData fixtureData, global::Xunit.Abstractions.ITestOutputHelper testOutputHelper)
         {
             this._testOutputHelper = testOutputHelper;
         }
@@ -108,34 +108,34 @@ namespace EShop.Catalog.Tests.Products.Create
         {
 #line 6
 #line hidden
-            global::Reqnroll.Table table26 = new global::Reqnroll.Table(new string[] {
+            global::Reqnroll.Table table35 = new global::Reqnroll.Table(new string[] {
                         "PermissionId"});
-            table26.AddRow(new string[] {
+            table35.AddRow(new string[] {
                         "Catalog_ManageProducts"});
-            table26.AddRow(new string[] {
+            table35.AddRow(new string[] {
                         "Catalog_ManageCategories"});
 #line 7
- await testRunner.GivenAsync("System user with following permissions", ((string)(null)), table26, "Given ");
+    await testRunner.GivenAsync("System user with following permissions", ((string)(null)), table35, "Given ");
 #line hidden
 #line 11
- await testRunner.AndAsync("all features are available for System User", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+    await testRunner.AndAsync("all features are available for System User", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
-            global::Reqnroll.Table table27 = new global::Reqnroll.Table(new string[] {
+            global::Reqnroll.Table table36 = new global::Reqnroll.Table(new string[] {
                         "Name",
                         "Reference",
                         "Slug"});
-            table27.AddRow(new string[] {
+            table36.AddRow(new string[] {
                         "Electronics",
                         "ELEC001",
                         "electronics"});
 #line 12
- await testRunner.AndAsync("System User has created the following category", ((string)(null)), table27, "And ");
+    await testRunner.AndAsync("System User has created the following category", ((string)(null)), table36, "And ");
 #line hidden
         }
         
         private static global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages InitializeCucumberMessages()
         {
-            return new global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages("Products/Create/CreateProduct.feature.ndjson", 3);
+            return new global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages("Products/Unpublish/UnpublishProduct.feature.ndjson", 3);
         }
         
         async global::System.Threading.Tasks.Task global::Xunit.IAsyncLifetime.InitializeAsync()
@@ -163,15 +163,15 @@ namespace EShop.Catalog.Tests.Products.Create
             await this.TestTearDownAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Create a new product")]
-        [global::Xunit.TraitAttribute("FeatureTitle", "CreateProduct")]
-        [global::Xunit.TraitAttribute("Description", "Create a new product")]
-        public async global::System.Threading.Tasks.Task CreateANewProduct()
+        [global::Xunit.SkippableFactAttribute(DisplayName="Unpublish a published product")]
+        [global::Xunit.TraitAttribute("FeatureTitle", "UnpublishProduct")]
+        [global::Xunit.TraitAttribute("Description", "Unpublish a published product")]
+        public async global::System.Threading.Tasks.Task UnpublishAPublishedProduct()
         {
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
             string pickleIndex = "0";
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Create a new product", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Unpublish a published product", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
 #line 16
@@ -187,7 +187,7 @@ this.ScenarioInitialize(scenarioInfo, ruleInfo);
 #line 6
 await this.FeatureBackgroundAsync();
 #line hidden
-                global::Reqnroll.Table table28 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table37 = new global::Reqnroll.Table(new string[] {
                             "Name",
                             "Description",
                             "Price",
@@ -195,42 +195,31 @@ await this.FeatureBackgroundAsync();
                             "Slug",
                             "Tags",
                             "Images"});
-                table28.AddRow(new string[] {
+                table37.AddRow(new string[] {
                             "Laptop Pro",
                             "A powerful laptop",
                             "500",
                             "459.99",
                             "laptop-pro",
-                            "laptop,portable",
+                            "portable",
                             "https://img.example.com/lp1.jpg"});
 #line 17
- await testRunner.WhenAsync("System user creates a new product under category \'ELEC001\'", ((string)(null)), table28, "When ");
+    await testRunner.GivenAsync("System User has created the following product under category \'ELEC001\'", ((string)(null)), table37, "Given ");
 #line hidden
-                global::Reqnroll.Table table29 = new global::Reqnroll.Table(new string[] {
-                            "Name",
-                            "Description",
-                            "Slug",
-                            "State",
-                            "TenantId"});
-                table29.AddRow(new string[] {
-                            "Laptop Pro",
-                            "A powerful laptop",
-                            "laptop-pro",
-                            "Draft",
-                            "TEST-TENANT"});
 #line 20
- await testRunner.ThenAsync("the product \'Laptop Pro\' has following details", ((string)(null)), table29, "Then ");
+    await testRunner.AndAsync("the product \'Laptop Pro\' is published", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
-                global::Reqnroll.Table table30 = new global::Reqnroll.Table(new string[] {
-                            "Price",
-                            "DiscountPrice",
-                            "IsDefault"});
-                table30.AddRow(new string[] {
-                            "500",
-                            "459.99",
-                            "true"});
-#line 23
- await testRunner.AndAsync("the product \'Laptop Pro\' has the following variants", ((string)(null)), table30, "And ");
+#line 21
+    await testRunner.WhenAsync("System user unpublishes the product \'Laptop Pro\'", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+                global::Reqnroll.Table table38 = new global::Reqnroll.Table(new string[] {
+                            "Name",
+                            "State"});
+                table38.AddRow(new string[] {
+                            "Laptop Pro",
+                            "Unpublished"});
+#line 22
+    await testRunner.ThenAsync("the product \'Laptop Pro\' has following details", ((string)(null)), table38, "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
@@ -243,12 +232,12 @@ await this.FeatureBackgroundAsync();
             
             async global::System.Threading.Tasks.Task global::Xunit.IAsyncLifetime.InitializeAsync()
             {
-                await CreateProductFeature.FeatureSetupAsync();
+                await UnpublishProductFeature.FeatureSetupAsync();
             }
             
             async global::System.Threading.Tasks.Task global::Xunit.IAsyncLifetime.DisposeAsync()
             {
-                await CreateProductFeature.FeatureTearDownAsync();
+                await UnpublishProductFeature.FeatureTearDownAsync();
             }
         }
     }

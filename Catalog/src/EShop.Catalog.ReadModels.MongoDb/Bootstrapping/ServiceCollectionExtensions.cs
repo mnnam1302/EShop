@@ -73,7 +73,6 @@ public static class ServiceCollectionExtensions
             .ValidateDataAnnotations()
             .ValidateOnStart();
 
-        services.AddScoped<ITenantProvider, TenantProvider>();
         services.AddMultiTenantScoping();
 
         services.AddDbContext<CatalogReadDbContext>((serviceProvider, options) =>
@@ -85,7 +84,6 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ICategoryReadRepository, CategoryReadRepository>();
         services.AddScoped<IProductReadRepository, ProductReadRepository>();
 
-        // Read model projection infrastructure
         services.UseEfCoreReadModelStore<Product, CatalogReadDbContext>("ProductId");
 
         return services;

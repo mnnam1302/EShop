@@ -1,4 +1,5 @@
 using EShop.Catalog.ReadModels.MongoDb.Models;
+using EShop.Shared.Authentication.Abstractions;
 using EShop.Shared.DomainTools.Entities;
 using EShop.Shared.EventBus;
 using Microsoft.EntityFrameworkCore;
@@ -8,13 +9,15 @@ namespace EShop.Catalog.ReadModels.MongoDb.Persistence;
 
 public sealed class CatalogReadDbContext : DbContext, IInboxDbContext
 {
-    private readonly string? _tenantId;
+    private readonly IUserDetailsProvider _userDetailsProvider;
 
-    public CatalogReadDbContext(DbContextOptions<CatalogReadDbContext> options, ITenantProvider tenantProvider)
+    public CatalogReadDbContext(DbContextOptions<CatalogReadDbContext> options, IUserDetailsProvider userDetailsProvider)
         : base(options)
     {
-        _tenantId = tenantProvider.TenantId;
+        _userDetailsProvider = userDetailsProvider;
     }
+
+    public string TenantId => _userDetailsProvider.AuthenticatedUser.TenantId;
 
     public DbSet<Category> Categories { get; set; } = null!;
 
@@ -28,29 +31,35 @@ public sealed class CatalogReadDbContext : DbContext, IInboxDbContext
 
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(CatalogReadDbContext).Assembly);
 
-        // Global query filter for tenant isolation on all IScoped entities
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())
         {
-            if (typeof(IScoped).IsAssignableFrom(entityType.ClrType))
-            {
-                modelBuilder.Entity(entityType.ClrType)
-                    .HasQueryFilter(BuildTenantFilter(entityType.ClrType));
-            }
+            if (!typeof(IScoped).IsAssignableFrom(entityType.ClrType))
+                continue;
+
+            var filter = BuildTenantFilter(entityType.ClrType);
+
+            modelBuilder
+                .Entity(entityType.ClrType)
+                .HasQueryFilter(filter);
         }
     }
 
-    /// <summary>
-    /// Builds a dynamic lambda expression for tenant filtering: <c>e => e.TenantId == _tenantId</c>.
-    /// This is equivalent to writing <c>.HasQueryFilter(e => e.TenantId == tenantId)</c> on each
-    /// <see cref="IScoped"/> entity, but constructed at runtime so it can be applied generically
-    /// across all scoped entity types discovered in the model.
-    /// </summary>
     private LambdaExpression BuildTenantFilter(Type entityType)
     {
+        // e
         var parameter = Expression.Parameter(entityType, "e");
-        var tenantIdProperty = Expression.Property(parameter, nameof(IScoped.TenantId));
-        var tenantIdValue = Expression.Constant(_tenantId);
-        var comparison = Expression.Equal(tenantIdProperty, tenantIdValue);
-        return Expression.Lambda(comparison, parameter);
+
+        // e.TenantId
+        var tenantProperty = Expression.Property(parameter, nameof(IScoped.TenantId));
+
+        // this.TenantId
+        var tenantId = Expression.Property(
+            Expression.Constant(this),
+            nameof(TenantId));
+
+        // e.TenantId == this.TenantId
+        var body = Expression.Equal(tenantProperty, tenantId);
+
+        return Expression.Lambda(body, parameter);
     }
 }

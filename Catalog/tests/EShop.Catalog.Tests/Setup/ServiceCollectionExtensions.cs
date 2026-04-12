@@ -118,9 +118,7 @@ public static class ServiceCollectionExtensions
 
     public static IServiceCollection AddCatalogReadModelTestServices(this IServiceCollection services, MongoDbTestDatabase mongoDatabase)
     {
-        services.AddScoped<ITenantProvider, TenantProvider>();
         services.AddMultiTenantScoping();
-
         services.AddDbContext<CatalogReadDbContext>(options =>
         {
             options.UseMongoDB(mongoDatabase.ConnectionString, mongoDatabase.DatabaseName);
