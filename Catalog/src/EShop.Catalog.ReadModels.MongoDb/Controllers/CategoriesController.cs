@@ -10,11 +10,13 @@ namespace EShop.Catalog.ReadModels.MongoDb.Controllers;
     PermissionConstants.Catalog.ViewCategories)]
 public partial class CategoriesController
 {
+    [HttpGet]
     public override Task<IActionResult> GetAsync(CancellationToken cancellationToken)
     {
         return base.GetAsync(cancellationToken);
     }
 
+    [HttpGet("{id}")]
     public override Task<IActionResult> GetAsync(string id, CancellationToken cancellationToken)
     {
         return base.GetAsync(id, cancellationToken);
