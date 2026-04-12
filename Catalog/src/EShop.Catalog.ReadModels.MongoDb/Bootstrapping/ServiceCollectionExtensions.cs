@@ -1,10 +1,8 @@
 ﻿using EShop.Catalog.ReadModels.MongoDb.Bootstrapping;
-using EShop.Catalog.ReadModels.MongoDb.Consumers;
 using EShop.Catalog.ReadModels.MongoDb.Models;
 using EShop.Catalog.ReadModels.MongoDb.Persistence;
 using EShop.Shared.Authentication.Filters;
 using EShop.Shared.Contracts.JsonConverters;
-using EShop.Shared.Contracts.Services.Catalog;
 using EShop.Shared.CQRS;
 using EShop.Shared.EventBus.DependencyInjections.Extensions;
 using EShop.Shared.EventBus.DependencyInjections.Options;
@@ -36,9 +34,10 @@ public static class ServiceCollectionExtensions
         services.AddCors()
             .AddSwagger()
             .AddApiVersioning()
-            .AddMassTransitRabbitMQ(configuration, webHostEnvironment)
-            .AddMongoDbPersistence(configuration)
             .AddJsonApiDotNet();
+
+        services.AddMongoDbPersistence(configuration);
+        services.AddMassTransitRabbitMQ(configuration, webHostEnvironment);
 
         return services;
     }

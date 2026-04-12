@@ -9,9 +9,12 @@ public sealed class StepContext(ApiContext apiContext)
 {
     public async Task<Category> GetCategoryAsync(string reference)
     {
-        var repository = apiContext.ServiceProvider.GetRequiredService<ICategoryReadRepository>();
+        var category = await apiContext.QueryReadModelAsync(async sp =>
+        {
+            var repository = sp.GetRequiredService<ICategoryReadRepository>();
+            return await repository.FindSingleAsync(c => c.Reference == reference, cancellationToken: CancellationToken.None);
+        });
 
-        var category = await repository.FindSingleAsync(c => c.Reference == reference, cancellationToken: CancellationToken.None);
         return category.Require();
     }
 }
