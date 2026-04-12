@@ -17,7 +17,7 @@ public class Startup
 
     public virtual void ConfigureServices(IServiceCollection services)
     {
-        services.AddShared();
+        services.AddShared(Configuration);
         services.AddBoostrapping(Configuration, Environment);
     }
 

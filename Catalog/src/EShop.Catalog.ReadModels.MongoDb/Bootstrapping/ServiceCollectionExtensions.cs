@@ -2,6 +2,7 @@
 using EShop.Catalog.ReadModels.MongoDb.Models;
 using EShop.Catalog.ReadModels.MongoDb.Persistence;
 using EShop.Shared.Authentication.Filters;
+using EShop.Shared.Cache.DependencyInejctions.Extensions;
 using EShop.Shared.Contracts.JsonConverters;
 using EShop.Shared.CQRS;
 using EShop.Shared.Diagnostics;
@@ -22,11 +23,21 @@ namespace EShop.Catalog.ReadModels.MongoDb.Bootstrapping;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddShared(this IServiceCollection services)
+    public static IServiceCollection AddShared(this IServiceCollection services, IConfiguration configuration)
     {
         services
             .AddGlobalExceptionMiddleware()
             .AddMediator(AssemblyReference.Assembly);
+
+        services
+            .AddRedisHealthCheck(configuration)
+            .AddRedisCacheInfrastructure(configuration);
+
+        services
+            .AddTenantAuthenticationProvider()
+            .AddUserPermissionsProvider()
+            .AddUserOrganizationContextProvider()
+            .AddTenantFeaturesProvider();
 
         return services;
     }

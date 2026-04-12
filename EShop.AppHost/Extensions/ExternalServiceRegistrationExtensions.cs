@@ -71,8 +71,7 @@ public static class ExternalServiceRegistrationExtensions
             .AddMongoDB(ResourceNames.MongoDb)
             .WithImageTag("6.0")
             .WithDataVolume("eshop-mongodb-data")
-            .WithLifetime(ContainerLifetime.Persistent)
-            .WithMongoExpress();
+            .WithLifetime(ContainerLifetime.Persistent);
 
         var catalogMongoDatabase = useExternalService
             ? builder.AddConnectionString("catalogMongoDatabase")
@@ -134,12 +133,14 @@ public static class ExternalServiceRegistrationExtensions
             .WithExternalServiceMode(useExternalService)
             .WithEnvironment("GRAFANA_URL", grafana.GetEndpoint("http"))
             .WithReference(catalogMongoDatabase)
+            .WithReference(redis)
             .WithReference(rabbitmq);
 
         if (!useExternalService)
         {
             catalogReadModel
                 .WaitFor(catalogMongoDatabase)
+                .WaitFor(redis)
                 .WaitFor(rabbitmq)
                 .WaitFor(catalogApplication);
         }
