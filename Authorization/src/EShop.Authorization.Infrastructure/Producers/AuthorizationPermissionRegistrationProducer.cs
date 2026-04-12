@@ -1,4 +1,5 @@
-﻿using EShop.Shared.Contracts.Services.Authorization;
+﻿using EShop.Shared.Authentication;
+using EShop.Shared.Contracts.Services.Authorization;
 using EShop.Shared.EventBus.Abstractions;
 using EShop.Shared.Scoping.ResourceAccessControl;
 
@@ -25,9 +26,9 @@ internal sealed class AuthorizationPermissionRegistrationProducer : IPermissionR
             SourceSystemReference = ModuleName,
             Permissions,
             Action = SupportedPermissionAction.Added,
-            TenantId = string.Empty,
-            ActionUserId = string.Empty,
-            ActionUserType = string.Empty
+            TenantId = UserData.SystemTenantId,
+            ActionUserId = UserData.SystemUsername,
+            ActionUserType = UserTypes.SystemUsers
         });
     }
 

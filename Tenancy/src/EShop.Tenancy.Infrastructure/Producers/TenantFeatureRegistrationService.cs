@@ -1,4 +1,5 @@
-﻿using EShop.Shared.Contracts.Services.Tenancy.Features;
+﻿using EShop.Shared.Authentication;
+using EShop.Shared.Contracts.Services.Tenancy.Features;
 using EShop.Shared.EventBus.Abstractions;
 using EShop.Shared.Scoping.ResourceAccessControl;
 
@@ -25,9 +26,9 @@ public sealed class TenantFeatureRegistrationService(IEventBus eventBusGateway) 
             SourceSystemReference = ApplicationName,
             Features = features,
             Action = SupportedFeaturesAction.AddOrUpdate,
-            TenantId = string.Empty,
-            ActionUserId = string.Empty,
-            ActionUserType = string.Empty,
+            TenantId = UserData.SystemTenantId,
+            ActionUserId = UserData.SystemUsername,
+            ActionUserType = UserTypes.SystemUsers
         });
     }
 

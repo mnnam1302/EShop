@@ -32,9 +32,6 @@ public sealed class TenantApi : ICarterModule
         group.MapGet("{tenantId}", GetTenantDetailsAsync)
             .RequireSystemUserFilter();
 
-        group.MapGet("{tenantId}/features", GetTenantFeaturesAsync)
-            .RequireSystemUserFilter();
-
         group.MapPatch("{tenantId}/features/{featureId}/enable", EnableTenantFeatureAsync)
             .RequireSystemUserFilter();
     }
@@ -66,21 +63,6 @@ public sealed class TenantApi : ICarterModule
         if (result.IsFailure)
         {
             return ApiEndpointHandler.Failure(result);
-        }
-
-        return Results.Ok(result);
-    }
-
-    private static async Task<IResult> GetTenantFeaturesAsync(
-        [FromRoute] string tenantId,
-        [FromServices] ISender sender,
-        CancellationToken cancellationToken)
-    {
-        var result = await sender.Send(new GetTenantFeaturesQuery(tenantId), cancellationToken);
-
-        if (result.IsFailure)
-        {
-            ApiEndpointHandler.Failure(result);
         }
 
         return Results.Ok(result);

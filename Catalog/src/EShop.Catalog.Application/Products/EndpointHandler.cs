@@ -25,7 +25,7 @@ public static class EndpointHandler
             .NewVersionedApi("Product")
             .MapGroup(BaseUrl)
             .HasApiVersion(1)
-            .RequireFeatureFilter(FeatureConstants.Catalog.ProductBuilder_FeatureId);
+            .RequireFeatureFilter(FeatureConstants.Catalog.Product_FeatureId);
 
         productEndpointsV1
             .MapCreateProduct()

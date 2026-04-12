@@ -31,7 +31,7 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    public static IServiceCollection AddSwagger(this IServiceCollection services)
+    private static IServiceCollection AddSwagger(this IServiceCollection services)
     {
         services
             .AddSwaggerGenNewtonsoftSupport()
@@ -126,11 +126,10 @@ public static class ServiceCollectionExtensions
         IWebHostEnvironment environment,
         string serviceName)
     {
-        bus.ConfigureEventReceiveEndpoint<OrganizationCreatedConsumer, OrganizationCreated>(
-            context, environment.EnvironmentName, serviceName);
+        bus.ConfigureEventReceiveEndpoint<OrganizationCreatedConsumer, OrganizationCreated>(context, environment.EnvironmentName, serviceName);
     }
 
-    public static IServiceCollection AddServiceBootstrapping(this IServiceCollection services)
+    private static IServiceCollection AddServiceBootstrapping(this IServiceCollection services)
     {
         services.AddTransient<DbInitializer>();
 

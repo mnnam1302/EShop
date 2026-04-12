@@ -12,7 +12,6 @@ using EShop.Shared.EventBus.PipelineObservers;
 using EShop.Shared.JsonApi.Extensions;
 using EShop.Shared.ReadModel.EfCore;
 using JsonApiDotNetCore.Configuration;
-using JsonApiDotNetCore.Repositories;
 using MassTransit;
 using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
 using Microsoft.EntityFrameworkCore;
@@ -119,7 +118,7 @@ public static class ServiceCollectionExtensions
 
     public static IServiceCollection AddJsonApiDotNet(this IServiceCollection services)
     {
-        services.AddJsonApi(options =>
+        services.AddJsonApi<CatalogReadDbContext>(options =>
         {
             options.Namespace = "api/v1";
             options.UseRelativeLinks = true;
@@ -135,10 +134,6 @@ public static class ServiceCollectionExtensions
             resourceGraphBuilder.Add<Category, string>();
             resourceGraphBuilder.Add<Product, string>();
         });
-
-        services.AddScoped(typeof(IResourceReadRepository<,>), typeof(EntityFrameworkCoreRepository<,>));
-        services.AddScoped(typeof(IResourceWriteRepository<,>), typeof(EntityFrameworkCoreRepository<,>));
-        services.AddScoped(typeof(IResourceRepository<,>), typeof(EntityFrameworkCoreRepository<,>));
 
         return services;
     }

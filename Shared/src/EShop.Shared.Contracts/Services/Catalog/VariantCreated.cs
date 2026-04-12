@@ -9,10 +9,10 @@ public sealed class VariantCreated : CatalogIntegrationEvent
     public decimal Price { get; init; }
     public decimal DiscountPrice { get; init; }
     public bool IsDefault { get; init; }
-    public List<VariantDimensionValueDto> VariantDimensionValues { get; init; } = [];
+    public List<VariantDimensionValueData> VariantDimensionValues { get; init; } = [];
 }
 
-public sealed class VariantDimensionValueDto
+public sealed class VariantDimensionValueData
 {
     public string Name { get; init; } = string.Empty;
     public string Value { get; init; } = string.Empty;

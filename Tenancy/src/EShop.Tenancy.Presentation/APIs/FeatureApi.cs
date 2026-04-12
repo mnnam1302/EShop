@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using static EShop.Shared.Contracts.Services.Tenancy.Features.Query;
 
 namespace EShop.Tenancy.Presentation.APIs;
 
@@ -24,8 +25,23 @@ public sealed class FeatureApi : ICarterModule
             .RequireAuthorization()
             .RequireSystemUserFilter();
 
+        group.MapGet("", GetTenantFeaturesAsync);
         group.MapGet("{featureId}", GetFeatureByIdAsync);
+
         group.MapPost("", CreateSystemFeatureAsync);
+    }
+
+    private static async Task<IResult> GetTenantFeaturesAsync([FromQuery] string tenantId, [FromServices] MediatR.ISender sender, CancellationToken cancellationToken)
+    {
+        var query = new GetTenantFeaturesQuery(tenantId);
+        var result = await sender.Send(query, cancellationToken);
+
+        if (result.IsFailure)
+        {
+            ApiEndpointHandler.Failure(result);
+        }
+
+        return Results.Ok(result);
     }
 
     private async Task<IResult> GetFeatureByIdAsync([FromRoute] string featureId, [FromServices] IMediator mediator, CancellationToken cancellationToken)
@@ -42,10 +58,7 @@ public sealed class FeatureApi : ICarterModule
         return Results.Ok(result);
     }
 
-    private static async Task<IResult> CreateSystemFeatureAsync(
-        [FromBody] CreateSystemFeatureRequest request,
-        [FromServices] IMediator sender,
-        CancellationToken cancellationToken)
+    private static async Task<IResult> CreateSystemFeatureAsync([FromBody] CreateSystemFeatureRequest request, [FromServices] IMediator sender, CancellationToken cancellationToken)
     {
         var command = new CreateSystemFeatureCommand
         {

@@ -1,6 +1,4 @@
-﻿using EShop.AppHost.OpenTelemetryCollector;
-
-namespace EShop.AppHost.Extensions;
+﻿namespace EShop.AppHost.Extensions;
 
 public static class ExternalServiceRegistrationExtensions
 {
@@ -18,19 +16,19 @@ public static class ExternalServiceRegistrationExtensions
     {
         #region Observability
 
-        var prometheus = builder.AddContainer(ResourceNames.Prometheus, "prom/prometheus", "v3.5.0")
-            .WithBindMount("../Deployment/config/prometheus/prometheus.yml", "/etc/prometheus/prometheus.yml", isReadOnly: true)
-            .WithArgs("--web.enable-otlp-receiver", "--config.file=/etc/prometheus/prometheus.yml")
-            .WithHttpEndpoint(targetPort: 9090, name: "http");
+        //var prometheus = builder.AddContainer(ResourceNames.Prometheus, "prom/prometheus", "v3.5.0")
+        //    .WithBindMount("../Deployment/config/prometheus/prometheus.yml", "/etc/prometheus/prometheus.yml", isReadOnly: true)
+        //    .WithArgs("--web.enable-otlp-receiver", "--config.file=/etc/prometheus/prometheus.yml")
+        //    .WithHttpEndpoint(targetPort: 9090, name: "http");
 
-        var grafana = builder.AddContainer(ResourceNames.Grafana, "grafana/grafana")
-            .WithBindMount("../Deployment/config/grafana/config", "/etc/grafana", isReadOnly: true)
-            .WithBindMount("../Deployment/config/grafana/dashboards", "/var/lib/grafana/dashboards", isReadOnly: true)
-            .WithEnvironment("PROMETHEUS_ENDPOINT", prometheus.GetEndpoint("http"))
-            .WithHttpEndpoint(targetPort: 3000, name: "http");
+        //var grafana = builder.AddContainer(ResourceNames.Grafana, "grafana/grafana")
+        //    .WithBindMount("../Deployment/config/grafana/config", "/etc/grafana", isReadOnly: true)
+        //    .WithBindMount("../Deployment/config/grafana/dashboards", "/var/lib/grafana/dashboards", isReadOnly: true)
+        //    .WithEnvironment("PROMETHEUS_ENDPOINT", prometheus.GetEndpoint("http"))
+        //    .WithHttpEndpoint(targetPort: 3000, name: "http");
 
-        builder.AddOpenTelemetryCollector(ResourceNames.OpenTelemetryCollector, @"..\Deployment\config\otelcollector\config.yaml")
-               .WithEnvironment("PROMETHEUS_ENDPOINT", $"{prometheus.GetEndpoint("http")}/api/v1/otlp");
+        //builder.AddOpenTelemetryCollector(ResourceNames.OpenTelemetryCollector, @"..\Deployment\config\otelcollector\config.yaml")
+        //       .WithEnvironment("PROMETHEUS_ENDPOINT", $"{prometheus.GetEndpoint("http")}/api/v1/otlp");
 
         #endregion Observability
 
@@ -84,7 +82,7 @@ public static class ExternalServiceRegistrationExtensions
         var tenancyDatabase = postgres.AddDatabase("tenancyDatabase", "eshop_tenancy");
         var tenancy = builder.AddProject<Projects.EShop_Tenancy_API>(ResourceNames.TenancyApi)
             .WithExternalServiceMode(useExternalService)
-            .WithEnvironment("GRAFANA_URL", grafana.GetEndpoint("http"))
+            //.WithEnvironment("GRAFANA_URL", grafana.GetEndpoint("http"))
             .WithReference(tenancyDatabase)
             .WithReference(redis)
             .WithReference(rabbitmq);
@@ -100,7 +98,7 @@ public static class ExternalServiceRegistrationExtensions
         var authorizationDatabase = postgres.AddDatabase("authorizationDatabase", "eshop_authorization");
         var authorization = builder.AddProject<Projects.EShop_Authorization_API>(ResourceNames.AuthorizationApi)
             .WithExternalServiceMode(useExternalService)
-            .WithEnvironment("GRAFANA_URL", grafana.GetEndpoint("http"))
+            //.WithEnvironment("GRAFANA_URL", grafana.GetEndpoint("http"))
             .WithReference(authorizationDatabase)
             .WithReference(redis)
             .WithReference(rabbitmq);
@@ -116,7 +114,7 @@ public static class ExternalServiceRegistrationExtensions
         var catalogDatabase = postgres.AddDatabase("catalogDatabase", "eshop_catalog");
         var catalogApplication = builder.AddProject<Projects.EShop_Catalog_Application>("catalog-application")
             .WithExternalServiceMode(useExternalService)
-            .WithEnvironment("GRAFANA_URL", grafana.GetEndpoint("http"))
+            //.WithEnvironment("GRAFANA_URL", grafana.GetEndpoint("http"))
             .WithReference(catalogDatabase)
             .WithReference(redis)
             .WithReference(rabbitmq);
@@ -131,7 +129,7 @@ public static class ExternalServiceRegistrationExtensions
 
         var catalogReadModel = builder.AddProject<Projects.EShop_Catalog_ReadModels_MongoDb>("catalog-readmodel")
             .WithExternalServiceMode(useExternalService)
-            .WithEnvironment("GRAFANA_URL", grafana.GetEndpoint("http"))
+            //.WithEnvironment("GRAFANA_URL", grafana.GetEndpoint("http"))
             .WithReference(catalogMongoDatabase)
             .WithReference(redis)
             .WithReference(rabbitmq);

@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace EShop.Catalog.ReadModels.MongoDb.Controllers;
 
-[RequireFeature(FeatureConstants.Catalog.ProductBuilder_FeatureId)]
+[RequireFeature(FeatureConstants.Catalog.Product_FeatureId)]
 [RequireOneOfPermissions(
     PermissionConstants.Catalog.ManageCategories,
     PermissionConstants.Catalog.ViewCategories)]

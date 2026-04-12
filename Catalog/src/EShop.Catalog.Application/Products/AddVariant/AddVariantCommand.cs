@@ -51,7 +51,7 @@ public sealed class AddVariantCommandHandler(
             DiscountPrice = createdVariant.DiscountPrice,
             IsDefault = false,
             VariantDimensionValues = createdVariant.VariantDimensionValues
-                .Select(dv => new VariantDimensionValueDto { Name = dv.Name, Value = dv.Value })
+                .Select(dv => new VariantDimensionValueData { Name = dv.Name, Value = dv.Value })
                 .ToList(),
             TenantId = userDetailsProvider.AuthenticatedUser.TenantId,
             ActionUserId = userDetailsProvider.AuthenticatedUser.ActionUserId,
