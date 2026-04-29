@@ -143,6 +143,8 @@ public static class ExternalServiceRegistrationExtensions
                 .WaitFor(catalogApplication);
         }
 
+        var inventory = builder.AddProject<Projects.EShop_Inventory_API>("inventory-api");
+
         #endregion Microservices
 
         #region Api Gateway
