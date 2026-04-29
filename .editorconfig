@@ -102,3 +102,6 @@ dotnet_style_prefer_simplified_interpolation = true:suggestion
 
 # IDE0046: Convert to conditional expression
 dotnet_diagnostic.IDE0046.severity = none
+
+[*.feature]
+gherkin_table_cell_right_align_numeric_content = false

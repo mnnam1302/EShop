@@ -25,5 +25,5 @@ Scenario: Add a variant with dimension values
         | Red Laptop | SKU-RED |   550 |           500 | Red   |
     Then the product 'Laptop Pro' has the following variants
         | Name       | Sku     | Price | DiscountPrice | IsDefault |
-        |            |         |   500 |        459.99 | true      |
-        | Red Laptop | SKU-RED |   550 |           500 | false     |
+        |            |         | 500   | 459.99        | true      |
+        | Red Laptop | SKU-RED | 550   | 500           | false     |
