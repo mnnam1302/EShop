@@ -11,4 +11,6 @@ else
     builder.AddServiceDefaults();
 }
 
+builder.AddProject<Projects.EShop_Order_API>("eshop-order-api");
+
 await builder.Build().RunAsync();
