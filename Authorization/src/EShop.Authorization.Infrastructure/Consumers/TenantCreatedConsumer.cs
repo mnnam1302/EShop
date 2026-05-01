@@ -2,19 +2,16 @@
 using EShop.Shared.Contracts.Services.Tenancy.Tenants;
 using EShop.Shared.CQRS;
 using MassTransit;
-using Microsoft.Extensions.Logging;
 
 namespace EShop.Authorization.Infrastructure.Consumers;
 
 public sealed class TenantCreatedConsumer : IConsumer<ITenantCreated>
 {
     private readonly IMediator _mediator;
-    private readonly ILogger<TenantCreatedConsumer> _logger;
 
-    public TenantCreatedConsumer(IMediator mediator, ILogger<TenantCreatedConsumer> logger)
+    public TenantCreatedConsumer(IMediator mediator)
     {
         _mediator = mediator;
-        _logger = logger;
     }
 
     public async Task Consume(ConsumeContext<ITenantCreated> context)

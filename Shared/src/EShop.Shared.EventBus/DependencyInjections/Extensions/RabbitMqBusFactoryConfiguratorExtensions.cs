@@ -10,7 +10,7 @@ public static class RabbitMqBusFactoryConfiguratorExtensions
     /// Scans an assembly for all concrete <see cref="IConsumer{T}"/> implementations
     /// and configures a receive endpoint for each consumer/event pair found.
     /// Follows the same queue naming convention as
-    /// <see cref="ConfigureEventReceiveEndpoint{TConsumer,TEvent}"/>.
+    /// <see cref="ConfigureReceiveEndpoint{TConsumer,TEvent}"/>.
     /// </summary>
     /// <param name="bus">The RabbitMQ bus configurator.</param>
     /// <param name="context">The MassTransit registration context.</param>
@@ -25,7 +25,7 @@ public static class RabbitMqBusFactoryConfiguratorExtensions
         Assembly assembly)
     {
         var configureMethod = typeof(RabbitMqBusFactoryConfiguratorExtensions)
-            .GetMethod(nameof(ConfigureEventReceiveEndpoint))!;
+            .GetMethod(nameof(ConfigureReceiveEndpoint))!;
 
         foreach (var consumerType in assembly.GetTypes().Where(t => t is { IsAbstract: false, IsClass: true }))
         {
@@ -48,7 +48,7 @@ public static class RabbitMqBusFactoryConfiguratorExtensions
         }
     }
 
-    public static void ConfigureEventReceiveEndpoint<TConsumer, TEvent>(
+    public static void ConfigureReceiveEndpoint<TConsumer, TEvent>(
         this IRabbitMqBusFactoryConfigurator bus,
         IRegistrationContext context,
         string environment,
@@ -66,8 +66,8 @@ public static class RabbitMqBusFactoryConfiguratorExtensions
             configureEndpoint: endpoint =>
             {
                 endpoint.ConfigureConsumeTopology = false;
-                endpoint.Bind<TEvent>();
                 endpoint.ConfigureConsumer<TConsumer>(context);
+                endpoint.Bind<TEvent>();
             });
     }
 
