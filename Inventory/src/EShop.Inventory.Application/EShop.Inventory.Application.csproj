@@ -2,6 +2,11 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\Authorization\src\EShop.Authorization.Domain\EShop.Authorization.Domain.csproj" />
+    <ProjectReference Include="..\..\..\Shared\src\EShop.Shared.CQRS\EShop.Shared.CQRS.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="UseCases\" />
   </ItemGroup>
 
 </Project>

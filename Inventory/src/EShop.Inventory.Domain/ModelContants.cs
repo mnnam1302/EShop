@@ -10,3 +10,8 @@ public static class ModelConstants
     public const int LongText = 255;
     public const int VeryLongText = 500;
 }
+
+public static class TableNames
+{
+    public const string Inventories = nameof(Inventories);
+}

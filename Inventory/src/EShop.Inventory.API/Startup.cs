@@ -15,7 +15,7 @@ public class Startup(IConfiguration configuration, IWebHostEnvironment environme
         services
             .AddInventoryAPI()
             .AddInventoryApplication()
-            .AddInventoryPersistence()
+            .AddInventoryPersistence(Configuration, Environment)
             .AddInventoryInfrastructure();
     }
 

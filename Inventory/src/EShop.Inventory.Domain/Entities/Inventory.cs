@@ -1,10 +1,37 @@
-﻿using EShop.Shared.DomainTools.Entities;
+﻿using EShop.Shared.DomainTools.Aggregates;
+using EShop.Shared.DomainTools.Entities;
+using System.ComponentModel.DataAnnotations;
 
 namespace EShop.Inventory.Domain.Entities;
 
-public sealed class Inventory : EntityBase<Guid>
+public class Inventory : AggregateRoot<Guid>, IScoped
 {
-    public required string Sku { get; set; }
+    public required Guid SkuId { get; set; } // variant id from catalog bounded context
+    public required int StockAvailable { get; set; }
 
-    public required int Quantity { get; set; }
+    [MaxLength(ModelConstants.MediumText)]
+    public required string TenantId { get; set; }
+
+    [MaxLength(ModelConstants.VeryLongText)]
+    public required string Scope { get; set; }
+
+    public void RecieveStock()
+    {
+    }
+
+    public void ReserveStock()
+    {
+    }
+
+    public void ReleaseStock()
+    {
+    }
+
+    public void DeductStock()
+    {
+    }
+
+    public void AdjustStock()
+    {
+    }
 }
