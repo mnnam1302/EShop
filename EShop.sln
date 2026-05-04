@@ -230,6 +230,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "secrets", "secrets", "{43E4
 	ProjectSection(SolutionItems) = preProject
 		deploy\secrets\.gitignore = deploy\secrets\.gitignore
 		deploy\secrets\authorization_connstr.txt.example = deploy\secrets\authorization_connstr.txt.example
+		deploy\secrets\mongodb_password.txt.example = deploy\secrets\mongodb_password.txt.example
 		deploy\secrets\postgres_password.txt.example = deploy\secrets\postgres_password.txt.example
 		deploy\secrets\rabbitmq_password.txt.example = deploy\secrets\rabbitmq_password.txt.example
 		deploy\secrets\redis_password.txt.example = deploy\secrets\redis_password.txt.example

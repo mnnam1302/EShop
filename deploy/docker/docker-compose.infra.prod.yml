@@ -146,9 +146,9 @@ services:
       retries: 3
       start_period: 40s
     environment:
+      RABBITMQ_DEFAULT_VHOST: ${RABBITMQ_VHOST}
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
       RABBITMQ_DEFAULT_PASS_FILE: /run/secrets/rabbitmq_password
-      RABBITMQ_DEFAULT_VHOST: ${RABBITMQ_VHOST}
     secrets:
       - rabbitmq_password
     volumes:
@@ -169,10 +169,50 @@ services:
         max-size: "10m"
         max-file: "3"
 
+  # ---------------------------------------------------------------------------
+  # MongoDB — NEVER on eshop-public. eshop-internal only.
+  # Root credentials injected via Docker secret.
+  # App connection strings must include credentials:
+  #   mongodb://catalog:password@mongodb:27017/eshop-catalog
+  # ---------------------------------------------------------------------------
+  mongodb:
+    image: mongo:6.0
+    container_name: mongodb
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mongosh", "--username", "root", "--password", "$(cat /run/secrets/mongodb_password)", "--eval", "db.adminCommand('ping')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD_FILE: /run/secrets/mongodb_password
+    secrets:
+      - mongodb_password
+    volumes:
+      - eshop-mongodb:/data/db
+    networks:
+      - eshop-internal
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
 volumes:
   eshop-data:
   eshop-redis:
   eshop-rabbitmq:
+  eshop-mongodb:
 
 secrets:
   postgres_password:
@@ -181,6 +221,8 @@ secrets:
     file: ../secrets/rabbitmq_password.txt
   redis_password:
     file: ../secrets/redis_password.txt
+  mongodb_password:
+    file: ../secrets/mongodb_password.txt
 
 # Networks defined here — single source of truth for the cluster.
 # Application compose files reference these as external: true.

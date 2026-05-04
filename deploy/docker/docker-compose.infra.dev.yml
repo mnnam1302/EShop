@@ -93,10 +93,30 @@ services:
     networks:
       - eshop-internal
 
+  # ---------------------------------------------------------------------------
+  # MongoDB — no authentication in dev.
+  # ---------------------------------------------------------------------------
+  mongodb:
+    image: mongo:6.0
+    container_name: mongodb
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - eshop-mongodb:/data/db
+    ports:
+      - "27017:27017"
+    networks:
+      - eshop-internal
+
 volumes:
   eshop-data:
   eshop-redis:
   eshop-rabbitmq:
+  eshop-mongodb:
 
 networks:
   eshop-public:
