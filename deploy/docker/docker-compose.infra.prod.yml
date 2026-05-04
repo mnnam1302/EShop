@@ -1,6 +1,5 @@
 # =============================================================================
-# Infrastructure services — postgres, redis, rabbitmq, dashboard.
-# Shared across all environments. This file owns network definitions.
+# Infrastructure services — PRODUCTION.
 #
 # Two-network security model:
 #   eshop-public   : edge-facing — dashboard UI, services reachable by gateway.
@@ -9,18 +8,15 @@
 #                    Services on both networks still have outbound access via
 #                    eshop-public. Databases never touch the public network.
 #
+# All credentials injected via Docker secrets — never in environment variables.
+# For local development, use docker-compose.infra.dev.yml instead.
+#
 # Usage (infrastructure only):
-#   docker compose \
-#     -f deploy/docker/docker-compose.infrastructure.yml \
-#     --env-file deploy/env/dev.env \
-#     up -d
+#   docker compose -f deploy/docker/docker-compose.infra.prod.yml --env-file deploy/env/prod.env up -d
 #
 # Usage (combined with services):
-#   docker compose \
-#     -f deploy/docker/docker-compose.infrastructure.yml \
-#     -f deploy/docker/docker-compose.dev.yml \
-#     --env-file deploy/env/dev.env \
-#     up -d
+#   docker compose -f deploy/docker/docker-compose.infra.prod.yml -f deploy/docker/docker-compose.prod.yml --env-file deploy/env/prod.env up -d
+#
 # =============================================================================
 
 services:
@@ -95,48 +91,41 @@ services:
 
   # ---------------------------------------------------------------------------
   # Redis — NEVER on eshop-public. eshop-internal only.
-  # Single secret: redis_connstr (full connection string, e.g. redis:6379,password=...).
-  # Server extracts the password via shell; app services mount the same secret
-  # directly as RedisOptions__ConnectionString via target: in dev/prod compose.
+  # Plain password injected via Docker secret (mirrors PostgreSQL pattern).
+  # App services mount the same redis_password secret as RedisOptions__Password;
+  # RedisOptions__Host=redis:6379 is set as a plain env var.
+  # Code combines them: $"{ConnectionString},password={Password}".
   # ---------------------------------------------------------------------------
-  # redis:
-  #   image: redis:7.4.7
-  #   container_name: redis
-  #   restart: unless-stopped
-  #   command:
-  #     - sh
-  #     - -c
-  #     - |
-  #       REDIS_PASS=$$(grep -oP '(?<=password=)[^,]+' /run/secrets/redis_connstr)
-  #       exec redis-server --requirepass "$$REDIS_PASS"
-  #   healthcheck:
-  #     test:
-  #       - CMD-SHELL
-  #       - |
-  #         redis-cli -a $$(grep -oP '(?<=password=)[^,]+' /run/secrets/redis_connstr) --no-auth-warning ping
-  #     interval: 30s
-  #     timeout: 10s
-  #     retries: 3
-  #     start_period: 30s
-  #   secrets:
-  #     - redis_connstr
-  #   volumes:
-  #     - eshop_redis:/data
-  #   networks:
-  #     - eshop-internal
-  #   deploy:
-  #     resources:
-  #       limits:
-  #         cpus: '0.25'
-  #         memory: 128M
-  #       reservations:
-  #         cpus: '0.1'
-  #         memory: 64M
-  #   logging:
-  #     driver: "json-file"
-  #     options:
-  #       max-size: "10m"
-  #       max-file: "3"
+  redis:
+    image: redis:7.4.7
+    container_name: redis
+    restart: unless-stopped
+    command: ["sh", "-c", "redis-server --requirepass $$(cat /run/secrets/redis_password)"]
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -a $$(cat /run/secrets/redis_password) --no-auth-warning ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    secrets:
+      - redis_password
+    volumes:
+      - eshop-redis:/data
+    networks:
+      - eshop-internal
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 128M
+        reservations:
+          cpus: '0.1'
+          memory: 64M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   # ---------------------------------------------------------------------------
   # RabbitMQ — NEVER on eshop-public. eshop-internal only.
@@ -146,61 +135,58 @@ services:
   # containers as MasstransitConfiguration__Password via target: in dev/prod
   # compose files.
   # ---------------------------------------------------------------------------
-  # rabbitmq:
-  #   image: rabbitmq:3-management-alpine
-  #   container_name: rabbitmq
-  #   restart: unless-stopped
-  #   healthcheck:
-  #     test: ["CMD", "rabbitmq-diagnostics", "check_port_connectivity"]
-  #     interval: 30s
-  #     timeout: 10s
-  #     retries: 3
-  #     start_period: 40s
-  #   environment:
-  #     RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
-  #     RABBITMQ_DEFAULT_PASS_FILE: /run/secrets/rabbitmq_password
-  #     RABBITMQ_DEFAULT_VHOST: ${RABBITMQ_VHOST}
-  #   secrets:
-  #     - rabbitmq_password
-  #   volumes:
-  #     - rabbitmq_data:/var/lib/rabbitmq
-  #   networks:
-  #     - eshop-internal  # isolated — no public network exposure
-  #   deploy:
-  #     resources:
-  #       limits:
-  #         cpus: '0.5'
-  #         memory: 512M
-  #       reservations:
-  #         cpus: '0.25'
-  #         memory: 256M
-  #   logging:
-  #     driver: "json-file"
-  #     options:
-  #       max-size: "10m"
-  #       max-file: "3"
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: rabbitmq
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "check_port_connectivity"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS_FILE: /run/secrets/rabbitmq_password
+      RABBITMQ_DEFAULT_VHOST: ${RABBITMQ_VHOST}
+    secrets:
+      - rabbitmq_password
+    volumes:
+      - eshop-rabbitmq:/var/lib/rabbitmq
+    networks:
+      - eshop-internal  # isolated — no public network exposure
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
 volumes:
   eshop-data:
-  eshop_redis:
-  rabbitmq_data:
+  eshop-redis:
+  eshop-rabbitmq:
 
 secrets:
   postgres_password:
     file: ../secrets/postgres_password.txt
   rabbitmq_password:
     file: ../secrets/rabbitmq_password.txt
-  redis_connstr:
-    file: ../secrets/redis_connstr.txt
+  redis_password:
+    file: ../secrets/redis_password.txt
 
 # Networks defined here — single source of truth for the cluster.
 # Application compose files reference these as external: true.
 networks:
   eshop-public:
-    name: eshop-public
-    driver: bridge
+    external: true
 
   eshop-internal:
-    name: eshop-internal
-    driver: bridge
-    internal: true  # containers ONLY on this network cannot reach the internet
+    external: true

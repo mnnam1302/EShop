@@ -7,7 +7,7 @@
 #
 # Usage (from solution root):
 #   docker compose \
-#     -f deploy/docker/docker-compose.infrastructure.yml \
+#     -f deploy/docker/docker-compose.infra.prod.yml \
 #     -f deploy/docker/docker-compose.prod.yml \
 #     --env-file deploy/env/prod.env \
 #     up -d
@@ -26,6 +26,7 @@ services:
       # Non-sensitive config only — no credentials here.
       - ASPNETCORE_ENVIRONMENT=Production
       - RedisOptions__Enabled=true
+      - RedisOptions__Host=redis:6379
       - MasstransitConfiguration__Host=rabbitmq
       - MasstransitConfiguration__Port=5672
       - MasstransitConfiguration__VirtualHost=${RABBITMQ_VHOST}
@@ -37,8 +38,8 @@ services:
         target: ConnectionStrings__DefaultConnection
       - source: rabbitmq_password
         target: MasstransitConfiguration__Password
-      - source: redis_connstr
-        target: RedisOptions__ConnectionString
+      - source: redis_password
+        target: RedisOptions__Password
     healthcheck:
       test: ["CMD-SHELL", "wget -q --spider http://localhost:8080/health || exit 1"]
       interval: 30s
@@ -83,6 +84,7 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - RedisOptions__Enabled=true
+      - RedisOptions__Host=redis:6379
       - MasstransitConfiguration__Host=rabbitmq
       - MasstransitConfiguration__Port=5672
       - MasstransitConfiguration__VirtualHost=${RABBITMQ_VHOST}
@@ -94,8 +96,8 @@ services:
         target: ConnectionStrings__DefaultConnection
       - source: rabbitmq_password
         target: MasstransitConfiguration__Password
-      - source: redis_connstr
-        target: RedisOptions__ConnectionString
+      - source: redis_password
+        target: RedisOptions__Password
     healthcheck:
       test: ["CMD-SHELL", "wget -q --spider http://localhost:8080/health || exit 1"]
       interval: 30s
@@ -140,12 +142,13 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - RedisOptions__Enabled=true
+      - RedisOptions__Host=redis:6379
       - Services__tenancy__http__0=http://tenancy:8080
       - Services__authorization__http__0=http://authorization:8080
       - OTEL_SERVICE_NAME=api-gateway
     secrets:
-      - source: redis_connstr
-        target: RedisOptions__ConnectionString
+      - source: redis_password
+        target: RedisOptions__Password
     healthcheck:
       test: ["CMD-SHELL", "wget -q --spider http://localhost:8080/health || exit 1"]
       interval: 30s
@@ -187,8 +190,8 @@ secrets:
     file: ../secrets/authorization_connstr.txt
   rabbitmq_password:
     file: ../secrets/rabbitmq_password.txt
-  redis_connstr:
-    file: ../secrets/redis_connstr.txt
+  redis_password:
+    file: ../secrets/redis_password.txt
 
 networks:
   eshop-public:

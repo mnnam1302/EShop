@@ -9,7 +9,8 @@ This guide walks you through everything needed to run the full EShop stack local
 ```
 deploy/
   docker/
-    docker-compose.infrastructure.yml   ← postgres, redis, rabbitmq, dashboard
+    docker-compose.infra.dev.yml        ← dev infra: postgres, redis, rabbitmq (plain env, no auth)
+    docker-compose.infra.prod.yml       ← prod infra: postgres, redis, rabbitmq (Docker secrets)
     docker-compose.dev.yml              ← application services (dev)
     docker-compose.prod.yml             ← application services (prod)
   env/
@@ -51,50 +52,29 @@ cd EShop
 
 ---
 
-## 2. Create secret files
+## 2. Secret files
 
-All credentials live in plain text files under `deploy/secrets/`. These files are git-ignored — you must create them once from the example templates.
+Dev infrastructure (postgres, redis, rabbitmq) runs with **plain env var credentials** —
+no secret files are needed to start infra locally.
 
-Run this from the **repository root** (PowerShell):
+Secret files are only required when running **containerized app services** (the commented
+services in `docker-compose.dev.yml`). Copy from the example templates if needed:
 
 ```powershell
-$secrets = @(
-    "postgres_password",
-    "rabbitmq_password",
-    "redis_password",
-    "redis_connstr",
-    "tenancy_connstr",
-    "authorization_connstr"
-)
-
+$secrets = @("rabbitmq_password", "tenancy_connstr", "authorization_connstr")
 foreach ($s in $secrets) {
     Copy-Item "deploy/secrets/$s.txt.example" "deploy/secrets/$s.txt"
 }
 ```
 
-Or copy each file manually:
-
-```
-secrets/postgres_password.txt          ← copy from postgres_password.txt.example
-secrets/rabbitmq_password.txt          ← copy from rabbitmq_password.txt.example
-secrets/redis_password.txt             ← copy from redis_password.txt.example
-secrets/redis_connstr.txt              ← copy from redis_connstr.txt.example
-secrets/tenancy_connstr.txt            ← copy from tenancy_connstr.txt.example
-secrets/authorization_connstr.txt      ← copy from authorization_connstr.txt.example
-```
-
-> The default values in the `.example` files are pre-configured for local development and work out of the box. You do not need to change them unless you want custom passwords.
-
-### What each secret contains
-
-| File | Contents |
+| File | Used for |
 |------|----------|
-| `postgres_password.txt` | PostgreSQL superuser password |
-| `rabbitmq_password.txt` | RabbitMQ default user password (also used by app services) |
-| `redis_password.txt` | Redis server password (`--requirepass`) |
-| `redis_connstr.txt` | Redis client connection string: `redis:6379,password=<same password>` |
-| `tenancy_connstr.txt` | Full Npgsql connection string for the Tenancy service |
-| `authorization_connstr.txt` | Full Npgsql connection string for the Authorization service |
+| `rabbitmq_password.txt` | RabbitMQ password for containerized app services |
+| `tenancy_connstr.txt` | Tenancy DB connection string |
+| `authorization_connstr.txt` | Authorization DB connection string |
+
+> **Production** additionally requires `postgres_password.txt` and `redis_password.txt` —
+> used by `docker-compose.infra.prod.yml` via Docker secrets.
 
 ---
 
@@ -103,18 +83,13 @@ secrets/authorization_connstr.txt      ← copy from authorization_connstr.txt.e
 Start PostgreSQL, Redis, RabbitMQ, and the Aspire observability dashboard:
 
 ```bash
-docker compose \
-  -f deploy/docker/docker-compose.infrastructure.yml \
-  --env-file deploy/env/dev.env \
-  up -d
+docker compose -f deploy/docker/docker-compose.infra.dev.yml up -d
 ```
 
 Verify all containers are healthy before continuing:
 
 ```bash
-docker compose \
-  -f deploy/docker/docker-compose.infrastructure.yml \
-  ps
+docker compose -f deploy/docker/docker-compose.infra.dev.yml ps
 ```
 
 All services should show `healthy` or `running`.
@@ -158,7 +133,7 @@ $env:MasstransitConfiguration__Port       = "5672"
 $env:MasstransitConfiguration__Username   = "guest"
 $env:MasstransitConfiguration__Password   = "guest"
 $env:MasstransitConfiguration__VirtualHost = "eshop01012025"
-$env:RedisOptions__ConnectionString      = "localhost:6379,password=redis-password-dev"
+$env:RedisOptions__Host                  = "localhost:6379"
 $env:ASPNETCORE_ENVIRONMENT               = "Development"
 
 dotnet run --project Tenancy/src/EShop.Tenancy.API
@@ -171,11 +146,7 @@ dotnet run --project Tenancy/src/EShop.Tenancy.API
 Start infrastructure and all application services together:
 
 ```bash
-docker compose \
-  -f deploy/docker/docker-compose.infrastructure.yml \
-  -f deploy/docker/docker-compose.dev.yml \
-  --env-file deploy/env/dev.env \
-  up -d --build
+docker compose -f deploy/docker/docker-compose.infra.dev.yml -f deploy/docker/docker-compose.dev.yml up -d --build
 ```
 
 > `--build` rebuilds service images from source. Omit it on subsequent runs for faster startup.
@@ -183,10 +154,7 @@ docker compose \
 Stop everything:
 
 ```bash
-docker compose \
-  -f deploy/docker/docker-compose.infrastructure.yml \
-  -f deploy/docker/docker-compose.dev.yml \
-  down
+docker compose -f deploy/docker/docker-compose.infra.dev.yml -f deploy/docker/docker-compose.dev.yml down
 ```
 
 ---
@@ -201,7 +169,7 @@ docker compose \
 | **Aspire Dashboard** | http://localhost:18888 | — |
 | **RabbitMQ Management** | http://localhost:15672 | `guest` / `rabbitmq_password.txt` |
 | **PostgreSQL** | localhost:5432 | `postgres` / `postgres_password.txt` |
-| **Redis** | localhost:6379 | password in `redis_password.txt` |
+| **Redis** | localhost:6379 | no auth (dev) |
 
 ---
 
@@ -241,7 +209,7 @@ Stop the conflicting process or change the host port mapping in `docker/docker-c
 ```bash
 # Removes containers AND volumes — all database data will be lost
 docker compose \
-  -f deploy/docker/docker-compose.infrastructure.yml \
+  -f deploy/docker/docker-compose.infra.dev.yml \
   -f deploy/docker/docker-compose.dev.yml \
   down -v
 ```

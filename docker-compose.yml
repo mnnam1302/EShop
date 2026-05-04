@@ -134,7 +134,7 @@ services:
     environment:
       - ConnectionStrings__DefaultConnection=Username=tenancy;Password=tenancy-password-dev;Server=postgres;Port=5432;Database=eshop_tenancy
       - RedisOptions__Enabled=true
-      - RedisOptions__ConnectionString=redis:6379
+      - RedisOptions__Host=redis:6379
       - MasstransitConfiguration__Host=rabbitmq
       - MasstransitConfiguration__Port=5672
       - MasstransitConfiguration__VirtualHost=eshop01012025
@@ -189,7 +189,7 @@ services:
     environment:
       - ConnectionStrings__DefaultConnection=Username=authorization;Password=authorization-password-dev;Server=postgres;Port=5432;Database=eshop_authorization
       - RedisOptions__Enabled=true
-      - RedisOptions__ConnectionString=redis:6379
+      - RedisOptions__Host=redis:6379
       - MasstransitConfiguration__Host=rabbitmq
       - MasstransitConfiguration__Port=5672
       - MasstransitConfiguration__VirtualHost=eshop01012025
@@ -243,7 +243,7 @@ services:
       dockerfile: ReverseProxy/src/EShop.ApiGateway/Dockerfile
     environment:
       - RedisOptions__Enabled=true
-      - RedisOptions__ConnectionString=redis:6379
+      - RedisOptions__Host=redis:6379
       - OTEL_SERVICE_NAME=api-gateway
     healthcheck:
       test: ["CMD-SHELL", "wget -q --spider http://localhost:8080/health || exit 1"]
