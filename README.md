@@ -361,10 +361,9 @@ For a complete step-by-step guide — prerequisites, secret files, migrations, r
 
 ```
 1. Clone the repo
-2. Copy deploy/secrets/*.txt.example  →  deploy/secrets/*.txt
-3. docker compose -f deploy/docker/docker-compose.infrastructure.yml --env-file deploy/env/dev.env up -d
-4. Run EF migrations per service (dotnet ef database update)
-5. dotnet run  (or bring up all services via docker-compose.dev.yml)
+2. docker compose -f deploy/docker/docker-compose.infra.dev.yml up -d
+3. Run EF migrations per service (dotnet ef database update)
+4. dotnet run  (or bring up all services via docker-compose.dev.yml)
 ```
 
 ---

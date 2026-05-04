@@ -1,59 +1,33 @@
 # =============================================================================
 # Application services — development environment.
 #
-# Security model (mirrors production):
-#   ENV  = non-sensitive config (hostnames, ports, feature flags, env name).
-#   SECRET = all credentials — connection strings, broker passwords, JWT key.
-#
-#   Sensitive values are injected as files at /run/secrets/<target> inside
-#   the container. The .NET app reads them via:
-#       builder.Configuration.AddKeyPerFile("/run/secrets", optional: true);
-#   The double-underscore target naming maps to .NET config keys:
-#       /run/secrets/ConnectionStrings__DefaultConnection
-#           → GetConnectionString("DefaultConnection")
-#       /run/secrets/MasstransitConfiguration__Password
-#           → Configuration["MasstransitConfiguration:Password"]
+# Credentials:
+#   - Infrastructure (postgres, redis, rabbitmq): plain env vars in infra.dev.yml.
+#     No Docker secrets needed for local dev.
+#   - App service credentials (DB conn strings, broker password): Docker secrets
+#     from deploy/secrets/ — only needed when app services are uncommented.
 #
 # Network model:
 #   eshop-public   : apigateway (edge) + services reachable by gateway.
 #   eshop-internal : services → postgres / redis / rabbitmq.
-#   Both networks are defined in docker-compose.infrastructure.yml and
-#   referenced here as external.
+#   Both networks are created by docker-compose.infra.dev.yml.
 #
-# Usage (from solution root):
+# Usage (infrastructure only):
+#   docker compose -f deploy/docker/docker-compose.infra.dev.yml up -d
+#
+# Usage (full dev stack with app services):
 #   docker compose \
-#     -f deploy/docker/docker-compose.infrastructure.yml \
+#     -f deploy/docker/docker-compose.infra.dev.yml \
 #     -f deploy/docker/docker-compose.dev.yml \
-#     --env-file deploy/env/dev.env \
 #     up -d
 #
-# Required secret files (copy from *.example and fill in values):
-#   deploy/secrets/postgres_password.txt    ← PostgreSQL superuser password
-#   deploy/secrets/rabbitmq_password.txt
-#   deploy/secrets/redis_connstr.txt        ← Redis connection string (host:port,password=...)
+# Required secret files (only needed when app services are uncommented):
 #   deploy/secrets/tenancy_connstr.txt
 #   deploy/secrets/authorization_connstr.txt
+#   deploy/secrets/rabbitmq_password.txt
 # =============================================================================
 
 services:
-
-  # Expose infrastructure ports for local development tooling.
-  dashboard:
-    ports:
-      - "18888:18888"
-
-  postgres:
-    ports:
-      - "5432:5432"
-
-  redis:
-    ports:
-      - "6379:6379"
-
-  rabbitmq:
-    ports:
-      - "5672:5672"
-      - "15672:15672"   # management UI
 
   # ---------------------------------------------------------------------------
   # Tenancy service
@@ -68,9 +42,9 @@ services:
       context: ../..
       dockerfile: Tenancy/src/EShop.Tenancy.API/Dockerfile
     environment:
-      # Non-sensitive config only — no credentials here.
       - ASPNETCORE_ENVIRONMENT=Development
       - RedisOptions__Enabled=true
+      - RedisOptions__Host=redis:6379
       - MasstransitConfiguration__Host=rabbitmq
       - MasstransitConfiguration__Port=5672
       - MasstransitConfiguration__VirtualHost=${RABBITMQ_VHOST}
@@ -78,16 +52,10 @@ services:
       - Services__Authorization=http://authorization:8080
       - OTEL_SERVICE_NAME=tenancy-api
     secrets:
-      # Full connection string → /run/secrets/ConnectionStrings__DefaultConnection
-      # AddKeyPerFile maps this to GetConnectionString("DefaultConnection").
       - source: tenancy_connstr
         target: ConnectionStrings__DefaultConnection
-      # Broker password → /run/secrets/MasstransitConfiguration__Password
       - source: rabbitmq_password
         target: MasstransitConfiguration__Password
-      # Redis connection string → /run/secrets/RedisOptions__ConnectionString
-      - source: redis_connstr
-        target: RedisOptions__ConnectionString
     ports:
       - "5001:8080"
     healthcheck:
@@ -111,8 +79,8 @@ services:
     env_file:
       - ../env/dev.env
     networks:
-      - eshop-public    # reachable by API gateway
-      - eshop-internal  # reaches postgres, redis, rabbitmq
+      - eshop-public
+      - eshop-internal
     deploy:
       resources:
         limits:
@@ -140,6 +108,7 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - RedisOptions__Enabled=true
+      - RedisOptions__Host=redis:6379
       - MasstransitConfiguration__Host=rabbitmq
       - MasstransitConfiguration__Port=5672
       - MasstransitConfiguration__VirtualHost=${RABBITMQ_VHOST}
@@ -151,8 +120,6 @@ services:
         target: ConnectionStrings__DefaultConnection
       - source: rabbitmq_password
         target: MasstransitConfiguration__Password
-      - source: redis_connstr
-        target: RedisOptions__ConnectionString
     ports:
       - "5002:8080"
     healthcheck:
@@ -208,12 +175,10 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - RedisOptions__Enabled=true
+      - RedisOptions__Host=redis:6379
       - Services__tenancy__http__0=http://tenancy:8080
       - Services__authorization__http__0=http://authorization:8080
       - OTEL_SERVICE_NAME=api-gateway
-    secrets:
-      - source: redis_connstr
-        target: RedisOptions__ConnectionString
     ports:
       - "5000:8080"
     healthcheck:
@@ -261,11 +226,7 @@ secrets:
     file: ../secrets/authorization_connstr.txt
   rabbitmq_password:
     file: ../secrets/rabbitmq_password.txt
-  redis_connstr:
-    file: ../secrets/redis_connstr.txt
 
-# Networks are owned by docker-compose.infrastructure.yml.
-# Declared external here so services can join them without redefining.
 networks:
   eshop-public:
     external: true

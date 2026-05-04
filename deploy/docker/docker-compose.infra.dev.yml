@@ -1,0 +1,106 @@
+# =============================================================================
+# Infrastructure services — LOCAL DEVELOPMENT ONLY.
+#
+# Intentionally simple:
+#   - Plain environment variable credentials (no Docker secrets).
+#   - All ports exposed for local tooling (pgAdmin, RedisInsight, etc.).
+#   - No resource limits — do not constrain the developer's machine.
+#   - No internal: true restriction — containers may reach the internet.
+#
+# For secure production infrastructure, see docker-compose.infra.prod.yml.
+#
+# Usage (infrastructure only):
+#   docker compose -f deploy/docker/docker-compose.infra.dev.yml up -d
+#
+# Usage (full dev stack with app services):
+#   docker compose \
+#     -f deploy/docker/docker-compose.infra.dev.yml \
+#     -f deploy/docker/docker-compose.dev.yml \
+#     up -d
+#
+# =============================================================================
+
+services:
+
+  # ---------------------------------------------------------------------------
+  # PostgreSQL
+  # Superuser password is a plain env var — fine for local dev.
+  # App user passwords are hardcoded in deploy/scripts/postgres-init.sql.
+  # ---------------------------------------------------------------------------
+  postgres:
+    image: postgres:17.0
+    container_name: postgres
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    command: postgres -c 'max_connections=200'
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres-dev}
+    volumes:
+      - ../scripts/postgres-init.sql:/docker-entrypoint-initdb.d/1-init.sql
+      - eshop-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - eshop-internal
+
+  # ---------------------------------------------------------------------------
+  # Redis — no authentication in dev. App services connect with Host only,
+  # no password needed. RedisOptions.ConnectionString = "localhost:6379".
+  # ---------------------------------------------------------------------------
+  redis:
+    image: redis:7.4.7
+    container_name: redis
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - eshop-redis:/data
+    ports:
+      - "6379:6379"
+    networks:
+      - eshop-internal
+
+  # ---------------------------------------------------------------------------
+  # RabbitMQ — plain credentials in dev. Default guest/guest works out of the
+  # box; override via env file if needed.
+  # ---------------------------------------------------------------------------
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: rabbitmq
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "check_port_connectivity"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-guest}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-guest}
+      RABBITMQ_DEFAULT_VHOST: ${RABBITMQ_VHOST:-eshop01012025}
+    volumes:
+      - eshop-rabbitmq:/var/lib/rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - eshop-internal
+
+volumes:
+  eshop-data:
+  eshop-redis:
+  eshop-rabbitmq:
+
+networks:
+  eshop-public:
+    external: true
+  eshop-internal:
+    external: true

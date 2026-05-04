@@ -105,8 +105,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EShop.Tenancy.Tests", "Tena
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EShop.Catalog.ReadModels.MongoDb", "Catalog\src\EShop.Catalog.ReadModels.MongoDb\EShop.Catalog.ReadModels.MongoDb.csproj", "{012E1CBC-EBC5-45FE-8AE7-30D29FF97B35}"
 EndProject
-Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{81DDED9D-158B-E303-5F62-77A2896D2A5A}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Aspire", "Aspire", "{31242E98-E92A-4500-8463-9CDA3627C571}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Deployment", "Deployment", "{645D1914-2B57-4FF2-85EC-2D25E851A35C}"
@@ -211,7 +209,8 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docker", "docker", "{CCECE209-D267-4CF5-AA05-9583F6C3FE11}"
 	ProjectSection(SolutionItems) = preProject
 		deploy\docker\docker-compose.dev.yml = deploy\docker\docker-compose.dev.yml
-		deploy\docker\docker-compose.infrastructure.yml = deploy\docker\docker-compose.infrastructure.yml
+		deploy\docker\docker-compose.infra.dev.yml = deploy\docker\docker-compose.infra.dev.yml
+		deploy\docker\docker-compose.infra.prod.yml = deploy\docker\docker-compose.infra.prod.yml
 		deploy\docker\docker-compose.prod.yml = deploy\docker\docker-compose.prod.yml
 	EndProjectSection
 EndProject
@@ -233,7 +232,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "secrets", "secrets", "{43E4
 		deploy\secrets\authorization_connstr.txt.example = deploy\secrets\authorization_connstr.txt.example
 		deploy\secrets\postgres_password.txt.example = deploy\secrets\postgres_password.txt.example
 		deploy\secrets\rabbitmq_password.txt.example = deploy\secrets\rabbitmq_password.txt.example
-		deploy\secrets\redis_connstr.txt.example = deploy\secrets\redis_connstr.txt.example
 		deploy\secrets\redis_password.txt.example = deploy\secrets\redis_password.txt.example
 		deploy\secrets\tenancy_connstr.txt.example = deploy\secrets\tenancy_connstr.txt.example
 	EndProjectSection
@@ -364,10 +362,6 @@ Global
 		{012E1CBC-EBC5-45FE-8AE7-30D29FF97B35}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{012E1CBC-EBC5-45FE-8AE7-30D29FF97B35}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{012E1CBC-EBC5-45FE-8AE7-30D29FF97B35}.Release|Any CPU.Build.0 = Release|Any CPU
-		{81DDED9D-158B-E303-5F62-77A2896D2A5A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{81DDED9D-158B-E303-5F62-77A2896D2A5A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{81DDED9D-158B-E303-5F62-77A2896D2A5A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{81DDED9D-158B-E303-5F62-77A2896D2A5A}.Release|Any CPU.Build.0 = Release|Any CPU
 		{D2933B25-8CA4-4EB4-BE39-1EE067B97AC8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{D2933B25-8CA4-4EB4-BE39-1EE067B97AC8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D2933B25-8CA4-4EB4-BE39-1EE067B97AC8}.Release|Any CPU.ActiveCfg = Release|Any CPU
