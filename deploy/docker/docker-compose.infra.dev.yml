@@ -94,18 +94,23 @@ services:
       - eshop-internal
 
   # ---------------------------------------------------------------------------
-  # MongoDB — no authentication in dev.
+  # MongoDB — root user (sa) for admin only; app users created via init script.
+  # Each service authenticates against its own database — no authSource needed.
   # ---------------------------------------------------------------------------
   mongodb:
     image: mongo:6.0
     container_name: mongodb
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      test: ["CMD", "mongosh", "-u", "catalog", "-p", "catalog-dev", "--authenticationDatabase", "eshop-catalog", "--eval", "db.adminCommand('ping')"]
       interval: 10s
       timeout: 5s
       retries: 5
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: sa
+      MONGO_INITDB_ROOT_PASSWORD: sa1302139
     volumes:
+      - ../scripts/mongodb-init.js:/docker-entrypoint-initdb.d/1-init.js:ro
       - eshop-mongodb:/data/db
     ports:
       - "27017:27017"

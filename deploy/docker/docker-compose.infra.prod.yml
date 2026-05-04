@@ -171,16 +171,16 @@ services:
 
   # ---------------------------------------------------------------------------
   # MongoDB — NEVER on eshop-public. eshop-internal only.
-  # Root credentials injected via Docker secret.
-  # App connection strings must include credentials:
-  #   mongodb://catalog:password@mongodb:27017/eshop-catalog
+  # Root and catalog-app passwords injected via Docker secrets.
+  # Init script creates dedicated app user (catalog) on eshop-catalog db.
+  # App services authenticate directly against eshop-catalog — no authSource.
   # ---------------------------------------------------------------------------
   mongodb:
     image: mongo:6.0
     container_name: mongodb
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "mongosh", "--username", "root", "--password", "$(cat /run/secrets/mongodb_password)", "--eval", "db.adminCommand('ping')"]
+      test: ["CMD", "mongosh", "-u", "catalog", "-p", "$$(cat /run/secrets/mongodb_catalog_password)", "--authenticationDatabase", "eshop-catalog", "--eval", "db.adminCommand('ping')"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -190,7 +190,9 @@ services:
       MONGO_INITDB_ROOT_PASSWORD_FILE: /run/secrets/mongodb_password
     secrets:
       - mongodb_password
+      - mongodb_catalog_password
     volumes:
+      - ../scripts/mongodb-init-prod.js:/docker-entrypoint-initdb.d/1-init.sh:ro
       - eshop-mongodb:/data/db
     networks:
       - eshop-internal
@@ -223,6 +225,8 @@ secrets:
     file: ../secrets/redis_password.txt
   mongodb_password:
     file: ../secrets/mongodb_password.txt
+  mongodb_catalog_password:
+    file: ../secrets/mongodb_catalog_password.txt
 
 # Networks defined here — single source of truth for the cluster.
 # Application compose files reference these as external: true.

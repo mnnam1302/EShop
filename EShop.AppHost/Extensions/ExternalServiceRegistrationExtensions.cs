@@ -61,10 +61,17 @@ public static class ExternalServiceRegistrationExtensions
 
         if (useExternalService)
         {
-            tenancyDatabase = builder.AddConnectionString("tenancyDatabase");
-            authorizationDatabase = builder.AddConnectionString("authorizationDatabase");
-            catalogDatabase = builder.AddConnectionString("catalogDatabase");
-            catalogMongoDatabase = builder.AddConnectionString("catalogMongoDatabase");
+            var postgresServer = builder.AddConnectionString(ResourceNames.PostgreSql);
+            var mongoServer = builder.AddConnectionString(ResourceNames.MongoDb);
+
+            tenancyDatabase = builder.AddConnectionString("tenancyDatabase")
+                .WithParentRelationship(postgresServer);
+            authorizationDatabase = builder.AddConnectionString("authorizationDatabase")
+                .WithParentRelationship(postgresServer);
+            catalogDatabase = builder.AddConnectionString("catalogDatabase")
+                .WithParentRelationship(postgresServer);
+            catalogMongoDatabase = builder.AddConnectionString("catalogMongoDatabase")
+                .WithParentRelationship(mongoServer);
         }
         else
         {
@@ -98,7 +105,7 @@ public static class ExternalServiceRegistrationExtensions
 
         var tenancy = builder.AddProject<Projects.EShop_Tenancy_API>(ResourceNames.TenancyApi)
             .WithExternalServiceMode(useExternalService)
-            //.WithEnvironment("GRAFANA_URL", grafana.GetEndpoint("http"))
+            //.WithEnvironment("GRAFANA_URL", grafana.GetEndpoint("http")) // add the same for other microservices
             .WithReference(tenancyDatabase)
             .WithReference(redis)
             .WithReference(rabbitmq);
@@ -113,7 +120,6 @@ public static class ExternalServiceRegistrationExtensions
 
         var authorization = builder.AddProject<Projects.EShop_Authorization_API>(ResourceNames.AuthorizationApi)
             .WithExternalServiceMode(useExternalService)
-            //.WithEnvironment("GRAFANA_URL", grafana.GetEndpoint("http"))
             .WithReference(authorizationDatabase)
             .WithReference(redis)
             .WithReference(rabbitmq);
@@ -128,7 +134,6 @@ public static class ExternalServiceRegistrationExtensions
 
         var catalogApplication = builder.AddProject<Projects.EShop_Catalog_Application>("catalog-application")
             .WithExternalServiceMode(useExternalService)
-            //.WithEnvironment("GRAFANA_URL", grafana.GetEndpoint("http"))
             .WithReference(catalogDatabase)
             .WithReference(redis)
             .WithReference(rabbitmq);
@@ -143,7 +148,6 @@ public static class ExternalServiceRegistrationExtensions
 
         var catalogReadModel = builder.AddProject<Projects.EShop_Catalog_ReadModels_MongoDb>("catalog-readmodel")
             .WithExternalServiceMode(useExternalService)
-            //.WithEnvironment("GRAFANA_URL", grafana.GetEndpoint("http"))
             .WithReference(catalogMongoDatabase)
             .WithReference(redis)
             .WithReference(rabbitmq);
@@ -157,28 +161,30 @@ public static class ExternalServiceRegistrationExtensions
                 .WaitFor(catalogApplication);
         }
 
-        var inventory = builder.AddProject<Projects.EShop_Inventory_API>("inventory-api");
+        //var inventory = builder.AddProject<Projects.EShop_Inventory_API>("inventory-api");
+
+        //builder.AddProject<Projects.EShop_Order_API>("eshop-order-api");
 
         #endregion Microservices
 
         #region Api Gateway
 
-        var apiGateway = builder.AddProject<Projects.EShop_ApiGateway>(ResourceNames.ApiGateway)
-            .WithReference(redis)
-            .WithReference(tenancy)
-            .WithReference(authorization)
-            .WithReference(catalogApplication)
-            .WithReference(catalogReadModel);
+        //var apiGateway = builder.AddProject<Projects.EShop_ApiGateway>(ResourceNames.ApiGateway)
+        //    .WithReference(redis)
+        //    .WithReference(tenancy)
+        //    .WithReference(authorization)
+        //    .WithReference(catalogApplication)
+        //    .WithReference(catalogReadModel);
 
-        if (!useExternalService)
-        {
-            apiGateway
-                .WaitFor(redis)
-                .WaitFor(tenancy)
-                .WaitFor(authorization)
-                .WaitFor(catalogApplication)
-                .WaitFor(catalogReadModel);
-        }
+        //if (!useExternalService)
+        //{
+        //    apiGateway
+        //        .WaitFor(redis)
+        //        .WaitFor(tenancy)
+        //        .WaitFor(authorization)
+        //        .WaitFor(catalogApplication)
+        //        .WaitFor(catalogReadModel);
+        //}
 
         #endregion Api Gateway
 
