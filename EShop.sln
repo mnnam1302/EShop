@@ -203,6 +203,41 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EShop.Order.Infrastructure"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EShop.Order.Tests", "Order\test\EShop.Order.Tests\EShop.Order.Tests.csproj", "{F2F2CAED-4D22-428B-9AA2-A23A645A6393}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "deploy", "deploy", "{84C560F2-F8FF-410D-A601-60CB860E981B}"
+	ProjectSection(SolutionItems) = preProject
+		deploy\README.md = deploy\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docker", "docker", "{CCECE209-D267-4CF5-AA05-9583F6C3FE11}"
+	ProjectSection(SolutionItems) = preProject
+		deploy\docker\docker-compose.dev.yml = deploy\docker\docker-compose.dev.yml
+		deploy\docker\docker-compose.infrastructure.yml = deploy\docker\docker-compose.infrastructure.yml
+		deploy\docker\docker-compose.prod.yml = deploy\docker\docker-compose.prod.yml
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "env", "env", "{0BED3C2E-3926-4754-92C5-5A6D2AFC2643}"
+	ProjectSection(SolutionItems) = preProject
+		deploy\env\dev.env = deploy\env\dev.env
+		deploy\env\prod.env = deploy\env\prod.env
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "scripts", "scripts", "{A71E29AD-F3F9-4F74-AE5F-2412A181DF88}"
+	ProjectSection(SolutionItems) = preProject
+		deploy\scripts\delete-tables.sql = deploy\scripts\delete-tables.sql
+		deploy\scripts\postgres-init.sql = deploy\scripts\postgres-init.sql
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "secrets", "secrets", "{43E4DC9B-DBDD-4B45-9AB4-4D7E5F698EA8}"
+	ProjectSection(SolutionItems) = preProject
+		deploy\secrets\.gitignore = deploy\secrets\.gitignore
+		deploy\secrets\authorization_connstr.txt.example = deploy\secrets\authorization_connstr.txt.example
+		deploy\secrets\postgres_password.txt.example = deploy\secrets\postgres_password.txt.example
+		deploy\secrets\rabbitmq_password.txt.example = deploy\secrets\rabbitmq_password.txt.example
+		deploy\secrets\redis_connstr.txt.example = deploy\secrets\redis_connstr.txt.example
+		deploy\secrets\redis_password.txt.example = deploy\secrets\redis_password.txt.example
+		deploy\secrets\tenancy_connstr.txt.example = deploy\secrets\tenancy_connstr.txt.example
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -473,6 +508,10 @@ Global
 		{F0C8F842-3D3B-46CA-A8F5-040E505E4BFD} = {221AD294-46CE-4844-9300-2CCC2004175D}
 		{10CE77DB-2F9E-40A1-BCFF-2E296A78961A} = {221AD294-46CE-4844-9300-2CCC2004175D}
 		{F2F2CAED-4D22-428B-9AA2-A23A645A6393} = {B7540073-8ABE-4C6F-B236-A4182096371A}
+		{CCECE209-D267-4CF5-AA05-9583F6C3FE11} = {84C560F2-F8FF-410D-A601-60CB860E981B}
+		{0BED3C2E-3926-4754-92C5-5A6D2AFC2643} = {84C560F2-F8FF-410D-A601-60CB860E981B}
+		{A71E29AD-F3F9-4F74-AE5F-2412A181DF88} = {84C560F2-F8FF-410D-A601-60CB860E981B}
+		{43E4DC9B-DBDD-4B45-9AB4-4D7E5F698EA8} = {84C560F2-F8FF-410D-A601-60CB860E981B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {BB890EFB-EE36-4A0E-A948-F28A53D375E6}

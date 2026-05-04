@@ -1,0 +1,206 @@
+# =============================================================================
+# Infrastructure services — postgres, redis, rabbitmq, dashboard.
+# Shared across all environments. This file owns network definitions.
+#
+# Two-network security model:
+#   eshop-public   : edge-facing — dashboard UI, services reachable by gateway.
+#   eshop-internal : backend-only — DB, cache, broker. internal:true means
+#                    containers ONLY on this network cannot reach the internet.
+#                    Services on both networks still have outbound access via
+#                    eshop-public. Databases never touch the public network.
+#
+# Usage (infrastructure only):
+#   docker compose \
+#     -f deploy/docker/docker-compose.infrastructure.yml \
+#     --env-file deploy/env/dev.env \
+#     up -d
+#
+# Usage (combined with services):
+#   docker compose \
+#     -f deploy/docker/docker-compose.infrastructure.yml \
+#     -f deploy/docker/docker-compose.dev.yml \
+#     --env-file deploy/env/dev.env \
+#     up -d
+# =============================================================================
+
+services:
+
+  # ---------------------------------------------------------------------------
+  # Dashboard — Aspire observability UI + OTLP collector endpoint.
+  # Sits on eshop-public (browser access) and eshop-internal (receives OTLP
+  # from services over the internal network).
+  # ---------------------------------------------------------------------------
+  # dashboard:
+  #   image: mcr.microsoft.com/dotnet/aspire-dashboard:9.0
+  #   container_name: dashboard
+  #   restart: unless-stopped
+  #   environment:
+  #     - DASHBOARD__OTLP__AUTHMODE=ApiKey
+  #     - DASHBOARD__OTLP__PRIMARYAPIKEY=${OTLP_API_KEY}
+  #   networks:
+  #     - eshop-public    # browser access to dashboard UI
+  #     - eshop-internal  # receives OTLP pushes from services
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         cpus: '0.5'
+  #         memory: 256M
+  #       reservations:
+  #         cpus: '0.25'
+  #         memory: 128M
+  #   logging:
+  #     driver: "json-file"
+  #     options:
+  #       max-size: "10m"
+  #       max-file: "3"
+
+  # ---------------------------------------------------------------------------
+  # PostgreSQL — NEVER on eshop-public. eshop-internal only.
+  # Password injected via Docker secret (not visible in inspect / logs).
+  # ---------------------------------------------------------------------------
+  postgres:
+    image: postgres:17.0
+    container_name: postgres
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    command: postgres -c 'max_connections=200'
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
+    volumes:
+      - ../scripts/postgres-init.sql:/docker-entrypoint-initdb.d/1-init.sql
+      - eshop-data:/var/lib/postgresql/data
+    secrets:
+      - postgres_password
+    networks:
+      - eshop-internal
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+        reservations:
+          cpus: '0.5'
+          memory: 256M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ---------------------------------------------------------------------------
+  # Redis — NEVER on eshop-public. eshop-internal only.
+  # Single secret: redis_connstr (full connection string, e.g. redis:6379,password=...).
+  # Server extracts the password via shell; app services mount the same secret
+  # directly as RedisOptions__ConnectionString via target: in dev/prod compose.
+  # ---------------------------------------------------------------------------
+  # redis:
+  #   image: redis:7.4.7
+  #   container_name: redis
+  #   restart: unless-stopped
+  #   command:
+  #     - sh
+  #     - -c
+  #     - |
+  #       REDIS_PASS=$$(grep -oP '(?<=password=)[^,]+' /run/secrets/redis_connstr)
+  #       exec redis-server --requirepass "$$REDIS_PASS"
+  #   healthcheck:
+  #     test:
+  #       - CMD-SHELL
+  #       - |
+  #         redis-cli -a $$(grep -oP '(?<=password=)[^,]+' /run/secrets/redis_connstr) --no-auth-warning ping
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 3
+  #     start_period: 30s
+  #   secrets:
+  #     - redis_connstr
+  #   volumes:
+  #     - eshop_redis:/data
+  #   networks:
+  #     - eshop-internal
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         cpus: '0.25'
+  #         memory: 128M
+  #       reservations:
+  #         cpus: '0.1'
+  #         memory: 64M
+  #   logging:
+  #     driver: "json-file"
+  #     options:
+  #       max-size: "10m"
+  #       max-file: "3"
+
+  # ---------------------------------------------------------------------------
+  # RabbitMQ — NEVER on eshop-public. eshop-internal only.
+  #
+  # Password injected via Docker secret using RABBITMQ_DEFAULT_PASS_FILE —
+  # supported since RabbitMQ 3.x. The same file is mounted into application
+  # containers as MasstransitConfiguration__Password via target: in dev/prod
+  # compose files.
+  # ---------------------------------------------------------------------------
+  # rabbitmq:
+  #   image: rabbitmq:3-management-alpine
+  #   container_name: rabbitmq
+  #   restart: unless-stopped
+  #   healthcheck:
+  #     test: ["CMD", "rabbitmq-diagnostics", "check_port_connectivity"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 3
+  #     start_period: 40s
+  #   environment:
+  #     RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+  #     RABBITMQ_DEFAULT_PASS_FILE: /run/secrets/rabbitmq_password
+  #     RABBITMQ_DEFAULT_VHOST: ${RABBITMQ_VHOST}
+  #   secrets:
+  #     - rabbitmq_password
+  #   volumes:
+  #     - rabbitmq_data:/var/lib/rabbitmq
+  #   networks:
+  #     - eshop-internal  # isolated — no public network exposure
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         cpus: '0.5'
+  #         memory: 512M
+  #       reservations:
+  #         cpus: '0.25'
+  #         memory: 256M
+  #   logging:
+  #     driver: "json-file"
+  #     options:
+  #       max-size: "10m"
+  #       max-file: "3"
+
+volumes:
+  eshop-data:
+  eshop_redis:
+  rabbitmq_data:
+
+secrets:
+  postgres_password:
+    file: ../secrets/postgres_password.txt
+  rabbitmq_password:
+    file: ../secrets/rabbitmq_password.txt
+  redis_connstr:
+    file: ../secrets/redis_connstr.txt
+
+# Networks defined here — single source of truth for the cluster.
+# Application compose files reference these as external: true.
+networks:
+  eshop-public:
+    name: eshop-public
+    driver: bridge
+
+  eshop-internal:
+    name: eshop-internal
+    driver: bridge
+    internal: true  # containers ONLY on this network cannot reach the internet

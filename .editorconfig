@@ -103,5 +103,14 @@ dotnet_style_prefer_simplified_interpolation = true:suggestion
 # IDE0046: Convert to conditional expression
 dotnet_diagnostic.IDE0046.severity = none
 
+# Default severity for all analyzer diagnostics
+dotnet_diagnostic.CA2007.severity = none
+
+# CA1062: Validate arguments of public methods
+dotnet_diagnostic.CA1062.severity = none
+
+# Default severity for all analyzer diagnostics
+dotnet_analyzer_diagnostic.severity = none
+
 [*.feature]
 gherkin_table_cell_right_align_numeric_content = false

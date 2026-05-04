@@ -5,6 +5,7 @@ using EShop.Shared.JsonApi.Middlewares;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Configuration.AddKeyPerFile("/run/secrets", optional: true);
 
 Logging.SetSerilog("ApiGateway");
 builder.Host.UseSerilog();
