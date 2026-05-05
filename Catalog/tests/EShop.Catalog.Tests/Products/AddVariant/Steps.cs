@@ -9,6 +9,7 @@ internal sealed class Steps(StepContext stepContext, Get.StepContext getStepCont
     private static readonly HashSet<string> KnownVariantColumns =
         new(StringComparer.OrdinalIgnoreCase) { "Name", "Sku", "Price", "DiscountPrice" };
 
+    [Given("System user has added a variant to the product {string}")]
     [When("System user adds a variant to the product {string}")]
     public async Task WhenSystemUserAddsAVariantToTheProduct(string productName, DataTable dataTable)
     {

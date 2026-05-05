@@ -108,28 +108,28 @@ namespace EShop.Catalog.Tests.Products.Unpublish
         {
 #line 6
 #line hidden
-            global::Reqnroll.Table table35 = new global::Reqnroll.Table(new string[] {
+            global::Reqnroll.Table table38 = new global::Reqnroll.Table(new string[] {
                         "PermissionId"});
-            table35.AddRow(new string[] {
+            table38.AddRow(new string[] {
                         "Catalog_ManageProducts"});
-            table35.AddRow(new string[] {
+            table38.AddRow(new string[] {
                         "Catalog_ManageCategories"});
 #line 7
-    await testRunner.GivenAsync("System user with following permissions", ((string)(null)), table35, "Given ");
+    await testRunner.GivenAsync("System user with following permissions", ((string)(null)), table38, "Given ");
 #line hidden
 #line 11
     await testRunner.AndAsync("all features are available for System User", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
-            global::Reqnroll.Table table36 = new global::Reqnroll.Table(new string[] {
+            global::Reqnroll.Table table39 = new global::Reqnroll.Table(new string[] {
                         "Name",
                         "Reference",
                         "Slug"});
-            table36.AddRow(new string[] {
+            table39.AddRow(new string[] {
                         "Electronics",
                         "ELEC001",
                         "electronics"});
 #line 12
-    await testRunner.AndAsync("System User has created the following category", ((string)(null)), table36, "And ");
+    await testRunner.AndAsync("System User has created the following category", ((string)(null)), table39, "And ");
 #line hidden
         }
         
@@ -187,39 +187,63 @@ this.ScenarioInitialize(scenarioInfo, ruleInfo);
 #line 6
 await this.FeatureBackgroundAsync();
 #line hidden
-                global::Reqnroll.Table table37 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table40 = new global::Reqnroll.Table(new string[] {
                             "Name",
                             "Description",
-                            "Price",
-                            "DiscountPrice",
                             "Slug",
                             "Tags",
                             "Images"});
-                table37.AddRow(new string[] {
+                table40.AddRow(new string[] {
                             "Laptop Pro",
                             "A powerful laptop",
-                            "500",
-                            "459.99",
                             "laptop-pro",
                             "portable",
                             "https://img.example.com/lp1.jpg"});
 #line 17
-    await testRunner.GivenAsync("System User has created the following product under category \'ELEC001\'", ((string)(null)), table37, "Given ");
+    await testRunner.GivenAsync("System User has created the following product under category \'ELEC001\'", ((string)(null)), table40, "Given ");
 #line hidden
+                global::Reqnroll.Table table41 = new global::Reqnroll.Table(new string[] {
+                            "Name",
+                            "DisplayName",
+                            "Values",
+                            "DisplayStyle"});
+                table41.AddRow(new string[] {
+                            "Color",
+                            "Color",
+                            "Red,Blue",
+                            "Text"});
 #line 20
+    await testRunner.AndAsync("System user has added a variation dimension to the product \'Laptop Pro\'", ((string)(null)), table41, "And ");
+#line hidden
+                global::Reqnroll.Table table42 = new global::Reqnroll.Table(new string[] {
+                            "Name",
+                            "Sku",
+                            "Price",
+                            "DiscountPrice",
+                            "Color"});
+                table42.AddRow(new string[] {
+                            "Red Laptop",
+                            "SKU-RED",
+                            "500",
+                            "0",
+                            "Red"});
+#line 23
+    await testRunner.AndAsync("System user has added a variant to the product \'Laptop Pro\'", ((string)(null)), table42, "And ");
+#line hidden
+#line 26
     await testRunner.AndAsync("the product \'Laptop Pro\' is published", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
-#line 21
+#line 27
     await testRunner.WhenAsync("System user unpublishes the product \'Laptop Pro\'", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
-                global::Reqnroll.Table table38 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table43 = new global::Reqnroll.Table(new string[] {
                             "Name",
                             "State"});
-                table38.AddRow(new string[] {
+                table43.AddRow(new string[] {
                             "Laptop Pro",
                             "Unpublished"});
-#line 22
-    await testRunner.ThenAsync("the product \'Laptop Pro\' has following details", ((string)(null)), table38, "Then ");
+#line 28
+    await testRunner.ThenAsync("the product \'Laptop Pro\' has following details", ((string)(null)), table43, "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();

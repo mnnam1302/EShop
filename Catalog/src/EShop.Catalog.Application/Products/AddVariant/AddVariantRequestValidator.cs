@@ -8,9 +8,11 @@ public sealed class AddVariantRequestValidator : AbstractValidator<AddVariantReq
     public AddVariantRequestValidator()
     {
         RuleFor(x => x.Name)
+            .NotEmpty()
             .MaximumLength(ModelConstants.MediumText);
 
         RuleFor(x => x.Sku)
+            .NotEmpty()
             .MaximumLength(ModelConstants.MediumText);
 
         RuleFor(x => x.Price)

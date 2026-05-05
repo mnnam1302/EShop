@@ -26,9 +26,7 @@ internal static class ProductAggregateBuilder
     public static ProductAggregate CreateDraftProduct(
         string name = "Test Product",
         string slug = "test-product",
-        Guid? categoryId = null,
-        decimal price = 100m,
-        decimal discountPrice = 0m)
+        Guid? categoryId = null)
     {
         var command = new CreateProductCommand
         {
@@ -42,7 +40,6 @@ internal static class ProductAggregateBuilder
         };
 
         var product = ProductAggregate.Create(command, DefaultUserDetailsProvider);
-        product.AddDefaultVariant(price, discountPrice);
         product.MarkEventsAsCommitted();
         return product;
     }
@@ -52,7 +49,24 @@ internal static class ProductAggregateBuilder
         string slug = "test-product",
         decimal price = 100m)
     {
-        var product = CreateDraftProduct(name, slug, price: price);
+        var product = CreateDraftProduct(name, slug);
+        product.AddVariationDimension(new AddVariationDimensionCommand
+        {
+            ProductId = product.Id,
+            Name = "Color",
+            DisplayName = "Color",
+            Values = ["Default"],
+            DisplayStyle = "Text"
+        });
+        product.AddVariant(new AddVariantCommand
+        {
+            ProductId = product.Id,
+            Name = "Default Variant",
+            Sku = "SKU-DEFAULT",
+            Price = price,
+            DiscountPrice = 0m,
+            DimensionValues = [new VariantDimensionValueInput { Name = "Color", Value = "Default" }]
+        });
         product.Publish(DefaultUserDetailsProvider);
         product.MarkEventsAsCommitted();
         return product;
@@ -111,7 +125,7 @@ internal static class ProductAggregateBuilder
             DiscountPrice = 0m,
             DimensionValues = [new VariantDimensionValueInput { Name = "Color", Value = "Red" }]
         });
-        variantId = product.Variants.Last(v => !v.IsDefault).Id;
+        variantId = product.Variants.Last().Id;
         product.MarkEventsAsCommitted();
         return product;
     }

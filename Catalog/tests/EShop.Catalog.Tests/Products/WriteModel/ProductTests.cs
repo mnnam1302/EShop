@@ -92,7 +92,7 @@ public class ProductTests
     public void Publish_DraftWithVariant_TransitionsToPublished()
     {
         // Arrange
-        var product = ProductAggregateBuilder.CreateDraftProduct();
+        var product = ProductAggregateBuilder.CreateProductWithVariant(out _);
         var userDetails = ProductAggregateBuilder.CreateUserDetailsProvider();
 
         // Act

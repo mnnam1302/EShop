@@ -17,8 +17,6 @@ internal sealed class Steps(StepContext stepContext, Categories.Get.StepContext 
         {
             Name = row["Name"],
             Description = row["Description"],
-            Price = decimal.Parse(row["Price"]),
-            DiscountPrice = decimal.Parse(row["DiscountPrice"]),
             Slug = row["Slug"],
             Tags = row["Tags"].Split(',', StringSplitOptions.RemoveEmptyEntries),
             Images = row["Images"].Split(',', StringSplitOptions.RemoveEmptyEntries),
