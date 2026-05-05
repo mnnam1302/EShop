@@ -1,8 +1,9 @@
+using EShop.Inventory.Infrastructure;
 using Serilog;
 
 namespace EShop.Inventory.API;
 
-public class Program
+public static class Program
 {
     private const int ShutdownTimeoutInSeconds = 90;
     internal const string ApplicationName = "Inventory";
@@ -15,8 +16,8 @@ public class Program
             var app = BuidlWebApp(args);
             await using (var scope = app.Services.CreateAsyncScope())
             {
-                //var dbInitializer = ActivatorUtilities.CreateInstance<DbInitializer>(scope.ServiceProvider);
-                //await dbInitializer.Initialize();
+                var dbInitializer = ActivatorUtilities.CreateInstance<DbInitializer>(scope.ServiceProvider);
+                await dbInitializer.Initialize();
             }
 
             Log.Information("Starting up {ApplicationName}...", ApplicationName);

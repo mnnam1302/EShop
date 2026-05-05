@@ -58,6 +58,7 @@ public static class ExternalServiceRegistrationExtensions
         IResourceBuilder<IResourceWithConnectionString> authorizationDatabase;
         IResourceBuilder<IResourceWithConnectionString> catalogDatabase;
         IResourceBuilder<IResourceWithConnectionString> catalogMongoDatabase;
+        IResourceBuilder<IResourceWithConnectionString> inventoryDatabase;
 
         if (useExternalService)
         {
@@ -70,6 +71,9 @@ public static class ExternalServiceRegistrationExtensions
                 .WithParentRelationship(postgresServer);
             catalogDatabase = builder.AddConnectionString("catalogDatabase")
                 .WithParentRelationship(postgresServer);
+            inventoryDatabase = builder.AddConnectionString("inventoryDatabase")
+                .WithParentRelationship(postgresServer);
+
             catalogMongoDatabase = builder.AddConnectionString("catalogMongoDatabase")
                 .WithParentRelationship(mongoServer);
         }
@@ -96,6 +100,7 @@ public static class ExternalServiceRegistrationExtensions
             tenancyDatabase = postgres.AddDatabase("tenancyDatabase", "eshop_tenancy");
             authorizationDatabase = postgres.AddDatabase("authorizationDatabase", "eshop_authorization");
             catalogDatabase = postgres.AddDatabase("catalogDatabase", "eshop_catalog");
+            inventoryDatabase = postgres.AddDatabase("inventoryDatabase", "eshop_inventory");
             catalogMongoDatabase = mongodb.AddDatabase("catalogMongoDatabase", "eshop-catalog");
         }
 
@@ -132,7 +137,7 @@ public static class ExternalServiceRegistrationExtensions
                 .WaitFor(rabbitmq);
         }
 
-        var catalogApplication = builder.AddProject<Projects.EShop_Catalog_Application>("catalog-application")
+        var catalogApplication = builder.AddProject<Projects.EShop_Catalog_Application>(ResourceNames.CatalogWriteApi)
             .WithExternalServiceMode(useExternalService)
             .WithReference(catalogDatabase)
             .WithReference(redis)
@@ -146,7 +151,7 @@ public static class ExternalServiceRegistrationExtensions
                 .WaitFor(rabbitmq);
         }
 
-        var catalogReadModel = builder.AddProject<Projects.EShop_Catalog_ReadModels_MongoDb>("catalog-readmodel")
+        var catalogReadModel = builder.AddProject<Projects.EShop_Catalog_ReadModels_MongoDb>(ResourceNames.CatalogReadApi)
             .WithExternalServiceMode(useExternalService)
             .WithReference(catalogMongoDatabase)
             .WithReference(redis)
@@ -161,7 +166,19 @@ public static class ExternalServiceRegistrationExtensions
                 .WaitFor(catalogApplication);
         }
 
-        //var inventory = builder.AddProject<Projects.EShop_Inventory_API>("inventory-api");
+        var inventory = builder.AddProject<Projects.EShop_Inventory_API>(ResourceNames.InventoryApi)
+            .WithExternalServiceMode(useExternalService)
+            .WithReference(inventoryDatabase)
+            .WithReference(redis)
+            .WithReference(rabbitmq);
+
+        if (!useExternalService)
+        {
+            inventory
+                .WaitFor(inventoryDatabase)
+                .WaitFor(redis)
+                .WaitFor(rabbitmq);
+        }
 
         //builder.AddProject<Projects.EShop_Order_API>("eshop-order-api");
 

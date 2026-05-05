@@ -14,8 +14,13 @@ public static class ResourceNames
     public const string MongoDb = "mongodb";
 
     // microservices
+    public const string ApiGateway = "api-gateway";
     public const string TenancyApi = "tenancy";
     public const string AuthorizationApi = "authorization";
 
-    public const string ApiGateway = "api-gateway";
+    public const string CatalogWriteApi = "catalog-write";
+    public const string CatalogReadApi = "catalog-read";
+    public const string CatalogSearchApi = "catalog-search";
+
+    public const string InventoryApi = "inventory";
 }

@@ -112,5 +112,8 @@ dotnet_diagnostic.CA1062.severity = none
 # Default severity for all analyzer diagnostics
 dotnet_analyzer_diagnostic.severity = none
 
+# CA1515: Consider making public types internal
+dotnet_diagnostic.CA1515.severity = none
+
 [*.feature]
 gherkin_table_cell_right_align_numeric_content = false
