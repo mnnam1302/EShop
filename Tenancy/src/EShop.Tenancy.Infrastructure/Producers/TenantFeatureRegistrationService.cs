@@ -9,20 +9,21 @@ public sealed class TenantFeatureRegistrationService(IEventBus eventBusGateway) 
 {
     private readonly string ApplicationName = nameof(FeatureModules.EShop_Tenancy);
 
-    private static readonly IEnumerable<IFeature> features = new List<TenancyFeature>
-    {
-         new TenancyFeature(
-             FeatureConstants.Tenancy.SystemFormatConfiguration_FeatureId,
-             "System Format Configuration",
-             "System Format Configuration",
-             FeatureState.Enabled),
-    };
+    private static readonly TenancyFeature[] features =
+    [
+        new TenancyFeature
+        {
+            Id = FeatureConstants.Tenancy.SystemFormatConfiguration_FeatureId,
+            Name = "System Format Configuration",
+            Description = "System Format Configuration",
+            State = nameof(FeatureState.Enabled)
+        }
+    ];
 
     public async Task RegisterFeatures()
     {
-        await eventBusGateway.PublishAsync<SupportedFeaturesUpdated>(new
+        await eventBusGateway.PublishAsync(new SupportedFeaturesUpdated
         {
-            EventId = Guid.NewGuid(),
             SourceSystemReference = ApplicationName,
             Features = features,
             Action = SupportedFeaturesAction.AddOrUpdate,
@@ -34,19 +35,10 @@ public sealed class TenantFeatureRegistrationService(IEventBus eventBusGateway) 
 
     private sealed class TenancyFeature : IFeature
     {
-        public TenancyFeature(string id, string name, string description, FeatureState state = FeatureState.Disabled)
-        {
-            Id = id;
-            Name = name;
-            Description = description;
-            State = state.ToString();
-            Module = nameof(FeatureModules.EShop_Tenancy);
-        }
-
-        public string Id { get; set; }
-        public string Name { get; set; }
-        public string Description { get; set; }
-        public string State { get; set; }
-        public string Module { get; set; }
+        public required string Id { get; init; }
+        public required string Name { get; init; }
+        public required string Description { get; init; }
+        public string State { get; init; } = nameof(FeatureState.Disabled);
+        public string Module { get; init; } = nameof(FeatureModules.EShop_Tenancy);
     }
 }

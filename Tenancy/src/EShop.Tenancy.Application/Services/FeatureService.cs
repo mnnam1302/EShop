@@ -15,9 +15,9 @@ public interface IFeatureService
 {
     Task<IEnumerable<TenantFeature>> GetTenantFeaturesByTenantIdAsync(string tenantId, string? state = null, CancellationToken cancellationToken = default);
 
-    Task AddOrUpdateFeatureAsync(Feature feature, CancellationToken cancellationToken);
+    Task AddOrUpdateFeatureAsync(Domain.Entities.Feature feature, CancellationToken cancellationToken);
 
-    Task DeleteFeatureAsync(Feature feature, CancellationToken cancellationToken);
+    Task DeleteFeatureAsync(Domain.Entities.Feature feature, CancellationToken cancellationToken);
 }
 
 public sealed class FeatureService : IFeatureService
@@ -48,7 +48,7 @@ public sealed class FeatureService : IFeatureService
         _logger = logger;
     }
 
-    public async Task AddOrUpdateFeatureAsync(Feature feature, CancellationToken cancellationToken)
+    public async Task AddOrUpdateFeatureAsync(Domain.Entities.Feature feature, CancellationToken cancellationToken)
     {
         var entityState = await AddOrUpdateFeatureInternalAsync(feature, cancellationToken);
         if (entityState == EntityState.Added)
@@ -57,7 +57,7 @@ public sealed class FeatureService : IFeatureService
         }
     }
 
-    private async Task<EntityState> AddOrUpdateFeatureInternalAsync(Feature feature, CancellationToken cancellationToken)
+    private async Task<EntityState> AddOrUpdateFeatureInternalAsync(Domain.Entities.Feature feature, CancellationToken cancellationToken)
     {
         feature.Category ??= FeatureCategory.Permanent.ToString();
 
@@ -82,7 +82,7 @@ public sealed class FeatureService : IFeatureService
         return entityState;
     }
 
-    private async Task RegisterTenantFeature(Feature feature, CancellationToken cancellationToken)
+    private async Task RegisterTenantFeature(Domain.Entities.Feature feature, CancellationToken cancellationToken)
     {
         var tenantIds = await _tenantRepository
             .FindAll(trackChanges: false)
@@ -123,16 +123,15 @@ public sealed class FeatureService : IFeatureService
 
     private async Task PublishTenantFeaturesUpdatedAsync(string tenantId)
     {
-        await _eventBusGateway.PublishAsync<ITenantFeaturesUpdated>(new
+        await _eventBusGateway.PublishAsync(new TenantFeaturesUpdated
         {
-            EventId = Guid.NewGuid(),
             TenantId = tenantId,
             ActionUserId = _userDetailsProvider.AuthenticatedUser.ActionUserId,
             ActionUserType = _userDetailsProvider.AuthenticatedUser.ActionUserType,
         });
     }
 
-    public async Task DeleteFeatureAsync(Feature feature, CancellationToken cancellationToken)
+    public async Task DeleteFeatureAsync(Domain.Entities.Feature feature, CancellationToken cancellationToken)
     {
         await DeleteAsync(feature.Id, cancellationToken);
     }

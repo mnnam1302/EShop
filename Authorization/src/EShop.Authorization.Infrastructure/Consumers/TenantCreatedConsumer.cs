@@ -5,7 +5,7 @@ using MassTransit;
 
 namespace EShop.Authorization.Infrastructure.Consumers;
 
-public sealed class TenantCreatedConsumer : IConsumer<ITenantCreated>
+public sealed class TenantCreatedConsumer : IConsumer<TenantCreated>
 {
     private readonly IMediator _mediator;
 
@@ -14,7 +14,7 @@ public sealed class TenantCreatedConsumer : IConsumer<ITenantCreated>
         _mediator = mediator;
     }
 
-    public async Task Consume(ConsumeContext<ITenantCreated> context)
+    public async Task Consume(ConsumeContext<TenantCreated> context)
     {
         var command = new CreateRootOrganizationCommand
         {

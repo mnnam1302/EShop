@@ -1,14 +1,19 @@
 ﻿using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.Contracts.Services.Tenancy.Features;
-using EShop.Shared.EventBus.Abstractions;
+using EShop.Tenancy.Persistence;
 using MediatR;
 
 namespace EShop.Tenancy.Infrastructure.Consumers;
 
-public sealed class SupportedFeaturesUpdatedConsumer(
-    IMessageRepository messageRepository,
-    ISender sender) : IdempotentConsumer<SupportedFeaturesUpdated>(messageRepository)
+public sealed class SupportedFeaturesUpdatedConsumer : Consumer<SupportedFeaturesUpdated>
 {
+    private readonly ISender sender;
+
+    public SupportedFeaturesUpdatedConsumer(ISender sender, TenancyDbContext dbContext) : base(dbContext)
+    {
+        this.sender = sender;
+    }
+
     protected override async Task<Result> HandleMessageAsync(SupportedFeaturesUpdated message, CancellationToken cancellationToken)
     {
         var command = new Command.UpdateSupportedFeaturesInternalCommand

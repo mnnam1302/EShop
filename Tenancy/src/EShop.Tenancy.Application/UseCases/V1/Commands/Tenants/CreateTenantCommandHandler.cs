@@ -3,6 +3,7 @@ using EShop.Shared.Contracts.Abstractions.Requests;
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.Contracts.Services.Tenancy.Tenants;
 using EShop.Shared.DomainTools.Exceptions;
+using EShop.Shared.DomainTools.Extensions;
 using EShop.Shared.DomainTools.UnitOfWorks;
 using EShop.Shared.EventBus.Abstractions;
 using EShop.Shared.Scoping.ResourceAccessControl;
@@ -35,13 +36,13 @@ internal sealed class CreateTenantCommandHandler(
         // TODO: can implement domain event handler to handle tenant features
         await EnsureTenantAvailableFeatures(tenant, operationalUser.ActionUserId, cancellationToken);
 
-        await eventBusGateway.PublishAsync<ITenantCreated>(new
+        await eventBusGateway.PublishAsync(new TenantCreated
         {
             TenantId = tenant.Id,
             TenantName = tenant.Name,
-            OwnerUsername = tenant.OwnerUsername,
+            OwnerUsername = tenant.OwnerUsername.Require(),
             OwnerDisplayName = tenant.Name ?? Tenant.RemoveDomainSuffix(request.OwnerUsername, tenant.Id),
-            OwnerEmail = tenant.Email,
+            OwnerEmail = tenant.Email.Require(),
             ActionUserId = operationalUser.ActionUserId,
             ActionUserType = operationalUser.ActionUserType
         }, cancellationToken);

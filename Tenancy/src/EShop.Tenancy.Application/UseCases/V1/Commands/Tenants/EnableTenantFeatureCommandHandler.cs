@@ -58,9 +58,8 @@ internal sealed class EnableTenantFeatureCommandHandler : ICommandHandler<Enable
         _tenantFeatureRepository.Update(tenantFeature);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        await _eventBus.PublishAsync<ITenantFeaturesUpdated>(new
+        await _eventBus.PublishAsync(new TenantFeaturesUpdated
         {
-            EventId = Guid.NewGuid(),
             TenantId = command.TenantId,
             ActionUserId = _userDetailsProvider.AuthenticatedUser.ActionUserId,
             ActionUserType = _userDetailsProvider.AuthenticatedUser.ActionUserType,

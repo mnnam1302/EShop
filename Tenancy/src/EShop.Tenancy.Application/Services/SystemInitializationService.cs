@@ -1,6 +1,7 @@
 using EShop.Shared.Authentication;
 using EShop.Shared.Authentication.Abstractions;
 using EShop.Shared.Contracts.Services.Tenancy.Tenants;
+using EShop.Shared.DomainTools.Extensions;
 using EShop.Shared.DomainTools.UnitOfWorks;
 using EShop.Shared.EventBus.Abstractions;
 using EShop.Tenancy.Application.Abstractions;
@@ -65,13 +66,13 @@ public sealed class SystemInitializationService(
 
     private async Task PublishTenantCreatedEventAsync(Tenant systemTenant, CancellationToken cancellationToken)
     {
-        await eventBusGateway.PublishAsync<ITenantCreated>(new
+        await eventBusGateway.PublishAsync(new TenantCreated
         {
             TenantId = systemTenant.Id,
             TenantName = systemTenant.Name,
-            OwnerUsername = systemTenant.OwnerUsername,
+            OwnerUsername = systemTenant.OwnerUsername.Require(),
             OwnerDisplayName = systemTenant.Name,
-            OwnerEmail = systemTenant.Email,
+            OwnerEmail = systemTenant.Email.Require(),
             ActionUserId = userDetailsProvider.AuthenticatedUser.ActionUserId,
             ActionUserType = userDetailsProvider.AuthenticatedUser.ActionUserType
         }, cancellationToken);

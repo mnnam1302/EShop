@@ -116,7 +116,7 @@ public static class ServiceCollectionExtensions
             environment.EnvironmentName,
             serviceName);
 
-        bus.ConfigureReceiveEndpoint<TenantFeaturesUpdatedConsumer, ITenantFeaturesUpdated>(
+        bus.ConfigureReceiveEndpoint<TenantFeaturesUpdatedConsumer, TenantFeaturesUpdated>(
             context,
             environment.EnvironmentName,
             serviceName);

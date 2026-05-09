@@ -19,9 +19,8 @@ public sealed class CatalogFeatureRegistrationService(IEventBus eventBus) : IFea
 
     public async Task RegisterFeatures()
     {
-        await eventBus.PublishAsync<SupportedFeaturesUpdated>(new
+        await eventBus.PublishAsync(new SupportedFeaturesUpdated
         {
-            EventId = Guid.NewGuid(),
             SourceSystemReference = Program.ApplicationName,
             Features = Features,
             Action = SupportedFeaturesAction.AddOrUpdate,
@@ -36,7 +35,7 @@ public sealed class CatalogFeatureRegistrationService(IEventBus eventBus) : IFea
         public required string Id { get; init; }
         public required string Name { get; init; }
         public required string Description { get; init; }
-        public string Module => nameof(FeatureModules.EShop_Catalog);
-        public string State => nameof(FeatureState.Enabled);
+        public string State { get; init; } = nameof(FeatureState.Enabled);
+        public string Module { get; init; } = nameof(FeatureModules.EShop_Catalog);
     }
 }

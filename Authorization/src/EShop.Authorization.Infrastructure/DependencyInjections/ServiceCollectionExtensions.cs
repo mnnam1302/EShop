@@ -155,7 +155,7 @@ public static class ServiceCollectionExtensions
         IWebHostEnvironment environment,
         string serviceName)
     {
-        bus.ConfigureReceiveEndpoint<TenantCreatedConsumer, ITenantCreated>(context, environment.EnvironmentName, serviceName);
+        bus.ConfigureReceiveEndpoint<TenantCreatedConsumer, TenantCreated>(context, environment.EnvironmentName, serviceName);
         bus.ConfigureReceiveEndpoint<SupportedPermissionsUpdatedConsumer, SupportedPermissionsUpdated>(context, environment.EnvironmentName, serviceName);
     }
 

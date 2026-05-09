@@ -4,4 +4,4 @@ using MassTransit;
 namespace EShop.Shared.Contracts.Services.Tenancy;
 
 [ExcludeFromTopology]
-public interface TenancyEvent : IIntegrationEvent { }
+public abstract class TenancyEvent : IntegrationEvent { }

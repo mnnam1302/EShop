@@ -75,7 +75,7 @@ internal sealed class Steps(ApiContext apiContext)
             var ownerEmail = row["OwnerEmail"];
 
             // Simulate the TenantCreated event that would trigger root organization creation
-            await apiContext.PublishIntegrationEvent<ITenantCreated>(new
+            await apiContext.PublishIntegrationEvent<TenantCreated>(new
             {
                 TenantId = tenantId,
                 TenantName = tenantName,
