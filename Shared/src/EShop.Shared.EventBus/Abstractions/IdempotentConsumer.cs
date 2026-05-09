@@ -4,15 +4,23 @@ using MassTransit;
 
 namespace EShop.Shared.EventBus.Abstractions;
 
-public abstract class IdempotentConsumer<T>(IMessageRepository messageRepository) : IConsumer<T>
+[Obsolete("Each microservice is responsible for implementing idempotent consumers when needed. This reuse make code more complex and harder to maintain.")]
+public abstract class IdempotentConsumer<T> : IConsumer<T>
     where T : class, IIntegrationEvent
 {
+    private readonly IMessageRepository messageRepository;
+
+    protected IdempotentConsumer(IMessageRepository messageRepository)
+    {
+        this.messageRepository = messageRepository;
+    }
+
     protected abstract Task<Result> HandleMessageAsync(T message, CancellationToken cancellationToken);
 
     public async Task Consume(ConsumeContext<T> context)
     {
+        var messageId = context.MessageId!.Value;
         var message = context.Message;
-        var messageId = message.EventId;
         var consumerId = $"{GetType().Name}_{message.GetType().Name}";
 
         var alreadyProcessed = await messageRepository.ExistsAsync(messageId, consumerId, context.CancellationToken);
@@ -21,9 +29,8 @@ public abstract class IdempotentConsumer<T>(IMessageRepository messageRepository
             return;
         }
 
-        var inboxMessage = InboxMessage.Create(consumerId, messageId, message.GetType().Name);
-
         var result = await HandleMessageAsync(message, context.CancellationToken);
+        var inboxMessage = InboxMessage.Create(consumerId, messageId, message.GetType().Name);
 
         if (result.IsSuccess)
         {
