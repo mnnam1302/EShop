@@ -1,15 +1,19 @@
-﻿using EShop.Shared.Contracts.Abstractions.Shared;
+﻿using EShop.Catalog.Application.Shared;
+using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.Contracts.Services.Authorization;
 using EShop.Shared.CQRS;
-using EShop.Shared.EventBus.Abstractions;
 
 namespace EShop.Catalog.Application.Agencies.CreateAgency;
 
-public sealed class OrganizationCreatedConsumer(
-    IMessageRepository messageRepository,
-    IMediator mediator) 
-    : IdempotentConsumer<OrganizationCreated>(messageRepository)
+public sealed class OrganizationCreatedConsumer : Consumer<OrganizationCreated>
 {
+    private readonly IMediator mediator;
+
+    public OrganizationCreatedConsumer(IMediator mediator, CatalogDbContext dbContext) : base(dbContext)
+    {
+        this.mediator = mediator;
+    }
+
     protected override Task<Result> HandleMessageAsync(OrganizationCreated message, CancellationToken cancellationToken)
     {
         var command = new CreateAgencyCommand

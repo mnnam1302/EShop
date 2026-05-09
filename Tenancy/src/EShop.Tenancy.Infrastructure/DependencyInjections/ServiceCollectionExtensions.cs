@@ -28,7 +28,6 @@ public static class ServiceCollectionExtensions
         services
             .AddMassTransitRabbitMQ(configuration, environment, serviceName)
             .AddEventBus()
-            .AddPostgreSqlIdempotentConsumer<TenancyDbContext>()
             .AddRegistrationFeatures();
 
         services.AddRedisHealthCheck(configuration)

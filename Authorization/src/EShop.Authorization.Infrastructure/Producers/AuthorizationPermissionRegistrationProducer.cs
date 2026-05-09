@@ -9,7 +9,7 @@ internal sealed class AuthorizationPermissionRegistrationProducer : IPermissionR
 {
     private const string ModuleName = "Authorization";
 
-    private static readonly ReportPermission[] Permissions = [];
+    private static readonly ReportPermission[] permissions = [];
 
     private readonly IEventBus eventBusGateway;
 
@@ -20,11 +20,10 @@ internal sealed class AuthorizationPermissionRegistrationProducer : IPermissionR
 
     public async Task RegisterPermissions()
     {
-        await eventBusGateway.PublishAsync<SupportedPermissionsUpdated>(new
+        await eventBusGateway.PublishAsync(new SupportedPermissionsUpdated
         {
-            EventId = Guid.NewGuid(),
             SourceSystemReference = ModuleName,
-            Permissions,
+            Permissions = permissions,
             Action = SupportedPermissionAction.Added,
             TenantId = UserData.SystemTenantId,
             ActionUserId = UserData.SystemUsername,

@@ -25,8 +25,7 @@ public static class ServiceCollectionExtensions
             .AddCatalogApiVersioning()
             .AddServiceBootstrapping()
             .AddMassTransitRabbitMQ(configuration, environment)
-            .AddEventBus()
-            .AddPostgreSqlIdempotentConsumer<CatalogDbContext>();
+            .AddEventBus();
 
         return services;
     }

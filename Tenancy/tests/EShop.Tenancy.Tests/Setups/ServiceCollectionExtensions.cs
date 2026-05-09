@@ -91,8 +91,7 @@ public static class ServiceCollectionExtensions
     {
         services
             .AddMassTransitMemory()
-            .AddEventBus()
-            .AddPostgreSqlIdempotentConsumer<TenancyDbContext>();
+            .AddEventBus();
 
         services.AddMemoryCacheInfrastructure();
 

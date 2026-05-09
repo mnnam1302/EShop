@@ -49,8 +49,7 @@ public static class ServiceCollectionExtensions
             .AddCatalogTestApiVersioning()
             .AddTestServiceBootstrapping()
             .AddMassTransitInMemory()
-            .AddEventBus()
-            .AddPostgreSqlIdempotentConsumer<CatalogDbContext>();
+            .AddEventBus();
 
         return services;
     }

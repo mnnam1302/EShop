@@ -26,9 +26,5 @@ public sealed class TenantCreatedConsumer : IConsumer<TenantCreated>
         };
 
         await _mediator.SendAsync(command, context.CancellationToken);
-
-        // TODO: Improvement: Use a Result pattern for error handling,
-        // or catch only intentional exceptions (e.g., DomainException),
-        // then log them as warnings instead of errors.
     }
 }
