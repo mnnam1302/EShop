@@ -1,4 +1,3 @@
-﻿using EShop.Catalog.ReadModels.MongoDb.Persistence;
 using EShop.Shared.Contracts.Abstractions.MessageBus;
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.EventBus;
@@ -6,14 +5,14 @@ using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using MongoDB.Driver;
 
-namespace EShop.Catalog.ReadModels.MongoDb.Consumers;
+namespace EShop.Catalog.Application.Shared;
 
-public abstract class IdempotentConsumer<TMessage> : IConsumer<TMessage>
+public abstract class Consumer<TMessage> : IConsumer<TMessage> 
     where TMessage : IntegrationEvent
 {
-    private readonly CatalogReadDbContext _dbContext;
+    private readonly CatalogDbContext _dbContext;
 
-    protected IdempotentConsumer(CatalogReadDbContext dbContext)
+    protected Consumer(CatalogDbContext dbContext)
     {
         _dbContext = dbContext;
     }
@@ -61,8 +60,6 @@ public abstract class IdempotentConsumer<TMessage> : IConsumer<TMessage>
         {
             // Duplicate message contraint violation, another consumer has processed the same message concurrently
             await transaction.RollbackAsync(context.CancellationToken);
-
-            return;
         }
     }
 

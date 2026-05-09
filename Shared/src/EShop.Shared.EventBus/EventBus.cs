@@ -2,7 +2,7 @@
 using EShop.Shared.EventBus.Abstractions;
 using MassTransit;
 
-namespace EShop.Shared.EventBus.Services;
+namespace EShop.Shared.EventBus;
 
 public sealed class EventBus(IPublishEndpoint publishEndpoint) : IEventBus
 {

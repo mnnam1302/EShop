@@ -1,4 +1,5 @@
-﻿using EShop.Shared.DbResourceAccessControl.Extensions;
+﻿using EntityFramework.Exceptions.PostgreSQL;
+using EShop.Shared.DbResourceAccessControl.Extensions;
 using EShop.Shared.DbResourceAccessControl.Interceptors;
 using EShop.Shared.DbResourceAccessControl.Options;
 using Microsoft.AspNetCore.Hosting;
@@ -62,7 +63,8 @@ public static class DataAccessExtensions
                             maxRetryDelay: retryOptions.CurrentValue.MaxRetryDelay,
                             errorCodesToAdd: retryOptions.CurrentValue.ErrorNumbersoAdd))
                         .MigrationsAssembly(typeof(TContext).Assembly.GetName().Name))
-                .AddInterceptors(tenantIsolationStrategy, domainEventsDispatcherInterceptor);
+                .AddInterceptors(tenantIsolationStrategy, domainEventsDispatcherInterceptor)
+                .UseExceptionProcessor();
 
             additionalDbContextConfig?.Invoke(serviceProvider, options);
         });

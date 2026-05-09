@@ -9,7 +9,7 @@ public sealed class CatalogPermissionRegistrationService(IEventBus eventBus) : I
 {
     private const string ModuleName = "Product builder";
 
-    private static readonly CatalogPermission[] Permissions =
+    private static readonly CatalogPermission[] permissions =
     [
         new CatalogPermission
         {
@@ -43,10 +43,10 @@ public sealed class CatalogPermissionRegistrationService(IEventBus eventBus) : I
 
     public async Task RegisterPermissions()
     {
-        await eventBus.PublishAsync<SupportedPermissionsUpdated>(new
+        await eventBus.PublishAsync(new SupportedPermissionsUpdated
         {
             SourceSystemReference = Program.ApplicationName,
-            Permissions = Permissions,
+            Permissions = permissions,
             Action = SupportedPermissionAction.Added,
             TenantId = UserData.SystemTenantId,
             ActionUserId = UserData.SystemUsername,

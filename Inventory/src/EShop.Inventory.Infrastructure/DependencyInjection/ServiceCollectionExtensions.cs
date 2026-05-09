@@ -16,8 +16,7 @@ public static class ServiceCollectionExtensions
         var connectionString = configuration.GetConnectionString(environment);
         services
             .AddPostgreSqlHealthCheck(configuration, connectionString)
-            .AddDbContextWithScoping<InventoryDbContext>(configuration, connectionString, useRingFencedScoping: false)
-            .AddPostgreSqlIdempotentConsumer<InventoryDbContext>();
+            .AddDbContextWithScoping<InventoryDbContext>(configuration, connectionString, useRingFencedScoping: false);
 
         return services;
     }

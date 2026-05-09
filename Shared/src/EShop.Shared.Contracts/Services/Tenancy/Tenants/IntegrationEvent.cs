@@ -1,12 +1,11 @@
 ﻿namespace EShop.Shared.Contracts.Services.Tenancy.Tenants;
 
-public interface ITenantCreated : TenancyEvent
+public sealed class TenantCreated : TenancyEvent
 {
-    string TenantName { get; }
+    public required string TenantName { get; init; }
 
-    string OwnerUsername { get; }
+    public required string OwnerUsername { get; init; }
 
-    string OwnerDisplayName { get; }
-
-    string OwnerEmail { get; }
+    public required string OwnerDisplayName { get; init;  }
+    public required string OwnerEmail { get; init;  }
 }

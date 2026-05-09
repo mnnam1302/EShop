@@ -8,7 +8,7 @@ public static class EventBusExtensions
 {
     public static IServiceCollection AddEventBus(this IServiceCollection services)
     {
-        services.AddScoped<IEventBus, Services.EventBus>();
+        services.AddScoped<IEventBus, EventBus>();
         return services;
     }
 
@@ -16,12 +16,5 @@ public static class EventBusExtensions
     {
         modelBuilder.ApplyConfiguration(new InboxMessageEntityTypeConfiguration());
         return modelBuilder;
-    }
-
-    public static IServiceCollection AddPostgreSqlIdempotentConsumer<TDbContext>(this IServiceCollection services)
-        where TDbContext : DbContext, IInboxDbContext
-    {
-        services.AddScoped<IMessageRepository, PostgreSqlMessageRepository<TDbContext>>();
-        return services;
     }
 }

@@ -11,11 +11,11 @@ using EShop.Shared.Contracts.Services.Authorization;
 using EShop.Shared.Contracts.Services.Tenancy.Tenants;
 using EShop.Shared.Diagnostics;
 using EShop.Shared.DomainTools.UnitOfWorks;
+using EShop.Shared.EventBus;
 using EShop.Shared.EventBus.Abstractions;
 using EShop.Shared.EventBus.DependencyInjections.Extensions;
 using EShop.Shared.EventBus.DependencyInjections.Options;
 using EShop.Shared.EventBus.PipelineObservers;
-using EShop.Shared.EventBus.Services;
 using EShop.Shared.JsonApi.Extensions;
 using EShop.Shared.Scoping.ResourceAccessControl;
 using FluentEmail.MailKitSmtp;
@@ -155,7 +155,7 @@ public static class ServiceCollectionExtensions
         IWebHostEnvironment environment,
         string serviceName)
     {
-        bus.ConfigureReceiveEndpoint<TenantCreatedConsumer, ITenantCreated>(context, environment.EnvironmentName, serviceName);
+        bus.ConfigureReceiveEndpoint<TenantCreatedConsumer, TenantCreated>(context, environment.EnvironmentName, serviceName);
         bus.ConfigureReceiveEndpoint<SupportedPermissionsUpdatedConsumer, SupportedPermissionsUpdated>(context, environment.EnvironmentName, serviceName);
     }
 

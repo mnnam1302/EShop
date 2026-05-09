@@ -5,7 +5,7 @@ using EShop.Shared.Scoping.ResourceAccessControl;
 
 namespace EShop.Authorization.Infrastructure.Producers;
 
-internal sealed class AuthorizationFeatureRegistrationProducer : IFeatureRegistrationService
+internal sealed class AuthorizationFeatureRegistrationProducer(IEventBus eventBusGateway) : IFeatureRegistrationService
 {
     private readonly string ApplicationName = "Authorization";
 
@@ -43,18 +43,10 @@ internal sealed class AuthorizationFeatureRegistrationProducer : IFeatureRegistr
         },
     ];
 
-    private readonly IEventBus eventBusGateway;
-
-    public AuthorizationFeatureRegistrationProducer(IEventBus eventBusGateway)
-    {
-        this.eventBusGateway = eventBusGateway;
-    }
-
     public async Task RegisterFeatures()
     {
-        await eventBusGateway.PublishAsync<SupportedFeaturesUpdated>(new
+        await eventBusGateway.PublishAsync(new SupportedFeaturesUpdated
         {
-            EventId = Guid.NewGuid(),
             SourceSystemReference = ApplicationName,
             Features = features,
             Action = SupportedFeaturesAction.AddOrUpdate,
@@ -69,7 +61,7 @@ internal sealed class AuthorizationFeatureRegistrationProducer : IFeatureRegistr
         public required string Id { get; init; }
         public required string Name { get; init; }
         public required string Description { get; init; }
-        public string Module => nameof(FeatureModules.EShop_Authorization);
-        public string State => nameof(FeatureState.Disabled);
+        public string State { get; init; } = nameof(FeatureState.Enabled);
+        public string Module { get; init; } = nameof(FeatureModules.EShop_Authorization);
     }
 }

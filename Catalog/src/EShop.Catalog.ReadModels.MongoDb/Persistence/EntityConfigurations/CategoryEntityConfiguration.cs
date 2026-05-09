@@ -9,7 +9,7 @@ public sealed class CategoryEntityConfiguration : IEntityTypeConfiguration<Categ
 {
     public void Configure(EntityTypeBuilder<Category> builder)
     {
-        builder.ToCollection("Category");
+        builder.ToCollection("Categories");
         builder.HasKey(c => c.Id);
     }
 }

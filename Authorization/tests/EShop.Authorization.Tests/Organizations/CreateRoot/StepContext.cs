@@ -10,7 +10,7 @@ internal sealed class StepContext(ApiContext apiContext)
     {
         var operationalUser = apiContext.GetUserByUsername(username);
 
-        await apiContext.PublishIntegrationEvent<ITenantCreated>(new
+        await apiContext.PublishIntegrationEvent<TenantCreated>(new
         {
             TenantId = dataTable.Rows[0]["TenantId"],
             TenantName = dataTable.Rows[0]["TenantName"],

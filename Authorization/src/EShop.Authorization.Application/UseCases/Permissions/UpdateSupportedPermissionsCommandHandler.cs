@@ -38,7 +38,7 @@ internal sealed class UpdateSupportedPermissionsCommandHandler : ICommandHandler
 
         foreach (var permission in command.Permissions)
         {
-            var permissionModel = Domain.Entities.Permission.Create(
+            var permissionModel = Permission.Create(
                 permission.Id,
                 permission.Name,
                 permission.Description,
