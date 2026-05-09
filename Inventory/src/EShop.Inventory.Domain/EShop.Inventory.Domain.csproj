@@ -1,9 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
-    <Folder Include="Abstractions\" />
     <Folder Include="DomainEvents\" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\Shared\src\EShop.Shared.Authentication\EShop.Shared.Authentication.csproj" />
     <ProjectReference Include="..\..\..\Shared\src\EShop.Shared.DomainTools\EShop.Shared.DomainTools.csproj" />
   </ItemGroup>
 </Project>

@@ -1,6 +1,6 @@
-﻿namespace EShop.Shared.Scoping.ResourceAccessControl;
+namespace EShop.Shared.Scoping.ResourceAccessControl;
 
-public static class FeatureConstants
+public class FeatureConstants
 {
     public const string InitialState = nameof(FeatureState.Enabled);
 
@@ -22,7 +22,12 @@ public static class FeatureConstants
 
     public static class Catalog
     {
-        public const string Product_FeatureId = "Catalog_ProductBuilder";
+        public const string ProductFeatureId = "Catalog_ProductBuilder";
+    }
+
+    public static class Inventory
+    {
+        public const string InventoryManagement = "Inventory_InventoryManagement";
     }
 }
 

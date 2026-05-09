@@ -1,4 +1,4 @@
-﻿using EShop.Shared.Authentication.Filters;
+using EShop.Shared.Authentication.Filters;
 using EShop.Shared.Cache.DependencyInejctions.Extensions;
 using EShop.Shared.Contracts.JsonConverters;
 using EShop.Shared.Contracts.Services.Tenancy.Features;
@@ -96,29 +96,11 @@ public static class ServiceCollectionExtensions
 
                 bus.MessageTopology.SetEntityNameFormatter(new KebabCaseEntityNameFormatter());
 
-                bus.ConfigureRecieveEndpoints(context, environment, serviceName);
                 bus.ConfigureEndpoints(context);
             });
         });
 
         return services;
-    }
-
-    private static void ConfigureRecieveEndpoints(
-        this IRabbitMqBusFactoryConfigurator bus,
-        IRegistrationContext context,
-        IWebHostEnvironment environment,
-        string serviceName)
-    {
-        bus.ConfigureReceiveEndpoint<SupportedFeaturesUpdatedConsumer, SupportedFeaturesUpdated>(
-            context,
-            environment.EnvironmentName,
-            serviceName);
-
-        bus.ConfigureReceiveEndpoint<TenantFeaturesUpdatedConsumer, TenantFeaturesUpdated>(
-            context,
-            environment.EnvironmentName,
-            serviceName);
     }
 
     private static void AddRegistrationFeatures(this IServiceCollection services)

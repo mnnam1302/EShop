@@ -1,4 +1,7 @@
+using EShop.Inventory.Domain.Abstractions;
+using EShop.Inventory.Infrastructure.Repositories;
 using EShop.Shared.Cache.DependencyInejctions.Extensions;
+using EShop.Shared.DomainTools.UnitOfWorks;
 using EShop.Shared.JsonApi.Extensions;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -16,8 +19,17 @@ public static class ServiceCollectionExtensions
         var connectionString = configuration.GetConnectionString(environment);
         services
             .AddPostgreSqlHealthCheck(configuration, connectionString)
-            .AddDbContextWithScoping<InventoryDbContext>(configuration, connectionString, useRingFencedScoping: false);
+            .AddDbContextWithScoping<InventoryDbContext>(configuration, connectionString, useRingFencedScoping: false)
+            .AddRepositoryUnitOfWork();
 
+        return services;
+    }
+
+    private static IServiceCollection AddRepositoryUnitOfWork(this IServiceCollection services)
+    {
+        services.AddScoped<IUnitOfWork, EFUnitOfWork<InventoryDbContext>>();
+        services
+            .AddScoped<IInventoryRepository, InventoryRepository>();
         return services;
     }
 

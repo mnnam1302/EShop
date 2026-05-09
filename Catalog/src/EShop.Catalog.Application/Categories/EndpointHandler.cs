@@ -1,4 +1,4 @@
-﻿using EShop.Catalog.Application.Categories.Create;
+using EShop.Catalog.Application.Categories.Create;
 using EShop.Catalog.Application.Categories.Publish;
 using EShop.Catalog.Application.Categories.Unpublish;
 using EShop.Catalog.Application.Categories.Update;
@@ -17,7 +17,7 @@ public static class EndpointHandler
             .NewVersionedApi("Category")
             .MapGroup(BaseUrl)
             .HasApiVersion(1)
-            .RequireFeatureFilter(FeatureConstants.Catalog.Product_FeatureId);
+            .RequireFeatureFilter(FeatureConstants.Catalog.ProductFeatureId);
 
         categoryEndpointsV1
             .MapCreateCategory()

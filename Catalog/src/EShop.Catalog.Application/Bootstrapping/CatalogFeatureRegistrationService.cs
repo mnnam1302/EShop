@@ -1,4 +1,4 @@
-﻿using EShop.Shared.Authentication;
+using EShop.Shared.Authentication;
 using EShop.Shared.Contracts.Services.Tenancy.Features;
 using EShop.Shared.EventBus.Abstractions;
 using EShop.Shared.Scoping.ResourceAccessControl;
@@ -11,7 +11,7 @@ public sealed class CatalogFeatureRegistrationService(IEventBus eventBus) : IFea
     [
         new CatalogFeature()
         {
-            Id = FeatureConstants.Catalog.Product_FeatureId,
+            Id = FeatureConstants.Catalog.ProductFeatureId,
             Name = "Product Builder",
             Description = "Product Builder"
         }

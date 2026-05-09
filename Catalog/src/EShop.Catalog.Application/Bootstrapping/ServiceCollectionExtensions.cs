@@ -1,4 +1,4 @@
-﻿using EShop.Catalog.Application.Agencies.CreateAgency;
+using EShop.Catalog.Application.Agencies.CreateAgency;
 using EShop.Catalog.Application.Shared;
 using EShop.Shared.Authentication.Filters;
 using EShop.Shared.Contracts.JsonConverters;
@@ -111,7 +111,7 @@ public static class ServiceCollectionExtensions
 
                 bus.MessageTopology.SetEntityNameFormatter(new KebabCaseEntityNameFormatter());
 
-                bus.ConfigureCatalogRecieveEndpoints(context, environment, Program.ApplicationName);
+                //bus.ConfigureCatalogRecieveEndpoints(context, environment, Program.ApplicationName);
                 bus.ConfigureEndpoints(context);
             });
         });
@@ -119,14 +119,14 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    private static void ConfigureCatalogRecieveEndpoints(
-        this IRabbitMqBusFactoryConfigurator bus,
-        IRegistrationContext context,
-        IWebHostEnvironment environment,
-        string serviceName)
-    {
-        bus.ConfigureReceiveEndpoint<OrganizationCreatedConsumer, OrganizationCreated>(context, environment.EnvironmentName, serviceName);
-    }
+    //private static void ConfigureCatalogRecieveEndpoints(
+    //    this IRabbitMqBusFactoryConfigurator bus,
+    //    IRegistrationContext context,
+    //    IWebHostEnvironment environment,
+    //    string serviceName)
+    //{
+    //    bus.ConfigureReceiveEndpoint<OrganizationCreatedConsumer, OrganizationCreated>(context, environment.EnvironmentName, serviceName);
+    //}
 
     private static IServiceCollection AddServiceBootstrapping(this IServiceCollection services)
     {

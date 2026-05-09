@@ -1,10 +1,10 @@
-﻿using EShop.Shared.JsonApi.ResourceAccessControl;
+using EShop.Shared.JsonApi.ResourceAccessControl;
 using EShop.Shared.Scoping.ResourceAccessControl;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EShop.Catalog.ReadModels.MongoDb.Controllers;
 
-[RequireFeature(FeatureConstants.Catalog.Product_FeatureId)]
+[RequireFeature(FeatureConstants.Catalog.ProductFeatureId)]
 [RequireOneOfPermissions(
     PermissionConstants.Catalog.ManageCategories,
     PermissionConstants.Catalog.ViewCategories)]

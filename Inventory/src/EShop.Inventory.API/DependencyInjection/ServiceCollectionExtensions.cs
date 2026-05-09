@@ -1,4 +1,3 @@
-using EShop.Inventory.API.APIs;
 using EShop.Shared.JsonApi.Extensions;
 using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
 
