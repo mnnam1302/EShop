@@ -12,32 +12,6 @@ namespace EShop.Catalog.Tests.Products.WriteModel;
 public class ProductVariantTests
 {
     [Fact]
-    public void AddDefaultVariant_NewProduct_AddsWithDefaultFlag()
-    {
-        // Arrange
-        var product = CreateBareProduct();
-
-        // Act
-        product.AddDefaultVariant(100m, 10m);
-
-        // Assert
-        var variant = Assert.Single(product.Variants);
-        Assert.True(variant.IsDefault);
-        Assert.Equal(100m, variant.Price);
-        Assert.Equal(VariantState.Unpublished, variant.State);
-    }
-
-    [Fact]
-    public void AddDefaultVariant_AlreadyExists_Throws()
-    {
-        // Arrange
-        var product = ProductAggregateBuilder.CreateDraftProduct();
-
-        // Act & Assert
-        Assert.Throws<DomainException>(() => product.AddDefaultVariant(50m, 0m));
-    }
-
-    [Fact]
     public void AddVariant_ValidDimensions_AddsNonDefaultVariant()
     {
         // Arrange

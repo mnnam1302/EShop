@@ -35,17 +35,6 @@ public static class ExternalServiceRegistrationExtensions
         #region Infrastructure resources
 
         var pathToDbInitDirectory = Path.GetFullPath(Path.Combine(Environment.CurrentDirectory, @"..\Deployment\Scripts\"));
-        var postgres = builder.AddPostgres(ResourceNames.PostgreSql, port: 5432)
-                .WithImageTag("17.0")
-                .WithDataVolume("ehop-data")
-                .WithInitFiles(pathToDbInitDirectory)
-                .WithArgs("-c", "max_connections=200")
-                .WithPgAdmin(rb =>
-                {
-                    rb.WithLifetime(ContainerLifetime.Persistent);
-                    rb.WithHostPort(5442);
-                })
-                .WithLifetime(ContainerLifetime.Persistent);
 
         var redis = useExternalService
             ? builder.AddConnectionString(ResourceNames.Redis)
@@ -65,24 +54,63 @@ public static class ExternalServiceRegistrationExtensions
                 .WithLifetime(ContainerLifetime.Persistent)
                 .WithManagementPlugin();
 
-        var mongodb = builder
-            .AddMongoDB(ResourceNames.MongoDb)
-            .WithImageTag("6.0")
-            .WithDataVolume("eshop-mongodb-data")
-            .WithLifetime(ContainerLifetime.Persistent);
+        IResourceBuilder<IResourceWithConnectionString> tenancyDatabase;
+        IResourceBuilder<IResourceWithConnectionString> authorizationDatabase;
+        IResourceBuilder<IResourceWithConnectionString> catalogDatabase;
+        IResourceBuilder<IResourceWithConnectionString> catalogMongoDatabase;
+        IResourceBuilder<IResourceWithConnectionString> inventoryDatabase;
 
-        var catalogMongoDatabase = useExternalService
-            ? builder.AddConnectionString("catalogMongoDatabase")
-            : mongodb.AddDatabase("catalogMongoDatabase", "eshop-catalog");
+        if (useExternalService)
+        {
+            var postgresServer = builder.AddConnectionString(ResourceNames.PostgreSql);
+            var mongoServer = builder.AddConnectionString(ResourceNames.MongoDb);
+
+            tenancyDatabase = builder.AddConnectionString("tenancyDatabase")
+                .WithParentRelationship(postgresServer);
+            authorizationDatabase = builder.AddConnectionString("authorizationDatabase")
+                .WithParentRelationship(postgresServer);
+            catalogDatabase = builder.AddConnectionString("catalogDatabase")
+                .WithParentRelationship(postgresServer);
+            inventoryDatabase = builder.AddConnectionString("inventoryDatabase")
+                .WithParentRelationship(postgresServer);
+
+            catalogMongoDatabase = builder.AddConnectionString("catalogMongoDatabase")
+                .WithParentRelationship(mongoServer);
+        }
+        else
+        {
+            var postgres = builder.AddPostgres(ResourceNames.PostgreSql, port: 5432)
+                .WithImageTag("17.0")
+                .WithDataVolume("ehop-data")
+                .WithInitFiles(pathToDbInitDirectory)
+                .WithArgs("-c", "max_connections=200")
+                .WithPgAdmin(rb =>
+                {
+                    rb.WithLifetime(ContainerLifetime.Persistent);
+                    rb.WithHostPort(5442);
+                })
+                .WithLifetime(ContainerLifetime.Persistent);
+
+            var mongodb = builder
+                .AddMongoDB(ResourceNames.MongoDb)
+                .WithImageTag("6.0")
+                .WithDataVolume("eshop-mongodb-data")
+                .WithLifetime(ContainerLifetime.Persistent);
+
+            tenancyDatabase = postgres.AddDatabase("tenancyDatabase", "eshop_tenancy");
+            authorizationDatabase = postgres.AddDatabase("authorizationDatabase", "eshop_authorization");
+            catalogDatabase = postgres.AddDatabase("catalogDatabase", "eshop_catalog");
+            inventoryDatabase = postgres.AddDatabase("inventoryDatabase", "eshop_inventory");
+            catalogMongoDatabase = mongodb.AddDatabase("catalogMongoDatabase", "eshop-catalog");
+        }
 
         #endregion Infrastructure resources
 
         #region Microservices
 
-        var tenancyDatabase = postgres.AddDatabase("tenancyDatabase", "eshop_tenancy");
         var tenancy = builder.AddProject<Projects.EShop_Tenancy_API>(ResourceNames.TenancyApi)
             .WithExternalServiceMode(useExternalService)
-            //.WithEnvironment("GRAFANA_URL", grafana.GetEndpoint("http"))
+            //.WithEnvironment("GRAFANA_URL", grafana.GetEndpoint("http")) // add the same for other microservices
             .WithReference(tenancyDatabase)
             .WithReference(redis)
             .WithReference(rabbitmq);
@@ -95,10 +123,8 @@ public static class ExternalServiceRegistrationExtensions
                 .WaitFor(rabbitmq);
         }
 
-        var authorizationDatabase = postgres.AddDatabase("authorizationDatabase", "eshop_authorization");
         var authorization = builder.AddProject<Projects.EShop_Authorization_API>(ResourceNames.AuthorizationApi)
             .WithExternalServiceMode(useExternalService)
-            //.WithEnvironment("GRAFANA_URL", grafana.GetEndpoint("http"))
             .WithReference(authorizationDatabase)
             .WithReference(redis)
             .WithReference(rabbitmq);
@@ -111,10 +137,8 @@ public static class ExternalServiceRegistrationExtensions
                 .WaitFor(rabbitmq);
         }
 
-        var catalogDatabase = postgres.AddDatabase("catalogDatabase", "eshop_catalog");
-        var catalogApplication = builder.AddProject<Projects.EShop_Catalog_Application>("catalog-application")
+        var catalogApplication = builder.AddProject<Projects.EShop_Catalog_Application>(ResourceNames.CatalogWriteApi)
             .WithExternalServiceMode(useExternalService)
-            //.WithEnvironment("GRAFANA_URL", grafana.GetEndpoint("http"))
             .WithReference(catalogDatabase)
             .WithReference(redis)
             .WithReference(rabbitmq);
@@ -127,9 +151,8 @@ public static class ExternalServiceRegistrationExtensions
                 .WaitFor(rabbitmq);
         }
 
-        var catalogReadModel = builder.AddProject<Projects.EShop_Catalog_ReadModels_MongoDb>("catalog-readmodel")
+        var catalogReadModel = builder.AddProject<Projects.EShop_Catalog_ReadModels_MongoDb>(ResourceNames.CatalogReadApi)
             .WithExternalServiceMode(useExternalService)
-            //.WithEnvironment("GRAFANA_URL", grafana.GetEndpoint("http"))
             .WithReference(catalogMongoDatabase)
             .WithReference(redis)
             .WithReference(rabbitmq);
@@ -143,26 +166,42 @@ public static class ExternalServiceRegistrationExtensions
                 .WaitFor(catalogApplication);
         }
 
+        var inventory = builder.AddProject<Projects.EShop_Inventory_API>(ResourceNames.InventoryApi)
+            .WithExternalServiceMode(useExternalService)
+            .WithReference(inventoryDatabase)
+            .WithReference(redis)
+            .WithReference(rabbitmq);
+
+        if (!useExternalService)
+        {
+            inventory
+                .WaitFor(inventoryDatabase)
+                .WaitFor(redis)
+                .WaitFor(rabbitmq);
+        }
+
+        //builder.AddProject<Projects.EShop_Order_API>("eshop-order-api");
+
         #endregion Microservices
 
         #region Api Gateway
 
-        var apiGateway = builder.AddProject<Projects.EShop_ApiGateway>(ResourceNames.ApiGateway)
-            .WithReference(redis)
-            .WithReference(tenancy)
-            .WithReference(authorization)
-            .WithReference(catalogApplication)
-            .WithReference(catalogReadModel);
+        //var apiGateway = builder.AddProject<Projects.EShop_ApiGateway>(ResourceNames.ApiGateway)
+        //    .WithReference(redis)
+        //    .WithReference(tenancy)
+        //    .WithReference(authorization)
+        //    .WithReference(catalogApplication)
+        //    .WithReference(catalogReadModel);
 
-        if (!useExternalService)
-        {
-            apiGateway
-                .WaitFor(redis)
-                .WaitFor(tenancy)
-                .WaitFor(authorization)
-                .WaitFor(catalogApplication)
-                .WaitFor(catalogReadModel);
-        }
+        //if (!useExternalService)
+        //{
+        //    apiGateway
+        //        .WaitFor(redis)
+        //        .WaitFor(tenancy)
+        //        .WaitFor(authorization)
+        //        .WaitFor(catalogApplication)
+        //        .WaitFor(catalogReadModel);
+        //}
 
         #endregion Api Gateway
 

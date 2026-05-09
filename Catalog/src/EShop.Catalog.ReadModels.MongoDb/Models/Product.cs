@@ -36,12 +36,6 @@ public sealed partial class Product : Identifiable<string>, IEntityBase<string>,
     public string State { get; set; } = string.Empty;
 
     [Attr(Capabilities = AllowView)]
-    public List<ProductVariationDimension> VariationDimensions { get; set; } = [];
-
-    [Attr(Capabilities = AllowView)]
-    public List<ProductVariant> Variants { get; set; } = [];
-
-    [Attr(Capabilities = AllowView)]
     public string CreatedByUserId { get; set; } = string.Empty;
 
     [Attr(Capabilities = AllowView)]
@@ -57,4 +51,10 @@ public sealed partial class Product : Identifiable<string>, IEntityBase<string>,
     public string TenantId { get; set; } = string.Empty;
 
     public string Scope { get; set; } = string.Empty;
+
+    [Attr(Capabilities = AllowView)]
+    public List<ProductVariationDimension> VariationDimensions { get; set; } = [];
+
+    [Attr(Capabilities = AllowView)]
+    public List<ProductVariant> Variants { get; set; } = [];
 }

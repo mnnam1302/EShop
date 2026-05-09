@@ -126,7 +126,7 @@ public static class ServiceCollectionExtensions
         IWebHostEnvironment environment,
         string serviceName)
     {
-        bus.ConfigureEventReceiveEndpoint<OrganizationCreatedConsumer, OrganizationCreated>(context, environment.EnvironmentName, serviceName);
+        bus.ConfigureReceiveEndpoint<OrganizationCreatedConsumer, OrganizationCreated>(context, environment.EnvironmentName, serviceName);
     }
 
     private static IServiceCollection AddServiceBootstrapping(this IServiceCollection services)

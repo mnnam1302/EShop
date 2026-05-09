@@ -26,8 +26,6 @@ public static class EndpointHandler
             Name = request.Name,
             Description = request.Description,
             CategoryId = request.CategoryId,
-            Price = request.Price,
-            DiscountPrice = request.DiscountPrice,
             Tags = request.Tags,
             Slug = request.Slug,
             Images = request.Images,

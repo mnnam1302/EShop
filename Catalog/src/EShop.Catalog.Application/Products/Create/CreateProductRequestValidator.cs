@@ -17,13 +17,6 @@ public sealed class CreateProductRequestValidator : AbstractValidator<CreateProd
         RuleFor(x => x.CategoryId)
             .NotEmpty();
 
-        RuleFor(x => x.Price)
-            .GreaterThanOrEqualTo(0);
-
-        RuleFor(x => x.DiscountPrice)
-            .GreaterThanOrEqualTo(0)
-            .LessThanOrEqualTo(x => x.Price);
-
         RuleFor(x => x.Slug)
             .NotEmpty()
             .MaximumLength(ModelConstants.MediumLongText);

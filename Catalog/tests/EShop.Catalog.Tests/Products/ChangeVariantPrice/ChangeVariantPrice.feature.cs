@@ -163,15 +163,15 @@ namespace EShop.Catalog.Tests.Products.ChangeVariantPrice
             await this.TestTearDownAsync();
         }
         
-        [global::Xunit.SkippableFactAttribute(DisplayName="Change the price of the default variant")]
+        [global::Xunit.SkippableFactAttribute(DisplayName="Change the price of a variant")]
         [global::Xunit.TraitAttribute("FeatureTitle", "ChangeVariantPrice")]
-        [global::Xunit.TraitAttribute("Description", "Change the price of the default variant")]
-        public async global::System.Threading.Tasks.Task ChangeThePriceOfTheDefaultVariant()
+        [global::Xunit.TraitAttribute("Description", "Change the price of a variant")]
+        public async global::System.Threading.Tasks.Task ChangeThePriceOfAVariant()
         {
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
             string pickleIndex = "0";
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Change the price of the default variant", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Change the price of a variant", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
 #line 16
@@ -190,16 +190,12 @@ await this.FeatureBackgroundAsync();
                 global::Reqnroll.Table table23 = new global::Reqnroll.Table(new string[] {
                             "Name",
                             "Description",
-                            "Price",
-                            "DiscountPrice",
                             "Slug",
                             "Tags",
                             "Images"});
                 table23.AddRow(new string[] {
                             "Laptop Pro",
                             "A powerful laptop",
-                            "500",
-                            "459.99",
                             "laptop-pro",
                             "portable",
                             "https://img.example.com/lp1.jpg"});
@@ -207,24 +203,56 @@ await this.FeatureBackgroundAsync();
     await testRunner.GivenAsync("System User has created the following product under category \'ELEC001\'", ((string)(null)), table23, "Given ");
 #line hidden
                 global::Reqnroll.Table table24 = new global::Reqnroll.Table(new string[] {
-                            "Price",
-                            "DiscountPrice"});
+                            "Name",
+                            "DisplayName",
+                            "Values",
+                            "DisplayStyle"});
                 table24.AddRow(new string[] {
-                            "599",
-                            "549.99"});
+                            "Color",
+                            "Color",
+                            "Red,Blue",
+                            "Text"});
 #line 20
-    await testRunner.WhenAsync("System user changes the price of the default variant of product \'Laptop Pro\'", ((string)(null)), table24, "When ");
+    await testRunner.AndAsync("System user has added a variation dimension to the product \'Laptop Pro\'", ((string)(null)), table24, "And ");
 #line hidden
                 global::Reqnroll.Table table25 = new global::Reqnroll.Table(new string[] {
+                            "Name",
+                            "Sku",
+                            "Price",
+                            "DiscountPrice",
+                            "Color"});
+                table25.AddRow(new string[] {
+                            "Red Laptop",
+                            "SKU-RED",
+                            "500",
+                            "459.99",
+                            "Red"});
+#line 23
+    await testRunner.AndAsync("System user has added a variant to the product \'Laptop Pro\'", ((string)(null)), table25, "And ");
+#line hidden
+                global::Reqnroll.Table table26 = new global::Reqnroll.Table(new string[] {
+                            "Price",
+                            "DiscountPrice"});
+                table26.AddRow(new string[] {
+                            "599",
+                            "549.99"});
+#line 26
+    await testRunner.WhenAsync("System user changes the price of variant \'SKU-RED\' of product \'Laptop Pro\'", ((string)(null)), table26, "When ");
+#line hidden
+                global::Reqnroll.Table table27 = new global::Reqnroll.Table(new string[] {
+                            "Name",
+                            "Sku",
                             "Price",
                             "DiscountPrice",
                             "IsDefault"});
-                table25.AddRow(new string[] {
+                table27.AddRow(new string[] {
+                            "Red Laptop",
+                            "SKU-RED",
                             "599",
                             "549.99",
-                            "true"});
-#line 23
-    await testRunner.ThenAsync("the product \'Laptop Pro\' has the following variants", ((string)(null)), table25, "Then ");
+                            "false"});
+#line 29
+    await testRunner.ThenAsync("the product \'Laptop Pro\' has the following variants", ((string)(null)), table27, "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();

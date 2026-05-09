@@ -43,6 +43,7 @@ public class Program
     private static WebApplication BuildWebApp(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
+        builder.Configuration.AddKeyPerFile("/run/secrets", optional: true);
         builder.AddServiceDefaults();
 
         var startup = new Startup(builder.Configuration, builder.Environment);

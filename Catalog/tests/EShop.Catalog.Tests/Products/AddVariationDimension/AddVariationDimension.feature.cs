@@ -190,16 +190,12 @@ await this.FeatureBackgroundAsync();
                 global::Reqnroll.Table table18 = new global::Reqnroll.Table(new string[] {
                             "Name",
                             "Description",
-                            "Price",
-                            "DiscountPrice",
                             "Slug",
                             "Tags",
                             "Images"});
                 table18.AddRow(new string[] {
                             "Laptop Pro",
                             "A powerful laptop",
-                            "500",
-                            "459.99",
                             "laptop-pro",
                             "portable",
                             "https://img.example.com/lp1.jpg"});

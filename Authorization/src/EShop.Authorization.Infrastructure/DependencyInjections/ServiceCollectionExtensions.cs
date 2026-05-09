@@ -155,14 +155,8 @@ public static class ServiceCollectionExtensions
         IWebHostEnvironment environment,
         string serviceName)
     {
-        bus.ConfigureEventReceiveEndpoint<TenantCreatedConsumer, ITenantCreated>(
-            context,
-            environment.EnvironmentName,
-            serviceName);
-        bus.ConfigureEventReceiveEndpoint<SupportedPermissionsUpdatedConsumer, SupportedPermissionsUpdated>(
-            context,
-            environment.EnvironmentName,
-            serviceName);
+        bus.ConfigureReceiveEndpoint<TenantCreatedConsumer, ITenantCreated>(context, environment.EnvironmentName, serviceName);
+        bus.ConfigureReceiveEndpoint<SupportedPermissionsUpdatedConsumer, SupportedPermissionsUpdated>(context, environment.EnvironmentName, serviceName);
     }
 
     public static IServiceCollection AddEmailServices(this IServiceCollection services, IConfiguration configuration)

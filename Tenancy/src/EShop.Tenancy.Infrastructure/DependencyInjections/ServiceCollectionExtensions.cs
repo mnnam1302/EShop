@@ -111,12 +111,12 @@ public static class ServiceCollectionExtensions
         IWebHostEnvironment environment,
         string serviceName)
     {
-        bus.ConfigureEventReceiveEndpoint<SupportedFeaturesUpdatedConsumer, SupportedFeaturesUpdated>(
+        bus.ConfigureReceiveEndpoint<SupportedFeaturesUpdatedConsumer, SupportedFeaturesUpdated>(
             context,
             environment.EnvironmentName,
             serviceName);
 
-        bus.ConfigureEventReceiveEndpoint<TenantFeaturesUpdatedConsumer, ITenantFeaturesUpdated>(
+        bus.ConfigureReceiveEndpoint<TenantFeaturesUpdatedConsumer, ITenantFeaturesUpdated>(
             context,
             environment.EnvironmentName,
             serviceName);

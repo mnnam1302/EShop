@@ -20,8 +20,6 @@ public sealed partial class Product :
 {
     public void Apply(ProductCreated @event, IReadModelContext context)
     {
-        var defaultVariant = @event.DefaultVariant;
-
         Id = @event.ProductId.ToString();
         DocumentId = @event.ProductId;
         Name = @event.Name;
@@ -37,17 +35,6 @@ public sealed partial class Product :
         LastModifiedAtUtc = @event.TimeStampUtc;
         TenantId = @event.TenantId;
         Scope = @event.TenantId;
-        Variants.Add(new ProductVariant
-        {
-            Id = defaultVariant.VariantId.ToString(),
-            Name = defaultVariant.Name,
-            Sku = defaultVariant.Sku,
-            Price = defaultVariant.Price,
-            DiscountPrice = defaultVariant.DiscountPrice,
-            IsDefault = defaultVariant.IsDefault,
-            State = defaultVariant.State,
-            DimensionValues = []
-        });
     }
 
     public void Apply(ProductUpdated @event, IReadModelContext context)

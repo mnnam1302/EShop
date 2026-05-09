@@ -13,8 +13,6 @@ public sealed class CreateProductCommand : ICommand
     public string Name { get; init; } = string.Empty;
     public string Description { get; init; } = string.Empty;
     public Guid CategoryId { get; init; }
-    public decimal Price { get; init; }
-    public decimal DiscountPrice { get; init; }
     public IEnumerable<string> Tags { get; init; } = [];
     public string Slug { get; init; } = string.Empty;
     public IEnumerable<string> Images { get; init; } = [];
@@ -47,11 +45,9 @@ public sealed class CreateProductCommandHandler : ICommandHandler<CreateProductC
         }
 
         var product = ProductAggregate.Create(command, userDetailsProvider);
-        product.AddDefaultVariant(command.Price, command.DiscountPrice);
 
         await aggregateStore.AppendEventsAsync(product, cancellationToken);
 
-        var defaultVariant = product.Variants.First(variant => variant.IsDefault);
         await eventBus.PublishAsync(new ProductCreated
         {
             ProductId = product.Id,
@@ -62,16 +58,6 @@ public sealed class CreateProductCommandHandler : ICommandHandler<CreateProductC
             Slug = product.Slug,
             Images = product.Images,
             Groups = product.Groups,
-            DefaultVariant = new ProductDefaultVariant
-            {
-                VariantId = defaultVariant.Id,
-                Name = defaultVariant.Name,
-                Sku = defaultVariant.Sku,
-                Price = defaultVariant.Price,
-                DiscountPrice = defaultVariant.DiscountPrice,
-                IsDefault = defaultVariant.IsDefault,
-                State = nameof(defaultVariant.State)
-            },
             TenantId = userDetailsProvider.AuthenticatedUser.TenantId,
             ActionUserId = userDetailsProvider.AuthenticatedUser.ActionUserId,
             ActionUserType = userDetailsProvider.AuthenticatedUser.ActionUserType

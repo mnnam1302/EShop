@@ -101,24 +101,6 @@ public sealed partial class ProductAggregate : Aggregate, IAuditable, IScoped, I
         });
     }
 
-    internal void AddDefaultVariant(decimal price, decimal discountPrice)
-    {
-        ProductCanAddVariantSpecification.New(true, [])
-            .ThrowDomainErrorIfNotSatisfied(this);
-
-        RaiseEvent(new VariantCreatedEvent
-        {
-            VariantId = Guid.NewGuid(),
-            ProductId = Id,
-            Name = string.Empty,
-            Sku = string.Empty,
-            Price = price,
-            DiscountPrice = discountPrice,
-            VariantDimensionValues = [],
-            IsDefault = true
-        });
-    }
-
     internal void AddVariant(AddVariantCommand command)
     {
         var dimensionValues = command.DimensionValues

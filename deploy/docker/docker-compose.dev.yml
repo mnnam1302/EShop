@@ -1,0 +1,234 @@
+# =============================================================================
+# Application services — development environment.
+#
+# Credentials:
+#   - Infrastructure (postgres, redis, rabbitmq): plain env vars in infra.dev.yml.
+#     No Docker secrets needed for local dev.
+#   - App service credentials (DB conn strings, broker password): Docker secrets
+#     from deploy/secrets/ — only needed when app services are uncommented.
+#
+# Network model:
+#   eshop-public   : apigateway (edge) + services reachable by gateway.
+#   eshop-internal : services → postgres / redis / rabbitmq.
+#   Both networks are created by docker-compose.infra.dev.yml.
+#
+# Usage (infrastructure only):
+#   docker compose -f deploy/docker/docker-compose.infra.dev.yml up -d
+#
+# Usage (full dev stack with app services):
+#   docker compose \
+#     -f deploy/docker/docker-compose.infra.dev.yml \
+#     -f deploy/docker/docker-compose.dev.yml \
+#     up -d
+#
+# Required secret files (only needed when app services are uncommented):
+#   deploy/secrets/tenancy_connstr.txt
+#   deploy/secrets/authorization_connstr.txt
+#   deploy/secrets/rabbitmq_password.txt
+# =============================================================================
+
+services:
+
+  # ---------------------------------------------------------------------------
+  # Tenancy service
+  # Networks: eshop-public (reachable by gateway) + eshop-internal (reaches DB).
+  # Sensitive: connection string + broker password + JWT key → Docker secrets.
+  # ---------------------------------------------------------------------------
+  tenancy:
+    image: ${DOCKER_REGISTRY-}eshop/tenancy
+    container_name: tenancy
+    restart: unless-stopped
+    build:
+      context: ../..
+      dockerfile: Tenancy/src/EShop.Tenancy.API/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - RedisOptions__Enabled=true
+      - RedisOptions__Host=redis:6379
+      - MasstransitConfiguration__Host=rabbitmq
+      - MasstransitConfiguration__Port=5672
+      - MasstransitConfiguration__VirtualHost=${RABBITMQ_VHOST}
+      - MasstransitConfiguration__Username=${RABBITMQ_USER}
+      - Services__Authorization=http://authorization:8080
+      - OTEL_SERVICE_NAME=tenancy-api
+    secrets:
+      - source: tenancy_connstr
+        target: ConnectionStrings__DefaultConnection
+      - source: rabbitmq_password
+        target: MasstransitConfiguration__Password
+    ports:
+      - "5001:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:8080/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      dashboard:
+        condition: service_started
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
+      - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
+    env_file:
+      - ../env/dev.env
+    networks:
+      - eshop-public
+      - eshop-internal
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+        reservations:
+          cpus: '0.5'
+          memory: 256M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ---------------------------------------------------------------------------
+  # Authorization service
+  # ---------------------------------------------------------------------------
+  authorization:
+    image: ${DOCKER_REGISTRY-}eshop/authorization
+    container_name: authorization
+    restart: unless-stopped
+    build:
+      context: ../..
+      dockerfile: Authorization/src/EShop.Authorization.API/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - RedisOptions__Enabled=true
+      - RedisOptions__Host=redis:6379
+      - MasstransitConfiguration__Host=rabbitmq
+      - MasstransitConfiguration__Port=5672
+      - MasstransitConfiguration__VirtualHost=${RABBITMQ_VHOST}
+      - MasstransitConfiguration__Username=${RABBITMQ_USER}
+      - Services__Tenancy=http://tenancy:8080
+      - OTEL_SERVICE_NAME=authorization-api
+    secrets:
+      - source: authorization_connstr
+        target: ConnectionStrings__DefaultConnection
+      - source: rabbitmq_password
+        target: MasstransitConfiguration__Password
+    ports:
+      - "5002:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:8080/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      dashboard:
+        condition: service_started
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
+      - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
+    env_file:
+      - ../env/dev.env
+    networks:
+      - eshop-public
+      - eshop-internal
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+        reservations:
+          cpus: '0.5'
+          memory: 256M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ---------------------------------------------------------------------------
+  # API Gateway — edge service. Receives all external traffic and routes it.
+  # eshop-public : receives requests, routes to tenancy/authorization.
+  # eshop-internal: needs redis (redis is on eshop-internal).
+  # No DB connection string — no database secret needed.
+  # ---------------------------------------------------------------------------
+  eshop.apigateway:
+    image: ${DOCKER_REGISTRY-}eshop/apigateway
+    container_name: apigateway
+    restart: unless-stopped
+    build:
+      context: ../..
+      dockerfile: ReverseProxy/src/EShop.ApiGateway/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - RedisOptions__Enabled=true
+      - RedisOptions__Host=redis:6379
+      - Services__tenancy__http__0=http://tenancy:8080
+      - Services__authorization__http__0=http://authorization:8080
+      - OTEL_SERVICE_NAME=api-gateway
+    ports:
+      - "5000:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:8080/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    depends_on:
+      tenancy:
+        condition: service_started
+      authorization:
+        condition: service_started
+      redis:
+        condition: service_healthy
+      dashboard:
+        condition: service_started
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
+      - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
+    env_file:
+      - ../env/dev.env
+    networks:
+      - eshop-public    # edge: receives external traffic, routes to services
+      - eshop-internal  # needs redis on internal network
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+# Secrets declared here are sourced from files in deploy/secrets/.
+secrets:
+  tenancy_connstr:
+    file: ../secrets/tenancy_connstr.txt
+  authorization_connstr:
+    file: ../secrets/authorization_connstr.txt
+  rabbitmq_password:
+    file: ../secrets/rabbitmq_password.txt
+
+networks:
+  eshop-public:
+    external: true
+  eshop-internal:
+    external: true
