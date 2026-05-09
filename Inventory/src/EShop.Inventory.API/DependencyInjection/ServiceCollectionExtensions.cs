@@ -1,4 +1,5 @@
-﻿using EShop.Shared.JsonApi.Extensions;
+using EShop.Inventory.API.APIs;
+using EShop.Shared.JsonApi.Extensions;
 using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
 
 namespace EShop.Inventory.API.DependencyInjection;
@@ -11,7 +12,8 @@ public static class ServiceCollectionExtensions
             .AddCors()
             .AddGlobalExceptionMiddleware()
             .AddSwagger()
-            .AddInventoryApiVersioning();
+            .AddInventoryApiVersioning()
+            .AddCrossCuttingConcerns();
 
         return services;
     }
@@ -36,6 +38,17 @@ public static class ServiceCollectionExtensions
                 options.GroupNameFormat = "'v'VVV";
                 options.SubstituteApiVersionInUrl = true;
             });
+
+        return services;
+    }
+
+    private static IServiceCollection AddCrossCuttingConcerns(this IServiceCollection services)
+    {
+        services
+            .AddTenantAuthenticationProvider()
+            .AddUserPermissionsProvider()
+            .AddUserOrganizationContextProvider()
+            .AddTenantFeaturesProvider();
 
         return services;
     }

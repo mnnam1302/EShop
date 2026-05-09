@@ -1,4 +1,4 @@
-﻿using EShop.Shared.DomainTools.Aggregates;
+using EShop.Shared.DomainTools.Aggregates;
 using EShop.Shared.DomainTools.Entities;
 using System.ComponentModel.DataAnnotations;
 

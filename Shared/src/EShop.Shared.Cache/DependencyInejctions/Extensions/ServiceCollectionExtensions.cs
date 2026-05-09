@@ -1,4 +1,4 @@
-﻿using EShop.Shared.Cache.DependencyInejctions.Options;
+using EShop.Shared.Cache.DependencyInejctions.Options;
 using EShop.Shared.Cache.Providers;
 using EShop.Shared.Diagnostics;
 using EShop.Shared.DomainTools.Extensions;
@@ -44,14 +44,11 @@ public static class ServiceCollectionExtensions
         if (!redisOptions.Enabled)
             return services;
 
-        if (configuration.IsRunningInAspire())
-        {
-            services.AddStackExchangeRedisCache(options => options.Configuration = configuration.GetConnectionString("redis"));
-        }
-        else
-        {
-            services.AddStackExchangeRedisCache(options => options.Configuration = redisOptions.ConnectionString);
-        }
+        var connectionString = configuration.IsRunningInAspire()
+            ? configuration.GetConnectionString("redis").Require()
+            : redisOptions.ConnectionString;
+
+        services.AddStackExchangeRedisCache(options => options.Configuration = connectionString);
 
         services.AddScoped(typeof(CachedRemoteConfiguration));
         services.AddScoped<IRedisResiliencePolicyProvider, RedisResiliencePolicyProvider>();

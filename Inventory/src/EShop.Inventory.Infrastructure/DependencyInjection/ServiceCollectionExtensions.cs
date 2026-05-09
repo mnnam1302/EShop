@@ -1,4 +1,4 @@
-﻿using EShop.Shared.EventBus.DependencyInjections.Extensions;
+using EShop.Shared.Cache.DependencyInejctions.Extensions;
 using EShop.Shared.JsonApi.Extensions;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -21,8 +21,18 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    public static IServiceCollection AddInventoryInfrastructure(this IServiceCollection services)
+    public static IServiceCollection AddInventoryInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
+        services.AddRedis(configuration);
+        return services;
+    }
+
+    private static IServiceCollection AddRedis(this IServiceCollection services, IConfiguration configuration)
+    {
+        services
+            .AddRedisHealthCheck(configuration)
+            .AddRedisCacheInfrastructure(configuration);
+
         return services;
     }
 }
