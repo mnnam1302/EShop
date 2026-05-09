@@ -39,9 +39,9 @@ public class InboxMessage : IExcludedFromScoping
         };
     }
 
-    public void MarkAsDone()
+    public void MarkAsCompleted()
     {
-        State = InboxMessageStatus.Done;
+        State = InboxMessageStatus.Completed;
         UpdatedOnUtc = DateTimeOffset.UtcNow;
     }
 
@@ -56,6 +56,6 @@ public class InboxMessage : IExcludedFromScoping
 public static class InboxMessageStatus
 {
     public const string Pending = "Pending";
-    public const string Done = "Done";
+    public const string Completed = "Completed";
     public const string Failed = "Failed";
 }

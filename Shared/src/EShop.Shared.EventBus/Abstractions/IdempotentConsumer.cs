@@ -34,7 +34,7 @@ public abstract class IdempotentConsumer<T> : IConsumer<T>
 
         if (result.IsSuccess)
         {
-            inboxMessage.MarkAsDone();
+            inboxMessage.MarkAsCompleted();
         }
         else
         {

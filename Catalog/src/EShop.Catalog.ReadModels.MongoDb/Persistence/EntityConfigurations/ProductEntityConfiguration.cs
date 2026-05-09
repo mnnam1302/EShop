@@ -9,7 +9,7 @@ public sealed class ProductEntityConfiguration : IEntityTypeConfiguration<Produc
 {
     public void Configure(EntityTypeBuilder<Product> builder)
     {
-        builder.ToCollection("Product");
+        builder.ToCollection("Products");
         builder.HasKey(p => p.Id);
     }
 }
