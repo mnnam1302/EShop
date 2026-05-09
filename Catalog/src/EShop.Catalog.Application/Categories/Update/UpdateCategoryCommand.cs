@@ -34,7 +34,7 @@ public sealed class UpdateCategoryCommandHandler(
 
         await eventStore.AppendEventsAsync(category, cancellationToken);
 
-        await eventBus.PublishAsync<CategoryUpdated>(new
+        await eventBus.PublishAsync(new CategoryUpdated
         {
             CategoryId = category.Id,
             Version = category.Version,
