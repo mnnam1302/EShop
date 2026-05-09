@@ -1,4 +1,4 @@
-﻿using EShop.Shared.DomainTools.EventSourcing.SeedWork;
+using EShop.Shared.DomainTools.EventSourcing.SeedWork;
 using EShop.Shared.DomainTools.Exceptions;
 using Microsoft.Extensions.Options;
 
@@ -28,7 +28,7 @@ public sealed class AggregateStore(
                     // Load events after snapshot
                     var eventsAfterSnapshot = await eventStoreRepository.GetEventStreamAsync(aggregateId, fromVersion, cancellationToken);
 
-                    if (eventsAfterSnapshot.Any())
+                    if (eventsAfterSnapshot.Count != 0)
                     {
                         snapshotAggregate.Replay(eventsAfterSnapshot);
                     }

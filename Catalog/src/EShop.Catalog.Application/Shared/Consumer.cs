@@ -1,4 +1,4 @@
-﻿using EShop.Shared.Contracts.Abstractions.MessageBus;
+using EShop.Shared.Contracts.Abstractions.MessageBus;
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.EventBus;
 using MassTransit;
@@ -60,8 +60,6 @@ public abstract class Consumer<TMessage> : IConsumer<TMessage>
         {
             // Duplicate message contraint violation, another consumer has processed the same message concurrently
             await transaction.RollbackAsync(context.CancellationToken);
-
-            return;
         }
     }
 
