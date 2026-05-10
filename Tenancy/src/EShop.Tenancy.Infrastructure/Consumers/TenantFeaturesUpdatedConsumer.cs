@@ -1,11 +1,11 @@
-﻿using EShop.Shared.Contracts.Abstractions.Shared;
+using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.Contracts.Services.Tenancy.Features;
 using EShop.Tenancy.Persistence;
 using MediatR;
 
 namespace EShop.Tenancy.Infrastructure.Consumers;
 
-public sealed class TenantFeaturesUpdatedConsumer : Consumer<TenantFeaturesUpdated>
+public sealed class TenantFeaturesUpdatedConsumer : IdempotentConsumer<TenantFeaturesUpdated>
 {
     private readonly ISender sender;
 

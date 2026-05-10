@@ -1,20 +1,20 @@
 using EntityFramework.Exceptions.Common;
-using EShop.Catalog.ReadModels.MongoDb.Persistence;
 using EShop.Shared.Contracts.Abstractions.MessageBus;
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.EventBus;
+using EShop.Tenancy.Persistence;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using MongoDB.Driver;
 
-namespace EShop.Catalog.ReadModels.MongoDb.Consumers;
+namespace EShop.Tenancy.Infrastructure.Consumers;
 
 public abstract class IdempotentConsumer<TMessage> : IConsumer<TMessage>
-    where TMessage : IntegrationEvent
+    where TMessage : IntegrationEvent, IIntegrationEvent
 {
-    private readonly CatalogReadDbContext _dbContext;
+    private readonly TenancyDbContext _dbContext;
 
-    protected IdempotentConsumer(CatalogReadDbContext dbContext)
+    protected IdempotentConsumer(TenancyDbContext dbContext)
     {
         _dbContext = dbContext;
     }
@@ -62,7 +62,7 @@ public abstract class IdempotentConsumer<TMessage> : IConsumer<TMessage>
 
                 await transaction.CommitAsync(context.CancellationToken);
             }
-            catch (MongoWriteException ex) when (ex.WriteError.Category == ServerErrorCategory.DuplicateKey)
+            catch (DbUpdateException ex) when (ex is UniqueConstraintException)
             {
                 // Duplicate message contraint violation, another consumer has processed the same message concurrently
                 await transaction.RollbackAsync(context.CancellationToken);

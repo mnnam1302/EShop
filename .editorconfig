@@ -136,6 +136,9 @@ dotnet_diagnostic.CA1848.severity = none
 # CA2254: Template should be a static expression
 dotnet_diagnostic.CA2254.severity = none
 
+# S2629: Logging templates should be constant
+dotnet_diagnostic.S2629.severity = none
+
 [**/*Tests*/**/*.cs]
 
 # CA1707: Identifiers should not contain underscores (relaxed for test method names)

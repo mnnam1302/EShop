@@ -1,4 +1,4 @@
-﻿namespace EShop.Shared.Contracts.Services.Tenancy.Features;
+namespace EShop.Shared.Contracts.Services.Tenancy.Features;
 
 public class SupportedFeaturesUpdated : TenancyEvent
 {
@@ -9,11 +9,11 @@ public class SupportedFeaturesUpdated : TenancyEvent
 
 public interface IFeature
 {
-    string Id { get; init; }
-    string Name { get; init; }
-    string Description { get; init; }
-    string State { get; init; }
-    string Module { get; init; }
+    string Id { get; }
+    string Name { get; }
+    string Description { get; }
+    string State { get; }
+    string Module { get; }
 }
 
 public enum SupportedFeaturesAction
