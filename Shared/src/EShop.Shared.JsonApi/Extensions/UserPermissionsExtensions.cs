@@ -1,4 +1,4 @@
-﻿using EShop.Shared.Cache.Providers;
+using EShop.Shared.Cache.Providers;
 using EShop.Shared.Cache.Services;
 using EShop.Shared.DomainTools.Extensions;
 using EShop.Shared.HealthChecks;
@@ -11,7 +11,6 @@ using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Nito.AsyncEx;
-using System;
 
 namespace EShop.Shared.JsonApi.Extensions;
 

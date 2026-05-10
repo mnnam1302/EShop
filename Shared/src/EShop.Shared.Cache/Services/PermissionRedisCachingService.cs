@@ -1,4 +1,4 @@
-﻿using EShop.Shared.Cache.CacheKeys;
+using EShop.Shared.Cache.CacheKeys;
 using EShop.Shared.Cache.Providers;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserPermissionProvider;
@@ -8,7 +8,7 @@ using StackExchange.Redis;
 
 namespace EShop.Shared.Cache.Services;
 
-public class PermissionRedisCachingService : IPermissionCachingService
+public sealed class PermissionRedisCachingService : IPermissionCachingService
 {
     private readonly IRedisCachingProvider<string[]> _redisCachingAsyncProvider;
     private readonly ILogger _logger;
@@ -33,9 +33,8 @@ public class PermissionRedisCachingService : IPermissionCachingService
     }
 
     public async Task RemoveCacheAsync(string userId)
-
     {
-        await _redisCachingAsyncProvider.ClearAsync(UserPermissionCacheKeyProvider.GetCacheKey(userId));
+        await _redisCachingAsyncProvider.RemoveAsync(UserPermissionCacheKeyProvider.GetCacheKey(userId));
     }
 
     public async Task<string[]> GetPermissionsAsync(string userId)
@@ -51,11 +50,6 @@ public class PermissionRedisCachingService : IPermissionCachingService
         catch (RedisConnectionException ex)
         {
             _logger.LogWarning(ex, "Redis connection exception '{FailureType}' while retrieving cached permission for user '{UserId}'", ex.FailureType, userId);
-            return permissions;
-        }
-        catch (Exception e)
-        {
-            _logger.LogError(e, "Exception while retrieving cached permission for user '{UserId}'", userId);
             return permissions;
         }
     }

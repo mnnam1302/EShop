@@ -1,4 +1,4 @@
-﻿using EShop.Shared.Cache.CacheKeys;
+using EShop.Shared.Cache.CacheKeys;
 using EShop.Shared.Cache.Providers;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers.TenantFeaturesProvider;
@@ -41,6 +41,6 @@ public class TenantFeaturesRedisCachingService : ITenantFeaturesCachingService
 
     public async Task RemoveTenantFeatures(string tenantId, CancellationToken cancellationToken = default)
     {
-        await _redisCachingService.ClearAsync(TenantFeaturesCacheKeyProvider.GetCacheKey(tenantId), cancellationToken);
+        await _redisCachingService.RemoveAsync(TenantFeaturesCacheKeyProvider.GetCacheKey(tenantId), cancellationToken);
     }
 }

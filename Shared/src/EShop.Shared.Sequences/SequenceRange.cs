@@ -1,46 +1,46 @@
-﻿using EShop.Shared.Sequences.DependencyInjections;
+using EShop.Shared.Sequences.DependencyInjections;
 using Microsoft.Extensions.Options;
 
 namespace EShop.Shared.Sequences;
 
 public sealed class SequenceRange : IDisposable
 {
-    private readonly string sequenceId;
-    private readonly SemaphoreSlim semaphoreSlim = new SemaphoreSlim(1);
-    private readonly IOptions<SequenceManagerOptions> options;
-    private int? currentValue;
-    private int? maxValueReserved;
+    private readonly string _sequenceId;
+    private readonly SemaphoreSlim _semaphoreSlim = new(1);
+    private readonly IOptions<SequenceManagerOptions> _options;
+    private int? _currentValue;
+    private int? _maxValueReserved;
 
     public SequenceRange(string sequenceId, IOptions<SequenceManagerOptions> options)
     {
-        this.sequenceId = sequenceId;
-        this.options = options;
+        _sequenceId = sequenceId;
+        _options = options;
     }
 
     internal async Task<int> GetNextValue(ISequenceStore sequenceStore)
     {
-        await this.semaphoreSlim.WaitAsync().ConfigureAwait(false);
+        await _semaphoreSlim.WaitAsync();
 
         try
         {
-            if (this.currentValue is null)
+            if (_currentValue is null)
             {
                 var startNewRange = await GetStartNewRange(sequenceStore);
-                currentValue = startNewRange;
+                _currentValue = startNewRange;
                 UpdateReservedValue(startNewRange);
             }
 
-            int sequenceValueForCaller = currentValue.Value;
+            int sequenceValueForCaller = _currentValue.Value;
 
             if (ReachedMax())
             {
                 var startNewRange = await GetStartNewRange(sequenceStore);
-                currentValue = startNewRange;
+                _currentValue = startNewRange;
                 UpdateReservedValue(startNewRange);
             }
             else
             {
-                currentValue++;
+                _currentValue++;
             }
 
             return sequenceValueForCaller;
@@ -48,30 +48,30 @@ public sealed class SequenceRange : IDisposable
         }
         finally
         {
-            this.semaphoreSlim.Release();
+            _semaphoreSlim.Release();
         }
     }
 
     private async Task<int> GetStartNewRange(ISequenceStore sequenceStore)
     {
         var startOfNewRange = await sequenceStore
-            .GetNextAvailableSequenceValue(this.sequenceId, options.Value.ReservedSequenceValueRange);
+            .GetNextAvailableSequenceValue(this._sequenceId, _options.Value.ReservedSequenceValueRange);
 
         return startOfNewRange;
     }
 
     private void UpdateReservedValue(int startOfNewRange)
     {
-        maxValueReserved = startOfNewRange + options.Value.ReservedSequenceValueRange;
+        _maxValueReserved = startOfNewRange + _options.Value.ReservedSequenceValueRange;
     }
 
     private bool ReachedMax()
     {
-        return currentValue == maxValueReserved;
+        return _currentValue == _maxValueReserved;
     }
 
     public void Dispose()
     {
-        semaphoreSlim.Dispose();
+        _semaphoreSlim.Dispose();
     }
 }
