@@ -31,7 +31,7 @@ public static class InventoryApis
         var command = new CreateInventoryCommand
         {
             ProductId = request.ProductId,
-            SkuId = request.SkuId,
+            VariantId = request.VariantId,
             Sku = request.Sku,
             StockAvailable = request.StockAvailable,
             MinimumStock = request.MinimumStock
@@ -44,6 +44,6 @@ public static class InventoryApis
             return ApiEndpointHandler.Failure(result);
         }
 
-        return Results.Created();
+        return Results.Created("", result);
     }
 }

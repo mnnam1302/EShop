@@ -1,4 +1,3 @@
-using EntityFramework.Exceptions.Common;
 using EShop.Catalog.ReadModels.MongoDb.Persistence;
 using EShop.Shared.Contracts.Abstractions.MessageBus;
 using EShop.Shared.Contracts.Abstractions.Shared;
@@ -33,41 +32,31 @@ public abstract class IdempotentConsumer<TMessage> : IConsumer<TMessage>
             return;
         }
 
-        var strategy = _dbContext.Database.CreateExecutionStrategy();
-
-        await strategy.ExecuteAsync(async () =>
+        try
         {
-            using var transaction = await _dbContext.Database.BeginTransactionAsync(context.CancellationToken);
+            var inboxMessage = InboxMessage.Create(consumerId, messageId, typeof(TMessage).Name);
 
-            try
+            _dbContext.InboxMessages.Add(inboxMessage);
+            await _dbContext.SaveChangesAsync(context.CancellationToken);
+
+            var result = await HandleMessageAsync(context.Message, context.CancellationToken);
+
+            if (result.IsSuccess)
             {
-                var inboxMessage = InboxMessage.Create(consumerId, messageId, typeof(TMessage).Name);
-
-                _dbContext.InboxMessages.Add(inboxMessage);
-                await _dbContext.SaveChangesAsync(context.CancellationToken);
-
-                var result = await HandleMessageAsync(context.Message, context.CancellationToken);
-
-                if (result.IsSuccess)
-                {
-                    inboxMessage.MarkAsCompleted();
-                }
-                else
-                {
-                    // Handling the message failed depend on business requirements
-                    inboxMessage.MarkAsFailed(result.Error.Message);
-                }
-
-                await _dbContext.SaveChangesAsync(context.CancellationToken);
-
-                await transaction.CommitAsync(context.CancellationToken);
+                inboxMessage.MarkAsCompleted();
             }
-            catch (MongoWriteException ex) when (ex.WriteError.Category == ServerErrorCategory.DuplicateKey)
+            else
             {
-                // Duplicate message contraint violation, another consumer has processed the same message concurrently
-                await transaction.RollbackAsync(context.CancellationToken);
+                // Handling the message failed depend on business requirements
+                inboxMessage.MarkAsFailed(result.Error.Message);
             }
-        });
+
+            await _dbContext.SaveChangesAsync(context.CancellationToken);
+        }
+        catch (MongoWriteException ex) when (ex.WriteError.Category == ServerErrorCategory.DuplicateKey)
+        {
+            // Duplicate message constraint violation, another consumer has processed the same message concurrently
+        }
     }
 
     protected abstract Task<Result> HandleMessageAsync(TMessage message, CancellationToken cancellationToken);

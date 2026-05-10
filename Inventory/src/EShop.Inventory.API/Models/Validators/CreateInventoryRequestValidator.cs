@@ -10,7 +10,7 @@ public sealed class CreateInventoryRequestValidator : AbstractValidator<CreateIn
         RuleFor(x => x.ProductId)
             .NotEmpty();
 
-        RuleFor(x => x.SkuId)
+        RuleFor(x => x.VariantId)
             .NotEmpty();
 
         RuleFor(x => x.Sku)

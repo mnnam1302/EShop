@@ -10,7 +10,7 @@ namespace EShop.Inventory.Application.UseCases.Inventory;
 public sealed class CreateInventoryCommand : ICommand
 {
     public required Guid ProductId { get; init; }
-    public required Guid SkuId { get; init; }
+    public required Guid VariantId { get; init; }
     public required string Sku { get; init; }
     public required int StockAvailable { get; init; }
     public int MinimumStock { get; init; }
@@ -38,7 +38,7 @@ internal sealed class CreateInventoryCommandHandler : ICommandHandler<CreateInve
     public async Task<Result> HandleAsync(CreateInventoryCommand command, CancellationToken cancellationToken)
     {
         var existing = await _repository.FindSingleAsync(
-            x => x.SkuId == command.SkuId,
+            x => x.VariantId == command.VariantId,
             cancellationToken: cancellationToken);
 
         if (existing is not null)
@@ -50,7 +50,7 @@ internal sealed class CreateInventoryCommandHandler : ICommandHandler<CreateInve
 
         var inventory = Domain.Entities.Inventory.Create(
             command.ProductId,
-            command.SkuId,
+            command.VariantId,
             command.Sku,
             command.StockAvailable,
             command.MinimumStock,
@@ -59,7 +59,7 @@ internal sealed class CreateInventoryCommandHandler : ICommandHandler<CreateInve
         _repository.Add(inventory);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        _logger.LogInformation("Inventory created for SKU {Sku} (SkuId: {SkuId})", inventory.Sku, inventory.SkuId);
+        _logger.LogInformation("Inventory created for SKU {Sku} (SkuId: {SkuId})", inventory.Sku, inventory.VariantId);
 
         return Result.Success();
     }

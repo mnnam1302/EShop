@@ -9,7 +9,7 @@ public class Inventory : AggregateRoot<Guid>, IScoped, IAuditable
 {
     public required Guid ProductId { get; set; }
 
-    public required Guid SkuId { get; set; } // variant id
+    public required Guid VariantId { get; set; }
 
     [MaxLength(ModelConstants.MediumText)]
     public required string Sku { get; set; }
@@ -38,7 +38,7 @@ public class Inventory : AggregateRoot<Guid>, IScoped, IAuditable
 
     public static Inventory Create(
         Guid productId,
-        Guid skuId,
+        Guid variantId,
         string sku,
         int stockAvailable,
         int minimumStock,
@@ -48,7 +48,7 @@ public class Inventory : AggregateRoot<Guid>, IScoped, IAuditable
         {
             Id = Guid.NewGuid(),
             ProductId = productId,
-            SkuId = skuId,
+            VariantId = variantId,
             Sku = sku,
             StockAvailable = stockAvailable,
             MinimumStock = minimumStock,
