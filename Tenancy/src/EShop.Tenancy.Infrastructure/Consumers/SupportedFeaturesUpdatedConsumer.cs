@@ -7,11 +7,11 @@ namespace EShop.Tenancy.Infrastructure.Consumers;
 
 public sealed class SupportedFeaturesUpdatedConsumer : IdempotentConsumer<SupportedFeaturesUpdated>
 {
-    private readonly ISender sender;
+    private readonly ISender _sender;
 
     public SupportedFeaturesUpdatedConsumer(ISender sender, TenancyDbContext dbContext) : base(dbContext)
     {
-        this.sender = sender;
+        this._sender = sender;
     }
 
     protected override async Task<Result> HandleMessageAsync(SupportedFeaturesUpdated message, CancellationToken cancellationToken)
@@ -25,7 +25,7 @@ public sealed class SupportedFeaturesUpdatedConsumer : IdempotentConsumer<Suppor
             ActionUserId = message.ActionUserId
         };
 
-        var result = await sender.Send(command, cancellationToken);
+        var result = await _sender.Send(command, cancellationToken);
         return result;
     }
 }

@@ -1,6 +1,7 @@
 using EShop.Inventory.API.DependencyInjection;
 using EShop.Inventory.Application.DependencyInjection;
 using EShop.Inventory.Infrastructure.DependencyInjection;
+using EShop.Shared.JsonApi.Extensions;
 using EShop.Shared.JsonApi.Middlewares;
 
 namespace EShop.Inventory.API;
@@ -41,6 +42,7 @@ public class Startup
 
         app.MapEndpoints();
 
-        app.UseRouting();
+        app.RegisterFeatures(applicationLifetime, logger);
+        app.RegisterPermissions(applicationLifetime, logger);
     }
 }

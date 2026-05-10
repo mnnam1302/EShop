@@ -2,6 +2,7 @@
 using EShop.Shared.DomainTools.UnitOfWorks;
 using EShop.Shared.JsonApi.Extensions;
 using EShop.Tenancy.Domain.Repositories;
+using EShop.Tenancy.Domain.UnitOfWorks;
 using EShop.Tenancy.Persistence.Repositories;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -29,7 +30,8 @@ public static class ServiceCollectionExtension
         services.AddScoped<IFeatureRepository, FeatureRepository>();
         services.AddScoped<ITenantRepository, TenantRepository>();
         services.AddScoped<ITenantFeatureRepository, TenantFeatureRepository>();
-        services.AddScoped<IUnitOfWork, EFUnitOfWork<TenancyDbContext>>();
+        services.AddScoped<ITenancyUnitOfWork, TenancyUnitOfWork>();
+        services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<ITenancyUnitOfWork>());
     }
 }
 

@@ -1,11 +1,11 @@
 ﻿using EShop.Shared.Authentication.Abstractions;
 using EShop.Shared.Contracts.Services.Tenancy.Features;
 using EShop.Shared.DomainTools.Exceptions;
-using EShop.Shared.DomainTools.UnitOfWorks;
 using EShop.Shared.EventBus.Abstractions;
 using EShop.Shared.Scoping.ResourceAccessControl;
 using EShop.Tenancy.Domain.Entities;
 using EShop.Tenancy.Domain.Repositories;
+using EShop.Tenancy.Domain.UnitOfWorks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -25,7 +25,7 @@ public sealed class FeatureService : IFeatureService
     private readonly IFeatureRepository _featureRepository;
     private readonly ITenantRepository _tenantRepository;
     private readonly ITenantFeatureRepository _tenantFeatureRepository;
-    private readonly IUnitOfWork _unitOfWork;
+    private readonly ITenancyUnitOfWork _unitOfWork;
     private readonly IUserDetailsProvider _userDetailsProvider;
     private readonly IEventBus _eventBusGateway;
     private readonly ILogger _logger;
@@ -34,7 +34,7 @@ public sealed class FeatureService : IFeatureService
         IFeatureRepository featureRepository,
         ITenantRepository tenantRepository,
         ITenantFeatureRepository tenantFeatureRepository,
-        IUnitOfWork unitOfWork,
+        ITenancyUnitOfWork unitOfWork,
         IUserDetailsProvider userDetailsProvider,
         IEventBus eventBusGateway,
         ILogger<FeatureService> logger)
@@ -95,6 +95,10 @@ public sealed class FeatureService : IFeatureService
 
             try
             {
+                // Explicitly update the PostgreSQL session variable so RLS sees the correct
+                // tenant even when the connection is already open inside a transaction.
+                await _unitOfWork.SetTenantContextAsync(tenantId, cancellationToken);
+
                 var tenantFeature = new TenantFeature(
                     Guid.NewGuid(),
                     tenantId,
@@ -150,6 +154,10 @@ public sealed class FeatureService : IFeatureService
 
                 try
                 {
+                    // Explicitly update the PostgreSQL session variable so RLS sees the correct
+                    // tenant even when the connection is already open inside a transaction.
+                    await _unitOfWork.SetTenantContextAsync(tenantId, cancellationToken);
+
                     var tenant = await _tenantRepository.FindByIdAsync(tenantId, cancellationToken: cancellationToken, includeProperties: t => t.TenantFeatures);
                     if (tenant != null)
                     {

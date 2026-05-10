@@ -8,13 +8,13 @@ namespace EShop.Inventory.API.APIs;
 
 public static class InventoryApis
 {
-    private const string BaseUrl = "api/v{version:apiVersion}/inventories";
+    private const string _baseUrl = "api/v{version:apiVersion}/inventories";
 
     public static IEndpointRouteBuilder MapInventoryEndpoints(this IEndpointRouteBuilder routerBuilder)
     {
         var inventoryEndpointsV1 = routerBuilder
             .NewVersionedApi("Inventory")
-            .MapGroup(BaseUrl)
+            .MapGroup(_baseUrl)
             .HasApiVersion(1);
         //.RequireFeatureFilter(FeatureConstants.Inventory.InventoryManagement);
 

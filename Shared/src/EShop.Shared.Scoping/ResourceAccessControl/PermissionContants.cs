@@ -1,4 +1,4 @@
-﻿namespace EShop.Shared.Scoping.ResourceAccessControl;
+namespace EShop.Shared.Scoping.ResourceAccessControl;
 
 public static class PermissionConstants
 {
@@ -39,5 +39,11 @@ public static class PermissionConstants
 
         public const string ViewProducts = "Catalog_ViewProducts";
         public const string ManageProducts = "Catalog_ManageProducts";
+    }
+
+    public static class Inventory
+    {
+        public const string ViewInventory = "Inventory_ViewInventory";
+        public const string ManageInventory = "Inventory_ManageInventory";
     }
 }

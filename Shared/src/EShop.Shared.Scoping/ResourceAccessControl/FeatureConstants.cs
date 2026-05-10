@@ -36,6 +36,7 @@ public enum FeatureModules
     EShop_Authorization,
     EShop_Tenancy,
     EShop_Catalog,
+    EShop_Inventory
 }
 
 public enum FeatureState
