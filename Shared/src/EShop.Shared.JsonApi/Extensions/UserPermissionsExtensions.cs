@@ -20,17 +20,15 @@ public static class UserPermissionsExtensions
     {
         applicationLifetime.ApplicationStarted.Register(() =>
         {
-            using (var scope = app.ApplicationServices.CreateScope())
-            {
-                var healthCheckService = scope.ServiceProvider.GetRequiredService<HealthCheckService>();
-                healthCheckService.WaitForHealthyEventBus();
+            using var scope = app.ApplicationServices.CreateScope();
+            var healthCheckService = scope.ServiceProvider.GetRequiredService<HealthCheckService>();
+            healthCheckService.WaitForHealthyEventBus();
 
-                var instances = scope.ServiceProvider.GetServices<IPermissionRegistrationService>();
-                foreach (var instance in instances)
-                {
-                    logger.LogDebug("Running permission registration for {Service}", instance.GetType().Name);
-                    AsyncContext.Run(() => instance.RegisterPermissions());
-                }
+            var instances = scope.ServiceProvider.GetServices<IPermissionRegistrationService>();
+            foreach (var instance in instances)
+            {
+                logger.LogDebug("Running permission registration for {Service}", instance.GetType().Name);
+                AsyncContext.Run(() => instance.RegisterPermissions());
             }
         });
     }
