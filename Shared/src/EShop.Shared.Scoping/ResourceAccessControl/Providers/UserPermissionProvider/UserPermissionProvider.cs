@@ -7,11 +7,8 @@ namespace EShop.Shared.Scoping.ResourceAccessControl.Providers.UserPermissionPro
 /// </summary>
 public sealed class UserPermissionProvider : IUserPermissionsProvider
 {
-    /// <summary>Maximum time the distributed lock is held while the cache entry is being rebuilt.</summary>
-    private static readonly TimeSpan LockExpiration = TimeSpan.FromSeconds(15);
-
-    /// <summary>Time to wait before re-reading the cache when another instance holds the rebuild lock.</summary>
-    private static readonly TimeSpan LockRetryDelay = TimeSpan.FromMilliseconds(200);
+    private static readonly TimeSpan _lockExpiration = TimeSpan.FromSeconds(15);
+    private static readonly TimeSpan _lockRetryDelay = TimeSpan.FromMilliseconds(200);
 
     private readonly IPermissionCachingService _permissionCache;
     private readonly UserPermisssionHttpClient _userPermissionHttpClient;
@@ -39,7 +36,7 @@ public sealed class UserPermissionProvider : IUserPermissionsProvider
         // 2. Slow path — acquire per-user lock
         using var lockHandle = await _distributedLock.TryAcquireAsync(
             $"permissions:{userId}",
-            LockExpiration,
+            _lockExpiration,
             cancellationToken);
 
         if (lockHandle is not null)
@@ -62,7 +59,7 @@ public sealed class UserPermissionProvider : IUserPermissionsProvider
         }
 
         // 5. Lock busy — another instance is rebuilding; wait and serve from cache
-        await Task.Delay(LockRetryDelay, cancellationToken);
+        await Task.Delay(_lockRetryDelay, cancellationToken);
         return await _permissionCache.GetPermissionsAsync(userId);
     }
 }
