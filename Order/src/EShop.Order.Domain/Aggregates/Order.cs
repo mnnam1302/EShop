@@ -16,7 +16,7 @@ public class Order : AggregateRoot<Guid>, IDateTracking, IExcludedFromScoping
     public string? Description { get; private set; }
 
     private List<OrderItem> _orderItems;
-    public IReadOnlyCollection<OrderItem> OrderItems => _orderItems;
+    public virtual IReadOnlyCollection<OrderItem> OrderItems => _orderItems;
 
     public DateTimeOffset CreatedAtUtc { get; set; }
     public DateTimeOffset? LastModifiedAtUtc { get; set; }

@@ -12,13 +12,13 @@ public class OrderItem : EntityBase<Guid>, IExcludedFromScoping
 
     public decimal TotalPrice => Quantity * UnitPrice;
 
-    internal OrderItem(Guid id, Guid orderId, Guid variantId, int quantity, decimal unitPrice, decimal? dicount)
+    public OrderItem(Guid id, Guid orderId, Guid variantId, int quantity, decimal unitPrice, decimal? discount)
     {
         Id = id;
         OrderId = orderId;
         VariantId = variantId;
         Quantity = quantity;
         UnitPrice = unitPrice;
-        Discount = dicount;
+        Discount = discount;
     }
 }

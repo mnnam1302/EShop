@@ -1,4 +1,4 @@
-﻿using EntityFramework.Exceptions.PostgreSQL;
+using EntityFramework.Exceptions.PostgreSQL;
 using EShop.Shared.DbResourceAccessControl.Extensions;
 using EShop.Shared.DbResourceAccessControl.Interceptors;
 using EShop.Shared.DbResourceAccessControl.Options;
@@ -53,7 +53,6 @@ public static class DataAccessExtensions
                 .EnableSensitiveDataLogging()
                 .UseLazyLoadingProxies()
                 .UseNpgsql(
-                    //connectionString: configuration.GetConnectionString("DefaultConnection"),
                     connectionString: connectionString,
                     npgsqlOptionsAction: optionsBuilder => optionsBuilder
                         .SetPostgresVersion(versionOptions.CurrentValue.Major, versionOptions.CurrentValue.Minor)
