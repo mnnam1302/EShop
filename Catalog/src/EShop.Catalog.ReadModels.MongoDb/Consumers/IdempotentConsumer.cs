@@ -1,4 +1,4 @@
-﻿using EShop.Catalog.ReadModels.MongoDb.Persistence;
+using EShop.Catalog.ReadModels.MongoDb.Persistence;
 using EShop.Shared.Contracts.Abstractions.MessageBus;
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.EventBus;
@@ -32,8 +32,6 @@ public abstract class IdempotentConsumer<TMessage> : IConsumer<TMessage>
             return;
         }
 
-        using var transaction = await _dbContext.Database.BeginTransactionAsync(context.CancellationToken);
-
         try
         {
             var inboxMessage = InboxMessage.Create(consumerId, messageId, typeof(TMessage).Name);
@@ -54,15 +52,10 @@ public abstract class IdempotentConsumer<TMessage> : IConsumer<TMessage>
             }
 
             await _dbContext.SaveChangesAsync(context.CancellationToken);
-
-            await transaction.CommitAsync(context.CancellationToken);
         }
         catch (MongoWriteException ex) when (ex.WriteError.Category == ServerErrorCategory.DuplicateKey)
         {
-            // Duplicate message contraint violation, another consumer has processed the same message concurrently
-            await transaction.RollbackAsync(context.CancellationToken);
-
-            return;
+            // Duplicate message constraint violation, another consumer has processed the same message concurrently
         }
     }
 

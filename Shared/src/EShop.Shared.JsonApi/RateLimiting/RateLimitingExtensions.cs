@@ -1,4 +1,4 @@
-﻿using EShop.Shared.Authentication.Abstractions;
+using EShop.Shared.Authentication.Abstractions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
@@ -41,7 +41,7 @@ public static class RateLimitingExtensions
                             TokenLimit = 10,
                             QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
                             QueueLimit = 3,
-                            ReplenishmentPeriod = TimeSpan.FromMinutes(1),
+                            ReplenishmentPeriod = TimeSpan.FromSeconds(1),
                             TokensPerPeriod = 4,
                             AutoReplenishment = true
                         });
@@ -50,7 +50,7 @@ public static class RateLimitingExtensions
                 return RateLimitPartition.GetSlidingWindowLimiter("anonymous-user",
                     _ => new SlidingWindowRateLimiterOptions
                     {
-                        PermitLimit = 10,
+                        PermitLimit = 5,
                         QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
                         QueueLimit = 5,
                         Window = TimeSpan.FromMinutes(1),

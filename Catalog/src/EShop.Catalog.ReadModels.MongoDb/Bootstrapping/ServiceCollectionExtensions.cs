@@ -1,4 +1,4 @@
-﻿using EShop.Catalog.ReadModels.MongoDb.Bootstrapping;
+using EShop.Catalog.ReadModels.MongoDb.Bootstrapping;
 using EShop.Catalog.ReadModels.MongoDb.Models;
 using EShop.Catalog.ReadModels.MongoDb.Persistence;
 using EShop.Shared.Authentication.Filters;
@@ -196,20 +196,10 @@ public static class ServiceCollectionExtensions
 
                 bus.MessageTopology.SetEntityNameFormatter(new KebabCaseEntityNameFormatter());
 
-                bus.ConfigureRecieveEndpoints(context, environment, Program.ApplicationName);
                 bus.ConfigureEndpoints(context);
             });
         });
 
         return services;
-    }
-
-    private static void ConfigureRecieveEndpoints(
-        this IRabbitMqBusFactoryConfigurator bus,
-        IRegistrationContext context,
-        IWebHostEnvironment environment,
-        string serviceName)
-    {
-        bus.ConfigureEventReceiveEndpoints(context, environment.EnvironmentName, serviceName, AssemblyReference.Assembly);
     }
 }

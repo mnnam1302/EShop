@@ -1,4 +1,4 @@
-﻿using EShop.Shared.Cache.Providers;
+using EShop.Shared.Cache.Providers;
 using EShop.Shared.Cache.Services;
 using EShop.Shared.DomainTools.Extensions;
 using EShop.Shared.HealthChecks;
@@ -11,7 +11,6 @@ using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Nito.AsyncEx;
-using System;
 
 namespace EShop.Shared.JsonApi.Extensions;
 
@@ -21,17 +20,15 @@ public static class UserPermissionsExtensions
     {
         applicationLifetime.ApplicationStarted.Register(() =>
         {
-            using (var scope = app.ApplicationServices.CreateScope())
-            {
-                var healthCheckService = scope.ServiceProvider.GetRequiredService<HealthCheckService>();
-                healthCheckService.WaitForHealthyEventBus();
+            using var scope = app.ApplicationServices.CreateScope();
+            var healthCheckService = scope.ServiceProvider.GetRequiredService<HealthCheckService>();
+            healthCheckService.WaitForHealthyEventBus();
 
-                var instances = scope.ServiceProvider.GetServices<IPermissionRegistrationService>();
-                foreach (var instance in instances)
-                {
-                    logger.LogDebug("Running permission registration for {Service}", instance.GetType().Name);
-                    AsyncContext.Run(() => instance.RegisterPermissions());
-                }
+            var instances = scope.ServiceProvider.GetServices<IPermissionRegistrationService>();
+            foreach (var instance in instances)
+            {
+                logger.LogDebug("Running permission registration for {Service}", instance.GetType().Name);
+                AsyncContext.Run(() => instance.RegisterPermissions());
             }
         });
     }

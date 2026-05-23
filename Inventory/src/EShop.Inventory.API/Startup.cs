@@ -1,14 +1,21 @@
-﻿using EShop.Inventory.API.DependencyInjection;
+using EShop.Inventory.API.DependencyInjection;
 using EShop.Inventory.Application.DependencyInjection;
 using EShop.Inventory.Infrastructure.DependencyInjection;
+using EShop.Shared.JsonApi.Extensions;
 using EShop.Shared.JsonApi.Middlewares;
 
 namespace EShop.Inventory.API;
 
-public class Startup(IConfiguration configuration, IWebHostEnvironment environment)
+public class Startup
 {
-    public IConfiguration Configuration { get; } = configuration;
-    public IWebHostEnvironment Environment { get; } = environment;
+    public IConfiguration Configuration { get; }
+    public IWebHostEnvironment Environment { get; }
+
+    public Startup(IConfiguration configuration, IWebHostEnvironment environment)
+    {
+        Configuration = configuration;
+        Environment = environment;
+    }
 
     public virtual void ConfigureServices(IServiceCollection services)
     {
@@ -16,7 +23,7 @@ public class Startup(IConfiguration configuration, IWebHostEnvironment environme
             .AddInventoryAPI()
             .AddInventoryApplication()
             .AddInventoryPersistence(Configuration, Environment)
-            .AddInventoryInfrastructure();
+            .AddInventoryInfrastructure(Configuration);
     }
 
     public void Configure(WebApplication app, IHostApplicationLifetime applicationLifetime, ILoggerFactory loggerFactory)
@@ -30,6 +37,12 @@ public class Startup(IConfiguration configuration, IWebHostEnvironment environme
             app.UseSwaggerAPI();
         }
 
-        app.UseRouting();
+        app.UseAuthentication();
+        app.UseAuthorization();
+
+        app.MapEndpoints();
+
+        app.RegisterFeatures(applicationLifetime, logger);
+        app.RegisterPermissions(applicationLifetime, logger);
     }
 }

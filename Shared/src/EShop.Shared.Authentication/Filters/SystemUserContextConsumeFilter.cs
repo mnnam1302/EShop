@@ -24,6 +24,7 @@ public sealed class SystemUserContextConsumeFilter<TMessage> : IFilter<ConsumeCo
         {
             // Extract auth context from integration event message
             var message = context.Message;
+
             _userDetailsProvider.SetSystemUserContext(
                 message.TenantId,
                 message.ActionUserId,

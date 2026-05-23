@@ -65,9 +65,6 @@ namespace EShop.Inventory.Infrastructure.Migrations
                         .HasMaxLength(150)
                         .HasColumnType("character varying(150)");
 
-                    b.Property<Guid>("SkuId")
-                        .HasColumnType("uuid");
-
                     b.Property<int>("StockAvailable")
                         .HasColumnType("integer");
 
@@ -75,6 +72,9 @@ namespace EShop.Inventory.Infrastructure.Migrations
                         .IsRequired()
                         .HasMaxLength(150)
                         .HasColumnType("character varying(150)");
+
+                    b.Property<Guid>("VariantId")
+                        .HasColumnType("uuid");
 
                     b.HasKey("Id");
 

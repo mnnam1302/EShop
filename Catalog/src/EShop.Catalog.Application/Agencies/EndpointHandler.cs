@@ -1,4 +1,4 @@
-﻿using EShop.Catalog.Application.Agencies.GetAgencies;
+using EShop.Catalog.Application.Agencies.GetAgencies;
 using EShop.Shared.JsonApi.ResourceAccessControl;
 using EShop.Shared.Scoping.ResourceAccessControl;
 
@@ -14,7 +14,7 @@ public static class EndpointHandler
             .NewVersionedApi("Agency")
             .MapGroup(BaseUrl)
             .HasApiVersion(1)
-            .RequireFeatureFilter(FeatureConstants.Catalog.Product_FeatureId);
+            .RequireFeatureFilter(FeatureConstants.Catalog.ProductFeatureId);
 
         productEndpointsV1
             .MapGetAgencies();

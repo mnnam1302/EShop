@@ -1,11 +1,11 @@
-﻿using EShop.Catalog.Application.Shared;
+using EShop.Catalog.Application.Shared;
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.Contracts.Services.Authorization;
 using EShop.Shared.CQRS;
 
 namespace EShop.Catalog.Application.Agencies.CreateAgency;
 
-public sealed class OrganizationCreatedConsumer : Consumer<OrganizationCreated>
+public sealed class OrganizationCreatedConsumer : IdempotentConsumer<OrganizationCreated>
 {
     private readonly IMediator mediator;
 

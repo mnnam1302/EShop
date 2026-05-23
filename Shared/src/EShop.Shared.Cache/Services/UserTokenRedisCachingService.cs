@@ -1,4 +1,4 @@
-﻿using EShop.Shared.Authentication;
+using EShop.Shared.Authentication;
 using EShop.Shared.Authentication.Abstractions;
 using EShop.Shared.Cache.CacheKeys;
 using EShop.Shared.Cache.Providers;
@@ -63,6 +63,6 @@ public sealed class UserTokenRedisCachingService : IUserTokenCachingService
     public async Task RemoveAsync(string userId, CancellationToken cancellationToken = default)
     {
         var cacheKey = UserTokenCacheKeyProvider.GetCacheKey(userId);
-        await _redisCachingService.ClearAsync(cacheKey, cancellationToken);
+        await _redisCachingService.RemoveAsync(cacheKey, cancellationToken);
     }
 }

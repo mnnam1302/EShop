@@ -1,4 +1,4 @@
-﻿using EShop.Shared.Cache.CacheKeys;
+using EShop.Shared.Cache.CacheKeys;
 using EShop.Shared.Cache.Providers;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserOrganizationContextProvider;
@@ -43,6 +43,6 @@ public sealed class UserOrganizationContextCachingService : IUserOrganizationCon
     {
         var cacheKey = OrganizationContextCacheKeyProvider.GetUserOrganizationContextCacheKey(userId, userType);
 
-        await _redisCachingProvider.ClearAsync(cacheKey, cancellationToken);
+        await _redisCachingProvider.RemoveAsync(cacheKey, cancellationToken);
     }
 }

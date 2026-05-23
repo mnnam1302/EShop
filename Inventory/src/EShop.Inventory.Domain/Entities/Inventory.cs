@@ -1,4 +1,5 @@
-﻿using EShop.Shared.DomainTools.Aggregates;
+using EShop.Shared.Authentication;
+using EShop.Shared.DomainTools.Aggregates;
 using EShop.Shared.DomainTools.Entities;
 using System.ComponentModel.DataAnnotations;
 
@@ -8,7 +9,7 @@ public class Inventory : AggregateRoot<Guid>, IScoped, IAuditable
 {
     public required Guid ProductId { get; set; }
 
-    public required Guid SkuId { get; set; } // variant id
+    public required Guid VariantId { get; set; }
 
     [MaxLength(ModelConstants.MediumText)]
     public required string Sku { get; set; }
@@ -35,23 +36,26 @@ public class Inventory : AggregateRoot<Guid>, IScoped, IAuditable
 
     public DateTimeOffset? LastModifiedAtUtc { get; set; }
 
-    public void RecieveStock()
+    public static Inventory Create(
+        Guid productId,
+        Guid variantId,
+        string sku,
+        int stockAvailable,
+        int minimumStock,
+        UserData currentUser)
     {
-    }
-
-    public void ReserveStock()
-    {
-    }
-
-    public void ReleaseStock()
-    {
-    }
-
-    public void DeductStock()
-    {
-    }
-
-    public void AdjustStock()
-    {
+        return new Inventory
+        {
+            Id = Guid.NewGuid(),
+            ProductId = productId,
+            VariantId = variantId,
+            Sku = sku,
+            StockAvailable = stockAvailable,
+            MinimumStock = minimumStock,
+            TenantId = currentUser.TenantId,
+            Scope = currentUser.TenantId,
+            CreatedByUserId = currentUser.Id,
+            CreatedAtUtc = DateTimeOffset.UtcNow
+        };
     }
 }

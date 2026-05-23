@@ -1,4 +1,4 @@
-﻿using EShop.Shared.Diagnostics;
+using EShop.Shared.Diagnostics;
 using Microsoft.Extensions.Logging;
 using Polly;
 using Polly.CircuitBreaker;
@@ -9,21 +9,23 @@ namespace EShop.Shared.Cache.Providers;
 
 public static class PollyPolicies
 {
-    private const int RetryCount = 2;
-    private const int ExceptionsAllowedBeforeBreaking = 3;
-    private const int DurationOfBreakInSeconds = 60;
+    private const int _retryCount = 2;
+    private const int _exceptionsAllowedBeforeBreaking = 3;
+    private const int _durationOfBreakInSeconds = 60;
 
     public static readonly RetryPolicy RedisRetryPolicy =
         Policy
             .Handle<RedisTimeoutException>()
             .Or<RedisConnectionException>()
             .Retry(
-                RetryCount,
+                _retryCount,
                 (exception, retryAttempt, context) =>
                 {
-                    if (context.TryGetLogger(out var logger))
+                    if (context.TryGetLogger(out var logger) && logger is not null)
                     {
-                        logger.LogDebug(exception, "RedisTimeoutException/RedisConnectionException handled, Retry number {current}/{max}'", retryAttempt, RetryCount);
+                        logger.LogDebug(exception,
+                            "RedisTimeoutException/RedisConnectionException handled, Retry number '{Current}/{Max}'",
+                            retryAttempt, _retryCount);
                     }
                 });
 
@@ -31,17 +33,17 @@ public static class PollyPolicies
         Policy
             .Handle<RedisTimeoutException>()
             .Or<RedisConnectionException>()
-            .CircuitBreaker(ExceptionsAllowedBeforeBreaking, TimeSpan.FromSeconds(DurationOfBreakInSeconds),
+            .CircuitBreaker(_exceptionsAllowedBeforeBreaking, TimeSpan.FromSeconds(_durationOfBreakInSeconds),
             (exception, timespan, context) =>
             {
-                if (context.TryGetLogger(out var logger))
+                if (context.TryGetLogger(out var logger) && logger is not null)
                 {
                     logger.LogWarning(LogEvents.RedisCircuitBreakerActivated, exception, "Redis circuit breaker activated due to server connection issues");
                 }
             },
             context =>
             {
-                if (context.TryGetLogger(out var logger))
+                if (context.TryGetLogger(out var logger) && logger is not null)
                 {
                     logger.LogInformation("Redis circuit breaker deactivated, connection back and working");
                 }

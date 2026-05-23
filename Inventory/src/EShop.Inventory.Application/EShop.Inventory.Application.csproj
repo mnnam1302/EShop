@@ -1,12 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Authorization\src\EShop.Authorization.Domain\EShop.Authorization.Domain.csproj" />
-    <ProjectReference Include="..\..\..\Shared\src\EShop.Shared.CQRS\EShop.Shared.CQRS.csproj" />
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="UseCases\" />
+    <ProjectReference Include="..\..\..\Shared\src\EShop.Shared.CQRS\EShop.Shared.CQRS.csproj" />
+    <ProjectReference Include="..\EShop.Inventory.Domain\EShop.Inventory.Domain.csproj" />
   </ItemGroup>
 
 </Project>

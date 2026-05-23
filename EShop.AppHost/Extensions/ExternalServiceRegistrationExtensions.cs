@@ -1,4 +1,4 @@
-﻿namespace EShop.AppHost.Extensions;
+namespace EShop.AppHost.Extensions;
 
 public static class ExternalServiceRegistrationExtensions
 {

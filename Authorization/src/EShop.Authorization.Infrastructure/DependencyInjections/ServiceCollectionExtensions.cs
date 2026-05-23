@@ -1,4 +1,4 @@
-﻿using EShop.Authorization.Application.Abstractions;
+using EShop.Authorization.Application.Abstractions;
 using EShop.Authorization.Domain.Repositories;
 using EShop.Authorization.Infrastructure.Consumers;
 using EShop.Authorization.Infrastructure.EmailServices;
@@ -141,22 +141,11 @@ public static class ServiceCollectionExtensions
 
                 bus.MessageTopology.SetEntityNameFormatter(new KebabCaseEntityNameFormatter());
 
-                bus.ConfigureReceiveEndpoints(context, environment, "Authorization");
                 bus.ConfigureEndpoints(context);
             });
         });
 
         return services;
-    }
-
-    private static void ConfigureReceiveEndpoints(
-        this IRabbitMqBusFactoryConfigurator bus,
-        IRegistrationContext context,
-        IWebHostEnvironment environment,
-        string serviceName)
-    {
-        bus.ConfigureReceiveEndpoint<TenantCreatedConsumer, TenantCreated>(context, environment.EnvironmentName, serviceName);
-        bus.ConfigureReceiveEndpoint<SupportedPermissionsUpdatedConsumer, SupportedPermissionsUpdated>(context, environment.EnvironmentName, serviceName);
     }
 
     public static IServiceCollection AddEmailServices(this IServiceCollection services, IConfiguration configuration)

@@ -1,4 +1,4 @@
-﻿using EShop.Catalog.Application.Products.AddVariant;
+using EShop.Catalog.Application.Products.AddVariant;
 using EShop.Catalog.Application.Products.AddVariationDimension;
 using EShop.Catalog.Application.Products.ChangeVariantPrice;
 using EShop.Catalog.Application.Products.ChangeVariationDimensionValues;
@@ -25,7 +25,7 @@ public static class EndpointHandler
             .NewVersionedApi("Product")
             .MapGroup(BaseUrl)
             .HasApiVersion(1)
-            .RequireFeatureFilter(FeatureConstants.Catalog.Product_FeatureId);
+            .RequireFeatureFilter(FeatureConstants.Catalog.ProductFeatureId);
 
         productEndpointsV1
             .MapCreateProduct()

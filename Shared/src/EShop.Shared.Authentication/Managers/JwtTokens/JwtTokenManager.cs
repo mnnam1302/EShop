@@ -1,4 +1,4 @@
-﻿using EShop.Shared.Authentication.Abstractions;
+using EShop.Shared.Authentication.Abstractions;
 using EShop.Shared.Authentication.DependencyInjections;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
