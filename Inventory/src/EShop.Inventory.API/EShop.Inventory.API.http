@@ -1,24 +1,36 @@
-@EShop.Authorization.API_HostAddress = http://localhost:5002
-@EShop.Inventory.API_HostAddress = http://localhost:5042
+@Authorization_URL = http://localhost:5002
+@Catalog_URL = http://localhost:5004
+@Inventory_URL = http://localhost:5042
 
 # ============================================
 # AUTHENTICATION
 # ============================================
 
-# @name login
-POST {{EShop.Authorization.API_HostAddress}}/api/v1/auth/login
+POST {{Authorization_URL}}/api/v1/auth/login
 Content-Type: application/json
 
 {
-  "username": "testuser",
-  "password": "testpassword"
+  "username": "owner-account@eshop-staging",
+  "password": "owner.eshop-staing-123"
 }
 
 ###
 
 # Extract the access token from login response
 # After running the login request above, copy the accessToken value and paste it below
-@accessToken = your-jwt-token-here
+@accessToken = eyJhbGciOiJSUzI1NiIsImtpZCI6ImExNzA4ZTk4LWVjMmMtNDQzZS05NDA5LTkzZmViZDdmNjZkZSIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJmMjIyOGRjMS1hYTMxLTRjNTctYjI1YS04NWU1Njg1YWZhYjgiLCJzdWIiOiJvd25lci1hY2NvdW50QGVzaG9wLXN0YWdpbmciLCJ0ZW5hbnRfaWQiOiJlc2hvcC1zdGFnaW5nIiwia2V5X2lkIjoiYTE3MDhlOTgtZWMyYy00NDNlLTk0MDktOTNmZWJkN2Y2NmRlIiwibmJmIjoxNzc5NTI5MzMxLCJleHAiOjE3Nzk1MzAyMzEsImlhdCI6MTc3OTUyOTMzMSwiaXNzIjoiaHR0cDovL2F1dGhvcml6YXRpb24iLCJhdWQiOiJodHRwOi8vYXV0aG9yaXphdGlvbiJ9.wMg9yaIiUJjx5ukppIwKT3nzbVES9MST25I4-xxxP1r3r0qIKpGTQqNcmzqyB0FcHi2oTsl3XfacNJpats8_mayD3U6c8CMJ-NEEp46OVobW-I-OaODWD1mWWOMCjTK9izAyDudLP5lJBDbslKD93iqx0_G3PTz4wfJs0sHKh4mqyveEe9Duc42i_1dvRJBm55zHOeK3pUbA7Sss-kZpGR1gM0uUNyg_mhhazzKiybB-SciqPV4xPPGjqsICwpWM7FqT19DokGcDTt60SPiWYwHPgxGyJrSRlN8GlMrpHN8DS8wzIzmLZLZeK2LRnPtRuz9QuribTqZNaZ8cnjl0kAs
+
+###
+
+
+# ============================================
+# CATALOG API ENDPOINTS
+# ============================================
+
+# Get Product by ID (Requires Authentication)
+GET {{Catalog_URL}}/api/v1/products
+Content-Type: application/vnd.api+json
+Authorization: Bearer {{accessToken}}
 
 ###
 
@@ -27,29 +39,29 @@ Content-Type: application/json
 # ============================================
 
 # Create Inventory (Requires Authentication)
-POST {{EShop.Inventory.API_HostAddress}}/api/v1/inventories
+POST {{Inventory_URL}}/api/v1/inventories
 Content-Type: application/json
 Authorization: Bearer {{accessToken}}
 
 {
-  "productId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-  "variantId": "3fa85f64-5717-4562-b3fc-2c963f66afa7",
-  "sku": "PROD-001-VAR-001",
-  "stockAvailable": 100,
-  "minimumStock": 10
+  "productId": "911b2c0b-7924-484a-ad0a-fbd9fbf0b08a",
+  "variantId": "214fe0df-9941-46f8-bb45-16ce39d9f3e6",
+  "sku": "SHIRT-GRN-S",
+  "stockAvailable": 50,
+  "minimumStock": 0
 }
 
 ###
 
 # Get Inventories by Product ID (Requires Authentication)
-GET {{EShop.Inventory.API_HostAddress}}/api/v1/inventories?productId=3fa85f64-5717-4562-b3fc-2c963f66afa6
+GET {{Inventory_URL}}/api/v1/inventories?productId=911b2c0b-7924-484a-ad0a-fbd9fbf0b08a
 Accept: application/json
 Authorization: Bearer {{accessToken}}
 
 ###
 
 # Get Inventories by Product ID with Pagination (Requires Authentication)
-GET {{EShop.Inventory.API_HostAddress}}/api/v1/inventories?productId=3fa85f64-5717-4562-b3fc-2c963f66afa6&pageIndex=1&pageSize=20
+GET {{Inventory_URL}}/api/v1/inventories?productId=3fa85f64-5717-4562-b3fc-2c963f66afa6&pageIndex=1&pageSize=20
 Accept: application/json
 Authorization: Bearer {{accessToken}}
 

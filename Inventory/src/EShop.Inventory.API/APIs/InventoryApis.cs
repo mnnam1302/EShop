@@ -21,8 +21,13 @@ public static class InventoryApis
             .HasApiVersion(1)
             .RequireFeatureFilter(FeatureConstants.Inventory.InventoryManagement);
 
-        inventoryEndpointsV1.MapPost("", CreateInventoriesV1Async);
-        inventoryEndpointsV1.MapGet("", GetInventoriesByProductIdV1Async);
+        inventoryEndpointsV1
+            .MapPost("", CreateInventoriesV1Async)
+            .RequirePermissionFilter(PermissionConstants.Inventory.ManageInventory);
+
+        inventoryEndpointsV1
+            .MapGet("", GetInventoriesByProductIdV1Async)
+            .RequireOneOfPermissionsFilter(PermissionConstants.Inventory.ViewInventory, PermissionConstants.Inventory.ManageInventory);
 
         return routerBuilder;
     }
