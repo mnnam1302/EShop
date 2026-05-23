@@ -14,7 +14,7 @@ public sealed class UserPermisssionHttpClient(
         var authenticatedClient = await systemInternalJwtTokenFactory.AddUserContext(httpClient, userData);
 
         var response = await authenticatedClient.GetAsync($"api/v1/users/{userData.Id}/permissions");
-
+        
         response.EnsureSuccessStatusCode();
 
         var permissions = await response.Content.ReadFromJsonAsync<string[]>();

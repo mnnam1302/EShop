@@ -1,4 +1,4 @@
-﻿using EShop.Shared.Authentication;
+using EShop.Shared.Authentication;
 using EShop.Shared.Authentication.Abstractions;
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.DomainTools.Exceptions;
@@ -29,7 +29,7 @@ public sealed class UserOrganizationContextHttpClient
             return new UserOrganizationContext();
         }
 
-        var authenticatedClient = await systemInternalJwtTokenFactory.AddUserContext(httpClient, userDetailsProvider.AuthenticatedUser);
+        var authenticatedClient = await systemInternalJwtTokenFactory.AddUserContext(httpClient, userDetailsProvider.AuthenticatedUser, cancellationToken);
         var response = await authenticatedClient.GetStringAsync($"api/v1/users/{userId}/organizationContext", cancellationToken);
 
         var result = JsonConvert.DeserializeObject<Result<UserOrganizationContext>>(response);

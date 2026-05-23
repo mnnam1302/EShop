@@ -1,15 +1,15 @@
-﻿using EShop.Shared.Authentication.Abstractions;
+using EShop.Shared.Authentication.Abstractions;
 using System.Net.Http.Headers;
 
 namespace EShop.Shared.Authentication.Managers.JwtTokens;
 
 public sealed class SystemInternalJwtTokenFactory : ISystemInternalJwtTokenFactory
 {
-    private readonly IJwtTokenManager jwtTokenManager;
+    private readonly IJwtTokenManager _jwtTokenManager;
 
     public SystemInternalJwtTokenFactory(IJwtTokenManager jwtTokenManager)
     {
-        this.jwtTokenManager = jwtTokenManager;
+        this._jwtTokenManager = jwtTokenManager;
     }
 
     public async Task<HttpClient> AddUserContext(HttpClient client, UserData operationalUser, CancellationToken cancellationToken = default)
@@ -41,7 +41,7 @@ public sealed class SystemInternalJwtTokenFactory : ISystemInternalJwtTokenFacto
     {
         // Generate short-lived internal JWT with 30-second expiry
         // No cache write or refresh token for S2S calls
-        var accessToken = await jwtTokenManager.GenerateAccessToken(
+        var accessToken = await _jwtTokenManager.GenerateAccessToken(
             user.Id,
             user.TenantId,
             additionalClaims,
