@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace EShop.Order.Domain.Aggregates;
 
-public class Order : AggregateRoot<Guid>, IDateTracking
+public class Order : AggregateRoot<Guid>, IDateTracking, IExcludedFromScoping
 {
     public DateTimeOffset OrderDate { get; set; }
 

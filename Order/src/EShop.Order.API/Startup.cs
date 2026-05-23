@@ -1,4 +1,4 @@
-﻿using EShop.Order.API.DependencyInjection;
+using EShop.Order.API.DependencyInjection;
 using EShop.Order.Application.DependencyInjections;
 using EShop.Order.Infrastructure.DependencyInjection;
 using EShop.Shared.JsonApi.Middlewares;
@@ -15,7 +15,7 @@ public class Startup(IConfiguration configuration, IWebHostEnvironment environme
         services
             .AddOrderAPI()
             .AddOrderApplication()
-            .AddOrderPersistence()
+            .AddOrderPersistence(Configuration, Environment)
             .AddOrderInfrastructure();
     }
 
