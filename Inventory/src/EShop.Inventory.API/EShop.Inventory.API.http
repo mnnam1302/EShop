@@ -1,6 +1,56 @@
-@EShop.Inventory.API_HostAddress = http://localhost:5276
+@EShop.Authorization.API_HostAddress = http://localhost:5002
+@EShop.Inventory.API_HostAddress = http://localhost:5042
 
-GET {{EShop.Inventory.API_HostAddress}}/weatherforecast/
+# ============================================
+# AUTHENTICATION
+# ============================================
+
+# @name login
+POST {{EShop.Authorization.API_HostAddress}}/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "username": "testuser",
+  "password": "testpassword"
+}
+
+###
+
+# Extract the access token from login response
+# After running the login request above, copy the accessToken value and paste it below
+@accessToken = your-jwt-token-here
+
+###
+
+# ============================================
+# INVENTORY API ENDPOINTS
+# ============================================
+
+# Create Inventory (Requires Authentication)
+POST {{EShop.Inventory.API_HostAddress}}/api/v1/inventories
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "productId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "variantId": "3fa85f64-5717-4562-b3fc-2c963f66afa7",
+  "sku": "PROD-001-VAR-001",
+  "stockAvailable": 100,
+  "minimumStock": 10
+}
+
+###
+
+# Get Inventories by Product ID (Requires Authentication)
+GET {{EShop.Inventory.API_HostAddress}}/api/v1/inventories?productId=3fa85f64-5717-4562-b3fc-2c963f66afa6
 Accept: application/json
+Authorization: Bearer {{accessToken}}
+
+###
+
+# Get Inventories by Product ID with Pagination (Requires Authentication)
+GET {{EShop.Inventory.API_HostAddress}}/api/v1/inventories?productId=3fa85f64-5717-4562-b3fc-2c963f66afa6&pageIndex=1&pageSize=20
+Accept: application/json
+Authorization: Bearer {{accessToken}}
 
 ###

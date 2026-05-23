@@ -58,24 +58,4 @@ public class Inventory : AggregateRoot<Guid>, IScoped, IAuditable
             CreatedAtUtc = DateTimeOffset.UtcNow
         };
     }
-
-    public void RecieveStock()
-    {
-    }
-
-    public void ReserveStock()
-    {
-    }
-
-    public void ReleaseStock()
-    {
-    }
-
-    public void DeductStock()
-    {
-    }
-
-    public void AdjustStock()
-    {
-    }
 }

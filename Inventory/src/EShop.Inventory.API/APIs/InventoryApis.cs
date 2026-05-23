@@ -1,7 +1,10 @@
 using EShop.Inventory.API.Models;
 using EShop.Inventory.Application.UseCases.Inventory;
+using EShop.Shared.Contracts.Abstractions.Pagination;
 using EShop.Shared.CQRS;
 using EShop.Shared.JsonApi.Abstractions;
+using EShop.Shared.JsonApi.ResourceAccessControl;
+using EShop.Shared.Scoping.ResourceAccessControl;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EShop.Inventory.API.APIs;
@@ -15,12 +18,34 @@ public static class InventoryApis
         var inventoryEndpointsV1 = routerBuilder
             .NewVersionedApi("Inventory")
             .MapGroup(_baseUrl)
-            .HasApiVersion(1);
-        //.RequireFeatureFilter(FeatureConstants.Inventory.InventoryManagement);
+            .HasApiVersion(1)
+            .RequireFeatureFilter(FeatureConstants.Inventory.InventoryManagement);
 
         inventoryEndpointsV1.MapPost("", CreateInventoriesV1Async);
+        inventoryEndpointsV1.MapGet("", GetInventoriesByProductIdV1Async);
 
         return routerBuilder;
+    }
+
+    private static async Task<IResult> GetInventoriesByProductIdV1Async(
+        [FromQuery] Guid productId,
+        [FromServices] IMediator mediator,
+        CancellationToken cancellationToken,
+        [FromQuery] int pageIndex = 1,
+        [FromQuery] int pageSize = 10)
+    {
+        var paginationRequest = PaginationRequest.Create(pageIndex, pageSize);
+
+        var query = new GetInventoriesByProductQuery(productId, paginationRequest.PageIndex, paginationRequest.PageSize);
+
+        var result = await mediator.QueryAsync<GetInventoriesByProductQuery, PaginationResult<InventoryDto>>(query, cancellationToken);
+
+        if (result.IsFailure)
+        {
+            return ApiEndpointHandler.Failure(result);
+        }
+
+        return Results.Ok(result);
     }
 
     private static async Task<IResult> CreateInventoriesV1Async(
