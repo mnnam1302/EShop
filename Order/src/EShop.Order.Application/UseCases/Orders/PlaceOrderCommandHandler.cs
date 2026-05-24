@@ -37,7 +37,7 @@ public sealed class PlaceOrderCommandHandler : ICommandHandler<PlaceOrderCommand
 public sealed class OrderDto
 {
     public required Guid Id { get; init; }
-    public required Guid BuyerId { get; init; }
+    public required string BuyerId { get; init; }
     public required DateTimeOffset OrderDate { get; init; }
     public required string Status { get; init; }
     public string? Description { get; init; }

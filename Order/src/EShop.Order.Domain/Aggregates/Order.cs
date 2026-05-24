@@ -8,7 +8,8 @@ namespace EShop.Order.Domain.Aggregates;
 
 public class Order : AggregateRoot<Guid>, IDateTracking, IExcludedFromScoping
 {
-    public Guid BuyerId { get; set; }
+    [MaxLength(ModelConstants.MediumText)]
+    public string BuyerId { get; set; }
 
     public DateTimeOffset OrderDate { get; set; }
 

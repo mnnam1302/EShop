@@ -5,7 +5,7 @@ namespace EShop.Order.API.Models;
 
 public sealed class PlaceOrderRequest
 {
-    public Guid BuyerId { get; init; }
+    public string BuyerId { get; init; }
 
     public List<OrderItemData> OrderItems { get; init; }
 }

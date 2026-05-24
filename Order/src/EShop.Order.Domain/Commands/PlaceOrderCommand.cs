@@ -4,7 +4,7 @@ namespace EShop.Order.Domain.Commands;
 
 public sealed class PlaceOrderCommand : ICommand
 {
-    public required Guid BuyerId { get; init; }
+    public required string BuyerId { get; init; }
 
     public required List<OrderItemData> OrderItems { get; init; }
 }
