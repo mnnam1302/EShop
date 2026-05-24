@@ -1,0 +1,18 @@
+using EShop.Shared.CQRS.Command;
+
+namespace EShop.Order.Domain.Commands;
+
+public sealed class PlaceOrderCommand : ICommand
+{
+    public required Guid BuyerId { get; init; }
+
+    public required List<OrderItemData> OrderItems { get; init; }
+}
+
+public sealed class OrderItemData
+{
+    public required Guid VariantId { get; init; }
+    public required int Quantity { get; init; }
+    public required decimal UnitPrice { get; init; }
+    public decimal? Discount { get; init; }
+}

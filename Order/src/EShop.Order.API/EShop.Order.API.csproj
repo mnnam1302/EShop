@@ -20,4 +20,8 @@
     <ProjectReference Include="..\EShop.Order.Infrastructure\EShop.Order.Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Models\Validators\" />
+  </ItemGroup>
+
 </Project>

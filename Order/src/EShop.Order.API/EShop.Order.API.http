@@ -1,6 +1,59 @@
-@EShop.Order.API_HostAddress = http://localhost:5034
+@Order_URL = http://localhost:5050
+@Inventory_URL = http://localhost:5042
 
-GET {{EShop.Order.API_HostAddress}}/weatherforecast/
-Accept: application/json
+
+# ============================================
+# AUTHENTICATION
+# ============================================
+
+POST {{Authorization_URL}}/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "username": "owner-account@eshop-staging",
+  "password": "owner.eshop-staing-123"
+}
 
 ###
+
+# Extract the access token from login response
+# After running the login request above, copy the accessToken value and paste it below
+@accessToken = eyJhbGciOiJSUzI1NiIsImtpZCI6ImExNzA4ZTk4LWVjMmMtNDQzZS05NDA5LTkzZmViZDdmNjZkZSIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJmMjIyOGRjMS1hYTMxLTRjNTctYjI1YS04NWU1Njg1YWZhYjgiLCJzdWIiOiJvd25lci1hY2NvdW50QGVzaG9wLXN0YWdpbmciLCJ0ZW5hbnRfaWQiOiJlc2hvcC1zdGFnaW5nIiwia2V5X2lkIjoiYTE3MDhlOTgtZWMyYy00NDNlLTk0MDktOTNmZWJkN2Y2NmRlIiwibmJmIjoxNzc5NTI5MzMxLCJleHAiOjE3Nzk1MzAyMzEsImlhdCI6MTc3OTUyOTMzMSwiaXNzIjoiaHR0cDovL2F1dGhvcml6YXRpb24iLCJhdWQiOiJodHRwOi8vYXV0aG9yaXphdGlvbiJ9.wMg9yaIiUJjx5ukppIwKT3nzbVES9MST25I4-xxxP1r3r0qIKpGTQqNcmzqyB0FcHi2oTsl3XfacNJpats8_mayD3U6c8CMJ-NEEp46OVobW-I-OaODWD1mWWOMCjTK9izAyDudLP5lJBDbslKD93iqx0_G3PTz4wfJs0sHKh4mqyveEe9Duc42i_1dvRJBm55zHOeK3pUbA7Sss-kZpGR1gM0uUNyg_mhhazzKiybB-SciqPV4xPPGjqsICwpWM7FqT19DokGcDTt60SPiWYwHPgxGyJrSRlN8GlMrpHN8DS8wzIzmLZLZeK2LRnPtRuz9QuribTqZNaZ8cnjl0kAs
+
+###
+
+
+# ============================================
+# CATALOG API ENDPOINTS
+# ============================================
+
+# Get Product by ID (Requires Authentication)
+GET {{Catalog_URL}}/api/v1/products
+Content-Type: application/vnd.api+json
+Authorization: Bearer {{accessToken}}
+
+###
+
+# ============================================
+# ORDER API ENDPOINTS
+# ============================================
+
+# Create Order (Requires Authentication)
+POST {{Order_URL}}/api/v1/orders
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "buyerId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "orderItems": [
+    {
+      "variantId": "01957eea-c993-714f-bf4a-ca767716031d",
+      "quantity": 10,
+      "unitPrice": 990,
+      "discount": 0
+    }
+  ]
+}
+
+###
+

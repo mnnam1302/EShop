@@ -31,5 +31,7 @@ public class Startup(IConfiguration configuration, IWebHostEnvironment environme
         }
 
         app.UseRouting();
+
+        app.MapEndpoints();
     }
 }

@@ -46,4 +46,10 @@ public static class PermissionConstants
         public const string ViewInventory = "Inventory_ViewInventory";
         public const string ManageInventory = "Inventory_ManageInventory";
     }
+
+    public static class Order
+    {
+        public const string ViewOrders = "Order_ViewOrders";
+        public const string ManageOrders = "Order_ManageOrders";
+    }
 }
