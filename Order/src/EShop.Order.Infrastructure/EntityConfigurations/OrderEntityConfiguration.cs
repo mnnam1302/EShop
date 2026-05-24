@@ -1,4 +1,3 @@
-using EShop.Order.Domain;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

@@ -18,7 +18,8 @@ BEGIN
       IF NOT EXISTS (
           SELECT FROM pg_catalog.pg_user p
           WHERE usename = userpassword[1]) THEN
-          EXECUTE 'CREATE USER '|| userpassword[1] ||' PASSWORD '|| quote_literal(userpassword[2]);
+--          EXECUTE 'CREATE USER '|| userpassword[1] ||' PASSWORD '|| quote_literal(userpassword[2]);
+			EXECUTE 'CREATE USER ' || quote_ident(userpassword[1]) || ' PASSWORD ' || quote_literal(userpassword[2]);
       END IF;
    END LOOP;
 END $do$;
@@ -67,24 +68,24 @@ GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO inventory;
 GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO inventory;
 GRANT ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA public TO inventory;
 
--- Order database
+-- order-user database
 
 CREATE DATABASE eshop_order;
-GRANT ALL PRIVILEGES ON DATABASE eshop_order TO inventory;
+GRANT ALL PRIVILEGES ON DATABASE eshop_order TO "order";
 \c eshop_order
 CREATE EXTENSION IF NOT EXISTS citext;
-GRANT ALL PRIVILEGES ON SCHEMA public TO inventory;
-GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO inventory;
-GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO inventory;
-GRANT ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA public TO inventory;
+GRANT ALL PRIVILEGES ON SCHEMA public TO "order";
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO "order";
+GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO "order";
+GRANT ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA public TO "order";
 
 -- Finance database
 
 CREATE DATABASE eshop_finance;
-GRANT ALL PRIVILEGES ON DATABASE eshop_finance TO inventory;
+GRANT ALL PRIVILEGES ON DATABASE eshop_finance TO finance;
 \c eshop_finance
 CREATE EXTENSION IF NOT EXISTS citext;
-GRANT ALL PRIVILEGES ON SCHEMA public TO inventory;
-GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO inventory;
-GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO inventory;
-GRANT ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA public TO inventory;
+GRANT ALL PRIVILEGES ON SCHEMA public TO finance;
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO finance;
+GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO finance;
+GRANT ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA public TO finance;
