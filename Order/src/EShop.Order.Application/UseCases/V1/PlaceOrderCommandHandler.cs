@@ -5,7 +5,7 @@ using EShop.Shared.CQRS.Command;
 using EShop.Shared.DomainTools.UnitOfWorks;
 using Microsoft.Extensions.Logging;
 
-namespace EShop.Order.Application.UseCases.Orders;
+namespace EShop.Order.Application.UseCases.V1;
 
 public sealed class PlaceOrderCommandHandler : ICommandHandler<PlaceOrderCommand>
 {
@@ -25,6 +25,10 @@ public sealed class PlaceOrderCommandHandler : ICommandHandler<PlaceOrderCommand
 
     public async Task<Result> HandleAsync(PlaceOrderCommand command, CancellationToken cancellationToken)
     {
+        // Step 1: Redis Lua: fast gate - same check as CAS
+
+
+        // Step 2: Persist order to Order database - outbox later
         var order = Domain.Aggregates.Order.CreateOrder(command);
 
         _orderRepository.Add(order);

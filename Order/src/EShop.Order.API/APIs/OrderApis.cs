@@ -1,6 +1,4 @@
 using EShop.Order.API.Models;
-using EShop.Order.Application.UseCases.Orders;
-using EShop.Order.Domain.Aggregates;
 using EShop.Order.Domain.Commands;
 using EShop.Shared.CQRS;
 using EShop.Shared.JsonApi.Abstractions;

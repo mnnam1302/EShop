@@ -9,7 +9,7 @@ namespace EShop.Order.Domain.Aggregates;
 public class Order : AggregateRoot<Guid>, IDateTracking, IExcludedFromScoping
 {
     [MaxLength(ModelConstants.MediumText)]
-    public string BuyerId { get; set; }
+    public required string BuyerId { get; set; }
 
     public DateTimeOffset OrderDate { get; set; }
 
@@ -19,7 +19,7 @@ public class Order : AggregateRoot<Guid>, IDateTracking, IExcludedFromScoping
     [MaxLength(ModelConstants.VeryLongText)]
     public string? Description { get; private set; }
 
-    private List<OrderItem> _orderItems = new();
+    private readonly List<OrderItem> _orderItems = new();
     public virtual IReadOnlyCollection<OrderItem> OrderItems => _orderItems;
 
     public DateTimeOffset CreatedAtUtc { get; set; }

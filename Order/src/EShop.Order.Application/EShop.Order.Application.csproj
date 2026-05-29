@@ -6,4 +6,7 @@
     <ProjectReference Include="..\..\..\Shared\src\EShop.Shared.CQRS\EShop.Shared.CQRS.csproj" />
     <ProjectReference Include="..\EShop.Order.Domain\EShop.Order.Domain.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="UseCases\V2\" />
+  </ItemGroup>
 </Project>
