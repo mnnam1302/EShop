@@ -39,13 +39,14 @@ public static class OrderApis
             }).ToList()
         };
 
-        var result = await mediator.SendAsync(command, cancellationToken);
+        var result = await mediator.SendAsync<PlaceOrderCommand, Guid>(command, cancellationToken);
 
         if (result.IsFailure)
         {
             return ApiEndpointHandler.Failure(result);
         }
 
-        return Results.Created("", result);
+        var orderId = result.Value;
+        return Results.Accepted($"/api/v1/orders/{orderId}", new { orderId });
     }
 }

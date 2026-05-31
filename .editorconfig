@@ -211,3 +211,5 @@ csharp_style_prefer_local_over_anonymous_function = true:suggestion
 dotnet_diagnostic.CA1062.severity = none
 dotnet_diagnostic.CA1303.severity = none
 dotnet_diagnostic.CA2007.severity = none
+dotnet_diagnostic.CA1848.severity = none  # (1) Use LoggerMessage delegates  (2) Evaluation of this argument may be expensive if logging is disabled
+dotnet_diagnostic.CA1873.severity = none  # The logging message template should not vary between calls

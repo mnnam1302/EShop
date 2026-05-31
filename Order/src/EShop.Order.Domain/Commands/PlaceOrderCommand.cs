@@ -2,10 +2,9 @@ using EShop.Shared.CQRS.Command;
 
 namespace EShop.Order.Domain.Commands;
 
-public sealed class PlaceOrderCommand : ICommand
+public sealed class PlaceOrderCommand : ICommand<Guid>
 {
     public required string BuyerId { get; init; }
-
     public required List<OrderItemData> OrderItems { get; init; }
 }
 
