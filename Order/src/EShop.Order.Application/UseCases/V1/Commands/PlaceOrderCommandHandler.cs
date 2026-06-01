@@ -6,7 +6,7 @@ using EShop.Shared.CQRS.Command;
 using MassTransit;
 using Microsoft.Extensions.Logging;
 
-namespace EShop.Order.Application.UseCases.V1;
+namespace EShop.Order.Application.UseCases.V1.Commands;
 
 public sealed class PlaceOrderCommandHandler : ICommandHandler<PlaceOrderCommand, Guid>
 {

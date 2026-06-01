@@ -5,7 +5,7 @@ using EShop.Shared.DomainTools.Exceptions;
 using EShop.Shared.DomainTools.Sagas;
 using EShop.Shared.DomainTools.Sagas.AggregateSagas;
 
-namespace EShop.Order.Domain.Sagas.OrderSaga;
+namespace EShop.Order.Domain.Sagas;
 
 public sealed class OrderSaga : AggregateSaga
 {
@@ -20,7 +20,7 @@ public sealed class OrderSaga : AggregateSaga
     /// </summary>
     public void HandleAsync(OrderSubmitted message)
     {
-        if (State == SagaState.New)
+        if (State != SagaState.New)
         {
             throw new DomainException("OrderSaga", "Saga must be new.");
         }
