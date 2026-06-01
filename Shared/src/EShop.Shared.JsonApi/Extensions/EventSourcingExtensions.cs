@@ -1,4 +1,4 @@
-﻿using EShop.Shared.DomainTools.EventSourcing;
+using EShop.Shared.DomainTools.EventSourcing;
 using EShop.Shared.DomainTools.EventSourcing.Configurations;
 using EShop.Shared.DomainTools.EventSourcing.SeedWork;
 using Microsoft.EntityFrameworkCore;
@@ -32,7 +32,7 @@ public static class EventSourcingExtensions
         });
 
         // Register Event Store Repository and Gateway
-        services.AddScoped<IEventStoreRepository, PostgresEventStoreRepository<TDbContext>>();
+        services.AddScoped<IEventStoreRepository, EFCoreEventStoreRepository<TDbContext>>();
         services.AddScoped<ISnapshotRepository, NullSnapshotRepository>();
         services.AddScoped<IAggregateStore, AggregateStore>();
 
@@ -69,8 +69,8 @@ public static class EventSourcingExtensions
             services.Configure(configureOptions);
         }
 
-        services.AddScoped<IEventStoreRepository, PostgresEventStoreRepository<TDbContext>>();
-        services.AddScoped<ISnapshotRepository, PostgresSnapshotRepository<TDbContext>>();
+        services.AddScoped<IEventStoreRepository, EFCoreEventStoreRepository<TDbContext>>();
+        services.AddScoped<ISnapshotRepository, EFCoreSnapshotRepository<TDbContext>>();
         services.AddScoped<IAggregateStore, AggregateStore>();
 
         return services;
