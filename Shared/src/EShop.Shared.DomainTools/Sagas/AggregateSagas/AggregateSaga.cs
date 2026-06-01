@@ -3,9 +3,9 @@ using EShop.Shared.CQRS.Command;
 using EShop.Shared.DomainTools.EventSourcing.SeedWork;
 using EShop.Shared.DomainTools.Exceptions;
 
-namespace EShop.Shared.DomainTools.Sagas;
+namespace EShop.Shared.DomainTools.Sagas.AggregateSagas;
 
-public abstract class AggregateSaga : Aggregate
+public abstract class AggregateSaga : Aggregate, IAggregateSaga
 {
     private bool _isCompleted;
     protected virtual bool ThrowExceptionsOnFailedPublish { get; set; } = true;
@@ -22,10 +22,6 @@ public abstract class AggregateSaga : Aggregate
         _isCompleted = true;
     }
 
-    public SagaState State => _isCompleted
-        ? SagaState.Completed
-        : IsNew ? SagaState.New : SagaState.Running;
-
     protected void Publish(ICommand command)
     {
         _unpublishedCommands.Add(
@@ -33,6 +29,10 @@ public abstract class AggregateSaga : Aggregate
                 command,
                 async (commandBus, cancellationToken) => await commandBus.DispatchAsync(command, cancellationToken)));
     }
+
+    public SagaState State => _isCompleted
+        ? SagaState.Completed
+        : IsNew ? SagaState.New : SagaState.Running;
 
     public virtual async Task PublishAsync(ICommandDispatcher commandBus, CancellationToken cancellationToken)
     {
