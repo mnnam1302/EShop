@@ -1,7 +1,8 @@
-﻿namespace EShop.Shared.DomainTools.EventSourcing.SeedWork;
+namespace EShop.Shared.DomainTools.EventSourcing.SeedWork;
 
 public interface ISnapshotRepository
 {
     Task<Snapshot?> GetSnapshotAsync(Guid id, CancellationToken cancellationToken = default);
     Task AddSnapshotAsync(Snapshot snapshot, CancellationToken cancellationToken = default);
+    Task AddSnapShotsAsync(IReadOnlyList<Snapshot> shapshots, CancellationToken cancellationToken= default);
 }

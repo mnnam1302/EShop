@@ -1,15 +1,15 @@
-﻿using EShop.Shared.Contracts.Abstractions.MessageBus;
+using EShop.Shared.Contracts.Abstractions.MessageBus;
 using EShop.Shared.DomainTools.EventSourcing.SeedWork;
 using Microsoft.EntityFrameworkCore;
 
 namespace EShop.Shared.DomainTools.EventSourcing;
 
-public sealed class PostgresEventStoreRepository<TDbContext> : IEventStoreRepository
+public sealed class EFCoreEventStoreRepository<TDbContext> : IEventStoreRepository
     where TDbContext : DbContext, IEventStoreDbContext
 {
     private readonly TDbContext _dbContext;
 
-    public PostgresEventStoreRepository(TDbContext dbContext)
+    public EFCoreEventStoreRepository(TDbContext dbContext)
     {
         _dbContext = dbContext;
     }
@@ -27,6 +27,12 @@ public sealed class PostgresEventStoreRepository<TDbContext> : IEventStoreReposi
     public async Task AppendEventAsync(EventStore eventStore, CancellationToken cancellationToken = default)
     {
         _dbContext.EventStores.Add(eventStore);
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task AppendEventsAsync(IReadOnlyList<EventStore> eventStores, CancellationToken cancellationToken = default)
+    {
+        _dbContext.AddRange(eventStores);
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 }

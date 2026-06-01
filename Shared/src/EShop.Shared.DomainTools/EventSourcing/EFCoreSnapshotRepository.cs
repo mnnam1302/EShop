@@ -1,14 +1,14 @@
-﻿using EShop.Shared.DomainTools.EventSourcing.SeedWork;
+using EShop.Shared.DomainTools.EventSourcing.SeedWork;
 using Microsoft.EntityFrameworkCore;
 
 namespace EShop.Shared.DomainTools.EventSourcing;
 
-public sealed class PostgresSnapshotRepository<TDbContext> : ISnapshotRepository
+public sealed class EFCoreSnapshotRepository<TDbContext> : ISnapshotRepository
     where TDbContext : DbContext, ISnapshotDbContext
 {
     private readonly TDbContext _dbContext;
 
-    public PostgresSnapshotRepository(TDbContext dbContext)
+    public EFCoreSnapshotRepository(TDbContext dbContext)
     {
         _dbContext = dbContext;
     }
@@ -25,6 +25,12 @@ public sealed class PostgresSnapshotRepository<TDbContext> : ISnapshotRepository
     public async Task AddSnapshotAsync(Snapshot snapshot, CancellationToken cancellationToken = default)
     {
         _dbContext.Snapshots.Add(snapshot);
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task AddSnapShotsAsync(IReadOnlyList<Snapshot> shapshots, CancellationToken cancellationToken = default)
+    {
+        _dbContext.AddRange(shapshots);
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 }

@@ -4,6 +4,7 @@
     <PackageReference Include="JsonNet.ContractResolvers" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" />
+    <PackageReference Include="EntityFrameworkCore.Exceptions.PostgreSQL" />
     <PackageReference Include="Polly" />
   </ItemGroup>
 

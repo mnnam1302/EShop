@@ -1,7 +1,3 @@
-﻿using EShop.Shared.Contracts.Abstractions.MessageBus;
-using EShop.Shared.DomainTools.Exceptions;
-using Microsoft.Extensions.Options;
-
 namespace EShop.Shared.DomainTools.EventSourcing.SeedWork;
 
 public interface IAggregateStore
