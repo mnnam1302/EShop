@@ -16,7 +16,7 @@ public class Startup(IConfiguration configuration, IWebHostEnvironment environme
             .AddOrderAPI()
             .AddOrderApplication()
             .AddOrderPersistence(Configuration, Environment)
-            .AddOrderInfrastructure();
+            .AddOrderInfrastructure(Configuration);
     }
 
     public void Configure(WebApplication app, IHostApplicationLifetime applicationLifetime, ILoggerFactory loggerFactory)

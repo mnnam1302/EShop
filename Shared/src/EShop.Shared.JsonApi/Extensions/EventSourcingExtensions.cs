@@ -1,6 +1,7 @@
 using EShop.Shared.DomainTools.EventSourcing;
 using EShop.Shared.DomainTools.EventSourcing.Configurations;
 using EShop.Shared.DomainTools.EventSourcing.SeedWork;
+using EShop.Shared.DomainTools.Sagas.AggregateSagas;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -35,6 +36,7 @@ public static class EventSourcingExtensions
         services.AddScoped<IEventStoreRepository, EFCoreEventStoreRepository<TDbContext>>();
         services.AddScoped<ISnapshotRepository, NullSnapshotRepository>();
         services.AddScoped<IAggregateStore, AggregateStore>();
+        services.AddScoped<IAggregateSagaStore, EFCoreAggregateSagaStore>();
 
         return services;
     }
@@ -72,6 +74,7 @@ public static class EventSourcingExtensions
         services.AddScoped<IEventStoreRepository, EFCoreEventStoreRepository<TDbContext>>();
         services.AddScoped<ISnapshotRepository, EFCoreSnapshotRepository<TDbContext>>();
         services.AddScoped<IAggregateStore, AggregateStore>();
+        services.AddScoped<IAggregateSagaStore, EFCoreAggregateSagaStore>();
 
         return services;
     }
