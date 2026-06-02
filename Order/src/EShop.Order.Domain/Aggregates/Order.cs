@@ -32,12 +32,11 @@ public class Order : AggregateRoot<Guid>, IDateTracking, IExcludedFromScoping
             Id = Guid.NewGuid(),
             BuyerId = command.BuyerId,
             OrderDate = DateTimeOffset.UtcNow,
-            Status = nameof(OrderStatus.Pending)
+            Status = nameof(OrderStatus.Pending),
+            CreatedAtUtc = DateTimeOffset.UtcNow
         };
 
         order.AddOrderItems(command.OrderItems);
-
-        // Raise Domain Event outbox later
 
         return order;
     }

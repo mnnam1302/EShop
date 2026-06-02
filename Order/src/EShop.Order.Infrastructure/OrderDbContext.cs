@@ -1,4 +1,3 @@
-using EShop.Order.Application.Sagas;
 using EShop.Shared.DomainTools.EventSourcing;
 using EShop.Shared.DomainTools.EventSourcing.SeedWork;
 using EShop.Shared.JsonApi.Extensions;
