@@ -1,15 +1,16 @@
-﻿using Carter;
+using Carter;
 using EShop.Shared.CQRS;
 using EShop.Shared.JsonApi.Abstractions;
 using EShop.Shared.JsonApi.ResourceAccessControl;
 using EShop.Tenancy.Application.UseCases.V1.Commands.Features;
 using EShop.Tenancy.Application.UseCases.V1.Queries.Features;
+using EShop.Tenancy.Application.UseCases.V1.Queries.Tenants;
 using EShop.Tenancy.Presentation.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
-using static EShop.Shared.Contracts.Services.Tenancy.Features.Query;
+using static EShop.Shared.Contracts.Services.Tenancy.Features.Response;
 
 namespace EShop.Tenancy.Presentation.APIs;
 
@@ -31,10 +32,17 @@ public sealed class FeatureApi : ICarterModule
         group.MapPost("", CreateSystemFeatureAsync);
     }
 
-    private static async Task<IResult> GetTenantFeaturesAsync([FromQuery] string tenantId, [FromServices] MediatR.ISender sender, CancellationToken cancellationToken)
+    private static async Task<IResult> GetTenantFeaturesAsync(
+        [FromQuery] string tenantId,
+        [FromServices] IMediator mediator,
+        CancellationToken cancellationToken)
     {
-        var query = new GetTenantFeaturesQuery(tenantId);
-        var result = await sender.Send(query, cancellationToken);
+        var query = new GetTenantFeaturesQuery
+        {
+            TenantId = tenantId
+        };
+
+        var result = await mediator.QueryAsync<GetTenantFeaturesQuery, TenantFeaturesResponse>(query, cancellationToken);
 
         if (result.IsFailure)
         {
@@ -44,7 +52,10 @@ public sealed class FeatureApi : ICarterModule
         return Results.Ok(result);
     }
 
-    private async Task<IResult> GetFeatureByIdAsync([FromRoute] string featureId, [FromServices] IMediator mediator, CancellationToken cancellationToken)
+    private static async Task<IResult> GetFeatureByIdAsync(
+        [FromRoute] string featureId,
+        [FromServices] IMediator mediator,
+        CancellationToken cancellationToken)
     {
         var query = new GetFeatureByIdQuery(featureId);
 

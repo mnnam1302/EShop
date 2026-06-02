@@ -1,12 +1,24 @@
-﻿using EShop.Shared.Contracts.Abstractions.Requests;
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.Contracts.Services.Tenancy.Features;
+using EShop.Shared.CQRS.Command;
 using EShop.Shared.DomainTools;
 using EShop.Tenancy.Application.Services;
 using Microsoft.Extensions.Logging;
-using static EShop.Shared.Contracts.Services.Tenancy.Features.Command;
 
 namespace EShop.Tenancy.Application.UseCases.V1.Events;
+
+public sealed class UpdateSupportedFeaturesInternalCommand : ICommand
+{
+    public required string SourceSystemReference { get; init; }
+
+    public IFeature[] Features { get; init; } = [];
+
+    public SupportedFeaturesAction Action { get; init; }
+
+    public required string TenantId { get; init; }
+
+    public required string ActionUserId { get; init; }
+}
 
 public class UpdateSupportedFeaturesInternalCommandHandler : ICommandHandler<UpdateSupportedFeaturesInternalCommand>
 {
@@ -24,16 +36,16 @@ public class UpdateSupportedFeaturesInternalCommandHandler : ICommandHandler<Upd
         _logger = logger;
     }
 
-    public async Task<Result> Handle(UpdateSupportedFeaturesInternalCommand request, CancellationToken cancellationToken)
+    public async Task<Result> HandleAsync(UpdateSupportedFeaturesInternalCommand command, CancellationToken cancellationToken)
     {
         _logger.LogDebug("{Action} {Count} features of source system: {SourceSystemReference}",
-            request.Action,
-            request.Features.Length,
-            request.SourceSystemReference);
+            command.Action,
+            command.Features.Length,
+            command.SourceSystemReference);
 
-        foreach (var feature in request.Features)
+        foreach (var feature in command.Features)
         {
-            _logger.LogDebug("Processing feature '{Action}' (ID='{Id}')", request.Action, feature.Id);
+            _logger.LogDebug("Processing feature '{Action}' (ID='{Id}')", command.Action, feature.Id);
 
             var dbFeature = Domain.Entities.Feature.Create(
                 feature.Id,
@@ -46,7 +58,7 @@ public class UpdateSupportedFeaturesInternalCommandHandler : ICommandHandler<Upd
                 .CreateDbUpdateHandlingAsyncPolly(_logger)
                 .ExecuteAsync(async () =>
                 {
-                    if (request.Action == SupportedFeaturesAction.AddOrUpdate)
+                    if (command.Action == SupportedFeaturesAction.AddOrUpdate)
                     {
                         await _featureService.AddOrUpdateFeatureAsync(dbFeature, cancellationToken);
                     }

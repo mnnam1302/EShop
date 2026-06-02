@@ -1,22 +1,23 @@
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.Contracts.Services.Tenancy.Features;
+using EShop.Shared.CQRS;
+using EShop.Tenancy.Application.UseCases.V1.Events;
 using EShop.Tenancy.Persistence;
-using MediatR;
 
 namespace EShop.Tenancy.Infrastructure.Consumers;
 
 public sealed class SupportedFeaturesUpdatedConsumer : IdempotentConsumer<SupportedFeaturesUpdated>
 {
-    private readonly ISender _sender;
+    private readonly IMediator _mediator;
 
-    public SupportedFeaturesUpdatedConsumer(ISender sender, TenancyDbContext dbContext) : base(dbContext)
+    public SupportedFeaturesUpdatedConsumer(TenancyDbContext dbContext, IMediator mediator) : base(dbContext)
     {
-        this._sender = sender;
+        this._mediator = mediator;
     }
 
     protected override async Task<Result> HandleMessageAsync(SupportedFeaturesUpdated message, CancellationToken cancellationToken)
     {
-        var command = new Command.UpdateSupportedFeaturesInternalCommand
+        var command = new UpdateSupportedFeaturesInternalCommand
         {
             SourceSystemReference = message.SourceSystemReference,
             Features = message.Features,
@@ -25,7 +26,7 @@ public sealed class SupportedFeaturesUpdatedConsumer : IdempotentConsumer<Suppor
             ActionUserId = message.ActionUserId
         };
 
-        var result = await _sender.Send(command, cancellationToken);
+        var result = await _mediator.SendAsync(command, cancellationToken);
         return result;
     }
 }

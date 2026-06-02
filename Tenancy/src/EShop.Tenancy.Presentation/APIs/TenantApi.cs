@@ -1,16 +1,14 @@
-﻿using Carter;
-using EShop.Shared.Contracts.Services.Tenancy.Tenants;
+using Carter;
 using EShop.Shared.CQRS;
 using EShop.Shared.JsonApi.Abstractions;
 using EShop.Shared.JsonApi.ResourceAccessControl;
 using EShop.Tenancy.Application.UseCases.V1.Commands.Tenants;
 using EShop.Tenancy.Application.UseCases.V1.Queries.Tenants;
-using MediatR;
+using EShop.Tenancy.Domain.Commands;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
-using static EShop.Shared.Contracts.Services.Tenancy.Features.Query;
 
 namespace EShop.Tenancy.Presentation.APIs;
 
@@ -37,11 +35,11 @@ public sealed class TenantApi : ICarterModule
     }
 
     private static async Task<IResult> CreateTenantAsync(
-        [FromServices] ISender sender,
-        [FromBody] Command.CreateTenantCommand request,
+        [FromServices] IMediator mediator,
+        [FromBody] CreateTenantCommand request,
         CancellationToken cancellationToken)
     {
-        var result = await sender.Send(request, cancellationToken);
+        var result = await mediator.SendAsync(request, cancellationToken);
 
         if (result.IsFailure)
         {
@@ -53,12 +51,12 @@ public sealed class TenantApi : ICarterModule
 
     private static async Task<IResult> GetTenantDetailsAsync(
         [FromRoute] string tenantId,
-        [FromServices] ISender sender,
+        [FromServices] IMediator mediator,
         CancellationToken cancellationToken)
     {
         var query = new GetTenantDetailsQuery(tenantId);
 
-        var result = await sender.Send(query, cancellationToken);
+        var result = await mediator.QueryAsync<GetTenantDetailsQuery, TenantDetailsResponse>(query, cancellationToken);
 
         if (result.IsFailure)
         {
@@ -71,7 +69,7 @@ public sealed class TenantApi : ICarterModule
     private static async Task<IResult> EnableTenantFeatureAsync(
         [FromRoute] string tenantId,
         [FromRoute] string featureId,
-        [FromServices] Shared.CQRS.IMediator mediator,
+        [FromServices] IMediator mediator,
         CancellationToken cancellationToken)
     {
         var command = new EnableTenantFeatureCommand
