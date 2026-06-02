@@ -1,4 +1,3 @@
-using EShop.Order.Application.Sagas;
 using EShop.Order.Domain.Repositories;
 using EShop.Order.Infrastructure.Repositories;
 using EShop.Shared.Authentication.Filters;
@@ -37,7 +36,6 @@ public static class ServiceCollectionExtensions
     {
         services.AddScoped<IUnitOfWork, EFUnitOfWork<OrderDbContext>>();
         services.AddScoped<IOrderRepository, OrderRepository>();
-        services.AddScoped<ISagaStateRepository, SagaStateRepository>();
         return services;
     }
 
@@ -46,7 +44,6 @@ public static class ServiceCollectionExtensions
         IConfiguration configuration)
     {
         services
-            .AddSingleton<PlaceOrderSagaOrchestrator>()
             .AddEventBus()
             .AddMasstransitRabbitMQ(configuration);
 

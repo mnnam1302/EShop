@@ -26,41 +26,41 @@ internal sealed class PersistOrderConsumer : IConsumer<PersistOrderCommand>
     {
         var cmd = context.Message;
 
-        using var _ = _userDetailsProvider.CreateSystemUserScope(cmd.TenantId, cmd.ActionUserId, cmd.ActionUserType);
+        //using var _ = _userDetailsProvider.CreateSystemUserScope(cmd.TenantId, cmd.ActionUserId, cmd.ActionUserType);
 
-        // Idempotency: check whether order already exists.
-        var existing = await _dbContext.Orders.FindAsync([cmd.OrderId], context.CancellationToken);
+        //// Idempotency: check whether order already exists.
+        //var existing = await _dbContext.Orders.FindAsync([cmd.OrderId], context.CancellationToken);
 
-        if (existing is not null)
-        {
-            _logger.LogWarning("Duplicate PersistOrderCommand for Order {OrderId} — replaying OrderPersisted.", cmd.OrderId);
-            await PublishOrderPersisted(context, cmd.OrderId);
-            return;
-        }
+        //if (existing is not null)
+        //{
+        //    _logger.LogWarning("Duplicate PersistOrderCommand for Order {OrderId} — replaying OrderPersisted.", cmd.OrderId);
+        //    await PublishOrderPersisted(context, cmd.OrderId);
+        //    return;
+        //}
 
-        var orderItems = cmd.Items.Select(i => new OrderItemData
-        {
-            VariantId = i.VariantId,
-            Quantity = i.Quantity,
-            UnitPrice = i.UnitPrice,
-            Discount = i.Discount
-        }).ToList();
+        //var orderItems = cmd.Items.Select(i => new OrderItemData
+        //{
+        //    VariantId = i.VariantId,
+        //    Quantity = i.Quantity,
+        //    UnitPrice = i.UnitPrice,
+        //    Discount = i.Discount
+        //}).ToList();
 
-        var command = new PlaceOrderCommand
-        {
-            BuyerId = cmd.BuyerId,
-            OrderId = cmd.OrderId,
-            OrderItems = orderItems
-        };
+        //var command = new PlaceOrderCommand
+        //{
+        //    BuyerId = cmd.BuyerId,
+        //    OrderId = cmd.OrderId,
+        //    OrderItems = orderItems
+        //};
 
-        var order = Domain.Aggregates.Orders.Order.CreateOrder(command);
+        //var order = Domain.Aggregates.Orders.Order.CreateOrder(command);
 
-        _dbContext.Orders.Add(order);
-        await _dbContext.SaveChangesAsync(context.CancellationToken);
+        //_dbContext.Orders.Add(order);
+        //await _dbContext.SaveChangesAsync(context.CancellationToken);
 
-        _logger.LogInformation("Order {OrderId} persisted.", cmd.OrderId);
+        //_logger.LogInformation("Order {OrderId} persisted.", cmd.OrderId);
 
-        await PublishOrderPersisted(context, cmd.OrderId);
+        //await PublishOrderPersisted(context, cmd.OrderId);
     }
 
     private async Task PublishOrderPersisted(ConsumeContext context, Guid orderId)

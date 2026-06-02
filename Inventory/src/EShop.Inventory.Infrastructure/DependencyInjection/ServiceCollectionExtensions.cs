@@ -48,9 +48,38 @@ public static class ServiceCollectionExtensions
             .AddEventBus()
             .AddMasstransitRabbitMQ(configuration)
             .AddFeaturesAndPermissionsService();
+        //.AddRedisStockGateway()
+        //.AddInventoryBackgroundJobs(configuration);
 
         return services;
     }
+
+    //private static IServiceCollection AddRedisStockGateway(this IServiceCollection services)
+    //{
+    //    services.AddSingleton<IRedisStockGateway, RedisStockGateway>();
+    //    services.AddHostedService<RedisStockInitializer>();
+    //    return services;
+    //}
+
+    //private static IServiceCollection AddInventoryBackgroundJobs(
+    //    this IServiceCollection services,
+    //    IConfiguration configuration)
+    //{
+    //    var connectionString = configuration.GetConnectionString("Default")!;
+
+    //    services.AddHangfire(cfg => cfg
+    //        .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+    //        .UseSimpleAssemblyNameTypeSerializer()
+    //        .UseRecommendedSerializerSettings()
+    //        .UsePostgreSqlStorage(opt => opt.UseNpgsqlConnection(connectionString)));
+
+    //    services.AddHangfireServer();
+
+    //    services.AddScoped<ExpireReservationsJob>();
+    //    services.AddScoped<SyncRedisStockJob>();
+
+    //    return services;
+    //}
 
     private static IServiceCollection AddRedis(this IServiceCollection services, IConfiguration configuration)
     {

@@ -12,5 +12,8 @@ internal sealed class InventoryEntityTypeConfiguration : IEntityTypeConfiguratio
         builder.HasKey(t => t.Id);
 
         builder.HasIndex(t => t.TenantId);
+
+        // xmin is a PostgreSQL system column — no bytea column added to schema.
+        builder.UseXminAsConcurrencyToken();
     }
 }

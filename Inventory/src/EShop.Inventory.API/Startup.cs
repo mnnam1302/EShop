@@ -42,6 +42,18 @@ public class Startup
 
         app.MapEndpoints();
 
+        //app.UseHangfireDashboard("/hangfire");
+
+        //RecurringJob.AddOrUpdate<ExpireReservationsJob>(
+        //    "expire-reservations",
+        //    job => job.ExecuteAsync(),
+        //    Cron.Minutely);
+
+        //RecurringJob.AddOrUpdate<SyncRedisStockJob>(
+        //    "sync-redis-stock",
+        //    job => job.ExecuteAsync(),
+        //    "*/5 * * * *");
+
         app.RegisterFeatures(applicationLifetime, logger);
         app.RegisterPermissions(applicationLifetime, logger);
     }
