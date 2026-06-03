@@ -1,20 +1,6 @@
 namespace EShop.Shared.Contracts.Services.Order.Saga;
 
 /// <summary>
-/// Sent by the saga to the Inventory service to atomically reserve stock
-/// for all line items. Uses a single idempotency key for the whole basket.
-/// </summary>
-public sealed class ReserveStockCommand
-{
-    public required Guid IdempotencyKey { get; init; }
-    public required Guid OrderId { get; init; }
-    public required IReadOnlyList<OrderItem> Items { get; init; }
-    public required string TenantId { get; init; }
-    public required string ActionUserId { get; init; }
-    public required string ActionUserType { get; init; }
-}
-
-/// <summary>
 /// Sent by the saga to the Inventory service to release a previously created
 /// reservation (compensation path).
 /// </summary>

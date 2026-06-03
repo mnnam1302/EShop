@@ -38,7 +38,7 @@ public sealed class OrderSaga : AggregateSaga, IScoped
             Scope = orderSaga.Scope
         });
 
-        orderSaga.Publish(new MakeReservationCommand
+        orderSaga.Publish(new MakeReservation
         {
             OrderId = orderSaga.OrderId,
             Items = message.Items,

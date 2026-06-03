@@ -2,7 +2,7 @@ using EShop.Shared.Contracts.Abstractions.Mediator;
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.CQRS.Command;
 
-namespace EShop.Inventory.Application.UseCases.Inventory;
+namespace EShop.Inventory.Application.UseCases.Inventories;
 
 public sealed class DecreaseStockCommand : ICommand
 {

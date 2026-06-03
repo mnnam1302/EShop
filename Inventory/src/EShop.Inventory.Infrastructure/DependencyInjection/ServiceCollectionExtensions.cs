@@ -44,10 +44,11 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddInventoryInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
         services
-            .AddRedis(configuration)
             .AddEventBus()
             .AddMasstransitRabbitMQ(configuration)
             .AddFeaturesAndPermissionsService();
+
+        services.AddRedis(configuration);
         //.AddRedisStockGateway()
         //.AddInventoryBackgroundJobs(configuration);
 

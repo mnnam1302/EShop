@@ -6,7 +6,7 @@ using EShop.Shared.CQRS.Command;
 using EShop.Shared.DomainTools.UnitOfWorks;
 using Microsoft.Extensions.Logging;
 
-namespace EShop.Inventory.Application.UseCases.Inventory;
+namespace EShop.Inventory.Application.UseCases.Inventories;
 
 public sealed class CreateInventoryCommand : ICommand
 {

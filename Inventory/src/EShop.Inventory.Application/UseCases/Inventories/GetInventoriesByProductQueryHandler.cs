@@ -5,7 +5,7 @@ using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.CQRS.Query;
 using Microsoft.EntityFrameworkCore;
 
-namespace EShop.Inventory.Application.UseCases.Inventory;
+namespace EShop.Inventory.Application.UseCases.Inventories;
 
 public sealed record GetInventoriesByProductQuery(Guid ProductId, int PageIndex, int PageSize) : IQuery<PaginationResult<InventoryDto>>;
 

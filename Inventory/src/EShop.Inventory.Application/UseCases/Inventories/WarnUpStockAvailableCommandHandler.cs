@@ -1,6 +1,6 @@
 using EShop.Shared.Contracts.Abstractions.Mediator;
 
-namespace EShop.Inventory.Application.UseCases.Inventory;
+namespace EShop.Inventory.Application.UseCases.Inventories;
 
 public sealed class WarnUpStockAvailableCommand : ICommand
 {
