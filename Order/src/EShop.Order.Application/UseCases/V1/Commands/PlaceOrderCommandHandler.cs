@@ -41,7 +41,7 @@ public sealed class PlaceOrderCommandHandler : ICommandHandler<PlaceOrderCommand
         _orderRepository.Add(order);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        await _publishEndpoint.Publish(new OrderSubmitted
+        await _publishEndpoint.Publish(new OrderCreated
         {
             OrderId = order.Id,
             BuyerId = order.BuyerId,

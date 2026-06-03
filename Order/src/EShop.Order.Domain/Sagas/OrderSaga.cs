@@ -17,7 +17,7 @@ public sealed class OrderSaga : AggregateSaga, IScoped
     public string TenantId { get; set; } = string.Empty;
     public string Scope { get; set; } = string.Empty;
 
-    public static OrderSaga Create(Guid orderSagaId, OrderSubmitted message)
+    public static OrderSaga Create(Guid orderSagaId, OrderCreated message)
     {
         var orderSaga = new OrderSaga
         {
@@ -54,7 +54,7 @@ public sealed class OrderSaga : AggregateSaga, IScoped
     /// Starts the saga: Initial → AwaitingStockReservation.
     /// Side effect: <see cref="ReserveStockCommand"/> sent to Inventory.
     /// </summary>
-    public void HandleAsync(OrderSubmitted message)
+    public void HandleAsync(OrderCreated message)
     {
         if (State != SagaState.New)
         {

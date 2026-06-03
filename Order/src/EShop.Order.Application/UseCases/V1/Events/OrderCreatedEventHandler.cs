@@ -8,25 +8,25 @@ using Microsoft.Extensions.Logging;
 
 namespace EShop.Order.Application.UseCases.V1.Events;
 
-internal sealed class OrderSubmittedEventHandler : ICommandHandler<OrderSubmitted>
+internal sealed class OrderCreatedEventHandler : ICommandHandler<OrderCreated>
 {
     private readonly IAggregateSagaStore _aggregateSagaStore;
-    private readonly ILogger<OrderSubmittedEventHandler> _logger;
+    private readonly ILogger<OrderCreatedEventHandler> _logger;
 
-    public OrderSubmittedEventHandler(IAggregateSagaStore aggregateSagaStore, ILogger<OrderSubmittedEventHandler> logger)
+    public OrderCreatedEventHandler(IAggregateSagaStore aggregateSagaStore, ILogger<OrderCreatedEventHandler> logger)
     {
         _aggregateSagaStore = aggregateSagaStore;
         _logger = logger;
     }
 
-    public async Task<Result> HandleAsync(OrderSubmitted command, CancellationToken cancellationToken)
+    public async Task<Result> HandleAsync(OrderCreated command, CancellationToken cancellationToken)
     {
         var orderSagaId = OrderSagaId
             .FromOrderId(command.OrderId)
             .GetGuid();
 
         _logger.LogInformation(
-            "Processing OrderSubmitted event for Order ID: {OrderId} with Saga ID: {OrderSagaId}",
+            "Processing OrderCreated event for Order ID: {OrderId} with Saga ID: {OrderSagaId}",
             command.OrderId, orderSagaId);
 
         var existingSaga = await _aggregateSagaStore.LoadAggregateSagaAsync<OrderSaga>(orderSagaId, cancellationToken);
