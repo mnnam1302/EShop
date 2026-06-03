@@ -1,4 +1,5 @@
 using EShop.Order.Domain.Sagas.DomainEvents;
+using EShop.Shared.Authentication.Abstractions;
 using EShop.Shared.Contracts.Services.Inventory;
 using EShop.Shared.Contracts.Services.Order;
 using EShop.Shared.Contracts.Services.Order.Saga;
@@ -17,7 +18,7 @@ public sealed class OrderSaga : AggregateSaga, IScoped
     public string TenantId { get; set; } = string.Empty;
     public string Scope { get; set; } = string.Empty;
 
-    public static OrderSaga Create(Guid orderSagaId, OrderCreated message)
+    public static OrderSaga Create(Guid orderSagaId, OrderCreated message, IUserDetailsProvider userDetailsProvider)
     {
         var orderSaga = new OrderSaga
         {
@@ -35,6 +36,15 @@ public sealed class OrderSaga : AggregateSaga, IScoped
             OrderId = orderSaga.OrderId,
             TenantId = orderSaga.TenantId,
             Scope = orderSaga.Scope
+        });
+
+        orderSaga.Publish(new MakeReservationCommand
+        {
+            OrderId = orderSaga.OrderId,
+            Items = message.Items,
+            TenantId = orderSaga.TenantId,
+            ActionUserId = userDetailsProvider.AuthenticatedUser.ActionUserId,
+            ActionUserType = userDetailsProvider.AuthenticatedUser.ActionUserType
         });
 
         return orderSaga;

@@ -1,11 +1,11 @@
 using EShop.Shared.Authentication.Abstractions;
+using EShop.Shared.Contracts.Abstractions.MessageBus;
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.Contracts.Services.Tenancy.Tenants;
 using EShop.Shared.CQRS.Command;
 using EShop.Shared.DomainTools.Exceptions;
 using EShop.Shared.DomainTools.Extensions;
 using EShop.Shared.DomainTools.UnitOfWorks;
-using EShop.Shared.EventBus.Abstractions;
 using EShop.Shared.Scoping.ResourceAccessControl;
 using EShop.Tenancy.Domain.Commands;
 using EShop.Tenancy.Domain.Entities;

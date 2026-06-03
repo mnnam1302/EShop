@@ -1,8 +1,9 @@
 using EShop.Order.Domain.Sagas;
+using EShop.Shared.Authentication.Abstractions;
+using EShop.Shared.Contracts.Abstractions.MessageBus;
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.Contracts.Services.Order;
 using EShop.Shared.CQRS.Command;
-using EShop.Shared.DomainTools.Exceptions;
 using EShop.Shared.DomainTools.Sagas.AggregateSagas;
 using Microsoft.Extensions.Logging;
 
@@ -12,11 +13,19 @@ internal sealed class OrderCreatedEventHandler : ICommandHandler<OrderCreated>
 {
     private readonly IAggregateSagaStore _aggregateSagaStore;
     private readonly ILogger<OrderCreatedEventHandler> _logger;
+    private readonly IUserDetailsProvider _userDetailsProvider;
+    private readonly ICommandBus _commandBus;
 
-    public OrderCreatedEventHandler(IAggregateSagaStore aggregateSagaStore, ILogger<OrderCreatedEventHandler> logger)
+    public OrderCreatedEventHandler(
+        IAggregateSagaStore aggregateSagaStore,
+        ILogger<OrderCreatedEventHandler> logger,
+        IUserDetailsProvider userDetailsProvider,
+        ICommandBus commandBus)
     {
         _aggregateSagaStore = aggregateSagaStore;
         _logger = logger;
+        _userDetailsProvider = userDetailsProvider;
+        _commandBus = commandBus;
     }
 
     public async Task<Result> HandleAsync(OrderCreated command, CancellationToken cancellationToken)
@@ -29,6 +38,7 @@ internal sealed class OrderCreatedEventHandler : ICommandHandler<OrderCreated>
             "Processing OrderCreated event for Order ID: {OrderId} with Saga ID: {OrderSagaId}",
             command.OrderId, orderSagaId);
 
+        // 1. Check idempotency via deterministic via OrderId
         var existingSaga = await _aggregateSagaStore.LoadAggregateSagaAsync<OrderSaga>(orderSagaId, cancellationToken);
 
         if (!existingSaga.IsNew)
@@ -40,13 +50,17 @@ internal sealed class OrderCreatedEventHandler : ICommandHandler<OrderCreated>
             return Result.Success();
         }
 
-        var orderSaga = OrderSaga.Create(orderSagaId, command);
+        // 2. Initial Order saga process manager
+        var orderSaga = OrderSaga.Create(orderSagaId, command, _userDetailsProvider);
 
         _logger.LogInformation(
             "Successfully initialized and persisted OrderSaga for Order ID: {OrderId} (Saga ID: {OrderSagaId})",
             command.OrderId, orderSagaId);
 
         await _aggregateSagaStore.UpdateAggregateSagaAsync(orderSaga, cancellationToken);
+
+        // 3. Publish commands to message queue
+        await orderSaga.PublishAsync(_commandBus, cancellationToken);
 
         return Result.Success();
     }

@@ -1,6 +1,4 @@
-﻿using EShop.Shared.Contracts.Abstractions.MessageBus;
-
-namespace EShop.Shared.EventBus.Abstractions;
+namespace EShop.Shared.Contracts.Abstractions.MessageBus;
 
 public interface IEventBus
 {

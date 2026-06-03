@@ -45,6 +45,7 @@ public static class ServiceCollectionExtensions
     {
         services
             .AddEventBus()
+            .AddCommandBus()
             .AddMasstransitRabbitMQ(configuration);
 
         return services;

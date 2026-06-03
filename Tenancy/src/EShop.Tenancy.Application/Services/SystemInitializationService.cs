@@ -1,9 +1,9 @@
 using EShop.Shared.Authentication;
 using EShop.Shared.Authentication.Abstractions;
+using EShop.Shared.Contracts.Abstractions.MessageBus;
 using EShop.Shared.Contracts.Services.Tenancy.Tenants;
 using EShop.Shared.DomainTools.Extensions;
 using EShop.Shared.DomainTools.UnitOfWorks;
-using EShop.Shared.EventBus.Abstractions;
 using EShop.Tenancy.Application.Abstractions;
 using EShop.Tenancy.Domain.Entities;
 using EShop.Tenancy.Domain.Repositories;

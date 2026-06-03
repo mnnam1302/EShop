@@ -1,9 +1,3 @@
-﻿using EShop.Authorization.Domain.DomainEvents;
-using EShop.Shared.Authentication.Abstractions;
-using EShop.Shared.Contracts.Services.Authorization;
-using EShop.Shared.CQRS.DomainEvent;
-using EShop.Shared.EventBus.Abstractions;
-
 namespace EShop.Authorization.Application.UseCases.Organizations;
 
 //internal sealed class OrganizationCreatedEventHandler : IDomainEventHandler<OrganizationCreatedEvent>
