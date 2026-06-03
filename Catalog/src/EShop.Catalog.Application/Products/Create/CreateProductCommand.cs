@@ -1,5 +1,6 @@
-﻿using EShop.Catalog.Application.Categories;
+using EShop.Catalog.Application.Categories;
 using EShop.Shared.Authentication.Abstractions;
+using EShop.Shared.Contracts.Abstractions.Mediator;
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.Contracts.Services.Catalog;
 using EShop.Shared.CQRS.Command;

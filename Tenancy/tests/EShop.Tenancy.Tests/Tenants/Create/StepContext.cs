@@ -1,9 +1,7 @@
-﻿using EShop.Shared.Authentication;
-using EShop.Shared.Contracts.Services.Tenancy.Tenants;
+using EShop.Shared.Authentication;
 using EShop.Tenancy.Application.UseCases.V1.Queries.Tenants;
-using EShop.Tenancy.Domain.Entities;
+using EShop.Tenancy.Domain.Commands;
 using EShop.Tenancy.Tests.Setups;
-using EShop.Testing.JsonApiApplication;
 
 namespace EShop.Tenancy.Tests.Tenants.Create;
 
@@ -11,7 +9,7 @@ internal class StepContext(ApiContext apiContext)
 {
     private const string BaseUrl = "/api/v1/tenants";
 
-    internal async Task CreateTenantAsync(Command.CreateTenantCommand request)
+    internal async Task CreateTenantAsync(CreateTenantCommand request)
     {
         var systemUser = UserData.GetSystemUser(request.Id);
         await apiContext.PostAsync($"{BaseUrl}", request, systemUser);

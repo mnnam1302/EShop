@@ -1,7 +1,8 @@
-﻿using EShop.Authorization.Domain.Constants;
+using EShop.Authorization.Domain.Constants;
 using EShop.Shared.Authentication;
 using EShop.Shared.Authentication.Abstractions;
 using EShop.Shared.Authentication.Managers.JwtTokens;
+using EShop.Shared.Contracts.Abstractions.Mediator;
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.CQRS.Query;
 using System.Security.Claims;

@@ -1,8 +1,9 @@
-﻿using EShop.Authorization.Application.Services;
+using EShop.Authorization.Application.Services;
 using EShop.Authorization.Domain.Entities;
 using EShop.Authorization.Domain.Repositories;
 using EShop.Shared.Authentication;
 using EShop.Shared.Authentication.Abstractions;
+using EShop.Shared.Contracts.Abstractions.Mediator;
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.CQRS.Query;
 using EShop.Shared.DomainTools.UnitOfWorks;

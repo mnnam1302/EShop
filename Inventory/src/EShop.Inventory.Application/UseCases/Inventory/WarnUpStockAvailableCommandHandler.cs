@@ -1,4 +1,4 @@
-using EShop.Shared.CQRS.Command;
+using EShop.Shared.Contracts.Abstractions.Mediator;
 
 namespace EShop.Inventory.Application.UseCases.Inventory;
 

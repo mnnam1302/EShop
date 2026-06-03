@@ -1,5 +1,6 @@
 using EShop.Inventory.Domain.Abstractions;
 using EShop.Shared.Authentication.Abstractions;
+using EShop.Shared.Contracts.Abstractions.Mediator;
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.CQRS.Command;
 using EShop.Shared.DomainTools.UnitOfWorks;
