@@ -1,6 +1,5 @@
 using EntityFramework.Exceptions.Common;
 using EShop.Shared.DomainTools.EventSourcing.SeedWork;
-using EShop.Shared.DomainTools.Exceptions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -23,7 +22,7 @@ public sealed class EFCoreAggregateSagaStore : IAggregateSagaStore
         var events = await eventStoreRepository.GetEventStreamAsync(aggregateSagaId, version: 0, cancellationToken: cancellationToken);
         if (events.Count == 0)
         {
-            throw new AggregateNotFoundException(aggregateSagaId, typeof(TSagaAggregate));
+            return new TSagaAggregate();
         }
 
         var aggregate = new TSagaAggregate();
