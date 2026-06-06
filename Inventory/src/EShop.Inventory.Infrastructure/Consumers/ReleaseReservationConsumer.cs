@@ -39,7 +39,7 @@ internal sealed class ReleaseReservationConsumer : IConsumer<ReleaseReservationC
             cmd.TenantId, cmd.ActionUserId, cmd.ActionUserType);
 
         var reservations = await _dbContext.StockReservations
-            .Where(r => r.OrderId == cmd.OrderId && r.Status == ReservationStatus.Active)
+            //.Where(r => r.OrderId == cmd.OrderId && r.Status == ReservationStatus.Active)
             .ToListAsync(context.CancellationToken);
 
         if (reservations.Count == 0)

@@ -1,6 +1,5 @@
 using EShop.Inventory.API.Models;
 using EShop.Inventory.Application.UseCases.Inventories;
-using EShop.Inventory.Application.UseCases.Inventory;
 using EShop.Shared.Contracts.Abstractions.Pagination;
 using EShop.Shared.CQRS;
 using EShop.Shared.JsonApi.Abstractions;

@@ -33,7 +33,7 @@ public sealed class ExpireReservationsJob
         var now = DateTimeOffset.UtcNow;
 
         var expired = await dbContext.StockReservations
-            .Where(r => r.Status == ReservationStatus.Active && r.ExpiresAt <= now)
+            //.Where(r => r.Status == ReservationStatus.Active && r.ExpiresAt <= now)
             .ToListAsync();
 
         if (expired.Count == 0)

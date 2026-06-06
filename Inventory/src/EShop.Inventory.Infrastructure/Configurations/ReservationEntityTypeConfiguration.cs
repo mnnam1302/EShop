@@ -13,16 +13,5 @@ internal sealed class ReservationEntityTypeConfiguration : IEntityTypeConfigurat
 
         builder.HasIndex(r => r.OrderId);
         //builder.HasIndex(r => new { r.Status, r.ExpiresAt });
-
-        builder.Property(r => r.OrderId).IsRequired();
-        builder.Property(r => r.VariantId).IsRequired();
-        builder.Property(r => r.Quantity).IsRequired();
-        builder.Property(r => r.ExpiresAt).IsRequired();
-        builder.Property(r => r.CreatedAtUtc).IsRequired();
-
-        builder.Property(r => r.Status)
-            .HasConversion<string>()
-            .HasMaxLength(20)
-            .IsRequired();
     }
 }
