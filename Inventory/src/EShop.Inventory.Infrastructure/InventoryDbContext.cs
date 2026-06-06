@@ -13,7 +13,7 @@ public class InventoryDbContext : DbContext, IInboxDbContext
 
     public DbSet<InboxMessage> InboxMessages { get; set; }
     public DbSet<Domain.Aggregates.Inventory> Inventories { get; set; }
-    public DbSet<Reservation> StockReservations { get; set; }
+    public DbSet<Reservation> Reservations { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

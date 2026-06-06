@@ -38,7 +38,7 @@ internal sealed class ReleaseReservationConsumer : IConsumer<ReleaseReservationC
         using var _ = _userDetailsProvider.CreateSystemUserScope(
             cmd.TenantId, cmd.ActionUserId, cmd.ActionUserType);
 
-        var reservations = await _dbContext.StockReservations
+        var reservations = await _dbContext.Reservations
             //.Where(r => r.OrderId == cmd.OrderId && r.Status == ReservationStatus.Active)
             .ToListAsync(context.CancellationToken);
 

@@ -38,7 +38,7 @@ internal static class PerformanceDecorator
             }
 
             var requestName = typeof(TQuery).Name;
-            _logger.LogWarning("Long Time Running: Request Details: {Name} ({ElapsedMilliseconds} milliseconds)", requestName, elapsedMilliseconds);
+            _logger.LogDebug("Long Time Running: Request Details: {Name} ({ElapsedMilliseconds} milliseconds)", requestName, elapsedMilliseconds);
 
             return result;
         }
@@ -73,7 +73,7 @@ internal static class PerformanceDecorator
             }
 
             var requestName = typeof(TCommand).Name;
-            _logger.LogWarning("Long Time Running: Request Details: {Name} ({ElapsedMilliseconds} milliseconds)", requestName, elapsedMilliseconds);
+            _logger.LogDebug("Long Time Running: Request Details: {Name} ({ElapsedMilliseconds} milliseconds)", requestName, elapsedMilliseconds);
 
             return result;
         }
@@ -109,7 +109,7 @@ internal static class PerformanceDecorator
             }
 
             var requestName = typeof(TCommand).Name;
-            _logger.LogWarning("Long Time Running: Request Details: {Name} ({ElapsedMilliseconds} milliseconds)", requestName, elapsedMilliseconds);
+            _logger.LogDebug("Long Time Running: Request Details: {Name} ({ElapsedMilliseconds} milliseconds)", requestName, elapsedMilliseconds);
 
             return result;
         }

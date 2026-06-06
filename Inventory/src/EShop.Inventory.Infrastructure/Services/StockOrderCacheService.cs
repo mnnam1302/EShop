@@ -16,8 +16,8 @@ public sealed class StockOrderCacheService(
         var stockCacheKey = InventoryCacheKeyProvider.GetStockItemCacheKey(variantId.ToString());
         await _redisDatabase.StringSetAsync(stockCacheKey, stockAvailable);
 
-        logger.LogInformation("Successfully warned up stock available for {VariantId} with details {Key}:{Value}",
-            variantId, stockCacheKey, stockCacheKey);
+        logger.LogInformation("Warned up stock available for variant '{VariantId}' with KEY: {Key} and VALUE: {Value}",
+            variantId, stockCacheKey, stockAvailable);
     }
 
     public async Task<int> DecreaseStockCache(Guid variantId, int quantity)

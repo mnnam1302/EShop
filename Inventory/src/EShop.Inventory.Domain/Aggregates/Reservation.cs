@@ -5,7 +5,7 @@ using EShop.Shared.DomainTools.Entities;
 
 namespace EShop.Inventory.Domain.Aggregates;
 
-public class Reservation : AggregateRoot<Guid>, IDateTracking
+public class Reservation : AggregateRoot<Guid>, IScoped, IDateTracking
 {
     public required Guid OrderId { get; set; }
     public required Guid VariantId { get; set; }
@@ -18,7 +18,13 @@ public class Reservation : AggregateRoot<Guid>, IDateTracking
     public DateTimeOffset CreatedAtUtc { get; set; }
     public DateTimeOffset? LastModifiedAtUtc { get; set; }
 
-    public static Reservation Create(Guid orderId, Guid variantId, int quantity, DateTimeOffset expiresAt)
+    [MaxLength(ModelConstants.ShortText)]
+    public required string TenantId { get; set; }
+
+    [MaxLength(ModelConstants.VeryLongText)]
+    public required string Scope { get; set; }
+
+    public static Reservation Create(Guid orderId, Guid variantId, int quantity, DateTimeOffset expiresAt, string tenantId)
     {
         return new Reservation
         {
@@ -28,7 +34,9 @@ public class Reservation : AggregateRoot<Guid>, IDateTracking
             Quantity = quantity,
             Status = nameof(ReservationStatus.Active),
             ExpiresAt = expiresAt,
-            CreatedAtUtc = DateTimeOffset.UtcNow
+            CreatedAtUtc = DateTimeOffset.UtcNow,
+            TenantId = tenantId,
+            Scope = tenantId
         };
     }
 

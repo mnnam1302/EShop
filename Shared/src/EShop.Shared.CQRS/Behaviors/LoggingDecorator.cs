@@ -26,17 +26,17 @@ public static class LoggingDecorator
         {
             var requestName = typeof(TQuery).Name;
 
-            _logger.LogInformation("Processing request {RequestName}", requestName);
+            _logger.LogDebug("Processing request {RequestName}", requestName);
 
             var result = await _innerHandler.HandleAsync(query, cancellationToken);
 
             if (result.IsSuccess)
             {
-                _logger.LogInformation("Completed request {RequestName}", requestName);
+                _logger.LogDebug("Completed request {RequestName}", requestName);
             }
             else
             {
-                _logger.LogWarning("Completed request  {RequestName} with error: {Error}", requestName, result.Error.Message);
+                _logger.LogDebug("Completed request  {RequestName} with error: {Error}", requestName, result.Error.Message);
             }
 
             return result;
@@ -61,17 +61,17 @@ public static class LoggingDecorator
         {
             var requestName = typeof(TCommand).Name;
 
-            _logger.LogInformation("Processing request {RequestName}", requestName);
+            _logger.LogDebug("Processing request {RequestName}", requestName);
 
             var result = await _innerHandler.HandleAsync(command, cancellationToken);
 
             if (result.IsSuccess)
             {
-                _logger.LogInformation("Completed request {RequestName}", requestName);
+                _logger.LogDebug("Completed request {RequestName}", requestName);
             }
             else
             {
-                _logger.LogWarning("Completed request  {RequestName} with message: {Message}", requestName, result.Error.Message);
+                _logger.LogDebug("Completed request  {RequestName} with message: {Message}", requestName, result.Error.Message);
             }
 
             return result;
@@ -96,17 +96,17 @@ public static class LoggingDecorator
         {
             var requestName = typeof(TCommand).Name;
 
-            _logger.LogInformation("Processing request {RequestName}", requestName);
+            _logger.LogDebug("Processing request {RequestName}", requestName);
 
             var result = await _innerHandler.HandleAsync(command, cancellationToken);
 
             if (result.IsSuccess)
             {
-                _logger.LogInformation("Completed request {RequestName}", requestName);
+                _logger.LogDebug("Completed request {RequestName}", requestName);
             }
             else
             {
-                _logger.LogWarning("Completed request  {RequestName} with error: {Error}", requestName, result.Error);
+                _logger.LogDebug("Completed request  {RequestName} with error: {Error}", requestName, result.Error);
             }
 
             return result;

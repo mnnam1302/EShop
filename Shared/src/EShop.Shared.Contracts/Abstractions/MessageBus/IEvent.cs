@@ -10,11 +10,8 @@ public interface IEvent : IMessage
 }
 
 [ExcludeFromTopology]
-public interface IIntegrationEvent : IEvent
+public interface IIntegrationEvent : IEvent, IAuditingMessage
 {
-    string TenantId { get; }
-    string ActionUserId { get; }
-    string ActionUserType { get; }
 }
 
 [ExcludeFromTopology]

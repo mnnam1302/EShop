@@ -3,11 +3,8 @@ using MassTransit;
 namespace EShop.Shared.Contracts.Abstractions.MessageBus;
 
 [ExcludeFromTopology]
-public interface IIntegrationCommand : IMessage
+public interface IIntegrationCommand : IMessage, IAuditingMessage
 {
-    string TenantId { get; }
-    string ActionUserId { get; }
-    string ActionUserType { get; }
 }
 
 /// <summary>
