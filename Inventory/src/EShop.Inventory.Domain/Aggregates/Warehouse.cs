@@ -1,7 +1,7 @@
-﻿using EShop.Shared.DomainTools.Aggregates;
+using EShop.Shared.DomainTools.Aggregates;
 using EShop.Shared.DomainTools.Entities;
 
-namespace EShop.Inventory.Domain.Entities;
+namespace EShop.Inventory.Domain.Aggregates;
 
 public sealed class Warehouse : AggregateRoot<Guid>, IScoped
 {

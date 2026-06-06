@@ -49,7 +49,7 @@ internal sealed class CreateInventoryCommandHandler : ICommandHandler<CreateInve
 
         var currentUser = _userDetailsProvider.AuthenticatedUser;
 
-        var inventory = Domain.Entities.Inventory.Create(
+        var inventory = Domain.Aggregates.Inventory.Create(
             command.ProductId,
             command.VariantId,
             command.Sku,

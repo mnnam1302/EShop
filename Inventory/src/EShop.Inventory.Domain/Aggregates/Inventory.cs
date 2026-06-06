@@ -3,7 +3,7 @@ using EShop.Shared.DomainTools.Aggregates;
 using EShop.Shared.DomainTools.Entities;
 using System.ComponentModel.DataAnnotations;
 
-namespace EShop.Inventory.Domain.Entities;
+namespace EShop.Inventory.Domain.Aggregates;
 
 public class Inventory : AggregateRoot<Guid>, IScoped, IAuditable
 {

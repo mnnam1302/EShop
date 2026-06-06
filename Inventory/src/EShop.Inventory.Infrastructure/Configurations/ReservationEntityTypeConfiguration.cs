@@ -1,4 +1,4 @@
-using EShop.Inventory.Domain.Entities;
+using EShop.Inventory.Domain.Aggregates;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -8,12 +8,10 @@ internal sealed class ReservationEntityTypeConfiguration : IEntityTypeConfigurat
 {
     public void Configure(EntityTypeBuilder<Reservation> builder)
     {
-        builder.ToTable("StockReservations");
+        builder.ToTable("Reservations");
         builder.HasKey(r => r.Id);
 
-        // Index for fast lookup by order (e.g. compensation path).
         builder.HasIndex(r => r.OrderId);
-
         //builder.HasIndex(r => new { r.Status, r.ExpiresAt });
 
         builder.Property(r => r.OrderId).IsRequired();

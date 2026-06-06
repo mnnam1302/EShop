@@ -16,6 +16,11 @@ public sealed class MakeReservationConsumer(IMediator mediator) : IConsumer<Make
             Items = message.Items,
         };
 
-        await mediator.SendAsync(command, context.CancellationToken);
+        var result = await mediator.SendAsync(command, context.CancellationToken);
+
+        if (result.IsFailure)
+        {
+            // TODO: publish StocksNotReserved
+        }
     }
 }

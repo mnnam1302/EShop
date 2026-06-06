@@ -8,6 +8,8 @@ internal class MakeReservationsCommandHandler : ICommandHandler<MakeReservations
 {
     public Task<Result> HandleAsync(MakeReservationsCommand command, CancellationToken cancellationToken)
     {
+        // LUA & CAS
+
         throw new NotImplementedException();
     }
 }
