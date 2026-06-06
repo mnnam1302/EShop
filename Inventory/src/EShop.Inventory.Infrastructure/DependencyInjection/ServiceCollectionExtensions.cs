@@ -1,6 +1,8 @@
+using EShop.Inventory.Application.Services;
 using EShop.Inventory.Domain.Abstractions;
 using EShop.Inventory.Infrastructure.Producers;
 using EShop.Inventory.Infrastructure.Repositories;
+using EShop.Inventory.Infrastructure.Services;
 using EShop.Shared.Authentication.Filters;
 using EShop.Shared.Cache.DependencyInejctions.Extensions;
 using EShop.Shared.Contracts.JsonConverters;
@@ -48,8 +50,8 @@ public static class ServiceCollectionExtensions
             .AddMasstransitRabbitMQ(configuration)
             .AddFeaturesAndPermissionsService();
 
-        services.AddRedis(configuration);
-        //.AddRedisStockGateway()
+        services.AddRedis(configuration)
+            .AddStockCacheService();
         //.AddInventoryBackgroundJobs(configuration);
 
         return services;
@@ -88,6 +90,12 @@ public static class ServiceCollectionExtensions
             .AddRedisHealthCheck(configuration)
             .AddRedisCacheInfrastructure(configuration);
 
+        return services;
+    }
+
+    private static IServiceCollection AddStockCacheService(this IServiceCollection services)
+    {
+        services.AddScoped<IStockOrderCacheService, StockOrderCacheService>();
         return services;
     }
 

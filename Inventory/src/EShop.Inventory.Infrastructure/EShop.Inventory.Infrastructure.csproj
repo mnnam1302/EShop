@@ -11,6 +11,7 @@
     <ProjectReference Include="..\..\..\Shared\src\EShop.Shared.Contracts\EShop.Shared.Contracts.csproj" />
     <ProjectReference Include="..\..\..\Shared\src\EShop.Shared.EventBus\EShop.Shared.EventBus.csproj" />
     <ProjectReference Include="..\..\..\Shared\src\EShop.Shared.JsonApi\EShop.Shared.JsonApi.csproj" />
+    <ProjectReference Include="..\EShop.Inventory.Application\EShop.Inventory.Application.csproj" />
     <ProjectReference Include="..\EShop.Inventory.Domain\EShop.Inventory.Domain.csproj" />
   </ItemGroup>
 

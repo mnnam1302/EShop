@@ -29,6 +29,10 @@ public static class InventoryApis
             .MapGet("", GetInventoriesByProductIdV1Async)
             .RequireOneOfPermissionsFilter(PermissionConstants.Inventory.ViewInventory, PermissionConstants.Inventory.ManageInventory);
 
+        inventoryEndpointsV1
+            .MapPatch("", WarnUpStockInventoryV1Async)
+            .RequirePermissionFilter(PermissionConstants.Inventory.ManageInventory);
+
         return routerBuilder;
     }
 
@@ -75,5 +79,25 @@ public static class InventoryApis
         }
 
         return Results.Created("", result);
+    }
+
+    private static async Task<IResult> WarnUpStockInventoryV1Async(
+        [FromBody] WarnUpStockAvailableRequest request,
+        [FromServices] IMediator mediator,
+        CancellationToken cancellationToken)
+    {
+        var command = new WarnUpStockAvailableCommand
+        {
+            VariantId = request.VariantId
+        };
+
+        var result = await mediator.SendAsync(command, cancellationToken);
+
+        if (result.IsFailure)
+        {
+            return ApiEndpointHandler.Failure(result);
+        }
+
+        return Results.Accepted();
     }
 }
