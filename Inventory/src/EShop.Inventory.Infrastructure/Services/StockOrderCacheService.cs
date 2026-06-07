@@ -32,22 +32,23 @@ public sealed class StockOrderCacheService(
             return 0;
         }
 
-        int currentStock = (int)stockCacheValue;
-        logger.LogInformation("Current stock for {StockCacheKey} is {CurrentStock}", stockCacheKey, currentStock);
-
-        if (currentStock < quantity)
+        int oldStockAvailable = (int)stockCacheValue;
+        if (oldStockAvailable < quantity)
         {
-            logger.LogWarning("In danger of overselling! Request qty: {Quantity}, Available: {CurrentStock}", quantity, currentStock);
             return 0;
         }
 
+        logger.LogInformation("Stock available normal: {Key}, {Value}, {NewStockAvailable}",
+            stockCacheValue,
+            oldStockAvailable,
+            oldStockAvailable - quantity);
+
         // 2. Decrease stock
-        var updatedStock = currentStock - quantity;
-        await _redisDatabase.StringSetAsync(stockCacheKey, updatedStock);
+        var newStockAvailable = oldStockAvailable - quantity; // 100 - 1 = 99
+        await _redisDatabase.StringSetAsync(stockCacheKey, newStockAvailable); // 99
+        logger.LogInformation("Stock available racing...: {NewStockAvailable}", newStockAvailable);
 
-        logger.LogInformation("Successfully updated stock for {StockCacheKey}. New stock: {UpdatedStock}", stockCacheKey, updatedStock);
-
-        return 1;
+        return oldStockAvailable;
     }
 
     public Task DecreaseStockCacheByLUA(Guid variantId, int quantity)
