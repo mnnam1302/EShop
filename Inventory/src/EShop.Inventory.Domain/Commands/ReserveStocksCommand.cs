@@ -2,7 +2,7 @@ using EShop.Shared.Contracts.Abstractions.Mediator;
 
 namespace EShop.Inventory.Domain.Commands;
 
-public sealed class MakeReservationsCommand : ICommand
+public sealed class ReserveStocksCommand : ICommand
 {
     public required Guid OrderId { get; init; }
     public required IReadOnlyList<OrderItem> Items { get; init; }

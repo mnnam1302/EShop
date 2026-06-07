@@ -10,7 +10,7 @@ public sealed class MakeReservationConsumer(IMediator mediator) : IConsumer<Make
     public async Task Consume(ConsumeContext<MakeReservation> context)
     {
         var message = context.Message;
-        var command = new MakeReservationsCommand
+        var command = new ReserveStocksCommand
         {
             OrderId = message.OrderId,
             Items = message.Items.Select(x => new Domain.Commands.OrderItem

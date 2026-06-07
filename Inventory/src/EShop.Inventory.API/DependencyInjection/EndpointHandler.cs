@@ -7,8 +7,7 @@ public static class EndpointHandler
     public static IEndpointRouteBuilder MapEndpoints(this IEndpointRouteBuilder endpoints)
     {
         endpoints
-            .MapInventoryEndpoints()
-            .MapReservationEndpoints();
+            .MapInventoryEndpoints();
 
         return endpoints;
     }

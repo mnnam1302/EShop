@@ -1,6 +1,5 @@
 using EShop.Inventory.Application.Services;
 using EShop.Inventory.Domain.Abstractions;
-using EShop.Inventory.Domain.Aggregates;
 using EShop.Inventory.Domain.Commands;
 using EShop.Shared.Authentication;
 using EShop.Shared.Authentication.Abstractions;
@@ -11,17 +10,17 @@ using EShop.Shared.CQRS.Command;
 using EShop.Shared.DomainTools.UnitOfWorks;
 using Microsoft.Extensions.Logging;
 
-namespace EShop.Inventory.Application.UseCases.Reservations;
+namespace EShop.Inventory.Application.UseCases.Inventories;
 
-internal sealed class MakeReservationsCommandHandler(
+internal sealed class ReserveStocksCommandHandler(
     IStockOrderCacheService stockOrderCacheService,
     IInventoryRepository inventoryRepository,
     IUnitOfWork unitOfWork,
     IUserDetailsProvider userDetailsProvider,
     IEventBus eventBus,
-    ILogger<MakeReservationsCommandHandler> logger) : ICommandHandler<MakeReservationsCommand>
+    ILogger<ReserveStocksCommandHandler> logger) : ICommandHandler<ReserveStocksCommand>
 {
-    public async Task<Result> HandleAsync(MakeReservationsCommand command, CancellationToken cancellationToken)
+    public async Task<Result> HandleAsync(ReserveStocksCommand command, CancellationToken cancellationToken)
     {
         var authenticatedUser = userDetailsProvider.AuthenticatedUser;
         var lockedCacheItems = new List<(Guid VariantId, int Quantity)>();
