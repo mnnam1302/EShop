@@ -38,21 +38,46 @@ public sealed class StockOrderCacheService(
             return 0;
         }
 
-        logger.LogInformation("Stock available normal: {Key}, {Value}, {NewStockAvailable}",
-            stockCacheValue,
+        logger.LogInformation("Stock available normal: key: '{Key}', value:'{Value}', newStock:'{NewStockAvailable}'",
+            stockCacheKey,
             oldStockAvailable,
             oldStockAvailable - quantity);
 
         // 2. Decrease stock
         var newStockAvailable = oldStockAvailable - quantity; // 100 - 1 = 99
         await _redisDatabase.StringSetAsync(stockCacheKey, newStockAvailable); // 99
-        logger.LogInformation("Stock available racing...: {NewStockAvailable}", newStockAvailable);
+        logger.LogInformation("Stock available racing...: newStock:'{NewStockAvailable}'", newStockAvailable);
 
         return oldStockAvailable;
     }
 
-    public Task DecreaseStockCacheByLUA(Guid variantId, int quantity)
+    public async Task<int> DecreaseStockCacheByLUA(Guid variantId, int quantity)
     {
-        throw new NotImplementedException();
+        var stockCacheKey = InventoryCacheKeyProvider.GetStockItemCacheKey(variantId.ToString());
+        string luaScript = """
+        local stock = redis.call('GET', KEYS[1])
+        if not stock then
+            return -1
+        end
+
+        stock = tonumber(stock)
+        local qty = tonumber(ARGV[1])
+
+        if stock >= qty then
+            redis.call('DECRBY', KEYS[1], qty)
+            return stock
+        else
+            return 0
+        end
+        """;
+
+        var result = (int)await _redisDatabase.ScriptEvaluateAsync(
+            luaScript,
+            new RedisKey[] { stockCacheKey },
+            new RedisValue[] { quantity });
+
+        logger.LogInformation("Stock available racing...current stock: '{StockAvailable}'", result);
+
+        return result;
     }
 }

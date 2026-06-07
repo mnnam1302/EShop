@@ -29,10 +29,12 @@ internal sealed class InventoryRepository
 
     public async Task DecreaseStockLevel3CAS(Guid variantId, int oldStockAvailable, int quantity, CancellationToken cancellationToken)
     {
-        FormattableString rawSql = $@"
-            UPDATE Inventories
-            SET StockAvailable = {oldStockAvailable} - {quantity}
-            WHERE VariantId = {variantId} AND StockAvailable = {oldStockAvailable}";
+        FormattableString rawSql = $"""
+    UPDATE "Inventories"
+    SET "StockAvailable" = "StockAvailable" - {quantity}
+    WHERE "VariantId" = {variantId} 
+      AND "StockAvailable" = {oldStockAvailable}
+    """;
 
         await _dbContext.Database.ExecuteSqlAsync(rawSql, cancellationToken);
     }
