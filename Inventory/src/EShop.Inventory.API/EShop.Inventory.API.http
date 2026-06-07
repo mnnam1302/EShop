@@ -18,7 +18,7 @@ Content-Type: application/json
 
 # Extract the access token from login response
 # After running the login request above, copy the accessToken value and paste it below
-@accessToken = eyJhbGciOiJSUzI1NiIsImtpZCI6IjMzY2U1NDRjLWMyYmQtNDZiYy04N2IwLTRlMjc2YTAyMTQ0NCIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJjNWQ2NGZhMS04NDNlLTQ0NTgtODAyMy0zNzc4ODdlY2ZiOGEiLCJzdWIiOiJvd25lci1hY2NvdW50QGVzaG9wLXN0YWdpbmciLCJ0ZW5hbnRfaWQiOiJlc2hvcC1zdGFnaW5nIiwia2V5X2lkIjoiMzNjZTU0NGMtYzJiZC00NmJjLTg3YjAtNGUyNzZhMDIxNDQ0IiwibmJmIjoxNzgwNzQxMTkxLCJleHAiOjE3ODA3NDQ3OTEsImlhdCI6MTc4MDc0MTE5MSwiaXNzIjoiaHR0cDovL2F1dGhvcml6YXRpb24iLCJhdWQiOiJodHRwOi8vYXV0aG9yaXphdGlvbiJ9.sqnx-Rr2HpYWeyT4BvTNFpZ9MQbLfLm1tkvDZmEIryMvm4FhVNHTWid4O1gnpgzuOcQ0UYdWC_ybQURT8UUiWxZqgMP2t-gK5og2cjjkNGcIvrTwHcbQZP2iw9G35Ge71DtXxvQFrhFKzIOAgmp2jRbeXUfbzdyp1u4YMXPhBXJUVz8A4pjHz8xZcLIYJKxcB_sizWyifxzaHv1wccAGZiUmuwy82bM-I1_jYPeHNadYDIA19rHu5B0W43jzX7NGZCGYVcP9wgRSjHbUuKr6k3bqJwWOY9XiilWH7LQrYCyDaR3pb110g3RiWEnc8u1n7i-qWsG0GJ7LYoL72-8tAw
+@accessToken = eyJhbGciOiJSUzI1NiIsImtpZCI6IjMzY2U1NDRjLWMyYmQtNDZiYy04N2IwLTRlMjc2YTAyMTQ0NCIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJiOTFiMjNjMC0wMmJlLTQ4YzQtYjEwNy1hODE1MTM5NzFhZGMiLCJzdWIiOiJvd25lci1hY2NvdW50QGVzaG9wLXN0YWdpbmciLCJ0ZW5hbnRfaWQiOiJlc2hvcC1zdGFnaW5nIiwia2V5X2lkIjoiMzNjZTU0NGMtYzJiZC00NmJjLTg3YjAtNGUyNzZhMDIxNDQ0IiwibmJmIjoxNzgwODI2MTIxLCJleHAiOjE3ODA4Mjk3MjEsImlhdCI6MTc4MDgyNjEyMSwiaXNzIjoiaHR0cDovL2F1dGhvcml6YXRpb24iLCJhdWQiOiJodHRwOi8vYXV0aG9yaXphdGlvbiJ9.tc3LzDdviEQU-ggw2Vu43nxTwSOjmcESU27QDzI9CVxfxapPUCkQFk_pXHSjN8O3C_U0WZq_qsBmx0LY5wa6eYAHvnwnRmSlJ6cU1sTZI-j_LgIl0yoQk-lvhwmYNknl1ZGM39MpI7WKNqEAP57UWvEaJHzc9AB4lHFjYzwsuzrSO3yedWaRdCHEIZWIETj_4EfenU6X715iR010Z_mDP0uWyDI4qTquZ5Oi0IrcSX72wozrNXpzISsfPoxglJOhe3Xcqn0997UDMGfUoEenMrsbjL8JpFcj2HrnUmoKHdZYcgjnT6FNpo00lkFAbNyiQ2erfHQmApKwm99UeTI4qQ
 
 ###
 
@@ -27,7 +27,7 @@ Content-Type: application/json
 # CATALOG API ENDPOINTS
 # ============================================
 
-# Get Product by ID (Requires Authentication)
+# Get Product by ID
 GET {{Catalog_URL}}/api/v1/products
 Content-Type: application/vnd.api+json
 Authorization: Bearer {{accessToken}}
@@ -38,7 +38,7 @@ Authorization: Bearer {{accessToken}}
 # INVENTORY API ENDPOINTS
 # ============================================
 
-# Create Inventory (Requires Authentication)
+# Create Inventory
 POST {{Inventory_URL}}/api/v1/inventories
 Content-Type: application/json
 Authorization: Bearer {{accessToken}}
@@ -53,14 +53,14 @@ Authorization: Bearer {{accessToken}}
 
 ###
 
-# Get Inventories by Product ID (Requires Authentication)
+# Get Inventories by Product ID
 GET {{Inventory_URL}}/api/v1/inventories?productId=911b2c0b-7924-484a-ad0a-fbd9fbf0b08a
 Accept: application/json
 Authorization: Bearer {{accessToken}}
 
 ###
 
-# Get Inventories by Product ID with Pagination (Requires Authentication)
+# Get Inventories by Product ID with Pagination
 GET {{Inventory_URL}}/api/v1/inventories?productId=3fa85f64-5717-4562-b3fc-2c963f66afa6&pageIndex=1&pageSize=20
 Accept: application/json
 Authorization: Bearer {{accessToken}}
@@ -68,7 +68,7 @@ Authorization: Bearer {{accessToken}}
 ###
 
   
-# Create Inventory (Requires Authentication)
+# Add inventory's stock available from Postgres to Redis
 PATCH {{Inventory_URL}}/api/v1/inventories
 Content-Type: application/json
 Authorization: Bearer {{accessToken}}
@@ -78,3 +78,21 @@ Authorization: Bearer {{accessToken}}
 }
 
 ###
+# ============================================
+# INVENTORY API ENDPOINTS
+# ============================================
+
+# Create Reservation
+POST {{Inventory_URL}}/api/v1/reservations
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "orderId": "911b2c0b-7924-484a-ad0a-fbd9fbf0b08a",
+  "items": [
+    {
+      "variantId": "214fe0df-9941-46f8-bb45-16ce39d9f3e6",
+      "quantity": 1
+    }
+  ]
+}

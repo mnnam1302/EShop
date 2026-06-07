@@ -15,21 +15,21 @@ public static class InventoryApis
 
     public static IEndpointRouteBuilder MapInventoryEndpoints(this IEndpointRouteBuilder routerBuilder)
     {
-        var inventoryEndpointsV1 = routerBuilder
+        var endpointsV1 = routerBuilder
             .NewVersionedApi("Inventory")
             .MapGroup(_baseUrl)
             .HasApiVersion(1)
             .RequireFeatureFilter(FeatureConstants.Inventory.InventoryManagement);
 
-        inventoryEndpointsV1
+        endpointsV1
             .MapPost("", CreateInventoriesV1Async)
             .RequirePermissionFilter(PermissionConstants.Inventory.ManageInventory);
 
-        inventoryEndpointsV1
+        endpointsV1
             .MapGet("", GetInventoriesByProductIdV1Async)
             .RequireOneOfPermissionsFilter(PermissionConstants.Inventory.ViewInventory, PermissionConstants.Inventory.ManageInventory);
 
-        inventoryEndpointsV1
+        endpointsV1
             .MapPatch("", WarnUpStockInventoryV1Async)
             .RequirePermissionFilter(PermissionConstants.Inventory.ManageInventory);
 

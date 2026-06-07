@@ -17,10 +17,12 @@ internal sealed class InventoryRepository
 
     public async Task DecreaseStockLevel1(Guid variantId, int quantity, CancellationToken cancellationToken)
     {
-        FormattableString rawSql = $@"
-            UPDATE Inventories
-            SET StockAvailable = StockAvailable - {quantity}
-            WHERE VariantId = {variantId} AND StockAvailable >= {quantity}";
+        FormattableString rawSql = $"""
+    UPDATE "Inventories"
+    SET "StockAvailable" = "StockAvailable" - {quantity}
+    WHERE "VariantId" = {variantId} 
+      AND "StockAvailable" >= {quantity}
+    """;
 
         await _dbContext.Database.ExecuteSqlAsync(rawSql, cancellationToken);
     }

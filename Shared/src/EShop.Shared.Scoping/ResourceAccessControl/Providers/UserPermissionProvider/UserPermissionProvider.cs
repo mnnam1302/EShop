@@ -26,40 +26,57 @@ public sealed class UserPermissionProvider : IUserPermissionsProvider
 
     public async Task<string[]> GetPermissions(string userId, CancellationToken cancellationToken = default)
     {
-        // 1. Fast path — cache is warm
+        // TODO: Need to review and refactor to avoid self-loop
+        //// 1. Fast path — cache is warm
+        //var cached = await _permissionCache.GetPermissionsAsync(userId);
+        //if (cached.Length != 0)
+        //{
+        //    return cached;
+        //}
+
+        //// 2. Slow path — acquire per-user lock
+        //using var lockHandle = await _distributedLock.TryAcquireAsync(
+        //    $"permissions:{userId}",
+        //    _lockExpiration,
+        //    cancellationToken);
+
+        //if (lockHandle is not null)
+        //{
+        //    // 3. Double-check: another instance may have just populated the cache
+        //    cached = await _permissionCache.GetPermissionsAsync(userId);
+        //    if (cached.Length != 0)
+        //    {
+        //        return cached;
+        //    }
+
+        //    // 4. We are the designated rebuilder
+        //    var permissions = await _userPermissionHttpClient.GetPermissionsForCurrentUser();
+        //    if (permissions.Length > 0)
+        //    {
+        //        await _permissionCache.AddPermissionsAsync(userId, permissions);
+        //    }
+
+        //    return permissions;
+        //}
+
+        //// 5. Lock busy — another instance is rebuilding; wait and serve from cache
+        //await Task.Delay(_lockRetryDelay, cancellationToken);
+        //return await _permissionCache.GetPermissionsAsync(userId);
+
+        
         var cached = await _permissionCache.GetPermissionsAsync(userId);
         if (cached.Length != 0)
         {
             return cached;
         }
 
-        // 2. Slow path — acquire per-user lock
-        using var lockHandle = await _distributedLock.TryAcquireAsync(
-            $"permissions:{userId}",
-            _lockExpiration,
-            cancellationToken);
-
-        if (lockHandle is not null)
+        // 4. We are the designated rebuilder
+        var permissions = await _userPermissionHttpClient.GetPermissionsForCurrentUser();
+        if (permissions.Length > 0)
         {
-            // 3. Double-check: another instance may have just populated the cache
-            cached = await _permissionCache.GetPermissionsAsync(userId);
-            if (cached.Length != 0)
-            {
-                return cached;
-            }
-
-            // 4. We are the designated rebuilder
-            var permissions = await _userPermissionHttpClient.GetPermissionsForCurrentUser();
-            if (permissions.Length > 0)
-            {
-                await _permissionCache.AddPermissionsAsync(userId, permissions);
-            }
-
-            return permissions;
+            await _permissionCache.AddPermissionsAsync(userId, permissions);
         }
 
-        // 5. Lock busy — another instance is rebuilding; wait and serve from cache
-        await Task.Delay(_lockRetryDelay, cancellationToken);
-        return await _permissionCache.GetPermissionsAsync(userId);
+        return permissions;
     }
 }
