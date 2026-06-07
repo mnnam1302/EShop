@@ -8,11 +8,10 @@ namespace EShop.Inventory.Domain.Aggregates;
 public class Reservation : AggregateRoot<Guid>, IScoped, IDateTracking
 {
     public required Guid OrderId { get; set; }
-    public required Guid VariantId { get; set; }
-    public required int Quantity { get; set; }
 
     [MaxLength(ModelConstants.ShortText)]
     public required string Status { get; set; }
+
     public required DateTimeOffset ExpiresAt { get; set; }
     public DateTimeOffset? ReleasedAtUtc { get; set; }
     public DateTimeOffset CreatedAtUtc { get; set; }
@@ -24,15 +23,13 @@ public class Reservation : AggregateRoot<Guid>, IScoped, IDateTracking
     [MaxLength(ModelConstants.VeryLongText)]
     public required string Scope { get; set; }
 
-    public static Reservation Create(Guid orderId, Guid variantId, int quantity, DateTimeOffset expiresAt, string tenantId)
+    public static Reservation Create(Guid orderId, DateTimeOffset expiresAt, string tenantId)
     {
         return new Reservation
         {
             Id = Guid.NewGuid(),
             OrderId = orderId,
-            VariantId = variantId,
-            Quantity = quantity,
-            Status = nameof(ReservationStatus.Active),
+            Status = nameof(ReservationStatus.Pending),
             ExpiresAt = expiresAt,
             CreatedAtUtc = DateTimeOffset.UtcNow,
             TenantId = tenantId,
