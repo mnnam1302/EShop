@@ -30,7 +30,7 @@ internal sealed class WarnUpStockAvailableCommandHandler : ICommandHandler<WarnU
 
         if (inventoryDetails == null)
         {
-            return Result.Failure(new Error("Inventoty.NotFound", $"Variant's inventory '{command.VariantId}' is not found."));
+            return Result.Failure(new Error("Inventory.NotFound", $"Variant's inventory '{command.VariantId}' is not found."));
         }
 
         await _stockOrderCacheService.AddStockAvailable(command.VariantId, inventoryDetails.StockAvailable);

@@ -40,6 +40,7 @@ public static class ServiceCollectionExtensions
     {
         services.AddScoped<IUnitOfWork, EFUnitOfWork<InventoryDbContext>>();
         services.AddScoped<IInventoryRepository, InventoryRepository>();
+        services.AddScoped<IReservationRepository, ReservationRepository>();
         return services;
     }
 
