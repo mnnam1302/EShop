@@ -49,7 +49,7 @@ public abstract class IdempotentConsumer<TMessage> : IConsumer<TMessage>
 
                 if (result.IsSuccess)
                 {
-                    inboxMessage.MarkAsCompleted();
+                    inboxMessage.MarkAsProccessed();
                 }
                 else
                 {

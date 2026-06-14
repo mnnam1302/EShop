@@ -1,4 +1,4 @@
-﻿using EShop.Shared.Contracts.Shared;
+using EShop.Shared.Contracts.Shared;
 using EShop.Shared.DomainTools.Entities;
 using System.ComponentModel.DataAnnotations;
 
@@ -39,9 +39,9 @@ public class InboxMessage : IExcludedFromScoping
         };
     }
 
-    public void MarkAsCompleted()
+    public void MarkAsProccessed()
     {
-        State = InboxMessageStatus.Completed;
+        State = InboxMessageStatus.Processed;
         UpdatedOnUtc = DateTimeOffset.UtcNow;
     }
 
@@ -56,6 +56,6 @@ public class InboxMessage : IExcludedFromScoping
 public static class InboxMessageStatus
 {
     public const string Pending = "Pending";
-    public const string Completed = "Completed";
+    public const string Processed = "Processed";
     public const string Failed = "Failed";
 }
