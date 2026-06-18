@@ -64,7 +64,7 @@ Reference: the EShop Anti-Patterns in the `refactor` skill.
 
 ## PR Checklist Reference
 
-See [pr-checklist.md](references/pr-checklist.md)
+See [pr-checklist.md](./pull-request-checklist.md)
 
 ## Anti-Pattern Reference
 
