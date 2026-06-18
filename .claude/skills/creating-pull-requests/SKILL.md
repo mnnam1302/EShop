@@ -37,7 +37,7 @@ Retrieve git changes between current branch and master branch. Use changes as co
 
 ## Step 3: Generate PR description
 
-Use [pull_request_template.md](/pull_request_template.md) as structure template.
+Use [pull_request_template.md](../../../.github/pull_request_template.md) as structure template.
 
 **Fill template sections:**
 
