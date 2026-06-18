@@ -12,14 +12,14 @@
 ### All services
 - <TODO: changes for all services if any>
 
-### Compliance/Configuration/Documents/Finance/Pricing/Sales/Tenancy/Users/Motor Registry/Migration/Reinsurance
+### Tenancy/Authorization/Catalog/Inventory/Order
 - <TODO: service changes if any; mention key files; consider adding a comment to highlight important changes>
 
 ## AC verification
 <TODO: Please describe how the changes are fulfilling the Acceptance Criteria. Provide screen recordings (or a link to them),
 relevant log entries, BDD scenarios or simply a short explanation on how we can confirm everything is working as expected.>
 
-## Please consider [checklist v24 (Updated 17/06/25)](Docs/PullRequest-CheckList.md):
+## Please consider [pull request checklist (Updated 19/06/26)](../.claude/skills//review-pull-requests/pull-request-checklist.md):
 (Please add notes on **how** each aspect has been addressed to help reviewer accept the item)
 - [ ] CPS001 Backward-compatible data access (DB Schema/Domain Events/background jobs/side-by-side) - TODO
 - [ ] CPS002 Safe EF migrations (separate PR; max length and indexes) - TODO
