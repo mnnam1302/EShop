@@ -17,7 +17,10 @@ public sealed class MakeReservationConsumer(IMediator mediator) : IConsumer<Make
             {
                 VariantId = x.VariantId,
                 Quantity = x.Quantity,
-            }).ToList()
+            }).ToList(),
+            TenantId = message.TenantId,
+            ActionUserId = message.ActionUserId,
+            ActionUserType = message.ActionUserType
         };
 
         await mediator.SendAsync(command, context.CancellationToken);

@@ -1,13 +1,12 @@
 using EShop.Inventory.Application.Services;
 using EShop.Inventory.Domain.Abstractions;
 using EShop.Inventory.Domain.Commands;
-using EShop.Shared.Authentication;
-using EShop.Shared.Authentication.Abstractions;
 using EShop.Shared.Contracts.Abstractions.MessageBus;
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.Contracts.Services.Inventory;
 using EShop.Shared.CQRS.Command;
 using EShop.Shared.DomainTools.UnitOfWorks;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace EShop.Inventory.Application.UseCases.Inventories;
@@ -16,13 +15,13 @@ internal sealed class ReserveStocksCommandHandler(
     IStockOrderCacheService stockOrderCacheService,
     IInventoryRepository inventoryRepository,
     IUnitOfWork unitOfWork,
-    IUserDetailsProvider userDetailsProvider,
     IEventBus eventBus,
     ILogger<ReserveStocksCommandHandler> logger) : ICommandHandler<ReserveStocksCommand>
 {
+    private const int MaxConcurrencyRetries = 3;
+
     public async Task<Result> HandleAsync(ReserveStocksCommand command, CancellationToken cancellationToken)
     {
-        var authenticatedUser = userDetailsProvider.AuthenticatedUser;
         var lockedCacheItems = new List<(Guid VariantId, int Quantity)>();
 
         // =========================================================================
@@ -30,16 +29,15 @@ internal sealed class ReserveStocksCommandHandler(
         // =========================================================================
         foreach (var item in command.Items)
         {
-            // Case 1: Cache Miss
             int redisResult = await stockOrderCacheService.DecreaseStockCacheByLUA(item.VariantId, item.Quantity);
             if (redisResult == -1)
             {
-                logger.LogInformation("StockDeduction: cache miss for variant '{VariantId}', warming up...", item.VariantId);
+                logger.LogInformation("StockReservation: cache miss for variant '{VariantId}', warming up...", item.VariantId);
 
                 var warnedResult = await WarnStockToRedisAsync(item, cancellationToken);
                 if (warnedResult.IsFailure)
                 {
-                    await PublishFailedEventAsync(command.OrderId, warnedResult.Error, authenticatedUser, cancellationToken);
+                    await PublishFailedEventAsync(command, warnedResult.Error, cancellationToken);
                     await RollbackCacheOnlyAsync(lockedCacheItems);
                     return warnedResult;
                 }
@@ -47,20 +45,16 @@ internal sealed class ReserveStocksCommandHandler(
                 redisResult = await stockOrderCacheService.DecreaseStockCacheByLUA(item.VariantId, item.Quantity);
             }
 
-            // Case 2: Out of Stock
             if (redisResult == 0)
             {
-                logger.LogWarning("StockDeduction: stock available < quantity for variant '{VariantId}'", item.VariantId);
+                logger.LogWarning("StockReservation: insufficient stock for variant '{VariantId}'", item.VariantId);
 
-                var error = new Error("Inventory.StockDeduction", $"Product '{item.VariantId}' is out of stock.");
-                await PublishFailedEventAsync(command.OrderId, error, authenticatedUser, cancellationToken);
-
-                // Compensate and release previously locked item stock back to the public pool
+                var error = new Error("Inventory.StockReservation", $"Product '{item.VariantId}' is out of stock.");
+                await PublishFailedEventAsync(command, error, cancellationToken);
                 await RollbackCacheOnlyAsync(lockedCacheItems);
                 return Result.Failure(error);
             }
 
-            // Case 3: Success
             if (redisResult == 1)
             {
                 lockedCacheItems.Add((item.VariantId, item.Quantity));
@@ -68,27 +62,50 @@ internal sealed class ReserveStocksCommandHandler(
         }
 
         // =========================================================================
-        // PHASE 2: PERSISTENCE STATE & RELATIONAL ATOMICITY (POSTGRES DB GATES)
+        // PHASE 2: PERSISTENCE WITH OPTIMISTIC LOCKING (RETRYABLE)
         // =========================================================================
-        foreach (var item in command.Items)
+        var retryCount = 0;
+        while (retryCount < MaxConcurrencyRetries)
         {
-            await inventoryRepository.DecreaseStockLevel1(item.VariantId, item.Quantity, cancellationToken);
+            try
+            {
+                foreach (var item in command.Items)
+                {
+                    await inventoryRepository.DecreaseStockLevel1(item.VariantId, item.Quantity, cancellationToken);
+                }
+
+                await unitOfWork.SaveChangesAsync(cancellationToken);
+                break;
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                retryCount++;
+                if (retryCount >= MaxConcurrencyRetries)
+                {
+                    logger.LogError("StockReservation: Concurrency conflict after {Retries} retries for Order {OrderId}", retryCount, command.OrderId);
+                    var error = new Error("Inventory.StockReservation.Conflict", "Failed to reserve stock due to concurrent modifications.");
+                    await PublishFailedEventAsync(command, error, cancellationToken);
+                    await RollbackCacheOnlyAsync(lockedCacheItems);
+                    return Result.Failure(error);
+                }
+
+                logger.LogWarning("StockReservation: Concurrency conflict (attempt {Attempt}/{Max}), retrying for Order {OrderId}", retryCount, MaxConcurrencyRetries, command.OrderId);
+                await Task.Delay(100 * retryCount, cancellationToken);
+            }
         }
 
-        await unitOfWork.SaveChangesAsync(cancellationToken);
-
         // =========================================================================
-        // PHASE 3: INTEGRATION EVENT DISPATCHING (HAPPY PATH OUTBOX/PUBLISH)
+        // PHASE 3: INTEGRATION EVENT DISPATCHING
         // =========================================================================
         await eventBus.PublishAsync(new StockReserved
         {
             OrderId = command.OrderId,
-            TenantId = authenticatedUser.TenantId,
-            ActionUserId = authenticatedUser.ActionUserId,
-            ActionUserType = authenticatedUser.ActionUserType
+            TenantId = command.TenantId,
+            ActionUserId = command.ActionUserId,
+            ActionUserType = command.ActionUserType
         }, cancellationToken);
 
-        logger.LogInformation("StockDeduction: Successfully reserved stock for Order {OrderId}", command.OrderId);
+        logger.LogInformation("StockReservation: Successfully reserved stock for Order {OrderId}", command.OrderId);
         return Result.Success();
     }
 
@@ -107,19 +124,19 @@ internal sealed class ReserveStocksCommandHandler(
         return Result.Success();
     }
 
-    private async Task PublishFailedEventAsync(Guid orderId, Error error, UserData authenticatedUser, CancellationToken cancellationToken)
+    private async Task PublishFailedEventAsync(ReserveStocksCommand command, Error error, CancellationToken cancellationToken)
     {
         var failedEvent = new StockReservationFailed
         {
-            OrderId = orderId,
+            OrderId = command.OrderId,
             FailureReason = error.Message,
-            TenantId = authenticatedUser.TenantId,
-            ActionUserId = authenticatedUser.ActionUserId,
-            ActionUserType = authenticatedUser.ActionUserType
+            TenantId = command.TenantId,
+            ActionUserId = command.ActionUserId,
+            ActionUserType = command.ActionUserType
         };
 
         await eventBus.PublishAsync(failedEvent, cancellationToken);
-        logger.LogInformation("Published StockReservationFailed for Order: {OrderId}. Reason: {Reason}", orderId, error.Message);
+        logger.LogInformation("Published StockReservationFailed for Order: {OrderId}. Reason: {Reason}", command.OrderId, error.Message);
     }
 
     private async Task RollbackCacheOnlyAsync(List<(Guid VariantId, int Quantity)> itemsToRollback)

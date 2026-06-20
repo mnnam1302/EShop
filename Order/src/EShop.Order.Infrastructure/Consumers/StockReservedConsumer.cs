@@ -1,41 +1,33 @@
+using EShop.Order.Domain.Sagas;
 using EShop.Shared.Contracts.Services.Inventory;
+using EShop.Shared.DomainTools.Sagas.AggregateSagas;
 using MassTransit;
 using Microsoft.Extensions.Logging;
 
 namespace EShop.Order.Infrastructure.Consumers;
 
-/// <summary>
-/// Receives <see cref="StockReserved"/> from Inventory and advances the saga to
-/// AwaitingOrderPersistence, sending <c>PersistOrderCommand</c> to the write side.
-/// </summary>
 internal sealed class StockReservedConsumer(
+    IAggregateSagaStore aggregateSagaStore,
     ILogger<StockReservedConsumer> logger) : IConsumer<StockReserved>
 {
     public async Task Consume(ConsumeContext<StockReserved> context)
     {
-        var msg = context.Message;
+        var message = context.Message;
+        var sagaId = OrderSagaId.FromOrderId(message.OrderId).GetGuid();
 
-        //var state = await repository.FindAsync(msg.OrderId, context.CancellationToken);
+        logger.LogInformation("StockReservedConsumer: Processing for Order {OrderId}, Saga {SagaId}", message.OrderId, sagaId);
 
-        //if (state is null)
-        //{
-        //    logger.LogWarning("StockReserved for unknown Order {OrderId} — discarding.", msg.OrderId);
-        //    return;
-        //}
+        var saga = await aggregateSagaStore.LoadAggregateSagaAsync<OrderSaga>(sagaId, context.CancellationToken);
 
-        //var result = orchestrator.OnStockReserved(state, msg);
+        if (saga.IsNew)
+        {
+            logger.LogWarning("StockReservedConsumer: Saga not found for Order {OrderId}", message.OrderId);
+            return;
+        }
 
-        //if (!result.Transitioned)
-        //{
-        //    logger.LogWarning("StockReserved for Order {OrderId} ignored — already in state {State}.", msg.OrderId, state.CurrentState);
-        //    return;
-        //}
+        saga.HandleAsync(message);
+        await aggregateSagaStore.UpdateAggregateSagaAsync(saga, context.CancellationToken);
 
-        //await repository.SaveChangeAsync(state, context.CancellationToken);
-
-        //foreach (var cmd in result.Commands)
-        //    await context.Publish(cmd, cmd.GetType(), context.CancellationToken);
-
-        //logger.LogInformation("Order {OrderId} saga → {State}.", msg.OrderId, state.CurrentState);
+        logger.LogInformation("StockReservedConsumer: Saga advanced for Order {OrderId}", message.OrderId);
     }
 }
