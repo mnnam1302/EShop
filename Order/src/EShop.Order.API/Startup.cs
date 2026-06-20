@@ -1,4 +1,4 @@
-﻿using EShop.Order.API.DependencyInjection;
+using EShop.Order.API.DependencyInjection;
 using EShop.Order.Application.DependencyInjections;
 using EShop.Order.Infrastructure.DependencyInjection;
 using EShop.Shared.JsonApi.Middlewares;
@@ -15,8 +15,8 @@ public class Startup(IConfiguration configuration, IWebHostEnvironment environme
         services
             .AddOrderAPI()
             .AddOrderApplication()
-            .AddOrderPersistence()
-            .AddOrderInfrastructure();
+            .AddOrderPersistence(Configuration, Environment)
+            .AddOrderInfrastructure(Configuration);
     }
 
     public void Configure(WebApplication app, IHostApplicationLifetime applicationLifetime, ILoggerFactory loggerFactory)
@@ -31,5 +31,7 @@ public class Startup(IConfiguration configuration, IWebHostEnvironment environme
         }
 
         app.UseRouting();
+
+        app.MapEndpoints();
     }
 }

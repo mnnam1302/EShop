@@ -1,10 +1,11 @@
-﻿using EShop.Shared.Authentication.Abstractions;
+using EShop.Shared.Authentication.Abstractions;
+using EShop.Shared.Contracts.Abstractions.Mediator;
+using EShop.Shared.Contracts.Abstractions.MessageBus;
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.Contracts.Services.Tenancy.Features;
 using EShop.Shared.CQRS.Command;
 using EShop.Shared.DomainTools.Exceptions;
 using EShop.Shared.DomainTools.UnitOfWorks;
-using EShop.Shared.EventBus.Abstractions;
 using EShop.Tenancy.Domain.Repositories;
 
 namespace EShop.Tenancy.Application.UseCases.V1.Commands.Tenants;

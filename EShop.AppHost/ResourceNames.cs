@@ -1,4 +1,4 @@
-﻿namespace EShop.AppHost;
+namespace EShop.AppHost;
 
 public static class ResourceNames
 {
@@ -23,4 +23,5 @@ public static class ResourceNames
     public const string CatalogSearchApi = "catalog-search";
 
     public const string InventoryApi = "inventory";
+    public const string OrderApi = "order";
 }

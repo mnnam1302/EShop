@@ -1,5 +1,6 @@
 using EShop.Inventory.API.Models;
-using EShop.Inventory.Application.UseCases.Inventory;
+using EShop.Inventory.Application.UseCases.Inventories;
+using EShop.Inventory.Domain.Commands;
 using EShop.Shared.Contracts.Abstractions.Pagination;
 using EShop.Shared.CQRS;
 using EShop.Shared.JsonApi.Abstractions;
@@ -15,21 +16,50 @@ public static class InventoryApis
 
     public static IEndpointRouteBuilder MapInventoryEndpoints(this IEndpointRouteBuilder routerBuilder)
     {
-        var inventoryEndpointsV1 = routerBuilder
+        var endpointsV1 = routerBuilder
             .NewVersionedApi("Inventory")
             .MapGroup(_baseUrl)
             .HasApiVersion(1)
             .RequireFeatureFilter(FeatureConstants.Inventory.InventoryManagement);
 
-        inventoryEndpointsV1
+        endpointsV1
             .MapPost("", CreateInventoriesV1Async)
             .RequirePermissionFilter(PermissionConstants.Inventory.ManageInventory);
 
-        inventoryEndpointsV1
+        endpointsV1
             .MapGet("", GetInventoriesByProductIdV1Async)
             .RequireOneOfPermissionsFilter(PermissionConstants.Inventory.ViewInventory, PermissionConstants.Inventory.ManageInventory);
 
+        endpointsV1
+            .MapPatch("", WarnUpStockInventoryV1Async)
+            .RequirePermissionFilter(PermissionConstants.Inventory.ManageInventory);
+
+        endpointsV1
+            .MapPut("", ReserveStocksAsyncV1)
+            .RequirePermissionFilter(PermissionConstants.Inventory.ManageInventory);
+
         return routerBuilder;
+    }
+
+    private static async Task<IResult> ReserveStocksAsyncV1(
+        [FromBody] CreateReservationRequest request,
+        [FromServices] IMediator mediator,
+         CancellationToken cancellationToken)
+    {
+        var command = new ReserveStocksCommand
+        {
+            OrderId = request.OrderId ?? Guid.NewGuid(),
+            Items = request.Items
+        };
+
+        var result = await mediator.SendAsync(command, cancellationToken);
+
+        if (result.IsFailure)
+        {
+            return ApiEndpointHandler.Failure(result);
+        }
+
+        return Results.Created("", result);
     }
 
     private static async Task<IResult> GetInventoriesByProductIdV1Async(
@@ -75,5 +105,25 @@ public static class InventoryApis
         }
 
         return Results.Created("", result);
+    }
+
+    private static async Task<IResult> WarnUpStockInventoryV1Async(
+        [FromBody] WarnUpStockAvailableRequest request,
+        [FromServices] IMediator mediator,
+        CancellationToken cancellationToken)
+    {
+        var command = new WarnUpStockAvailableCommand
+        {
+            VariantId = request.VariantId
+        };
+
+        var result = await mediator.SendAsync(command, cancellationToken);
+
+        if (result.IsFailure)
+        {
+            return ApiEndpointHandler.Failure(result);
+        }
+
+        return Results.Accepted();
     }
 }

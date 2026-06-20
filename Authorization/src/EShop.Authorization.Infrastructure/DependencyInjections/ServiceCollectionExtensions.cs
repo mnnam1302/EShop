@@ -1,18 +1,15 @@
 using EShop.Authorization.Application.Abstractions;
 using EShop.Authorization.Domain.Repositories;
-using EShop.Authorization.Infrastructure.Consumers;
 using EShop.Authorization.Infrastructure.EmailServices;
 using EShop.Authorization.Infrastructure.Producers;
 using EShop.Authorization.Infrastructure.Repositories;
 using EShop.Shared.Authentication.Filters;
 using EShop.Shared.Cache.DependencyInejctions.Extensions;
+using EShop.Shared.Contracts.Abstractions.MessageBus;
 using EShop.Shared.Contracts.JsonConverters;
-using EShop.Shared.Contracts.Services.Authorization;
-using EShop.Shared.Contracts.Services.Tenancy.Tenants;
 using EShop.Shared.Diagnostics;
 using EShop.Shared.DomainTools.UnitOfWorks;
 using EShop.Shared.EventBus;
-using EShop.Shared.EventBus.Abstractions;
 using EShop.Shared.EventBus.DependencyInjections.Extensions;
 using EShop.Shared.EventBus.DependencyInjections.Options;
 using EShop.Shared.EventBus.PipelineObservers;
@@ -55,7 +52,8 @@ public static class ServiceCollectionExtensions
 
     public static IServiceCollection AddAuthorizationInfrastructure(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment)
     {
-        services.AddEventBus()
+        services
+            .AddEventBus()
             .AddMasstransitRabbitMQ(configuration, environment)
             .AddProducers();
 
@@ -64,12 +62,6 @@ public static class ServiceCollectionExtensions
 
         services.AddEmailServices(configuration);
 
-        return services;
-    }
-
-    public static IServiceCollection AddEventBus(this IServiceCollection services)
-    {
-        services.AddScoped<IEventBus, EventBus>();
         return services;
     }
 

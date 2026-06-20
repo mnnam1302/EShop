@@ -59,6 +59,7 @@ public static class ExternalServiceRegistrationExtensions
         IResourceBuilder<IResourceWithConnectionString> catalogDatabase;
         IResourceBuilder<IResourceWithConnectionString> catalogMongoDatabase;
         IResourceBuilder<IResourceWithConnectionString> inventoryDatabase;
+        IResourceBuilder<IResourceWithConnectionString> orderDatabase;
 
         if (useExternalService)
         {
@@ -72,6 +73,8 @@ public static class ExternalServiceRegistrationExtensions
             catalogDatabase = builder.AddConnectionString("catalogDatabase")
                 .WithParentRelationship(postgresServer);
             inventoryDatabase = builder.AddConnectionString("inventoryDatabase")
+                .WithParentRelationship(postgresServer);
+            orderDatabase = builder.AddConnectionString("orderDatabase")
                 .WithParentRelationship(postgresServer);
 
             catalogMongoDatabase = builder.AddConnectionString("catalogMongoDatabase")
@@ -101,6 +104,7 @@ public static class ExternalServiceRegistrationExtensions
             authorizationDatabase = postgres.AddDatabase("authorizationDatabase", "eshop_authorization");
             catalogDatabase = postgres.AddDatabase("catalogDatabase", "eshop_catalog");
             inventoryDatabase = postgres.AddDatabase("inventoryDatabase", "eshop_inventory");
+            orderDatabase = postgres.AddDatabase("orderDatabase", "eshop_order");
             catalogMongoDatabase = mongodb.AddDatabase("catalogMongoDatabase", "eshop-catalog");
         }
 
@@ -180,7 +184,19 @@ public static class ExternalServiceRegistrationExtensions
                 .WaitFor(rabbitmq);
         }
 
-        //builder.AddProject<Projects.EShop_Order_API>("eshop-order-api");
+        var order = builder.AddProject<Projects.EShop_Order_API>(ResourceNames.OrderApi)
+            .WithExternalServiceMode(useExternalService)
+            .WithReference(orderDatabase)
+            .WithReference(redis)
+            .WithReference(rabbitmq);
+
+        if (!useExternalService)
+        {
+            order
+                .WaitFor(orderDatabase)
+                .WaitFor(redis)
+                .WaitFor(rabbitmq);
+        }
 
         #endregion Microservices
 

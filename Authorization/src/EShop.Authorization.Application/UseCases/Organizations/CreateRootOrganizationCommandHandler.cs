@@ -1,5 +1,6 @@
-﻿using EShop.Authorization.Domain.Repositories;
+using EShop.Authorization.Domain.Repositories;
 using EShop.Authorization.Domain.Services;
+using EShop.Shared.Contracts.Abstractions.Mediator;
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.CQRS.Command;
 using EShop.Shared.DomainTools.UnitOfWorks;

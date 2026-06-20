@@ -1,8 +1,9 @@
-﻿using EShop.Shared.Authentication;
+using EShop.Shared.Authentication;
 using EShop.Shared.Contracts.Services.Tenancy.Tenants;
 using EShop.Shared.DomainTools.Aggregates;
 using EShop.Shared.DomainTools.Entities;
 using EShop.Shared.DomainTools.Exceptions;
+using EShop.Tenancy.Domain.Commands;
 using System.ComponentModel.DataAnnotations;
 
 namespace EShop.Tenancy.Domain.Entities;
@@ -46,7 +47,7 @@ public class Tenant : AggregateRoot<string>, IExcludedFromScoping
         return tenant;
     }
 
-    public static Tenant Create(Command.CreateTenantCommand command)
+    public static Tenant Create(CreateTenantCommand command)
     {
         AssertTenant(command);
 
@@ -65,7 +66,7 @@ public class Tenant : AggregateRoot<string>, IExcludedFromScoping
         return tenant;
     }
 
-    private static void AssertTenant(Command.CreateTenantCommand command)
+    private static void AssertTenant(CreateTenantCommand command)
     {
         // TODO: TenantId should value object contains domain invariants
         AssertTenantId(command.Id);

@@ -29,6 +29,11 @@ public class FeatureConstants
     {
         public const string InventoryManagement = "Inventory_InventoryManagement";
     }
+
+    public static class Order
+    {
+        public const string OrderManagement = "Order_OrderManagement";
+    }
 }
 
 public enum FeatureModules

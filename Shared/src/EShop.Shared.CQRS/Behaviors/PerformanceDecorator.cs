@@ -1,4 +1,5 @@
-﻿using EShop.Shared.Contracts.Abstractions.Shared;
+using EShop.Shared.Contracts.Abstractions.Mediator;
+using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.CQRS.Command;
 using EShop.Shared.CQRS.Query;
 using Microsoft.Extensions.Logging;
@@ -37,7 +38,7 @@ internal static class PerformanceDecorator
             }
 
             var requestName = typeof(TQuery).Name;
-            _logger.LogWarning("Long Time Running: Request Details: {Name} ({ElapsedMilliseconds} milliseconds)", requestName, elapsedMilliseconds);
+            _logger.LogDebug("Long Time Running: Request Details: {Name} ({ElapsedMilliseconds} milliseconds)", requestName, elapsedMilliseconds);
 
             return result;
         }
@@ -72,7 +73,7 @@ internal static class PerformanceDecorator
             }
 
             var requestName = typeof(TCommand).Name;
-            _logger.LogWarning("Long Time Running: Request Details: {Name} ({ElapsedMilliseconds} milliseconds)", requestName, elapsedMilliseconds);
+            _logger.LogDebug("Long Time Running: Request Details: {Name} ({ElapsedMilliseconds} milliseconds)", requestName, elapsedMilliseconds);
 
             return result;
         }
@@ -108,7 +109,7 @@ internal static class PerformanceDecorator
             }
 
             var requestName = typeof(TCommand).Name;
-            _logger.LogWarning("Long Time Running: Request Details: {Name} ({ElapsedMilliseconds} milliseconds)", requestName, elapsedMilliseconds);
+            _logger.LogDebug("Long Time Running: Request Details: {Name} ({ElapsedMilliseconds} milliseconds)", requestName, elapsedMilliseconds);
 
             return result;
         }

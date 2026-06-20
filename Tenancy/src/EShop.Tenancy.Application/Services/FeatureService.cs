@@ -1,7 +1,7 @@
-﻿using EShop.Shared.Authentication.Abstractions;
+using EShop.Shared.Authentication.Abstractions;
+using EShop.Shared.Contracts.Abstractions.MessageBus;
 using EShop.Shared.Contracts.Services.Tenancy.Features;
 using EShop.Shared.DomainTools.Exceptions;
-using EShop.Shared.EventBus.Abstractions;
 using EShop.Shared.Scoping.ResourceAccessControl;
 using EShop.Tenancy.Domain.Entities;
 using EShop.Tenancy.Domain.Repositories;

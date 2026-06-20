@@ -1,6 +1,61 @@
-@EShop.Order.API_HostAddress = http://localhost:5034
+@Authorization_URL = http://localhost:5002
+@Catalog_URL = http://localhost:5004
+@Inventory_URL = http://localhost:5042
+@Order_URL = http://localhost:5050
 
-GET {{EShop.Order.API_HostAddress}}/weatherforecast/
-Accept: application/json
+
+# ============================================
+# AUTHENTICATION
+# ============================================
+
+POST {{Authorization_URL}}/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "username": "owner-account@eshop-staging",
+  "password": "owner.eshop-staing-123"
+}
 
 ###
+
+# Extract the access token from login response
+# After running the login request above, copy the accessToken value and paste it below
+@accessToken = eyJhbGciOiJSUzI1NiIsImtpZCI6IjMzY2U1NDRjLWMyYmQtNDZiYy04N2IwLTRlMjc2YTAyMTQ0NCIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI5ZmJiMWNlYS0yMDQ5LTQyNjUtYjMwZS0wODk4MTRjY2Q2ZDUiLCJzdWIiOiJvd25lci1hY2NvdW50QGVzaG9wLXN0YWdpbmciLCJ0ZW5hbnRfaWQiOiJlc2hvcC1zdGFnaW5nIiwia2V5X2lkIjoiMzNjZTU0NGMtYzJiZC00NmJjLTg3YjAtNGUyNzZhMDIxNDQ0IiwibmJmIjoxNzgwNTA5NjM2LCJleHAiOjE3ODA1MTMyMzUsImlhdCI6MTc4MDUwOTYzNiwiaXNzIjoiaHR0cDovL2F1dGhvcml6YXRpb24iLCJhdWQiOiJodHRwOi8vYXV0aG9yaXphdGlvbiJ9.A2eECyPXgBpxjCLsh8Dq5R-OpQWfqhNOy-LZR_8BYe4aZ1hk1SHFtW_wlXMtW-y9n2oD5HhD0r9L47gfe7JMMtzgwgNoVaGMDKe_ciVY4a6mqLdXjRRamlOMP2s-07OKPKsQ3ttbrysZ6nNCWRd9m1PnPbJtP1tJLixsuW2XYoG1Tv3-6XDkjWtExh0aW3XIo3zAfYyQrNvwz3TL4we5Cx0_wW0_alXucA0c-CkvlsJ2r3Ye1doiJrlTojteCDDpBQspMLNvK9VcAUz0CCJRs1EEi8xD6E7tRcURsfGPGB_3Y5ST2Sd4_g0BjqAmUNEeMZZVjn_9UIsKf9hwfQ6tow
+
+###
+
+
+# ============================================
+# CATALOG API ENDPOINTS
+# ============================================
+
+# Get Product by ID (Requires Authentication)
+GET {{Catalog_URL}}/api/v1/products
+Content-Type: application/vnd.api+json
+Authorization: Bearer {{accessToken}}
+
+###
+
+# ============================================
+# ORDER API ENDPOINTS
+# ============================================
+
+# Create Order (Requires Authentication)
+POST {{Order_URL}}/api/v1/orders
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "buyerId": "customer-test1",
+  "orderItems": [
+    {
+      "variantId": "01957eea-c993-714f-bf4a-ca767716031d",
+      "quantity": 10,
+      "unitPrice": 990,
+      "discount": 0
+    }
+  ]
+}
+
+###
+

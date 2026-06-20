@@ -4,6 +4,10 @@
     <PackageReference Include="Asp.Versioning.Http" />
     <PackageReference Include="Asp.Versioning.Mvc.ApiExplorer" />
     <PackageReference Include="MicroElements.Swashbuckle.FluentValidation" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Swashbuckle.AspNetCore" />
     <PackageReference Include="Swashbuckle.AspNetCore.Newtonsoft" />
   </ItemGroup>
@@ -14,6 +18,10 @@
     <ProjectReference Include="..\EShop.Order.Application\EShop.Order.Application.csproj" />
     <ProjectReference Include="..\EShop.Order.Domain\EShop.Order.Domain.csproj" />
     <ProjectReference Include="..\EShop.Order.Infrastructure\EShop.Order.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Models\Validators\" />
   </ItemGroup>
 
 </Project>

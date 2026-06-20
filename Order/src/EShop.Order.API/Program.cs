@@ -1,23 +1,27 @@
-using EShop.Order.API;
+using EShop.Order.Infrastructure;
+using EShop.Shared.Diagnostics;
 using Serilog;
 
 namespace EShop.Order.API;
 
-internal class Program
+internal static class Program
 {
     private const int ShutdownTimeoutInSeconds = 90;
     internal const string ApplicationName = "Order";
 
     public static async Task<int> Main(string[] args)
     {
-        Log.Information("Initilizing {ApplicationName} ....", ApplicationName);
+        Logging.SetSerilog(ApplicationName);
+
         try
         {
+            Log.Information("Initilizing {ApplicationName} ....", ApplicationName);
+
             var app = BuidlWebApp(args);
             await using (var scope = app.Services.CreateAsyncScope())
             {
-                //var dbInitializer = ActivatorUtilities.CreateInstance<DbInitializer>(scope.ServiceProvider);
-                //await dbInitializer.Initialize();
+                var dbInitializer = ActivatorUtilities.CreateInstance<DbInitializer>(scope.ServiceProvider);
+                await dbInitializer.Initialize();
             }
 
             Log.Information("Starting up {ApplicationName}...", ApplicationName);

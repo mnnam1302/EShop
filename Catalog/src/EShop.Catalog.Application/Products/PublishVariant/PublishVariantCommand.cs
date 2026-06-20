@@ -1,9 +1,10 @@
 using EShop.Shared.Authentication.Abstractions;
+using EShop.Shared.Contracts.Abstractions.Mediator;
+using EShop.Shared.Contracts.Abstractions.MessageBus;
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.Contracts.Services.Catalog;
 using EShop.Shared.CQRS.Command;
 using EShop.Shared.DomainTools.EventSourcing.SeedWork;
-using EShop.Shared.EventBus.Abstractions;
 
 namespace EShop.Catalog.Application.Products.PublishVariant;
 

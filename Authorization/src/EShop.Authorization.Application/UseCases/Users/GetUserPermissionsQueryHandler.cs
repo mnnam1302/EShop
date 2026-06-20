@@ -1,4 +1,5 @@
-﻿using EShop.Authorization.Domain.Constants;
+using EShop.Authorization.Domain.Constants;
+using EShop.Shared.Contracts.Abstractions.Mediator;
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.CQRS.Query;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers.UserPermissionProvider;

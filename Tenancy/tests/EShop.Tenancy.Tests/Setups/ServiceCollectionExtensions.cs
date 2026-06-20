@@ -1,4 +1,4 @@
-﻿using Carter;
+using Carter;
 using EShop.Shared.Authentication.DependencyInjections;
 using EShop.Shared.Cache.DependencyInejctions.Extensions;
 using EShop.Shared.Contracts.JsonConverters;
@@ -68,7 +68,6 @@ public static class ServiceCollectionExtensions
 
     private static IServiceCollection AddTestTenancyApplication(this IServiceCollection services)
     {
-        services.AddMediatR();
         services.AddMediator(Application.AssemblyReference.Assembly);
 
         services.AddScoped<IPermissionValidator, CurrentUserPermissionsValidator>();

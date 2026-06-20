@@ -1,4 +1,4 @@
-﻿using EShop.Shared.Contracts.Abstractions.MessageBus;
+using EShop.Shared.Contracts.Abstractions.MessageBus;
 using EShop.Shared.DomainTools.Entities;
 using System.Text.Json.Serialization;
 
@@ -19,6 +19,8 @@ public abstract class Aggregate : IAggregate
 
     public Guid Id { get; set; }
     public ulong Version { get; private set; }
+
+    public virtual bool IsNew => Version <= 0;
 
     [JsonIgnore]
     public IEnumerable<IDomainEvent> UncommittedEvents => _uncommittedEvents.AsReadOnly();

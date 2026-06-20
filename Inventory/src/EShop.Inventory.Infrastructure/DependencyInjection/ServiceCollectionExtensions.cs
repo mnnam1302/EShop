@@ -1,6 +1,8 @@
+using EShop.Inventory.Application.Services;
 using EShop.Inventory.Domain.Abstractions;
 using EShop.Inventory.Infrastructure.Producers;
 using EShop.Inventory.Infrastructure.Repositories;
+using EShop.Inventory.Infrastructure.Services;
 using EShop.Shared.Authentication.Filters;
 using EShop.Shared.Cache.DependencyInejctions.Extensions;
 using EShop.Shared.Contracts.JsonConverters;
@@ -38,19 +40,50 @@ public static class ServiceCollectionExtensions
     {
         services.AddScoped<IUnitOfWork, EFUnitOfWork<InventoryDbContext>>();
         services.AddScoped<IInventoryRepository, InventoryRepository>();
+        services.AddScoped<IReservationRepository, ReservationRepository>();
         return services;
     }
 
     public static IServiceCollection AddInventoryInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
         services
-            .AddRedis(configuration)
             .AddEventBus()
             .AddMasstransitRabbitMQ(configuration)
             .AddFeaturesAndPermissionsService();
 
+        services.AddRedis(configuration)
+            .AddStockCacheService();
+        //.AddInventoryBackgroundJobs(configuration);
+
         return services;
     }
+
+    //private static IServiceCollection AddRedisStockGateway(this IServiceCollection services)
+    //{
+    //    services.AddSingleton<IRedisStockGateway, RedisStockGateway>();
+    //    services.AddHostedService<RedisStockInitializer>();
+    //    return services;
+    //}
+
+    //private static IServiceCollection AddInventoryBackgroundJobs(
+    //    this IServiceCollection services,
+    //    IConfiguration configuration)
+    //{
+    //    var connectionString = configuration.GetConnectionString("Default")!;
+
+    //    services.AddHangfire(cfg => cfg
+    //        .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+    //        .UseSimpleAssemblyNameTypeSerializer()
+    //        .UseRecommendedSerializerSettings()
+    //        .UsePostgreSqlStorage(opt => opt.UseNpgsqlConnection(connectionString)));
+
+    //    services.AddHangfireServer();
+
+    //    services.AddScoped<ExpireReservationsJob>();
+    //    services.AddScoped<SyncRedisStockJob>();
+
+    //    return services;
+    //}
 
     private static IServiceCollection AddRedis(this IServiceCollection services, IConfiguration configuration)
     {
@@ -58,6 +91,12 @@ public static class ServiceCollectionExtensions
             .AddRedisHealthCheck(configuration)
             .AddRedisCacheInfrastructure(configuration);
 
+        return services;
+    }
+
+    private static IServiceCollection AddStockCacheService(this IServiceCollection services)
+    {
+        services.AddScoped<IStockOrderCacheService, StockOrderCacheService>();
         return services;
     }
 

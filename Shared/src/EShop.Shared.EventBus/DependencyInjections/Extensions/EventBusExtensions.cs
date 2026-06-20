@@ -1,4 +1,4 @@
-﻿using EShop.Shared.EventBus.Abstractions;
+using EShop.Shared.Contracts.Abstractions.MessageBus;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -9,6 +9,12 @@ public static class EventBusExtensions
     public static IServiceCollection AddEventBus(this IServiceCollection services)
     {
         services.AddScoped<IEventBus, EventBus>();
+        return services;
+    }
+
+    public static IServiceCollection AddCommandBus(this IServiceCollection services)
+    {
+        services.AddScoped<ICommandBus, CommandBus>();
         return services;
     }
 

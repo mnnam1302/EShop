@@ -5,11 +5,11 @@ using MassTransit;
 namespace EShop.Shared.Authentication.Filters;
 
 /// <summary>
-/// MassTransit consume filter that automatically sets auth context from IIntegrationEvent messages.
+/// MassTransit consume filter that automatically sets auth context from IAuditingMessage messages.
 /// Ensures SetSystemUserContext is called before consumer logic and ClearSystemUserContext is called after.
 /// </summary>
 public sealed class SystemUserContextConsumeFilter<TMessage> : IFilter<ConsumeContext<TMessage>>
-    where TMessage : class, IIntegrationEvent
+    where TMessage : class, IMessage, IAuditingMessage
 {
     private readonly IUserDetailsProvider _userDetailsProvider;
 

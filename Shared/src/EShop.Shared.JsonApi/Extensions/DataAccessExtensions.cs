@@ -1,13 +1,11 @@
-﻿using EntityFramework.Exceptions.PostgreSQL;
+using EntityFramework.Exceptions.PostgreSQL;
 using EShop.Shared.DbResourceAccessControl.Extensions;
 using EShop.Shared.DbResourceAccessControl.Interceptors;
 using EShop.Shared.DbResourceAccessControl.Options;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Npgsql.EntityFrameworkCore.PostgreSQL;
 
@@ -53,7 +51,6 @@ public static class DataAccessExtensions
                 .EnableSensitiveDataLogging()
                 .UseLazyLoadingProxies()
                 .UseNpgsql(
-                    //connectionString: configuration.GetConnectionString("DefaultConnection"),
                     connectionString: connectionString,
                     npgsqlOptionsAction: optionsBuilder => optionsBuilder
                         .SetPostgresVersion(versionOptions.CurrentValue.Major, versionOptions.CurrentValue.Minor)

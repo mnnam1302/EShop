@@ -1,12 +1,13 @@
-﻿using EShop.Shared.Authentication.Abstractions;
-using EShop.Shared.Contracts.Abstractions.Requests;
+using EShop.Shared.Authentication.Abstractions;
+using EShop.Shared.Contracts.Abstractions.MessageBus;
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.Contracts.Services.Tenancy.Tenants;
+using EShop.Shared.CQRS.Command;
 using EShop.Shared.DomainTools.Exceptions;
 using EShop.Shared.DomainTools.Extensions;
 using EShop.Shared.DomainTools.UnitOfWorks;
-using EShop.Shared.EventBus.Abstractions;
 using EShop.Shared.Scoping.ResourceAccessControl;
+using EShop.Tenancy.Domain.Commands;
 using EShop.Tenancy.Domain.Entities;
 using EShop.Tenancy.Domain.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -18,22 +19,21 @@ internal sealed class CreateTenantCommandHandler(
     IUnitOfWork unitOfWork,
     IEventBus eventBusGateway,
     IUserDetailsProvider userDetailsProvider,
-    IFeatureRepository featureRepository) : ICommandHandler<Command.CreateTenantCommand>
+    IFeatureRepository featureRepository) : ICommandHandler<CreateTenantCommand>
 {
-    public async Task<Result> Handle(Command.CreateTenantCommand request, CancellationToken cancellationToken)
+    public async Task<Result> HandleAsync(CreateTenantCommand command, CancellationToken cancellationToken)
     {
-        var existingTenant = await tenantRepository.FindSingleAsync(x => x.Id == request.Id || x.Name == request.Name);
+        var existingTenant = await tenantRepository.FindSingleAsync(x => x.Id == command.Id || x.Name == command.Name);
         if (existingTenant is not null)
         {
-            throw new BadRequestException($"Tenant with ID {request.Id} or name {request.Name} has already exists.");
+            throw new BadRequestException($"Tenant with ID {command.Id} or name {command.Name} has already exists.");
         }
 
         var operationalUser = userDetailsProvider.AuthenticatedUser;
 
-        var tenant = Tenant.Create(request);
+        var tenant = Tenant.Create(command);
         tenant.AddDefaultTenantSetting();
 
-        // TODO: can implement domain event handler to handle tenant features
         await EnsureTenantAvailableFeatures(tenant, operationalUser.ActionUserId, cancellationToken);
 
         await eventBusGateway.PublishAsync(new TenantCreated
@@ -41,7 +41,7 @@ internal sealed class CreateTenantCommandHandler(
             TenantId = tenant.Id,
             TenantName = tenant.Name,
             OwnerUsername = tenant.OwnerUsername.Require(),
-            OwnerDisplayName = tenant.Name ?? Tenant.RemoveDomainSuffix(request.OwnerUsername, tenant.Id),
+            OwnerDisplayName = tenant.Name ?? Tenant.RemoveDomainSuffix(command.OwnerUsername, tenant.Id),
             OwnerEmail = tenant.Email.Require(),
             ActionUserId = operationalUser.ActionUserId,
             ActionUserType = operationalUser.ActionUserType

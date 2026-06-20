@@ -1,3 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Shared\src\EShop.Shared.DomainTools\EShop.Shared.DomainTools.csproj" />
+    <ProjectReference Include="..\..\..\Shared\src\EShop.Shared.Scoping\EShop.Shared.Scoping.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="DomainEvents\" />
+  </ItemGroup>
 </Project>

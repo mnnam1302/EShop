@@ -1,5 +1,8 @@
+using EntityFramework.Exceptions.Common;
 using EShop.Shared.DomainTools.EventSourcing.SeedWork;
 using EShop.Shared.DomainTools.Exceptions;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace EShop.Shared.DomainTools.EventSourcing;
@@ -7,7 +10,8 @@ namespace EShop.Shared.DomainTools.EventSourcing;
 public sealed class AggregateStore(
     IOptions<EventStoreOptions> options,
     IEventStoreRepository eventStoreRepository,
-    ISnapshotRepository? snapshotRepository) : IAggregateStore
+    ISnapshotRepository? snapshotRepository,
+    ILogger<AggregateStore> logger) : IAggregateStore
 {
     private readonly EventStoreOptions options = options.Value;
     private readonly ISnapshotRepository snapshotRepository = snapshotRepository ?? new NullSnapshotRepository();
@@ -41,7 +45,7 @@ public sealed class AggregateStore(
         var events = await eventStoreRepository.GetEventStreamAsync(aggregateId, version: 0, cancellationToken: cancellationToken);
         if (events.Count == 0)
         {
-            throw new AggregatenNotFoundException(aggregateId, typeof(TAggregate));
+            throw new AggregateNotFoundException(aggregateId, typeof(TAggregate));
         }
 
         var aggregate = new TAggregate();
@@ -52,10 +56,18 @@ public sealed class AggregateStore(
 
     public async Task AppendEventsAsync(IAggregate aggregate, CancellationToken cancellationToken)
     {
+        if (!aggregate.UncommittedEvents.Any())
+        {
+            return;
+        }
+
+        var eventDataModels = new List<EventStore>();
+        var snapshotsDataModels = new List<Snapshot>();
+
         foreach (var @event in aggregate.UncommittedEvents)
         {
             var eventStore = EventStore.Create(aggregate, @event);
-            await eventStoreRepository.AppendEventAsync(eventStore, cancellationToken);
+            eventDataModels.Add(eventStore);
 
             if (options.IncludeSnapshots)
             {
@@ -63,12 +75,36 @@ public sealed class AggregateStore(
                  * Ex: SnapshotInterval = 3 - Create a snapshot every 3 events
                  * @event.Version = 3 => 3 % 3 = 0 => Create snapshot
                  */
-                if ((long)@event.Version % options.SnapshotIntervalInEvents == 0)
+                if ((long)@event.Version % options.SnapshotIntervalInEvents != 0)
                 {
-                    var snapshot = Snapshot.Create(aggregate, eventStore);
-                    await snapshotRepository.AddSnapshotAsync(snapshot, cancellationToken);
+                    continue;
                 }
+
+                var snapshot = Snapshot.Create(aggregate, eventStore);
+                snapshotsDataModels.Add(snapshot);
             }
+        }
+
+        logger.LogTrace(
+            "Committing {EventCount} events to PostgreSQL event store for entity with ID '{AggregateId}'",
+            eventDataModels.Count,
+            aggregate.Id);
+
+        try
+        {
+            await eventStoreRepository.AppendEventsAsync(eventDataModels, cancellationToken);
+            aggregate.MarkEventsAsCommitted();
+
+            if (snapshotsDataModels.Count != 0)
+            {
+                await snapshotRepository.AddSnapShotsAsync(snapshotsDataModels, cancellationToken);
+            }
+        }
+        catch (DbUpdateException ex) when (ex is UniqueConstraintException)
+        {
+            logger.LogTrace(ex,
+                "Entity Framework event insert detected an optimistic concurrency exception for entity with ID '{Id}'",
+                aggregate.Id);
         }
     }
 }

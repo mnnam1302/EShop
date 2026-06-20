@@ -1,3 +1,4 @@
+using EShop.Shared.Contracts.Abstractions.Mediator;
 using EShop.Shared.Contracts.Abstractions.Shared;
 using Microsoft.Extensions.DependencyInjection;
 

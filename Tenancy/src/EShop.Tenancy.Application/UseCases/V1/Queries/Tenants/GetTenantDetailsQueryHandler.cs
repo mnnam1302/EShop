@@ -1,5 +1,6 @@
-﻿using EShop.Shared.Contracts.Abstractions.Requests;
+using EShop.Shared.Contracts.Abstractions.Mediator;
 using EShop.Shared.Contracts.Abstractions.Shared;
+using EShop.Shared.CQRS.Query;
 using EShop.Tenancy.Domain.Repositories;
 
 namespace EShop.Tenancy.Application.UseCases.V1.Queries.Tenants;
@@ -25,13 +26,13 @@ internal sealed class GetTenantDetailsQueryHandler : IQueryHandler<GetTenantDeta
         this.tenantRepository = tenantRepository;
     }
 
-    public async Task<Result<TenantDetailsResponse>> Handle(GetTenantDetailsQuery request, CancellationToken cancellationToken)
+    public async Task<Result<TenantDetailsResponse>> HandleAsync(GetTenantDetailsQuery query, CancellationToken cancellationToken = default)
     {
-        var tenant = await tenantRepository.FindByIdAsync(request.TenantId, cancellationToken: cancellationToken);
+        var tenant = await tenantRepository.FindByIdAsync(query.TenantId, cancellationToken: cancellationToken);
 
         if (tenant is null)
         {
-            return Result.Failure<TenantDetailsResponse>(new("Tenant.NotFound", $"Tenant with ID '{request.TenantId}' not found."));
+            return Result.Failure<TenantDetailsResponse>(new("Tenant.NotFound", $"Tenant with ID '{query.TenantId}' not found."));
         }
 
         var response = new TenantDetailsResponse

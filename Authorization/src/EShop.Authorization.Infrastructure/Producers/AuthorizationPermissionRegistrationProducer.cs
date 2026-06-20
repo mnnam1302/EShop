@@ -1,6 +1,6 @@
-﻿using EShop.Shared.Authentication;
+using EShop.Shared.Authentication;
+using EShop.Shared.Contracts.Abstractions.MessageBus;
 using EShop.Shared.Contracts.Services.Authorization;
-using EShop.Shared.EventBus.Abstractions;
 using EShop.Shared.Scoping.ResourceAccessControl;
 
 namespace EShop.Authorization.Infrastructure.Producers;

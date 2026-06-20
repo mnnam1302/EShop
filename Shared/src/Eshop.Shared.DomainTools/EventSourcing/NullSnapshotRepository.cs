@@ -1,4 +1,4 @@
-﻿using EShop.Shared.DomainTools.EventSourcing.SeedWork;
+using EShop.Shared.DomainTools.EventSourcing.SeedWork;
 
 namespace EShop.Shared.DomainTools.EventSourcing;
 
@@ -12,5 +12,10 @@ public sealed class NullSnapshotRepository : ISnapshotRepository
     public Task<Snapshot?> GetSnapshotAsync(Guid id, CancellationToken cancellationToken = default)
     {
         return Task.FromResult<Snapshot?>(null);
+    }
+
+    public Task AddSnapShotsAsync(IReadOnlyList<Snapshot> shapshots, CancellationToken cancellationToken = default)
+    {
+        return Task.CompletedTask;
     }
 }
