@@ -8,5 +8,5 @@ public interface IStockOrderCacheService
 
     Task<int> DecreaseStockCacheByLUA(Guid variantId, int quantity);
 
-    Task IncreaseStockCache(Guid variantId, int quantity);
+    Task<bool> IncreaseStockCache(Guid variantId, int quantity);
 }

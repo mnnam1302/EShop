@@ -51,6 +51,20 @@ public sealed class StockOrderCacheService(
         return oldStockAvailable;
     }
 
+    private static readonly LuaScript _decreaseScript = LuaScript.Prepare(
+        """
+        local stock = redis.call('GET', @stockKey)
+        if not stock then return -1 end
+        stock = tonumber(stock)
+        local qty = tonumber(@quantity)
+        if stock >= qty then
+            redis.call('DECRBY', @stockKey, qty)
+            return 1
+        else
+            return 0
+        end
+        """);
+
     /// <summary>
     /// Evaluates stock via an atomic LUA script to prevent race conditions (Overselling).
     /// Returns standardized status codes: 1 (Success), 0 (Out of Stock), -1 (Cache Miss).
@@ -58,38 +72,41 @@ public sealed class StockOrderCacheService(
     public async Task<int> DecreaseStockCacheByLUA(Guid variantId, int quantity)
     {
         var stockCacheKey = InventoryCacheKeyProvider.GetStockItemCacheKey(variantId.ToString());
-        string luaScript = """
-        local stock = redis.call('GET', KEYS[1])
-        if not stock then
-            return -1
-        end
 
-        stock = tonumber(stock)
-        local qty = tonumber(ARGV[1])
-
-        if stock >= qty then
-            redis.call('DECRBY', KEYS[1], qty)
-            return 1
-        else
-            return 0
-        end
-        """;
-
-        var result = (int)await _redisDatabase.ScriptEvaluateAsync(luaScript, [stockCacheKey], [quantity]);
+        var result = (int)await _redisDatabase.ScriptEvaluateAsync(
+            _decreaseScript,
+            new { stockKey = (RedisKey)stockCacheKey, quantity = (RedisValue)quantity });
 
         logger.LogInformation("LUA Stock Deduction Result for Key '{Key}': {StatusCode}", stockCacheKey, result);
 
         return result;
     }
 
+    private static readonly LuaScript _increaseScript = LuaScript.Prepare(
+        """
+        local exists = redis.call('EXISTS', @stockKey)
+        if exists == 0 then return 0 end
+        redis.call('INCRBY', @stockKey, @quantity)
+        return 1
+        """);
+
     /// <summary>
     /// Reverts/Refunds stock back to Redis asynchronously.
     /// Uses the atomic INCRBY command to prevent concurrent data pollution during rollbacks.
     /// </summary>
-    public async Task IncreaseStockCache(Guid variantId, int quantity)
+    public async Task<bool> IncreaseStockCache(Guid variantId, int quantity)
     {
         var stockCacheKey = InventoryCacheKeyProvider.GetStockItemCacheKey(variantId.ToString());
-        await _redisDatabase.StringIncrementAsync(stockCacheKey, quantity);
-        logger.LogInformation("Successfully rolled back (increased) stock for variant '{VariantId}' by +{Quantity}", variantId, quantity);
+
+        var result = (int)await _redisDatabase.ScriptEvaluateAsync(
+            _increaseScript,
+            new { stockKey = (RedisKey)stockCacheKey, quantity = (RedisValue)quantity });
+
+        if (result == 0)
+        {
+            logger.LogWarning("RollbackCache: Key for variant '{VariantId}' not found — rollback skipped, DB is source of truth", variantId);
+        }
+
+        return result == 1;
     }
 }
