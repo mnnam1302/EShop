@@ -36,9 +36,6 @@ public class Inventory : AggregateRoot<Guid>, IScoped, IAuditable
 
     public DateTimeOffset? LastModifiedAtUtc { get; set; }
 
-    [Timestamp]
-    public byte[]? RowVersion { get; set; }
-
     public static Inventory Create(
         Guid productId,
         Guid variantId,

@@ -12,6 +12,10 @@ internal sealed class ReservationEntityTypeConfiguration : IEntityTypeConfigurat
         builder.HasKey(r => r.Id);
 
         builder.HasIndex(r => r.OrderId);
-        //builder.HasIndex(r => new { r.Status, r.ExpiresAt });
+
+        builder.HasIndex(r => new { r.TenantId, r.OrderId })
+            .IsUnique();
+
+        builder.HasIndex(r => new { r.Status, r.ExpiresAt });
     }
 }

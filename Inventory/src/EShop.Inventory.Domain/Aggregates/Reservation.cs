@@ -23,6 +23,9 @@ public class Reservation : AggregateRoot<Guid>, IScoped, IDateTracking
     [MaxLength(ModelConstants.VeryLongText)]
     public required string Scope { get; set; }
 
+    private readonly List<ReservationItem> _items = new();
+    public virtual IReadOnlyCollection<ReservationItem> Items => _items;
+
     public static Reservation Create(Guid orderId, DateTimeOffset expiresAt, string tenantId)
     {
         return new Reservation
@@ -35,6 +38,22 @@ public class Reservation : AggregateRoot<Guid>, IScoped, IDateTracking
             TenantId = tenantId,
             Scope = tenantId
         };
+    }
+
+    public ReservationItem AddItem(Guid variantId, int quantity)
+    {
+        var item = new ReservationItem
+        {
+            Id = Guid.NewGuid(),
+            ReservationId = Id,
+            VariantId = variantId,
+            Quantity = quantity,
+            TenantId = TenantId,
+            Scope = TenantId
+        };
+
+        _items.Add(item);
+        return item;
     }
 
     public void Confirm()
