@@ -1,5 +1,6 @@
 using EShop.Inventory.Application.Services;
 using EShop.Inventory.Domain.Abstractions;
+using EShop.Inventory.Infrastructure.Gateways;
 using EShop.Inventory.Infrastructure.Producers;
 using EShop.Inventory.Infrastructure.Repositories;
 using EShop.Inventory.Infrastructure.Services;
@@ -41,6 +42,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IUnitOfWork, EFUnitOfWork<InventoryDbContext>>();
         services.AddScoped<IInventoryRepository, InventoryRepository>();
         services.AddScoped<IReservationRepository, ReservationRepository>();
+        services.AddScoped<IOutboxWriter, OutboxWriter>();
+
         return services;
     }
 
@@ -53,17 +56,9 @@ public static class ServiceCollectionExtensions
 
         services.AddRedis(configuration)
             .AddStockCacheService();
-        //.AddInventoryBackgroundJobs(configuration);
 
         return services;
     }
-
-    //private static IServiceCollection AddRedisStockGateway(this IServiceCollection services)
-    //{
-    //    services.AddSingleton<IRedisStockGateway, RedisStockGateway>();
-    //    services.AddHostedService<RedisStockInitializer>();
-    //    return services;
-    //}
 
     //private static IServiceCollection AddInventoryBackgroundJobs(
     //    this IServiceCollection services,
@@ -97,6 +92,7 @@ public static class ServiceCollectionExtensions
     private static IServiceCollection AddStockCacheService(this IServiceCollection services)
     {
         services.AddScoped<IStockOrderCacheService, StockOrderCacheService>();
+        services.AddSingleton<IRedisStockGateway, RedisStockGateway>();
         return services;
     }
 

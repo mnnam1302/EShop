@@ -4,7 +4,15 @@ namespace EShop.Inventory.Domain.Abstractions;
 
 public interface IInventoryRepository : IRepositoryBase<Aggregates.Inventory, Guid>
 {
-    Task DecreaseStockLevel1(Guid variantId, int quantity, CancellationToken cancellationToken);
+    /// <summary>
+    /// Atomically deducts <paramref name="quantity"/> from stock_available
+    /// using a conditional UPDATE (WHERE stock_available >= quantity).
+    /// Returns 1 if deducted, 0 if insufficient stock.
+    /// </summary>
+    Task<int> DeductStocLevel1Async(Guid variantId, string tenantId, int quantity, CancellationToken cancellationToken);
 
-    Task DecreaseStockLevel3CAS(Guid variantId, int oldStockAvailable, int quantity, CancellationToken cancellationToken);
+    /// <summary>
+    /// Adds <paramref name="quantity"/> back to stock_available (release/expiry path).
+    /// </summary>
+    Task AddBackStockAsync(Guid variantId, string tenantId, int quantity, CancellationToken cancellationToken);
 }

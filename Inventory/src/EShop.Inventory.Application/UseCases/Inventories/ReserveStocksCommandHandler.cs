@@ -150,7 +150,7 @@ internal sealed class ReserveStocksCommandHandler(
             // 1. Optimistic Locking (Compare-And-Swap) deduction
             foreach (var item in sortedItems)
             {
-                var rowsAffected = await inventoryRepository.DeductStockCasAsync(item.VariantId, command.TenantId, item.Quantity, cancellationToken);
+                var rowsAffected = await inventoryRepository.DeductStocLevel1Async(item.VariantId, command.TenantId, item.Quantity, cancellationToken);
 
                 if (rowsAffected == 0) // Stock changed by another thread between Phase 1 and Phase 2
                 {

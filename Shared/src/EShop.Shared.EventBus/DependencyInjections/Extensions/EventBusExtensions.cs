@@ -23,4 +23,10 @@ public static class EventBusExtensions
         modelBuilder.ApplyConfiguration(new InboxMessageEntityTypeConfiguration());
         return modelBuilder;
     }
+
+    public static ModelBuilder AddOutboxMessageEntity(this ModelBuilder modelBuilder)
+    {
+        modelBuilder.ApplyConfiguration(new OutboxMessageEntityTypeConfiguration());
+        return modelBuilder;
+    }
 }
