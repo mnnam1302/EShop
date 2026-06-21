@@ -1,5 +1,6 @@
 using EShop.Order.Domain.Commands;
 using EShop.Order.Domain.Sagas.DomainEvents;
+using EShop.Order.Domain.StateMachines;
 using EShop.Shared.Authentication.Abstractions;
 using EShop.Shared.Contracts.Services.Order;
 using EShop.Shared.Contracts.Services.Order.Saga;
@@ -14,10 +15,12 @@ public sealed class OrderSaga : AggregateSaga, IScoped
 {
     public string BuyerId { get; set; } = string.Empty;
     public Guid OrderId { get; set; }
-    public Guid ReservationId { get; set; }
+    public Guid ReservationId { get; private set; }
 
-    public string TenantId { get; set; } = string.Empty;
-    public string Scope { get; set; } = string.Empty;
+    public OrderSagaStates Status { get; private set; }
+
+    public string TenantId { get; private set; } = string.Empty;
+    public string Scope { get; private set; } = string.Empty;
 
     public static OrderSaga Create(Guid orderSagaId, OrderCreated message, IUserDetailsProvider userDetailsProvider)
     {
@@ -60,7 +63,6 @@ public sealed class OrderSaga : AggregateSaga, IScoped
 
         RaiseEvent(new StockReservedEvent
         {
-            OrderId = OrderId,
             ReservationId = message.ReservationId
         });
 
@@ -77,15 +79,7 @@ public sealed class OrderSaga : AggregateSaga, IScoped
             throw new DomainException("OrderSaga", "StockReservationFailed event received in wrong saga state");
         }
 
-        RaiseEvent(new StockReservationFailedEvent
-        {
-            OrderSagaId = OrderId,
-            BuyerId = BuyerId,
-            OrderId = OrderId,
-            TenantId = TenantId,
-            Scope = Scope,
-            FailureReason = message.FailureReason
-        });
+        RaiseEvent(new StockReservationFailedEvent());
 
         Publish(new RejectOrderCommand
         {
@@ -101,21 +95,19 @@ public sealed class OrderSaga : AggregateSaga, IScoped
         Id = @event.OrderSagaId;
         BuyerId = @event.BuyerId;
         OrderId = @event.OrderId;
+        Status = OrderSagaStates.AwaitingStockReservation;
         TenantId = @event.TenantId;
         Scope = @event.Scope;
     }
 
     public void Apply(StockReservedEvent @event)
     {
-        OrderId = @event.OrderId;
         ReservationId = @event.ReservationId;
+        Status = OrderSagaStates.StocksAccepted;
     }
 
-    public void Apply(StockReservationFailedEvent @event)
+    public void Apply(StockReservationFailedEvent _)
     {
-        BuyerId = @event.BuyerId;
-        OrderId = @event.OrderId;
-        TenantId = @event.TenantId;
-        Scope = @event.Scope;
+        Status = OrderSagaStates.StocksRejected;
     }
 }
