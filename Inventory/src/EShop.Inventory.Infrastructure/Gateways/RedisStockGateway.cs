@@ -4,47 +4,60 @@ using StackExchange.Redis;
 namespace EShop.Inventory.Infrastructure.Gateways;
 
 /// <summary>
-/// Atomic Redis-backed stock reservation gateway using Lua scripts.
-///
-/// Key schema:
-///   stock:available:{variantId}  — available units (integer)
-///   stock:reserved:{variantId}   — reserved units (integer)
-///   stock:_initialized           — sentinel; presence means Redis is seeded
-///
-/// Lua guarantees single-threaded execution per Redis node, making the
-/// check-and-reserve fully atomic without distributed locking overhead.
+/// Atomic Redis-backed stock manager using Lua Scripts.
+/// Lua executes single-threaded inside Redis, ensuring atomicity without distributed locks.
 /// </summary>
 internal sealed class RedisStockGateway : IRedisStockGateway
 {
     private readonly IConnectionMultiplexer _redis;
+    private const string RedisSentinelKey = "stock:_initialized";
 
-    // Lua: Phase 1 — check; Phase 2 — reserve (all-or-nothing).
-    // KEYS[i*2-1] = available key, KEYS[i*2] = reserved key for item i
-    // ARGV[i]     = requested quantity for item i
-    // Returns 1 if all reserved, 0 if any item has insufficient stock.
-    private static readonly string _reserveLuaScript = """
+    public RedisStockGateway(IConnectionMultiplexer redis)
+    {
+        _redis = redis;
+    }
+
+    // Lua Script: Atomic multi-item check and reserve (All-or-Nothing)
+    // KEYS[i*2-1] = Available key, KEYS[i*2] = Reserved key
+    // ARGV[i]     = Target quantity
+    private const string ReserveStockLuaScript = """
         local count = #KEYS / 2
-        -- Phase 1: check all
+        
+        -- Phase 1: Dry run validation
         for i = 1, count do
             local avail = tonumber(redis.call('GET', KEYS[i*2-1])) or 0
             local qty   = tonumber(ARGV[i]) or 0
             if avail < qty then
-                return 0
+                return 0 -- Fail immediately if any item is out of stock
             end
         end
-        -- Phase 2: reserve all
+        
+        -- Phase 2: Atomic execution
         for i = 1, count do
             local qty = tonumber(ARGV[i]) or 0
-            redis.call('DECRBY', KEYS[i*2-1], qty)
-            redis.call('INCRBY', KEYS[i*2],   qty)
+            redis.call('DECRBY', KEYS[i*2-1], qty) -- Deduct from sellable pool
+            redis.call('INCRBY', KEYS[i*2],   qty) -- Hold inside holding pool
         end
         return 1
         """;
 
-    // Lua: release reserved units back to available.
-    // KEYS[i*2-1] = available key, KEYS[i*2] = reserved key
-    // ARGV[i]     = quantity to release
-    private static readonly string _releaseLuaScript = """
+    public async Task<bool> TryReserveAsync(IReadOnlyList<StockReservationRequest> items, CancellationToken cancellationToken = default)
+    {
+        if (items.Count == 0) return true;
+
+        var db = _redis.GetDatabase();
+
+        var keys = FlattenItemKeys(items);
+        var args = FlattenItemQuantities(items);
+
+        var result = (long)await db.ScriptEvaluateAsync(ReserveStockLuaScript, keys, args);
+
+        return result == 1;
+    }
+
+
+    // Lua Script: Revert temporary reservation holdings back to the sellable pool
+    private const string ReleaseStockLuaScript = """
         local count = #KEYS / 2
         for i = 1, count do
             local qty = tonumber(ARGV[i]) or 0
@@ -54,79 +67,42 @@ internal sealed class RedisStockGateway : IRedisStockGateway
         return 1
         """;
 
-    private const string _sentinelKey = "stock:_initialized";
-
-    public RedisStockGateway(IConnectionMultiplexer redis)
+    public async Task ReleaseAsync(IReadOnlyList<StockReservationRequest> items, CancellationToken cancellationToken = default)
     {
-        _redis = redis;
-    }
-
-    public async Task<bool> TryReserveAsync(
-        IReadOnlyList<StockReservationRequest> items,
-        CancellationToken cancellationToken = default)
-    {
-        if (items.Count == 0)
-        {
-            return true;
-        }
+        if (items.Count == 0) return;
 
         var db = _redis.GetDatabase();
 
-        var keys = BuildKeys(items);
-        var args = BuildArgs(items);
-
-        var result = (long)await db.ScriptEvaluateAsync(
-            _reserveLuaScript,
-            keys,
-            args);
-
-        return result == 1;
-    }
-
-    public async Task ReleaseAsync(
-        IReadOnlyList<StockReservationRequest> items,
-        CancellationToken cancellationToken = default)
-    {
-        if (items.Count == 0)
-        {
-            return;
-        }
-
-        var db = _redis.GetDatabase();
-
-        await db.ScriptEvaluateAsync(
-            _releaseLuaScript,
-            BuildKeys(items),
-            BuildArgs(items));
+        await db.ScriptEvaluateAsync(ReleaseStockLuaScript, FlattenItemKeys(items), FlattenItemQuantities(items));
     }
 
     public async Task SeedStockAsync(Guid variantId, int availableStock, CancellationToken cancellationToken = default)
     {
         var db = _redis.GetDatabase();
-        await db.StringSetAsync(AvailableKey(variantId), availableStock);
+        var stockAvailableKey = GetAvailableStockKey(variantId);
+        await db.StringSetAsync(stockAvailableKey, availableStock);
     }
 
     public async Task<bool> IsInitializedAsync(CancellationToken cancellationToken = default)
     {
         var db = _redis.GetDatabase();
-        return await db.KeyExistsAsync(_sentinelKey);
+        return await db.KeyExistsAsync(RedisSentinelKey);
     }
 
-    // ── internal helpers ──────────────────────────────────────────────────────
-
-    private static RedisKey[] BuildKeys(IReadOnlyList<StockReservationRequest> items)
+    // Maps domain array into interleaved layout: [AvailableKey_1, ReservedKey_1, AvailableKey_2...]
+    private static RedisKey[] FlattenItemKeys(IReadOnlyList<StockReservationRequest> items)
     {
         var keys = new RedisKey[items.Count * 2];
         for (var i = 0; i < items.Count; i++)
         {
-            keys[i * 2] = AvailableKey(items[i].VariantId);
-            keys[i * 2 + 1] = ReservedKey(items[i].VariantId);
+            keys[i * 2] = GetAvailableStockKey(items[i].VariantId);
+            keys[i * 2 + 1] = GetReservedStockKey(items[i].VariantId);
         }
 
         return keys;
     }
 
-    private static RedisValue[] BuildArgs(IReadOnlyList<StockReservationRequest> items)
+    private static RedisValue[] FlattenItemQuantities(IReadOnlyList<StockReservationRequest> items)
     {
         var args = new RedisValue[items.Count];
         for (var i = 0; i < items.Count; i++)
@@ -137,6 +113,6 @@ internal sealed class RedisStockGateway : IRedisStockGateway
         return args;
     }
 
-    private static string AvailableKey(Guid variantId) => $"stock:available:{variantId}";
-    private static string ReservedKey(Guid variantId) => $"stock:reserved:{variantId}";
+    private static string GetAvailableStockKey(Guid variantId) => $"stock:available:{variantId}";
+    private static string GetReservedStockKey(Guid variantId) => $"stock:reserved:{variantId}";
 }
