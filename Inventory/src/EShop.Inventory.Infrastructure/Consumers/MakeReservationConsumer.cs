@@ -1,5 +1,5 @@
 using EShop.Inventory.Domain.Commands;
-using EShop.Shared.Contracts.Services.Order;
+using EShop.Shared.Contracts.Services.Order.Saga;
 using EShop.Shared.CQRS;
 using MassTransit;
 
@@ -10,7 +10,7 @@ public sealed class MakeReservationConsumer(IMediator mediator) : IConsumer<Make
     public async Task Consume(ConsumeContext<MakeReservation> context)
     {
         var message = context.Message;
-        var command = new ReserveStocksCommand
+        var command = new MakeReservationCommand
         {
             OrderId = message.OrderId,
             Items = message.Items.Select(x => new Domain.Commands.OrderItem

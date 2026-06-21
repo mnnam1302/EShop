@@ -35,7 +35,7 @@ public static class ReservationApis
         CancellationToken cancellationToken)
     {
         var user = userDetails.AuthenticatedUser;
-        var command = new ReserveStocksCommand
+        var command = new MakeReservationCommand
         {
             OrderId = Guid.NewGuid(),
             Items = request.Items,

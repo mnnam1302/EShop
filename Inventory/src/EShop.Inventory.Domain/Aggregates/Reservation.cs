@@ -28,7 +28,7 @@ public class Reservation : AggregateRoot<Guid>, IScoped, IDateTracking
     private readonly List<ReservationItem> _items = new();
     public virtual IReadOnlyCollection<ReservationItem> Items => _items;
 
-    public static Reservation Create(ReserveStocksCommand command, DateTimeOffset expiresAt)
+    public static Reservation Create(MakeReservationCommand command, DateTimeOffset expiresAt)
     {
         var reservation = new Reservation
         {

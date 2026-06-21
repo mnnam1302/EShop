@@ -5,23 +5,23 @@ using EShop.Inventory.Domain.Aggregates;
 using EShop.Inventory.Domain.Commands;
 using EShop.Shared.Contracts.Abstractions.MessageBus;
 using EShop.Shared.Contracts.Abstractions.Shared;
-using EShop.Shared.Contracts.Services.Inventory;
+using EShop.Shared.Contracts.Services.Order.Saga;
 using EShop.Shared.CQRS.Command;
 using EShop.Shared.DomainTools.UnitOfWorks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Npgsql;
 
-namespace EShop.Inventory.Application.UseCases.Inventories;
+namespace EShop.Inventory.Application.UseCases.Reservations;
 
-internal sealed class ReserveStocksCommandHandler(
+internal sealed class MakeReservationCommandHandler(
     IStockCacheService stockCacheService,
     IInventoryRepository inventoryRepository,
     IReservationRepository reservationRepository,
     IOutboxWriter outboxWriter,
     IUnitOfWork unitOfWork,
     IEventBus eventBus,
-    ILogger<ReserveStocksCommandHandler> logger) : ICommandHandler<ReserveStocksCommand>
+    ILogger<MakeReservationCommandHandler> logger) : ICommandHandler<MakeReservationCommand>
 {
     private const int MaxDeadlockRetries = 3;
     private const int LinearBackoffDelayMs = 50;
@@ -31,7 +31,7 @@ internal sealed class ReserveStocksCommandHandler(
     private const string ErrorInventoryNotFound = "Inventory.StockReservation.SkuNotFound";
     private const string ErrorInsufficientStock = "Inventory.StockReservation.InsufficientStock";
 
-    public async Task<Result> HandleAsync(ReserveStocksCommand command, CancellationToken cancellationToken)
+    public async Task<Result> HandleAsync(MakeReservationCommand command, CancellationToken cancellationToken)
     {
         // DEADLOCK: Sort items by ID to enforce identical lock order across all database transactions.
         var itemsOrderedByLockSequence = command.Items.OrderBy(i => i.VariantId).ToList();
@@ -90,7 +90,7 @@ internal sealed class ReserveStocksCommandHandler(
 
     private async Task<Result> ValidateAndReserveOnRedisGateAsync(
         List<StockReservationRequest> redisItems,
-        ReserveStocksCommand command,
+        MakeReservationCommand command,
         CancellationToken cancellationToken)
     {
         foreach (var item in redisItems)
@@ -139,7 +139,7 @@ internal sealed class ReserveStocksCommandHandler(
     }
 
     private async Task<Result> DeductStocksAsync(
-        ReserveStocksCommand command,
+        MakeReservationCommand command,
         List<OrderItem> sortedItems,
         List<StockReservationRequest> redisItems,
         CancellationToken cancellationToken)
@@ -175,18 +175,18 @@ internal sealed class ReserveStocksCommandHandler(
 
             // TODO: CDC and Long-Polling later, currently acceptable publish integration event
             // 3. Transactional Outbox Pattern: Event commits or rolls back atomically with the stock deduction
-            outboxWriter.ConvertDomainEventsToOutboxMessages(reservation.Id.ToString(), reservation);
+            //outboxWriter.ConvertDomainEventsToOutboxMessages(reservation.Id.ToString(), reservation);
 
             await unitOfWork.SaveChangesAsync(cancellationToken);
 
-            //await eventBus.PublishAsync(new StockReserved
-            //{
-            //    OrderId = command.OrderId,
-            //    ReservationId = reservation.Id,
-            //    TenantId = command.TenantId,
-            //    ActionUserId = command.ActionUserId,
-            //    ActionUserType = command.ActionUserType,
-            //}, cancellationToken);
+            await eventBus.PublishAsync(new StocksReserved
+            {
+                OrderId = command.OrderId,
+                ReservationId = reservation.Id,
+                TenantId = command.TenantId,
+                ActionUserId = command.ActionUserId,
+                ActionUserType = command.ActionUserType,
+            }, cancellationToken);
 
             logger.LogInformation("Stock committed successfully for Order {OrderId}.", command.OrderId);
             return Result.Success();
@@ -202,9 +202,9 @@ internal sealed class ReserveStocksCommandHandler(
         }
     }
 
-    private async Task PublishFailedEventAsync(ReserveStocksCommand command, Error error, CancellationToken cancellationToken)
+    private async Task PublishFailedEventAsync(MakeReservationCommand command, Error error, CancellationToken cancellationToken)
     {
-        await eventBus.PublishAsync(new StockReservationFailed
+        await eventBus.PublishAsync(new StocksNotReserved
         {
             OrderId = command.OrderId,
             FailureReason = error.Message,
