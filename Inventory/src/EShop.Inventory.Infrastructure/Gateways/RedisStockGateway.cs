@@ -1,4 +1,5 @@
 using EShop.Inventory.Domain.Abstractions;
+using EShop.Shared.Cache.CacheKeys;
 using StackExchange.Redis;
 
 namespace EShop.Inventory.Infrastructure.Gateways;
@@ -79,7 +80,7 @@ internal sealed class RedisStockGateway : IRedisStockGateway
     public async Task SeedStockAsync(Guid variantId, int availableStock, CancellationToken cancellationToken = default)
     {
         var db = _redis.GetDatabase();
-        var stockAvailableKey = GetAvailableStockKey(variantId);
+        var stockAvailableKey = InventoryCacheKeyProvider.GetAvailableStockKey(variantId);
         await db.StringSetAsync(stockAvailableKey, availableStock);
     }
 
@@ -95,8 +96,8 @@ internal sealed class RedisStockGateway : IRedisStockGateway
         var keys = new RedisKey[items.Count * 2];
         for (var i = 0; i < items.Count; i++)
         {
-            keys[i * 2] = GetAvailableStockKey(items[i].VariantId);
-            keys[i * 2 + 1] = GetReservedStockKey(items[i].VariantId);
+            keys[i * 2] = InventoryCacheKeyProvider.GetAvailableStockKey(items[i].VariantId);
+            keys[i * 2 + 1] = InventoryCacheKeyProvider.GetReservedStockKey(items[i].VariantId);
         }
 
         return keys;
@@ -112,7 +113,4 @@ internal sealed class RedisStockGateway : IRedisStockGateway
 
         return args;
     }
-
-    private static string GetAvailableStockKey(Guid variantId) => $"stock:available:{variantId}";
-    private static string GetReservedStockKey(Guid variantId) => $"stock:reserved:{variantId}";
 }

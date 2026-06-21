@@ -8,4 +8,8 @@ public static class InventoryCacheKeyProvider
     {
         return string.Format("{0}:stocks:{1}", OwnerService, variantId);
     }
+
+    public static string GetAvailableStockKey(Guid variantId) => $"{OwnerService}:stock_available:{variantId}";
+
+    public static string GetReservedStockKey(Guid variantId) => $"{OwnerService}:stock_reserved:{variantId}";
 }

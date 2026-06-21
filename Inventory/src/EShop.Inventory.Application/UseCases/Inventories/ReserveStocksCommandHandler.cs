@@ -172,10 +172,20 @@ internal sealed class ReserveStocksCommandHandler(
 
             reservationRepository.Add(reservation);
 
+            // TODO: CDC and Long-Polling later, currently acceptable publish integration event
             // 3. Transactional Outbox Pattern: Event commits or rolls back atomically with the stock deduction
             outboxWriter.ConvertDomainEventsToOutboxMessages(reservation.Id.ToString(), reservation);
 
             await unitOfWork.SaveChangesAsync(cancellationToken);
+
+            //await eventBus.PublishAsync(new StockReserved
+            //{
+            //    OrderId = command.OrderId,
+            //    ReservationId = reservation.Id,
+            //    TenantId = command.TenantId,
+            //    ActionUserId = command.ActionUserId,
+            //    ActionUserType = command.ActionUserType,
+            //}, cancellationToken);
 
             logger.LogInformation("Stock committed successfully for Order {OrderId}.", command.OrderId);
             return Result.Success();

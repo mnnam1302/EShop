@@ -35,37 +35,7 @@ public static class InventoryApis
             .MapPatch("", WarnUpStockInventoryV1Async)
             .RequirePermissionFilter(PermissionConstants.Inventory.ManageInventory);
 
-        endpointsV1
-            .MapPut("", ReserveStocksAsyncV1)
-            .RequirePermissionFilter(PermissionConstants.Inventory.ManageInventory);
-
         return routerBuilder;
-    }
-
-    private static async Task<IResult> ReserveStocksAsyncV1(
-        [FromBody] CreateReservationRequest request,
-        [FromServices] IMediator mediator,
-        [FromServices] IUserDetailsProvider userDetails,
-        CancellationToken cancellationToken)
-    {
-        var user = userDetails.AuthenticatedUser;
-        var command = new ReserveStocksCommand
-        {
-            OrderId = request.OrderId ?? Guid.NewGuid(),
-            Items = request.Items,
-            TenantId = user.TenantId,
-            ActionUserId = user.Id,
-            ActionUserType = user.UserType
-        };
-
-        var result = await mediator.SendAsync(command, cancellationToken);
-
-        if (result.IsFailure)
-        {
-            return ApiEndpointHandler.Failure(result);
-        }
-
-        return Results.Created("", result);
     }
 
     private static async Task<IResult> GetInventoriesByProductIdV1Async(
