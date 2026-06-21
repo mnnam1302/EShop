@@ -49,4 +49,11 @@ public class Order : AggregateRoot<Guid>, IDateTracking, IExcludedFromScoping
             _orderItems.Add(orderItem);
         }
     }
+
+    public void Reject(string reason)
+    {
+        Status = nameof(OrderStatus.Rejected);
+        Description = reason;
+        LastModifiedAtUtc = DateTimeOffset.UtcNow;
+    }
 }
