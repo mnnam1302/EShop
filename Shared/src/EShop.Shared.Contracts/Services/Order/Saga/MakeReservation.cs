@@ -1,6 +1,6 @@
 using EShop.Shared.Contracts.Abstractions.MessageBus;
 
-namespace EShop.Shared.Contracts.Services.Order;
+namespace EShop.Shared.Contracts.Services.Order.Saga;
 
 public sealed class MakeReservation : IntegrationCommand
 {

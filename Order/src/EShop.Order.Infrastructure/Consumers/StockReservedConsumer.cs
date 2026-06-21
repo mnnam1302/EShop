@@ -1,5 +1,6 @@
 using EShop.Order.Domain.Sagas;
-using EShop.Shared.Contracts.Services.Inventory;
+using EShop.Shared.Contracts.Services.Order.Saga;
+using EShop.Shared.CQRS.Command;
 using EShop.Shared.DomainTools.Sagas.AggregateSagas;
 using MassTransit;
 using Microsoft.Extensions.Logging;
@@ -8,9 +9,10 @@ namespace EShop.Order.Infrastructure.Consumers;
 
 internal sealed class StockReservedConsumer(
     IAggregateSagaStore aggregateSagaStore,
-    ILogger<StockReservedConsumer> logger) : IConsumer<StockReserved>
+    ILogger<StockReservedConsumer> logger,
+    ICommandDispatcher commandDispatcher) : IConsumer<StocksReserved>
 {
-    public async Task Consume(ConsumeContext<StockReserved> context)
+    public async Task Consume(ConsumeContext<StocksReserved> context)
     {
         var message = context.Message;
         var sagaId = OrderSagaId.FromOrderId(message.OrderId).GetGuid();
@@ -27,6 +29,8 @@ internal sealed class StockReservedConsumer(
 
         saga.HandleAsync(message);
         await aggregateSagaStore.UpdateAggregateSagaAsync(saga, context.CancellationToken);
+
+        await saga.PublishAsync(commandDispatcher, context.CancellationToken);
 
         logger.LogInformation("StockReservedConsumer: Saga advanced for Order {OrderId}", message.OrderId);
     }

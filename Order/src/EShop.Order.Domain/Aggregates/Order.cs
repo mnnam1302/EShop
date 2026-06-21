@@ -56,4 +56,10 @@ public class Order : AggregateRoot<Guid>, IDateTracking, IExcludedFromScoping
         Description = reason;
         LastModifiedAtUtc = DateTimeOffset.UtcNow;
     }
+
+    public void Accept()
+    {
+        Status = nameof(OrderStatus.Accepted);
+        LastModifiedAtUtc = DateTimeOffset.UtcNow;
+    }
 }

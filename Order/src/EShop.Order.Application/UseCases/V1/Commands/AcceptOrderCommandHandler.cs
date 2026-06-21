@@ -8,11 +8,11 @@ using EShop.Shared.DomainTools.UnitOfWorks;
 
 namespace EShop.Order.Application.UseCases.V1.Commands;
 
-internal sealed class RejectOrderCommandHandler(
+internal sealed class AcceptOrderCommandHandler(
     IOrderRepository orderRepository,
-    IUnitOfWork unitOfWork) : ICommandHandler<RejectOrderCommand>
+    IUnitOfWork unitOfWork) : ICommandHandler<AcceptOrderCommand>
 {
-    public async Task<Result> HandleAsync(RejectOrderCommand command, CancellationToken cancellationToken)
+    public async Task<Result> HandleAsync(AcceptOrderCommand command, CancellationToken cancellationToken)
     {
         var order = await orderRepository.FindSingleAsync(o => o.Id == command.OrderId, cancellationToken: cancellationToken);
 
@@ -23,10 +23,10 @@ internal sealed class RejectOrderCommandHandler(
 
         if (order.Status != nameof(OrderStatus.Pending))
         {
-            throw new DomainException("Order", "Cannot reject an order that is already processed.");
+            throw new DomainException("Order", "Cannot confirm an order that is already processed.");
         }
 
-        order.Reject(command.Reason);
+        order.Accept();
 
         orderRepository.Update(order);
         await unitOfWork.SaveChangesAsync(cancellationToken);

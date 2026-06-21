@@ -1,6 +1,6 @@
+using EShop.Order.Domain.Commands;
 using EShop.Order.Domain.Sagas.DomainEvents;
 using EShop.Shared.Authentication.Abstractions;
-using EShop.Shared.Contracts.Services.Inventory;
 using EShop.Shared.Contracts.Services.Order;
 using EShop.Shared.Contracts.Services.Order.Saga;
 using EShop.Shared.DomainTools.Entities;
@@ -14,6 +14,7 @@ public sealed class OrderSaga : AggregateSaga, IScoped
 {
     public string BuyerId { get; set; } = string.Empty;
     public Guid OrderId { get; set; }
+    public Guid ReservationId { get; set; }
 
     public string TenantId { get; set; } = string.Empty;
     public string Scope { get; set; } = string.Empty;
@@ -50,16 +51,7 @@ public sealed class OrderSaga : AggregateSaga, IScoped
         return orderSaga;
     }
 
-
-    public void HandleAsync(OrderCreated message)
-    {
-        if (State != SagaState.New)
-        {
-            throw new DomainException("OrderSaga", "Saga must be new");
-        }
-    }
-
-    public void HandleAsync(StockReserved message)
+    public void HandleAsync(StocksReserved message)
     {
         if (State != SagaState.Running)
         {
@@ -68,15 +60,17 @@ public sealed class OrderSaga : AggregateSaga, IScoped
 
         RaiseEvent(new StockReservedEvent
         {
-            OrderSagaId = OrderId,
-            BuyerId = BuyerId,
             OrderId = OrderId,
-            TenantId = TenantId,
-            Scope = Scope
+            ReservationId = message.ReservationId
+        });
+
+        Publish(new AcceptOrderCommand
+        {
+            OrderId = OrderId
         });
     }
 
-    public void HandleAsync(StockReservationFailed message)
+    public void HandleAsync(StocksNotReserved message)
     {
         if (State != SagaState.Running)
         {
@@ -93,23 +87,10 @@ public sealed class OrderSaga : AggregateSaga, IScoped
             FailureReason = message.FailureReason
         });
 
-        MarkComplete();
-    }
-
-    public void HandleAsync(OrderPersisted message)
-    {
-        if (State != SagaState.Running)
+        Publish(new RejectOrderCommand
         {
-            throw new DomainException("OrderSaga", "OrderPersisted event received in wrong saga state");
-        }
-
-        RaiseEvent(new OrderPersistedEvent
-        {
-            OrderSagaId = OrderId,
-            BuyerId = BuyerId,
             OrderId = OrderId,
-            TenantId = TenantId,
-            Scope = Scope
+            Reason = message.FailureReason
         });
 
         MarkComplete();
@@ -126,21 +107,11 @@ public sealed class OrderSaga : AggregateSaga, IScoped
 
     public void Apply(StockReservedEvent @event)
     {
-        BuyerId = @event.BuyerId;
         OrderId = @event.OrderId;
-        TenantId = @event.TenantId;
-        Scope = @event.Scope;
+        ReservationId = @event.ReservationId;
     }
 
     public void Apply(StockReservationFailedEvent @event)
-    {
-        BuyerId = @event.BuyerId;
-        OrderId = @event.OrderId;
-        TenantId = @event.TenantId;
-        Scope = @event.Scope;
-    }
-
-    public void Apply(OrderPersistedEvent @event)
     {
         BuyerId = @event.BuyerId;
         OrderId = @event.OrderId;
