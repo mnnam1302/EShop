@@ -1,24 +1,40 @@
 using EShop.Inventory.Domain.Abstractions;
+using EShop.Shared.DomainTools.Aggregates;
 using EShop.Shared.EventBus;
-using System.Text.Json;
+using Newtonsoft.Json;
 
 namespace EShop.Inventory.Infrastructure.Services;
 
 internal sealed class OutboxWriter(InventoryDbContext dbContext) : IOutboxWriter
 {
-    public void Enqueue<TEvent>(TEvent @event) where TEvent : class
+    public void ConvertDomainEventsToOutboxMessages<TAggregate>(string aggregateId, TAggregate aggregate) where TAggregate : IAggregateRoot
     {
-        var outbox = new OutboxMessage
+        if (aggregate is null)
         {
-            Id = Guid.NewGuid(),
-            AggregateName = typeof(TEvent).Assembly.GetName().Name ?? string.Empty,
-            AggregateId = string.Empty,
-            EventId = Guid.NewGuid().ToString(),
-            EventName = typeof(TEvent).FullName ?? typeof(TEvent).Name,
-            Payload = JsonSerializer.Serialize(@event),
-            OccurredOnUtc = DateTimeOffset.UtcNow
-        };
+            throw new ArgumentNullException(nameof(aggregate));
+        }
 
-        dbContext.OutboxMessages.Add(outbox);
+        var domainEvents = aggregate.GetDomainEvents();
+        aggregate.ClearDomainEvents();
+
+        var events = domainEvents
+            .Select(domainEvent => new OutboxMessage
+            {
+                Id = Guid.NewGuid(),
+                AggregateId = aggregateId,
+                AggregateName = aggregate.GetType().Name,
+                EventId = domainEvent.EventId.ToString(),
+                EventName = domainEvent.GetType().Name,
+                Payload = JsonConvert.SerializeObject(
+                    domainEvent,
+                    new JsonSerializerSettings
+                    {
+                        TypeNameHandling = TypeNameHandling.All
+                    }),
+                OccurredOnUtc = DateTime.UtcNow,
+            })
+            .ToList();
+
+        dbContext.OutboxMessages.AddRange(events);
     }
 }

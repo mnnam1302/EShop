@@ -1,4 +1,6 @@
 using System.ComponentModel.DataAnnotations;
+using EShop.Inventory.Domain.Commands;
+using EShop.Inventory.Domain.DomainEvents;
 using EShop.Inventory.Domain.Enums;
 using EShop.Shared.DomainTools.Aggregates;
 using EShop.Shared.DomainTools.Entities;
@@ -26,18 +28,29 @@ public class Reservation : AggregateRoot<Guid>, IScoped, IDateTracking
     private readonly List<ReservationItem> _items = new();
     public virtual IReadOnlyCollection<ReservationItem> Items => _items;
 
-    public static Reservation Create(Guid orderId, DateTimeOffset expiresAt, string tenantId)
+    public static Reservation Create(ReserveStocksCommand command, DateTimeOffset expiresAt)
     {
-        return new Reservation
+        var reservation = new Reservation
         {
             Id = Guid.NewGuid(),
-            OrderId = orderId,
+            OrderId = command.OrderId,
             Status = nameof(ReservationStatus.Pending),
             ExpiresAt = expiresAt,
             CreatedAtUtc = DateTimeOffset.UtcNow,
-            TenantId = tenantId,
-            Scope = tenantId
+            TenantId = command.TenantId,
+            Scope = command.TenantId
         };
+
+        reservation.RaiseDomainEvent(new ReservationCreated
+        {
+            ReservationId = reservation.Id,
+            OrderId = command.OrderId,
+            TenantId = command.TenantId,
+            ActionUserId = command.ActionUserId,
+            ActionUserType = command.ActionUserType
+        });
+
+        return reservation;
     }
 
     public ReservationItem AddItem(Guid variantId, int quantity)

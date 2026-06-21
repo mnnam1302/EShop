@@ -143,8 +143,6 @@ internal sealed class ReserveStocksCommandHandler(
         List<StockReservationRequest> redisItems,
         CancellationToken cancellationToken)
     {
-        await unitOfWork.BeginTransactionAsync(cancellationToken);
-
         try
         {
             // 1. Optimistic Locking (Compare-And-Swap) deduction
@@ -155,7 +153,6 @@ internal sealed class ReserveStocksCommandHandler(
                 if (rowsAffected == 0) // Stock changed by another thread between Phase 1 and Phase 2
                 {
                     // All-or-nothing: one short item → roll back entire transaction.
-                    await unitOfWork.RollbackTransactionAsync(cancellationToken);
                     await redisStockGateway.ReleaseAsync(redisItems, cancellationToken);
 
                     var insufficientError = new Error(ErrorInsufficientStock, $"SKU {item.VariantId} stock mismatch during database write.");
@@ -166,7 +163,7 @@ internal sealed class ReserveStocksCommandHandler(
 
             // 2. Track reservation inside DB (Pending state with 15m expiration)
             var expirationTime = DateTimeOffset.UtcNow.AddMinutes(ReservationExpiryMinutes);
-            var reservation = Reservation.Create(command.OrderId, expirationTime, command.TenantId);
+            var reservation = Reservation.Create(command, expirationTime);
 
             foreach (var item in sortedItems)
             {
@@ -176,17 +173,9 @@ internal sealed class ReserveStocksCommandHandler(
             reservationRepository.Add(reservation);
 
             // 3. Transactional Outbox Pattern: Event commits or rolls back atomically with the stock deduction
-            outboxWriter.Enqueue(new StockReserved
-            {
-                OrderId = command.OrderId,
-                ReservationId = reservation.Id,
-                TenantId = command.TenantId,
-                ActionUserId = command.ActionUserId,
-                ActionUserType = command.ActionUserType
-            });
+            outboxWriter.ConvertDomainEventsToOutboxMessages(reservation.Id.ToString(), reservation);
 
             await unitOfWork.SaveChangesAsync(cancellationToken);
-            await unitOfWork.CommitTransactionAsync(cancellationToken);
 
             logger.LogInformation("Stock committed successfully for Order {OrderId}.", command.OrderId);
             return Result.Success();
@@ -195,16 +184,10 @@ internal sealed class ReserveStocksCommandHandler(
         {
             // IDEMPOTENCY GUARD: UNIQUE(tenant_id, order_id) constraint violated.
             // Means network dropped on previous success and Client resent the command. Safely ACK & ignore.
-            await unitOfWork.RollbackTransactionAsync(cancellationToken);
             await redisStockGateway.ReleaseAsync(redisItems, cancellationToken);
 
             logger.LogInformation("Duplicate request for Order {OrderId} detected. Safely ignored.", command.OrderId);
             return Result.Success();
-        }
-        catch
-        {
-            await unitOfWork.RollbackTransactionAsync(cancellationToken);
-            throw;
         }
     }
 

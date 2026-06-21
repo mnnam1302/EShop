@@ -1,4 +1,4 @@
-﻿using EShop.Authorization.API.Boostrapping;
+using EShop.Authorization.API.Boostrapping;
 using EShop.Authorization.Application.Abstractions;
 using EShop.Authorization.Application.DependencyInjections;
 using EShop.Authorization.Infrastructure;
@@ -9,6 +9,7 @@ using EShop.Shared.Cache.DependencyInejctions.Extensions;
 using EShop.Shared.Contracts.JsonConverters;
 using EShop.Shared.CQRS;
 using EShop.Shared.DomainTools.Extensions;
+using EShop.Shared.EventBus.DependencyInjections.Extensions;
 using EShop.Shared.JsonApi.Extensions;
 using EShop.Shared.Scoping.ResourceAccessControl;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers.TenantFeaturesProvider;
