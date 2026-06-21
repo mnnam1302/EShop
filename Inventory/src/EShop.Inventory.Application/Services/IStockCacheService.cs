@@ -1,11 +1,11 @@
-namespace EShop.Inventory.Domain.Abstractions;
+namespace EShop.Inventory.Application.Services;
 
 /// <summary>
 /// Fast-path Redis gate for stock availability.
 /// Provides atomic check-and-reserve via Lua scripts.
 /// Redis is the first line of defence; Postgres remains the authoritative source.
 /// </summary>
-public interface IRedisStockGateway
+public interface IStockCacheService
 {
     /// <summary>
     /// Atomically checks and reserves the requested quantities.

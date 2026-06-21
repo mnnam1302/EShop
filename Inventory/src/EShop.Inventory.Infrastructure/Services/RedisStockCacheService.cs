@@ -1,19 +1,19 @@
-using EShop.Inventory.Domain.Abstractions;
+using EShop.Inventory.Application.Services;
 using EShop.Shared.Cache.CacheKeys;
 using StackExchange.Redis;
 
-namespace EShop.Inventory.Infrastructure.Gateways;
+namespace EShop.Inventory.Infrastructure.Services;
 
 /// <summary>
 /// Atomic Redis-backed stock manager using Lua Scripts.
 /// Lua executes single-threaded inside Redis, ensuring atomicity without distributed locks.
 /// </summary>
-internal sealed class RedisStockGateway : IRedisStockGateway
+internal sealed class RedisStockCacheService : IStockCacheService
 {
     private readonly IConnectionMultiplexer _redis;
     private const string RedisSentinelKey = "stock:_initialized";
 
-    public RedisStockGateway(IConnectionMultiplexer redis)
+    public RedisStockCacheService(IConnectionMultiplexer redis)
     {
         _redis = redis;
     }

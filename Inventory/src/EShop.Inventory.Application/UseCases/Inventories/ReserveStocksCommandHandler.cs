@@ -1,4 +1,5 @@
 using EntityFramework.Exceptions.Common;
+using EShop.Inventory.Application.Services;
 using EShop.Inventory.Domain.Abstractions;
 using EShop.Inventory.Domain.Aggregates;
 using EShop.Inventory.Domain.Commands;
@@ -14,7 +15,7 @@ using Npgsql;
 namespace EShop.Inventory.Application.UseCases.Inventories;
 
 internal sealed class ReserveStocksCommandHandler(
-    IRedisStockGateway redisStockGateway,
+    IStockCacheService stockCacheService,
     IInventoryRepository inventoryRepository,
     IReservationRepository reservationRepository,
     IOutboxWriter outboxWriter,
@@ -72,14 +73,14 @@ internal sealed class ReserveStocksCommandHandler(
             catch (Exception ex) when (ex is not OperationCanceledException)
             {
                 // Unexpected error: Compensate and release Redis stock to prevent "ghost" lockouts
-                await redisStockGateway.ReleaseAsync(redisReservationRequests, cancellationToken);
+                await stockCacheService.ReleaseAsync(redisReservationRequests, cancellationToken);
                 logger.LogError(ex, "Fatal error executing transaction for Order {OrderId}.", command.OrderId);
                 throw;
             }
         }
 
         // Retries exhausted
-        await redisStockGateway.ReleaseAsync(redisReservationRequests, cancellationToken);
+        await stockCacheService.ReleaseAsync(redisReservationRequests, cancellationToken);
 
         var deadlockError = new Error(ErrorDeadlockExceeded, "Resource deadlock. Please try placing your order again.");
         await PublishFailedEventAsync(command, deadlockError, cancellationToken);
@@ -94,7 +95,7 @@ internal sealed class ReserveStocksCommandHandler(
     {
         foreach (var item in redisItems)
         {
-            var isReservedOnRedis = await redisStockGateway.TryReserveAsync([item], cancellationToken);
+            var isReservedOnRedis = await stockCacheService.TryReserveAsync([item], cancellationToken);
 
             // False means either out of stock OR cache miss (cold cache)
             if (!isReservedOnRedis)
@@ -122,8 +123,8 @@ internal sealed class ReserveStocksCommandHandler(
                 }
 
                 // Self-Seeding Mechanism: Populate Redis with DB state, then try reserving again
-                await redisStockGateway.SeedStockAsync(item.VariantId, databaseInventory.StockAvailable, cancellationToken);
-                isReservedOnRedis = await redisStockGateway.TryReserveAsync([item], cancellationToken);
+                await stockCacheService.SeedStockAsync(item.VariantId, databaseInventory.StockAvailable, cancellationToken);
+                isReservedOnRedis = await stockCacheService.TryReserveAsync([item], cancellationToken);
             }
 
             if (!isReservedOnRedis)
@@ -153,7 +154,7 @@ internal sealed class ReserveStocksCommandHandler(
                 if (rowsAffected == 0) // Stock changed by another thread between Phase 1 and Phase 2
                 {
                     // All-or-nothing: one short item → roll back entire transaction.
-                    await redisStockGateway.ReleaseAsync(redisItems, cancellationToken);
+                    await stockCacheService.ReleaseAsync(redisItems, cancellationToken);
 
                     var insufficientError = new Error(ErrorInsufficientStock, $"SKU {item.VariantId} stock mismatch during database write.");
                     await PublishFailedEventAsync(command, insufficientError, cancellationToken);
@@ -194,7 +195,7 @@ internal sealed class ReserveStocksCommandHandler(
         {
             // IDEMPOTENCY GUARD: UNIQUE(tenant_id, order_id) constraint violated.
             // Means network dropped on previous success and Client resent the command. Safely ACK & ignore.
-            await redisStockGateway.ReleaseAsync(redisItems, cancellationToken);
+            await stockCacheService.ReleaseAsync(redisItems, cancellationToken);
 
             logger.LogInformation("Duplicate request for Order {OrderId} detected. Safely ignored.", command.OrderId);
             return Result.Success();

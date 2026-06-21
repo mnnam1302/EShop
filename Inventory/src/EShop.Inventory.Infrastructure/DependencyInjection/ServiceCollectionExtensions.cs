@@ -1,6 +1,5 @@
 using EShop.Inventory.Application.Services;
 using EShop.Inventory.Domain.Abstractions;
-using EShop.Inventory.Infrastructure.Gateways;
 using EShop.Inventory.Infrastructure.Producers;
 using EShop.Inventory.Infrastructure.Repositories;
 using EShop.Inventory.Infrastructure.Services;
@@ -60,26 +59,6 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    //private static IServiceCollection AddInventoryBackgroundJobs(
-    //    this IServiceCollection services,
-    //    IConfiguration configuration)
-    //{
-    //    var connectionString = configuration.GetConnectionString("Default")!;
-
-    //    services.AddHangfire(cfg => cfg
-    //        .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
-    //        .UseSimpleAssemblyNameTypeSerializer()
-    //        .UseRecommendedSerializerSettings()
-    //        .UsePostgreSqlStorage(opt => opt.UseNpgsqlConnection(connectionString)));
-
-    //    services.AddHangfireServer();
-
-    //    services.AddScoped<ExpireReservationsJob>();
-    //    services.AddScoped<SyncRedisStockJob>();
-
-    //    return services;
-    //}
-
     private static IServiceCollection AddRedis(this IServiceCollection services, IConfiguration configuration)
     {
         services
@@ -91,8 +70,7 @@ public static class ServiceCollectionExtensions
 
     private static IServiceCollection AddStockCacheService(this IServiceCollection services)
     {
-        services.AddScoped<IStockOrderCacheService, StockOrderCacheService>();
-        services.AddSingleton<IRedisStockGateway, RedisStockGateway>();
+        services.AddScoped<IStockCacheService, RedisStockCacheService>();
         return services;
     }
 
@@ -167,4 +145,24 @@ public static class ServiceCollectionExtensions
 
         return services;
     }
+
+    //private static IServiceCollection AddInventoryBackgroundJobs(
+    //    this IServiceCollection services,
+    //    IConfiguration configuration)
+    //{
+    //    var connectionString = configuration.GetConnectionString("Default")!;
+
+    //    services.AddHangfire(cfg => cfg
+    //        .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+    //        .UseSimpleAssemblyNameTypeSerializer()
+    //        .UseRecommendedSerializerSettings()
+    //        .UsePostgreSqlStorage(opt => opt.UseNpgsqlConnection(connectionString)));
+
+    //    services.AddHangfireServer();
+
+    //    services.AddScoped<ExpireReservationsJob>();
+    //    services.AddScoped<SyncRedisStockJob>();
+
+    //    return services;
+    //}
 }

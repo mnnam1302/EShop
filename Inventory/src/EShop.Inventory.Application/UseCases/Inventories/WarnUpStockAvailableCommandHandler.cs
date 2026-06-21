@@ -14,12 +14,14 @@ public sealed class WarnUpStockAvailableCommand : ICommand
 internal sealed class WarnUpStockAvailableCommandHandler : ICommandHandler<WarnUpStockAvailableCommand>
 {
     private readonly IInventoryRepository _inventoryRepository;
-    private readonly IStockOrderCacheService _stockOrderCacheService;
+    private readonly IStockCacheService _redisStockGateway;
 
-    public WarnUpStockAvailableCommandHandler(IInventoryRepository inventoryRepository, IStockOrderCacheService stockOrderCacheService)
+    public WarnUpStockAvailableCommandHandler(
+        IInventoryRepository inventoryRepository,
+        IStockCacheService redisStockGateway)
     {
         _inventoryRepository = inventoryRepository;
-        _stockOrderCacheService = stockOrderCacheService;
+        _redisStockGateway = redisStockGateway;
     }
 
     public async Task<Result> HandleAsync(WarnUpStockAvailableCommand command, CancellationToken cancellationToken)
@@ -33,7 +35,7 @@ internal sealed class WarnUpStockAvailableCommandHandler : ICommandHandler<WarnU
             return Result.Failure(new Error("Inventory.NotFound", $"Variant's inventory '{command.VariantId}' is not found."));
         }
 
-        await _stockOrderCacheService.AddStockAvailable(command.VariantId, inventoryDetails.StockAvailable);
+        await _redisStockGateway.SeedStockAsync(command.VariantId, inventoryDetails.StockAvailable, cancellationToken);
 
         return Result.Success();
     }
