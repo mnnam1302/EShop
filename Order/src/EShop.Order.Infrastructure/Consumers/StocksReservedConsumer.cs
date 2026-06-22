@@ -7,9 +7,9 @@ using Microsoft.Extensions.Logging;
 
 namespace EShop.Order.Infrastructure.Consumers;
 
-internal sealed class StockReservedConsumer(
+public sealed class StocksReservedConsumer(
     IAggregateSagaStore aggregateSagaStore,
-    ILogger<StockReservedConsumer> logger,
+    ILogger<StocksReservedConsumer> logger,
     ICommandDispatcher commandDispatcher) : IConsumer<StocksReserved>
 {
     public async Task Consume(ConsumeContext<StocksReserved> context)

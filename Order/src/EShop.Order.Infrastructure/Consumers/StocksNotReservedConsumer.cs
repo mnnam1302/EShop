@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 
 namespace EShop.Order.Infrastructure.Consumers;
 
-internal sealed class StocksNotReservedConsumer(
+public sealed class StocksNotReservedConsumer(
     IAggregateSagaStore aggregateSagaStore,
     ILogger<StocksNotReservedConsumer> logger,
     ICommandDispatcher commandDispatcher) : IConsumer<StocksNotReserved>

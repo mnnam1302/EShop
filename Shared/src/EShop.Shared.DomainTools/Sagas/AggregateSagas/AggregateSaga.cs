@@ -32,7 +32,7 @@ public abstract class AggregateSaga : Aggregate, IAggregateSaga
         _isCompleted = true;
     }
 
-    protected void Publish(ICommand command)
+    protected void Publish<TCommand>(TCommand command) where TCommand : ICommand
     {
         _unpublishedCommands.Add(
             new Tuple<ICommand, Func<ICommandDispatcher, CancellationToken, Task<Result>>>(
