@@ -2,6 +2,7 @@
 
 > Audience: Inventory & Order squad.
 > Status: **Design locked for implementation.** Timing model confirmed = **Deduct-on-Order**.
+> **Source of truth:** [`stock-deduction-solution-specification.md`](./stock-deduction-solution-specification.md) — final decisions, data model, contracts, readiness gate. This document is the architecture *rationale* behind it.
 > Companions: [`stock-deduction-industry-research.md`](./stock-deduction-industry-research.md) (research behind the choice) · [`stock-deduction-architecture.md`](./stock-deduction-architecture.md) (earlier reserve-then-confirm exploration, retained for reference).
 > Branch: `technical/eshop-2006-improve-stock-deduction`.
 
@@ -12,12 +13,12 @@
 | # | Decision | Choice | Rationale |
 |---|----------|--------|-----------|
 | D1 | **When to deduct** | **Deduct-on-order** — `StockAvailable` decremented at order placement | No oversell even with a slow payment step; fair "first-to-order-wins"; fits flash-sale traffic. |
-| D2 | DB concurrency primitive | **Atomic conditional UPDATE (CAS)** `… WHERE stock_available >= qty` | Enforces the invariant in one statement; no read-modify-write race, no optimistic-retry storm under hot SKUs. |
+| D2 | DB concurrency primitive | **Atomic conditional UPDATE (CAS)** `… WHERE stock_available >= qty` | Prevents oversell across **different** concurrent orders. **Does NOT provide idempotency** for the *same* order — that is D7's job. See [§14](#14-deep-dive-cas-≠-idempotency). |
 | D3 | Front gate | **Redis atomic Lua — in scope from Phase 1** (rebuildable cache, not source of truth) | Sheds stampede in <1ms; protects Postgres. **Confirmed: gate + CAS together from the start.** |
 | D4 | Source of truth | **PostgreSQL** | Durable; CAS binds the decision. |
 | D5 | Releasability (mandatory for D1) | **Hold record + TTL sweeper + `ReleaseReservationCommand`** | Deduct-on-order locks real stock; unpaid/abandoned/cancelled orders MUST return it or inventory bleeds. |
 | D6 | Messaging durability | **Transactional Outbox** | "DB deducted but event lost" must be impossible. |
-| D7 | Consumer idempotency | **Inbox** dedupe keyed by OrderId | At-least-once delivery must not double-deduct. |
+| D7 | Consumer idempotency | **Inbox** dedupe keyed by OrderId **+ unique constraint on Hold(OrderId)** | At-least-once delivery must not double-deduct. Orthogonal to D2 (CAS). See [§14](#14-deep-dive-cas-≠-idempotency). |
 | D8 | Multi-item order | **All-or-nothing + deterministic lock order (sort by VariantId)** | Atomic order semantics; deadlock-free. |
 | D9 | **Payment finality** | **Payment step exists** — order is *provisional* until paid | Hold stays `Pending` until payment; `Confirmed` on success; release on cancel / payment-fail / TTL. |
 | D10 | **Release TTL** | **15 minutes** | Standard e-commerce grace window; frees hot stock promptly. |
@@ -327,4 +328,84 @@ Phase 4 — Consistency at scale
 
 ## 13. One-Paragraph Summary for the Team
 
-> We deduct stock **at order placement** (deduct-on-order). The binding mechanism is a **single atomic conditional `UPDATE … WHERE stock_available >= qty`** in Postgres — not optimistic-retry, which collapses on hot SKUs — wrapped in **one transaction** with a **Hold record**, an **inbox** (idempotent) and an **outbox** (durable event). Because deduct-on-order locks real stock, the **release path is mandatory**: cancellations and payment failures send `ReleaseReservationCommand`, and a **TTL sweeper** auto-returns stock from abandoned orders. **Redis** is an optional fast gate added later under load; **Postgres is always the source of truth**, so the worst transient failure is a brief lost sale — never an oversell.
+> We deduct stock **at order placement** (deduct-on-order). The binding mechanism is a **single atomic conditional `UPDATE … WHERE stock_available >= qty`** in Postgres — not optimistic-retry, which collapses on hot SKUs — wrapped in **one transaction** with a **Hold record**, an **inbox + unique key** (idempotent) and an **outbox** (durable event). Because deduct-on-order locks real stock, the **release path is mandatory**: cancellations and payment failures send `ReleaseReservationCommand`, and a **TTL sweeper** auto-returns stock from abandoned orders. **Redis** is a Phase-1 fast gate; **Postgres is always the source of truth**, so the worst transient failure is a brief lost sale — never an oversell.
+
+---
+
+## 14. Deep-Dive: CAS ≠ Idempotency
+
+CAS (D2) and idempotency (D7) solve **two different failure modes**. Conflating them is a common and dangerous mistake.
+
+| | Concurrency (CAS / D2) | Idempotency (Inbox + unique key / D7) |
+|---|---|---|
+| Failure mode | **Different** orders race for the same stock | The **same** order's message is applied twice |
+| Trigger | two buyers, one last unit | redelivery after consumer crash / MassTransit retry / at-least-once |
+| CAS result | one rows=1, other rows=0 ✅ | `9 >= 1` still true → deducts **again** ❌ double-deduct |
+
+**Why CAS cannot be idempotent on its own:** the predicate `stock_available >= qty` is **stateless about the caller** — it asks "is there enough?", never "did I already serve *this* order?". Idempotency requires *memory* of applied requests; CAS has none. CAS is **necessary but not sufficient**.
+
+**Mechanisms (must share ONE transaction with the deduction):**
+1. **Inbox** dedupe on `MessageId`/`OrderId` (generic; `IdempotentConsumer<T>` already implements it).
+2. **Unique constraint on `Hold(OrderId)`** — the reservation row *is* the guard; a duplicate `INSERT` raises a unique violation → treat as already-processed → skip the CAS. A read-first check is only an *optimization*, never the guard (two concurrent redeliveries both read "not found").
+
+**Rule:** dedupe guard + CAS deduction commit **atomically**. CAS handles cross-order concurrency; the unique key handles same-order idempotency.
+
+---
+
+## 15. Deep-Dive: Outbox Relay — Polling Publisher vs CDC
+
+After the business row + `OutboxMessage` row commit together (`ProcessedOnUtc IS NULL` = pending), a relay must publish pending rows and mark them processed.
+
+### Polling Publisher (recommended now)
+```sql
+SELECT * FROM outbox_messages
+WHERE processed_on_utc IS NULL
+ORDER BY occurred_on_utc
+LIMIT @batch
+FOR UPDATE SKIP LOCKED;     -- many workers, no double-publish
+-- publish each → RabbitMQ, then set processed_on_utc = now()
+```
+| | Pros | Cons |
+|---|------|------|
+| Polling | No extra infra (app+DB); consistent with the business write; testable in-process; `SKIP LOCKED` scales out; retry via `Error` column | Latency = poll interval (100ms–1s); polling load; table goes hot → needs index on `processed_on_utc` + archival; at-least-once → consumers must be idempotent |
+| CDC (Debezium/WAL) | Near-real-time; no table polling; very high throughput; LSN-ordered | Operate Debezium+Connect+replication slots; lagging slot bloats WAL; usually needs Kafka; overkill at current scale |
+
+**Recommendation:** Polling publisher — prefer **MassTransit's built-in EF Core Outbox** (a polling publisher with inbox baked in) over hand-rolling. Keep the custom `OutboxMessage` table only if we want explicit control (then add a retry-count column + `processed_on_utc` index). Move to **CDC only** when latency/throughput outgrows polling or Kafka/Debezium is already operated.
+
+---
+
+## 16. Deep-Dive: Multi-Item Deadlock & Deterministic Lock Ordering
+
+**Why it happens:** a deadlock needs a wait-for **cycle**. T1 (items `[A,B]`) locks **A** then waits on **B**; T2 (items `[B,A]`) locks **B** then waits on **A** → `T1→T2→T1`; Postgres kills one after `deadlock_timeout`. Preconditions: (1) multiple rows locked per TX, (2) locks held to commit, (3) **different acquisition order** — only #3 is cheaply removable.
+
+**Principle:** resource-ordering deadlock-*prevention* — if every transaction locks rows in the **same total order**, a cycle is impossible (breaks "circular wait").
+
+| Option | Pros | Cons |
+|--------|------|------|
+| **1. Sort items by VariantId** (primary) | Trivial, app-side, zero infra; removes precondition #3; pairs with single-statement CAS | Protects only this path — all multi-row inventory writes must honour the convention |
+| **2. Catch deadlock + retry** (safety net) | Simple; deadlocks are transient; order-independent | Recovers not prevents; wastes rolled-back work; latency spikes |
+| 3. Single batched `… IN (...)` | Fewer round-trips | Lock order not guaranteed across statements → can still deadlock; loses per-item rows=1 check |
+| 4. `SELECT … FOR UPDATE ORDER BY variant_id` | Explicit order + pre-check | Extra round-trip; longer locks; reintroduces read-then-write |
+| 5. Serialize per-SKU (queue) | No row contention; great for extreme hot SKU | Heavy; per-SKU bottleneck; overkill now |
+
+**Recommendation:** Option 1 (sort by `VariantId asc`) as prevention **+** Option 2 (bounded deadlock-retry) as safety net. **Convention:** *any transaction locking multiple inventory rows acquires them ordered by `VariantId` ascending.*
+
+---
+
+## 17. Cross-Document Consistency
+
+This document is the **authority for stock-deduction mechanics**. The Order service README (`Order/src/EShop.Order.API/README.md`) is the authority for the **saga/process-manager** view. Aligned facts:
+
+| Fact | Value (both docs) |
+|------|-------------------|
+| Reservation/Hold statuses | `Pending → Confirmed | Released | Expired` (matches `ReservationStatus` enum) |
+| TTL | 15 minutes; sweeper every 1 minute |
+| Redis role | fast gate, rebuildable cache — **not** source of truth |
+| Source of truth | PostgreSQL |
+| Idempotency key | `OrderId` |
+| Deduction primitive | CAS (`stock_available >= qty`) — **not** the saga's optimistic `RowVersion` |
+
+**Known drift to resolve (tracked, not silently rewritten):**
+1. Contract names — README uses illustrative `OrderSubmitted`/`ReserveStockCommand`; live contracts are `OrderCreated`/`MakeReservation` (+ internal `ReserveStocksCommand`).
+2. Saga implementation — README describes a `PlaceOrderSagaOrchestrator` POCO + `RowVersion`; the code is an **event-sourced `OrderSaga : AggregateSaga`**.
+3. **Reservation granularity (open):** code's `Reservation` is **per-order** (`OrderId`, no line items); release needs **per-variant quantities**. Decide: store reservation **line items** (per-variant) or re-derive from the order. Blocks the release path's add-back. *(Links to open decision O3.)*
