@@ -9,58 +9,39 @@ using Microsoft.Extensions.Logging;
 
 namespace EShop.Order.Application.UseCases.V1.Events;
 
-internal sealed class OrderCreatedEventHandler : ICommandHandler<OrderCreated>
+internal sealed class OrderCreatedEventHandler(
+    IAggregateSagaStore aggregateSagaStore,
+    ILogger<OrderCreatedEventHandler> logger,
+    IUserDetailsProvider userDetailsProvider,
+    ICommandBus commandBus) : ICommandHandler<OrderCreated>
 {
-    private readonly IAggregateSagaStore _aggregateSagaStore;
-    private readonly ILogger<OrderCreatedEventHandler> _logger;
-    private readonly IUserDetailsProvider _userDetailsProvider;
-    private readonly ICommandBus _commandBus;
-
-    public OrderCreatedEventHandler(
-        IAggregateSagaStore aggregateSagaStore,
-        ILogger<OrderCreatedEventHandler> logger,
-        IUserDetailsProvider userDetailsProvider,
-        ICommandBus commandBus)
-    {
-        _aggregateSagaStore = aggregateSagaStore;
-        _logger = logger;
-        _userDetailsProvider = userDetailsProvider;
-        _commandBus = commandBus;
-    }
-
     public async Task<Result> HandleAsync(OrderCreated command, CancellationToken cancellationToken)
     {
-        var orderSagaId = OrderSagaId
-            .FromOrderId(command.OrderId)
-            .GetGuid();
+        var orderSagaId = OrderSagaId.FromOrderId(command.OrderId);
 
-        _logger.LogInformation(
-            "Processing OrderCreated event for Order ID: {OrderId} with Saga ID: {OrderSagaId}",
+        logger.LogInformation(
+            "Processing OrderCreated for Order {OrderId} with Saga {OrderSagaId}",
             command.OrderId, orderSagaId);
 
-        // 1. Check idempotency via deterministic via OrderId
-        var existingSaga = await _aggregateSagaStore.LoadAggregateSagaAsync<OrderSaga>(orderSagaId, cancellationToken);
+        var existingSaga = await aggregateSagaStore.LoadAggregateSagaAsync<OrderSaga>(orderSagaId, cancellationToken);
 
         if (!existingSaga.IsNew)
         {
-            _logger.LogWarning(
-                "Idempotency conflict detected. OrderSaga already exists for Order ID: {OrderId} (Saga ID: {OrderSagaId}). Command execution halted.",
+            logger.LogWarning(
+                "OrderSaga already exists for Order {OrderId} (Saga {OrderSagaId}). Idempotency guard triggered.",
                 command.OrderId, orderSagaId);
 
             return Result.Success();
         }
 
-        // 2. Initial Order saga process manager
-        var orderSaga = OrderSaga.Create(orderSagaId, command, _userDetailsProvider);
+        var orderSaga = OrderSaga.Create(orderSagaId, command, userDetailsProvider);
+        await aggregateSagaStore.UpdateAggregateSagaAsync(orderSaga, cancellationToken);
 
-        _logger.LogInformation(
-            "Successfully initialized and persisted OrderSaga for Order ID: {OrderId} (Saga ID: {OrderSagaId})",
+        await orderSaga.PublishAsync(commandBus, cancellationToken);
+
+        logger.LogInformation(
+            "OrderSaga started for Order {OrderId} (Saga {OrderSagaId}).",
             command.OrderId, orderSagaId);
-
-        await _aggregateSagaStore.UpdateAggregateSagaAsync(orderSaga, cancellationToken);
-
-        // 3. Publish commands to message queue
-        await orderSaga.PublishAsync(_commandBus, cancellationToken);
 
         return Result.Success();
     }

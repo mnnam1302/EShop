@@ -15,7 +15,7 @@ public sealed class StocksReservedConsumer(
     public async Task Consume(ConsumeContext<StocksReserved> context)
     {
         var message = context.Message;
-        var sagaId = OrderSagaId.FromOrderId(message.OrderId).GetGuid();
+        var sagaId = OrderSagaId.FromOrderId(message.OrderId);
 
         logger.LogInformation("StockReservedConsumer: Processing for Order {OrderId}, Saga {SagaId}", message.OrderId, sagaId);
 

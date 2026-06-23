@@ -1,6 +1,5 @@
 using EShop.Order.Domain.Commands;
 using EShop.Order.Domain.Repositories;
-using EShop.Order.Domain.StateMachines;
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.CQRS.Command;
 using EShop.Shared.DomainTools.Exceptions;
@@ -19,11 +18,6 @@ internal sealed class RejectOrderCommandHandler(
         if (order is null)
         {
             throw new NotFoundException($"Order {command.OrderId} is not found.");
-        }
-
-        if (order.Status != nameof(OrderStatus.Pending))
-        {
-            throw new DomainException("Order", "Cannot reject an order that is already processed.");
         }
 
         order.Reject(command.Reason);

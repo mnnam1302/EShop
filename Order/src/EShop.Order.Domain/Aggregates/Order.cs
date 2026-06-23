@@ -1,8 +1,9 @@
+using System.ComponentModel.DataAnnotations;
 using EShop.Order.Domain.Commands;
 using EShop.Order.Domain.StateMachines;
 using EShop.Shared.DomainTools.Aggregates;
 using EShop.Shared.DomainTools.Entities;
-using System.ComponentModel.DataAnnotations;
+using EShop.Shared.DomainTools.Exceptions;
 
 namespace EShop.Order.Domain.Aggregates;
 
@@ -13,9 +14,6 @@ public class Order : AggregateRoot<Guid>, IDateTracking, IExcludedFromScoping
 
     public DateTimeOffset OrderDate { get; set; }
 
-    [MaxLength(ModelConstants.ShortText)]
-    public string Status { get; private set; } = nameof(OrderStatus.Pending);
-    
     [MaxLength(ModelConstants.VeryLongText)]
     public string? Description { get; private set; }
 
@@ -25,6 +23,27 @@ public class Order : AggregateRoot<Guid>, IDateTracking, IExcludedFromScoping
     public DateTimeOffset CreatedAtUtc { get; set; }
     public DateTimeOffset? LastModifiedAtUtc { get; set; }
 
+    public OrderStateMachine State => new(() => ParseStatusSafely(), AfterStateUpdated);
+
+    [MaxLength(ModelConstants.ShortText)]
+    public string Status { get; private set; } = nameof(OrderState.Pending);
+
+    private OrderState ParseStatusSafely()
+    {
+        if (!Enum.TryParse<OrderState>(Status, out var state))
+        {
+            throw new ArgumentException(nameof(Status));
+        }
+
+        return state;
+    }
+
+    private void AfterStateUpdated(OrderState newState)
+    {
+        Status = Enum.GetName(newState)
+            ?? throw new DomainException("Order", $"Order state {newState} is invalid.");
+    }
+
     public static Order CreateOrder(PlaceOrderCommand command)
     {
         var order = new Order
@@ -32,7 +51,6 @@ public class Order : AggregateRoot<Guid>, IDateTracking, IExcludedFromScoping
             Id = Guid.NewGuid(),
             BuyerId = command.BuyerId,
             OrderDate = DateTimeOffset.UtcNow,
-            Status = nameof(OrderStatus.Pending),
             CreatedAtUtc = DateTimeOffset.UtcNow
         };
 
@@ -50,16 +68,16 @@ public class Order : AggregateRoot<Guid>, IDateTracking, IExcludedFromScoping
         }
     }
 
-    public void Reject(string reason)
+    public void Accept()
     {
-        Status = nameof(OrderStatus.Rejected);
-        Description = reason;
+        State.Fire(OrderAction.Accept);
         LastModifiedAtUtc = DateTimeOffset.UtcNow;
     }
 
-    public void Accept()
+    public void Reject(string reason)
     {
-        Status = nameof(OrderStatus.Accepted);
+        State.Fire(OrderAction.Reject);
+        Description = reason;
         LastModifiedAtUtc = DateTimeOffset.UtcNow;
     }
 }

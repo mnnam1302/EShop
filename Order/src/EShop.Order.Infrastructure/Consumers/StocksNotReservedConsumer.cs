@@ -15,7 +15,7 @@ public sealed class StocksNotReservedConsumer(
     public async Task Consume(ConsumeContext<StocksNotReserved> context)
     {
         var message = context.Message;
-        var sagaId = OrderSagaId.FromOrderId(message.OrderId).GetGuid();
+        var sagaId = OrderSagaId.FromOrderId(message.OrderId);
 
         logger.LogWarning("StockReservationFailedConsumer: Stock reservation failed for Order {OrderId}, Saga {SagaId}. Reason: {Reason}",
             message.OrderId, sagaId, message.FailureReason);

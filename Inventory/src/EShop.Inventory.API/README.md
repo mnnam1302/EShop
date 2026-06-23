@@ -288,6 +288,44 @@ graph LR
 
 ---
 
+## Order Process Manager Integration
+
+> Inventory is the **receiving side** of the Order service's Process Manager (`OrderSaga`). The saga drives this service with commands; Inventory replies with events. See the [Order Service README](../../../Order/src/EShop.Order.API/README.md) for the saga's own state machine and roadmap.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant PM  as Order Process Manager
+    participant INV as Inventory Service
+    participant HOLD as Reservation (hold)
+
+    PM->>INV: MakeReservation
+    alt gate + CAS pass
+        INV->>HOLD: create Pending hold (+15 min TTL)
+        INV-->>PM: StocksReserved (ReservationId)
+    else sold out / CAS rows = 0
+        INV-->>PM: StocksNotReserved (reason)
+    end
+
+    rect rgb(232,245,233)
+        Note over PM,HOLD: Planned — payment-aware step (not issued by the saga yet)
+        PM->>INV: ConfirmReservationCommand
+        INV->>HOLD: Pending → Confirmed (no stock change)
+        PM->>INV: ReleaseReservationCommand
+        INV->>HOLD: Pending → Released (available += qty)
+    end
+```
+
+| Saga sends | Inventory does | Reply | Status today |
+|------------|----------------|-------|--------------|
+| `MakeReservation` | Redis gate + CAS deduct + create `Pending` hold | `StocksReserved` / `StocksNotReserved` | ✅ Live |
+| `ConfirmReservationCommand` | `Pending → Confirmed` (no stock change) | — | ⏳ Inventory side ready; saga does not issue it yet |
+| `ReleaseReservationCommand` | `Pending → Released`, add stock back | — | ⏳ Inventory side ready; saga does not issue it yet |
+
+> The release/confirm handlers exist in Inventory, but the Order saga has no payment-awaiting state to trigger them. That work is tracked in the [Order README roadmap](../../../Order/src/EShop.Order.API/README.md#roadmap--next-steps). Until then, the `ExpireReservationsJob` TTL sweeper is the only thing that releases unconfirmed holds.
+
+---
+
 ## Key Tables
 
 | Table | One row per |

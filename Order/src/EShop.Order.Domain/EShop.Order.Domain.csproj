@@ -1,5 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
+    <PackageReference Include="Stateless" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\..\..\Shared\src\EShop.Shared.DomainTools\EShop.Shared.DomainTools.csproj" />
     <ProjectReference Include="..\..\..\Shared\src\EShop.Shared.Scoping\EShop.Shared.Scoping.csproj" />
   </ItemGroup>
