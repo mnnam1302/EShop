@@ -21,9 +21,9 @@ public sealed class OrderSagaExpireJob(
             return;
         }
 
-        if (saga.State.IsInState(OrderSagaState.ReservingInventory))
+        if (!saga.State.IsInState(OrderSagaState.ReservingInventory))
         {
-            logger.LogDebug("Saga {SagaId} is in state {State}. Not eligible for expiration.", sagaId, saga.State);
+            logger.LogDebug("Saga {SagaId} is in state {State}. Already past ReservingInventory — expiration is a no-op.", sagaId, saga.State);
             return;
         }
 

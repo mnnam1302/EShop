@@ -57,12 +57,12 @@ public sealed class OrderSaga : AggregateSaga, IScoped
     {
         if (!State.CanFire(OrderSagaTrigger.InventoryReserved))
         {
-            throw new DomainException("OrderSaga", $"Cannot handle StocksReserved in saga state '{State}'.");
+            throw new DomainException("OrderSaga", $"Cannot handle InventoryReserved in saga state '{State}'.");
         }
 
         RaiseEvent(new SagaInventoryReservedEvent { ReservationId = message.ReservationId });
 
-        Publish(new AcceptOrderCommand { OrderId = OrderId });
+        Publish(new StartOrderPaymentCommand { OrderId = OrderId });
 
         MarkComplete();
     }
@@ -71,7 +71,7 @@ public sealed class OrderSaga : AggregateSaga, IScoped
     {
         if (!State.CanFire(OrderSagaTrigger.InventoryReservationFailed))
         {
-            throw new DomainException("OrderSaga", $"Cannot handle StocksNotReserved in saga state '{State}'.");
+            throw new DomainException("OrderSaga", $"Cannot handle InventoryReservationFailed in saga state '{State}'.");
         }
 
         RaiseEvent(new SagaInventoryReservationFailedEvent());
@@ -89,7 +89,7 @@ public sealed class OrderSaga : AggregateSaga, IScoped
     {
         if (!State.CanFire(OrderSagaTrigger.Expire))
         {
-            throw new DomainException("OrderSaga", $"Cannot handle Timeout in saga state '{State}'.");
+            throw new DomainException("OrderSaga", $"Cannot handle Expire in saga state '{State}'.");
         }
 
         RaiseEvent(new SagaExpiredEvent());

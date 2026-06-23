@@ -97,7 +97,6 @@ public static class ServiceCollectionExtensions
             cfg.UsingRabbitMq((context, bus) =>
             {
                 // SendTopology conventions apply to messages this bus PUBLISHES/SENDS.
-                // StocksReserved/StocksNotReserved are published by Inventory — their conventions live there.
                 bus.SendTopology.UseCorrelationId<OrderCreated>(x => x.OrderId);
                 bus.SendTopology.UseCorrelationId<MakeReservation>(x => x.OrderId);
                 bus.SendTopology.UseCorrelationId<ReleaseReservationCommand>(x => x.OrderId);

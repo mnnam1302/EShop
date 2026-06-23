@@ -26,7 +26,7 @@ public class Order : AggregateRoot<Guid>, IDateTracking, IExcludedFromScoping
     public OrderStateMachine State => new(() => ParseStatusSafely(), AfterStateUpdated);
 
     [MaxLength(ModelConstants.ShortText)]
-    public string Status { get; private set; } = nameof(OrderState.Pending);
+    public string Status { get; private set; } = nameof(OrderState.ReservingInventory);
 
     private OrderState ParseStatusSafely()
     {
@@ -66,6 +66,12 @@ public class Order : AggregateRoot<Guid>, IDateTracking, IExcludedFromScoping
             var orderItem = new OrderItem(Guid.NewGuid(), Id, item.VariantId, item.Quantity, item.UnitPrice, item.Discount);
             _orderItems.Add(orderItem);
         }
+    }
+
+    public void StartPayment()
+    {
+        State.Fire(OrderAction.StartPayment);
+        LastModifiedAtUtc = DateTimeOffset.UtcNow;
     }
 
     public void Accept()

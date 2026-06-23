@@ -1,3 +1,4 @@
+using EShop.Shared.DomainTools.Exceptions;
 using Stateless;
 
 namespace EShop.Order.Domain.StateMachines;
@@ -11,6 +12,9 @@ public sealed class OrderSagaStateMachine : StateMachine<OrderSagaState, OrderSa
 
     private void Configure()
     {
+        OnUnhandledTrigger((state, trigger) =>
+            throw new DomainException("OrderSaga", $"Trigger '{trigger}' is not permitted in state '{state}'."));
+
         Configure(OrderSagaState.ReservingInventory)
             .Permit(OrderSagaTrigger.InventoryReserved, OrderSagaState.ProcessingPayment)
             .Permit(OrderSagaTrigger.InventoryReservationFailed, OrderSagaState.Failed)
@@ -29,6 +33,7 @@ public enum OrderSagaState
     ReservingInventory,
     ProcessingPayment,
     Failed,
+    Completed,
     Expired,
 }
 
