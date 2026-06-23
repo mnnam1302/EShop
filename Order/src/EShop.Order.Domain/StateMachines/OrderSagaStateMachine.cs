@@ -4,35 +4,37 @@ namespace EShop.Order.Domain.StateMachines;
 
 public sealed class OrderSagaStateMachine : StateMachine<OrderSagaState, OrderSagaTrigger>
 {
-    public OrderSagaStateMachine() : base(OrderSagaState.AwaitingStockReservation)
+    public OrderSagaStateMachine() : base(OrderSagaState.ReservingInventory)
     {
         Configure();
     }
 
     private void Configure()
     {
-        Configure(OrderSagaState.AwaitingStockReservation)
-            .Permit(OrderSagaTrigger.StocksReserved, OrderSagaState.StocksAccepted)
-            .Permit(OrderSagaTrigger.StocksNotReserved, OrderSagaState.StocksRejected)
-            .Permit(OrderSagaTrigger.Timeout, OrderSagaState.TimedOut);
+        Configure(OrderSagaState.ReservingInventory)
+            .Permit(OrderSagaTrigger.InventoryReserved, OrderSagaState.ProcessingPayment)
+            .Permit(OrderSagaTrigger.InventoryReservationFailed, OrderSagaState.Failed)
+            .Permit(OrderSagaTrigger.Expire, OrderSagaState.Expired);
 
-        Configure(OrderSagaState.StocksAccepted);
-        Configure(OrderSagaState.StocksRejected);
-        Configure(OrderSagaState.TimedOut);
+        Configure(OrderSagaState.ProcessingPayment);
+
+        Configure(OrderSagaState.Failed);
+
+        Configure(OrderSagaState.Expired);
     }
 }
 
 public enum OrderSagaState
 {
-    AwaitingStockReservation,
-    StocksAccepted,
-    StocksRejected,
-    TimedOut,
+    ReservingInventory,
+    ProcessingPayment,
+    Failed,
+    Expired,
 }
 
 public enum OrderSagaTrigger
 {
-    StocksReserved,
-    StocksNotReserved,
-    Timeout,
+    InventoryReserved,
+    InventoryReservationFailed,
+    Expire,
 }

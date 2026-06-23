@@ -179,7 +179,7 @@ internal sealed class MakeReservationCommandHandler(
 
             await unitOfWork.SaveChangesAsync(cancellationToken);
 
-            await eventBus.PublishAsync(new StocksReserved
+            await eventBus.PublishAsync(new InventoryReserved
             {
                 OrderId = command.OrderId,
                 ReservationId = reservation.Id,
@@ -204,7 +204,7 @@ internal sealed class MakeReservationCommandHandler(
 
     private async Task PublishFailedEventAsync(MakeReservationCommand command, Error error, CancellationToken cancellationToken)
     {
-        await eventBus.PublishAsync(new StocksNotReserved
+        await eventBus.PublishAsync(new InventoryReservationFailed
         {
             OrderId = command.OrderId,
             FailureReason = error.Message,

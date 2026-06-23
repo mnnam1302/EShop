@@ -56,7 +56,7 @@ public static class ServiceCollectionExtensions
             .AddOrderHangfire(configuration);
 
         services.AddSingleton(typeof(CorrelationIdLogEnrichFilter<>));
-        services.AddScoped<OrderSagaTimeoutJob>();
+        services.AddScoped<OrderSagaExpireJob>();
 
         return services;
     }

@@ -1,6 +1,6 @@
 namespace EShop.Order.Domain.Sagas.DomainEvents;
 
-public sealed class OrderSagaStartedEvent : OrderSagaDomainEvent
+public sealed class SagaStartedEvent : OrderSagaDomainEvent
 {
     public required Guid OrderSagaId { get; set; }
     public required string BuyerId { get; init; }

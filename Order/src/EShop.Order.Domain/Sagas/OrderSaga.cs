@@ -32,7 +32,7 @@ public sealed class OrderSaga : AggregateSaga, IScoped
             Scope = message.TenantId
         };
 
-        orderSaga.RaiseEvent(new OrderSagaStartedEvent
+        orderSaga.RaiseEvent(new SagaStartedEvent
         {
             OrderSagaId = orderSagaId,
             BuyerId = orderSaga.BuyerId,
@@ -53,28 +53,28 @@ public sealed class OrderSaga : AggregateSaga, IScoped
         return orderSaga;
     }
 
-    public void HandleAsync(StocksReserved message)
+    public void HandleAsync(InventoryReserved message)
     {
-        if (!State.CanFire(OrderSagaTrigger.StocksReserved))
+        if (!State.CanFire(OrderSagaTrigger.InventoryReserved))
         {
             throw new DomainException("OrderSaga", $"Cannot handle StocksReserved in saga state '{State}'.");
         }
 
-        RaiseEvent(new StockReservedEvent { ReservationId = message.ReservationId });
+        RaiseEvent(new SagaInventoryReservedEvent { ReservationId = message.ReservationId });
 
         Publish(new AcceptOrderCommand { OrderId = OrderId });
 
         MarkComplete();
     }
 
-    public void HandleAsync(StocksNotReserved message)
+    public void HandleAsync(InventoryReservationFailed message)
     {
-        if (!State.CanFire(OrderSagaTrigger.StocksNotReserved))
+        if (!State.CanFire(OrderSagaTrigger.InventoryReservationFailed))
         {
             throw new DomainException("OrderSaga", $"Cannot handle StocksNotReserved in saga state '{State}'.");
         }
 
-        RaiseEvent(new StockReservationFailedEvent());
+        RaiseEvent(new SagaInventoryReservationFailedEvent());
 
         Publish(new RejectOrderCommand
         {
@@ -85,14 +85,14 @@ public sealed class OrderSaga : AggregateSaga, IScoped
         MarkComplete();
     }
 
-    public void HandleTimeout()
+    public void HandleExpire()
     {
-        if (!State.CanFire(OrderSagaTrigger.Timeout))
+        if (!State.CanFire(OrderSagaTrigger.Expire))
         {
             throw new DomainException("OrderSaga", $"Cannot handle Timeout in saga state '{State}'.");
         }
 
-        RaiseEvent(new SagaTimedOutEvent());
+        RaiseEvent(new SagaExpiredEvent());
 
         Publish(new RejectOrderCommand
         {
@@ -103,7 +103,7 @@ public sealed class OrderSaga : AggregateSaga, IScoped
         MarkComplete();
     }
 
-    public void Apply(OrderSagaStartedEvent @event)
+    public void Apply(SagaStartedEvent @event)
     {
         Id = @event.OrderSagaId;
         BuyerId = @event.BuyerId;
@@ -112,19 +112,19 @@ public sealed class OrderSaga : AggregateSaga, IScoped
         Scope = @event.Scope;
     }
 
-    public void Apply(StockReservedEvent @event)
+    public void Apply(SagaInventoryReservedEvent @event)
     {
-        State.Fire(OrderSagaTrigger.StocksReserved);
+        State.Fire(OrderSagaTrigger.InventoryReserved);
         ReservationId = @event.ReservationId;
     }
 
-    public void Apply(StockReservationFailedEvent _)
+    public void Apply(SagaInventoryReservationFailedEvent _)
     {
-        State.Fire(OrderSagaTrigger.StocksNotReserved);
+        State.Fire(OrderSagaTrigger.InventoryReservationFailed);
     }
 
-    public void Apply(SagaTimedOutEvent _)
+    public void Apply(SagaExpiredEvent _)
     {
-        State.Fire(OrderSagaTrigger.Timeout);
+        State.Fire(OrderSagaTrigger.Expire);
     }
 }

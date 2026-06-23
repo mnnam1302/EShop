@@ -7,24 +7,23 @@ using Microsoft.Extensions.Logging;
 
 namespace EShop.Order.Infrastructure.Consumers;
 
-public sealed class StocksNotReservedConsumer(
+public sealed class InventoryReservedConsumer(
     IAggregateSagaStore aggregateSagaStore,
-    ILogger<StocksNotReservedConsumer> logger,
-    ICommandDispatcher commandDispatcher) : IConsumer<StocksNotReserved>
+    ILogger<InventoryReservedConsumer> logger,
+    ICommandDispatcher commandDispatcher) : IConsumer<InventoryReserved>
 {
-    public async Task Consume(ConsumeContext<StocksNotReserved> context)
+    public async Task Consume(ConsumeContext<InventoryReserved> context)
     {
         var message = context.Message;
         var sagaId = OrderSagaId.FromOrderId(message.OrderId);
 
-        logger.LogWarning("StockReservationFailedConsumer: Stock reservation failed for Order {OrderId}, Saga {SagaId}. Reason: {Reason}",
-            message.OrderId, sagaId, message.FailureReason);
+        logger.LogInformation("InventoryReservedConsumer: Processing for Order {OrderId}, Saga {SagaId}", message.OrderId, sagaId);
 
         var saga = await aggregateSagaStore.LoadAggregateSagaAsync<OrderSaga>(sagaId, context.CancellationToken);
 
         if (saga.IsNew)
         {
-            logger.LogWarning("StockReservationFailedConsumer: Saga not found for Order {OrderId}", message.OrderId);
+            logger.LogWarning("InventoryReservedConsumer: Saga not found for Order {OrderId}", message.OrderId);
             return;
         }
 
@@ -33,6 +32,6 @@ public sealed class StocksNotReservedConsumer(
 
         await saga.PublishAsync(commandDispatcher, context.CancellationToken);
 
-        logger.LogInformation("StockReservationFailedConsumer: Saga marked as failed for Order {OrderId}", message.OrderId);
+        logger.LogInformation("InventoryReservedConsumer: Saga advanced for Order {OrderId}", message.OrderId);
     }
 }

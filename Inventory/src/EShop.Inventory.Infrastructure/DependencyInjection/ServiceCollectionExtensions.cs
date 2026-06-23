@@ -103,8 +103,8 @@ public static class ServiceCollectionExtensions
             cfg.UsingRabbitMq((context, bus) =>
             {
                 // Messages published FROM Inventory — stamp OrderId as the envelope CorrelationId.
-                bus.SendTopology.UseCorrelationId<StocksReserved>(x => x.OrderId);
-                bus.SendTopology.UseCorrelationId<StocksNotReserved>(x => x.OrderId);
+                bus.SendTopology.UseCorrelationId<InventoryReserved>(x => x.OrderId);
+                bus.SendTopology.UseCorrelationId<InventoryReservationFailed>(x => x.OrderId);
 
                 if (configuration.IsRunningInAspire())
                 {
