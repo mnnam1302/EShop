@@ -6,10 +6,13 @@ using EShop.Inventory.Infrastructure.Services;
 using EShop.Shared.Authentication.Filters;
 using EShop.Shared.Cache.DependencyInejctions.Extensions;
 using EShop.Shared.Contracts.JsonConverters;
+using EShop.Shared.Contracts.Services.Inventory;
+using EShop.Shared.Contracts.Services.Order.Saga;
 using EShop.Shared.Diagnostics;
 using EShop.Shared.DomainTools.UnitOfWorks;
 using EShop.Shared.EventBus.DependencyInjections.Extensions;
 using EShop.Shared.EventBus.DependencyInjections.Options;
+using EShop.Shared.EventBus.Filters;
 using EShop.Shared.EventBus.PipelineObservers;
 using EShop.Shared.JsonApi.Extensions;
 using EShop.Shared.Scoping.ResourceAccessControl;
@@ -52,6 +55,8 @@ public static class ServiceCollectionExtensions
             .AddEventBus()
             .AddMasstransitRabbitMQ(configuration)
             .AddFeaturesAndPermissionsService();
+
+        services.AddSingleton(typeof(CorrelationIdLogEnrichFilter<>));
 
         services.AddRedis(configuration)
             .AddStockCacheService();
@@ -97,6 +102,10 @@ public static class ServiceCollectionExtensions
 
             cfg.UsingRabbitMq((context, bus) =>
             {
+                // Messages published FROM Inventory — stamp OrderId as the envelope CorrelationId.
+                bus.SendTopology.UseCorrelationId<StocksReserved>(x => x.OrderId);
+                bus.SendTopology.UseCorrelationId<StocksNotReserved>(x => x.OrderId);
+
                 if (configuration.IsRunningInAspire())
                 {
                     var connectionString = configuration.GetConnectionString("rabbitmq");
@@ -112,6 +121,7 @@ public static class ServiceCollectionExtensions
                 }
 
                 bus.UseConsumeFilter(typeof(SystemUserContextConsumeFilter<>), context);
+                bus.UseConsumeFilter(typeof(CorrelationIdLogEnrichFilter<>), context);
 
                 bus.UseMessageRetry(retry => retry.Incremental(
                     retryLimit: messageBusOptions.RetryLimit,

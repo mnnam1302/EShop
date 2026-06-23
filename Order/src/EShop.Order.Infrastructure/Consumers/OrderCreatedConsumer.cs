@@ -19,7 +19,7 @@ public sealed class OrderCreatedConsumer(
 
         var sagaId = OrderSagaId.FromOrderId(context.Message.OrderId);
 
-        backgroundJobClient.Schedule<SagaTimeoutJob>(
+        backgroundJobClient.Schedule<OrderSagaTimeoutJob>(
             job => job.Execute(sagaId, context.Message.OrderId, context.CancellationToken),
             SagaTimeout);
     }

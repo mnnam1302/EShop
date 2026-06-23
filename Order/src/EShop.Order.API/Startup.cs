@@ -2,6 +2,7 @@ using EShop.Order.API.DependencyInjection;
 using EShop.Order.Application.DependencyInjections;
 using EShop.Order.Infrastructure.DependencyInjection;
 using EShop.Shared.JsonApi.Middlewares;
+using Hangfire;
 
 namespace EShop.Order.API;
 
@@ -33,5 +34,7 @@ public class Startup(IConfiguration configuration, IWebHostEnvironment environme
         app.UseRouting();
 
         app.MapEndpoints();
+
+        app.UseHangfireDashboard("/hangfire");
     }
 }
