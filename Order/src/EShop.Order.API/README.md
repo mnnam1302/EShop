@@ -1,627 +1,478 @@
-# 🛒 Order Bounded Context
+﻿# Order Service
 
-[![DDD](https://img.shields.io/badge/Pattern-Domain--Driven%20Design-blue)](/)
-[![Saga](https://img.shields.io/badge/Pattern-Process%20Manager%20Saga-purple)](/)
-[![Event Storming](https://img.shields.io/badge/Discovery-Event%20Storming-orange)](/)
-[![CQRS](https://img.shields.io/badge/Pattern-CQRS-green)](/)
+> Accepts orders from buyers and coordinates inventory reservation with the Inventory service via a **Process Manager** before resolving the order.
 
-> **Order Aggregate** is the core aggregate root in the Order bounded context. It is created at the end of a **Place-Order Saga** — an orchestration process manager that coordinates stock reservation in the Inventory service before persisting the order.
-
----
-
-## 📋 Table of Contents
-
-- [Strategic Design](#-strategic-design)
-- [Event Storming](#-event-storming)
-- [Saga State Machine](#-saga-state-machine)
-- [End-to-End Flow](#-end-to-end-flow)
-- [Architecture — Process Manager Pattern](#-architecture--process-manager-pattern)
-- [Message Contracts](#-message-contracts)
-- [Tactical Design](#-tactical-design)
-- [Key Design Decisions](#-key-design-decisions)
+> Reference: [CQRS Journey — Chapter 6: Sagas and Process Managers](https://learn.microsoft.com/en-us/previous-versions/msp-n-p/jj591569(v=pandp.10))
+>
+> Inventory side of this contract: [Inventory Service README](../../../Inventory/src/EShop.Inventory.API/README.md)
 
 ---
 
-## 🗺 Strategic Design
-
-### Bounded Context Map
-
-```mermaid
-graph TB
-    subgraph Order["🛒 Order Bounded Context"]
-        direction TB
-        OA["Order Aggregate<br/>(Order + OrderItems)"]
-        PM["PlaceOrderSagaOrchestrator<br/>(Process Manager)"]
-    end
-
-    subgraph Inventory["📦 Inventory Bounded Context"]
-        SR["StockReservation Entity"]
-        IG["IRedisStockGateway<br/>(Redis fast-gate)"]
-    end
-
-    subgraph Catalog["🏷 Catalog Bounded Context"]
-        VA["Variant (SKU)"]
-    end
-
-    subgraph Downstream["📣 Downstream Consumers (future)"]
-        NS["Notification Service"]
-        FS["Finance Service"]
-    end
-
-    Order -->|"ReserveStockCommand<br/>(saga command)"| Inventory
-    Inventory -->|"StockReserved / StockReservationFailed<br/>(integration events)"| Order
-    Catalog -.->|"VariantId reference<br/>(read-only)"| Order
-    Order -->|"OrderAccepted / OrderRejected<br/>(integration events)"| Downstream
-
-    style Order fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
-    style Inventory fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
-    style Catalog fill:#fff3e0,stroke:#e65100,stroke-width:1px,stroke-dasharray:4
-    style Downstream fill:#f3e5f5,stroke:#6a1b9a,stroke-width:1px,stroke-dasharray:4
-```
-
-### Context Classification
-
-| Aspect | Description |
-|:-------|:------------|
-| **Bounded Context** | Order |
-| **Aggregate Root** | `Order` |
-| **Domain Type** | Core Domain |
-| **Persistence** | EF Core + PostgreSQL (write side) |
-| **Saga Persistence** | `SagaStates` table — `PlaceOrderSagaState` (EF Core) |
-| **Multi-tenancy** | `IExcludedFromScoping` — tenant propagated through saga context |
-| **Saga Pattern** | Orchestration — Process Manager (no MassTransit native state machine) |
-
-### Ubiquitous Language
-
-| Term | Definition |
-|:-----|:-----------|
-| **Order** | A confirmed purchase intent, containing one or more OrderItems |
-| **OrderItem** | A line item referencing a Catalog Variant (SKU), with quantity and price snapshot |
-| **Saga** | Long-running process manager coordinating Order + Inventory across a distributed transaction |
-| **Stock Reservation** | A temporary hold on inventory units pending order confirmation (TTL: 15 min) |
-| **ReservationId** | A handle returned by Inventory identifying the reservation row — stored in saga state |
-| **IdempotencyKey** | Equals `OrderId`; used by Inventory to detect duplicate `ReserveStockCommand` retries |
-| **OrderSubmitted** | Trigger event that starts the saga — published by `PlaceOrderCommandHandler` |
-| **OrderAccepted** | Terminal success event — stock reserved + order row persisted |
-| **OrderRejected** | Terminal failure event — insufficient stock or saga timed out |
-
----
-
-## 🔶 Event Storming
-
-> **Phase 1 — Collaborative Discovery.** Event Storming maps the entire Place-Order flow across service boundaries. Notation follows [Alberto Brandolini's](https://www.eventstorming.com/) sticky-note convention.
-
-### Legend
+## What This Service Does
 
 ```mermaid
 graph LR
-    A["👤 Actor"]:::actor -- issues a --> C["Command"]:::command
-    C -- handled by --> AGG["Aggregate / Handler"]:::aggregate
-    AGG -- produces a --> E["Domain / Integration Event"]:::event
-    E -- triggers --> P["Policy / Process Manager"]:::policy
-    P -- issues a --> C2["Command"]:::command
-    E -- updates a --> R["Read Model"]:::readmodel
-    H["Hotspot ❓"]:::hotspot
+    classDef actor   fill:#fff9c4,color:#000,stroke:#f9a825
+    classDef agg     fill:#f48fb1,color:#000,stroke:#c62828
+    classDef pm      fill:#ce93d8,color:#000,stroke:#7b1fa2
+    classDef inv     fill:#a5d6a7,color:#000,stroke:#2e7d32
 
-    classDef actor    fill:#fff176,stroke:#f9a825,color:#000
-    classDef command  fill:#42a5f5,stroke:#1565c0,color:#fff
-    classDef aggregate fill:#f8bbd0,stroke:#c2185b,color:#000
-    classDef event    fill:#ff9800,stroke:#e65100,color:#fff
-    classDef policy   fill:#ce93d8,stroke:#7b1fa2,color:#000
-    classDef readmodel fill:#a5d6a7,stroke:#2e7d32,color:#000
-    classDef hotspot  fill:#f06292,stroke:#c2185b,color:#fff
+    C([Customer]):::actor
+    OA(Order Aggregate):::agg
+    PM(Process Manager):::pm
+    INV([Inventory Service]):::inv
+
+    C -->|"PlaceOrder"| OA
+    OA -->|"OrderCreated"| PM
+    PM -->|"MakeReservation"| INV
+    INV -->|"InventoryReserved / InventoryReservationFailed"| PM
+    PM -->|"StartOrderPaymentCommand / RejectOrderCommand"| OA
+    OA -->|"Accepted / Rejected"| C
 ```
 
-### Actors
+**Two things this service owns:**
 
-```mermaid
-graph TB
-    subgraph Actors["👤 Actors in Order Domain"]
-        direction LR
-        A1["👤 Buyer<br/>━━━━━━━━━━<br/>End customer<br/>Places orders"]:::actor
-        A2["⚙️ Saga Orchestrator<br/>━━━━━━━━━━<br/>PlaceOrderSagaOrchestrator<br/>Coordinates cross-service flow"]:::system
-        A3["⚙️ Inventory Service<br/>━━━━━━━━━━<br/>Reserves / releases stock<br/>Publishes reservation events"]:::system
-        A4["⏱ Hangfire Job<br/>━━━━━━━━━━<br/>ExpireReservationsJob<br/>Compensates expired TTLs"]:::system
-    end
-
-    classDef actor  fill:#fff176,stroke:#f9a825,color:#000
-    classDef system fill:#e0e0e0,stroke:#616161,color:#000
-```
-
-### Place-Order — Full Event Storm
-
-```mermaid
-graph LR
-    BUYER["👤 Buyer"]:::actor
-
-    C1["PlaceOrderCommand"]:::command
-    C2["ReserveStockCommand"]:::command
-    C3["PersistOrderCommand"]:::command
-    C4["ReleaseReservationCommand"]:::command
-
-    H1["PlaceOrderCommandHandler"]:::aggregate
-    AGG_INV["ReserveStockConsumer<br/>(Inventory)"]:::aggregate
-    AGG_ORD["PersistOrderConsumer<br/>(Order)"]:::aggregate
-    AGG_REL["ReleaseReservationConsumer<br/>(Inventory)"]:::aggregate
-
-    E1["OrderSubmitted"]:::event
-    E2["StockReserved"]:::event
-    E3["StockReservationFailed"]:::event
-    E4["OrderPersisted"]:::event
-    E5["OrderAccepted"]:::event
-    E6["OrderRejected"]:::event
-
-    PM["PlaceOrderSagaOrchestrator<br/>━━━━━━━━━━━━━━━━━━━━━<br/>Process Manager<br/>(pure C# — no MassTransit)"]:::policy
-
-    RM["SagaStates Table<br/>(PostgreSQL)"]:::readmodel
-    RM2["Orders Table<br/>(PostgreSQL)"]:::readmodel
-
-    BUYER --> C1 --> H1 --> E1
-    E1 --> PM
-    PM -->|"Initial → AwaitingStockReservation"| C2
-    PM -.->|"persist state"| RM
-    C2 --> AGG_INV
-    AGG_INV --> E2
-    AGG_INV --> E3
-
-    E2 --> PM
-    PM -->|"AwaitingStockReservation → AwaitingOrderPersistence"| C3
-    C3 --> AGG_ORD --> E4
-    E4 --> PM
-    PM -->|"AwaitingOrderPersistence → Completed"| E5
-    AGG_ORD -.->|"persist order"| RM2
-
-    E3 --> PM
-    PM -->|"AwaitingStockReservation → Failed"| E6
-    PM -->|"compensation"| C4
-    C4 --> AGG_REL
-
-    classDef actor    fill:#fff176,stroke:#f9a825,color:#000
-    classDef command  fill:#42a5f5,stroke:#1565c0,color:#fff
-    classDef aggregate fill:#f8bbd0,stroke:#c2185b,color:#000
-    classDef event    fill:#ff9800,stroke:#e65100,color:#fff
-    classDef policy   fill:#ce93d8,stroke:#7b1fa2,color:#000
-    classDef readmodel fill:#a5d6a7,stroke:#2e7d32,color:#000
-```
-
-### Expiry Compensation — Event Storm
-
-```mermaid
-graph LR
-    JOB["⏱ ExpireReservationsJob<br/>(Hangfire — every 1 min)"]:::system
-
-    C1["reservation.Expire()"]:::aggregate
-    C2["Redis.Release(qty)"]:::aggregate
-
-    E1["ReservationExpired"]:::event
-
-    INV_DB["StockReservations Table<br/>(PostgreSQL)"]:::readmodel
-    REDIS["Redis Counters<br/>stock:available / stock:reserved"]:::readmodel
-
-    JOB -->|"Status=Active AND ExpiresAt ≤ now"| C1
-    C1 --> E1
-    C1 -.->|"Status → Expired"| INV_DB
-    C2 -.->|"INCRBY available / DECRBY reserved"| REDIS
-    E1 --> C2
-
-    classDef system   fill:#e0e0e0,stroke:#616161,color:#000
-    classDef aggregate fill:#f8bbd0,stroke:#c2185b,color:#000
-    classDef event    fill:#ff9800,stroke:#e65100,color:#fff
-    classDef readmodel fill:#a5d6a7,stroke:#2e7d32,color:#000
-```
+| | What it is |
+|--|-----------|
+| **Order aggregate** | The canonical purchase record — `ReservingInventory → ProcessingPayment → Accepted / Rejected` |
+| **Process Manager** (`OrderSaga`) | Listens to events, issues commands — pure routing, no business logic |
 
 ---
 
-## 🔄 Saga State Machine
+## Two Command Rails
 
-### State Diagram
+> The single most important implementation detail. The Process Manager issues **two different kinds of command**, dispatched over **two different transports**.
 
 ```mermaid
-stateDiagram-v2
-    [*] --> Initial : PlaceOrderSagaState created
+flowchart TB
+    classDef pm      fill:#ce93d8,color:#000,stroke:#7b1fa2,stroke-width:2px
+    classDef command fill:#42a5f5,color:#fff,stroke:none
+    classDef infra   fill:#b0bec5,color:#000,stroke:#455a64
 
-    Initial --> AwaitingStockReservation : OrderSubmitted\n→ sends ReserveStockCommand
+    PM(OrderSaga):::pm
 
-    AwaitingStockReservation --> AwaitingOrderPersistence : StockReserved\n→ sends PersistOrderCommand
-    AwaitingStockReservation --> Failed : StockReservationFailed\n→ publishes OrderRejected
+    subgraph RAIL_A["Rail A — Integration command (cross-service)"]
+        IC["IIntegrationCommand<br/>e.g. MakeReservation"]:::command
+        BUS["ICommandBus.SendAsync<br/>→ MassTransit → RabbitMQ"]:::infra
+    end
 
-    AwaitingOrderPersistence --> Completed : OrderPersisted\n→ publishes OrderAccepted
+    subgraph RAIL_B["Rail B — Local command (in-process)"]
+        LC["ICommand&lt;T&gt;<br/>e.g. AcceptOrderCommand / RejectOrderCommand"]:::command
+        DISP["ICommandDispatcher.DispatchAsync&lt;T&gt;<br/>→ ICommandHandler&lt;T&gt;"]:::infra
+    end
 
-    Completed --> [*]
-    Failed --> [*]
-
-    state AwaitingStockReservation {
-        [*] --> reserving
-        reserving : ReserveStockCommand sent to Inventory
-        reserving : Redis Lua fast-gate running
-        reserving : Postgres tx pending
-    }
-
-    state AwaitingOrderPersistence {
-        [*] --> persisting
-        persisting : PersistOrderCommand sent to Order write side
-        persisting : Order.CreateOrder() running
-        persisting : EF Core SaveChanges pending
-    }
-
-    state Completed {
-        [*] --> done
-        done : OrderAccepted published
-        done : Saga row retained for audit
-    }
-
-    state Failed {
-        [*] --> rejected
-        rejected : OrderRejected published
-        rejected : No stock was deducted
-        rejected : Saga row retained for audit
-    }
+    PM -->|"Publish(IIntegrationCommand)"| IC --> BUS
+    PM -->|"Publish&lt;TCommand&gt;(ICommand)"| LC --> DISP
 ```
 
-### State Reference
-
-| State | Entry trigger | Exit triggers | Side effects on entry |
-|:------|:-------------|:-------------|:----------------------|
-| `Initial` | Row created | `OrderSubmitted` | — |
-| `AwaitingStockReservation` | `OrderSubmitted` | `StockReserved`, `StockReservationFailed` | `ReserveStockCommand` sent |
-| `AwaitingOrderPersistence` | `StockReserved` | `OrderPersisted` | `PersistOrderCommand` sent |
-| `Completed` | `OrderPersisted` | — (terminal) | `OrderAccepted` published |
-| `Failed` | `StockReservationFailed` | — (terminal) | `OrderRejected` published |
+| | Rail A — Integration command | Rail B — Local command |
+|--|------------------------------|------------------------|
+| Marker | `IIntegrationCommand` | `ICommand` / `ICommand<T>` |
+| Buffer in saga | `_unpublishedIntegrationCommands` | `_unpublishedCommands` |
+| Flushed by | `saga.PublishAsync(ICommandBus)` | `saga.PublishAsync(ICommandDispatcher)` |
+| Transport | MassTransit → RabbitMQ → another service | In-process `ICommandHandler<T>` resolved from DI |
+| Examples | `MakeReservation`, *(planned)* `ConfirmReservationCommand`, `ReleaseReservationCommand` | `AcceptOrderCommand`, `RejectOrderCommand` |
 
 ---
 
-## ⚡ End-to-End Flow
-
-### Happy Path — Sequence
-
-```mermaid
-sequenceDiagram
-    participant Buyer
-    participant OrderAPI as Order API
-    participant Handler as PlaceOrderCommandHandler
-    participant PM as PlaceOrderSagaOrchestrator
-    participant InvSvc as Inventory Service
-    participant OrdWrite as Order Write Side
-
-    Buyer->>OrderAPI: POST /api/v1/orders
-    OrderAPI->>Handler: PlaceOrderCommand
-    Handler->>Handler: generate OrderId
-    Handler-->>OrderAPI: publishes OrderSubmitted
-    OrderAPI-->>Buyer: 202 Accepted { orderId }
-
-    Note over PM: Saga row created (Initial)
-    PM->>PM: OnOrderSubmitted → state = AwaitingStockReservation
-    PM->>InvSvc: ReserveStockCommand
-
-    Note over InvSvc: Redis Lua fast-gate (atomic all-or-nothing)
-    Note over InvSvc: Postgres tx: StockAvailable -= qty, insert StockReservation
-    InvSvc-->>PM: StockReserved { reservationId }
-
-    PM->>PM: OnStockReserved → state = AwaitingOrderPersistence
-    PM->>OrdWrite: PersistOrderCommand
-
-    Note over OrdWrite: idempotency check
-    Note over OrdWrite: Order.CreateOrder → EF SaveChanges
-    OrdWrite-->>PM: OrderPersisted
-
-    PM->>PM: OnOrderPersisted → state = Completed
-    PM-->>Buyer: OrderAccepted (published — via downstream consumer)
-```
-
-### Failure Path — Insufficient Stock
-
-```mermaid
-sequenceDiagram
-    participant Buyer
-    participant OrderAPI as Order API
-    participant PM as PlaceOrderSagaOrchestrator
-    participant InvSvc as Inventory Service
-
-    Buyer->>OrderAPI: POST /api/v1/orders
-    OrderAPI-->>Buyer: 202 Accepted { orderId }
-
-    PM->>InvSvc: ReserveStockCommand
-
-    Note over InvSvc: Redis Lua: available < requested quantity
-    InvSvc-->>PM: StockReservationFailed { reason }
-
-    PM->>PM: OnStockReservationFailed → state = Failed
-    PM-->>Buyer: OrderRejected (published — downstream Notification)
-```
-
-### Compensation — Reservation Expiry
-
-```mermaid
-sequenceDiagram
-    participant Hangfire as ExpireReservationsJob (Hangfire)
-    participant InvDB as Inventory PostgreSQL
-    participant Redis as Redis
-
-    loop Every 1 minute
-        Hangfire->>InvDB: SELECT WHERE Status=Active AND ExpiresAt ≤ now
-        InvDB-->>Hangfire: expired reservations[]
-
-        loop per reservation
-            Hangfire->>InvDB: reservation.Expire() → Status = Expired
-            Hangfire->>Redis: INCRBY available, DECRBY reserved (Lua)
-        end
-
-        Hangfire->>InvDB: SaveChangesAsync
-    end
-```
-
----
-
-## 🏗 Architecture — Process Manager Pattern
-
-### Layer Diagram
-
-```mermaid
-graph TB
-    subgraph Application["EShop.Order.Application — zero MassTransit dependency"]
-        direction TB
-        STATE["PlaceOrderSagaState<br/>(plain POCO)"]
-        ORCH["PlaceOrderSagaOrchestrator<br/>(pure C# — On* methods)"]
-        RESULT["SagaTransitionResult<br/>(Commands + Events)"]
-        IREPOSITORY["ISagaStateRepository<br/>(persistence abstraction)"]
-        STATES["SagaStates<br/>(string constants)"]
-    end
-
-    subgraph Infrastructure["EShop.Order.Infrastructure — MassTransit consumers"]
-        direction TB
-        C1["OrderSubmittedConsumer<br/>IConsumer&lt;OrderSubmitted&gt;"]
-        C2["StockReservedConsumer<br/>IConsumer&lt;StockReserved&gt;"]
-        C3["StockReservationFailedConsumer<br/>IConsumer&lt;StockReservationFailed&gt;"]
-        C4["OrderPersistedConsumer<br/>IConsumer&lt;OrderPersisted&gt;"]
-        C5["PersistOrderConsumer<br/>IConsumer&lt;PersistOrderCommand&gt;"]
-        REPO["SagaStateRepository<br/>(EF Core impl of ISagaStateRepository)"]
-        DBCTX["OrderDbContext<br/>SagaStates + Orders + OrderItems"]
-    end
-
-    Infrastructure -->|"depends on"| Application
-    ORCH --> RESULT
-    ORCH --> STATE
-    REPO -->|"implements"| IREPOSITORY
-    C1 & C2 & C3 & C4 -->|"loads/saves via"| IREPOSITORY
-    C1 & C2 & C3 & C4 -->|"delegates to"| ORCH
-    REPO --> DBCTX
-
-    style Application fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
-    style Infrastructure fill:#fff3e0,stroke:#e65100,stroke-width:2px
-```
-
-### Write Model — Command → Event Flow
+## Event Storming — Place Order Flow (current)
 
 ```mermaid
 flowchart LR
-    subgraph API["🌐 API Layer"]
-        EP["POST /api/v1/orders<br/>(Minimal API)"]
-    end
+    classDef event   fill:#ff9800,color:#fff,stroke:none
+    classDef command fill:#42a5f5,color:#fff,stroke:none
+    classDef agg     fill:#f48fb1,color:#000,stroke:#c62828
+    classDef pm      fill:#ce93d8,color:#000,stroke:#7b1fa2
+    classDef actor   fill:#fff9c4,color:#000,stroke:#f9a825
 
-    subgraph Application["⚙️ Application Layer"]
-        CMD["PlaceOrderCommand"]
-        HANDLER["PlaceOrderCommandHandler"]
-        ORCH2["PlaceOrderSagaOrchestrator<br/>(pure C#)"]
-        STATE2["PlaceOrderSagaState"]
-    end
+    Customer([Customer]):::actor
+    PlaceOrder[PlaceOrderCommand]:::command
+    OA(Order Aggregate):::agg
+    OrderCreated([OrderCreated]):::event
+    PM(Process Manager):::pm
+    MakeReservation[MakeReservation]:::command
+    INV(Inventory Service):::agg
+    InventoryReserved([InventoryReserved]):::event
+    InventoryReservationFailed([InventoryReservationFailed]):::event
+    StartPayment[StartOrderPaymentCommand]:::command
+    RejectOrder[RejectOrderCommand]:::command
 
-    subgraph Infrastructure["🗄 Infrastructure"]
-        CONSUMERS["Saga Consumers<br/>(thin MassTransit adapters)"]
-        REPO2["SagaStateRepository<br/>(EF Core)"]
-        DB["PostgreSQL<br/>SagaStates + Orders"]
-        MQ["RabbitMQ<br/>(MassTransit)"]
-    end
-
-    EP -->|"map request"| CMD
-    CMD -->|"handled by"| HANDLER
-    HANDLER -->|"publish OrderSubmitted"| MQ
-    MQ -->|"consumed by"| CONSUMERS
-    CONSUMERS -->|"load state"| REPO2
-    CONSUMERS -->|"call On*(state, msg)"| ORCH2
-    ORCH2 -->|"mutate"| STATE2
-    ORCH2 -->|"return SagaTransitionResult"| CONSUMERS
-    CONSUMERS -->|"save"| REPO2
-    REPO2 --> DB
-    CONSUMERS -->|"dispatch commands/events"| MQ
-
-    style API fill:#e3f2fd,stroke:#1565c0
-    style Application fill:#fff3e0,stroke:#e65100
-    style Infrastructure fill:#e8f5e9,stroke:#2e7d32
+    Customer --> PlaceOrder --> OA --> OrderCreated --> PM
+    PM -->|"Rail A"| MakeReservation --> INV
+    INV --> InventoryReserved --> PM
+    INV --> InventoryReservationFailed --> PM
+    PM -->|"Rail B"| StartPayment --> OA
+    PM -->|"Rail B"| RejectOrder --> OA
 ```
+
+### Policies — When / Then Rules (current)
+
+| When this event | Then issue this command | Rail |
+|----------------|------------------------|------|
+| `OrderCreated` | `MakeReservation` → Inventory | A |
+| `InventoryReserved` | `StartOrderPaymentCommand` → Order (Order → `ProcessingPayment`) | B |
+| `InventoryReservationFailed` | `RejectOrderCommand` → Order | B |
+| Saga expiry (15 min, no reply) | `RejectOrderCommand` → Order | B |
+
+> **No release on `InventoryReservationFailed`.** In the deduct-on-order model, a failed reservation deducted **nothing**, so there is nothing to compensate. Release becomes relevant only **after a successful reservation** (payment-fail / cancel) — see [Roadmap](#roadmap--next-steps).
 
 ---
 
-## 📨 Message Contracts
-
-All contracts live in `EShop.Shared.Contracts` — shared between Order and Inventory services.
-
-### Contract Flow Map
-
-```mermaid
-graph LR
-    subgraph OrderSvc["Order Service"]
-        H["PlaceOrderCommandHandler"]
-        OSC["OrderSubmittedConsumer"]
-        SRC["StockReservedConsumer"]
-        SRFC["StockReservationFailedConsumer"]
-        OPC["OrderPersistedConsumer"]
-        POC["PersistOrderConsumer"]
-    end
-
-    subgraph InventorySvc["Inventory Service"]
-        RSC["ReserveStockConsumer"]
-        RRC["ReleaseReservationConsumer"]
-    end
-
-    subgraph Bus["RabbitMQ"]
-        OS["OrderSubmitted"]:::event
-        RSCmd["ReserveStockCommand"]:::command
-        StockR["StockReserved"]:::event
-        StockF["StockReservationFailed"]:::event
-        POCmd["PersistOrderCommand"]:::command
-        OP["OrderPersisted"]:::event
-        OA["OrderAccepted"]:::event
-        OR["OrderRejected"]:::event
-        RRCmd["ReleaseReservationCommand"]:::command
-    end
-
-    H -->|publishes| OS
-    OS -->|consumed by| OSC
-    OSC -->|publishes| RSCmd
-    RSCmd -->|consumed by| RSC
-    RSC -->|publishes| StockR
-    RSC -->|publishes| StockF
-    StockR -->|consumed by| SRC
-    StockF -->|consumed by| SRFC
-    SRC -->|publishes| POCmd
-    SRFC -->|publishes| OR
-    SRFC -->|publishes| RRCmd
-    POCmd -->|consumed by| POC
-    POC -->|publishes| OP
-    OP -->|consumed by| OPC
-    OPC -->|publishes| OA
-    RRCmd -->|consumed by| RRC
-
-    classDef event   fill:#ff9800,stroke:#e65100,color:#fff
-    classDef command fill:#42a5f5,stroke:#1565c0,color:#fff
-```
-
-### Contract Reference
-
-| Message | Type | Publisher | Consumer |
-|:--------|:-----|:----------|:---------|
-| `OrderSubmitted` | Trigger event | `PlaceOrderCommandHandler` | `OrderSubmittedConsumer` |
-| `ReserveStockCommand` | Saga command | `OrderSubmittedConsumer` | `ReserveStockConsumer` |
-| `StockReserved` | Integration event | `ReserveStockConsumer` | `StockReservedConsumer` |
-| `StockReservationFailed` | Integration event | `ReserveStockConsumer` | `StockReservationFailedConsumer` |
-| `PersistOrderCommand` | Saga command | `StockReservedConsumer` | `PersistOrderConsumer` |
-| `OrderPersisted` | Internal event | `PersistOrderConsumer` | `OrderPersistedConsumer` |
-| `OrderAccepted` | Integration event | `OrderPersistedConsumer` | downstream |
-| `OrderRejected` | Integration event | `StockReservationFailedConsumer` | downstream |
-| `ReleaseReservationCommand` | Compensation command | `StockReservationFailedConsumer` | `ReleaseReservationConsumer` |
-| `ReservationExpired` | Integration event | `ExpireReservationsJob` | (future) |
-
----
-
-## 🧱 Tactical Design
-
-### Aggregate Structure
+## Domain Model
 
 ```mermaid
 classDiagram
     class Order {
-        <<Aggregate Root>>
         Guid Id
         string BuyerId
-        DateTimeOffset OrderDate
         string Status
-        string? Description
-        DateTimeOffset CreatedAtUtc
-        DateTimeOffset? LastModifiedAtUtc
-        +CreateOrder(PlaceOrderCommand) Order$
-        +AddOrderItems(items)
+        string Description
+        DateTimeOffset OrderDate
+        +CreateOrder(command)
+        +StartPayment()
+        +Accept()
+        +Reject(reason)
     }
 
     class OrderItem {
-        <<Entity>>
-        Guid Id
-        Guid OrderId
         Guid VariantId
         int Quantity
         decimal UnitPrice
-        decimal? Discount
-        decimal TotalPrice
+        decimal Discount
     }
 
-    class OrderStatus {
-        <<Enumeration>>
-        Pending
-        Created
+    class OrderState {
+        <<enumeration>>
+        ReservingInventory
+        ProcessingPayment
+        Accepted
         Rejected
-        Processing
-        Shipped
-        Delivered
-        Cancelled
     }
 
-    class PlaceOrderSagaState {
-        <<Process Manager State>>
-        Guid CorrelationId
-        string CurrentState
-        string BuyerId
-        string TenantId
-        string OrderItemsJson
-        Guid? ReservationId
-        string? FailureReason
-        DateTimeOffset SubmittedAt
-        byte[] RowVersion
+    class OrderAction {
+        <<enumeration>>
+        StartPayment
+        Accept
+        Reject
     }
 
-    Order "1" *-- "1..*" OrderItem : contains
-    Order --> OrderStatus : status
-    PlaceOrderSagaState ..> Order : creates via PersistOrderCommand
+    Order "1" --> "1..*" OrderItem
+    Order --> OrderState
+    OrderState --> OrderAction : driven by
 ```
 
-### Inventory — Supporting Entities
+`Order` is `IExcludedFromScoping` + `IDateTracking`; status is stored as the enum **name** string (`ReservingInventory` / `ProcessingPayment` / `Accepted` / `Rejected`).
+
+State transitions are guarded by `OrderStateMachine` (Stateless) — `OnUnhandledTrigger` throws `DomainException` if the transition is invalid (e.g. accepting a rejected order).
+
+---
+
+## Order Lifecycle
 
 ```mermaid
-classDiagram
-    class StockReservation {
-        <<Entity>>
-        Guid Id
-        Guid OrderId
-        Guid VariantId
-        int Quantity
-        Guid IdempotencyKey
-        ReservationStatus Status
-        DateTimeOffset ExpiresAt
-        DateTimeOffset CreatedAtUtc
-        DateTimeOffset? ReleasedAtUtc
-        +Create(orderId, variantId, qty, idempotencyKey, expiresAt)$
-        +Release()
-        +Expire()
-        +Confirm()
-    }
+stateDiagram-v2
+    [*] --> ReservingInventory : PlaceOrderCommand<br/>POST /api/v1/orders — 202 Accepted
 
-    class ReservationStatus {
-        <<Enumeration>>
-        Active
-        Released
-        Expired
-        Confirmed
-    }
+    ReservingInventory --> ProcessingPayment : StartOrderPaymentCommand<br/>inventory reserved
+    ReservingInventory --> Rejected          : RejectOrderCommand<br/>inventory failed or saga expired
 
-    StockReservation --> ReservationStatus : status
+    ProcessingPayment --> Accepted : AcceptOrderCommand<br/>payment *(currently: immediate no-op)*
+    ProcessingPayment --> Rejected : RejectOrderCommand<br/>*(future: payment failed)*
+
+    Accepted --> [*]
+    Rejected --> [*]
+```
+
+> Buyer gets `202 Accepted` immediately. `Accepted` / `Rejected` resolves asynchronously once the saga runs.
+
+---
+
+## Process Manager — How It Works
+
+```mermaid
+flowchart TB
+    classDef event   fill:#ff9800,color:#fff,stroke:none
+    classDef command fill:#42a5f5,color:#fff,stroke:none
+    classDef pm      fill:#ce93d8,color:#000,stroke:#7b1fa2,stroke-width:2px
+
+    subgraph PM["OrderSaga : AggregateSaga — event-sourced"]
+        S1["ReservingInventory"]
+        S2["ProcessingPayment"]
+        S3["Failed"]
+        S4["Expired"]
+    end
+
+    E1([OrderCreated]):::event -->|"Create + RaiseEvent(SagaStartedEvent)"| S1
+    S1 -->|"Publish (Rail A)"| C1[MakeReservation]:::command --> INV["Inventory"]
+
+    INV --> E2([InventoryReserved]):::event -->|"RaiseEvent(SagaInventoryReservedEvent)"| S2
+    INV --> E3([InventoryReservationFailed]):::event -->|"RaiseEvent(SagaInventoryReservationFailedEvent)"| S3
+    E4([Expiry — 15 min]):::event -->|"RaiseEvent(SagaExpiredEvent)"| S4
+
+    S2 -->|"Publish (Rail B) + MarkComplete()"| C2[StartOrderPaymentCommand]:::command --> OA["Order Aggregate"]
+    S3 -->|"Publish (Rail B) + MarkComplete()"| C3[RejectOrderCommand]:::command --> OA
+    S4 -->|"Publish (Rail B) + MarkComplete()"| C3
+```
+
+| Question | Answer |
+|----------|--------|
+| What does a Process Manager do? | Listens to events, issues commands — no business logic, pure routing |
+| Where is its state? | Event-sourced — rebuilt from `SagaStartedEvent`, `SagaInventoryReservedEvent`, `SagaInventoryReservationFailedEvent`, `SagaExpiredEvent` via `Apply(...)` |
+| How is it identified? | `OrderSagaId.FromOrderId(orderId)` — deterministic `EventFlow.Identity` (namespace GUID + orderId), no extra lookup |
+| Duplicate event delivered twice? | `IsNew` guard on load; on create, the handler checks `!existingSaga.IsNew` and no-ops |
+
+---
+
+## Saga Lifecycle
+
+```mermaid
+stateDiagram-v2
+    [*] --> ReservingInventory : Event: OrderCreated<br/>Issues: MakeReservation (Rail A)
+
+    ReservingInventory --> ProcessingPayment : Event: InventoryReserved<br/>Stores: ReservationId<br/>Issues: StartOrderPaymentCommand (Rail B)<br/>MarkComplete()
+
+    ReservingInventory --> Failed : Event: InventoryReservationFailed<br/>Issues: RejectOrderCommand (Rail B)<br/>MarkComplete()
+
+    ReservingInventory --> Expired : Hangfire: OrderSagaExpireJob (15 min TTL)<br/>Issues: RejectOrderCommand (Rail B)<br/>MarkComplete()
+
+    ProcessingPayment --> [*]
+    Failed --> [*]
+    Expired --> [*]
+```
+
+> `ProcessingPayment` is the terminal state for the current (no-payment) happy path. When the payment step lands, the saga will **wait** in `ProcessingPayment` instead of immediately completing — see [Roadmap](#roadmap--next-steps).
+
+---
+
+## Saga Expiry (Timeout)
+
+The `OrderSagaExpireJob` (Hangfire delayed job) is scheduled 15 minutes after `OrderCreated`. It is idempotent:
+
+1. Load the saga. If already completed or not found → no-op.
+2. If the saga is **not** in `ReservingInventory` (already advanced) → no-op.
+3. Otherwise fire `HandleExpire()` → `SagaExpiredEvent` → `RejectOrderCommand` → `MarkComplete()`.
+
+```mermaid
+sequenceDiagram
+    participant OCC as OrderCreatedConsumer
+    participant HF  as Hangfire
+    participant JOB as OrderSagaExpireJob
+    participant PM  as OrderSaga
+    participant OA  as Order Aggregate
+
+    OCC->>HF: Schedule(OrderSagaExpireJob, +15 min)
+    Note over HF: fires if INV never replies
+    HF->>JOB: Execute(sagaId, orderId)
+    JOB->>PM: Load saga
+    JOB->>PM: HandleExpire()
+    PM->>OA: RejectOrderCommand (Rail B)
+    PM-->>PM: MarkComplete()
 ```
 
 ---
 
-## 🛡 Key Design Decisions
+## CorrelationId / Tracing
+
+Every message in the Order flow carries `OrderId` as the MassTransit envelope `CorrelationId`. This is wired via `bus.SendTopology.UseCorrelationId<T>(x => x.OrderId)` in each service's bus configuration — no domain interface needed.
+
+| Service | Messages stamped | Filter |
+|---------|-----------------|--------|
+| **Order** | `OrderCreated`, `MakeReservation`, `ReleaseReservationCommand` | `CorrelationIdLogEnrichFilter<T>` |
+| **Inventory** | `InventoryReserved`, `InventoryReservationFailed`, `ReservationExpired` | `CorrelationIdLogEnrichFilter<T>` |
+
+`CorrelationIdLogEnrichFilter<T>` (in `EShop.Shared.EventBus`) pushes `context.CorrelationId` into Serilog's `LogContext` for every consumer, so all log entries within a handler automatically carry `CorrelationId`.
+
+OpenTelemetry spans from MassTransit are collected via `.AddSource("MassTransit")` in `EShop.ServiceDefaults`.
+
+---
+
+## End-to-End Sequence
+
+### Happy Path (current)
 
 ```mermaid
-graph TB
-    subgraph Decisions["Key Design Decisions"]
-        D1["🔵 Process Manager over<br/>MassTransit native saga<br/>━━━━━━━━━━━━━━<br/>Orchestrator is pure C#<br/>No framework lock-in<br/>Fully unit-testable"]
-        D2["🟠 202 Accepted immediately<br/>━━━━━━━━━━━━━━<br/>Client gets orderId before<br/>stock reservation completes<br/>Async by design"]
-        D3["🟢 Redis fast-gate + Postgres<br/>━━━━━━━━━━━━━━<br/>Redis Lua: atomic all-or-nothing<br/>Postgres: authoritative truth<br/>Avoids DB load under contention"]
-        D4["🟣 Idempotency everywhere<br/>━━━━━━━━━━━━━━<br/>PersistOrderConsumer: order exists check<br/>ReserveStockConsumer: IdempotencyKey<br/>SagaOrchestrator: NoOp() guard"]
-        D5["🔴 Optimistic concurrency<br/>━━━━━━━━━━━━━━<br/>RowVersion on SagaStates<br/>Prevents two consumers<br/>advancing same saga"]
-        D6["⏱ TTL = 15 min / job = 1 min<br/>━━━━━━━━━━━━━━<br/>Hangfire ExpireReservationsJob<br/>Compensates Redis on expiry<br/>Status: Active → Expired"]
-    end
+sequenceDiagram
+    autonumber
+    participant C   as Customer
+    participant OA  as Order Aggregate
+    participant OC  as OrderCreatedConsumer
+    participant PM  as OrderSaga (Process Manager)
+    participant IRC as InventoryReservedConsumer
+    participant INV as Inventory
 
-    style D1 fill:#e3f2fd,stroke:#1565c0
-    style D2 fill:#fff3e0,stroke:#e65100
-    style D3 fill:#e8f5e9,stroke:#2e7d32
-    style D4 fill:#f3e5f5,stroke:#6a1b9a
-    style D5 fill:#ffebee,stroke:#c62828
-    style D6 fill:#f9fbe7,stroke:#558b2f
+    C->>OA: PlaceOrderCommand
+    OA-->>C: 202 Accepted
+    OA-->>OC: OrderCreated (integration event)
+    OC->>PM: create saga + PublishAsync(ICommandBus)
+    OC->>HF: Schedule(OrderSagaExpireJob, +15 min)
+    PM->>INV: MakeReservation (Rail A)
+
+    INV-->>IRC: InventoryReserved (ReservationId)
+    IRC->>PM: HandleAsync + PublishAsync(ICommandDispatcher)
+    PM->>OA: StartOrderPaymentCommand (Rail B)
+    OA-->>OA: Status = ProcessingPayment
+    Note over PM,OA: Saga marks complete. Order waits in ProcessingPayment<br/>until payment step is implemented (see Roadmap G1).
 ```
 
-| Decision | Rationale |
-|:---------|:----------|
-| **Process Manager over MassTransit native saga** | `PlaceOrderSagaOrchestrator` has zero dependency on MassTransit. It is a plain, unit-testable class. MassTransit is confined to the Infrastructure boundary. |
-| **202 Accepted immediately** | Client receives `orderId` before reservation completes. Async by design — subscribe to `OrderAccepted` / `OrderRejected` downstream. |
-| **Redis fast-gate before Postgres** | Lua script performs atomic all-or-nothing check. Only on Redis pass does a Postgres transaction run — avoids unnecessary DB load under contention. |
-| **Idempotency in every consumer** | `PersistOrderConsumer` checks for existing order row. `ReserveStockConsumer` checks `IdempotencyKey`. `OnXxx` returns `NoOp()` when saga is not in expected state. Safe to replay on MassTransit retry. |
-| **Optimistic concurrency on saga state** | `PlaceOrderSagaState.RowVersion` prevents two concurrent consumers advancing the same saga simultaneously. |
-| **Reservation TTL = 15 minutes** | `ExpireReservationsJob` (Hangfire, every 1 min) scans `Status=Active AND ExpiresAt ≤ now`, calls `Expire()`, compensates Redis counters. |
+### Compensation — Inventory Failed (current)
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant INV  as Inventory
+    participant IRFC as InventoryReservationFailedConsumer
+    participant PM   as OrderSaga (Process Manager)
+    participant OA   as Order Aggregate
+
+    INV-->>IRFC: InventoryReservationFailed (reason)
+    IRFC->>PM: HandleAsync + PublishAsync(ICommandDispatcher)
+    PM->>OA: RejectOrderCommand (Rail B)
+    OA-->>OA: Status = Rejected
+    Note over PM: MarkComplete()
+```
+
+### Compensation — Saga Expiry (current)
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant HF  as Hangfire
+    participant JOB as OrderSagaExpireJob
+    participant PM  as OrderSaga (Process Manager)
+    participant OA  as Order Aggregate
+
+    Note over HF: 15 min elapsed, no InventoryReserved
+    HF->>JOB: Execute(sagaId, orderId)
+    JOB->>PM: HandleExpire()
+    PM->>OA: RejectOrderCommand (Rail B)
+    OA-->>OA: Status = Rejected
+    Note over PM: MarkComplete()
+```
+
+---
+
+## State Machines
+
+Both aggregates use the **Stateless** library with an accessor/mutator constructor so the machine always reads from (and writes back to) the persisted `Status` string.
+
+### `OrderStateMachine` (Order aggregate)
+
+```
+ReservingInventory --[StartPayment]--> ProcessingPayment
+ReservingInventory --[Reject]-----------> Rejected
+ProcessingPayment  --[Accept]-----------> Accepted
+ProcessingPayment  --[Reject]-----------> Rejected
+```
+
+`OnUnhandledTrigger` throws `DomainException` — invalid transitions are caught at the domain layer.
+
+### `OrderSagaStateMachine` (OrderSaga)
+
+```
+ReservingInventory --[InventoryReserved]-----------> ProcessingPayment
+ReservingInventory --[InventoryReservationFailed]--> Failed
+ReservingInventory --[Expire]---------------------> Expired
+```
+
+State is rebuilt during event replay: each `Apply(*)` method calls `State.Fire(trigger)` to advance the machine. `CanFire(trigger)` is checked in every `Handle*` method before raising domain events.
+
+---
+
+## Code Map
+
+| Concern | Type | File |
+|---------|------|------|
+| Order aggregate | `Order : AggregateRoot<Guid>` | `Order.Domain/Aggregates/Order.cs` |
+| Order state machine | `OrderStateMachine : StateMachine<OrderState, OrderAction>` | `Order.Domain/StateMachines/OrderStateMachine.cs` |
+| Saga (Process Manager) | `OrderSaga : AggregateSaga, IScoped` | `Order.Domain/Sagas/OrderSaga.cs` |
+| Saga identity | `OrderSagaId : Identity<OrderSagaId>` | `Order.Domain/Sagas/OrderSagaId.cs` |
+| Saga state machine | `OrderSagaStateMachine : StateMachine<OrderSagaState, OrderSagaTrigger>` | `Order.Domain/StateMachines/OrderSagaStateMachine.cs` |
+| Saga domain events | `SagaStartedEvent`, `SagaInventoryReservedEvent`, `SagaInventoryReservationFailedEvent`, `SagaExpiredEvent` | `Order.Domain/Sagas/DomainEvents/` |
+| Saga expiry job | `OrderSagaExpireJob` | `Order.Infrastructure/BackgroundJobs/OrderSagaExpireJob.cs` |
+| Correlation filter | `CorrelationIdLogEnrichFilter<T>` | `Shared/EShop.Shared.EventBus/Filters/` |
+| Start trigger | `OrderCreatedConsumer` → `OrderCreatedEventHandler` | `Order.Infrastructure/Consumers/`, `Order.Application/UseCases/V1/Events/` |
+| Success trigger | `InventoryReservedConsumer` | `Order.Infrastructure/Consumers/InventoryReservedConsumer.cs` |
+| Failure trigger | `InventoryReservationFailedConsumer` | `Order.Infrastructure/Consumers/InventoryReservationFailedConsumer.cs` |
+| Local command handlers | `StartOrderPaymentCommandHandler`, `AcceptOrderCommandHandler`, `RejectOrderCommandHandler` | `Order.Application/UseCases/V1/Commands/` |
+| Two command rails | `AggregateSaga.Publish` / `PublishAsync` overloads | `Shared/EShop.Shared.DomainTools/Sagas/AggregateSagas/AggregateSaga.cs` |
+
+---
+
+## Message Contracts (current)
+
+| Message | Kind | Sender | Receiver |
+|---------|------|--------|----------|
+| `OrderCreated` | Integration event | Order Aggregate | Process Manager |
+| `MakeReservation` | Integration command | Process Manager | Inventory |
+| `InventoryReserved` | Integration event | Inventory | Process Manager |
+| `InventoryReservationFailed` | Integration event | Inventory | Process Manager |
+| `StartOrderPaymentCommand` | Local command | Process Manager | Order Aggregate |
+| `AcceptOrderCommand` | Local command | *(payment saga — planned)* | Order Aggregate |
+| `RejectOrderCommand` | Local command | Process Manager | Order Aggregate |
+| `ReleaseReservationCommand` | Integration command | *(saga — planned)* | Inventory |
+| `ConfirmReservationCommand` | Integration command | *(saga — planned)* | Inventory |
+
+All contracts live in `Shared/src/EShop.Shared.Contracts/Services/Order/` and `/Saga/`.
+
+---
+
+## Roadmap — Next Steps
+
+> Target design: a real payment step exists between inventory reservation and order confirmation.
+
+### Gap analysis
+
+| # | Gap | Status |
+|---|-----|--------|
+| G1 | **No payment-awaiting step.** Happy path stops at `ProcessingPayment` — `AcceptOrderCommand` is never issued. Saga closes immediately after `StartOrderPaymentCommand`. | Open |
+| G2 | `ConfirmReservationCommand` contract exists but is never issued. Reservation stays `Pending`. | Open |
+| G3 | `ReleaseReservationCommand` is never issued on payment-fail / cancel. Reserved stock is only released by the Inventory TTL expiry job. | Open |
+| G4 | ~~Success-path saga never `MarkComplete()`s.~~ | **Resolved** |
+| G5 | ~~No saga expiry. If Inventory never replies, the order hangs indefinitely.~~ | **Resolved** — `OrderSagaExpireJob` (Hangfire, 15 min) |
+
+### Target saga (payment-aware)
+
+```mermaid
+stateDiagram-v2
+    [*] --> ReservingInventory : OrderCreated → MakeReservation
+
+    ReservingInventory --> ProcessingPayment : InventoryReserved<br/>store ReservationId
+    ReservingInventory --> Failed : InventoryReservationFailed<br/>RejectOrderCommand
+    ReservingInventory --> Expired : Expiry (15 min)<br/>RejectOrderCommand
+
+    ProcessingPayment --> Completed : PaymentAccepted<br/>ConfirmReservationCommand → Inventory<br/>AcceptOrderCommand → Order
+    ProcessingPayment --> Released : PaymentFailed / Cancelled<br/>ReleaseReservationCommand → Inventory<br/>RejectOrderCommand → Order
+    ProcessingPayment --> Released : Expiry (payment TTL)<br/>ReleaseReservationCommand → Inventory<br/>RejectOrderCommand → Order
+
+    Completed --> [*]
+    Failed    --> [*]
+    Expired   --> [*]
+    Released  --> [*]
+```
+
+### Target policies (payment-aware)
+
+| When this event | Then issue | Rail |
+|-----------------|-----------|------|
+| `OrderCreated` | `MakeReservation` → Inventory | A |
+| `InventoryReserved` | `StartOrderPaymentCommand` → Order *(transition to `ProcessingPayment`, then wait for payment)* | B |
+| `InventoryReservationFailed` | `RejectOrderCommand` → Order | B |
+| `PaymentAccepted` | `ConfirmReservationCommand` → Inventory **+** `AcceptOrderCommand` → Order | A + B |
+| `PaymentFailed` / `OrderCancelled` | `ReleaseReservationCommand` → Inventory **+** `RejectOrderCommand` → Order | A + B |
+| Saga expiry (payment TTL) | `ReleaseReservationCommand` → Inventory **+** `RejectOrderCommand` → Order | A + B |
+
+### Suggested implementation order
+
+1. **Add `PaymentAccepted` / `PaymentFailed` events and saga consumers** — wire `ProcessingPayment` as a true waiting state (G1, G2).
+2. **Issue `ReleaseReservationCommand`** on payment-fail / cancel (G3).
+3. **Add a second saga expiry** scoped to `ProcessingPayment` — fires if no payment arrives within TTL.
+
+> Inventory already implements the receiving side of `ConfirmReservationCommand` / `ReleaseReservationCommand`. See the [Inventory Service README](../../../Inventory/src/EShop.Inventory.API/README.md#order-process-manager-integration).
+
+---
+
+## API
+
+| Method | Path | Response | Note |
+|--------|------|----------|------|
+| `POST` | `/api/v1/orders` | `202 Accepted { orderId }` | Async — saga resolves after the response |

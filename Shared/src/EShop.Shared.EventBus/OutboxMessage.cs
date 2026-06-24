@@ -1,6 +1,8 @@
-﻿namespace EShop.Shared.EventBus;
+using EShop.Shared.DomainTools.Entities;
 
-public class OutboxMessage
+namespace EShop.Shared.EventBus;
+
+public class OutboxMessage : IExcludedFromScoping
 {
     public Guid Id { get; set; }
 

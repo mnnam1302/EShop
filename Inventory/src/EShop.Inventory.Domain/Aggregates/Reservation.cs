@@ -1,4 +1,6 @@
 using System.ComponentModel.DataAnnotations;
+using EShop.Inventory.Domain.Commands;
+using EShop.Inventory.Domain.DomainEvents;
 using EShop.Inventory.Domain.Enums;
 using EShop.Shared.DomainTools.Aggregates;
 using EShop.Shared.DomainTools.Entities;
@@ -23,18 +25,48 @@ public class Reservation : AggregateRoot<Guid>, IScoped, IDateTracking
     [MaxLength(ModelConstants.VeryLongText)]
     public required string Scope { get; set; }
 
-    public static Reservation Create(Guid orderId, DateTimeOffset expiresAt, string tenantId)
+    private readonly List<ReservationItem> _items = new();
+    public virtual IReadOnlyCollection<ReservationItem> Items => _items;
+
+    public static Reservation Create(MakeReservationCommand command, DateTimeOffset expiresAt)
     {
-        return new Reservation
+        var reservation = new Reservation
         {
             Id = Guid.NewGuid(),
-            OrderId = orderId,
+            OrderId = command.OrderId,
             Status = nameof(ReservationStatus.Pending),
             ExpiresAt = expiresAt,
             CreatedAtUtc = DateTimeOffset.UtcNow,
-            TenantId = tenantId,
-            Scope = tenantId
+            TenantId = command.TenantId,
+            Scope = command.TenantId
         };
+
+        reservation.RaiseDomainEvent(new ReservationCreated
+        {
+            ReservationId = reservation.Id,
+            OrderId = command.OrderId,
+            TenantId = command.TenantId,
+            ActionUserId = command.ActionUserId,
+            ActionUserType = command.ActionUserType
+        });
+
+        return reservation;
+    }
+
+    public ReservationItem AddItem(Guid variantId, int quantity)
+    {
+        var item = new ReservationItem
+        {
+            Id = Guid.NewGuid(),
+            ReservationId = Id,
+            VariantId = variantId,
+            Quantity = quantity,
+            TenantId = TenantId,
+            Scope = TenantId
+        };
+
+        _items.Add(item);
+        return item;
     }
 
     public void Confirm()

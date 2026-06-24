@@ -1,14 +1,45 @@
+using EShop.Shared.DomainTools.Exceptions;
+using Stateless;
+
 namespace EShop.Order.Domain.StateMachines;
 
-public sealed class OrderSagaStateMachine
+public sealed class OrderSagaStateMachine : StateMachine<OrderSagaState, OrderSagaTrigger>
 {
+    public OrderSagaStateMachine() : base(OrderSagaState.ReservingInventory)
+    {
+        Configure();
+    }
+
+    private void Configure()
+    {
+        OnUnhandledTrigger((state, trigger) =>
+            throw new DomainException("OrderSaga", $"Trigger '{trigger}' is not permitted in state '{state}'."));
+
+        Configure(OrderSagaState.ReservingInventory)
+            .Permit(OrderSagaTrigger.InventoryReserved, OrderSagaState.ProcessingPayment)
+            .Permit(OrderSagaTrigger.InventoryReservationFailed, OrderSagaState.Failed)
+            .Permit(OrderSagaTrigger.Expire, OrderSagaState.Expired);
+
+        Configure(OrderSagaState.ProcessingPayment);
+
+        Configure(OrderSagaState.Failed);
+
+        Configure(OrderSagaState.Expired);
+    }
 }
 
-public static class OrderSagaStates
+public enum OrderSagaState
 {
-    public const string Initial = "Initial";
-    public const string AwaitingStockReservation = "AwaitingStockReservation";
-    public const string AwaitingOrderPersistence = "AwaitingOrderPersistence";
-    public const string Completed = "Completed";
-    public const string Failed = "Failed";
+    ReservingInventory,
+    ProcessingPayment,
+    Failed,
+    Completed,
+    Expired,
+}
+
+public enum OrderSagaTrigger
+{
+    InventoryReserved,
+    InventoryReservationFailed,
+    Expire,
 }

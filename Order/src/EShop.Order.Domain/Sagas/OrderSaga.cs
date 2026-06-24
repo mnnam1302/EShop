@@ -1,11 +1,11 @@
+using EShop.Order.Domain.Commands;
 using EShop.Order.Domain.Sagas.DomainEvents;
+using EShop.Order.Domain.StateMachines;
 using EShop.Shared.Authentication.Abstractions;
-using EShop.Shared.Contracts.Services.Inventory;
 using EShop.Shared.Contracts.Services.Order;
 using EShop.Shared.Contracts.Services.Order.Saga;
 using EShop.Shared.DomainTools.Entities;
 using EShop.Shared.DomainTools.Exceptions;
-using EShop.Shared.DomainTools.Sagas;
 using EShop.Shared.DomainTools.Sagas.AggregateSagas;
 
 namespace EShop.Order.Domain.Sagas;
@@ -14,9 +14,12 @@ public sealed class OrderSaga : AggregateSaga, IScoped
 {
     public string BuyerId { get; set; } = string.Empty;
     public Guid OrderId { get; set; }
+    public Guid ReservationId { get; private set; }
 
-    public string TenantId { get; set; } = string.Empty;
-    public string Scope { get; set; } = string.Empty;
+    public OrderSagaStateMachine State { get; private set; } = new();
+
+    public string TenantId { get; private set; } = string.Empty;
+    public string Scope { get; private set; } = string.Empty;
 
     public static OrderSaga Create(Guid orderSagaId, OrderCreated message, IUserDetailsProvider userDetailsProvider)
     {
@@ -29,7 +32,7 @@ public sealed class OrderSaga : AggregateSaga, IScoped
             Scope = message.TenantId
         };
 
-        orderSaga.RaiseEvent(new OrderSagaStartedEvent
+        orderSaga.RaiseEvent(new SagaStartedEvent
         {
             OrderSagaId = orderSagaId,
             BuyerId = orderSaga.BuyerId,
@@ -50,72 +53,57 @@ public sealed class OrderSaga : AggregateSaga, IScoped
         return orderSaga;
     }
 
-
-    public void HandleAsync(OrderCreated message)
+    public void HandleAsync(InventoryReserved message)
     {
-        if (State != SagaState.New)
+        if (!State.CanFire(OrderSagaTrigger.InventoryReserved))
         {
-            throw new DomainException("OrderSaga", "Saga must be new");
+            throw new DomainException("OrderSaga", $"Cannot handle InventoryReserved in saga state '{State}'.");
         }
+
+        RaiseEvent(new SagaInventoryReservedEvent { ReservationId = message.ReservationId });
+
+        Publish(new StartOrderPaymentCommand { OrderId = OrderId });
+
+        MarkComplete();
     }
 
-    public void HandleAsync(StockReserved message)
+    public void HandleAsync(InventoryReservationFailed message)
     {
-        if (State != SagaState.Running)
+        if (!State.CanFire(OrderSagaTrigger.InventoryReservationFailed))
         {
-            throw new DomainException("OrderSaga", "StockReserved event received in wrong saga state");
+            throw new DomainException("OrderSaga", $"Cannot handle InventoryReservationFailed in saga state '{State}'.");
         }
 
-        RaiseEvent(new StockReservedEvent
-        {
-            OrderSagaId = OrderId,
-            BuyerId = BuyerId,
-            OrderId = OrderId,
-            TenantId = TenantId,
-            Scope = Scope
-        });
-    }
+        RaiseEvent(new SagaInventoryReservationFailedEvent());
 
-    public void HandleAsync(StockReservationFailed message)
-    {
-        if (State != SagaState.Running)
+        Publish(new RejectOrderCommand
         {
-            throw new DomainException("OrderSaga", "StockReservationFailed event received in wrong saga state");
-        }
-
-        RaiseEvent(new StockReservationFailedEvent
-        {
-            OrderSagaId = OrderId,
-            BuyerId = BuyerId,
             OrderId = OrderId,
-            TenantId = TenantId,
-            Scope = Scope,
-            FailureReason = message.FailureReason
+            Reason = message.FailureReason
         });
 
         MarkComplete();
     }
 
-    public void HandleAsync(OrderPersisted message)
+    public void HandleExpire()
     {
-        if (State != SagaState.Running)
+        if (!State.CanFire(OrderSagaTrigger.Expire))
         {
-            throw new DomainException("OrderSaga", "OrderPersisted event received in wrong saga state");
+            throw new DomainException("OrderSaga", $"Cannot handle Expire in saga state '{State}'.");
         }
 
-        RaiseEvent(new OrderPersistedEvent
+        RaiseEvent(new SagaExpiredEvent());
+
+        Publish(new RejectOrderCommand
         {
-            OrderSagaId = OrderId,
-            BuyerId = BuyerId,
             OrderId = OrderId,
-            TenantId = TenantId,
-            Scope = Scope
+            Reason = "Order reservation timed out — no stock confirmation received."
         });
 
         MarkComplete();
     }
 
-    public void Apply(OrderSagaStartedEvent @event)
+    public void Apply(SagaStartedEvent @event)
     {
         Id = @event.OrderSagaId;
         BuyerId = @event.BuyerId;
@@ -124,27 +112,19 @@ public sealed class OrderSaga : AggregateSaga, IScoped
         Scope = @event.Scope;
     }
 
-    public void Apply(StockReservedEvent @event)
+    public void Apply(SagaInventoryReservedEvent @event)
     {
-        BuyerId = @event.BuyerId;
-        OrderId = @event.OrderId;
-        TenantId = @event.TenantId;
-        Scope = @event.Scope;
+        State.Fire(OrderSagaTrigger.InventoryReserved);
+        ReservationId = @event.ReservationId;
     }
 
-    public void Apply(StockReservationFailedEvent @event)
+    public void Apply(SagaInventoryReservationFailedEvent _)
     {
-        BuyerId = @event.BuyerId;
-        OrderId = @event.OrderId;
-        TenantId = @event.TenantId;
-        Scope = @event.Scope;
+        State.Fire(OrderSagaTrigger.InventoryReservationFailed);
     }
 
-    public void Apply(OrderPersistedEvent @event)
+    public void Apply(SagaExpiredEvent _)
     {
-        BuyerId = @event.BuyerId;
-        OrderId = @event.OrderId;
-        TenantId = @event.TenantId;
-        Scope = @event.Scope;
+        State.Fire(OrderSagaTrigger.Expire);
     }
 }

@@ -1,8 +1,9 @@
 using EShop.Shared.Contracts.Abstractions.Mediator;
+using EShop.Shared.Contracts.Abstractions.MessageBus;
 
 namespace EShop.Shared.Contracts.Services.Order;
 
-public sealed class OrderCreated : OrderIntegrationEvent, ICommand
+public sealed class OrderCreated : IntegrationEvent, ICommand
 {
     public required Guid OrderId { get; init; }
 

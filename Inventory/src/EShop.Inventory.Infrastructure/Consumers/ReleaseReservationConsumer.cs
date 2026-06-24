@@ -1,4 +1,4 @@
-using EShop.Inventory.Domain.Abstractions;
+using EShop.Inventory.Application.Services;
 using EShop.Inventory.Domain.Enums;
 using EShop.Shared.Authentication.Abstractions;
 using EShop.Shared.Contracts.Services.Order.Saga;
@@ -12,81 +12,72 @@ namespace EShop.Inventory.Infrastructure.Consumers;
 /// Handles <see cref="ReleaseReservationCommand"/> sent by the PlaceOrder saga
 /// during the compensation path (stock reservation released back to available).
 /// </summary>
-internal sealed class ReleaseReservationConsumer : IConsumer<ReleaseReservationCommand>
+internal sealed class ReleaseReservationConsumer(
+    InventoryDbContext dbContext,
+    IStockCacheService redisGateway,
+    IUserDetailsProvider userDetailsProvider,
+    ILogger<ReleaseReservationConsumer> logger) : IConsumer<ReleaseReservationCommand>
 {
-    private readonly InventoryDbContext _dbContext;
-    private readonly IRedisStockGateway _redisGateway;
-    private readonly IUserDetailsProvider _userDetailsProvider;
-    private readonly ILogger<ReleaseReservationConsumer> _logger;
-
-    public ReleaseReservationConsumer(
-        InventoryDbContext dbContext,
-        IRedisStockGateway redisGateway,
-        IUserDetailsProvider userDetailsProvider,
-        ILogger<ReleaseReservationConsumer> logger)
-    {
-        _dbContext = dbContext;
-        _redisGateway = redisGateway;
-        _userDetailsProvider = userDetailsProvider;
-        _logger = logger;
-    }
-
     public async Task Consume(ConsumeContext<ReleaseReservationCommand> context)
     {
         var cmd = context.Message;
 
-        using var _ = _userDetailsProvider.CreateSystemUserScope(
+        using var _ = userDetailsProvider.CreateSystemUserScope(
             cmd.TenantId, cmd.ActionUserId, cmd.ActionUserType);
 
-        var reservations = await _dbContext.Reservations
-            //.Where(r => r.OrderId == cmd.OrderId && r.Status == ReservationStatus.Active)
-            .ToListAsync(context.CancellationToken);
+        var reservation = await dbContext.Reservations
+            .Include(r => r.Items)
+            .FirstOrDefaultAsync(
+                r => r.Id == cmd.ReservationId && r.OrderId == cmd.OrderId && r.TenantId == cmd.TenantId,
+                context.CancellationToken);
 
-        if (reservations.Count == 0)
+        if (reservation is null)
         {
-            _logger.LogWarning("ReleaseReservationCommand for Order {OrderId}: no active reservations found — idempotent no-op.", cmd.OrderId);
+            logger.LogWarning("ReleaseReservationCommand for Reservation {ReservationId} / Order {OrderId}: not found — no-op.", cmd.ReservationId, cmd.OrderId);
             return;
         }
 
-        await using var tx = await _dbContext.Database.BeginTransactionAsync(context.CancellationToken);
+        // Idempotent: already released or expired — no stock change, just ACK.
+        if (reservation.Status != nameof(ReservationStatus.Pending))
+        {
+            logger.LogInformation("ReleaseReservationCommand for Reservation {ReservationId}: status is {Status} — skipping.", cmd.ReservationId, reservation.Status);
+            return;
+        }
+
+        await using var tx = await dbContext.Database.BeginTransactionAsync(context.CancellationToken);
 
         try
         {
-            var redisItems = new List<StockReservationRequest>(reservations.Count);
+            var redisItems = new List<StockReservationRequest>(reservation.Items.Count);
 
-            foreach (var reservation in reservations)
+            foreach (var item in reservation.Items)
             {
-                var inventory = await _dbContext.Inventories
-                    .Where(i => i.VariantId == reservation.VariantId && i.TenantId == cmd.TenantId)
+                var inventory = await dbContext.Inventories
+                    .Where(i => i.VariantId == item.VariantId && i.TenantId == cmd.TenantId)
                     .FirstOrDefaultAsync(context.CancellationToken);
 
                 if (inventory is not null)
                 {
-                    inventory.StockAvailable += reservation.Quantity;
-                    inventory.ReservedStock = Math.Max(0, inventory.ReservedStock - reservation.Quantity);
+                    inventory.StockAvailable += item.Quantity;
+                    inventory.ReservedStock = Math.Max(0, inventory.ReservedStock - item.Quantity);
                 }
 
-                redisItems.Add(new StockReservationRequest
-                {
-                    VariantId = reservation.VariantId,
-                    Quantity = reservation.Quantity
-                });
-
-                reservation.Release();
+                redisItems.Add(new StockReservationRequest { VariantId = item.VariantId, Quantity = item.Quantity });
             }
 
-            await _dbContext.SaveChangesAsync(context.CancellationToken);
+            reservation.Release();
+            await dbContext.SaveChangesAsync(context.CancellationToken);
             await tx.CommitAsync(context.CancellationToken);
 
             // Redis compensation — best-effort after Postgres commit.
-            await _redisGateway.ReleaseAsync(redisItems, context.CancellationToken);
+            await redisGateway.ReleaseAsync(redisItems, context.CancellationToken);
 
-            _logger.LogInformation("Released {Count} reservations for Order {OrderId}.", reservations.Count, cmd.OrderId);
+            logger.LogInformation("Released reservation {ReservationId} for Order {OrderId} ({Count} items).", cmd.ReservationId, cmd.OrderId, reservation.Items.Count);
         }
         catch (Exception ex)
         {
             await tx.RollbackAsync(context.CancellationToken);
-            _logger.LogError(ex, "Error releasing reservations for Order {OrderId}.", cmd.OrderId);
+            logger.LogError(ex, "Error releasing reservation {ReservationId} for Order {OrderId}.", cmd.ReservationId, cmd.OrderId);
             throw;
         }
     }

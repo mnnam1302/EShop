@@ -15,27 +15,28 @@ internal sealed class InventoryRepository
         _dbContext = dbContext;
     }
 
-    public async Task DecreaseStockLevel1(Guid variantId, int quantity, CancellationToken cancellationToken)
+    public async Task<int> DeductStocLevel1Async(Guid variantId, string tenantId, int quantity, CancellationToken cancellationToken)
     {
-        FormattableString rawSql = $"""
+        FormattableString sql = $"""
             UPDATE "Inventories"
-            SET "StockAvailable" = "StockAvailable" - {quantity}
-            WHERE "VariantId" = {variantId} 
+            SET "StockAvailable" = "StockAvailable" - {quantity},
+                "ReservedStock"  = "ReservedStock"  + {quantity}
+            WHERE "VariantId" = {variantId}
               AND "StockAvailable" >= {quantity}
             """;
 
-        await _dbContext.Database.ExecuteSqlAsync(rawSql, cancellationToken);
+        return await _dbContext.Database.ExecuteSqlAsync(sql, cancellationToken);
     }
 
-    public async Task DecreaseStockLevel3CAS(Guid variantId, int oldStockAvailable, int quantity, CancellationToken cancellationToken)
+    public async Task AddBackStockAsync(Guid variantId, string tenantId, int quantity, CancellationToken cancellationToken)
     {
-        FormattableString rawSql = $"""
+        FormattableString sql = $"""
             UPDATE "Inventories"
-            SET "StockAvailable" = "StockAvailable" - {quantity}
-            WHERE "VariantId" = {variantId} 
-              AND "StockAvailable" >= {quantity}
+            SET "StockAvailable" = "StockAvailable" + {quantity},
+                "ReservedStock"  = GREATEST(0, "ReservedStock" - {quantity})
+            WHERE "VariantId" = {variantId}
             """;
 
-        await _dbContext.Database.ExecuteSqlAsync(rawSql, cancellationToken);
+        await _dbContext.Database.ExecuteSqlAsync(sql, cancellationToken);
     }
 }

@@ -1,5 +1,4 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <ItemGroup>
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
   </ItemGroup>
@@ -8,5 +7,4 @@
     <ProjectReference Include="..\..\..\Shared\src\EShop.Shared.CQRS\EShop.Shared.CQRS.csproj" />
     <ProjectReference Include="..\EShop.Inventory.Domain\EShop.Inventory.Domain.csproj" />
   </ItemGroup>
-
 </Project>

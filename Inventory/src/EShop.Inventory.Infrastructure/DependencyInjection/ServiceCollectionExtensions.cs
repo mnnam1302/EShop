@@ -6,10 +6,13 @@ using EShop.Inventory.Infrastructure.Services;
 using EShop.Shared.Authentication.Filters;
 using EShop.Shared.Cache.DependencyInejctions.Extensions;
 using EShop.Shared.Contracts.JsonConverters;
+using EShop.Shared.Contracts.Services.Inventory;
+using EShop.Shared.Contracts.Services.Order.Saga;
 using EShop.Shared.Diagnostics;
 using EShop.Shared.DomainTools.UnitOfWorks;
 using EShop.Shared.EventBus.DependencyInjections.Extensions;
 using EShop.Shared.EventBus.DependencyInjections.Options;
+using EShop.Shared.EventBus.Filters;
 using EShop.Shared.EventBus.PipelineObservers;
 using EShop.Shared.JsonApi.Extensions;
 using EShop.Shared.Scoping.ResourceAccessControl;
@@ -41,6 +44,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IUnitOfWork, EFUnitOfWork<InventoryDbContext>>();
         services.AddScoped<IInventoryRepository, InventoryRepository>();
         services.AddScoped<IReservationRepository, ReservationRepository>();
+        services.AddScoped<IOutboxWriter, OutboxWriter>();
+
         return services;
     }
 
@@ -51,39 +56,13 @@ public static class ServiceCollectionExtensions
             .AddMasstransitRabbitMQ(configuration)
             .AddFeaturesAndPermissionsService();
 
+        services.AddSingleton(typeof(CorrelationIdLogEnrichFilter<>));
+
         services.AddRedis(configuration)
             .AddStockCacheService();
-        //.AddInventoryBackgroundJobs(configuration);
 
         return services;
     }
-
-    //private static IServiceCollection AddRedisStockGateway(this IServiceCollection services)
-    //{
-    //    services.AddSingleton<IRedisStockGateway, RedisStockGateway>();
-    //    services.AddHostedService<RedisStockInitializer>();
-    //    return services;
-    //}
-
-    //private static IServiceCollection AddInventoryBackgroundJobs(
-    //    this IServiceCollection services,
-    //    IConfiguration configuration)
-    //{
-    //    var connectionString = configuration.GetConnectionString("Default")!;
-
-    //    services.AddHangfire(cfg => cfg
-    //        .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
-    //        .UseSimpleAssemblyNameTypeSerializer()
-    //        .UseRecommendedSerializerSettings()
-    //        .UsePostgreSqlStorage(opt => opt.UseNpgsqlConnection(connectionString)));
-
-    //    services.AddHangfireServer();
-
-    //    services.AddScoped<ExpireReservationsJob>();
-    //    services.AddScoped<SyncRedisStockJob>();
-
-    //    return services;
-    //}
 
     private static IServiceCollection AddRedis(this IServiceCollection services, IConfiguration configuration)
     {
@@ -96,7 +75,7 @@ public static class ServiceCollectionExtensions
 
     private static IServiceCollection AddStockCacheService(this IServiceCollection services)
     {
-        services.AddScoped<IStockOrderCacheService, StockOrderCacheService>();
+        services.AddScoped<IStockCacheService, RedisStockCacheService>();
         return services;
     }
 
@@ -123,6 +102,10 @@ public static class ServiceCollectionExtensions
 
             cfg.UsingRabbitMq((context, bus) =>
             {
+                // Messages published FROM Inventory — stamp OrderId as the envelope CorrelationId.
+                bus.SendTopology.UseCorrelationId<InventoryReserved>(x => x.OrderId);
+                bus.SendTopology.UseCorrelationId<InventoryReservationFailed>(x => x.OrderId);
+
                 if (configuration.IsRunningInAspire())
                 {
                     var connectionString = configuration.GetConnectionString("rabbitmq");
@@ -138,6 +121,7 @@ public static class ServiceCollectionExtensions
                 }
 
                 bus.UseConsumeFilter(typeof(SystemUserContextConsumeFilter<>), context);
+                bus.UseConsumeFilter(typeof(CorrelationIdLogEnrichFilter<>), context);
 
                 bus.UseMessageRetry(retry => retry.Incremental(
                     retryLimit: messageBusOptions.RetryLimit,
@@ -171,4 +155,24 @@ public static class ServiceCollectionExtensions
 
         return services;
     }
+
+    //private static IServiceCollection AddInventoryBackgroundJobs(
+    //    this IServiceCollection services,
+    //    IConfiguration configuration)
+    //{
+    //    var connectionString = configuration.GetConnectionString("Default")!;
+
+    //    services.AddHangfire(cfg => cfg
+    //        .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+    //        .UseSimpleAssemblyNameTypeSerializer()
+    //        .UseRecommendedSerializerSettings()
+    //        .UsePostgreSqlStorage(opt => opt.UseNpgsqlConnection(connectionString)));
+
+    //    services.AddHangfireServer();
+
+    //    services.AddScoped<ExpireReservationsJob>();
+    //    services.AddScoped<SyncRedisStockJob>();
+
+    //    return services;
+    //}
 }

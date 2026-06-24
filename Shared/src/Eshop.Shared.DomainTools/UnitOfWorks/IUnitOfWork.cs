@@ -1,4 +1,4 @@
-﻿namespace EShop.Shared.DomainTools.UnitOfWorks;
+namespace EShop.Shared.DomainTools.UnitOfWorks;
 
 public interface IUnitOfWork : IAsyncDisposable
 {

@@ -10,8 +10,8 @@ public sealed class OrderSagaId : Identity<OrderSagaId>
     {
     }
 
-    public static OrderSagaId FromOrderId(Guid orderId)
+    public static Guid FromOrderId(Guid orderId)
     {
-        return NewDeterministic(Namespace, orderId.ToString());
+        return NewDeterministic(Namespace, orderId.ToString()).GetGuid();
     }
 }
