@@ -27,6 +27,12 @@ public sealed class InventoryReservedConsumer(
             return;
         }
 
+        if (saga.IsCompleted())
+        {
+            logger.LogDebug("InventoryReservedConsumer: Saga {SagaId} already completed — duplicate delivery, skipping.", sagaId);
+            return;
+        }
+
         saga.HandleAsync(message);
         await aggregateSagaStore.UpdateAggregateSagaAsync(saga, context.CancellationToken);
 

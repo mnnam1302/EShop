@@ -26,7 +26,7 @@ graph LR
     OA -->|"OrderCreated"| PM
     PM -->|"MakeReservation"| INV
     INV -->|"InventoryReserved / InventoryReservationFailed"| PM
-    PM -->|"AcceptOrderCommand / RejectOrderCommand"| OA
+    PM -->|"StartOrderPaymentCommand / RejectOrderCommand"| OA
     OA -->|"Accepted / Rejected"| C
 ```
 
@@ -94,14 +94,14 @@ flowchart LR
     INV(Inventory Service):::agg
     InventoryReserved([InventoryReserved]):::event
     InventoryReservationFailed([InventoryReservationFailed]):::event
-    AcceptOrder[AcceptOrderCommand]:::command
+    StartPayment[StartOrderPaymentCommand]:::command
     RejectOrder[RejectOrderCommand]:::command
 
     Customer --> PlaceOrder --> OA --> OrderCreated --> PM
     PM -->|"Rail A"| MakeReservation --> INV
     INV --> InventoryReserved --> PM
     INV --> InventoryReservationFailed --> PM
-    PM -->|"Rail B"| AcceptOrder --> OA
+    PM -->|"Rail B"| StartPayment --> OA
     PM -->|"Rail B"| RejectOrder --> OA
 ```
 
@@ -129,6 +129,7 @@ classDiagram
         string Description
         DateTimeOffset OrderDate
         +CreateOrder(command)
+        +StartPayment()
         +Accept()
         +Reject(reason)
     }
@@ -406,7 +407,7 @@ State is rebuilt during event replay: each `Apply(*)` method calls `State.Fire(t
 | `InventoryReserved` | Integration event | Inventory | Process Manager |
 | `InventoryReservationFailed` | Integration event | Inventory | Process Manager |
 | `StartOrderPaymentCommand` | Local command | Process Manager | Order Aggregate |
-| `AcceptOrderCommand` | Local command | Process Manager | Order Aggregate |
+| `AcceptOrderCommand` | Local command | *(payment saga — planned)* | Order Aggregate |
 | `RejectOrderCommand` | Local command | Process Manager | Order Aggregate |
 | `ReleaseReservationCommand` | Integration command | *(saga — planned)* | Inventory |
 | `ConfirmReservationCommand` | Integration command | *(saga — planned)* | Inventory |
@@ -423,7 +424,7 @@ All contracts live in `Shared/src/EShop.Shared.Contracts/Services/Order/` and `/
 
 | # | Gap | Status |
 |---|-----|--------|
-| G1 | **No payment-awaiting step.** Happy path goes straight to `Accepted`. Saga completes in `ProcessingPayment`. | Open |
+| G1 | **No payment-awaiting step.** Happy path stops at `ProcessingPayment` — `AcceptOrderCommand` is never issued. Saga closes immediately after `StartOrderPaymentCommand`. | Open |
 | G2 | `ConfirmReservationCommand` contract exists but is never issued. Reservation stays `Pending`. | Open |
 | G3 | `ReleaseReservationCommand` is never issued on payment-fail / cancel. Reserved stock is only released by the Inventory TTL expiry job. | Open |
 | G4 | ~~Success-path saga never `MarkComplete()`s.~~ | **Resolved** |
