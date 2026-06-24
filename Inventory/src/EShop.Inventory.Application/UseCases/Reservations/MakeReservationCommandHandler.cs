@@ -129,7 +129,7 @@ internal sealed class MakeReservationCommandHandler(
 
             if (!isReservedOnRedis)
             {
-                var outOfStockError = new Error(ErrorInsufficientStock, $"SKU {item.VariantId} has insufficient stock.");
+                var outOfStockError = new Error(ErrorInsufficientStock, $"Product variant {item.VariantId} has insufficient stock.");
                 await PublishFailedEventAsync(command, outOfStockError, cancellationToken);
                 return Result.Failure(outOfStockError);
             }
@@ -156,7 +156,7 @@ internal sealed class MakeReservationCommandHandler(
                     // All-or-nothing: one short item → roll back entire transaction.
                     await stockCacheService.ReleaseAsync(redisItems, cancellationToken);
 
-                    var insufficientError = new Error(ErrorInsufficientStock, $"SKU {item.VariantId} stock mismatch during database write.");
+                    var insufficientError = new Error(ErrorInsufficientStock, $"Product variant {item.VariantId} stock mismatch during database write.");
                     await PublishFailedEventAsync(command, insufficientError, cancellationToken);
                     return Result.Failure(insufficientError);
                 }
