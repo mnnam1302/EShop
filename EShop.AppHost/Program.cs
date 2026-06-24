@@ -11,4 +11,6 @@ else
     builder.AddServiceDefaults();
 }
 
+builder.AddProject<Projects.EShop_Finance_API>("eshop-finance-api");
+
 await builder.Build().RunAsync();
