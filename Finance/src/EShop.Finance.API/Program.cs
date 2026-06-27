@@ -15,7 +15,7 @@ internal static class Program
 
         try
         {
-            Log.Information("Initilizing {ApplicationName} ....", ApplicationName);
+            Log.Information("Initializing {ApplicationName} ....", ApplicationName);
 
             var app = BuidlWebApp(args);
             await using (var scope = app.Services.CreateAsyncScope())

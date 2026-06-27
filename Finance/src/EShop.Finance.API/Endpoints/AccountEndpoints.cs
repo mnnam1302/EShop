@@ -5,13 +5,13 @@ namespace EShop.Finance.API.Endpoints;
 
 public static class AccountEndpoints
 {
-    private const string _baseUrl = "api/v{version:apiVersion}/accounts";
+    private const string BaseUrl = "api/v{version:apiVersion}/accounts";
 
     public static IEndpointRouteBuilder MapAccountEndpoints(this IEndpointRouteBuilder routerBuilder)
     {
         var orderEndpointsV1 = routerBuilder
             .NewVersionedApi("Account")
-            .MapGroup(_baseUrl)
+            .MapGroup(BaseUrl)
             .HasApiVersion(1);
 
         orderEndpointsV1.MapPost("{orderId:guid}", GetAccountByOrderIdAsync);
