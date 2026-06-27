@@ -14,6 +14,16 @@ public sealed class MakePayment : IntegrationCommand
     public required decimal TotalAmount { get; init; }
     public required string Currency { get; init; }
 
-    /// <summary>OneOff / Monthly / Quarterly / Annually. When null, Finance defaults to OneOff.</summary>
+    /// <summary>
+    /// OneOff / Monthly / Quarterly / Annually. When null, Finance defaults to OneOff.
+    /// </summary>
     public string? PaymentFrequency { get; init; }
+}
+
+public static class PaymentFrequencyConstants
+{
+    public const string OneOff = "OneOff";
+    public const string Monthly = "Monthly";
+    public const string Quarterly = "Quarterly";
+    public const string Annually = "Annually";
 }

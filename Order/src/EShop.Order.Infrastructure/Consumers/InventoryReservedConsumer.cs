@@ -1,4 +1,6 @@
 using EShop.Order.Domain.Sagas;
+using EShop.Shared.Authentication.Abstractions;
+using EShop.Shared.Contracts.Abstractions.MessageBus;
 using EShop.Shared.Contracts.Services.Order.Saga;
 using EShop.Shared.CQRS.Command;
 using EShop.Shared.DomainTools.Sagas.AggregateSagas;
@@ -10,7 +12,9 @@ namespace EShop.Order.Infrastructure.Consumers;
 public sealed class InventoryReservedConsumer(
     IAggregateSagaStore aggregateSagaStore,
     ILogger<InventoryReservedConsumer> logger,
-    ICommandDispatcher commandDispatcher) : IConsumer<InventoryReserved>
+    ICommandDispatcher commandDispatcher,
+    ICommandBus commandBus,
+    IUserDetailsProvider userDetailsProvider) : IConsumer<InventoryReserved>
 {
     public async Task Consume(ConsumeContext<InventoryReserved> context)
     {
@@ -33,10 +37,15 @@ public sealed class InventoryReservedConsumer(
             return;
         }
 
-        saga.HandleAsync(message);
+        
+        saga.HandleAsync(message, userDetailsProvider.AuthenticatedUser);
         await aggregateSagaStore.UpdateAggregateSagaAsync(saga, context.CancellationToken);
 
+        // Command bus in-memory
         await saga.PublishAsync(commandDispatcher, context.CancellationToken);
+
+        // Command bus via message queue
+        await saga.PublishAsync(commandBus, context.CancellationToken);
 
         logger.LogInformation("InventoryReservedConsumer: Saga advanced for Order {OrderId}", message.OrderId);
     }

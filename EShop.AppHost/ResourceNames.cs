@@ -24,4 +24,6 @@ public static class ResourceNames
 
     public const string InventoryApi = "inventory";
     public const string OrderApi = "order";
+    public const string FinanceApi = "finance";
+
 }

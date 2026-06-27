@@ -1,6 +1,7 @@
 using EShop.Order.Domain.Commands;
 using EShop.Order.Domain.Sagas.DomainEvents;
 using EShop.Order.Domain.StateMachines;
+using EShop.Shared.Authentication;
 using EShop.Shared.Authentication.Abstractions;
 using EShop.Shared.Contracts.Services.Order;
 using EShop.Shared.Contracts.Services.Order.Saga;
@@ -53,7 +54,7 @@ public sealed class OrderSaga : AggregateSaga, IScoped
         return orderSaga;
     }
 
-    public void HandleAsync(InventoryReserved message)
+    public void HandleAsync(InventoryReserved message, UserData currentUser)
     {
         if (!State.CanFire(OrderSagaTrigger.InventoryReserved))
         {
@@ -63,6 +64,16 @@ public sealed class OrderSaga : AggregateSaga, IScoped
         RaiseEvent(new SagaInventoryReservedEvent { ReservationId = message.ReservationId });
 
         Publish(new StartOrderPaymentCommand { OrderId = OrderId });
+        Publish(new MakePayment
+        {
+            OrderId = OrderId,
+            BuyerId = BuyerId,
+            TotalAmount = 1200,
+            Currency = "VND",
+            TenantId = currentUser.TenantId,
+            ActionUserId = currentUser.ActionUserId,
+            ActionUserType = currentUser.ActionUserType
+        });
 
         MarkComplete();
     }

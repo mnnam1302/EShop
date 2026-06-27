@@ -60,6 +60,7 @@ public static class ExternalServiceRegistrationExtensions
         IResourceBuilder<IResourceWithConnectionString> catalogMongoDatabase;
         IResourceBuilder<IResourceWithConnectionString> inventoryDatabase;
         IResourceBuilder<IResourceWithConnectionString> orderDatabase;
+        IResourceBuilder<IResourceWithConnectionString> financeDatabase;
 
         if (useExternalService)
         {
@@ -75,6 +76,8 @@ public static class ExternalServiceRegistrationExtensions
             inventoryDatabase = builder.AddConnectionString("inventoryDatabase")
                 .WithParentRelationship(postgresServer);
             orderDatabase = builder.AddConnectionString("orderDatabase")
+                .WithParentRelationship(postgresServer);
+            financeDatabase = builder.AddConnectionString("financeDatabase")
                 .WithParentRelationship(postgresServer);
 
             catalogMongoDatabase = builder.AddConnectionString("catalogMongoDatabase")
@@ -105,6 +108,7 @@ public static class ExternalServiceRegistrationExtensions
             catalogDatabase = postgres.AddDatabase("catalogDatabase", "eshop_catalog");
             inventoryDatabase = postgres.AddDatabase("inventoryDatabase", "eshop_inventory");
             orderDatabase = postgres.AddDatabase("orderDatabase", "eshop_order");
+            financeDatabase = postgres.AddDatabase("financeDatabase", "eshop_finance");
             catalogMongoDatabase = mongodb.AddDatabase("catalogMongoDatabase", "eshop-catalog");
         }
 
@@ -194,6 +198,20 @@ public static class ExternalServiceRegistrationExtensions
         {
             order
                 .WaitFor(orderDatabase)
+                .WaitFor(redis)
+                .WaitFor(rabbitmq);
+        }
+
+        var finance = builder.AddProject<Projects.EShop_Finance_API>(ResourceNames.FinanceApi)
+            .WithExternalServiceMode(useExternalService)
+            .WithReference(financeDatabase)
+            .WithReference(redis)
+            .WithReference(rabbitmq);
+
+        if (!useExternalService)
+        {
+            finance
+                .WaitFor(financeDatabase)
                 .WaitFor(redis)
                 .WaitFor(rabbitmq);
         }

@@ -48,10 +48,11 @@ public static class ServiceCollectionExtensions
     {
         services
             .AddEventBus()
-            .AddAccountingProviders(configuration)
             .AddMasstransitRabbitMQ(configuration);
 
         services.AddSingleton(typeof(CorrelationIdLogEnrichFilter<>));
+
+        services.AddAccountingProviders(configuration);
 
         return services;
     }

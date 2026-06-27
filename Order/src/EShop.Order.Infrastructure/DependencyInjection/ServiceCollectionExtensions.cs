@@ -100,6 +100,7 @@ public static class ServiceCollectionExtensions
                 bus.SendTopology.UseCorrelationId<OrderCreated>(x => x.OrderId);
                 bus.SendTopology.UseCorrelationId<MakeReservation>(x => x.OrderId);
                 bus.SendTopology.UseCorrelationId<ReleaseReservationCommand>(x => x.OrderId);
+                bus.SendTopology.UseCorrelationId<MakePayment>(x => x.OrderId);
 
                 if (configuration.IsRunningInAspire())
                 {
