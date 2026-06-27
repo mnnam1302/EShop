@@ -7,8 +7,6 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddFinanceApplication(this IServiceCollection services)
     {
-        services.AddMediator(AssemblyReference.Assembly);
-
-        return services;
+        return services.AddMediator(AssemblyReference.Assembly);
     }
 }

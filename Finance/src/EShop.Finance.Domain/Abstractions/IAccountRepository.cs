@@ -7,5 +7,5 @@ public interface IAccountRepository : IRepositoryBase<Account, Guid>
 {
     Task<Account?> FindByOrderIdAsync(Guid orderId, bool trackChanges = false, CancellationToken cancellationToken = default);
 
-    Task<Account?> FindByPaymentIdAsync(Guid instalmentId, bool trackChanges = false, CancellationToken cancellationToken = default);
+    Task<Account?> FindByPaymentIdAsync(Guid paymentId, bool trackChanges = false, CancellationToken cancellationToken = default);
 }

@@ -7,11 +7,22 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Asp.Versioning.Http" />
+    <PackageReference Include="Asp.Versioning.Mvc.ApiExplorer" />
+    <PackageReference Include="MicroElements.Swashbuckle.FluentValidation" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Swashbuckle.AspNetCore" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Newtonsoft" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\EShop.ServiceDefaults\EShop.ServiceDefaults.csproj" />
+    <ProjectReference Include="..\EShop.Finance.Application\EShop.Finance.Application.csproj" />
+    <ProjectReference Include="..\EShop.Finance.Domain\EShop.Finance.Domain.csproj" />
+    <ProjectReference Include="..\EShop.Finance.Infrastructure\EShop.Finance.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>
