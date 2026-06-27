@@ -41,10 +41,7 @@ public sealed class InventoryReservedConsumer(
         saga.HandleAsync(message, userDetailsProvider.AuthenticatedUser);
         await aggregateSagaStore.UpdateAggregateSagaAsync(saga, context.CancellationToken);
 
-        // Command bus in-memory
         await saga.PublishAsync(commandDispatcher, context.CancellationToken);
-
-        // Command bus via message queue
         await saga.PublishAsync(commandBus, context.CancellationToken);
 
         logger.LogInformation("InventoryReservedConsumer: Saga advanced for Order {OrderId}", message.OrderId);

@@ -7,6 +7,23 @@ Supplements [design.md](design.md). Covers two refinements requested after the i
 
 ---
 
+## 0. Scope update (2026-06-28)
+
+Booking is split to a follow-up ticket (see `tasks.md` §0). This ticket delivers **create account →
+calculate & schedule → reply**. The saga reply is published by `CreateAccountCommandHandler`:
+
+- **`Order.Saga.OrderPaymentScheduled`** `{ OrderId, AccountId, PaymentCount }` — account created + schedule
+  calculated (success). Re-published on a redelivered `MakePayment` for an existing account (idempotent).
+- **`Order.Saga.OrderPaymentScheduleFailed`** `{ OrderId, Reason }` — schedule could not be built (invalid
+  total/frequency); the saga compensates.
+
+The `GenericHttp` provider, `BookInstalments`/`RecordInstalmentPayment`, and the
+`OrderPaymentCompleted`/`OrderPaymentFailed`/`PaymentReceived` contracts described below were **removed**
+from this ticket and return with booking. The named-strategy calculation (§3) and the `MakePayment` command
+(§2) remain as shipped.
+
+---
+
 ## 1. Distilling the reference (`Komodo.Finance` `AccountAggregate`)
 
 The reference `AccountAggregate` is a ~1,500-line **EventFlow event-sourced** aggregate covering value

@@ -10,4 +10,6 @@ public sealed record CreateAccountCommand : ICommand
     public required string Currency { get; init; }
     public string? PaymentFrequency { get; init; }
     public required string TenantId { get; init; }
+    public required string ActionUserId { get; init; }
+    public required string ActionUserType { get; init; }
 }

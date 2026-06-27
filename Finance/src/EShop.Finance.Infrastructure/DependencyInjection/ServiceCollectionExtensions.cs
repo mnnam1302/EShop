@@ -1,11 +1,8 @@
-using EShop.Finance.Application.Services.IntegrationProvider;
 using EShop.Finance.Domain.Abstractions;
-using EShop.Finance.Infrastructure.IntegrationProvider;
-using EShop.Finance.Infrastructure.IntegrationProvider.GenericHttp;
 using EShop.Finance.Infrastructure.Repositories;
 using EShop.Shared.Authentication.Filters;
 using EShop.Shared.Contracts.JsonConverters;
-using EShop.Shared.Contracts.Services.Finance;
+using EShop.Shared.Contracts.Services.Order.Saga;
 using EShop.Shared.Diagnostics;
 using EShop.Shared.DomainTools.UnitOfWorks;
 using EShop.Shared.EventBus.DependencyInjections.Extensions;
@@ -52,22 +49,6 @@ public static class ServiceCollectionExtensions
 
         services.AddSingleton(typeof(CorrelationIdLogEnrichFilter<>));
 
-        services.AddAccountingProviders(configuration);
-
-        return services;
-    }
-
-    private static IServiceCollection AddAccountingProviders(this IServiceCollection services, IConfiguration configuration)
-    {
-        services.Configure<GenericHttpProviderOptions>(
-            configuration.GetSection(GenericHttpProviderOptions.SectionName));
-
-        services.AddHttpClient<GenericHttpAccountingProvider>();
-        services.AddTransient<IAccountingIntegrationProvider>(sp =>
-            sp.GetRequiredService<GenericHttpAccountingProvider>());
-
-        services.AddScoped<IAccountingProviderResolver, AccountingProviderResolver>();
-
         return services;
     }
 
@@ -88,8 +69,8 @@ public static class ServiceCollectionExtensions
             cfg.UsingRabbitMq((context, bus) =>
             {
                 // Messages published FROM Finance — stamp OrderId as the envelope CorrelationId.
-                bus.SendTopology.UseCorrelationId<OrderPaymentCompleted>(x => x.OrderId);
-                bus.SendTopology.UseCorrelationId<OrderPaymentFailed>(x => x.OrderId);
+                bus.SendTopology.UseCorrelationId<OrderPaymentScheduled>(x => x.OrderId);
+                bus.SendTopology.UseCorrelationId<OrderPaymentScheduleFailed>(x => x.OrderId);
 
                 if (configuration.IsRunningInAspire())
                 {

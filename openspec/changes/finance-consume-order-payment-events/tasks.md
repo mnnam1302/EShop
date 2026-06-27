@@ -1,3 +1,24 @@
+## 0. Scope update (2026-06-28) — booking split to a follow-up ticket
+
+This change now ships only **create account → calculate & schedule payments → reply to the Order saga**.
+The **booking** feature (push each payment to the tenant's external accounting provider + record collected
+payments) moves to a separate ticket. Net effect on the tasks below:
+
+- **Done & shipping:** create account + schedule (§2, §3.2, §3.5, §4.1–4.3, §5), Strategy-pattern calculation
+  (§1.4), and the saga **reply flow** — `CreateAccountCommandHandler` publishes
+  `Order.Saga.OrderPaymentScheduled` / `OrderPaymentScheduleFailed`, consumed via `MakePaymentConsumer`.
+  Covered by `CreateAccountCommandHandlerTests` (replaces the old §7.5).
+- **Removed / deferred to the booking ticket:** the GenericHttp provider stack (§3.1, §4.5–4.7, §7.4),
+  `BookInstalmentsCommand` (§3.3), `RecordInstalmentPayment` + `PaymentReceived` consumer (§3.4, §4.4),
+  and the `OrderPaymentCompleted`/`OrderPaymentFailed`/`PaymentReceived` contracts (§1.1, §1.3). The
+  `Account`/`Payment` domain methods for booking/paying remain in place (unit-tested) ready for that ticket.
+- **Still open (Order-side ticket):** §6 — the event-sourced `OrderSaga` *publishing* `MakePayment` and
+  *consuming* the two reply events.
+
+The checkboxes below reflect the original plan and are kept for history; this section is the source of truth.
+
+---
+
 ## 1. Shared contracts
 
 - [x] 1.1 Add `Services/Finance/OrderPaymentCompleted.cs` and `OrderPaymentFailed.cs` (derive `IntegrationEvent`, carry `OrderId`)

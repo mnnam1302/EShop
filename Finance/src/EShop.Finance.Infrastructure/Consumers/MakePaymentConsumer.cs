@@ -18,6 +18,8 @@ public sealed class MakePaymentConsumer(IMediator mediator) : IConsumer<MakePaym
             Currency = message.Currency,
             PaymentFrequency = message.PaymentFrequency,
             TenantId = message.TenantId,
+            ActionUserId = message.ActionUserId,
+            ActionUserType = message.ActionUserType,
         };
 
         await mediator.SendAsync(command, context.CancellationToken);
