@@ -60,27 +60,33 @@
                               │     API GATEWAY / PROXY     │
                               └──────────────┬──────────────┘
                                              │
-┌────────────────────────────────────────────┼────────────────────────────────────────────┐
-│                                    MICROSERVICES                                        │
-│                                                                                         │
-│    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐                               │
-│    │   TENANCY   │    │    AUTH     │    │   CATALOG   │                               │
-│    │             │    │             │    │             │                               │
-│    │  • Tenants  │    │  • Users    │    │  • Products │                               │
-│    │  • Settings │    │  • Roles    │    │  • Variants │                               │
-│    │  • Features │    │  • Perms    │    │  • Category │                               │
-│    └──────┬──────┘    └──────┬──────┘    └──────┬──────┘                               │
-│           │                  │                  │                                      │
-└───────────┼──────────────────┼──────────────────┼──────────────────────────────────────-┘
-            │                  │                  │
-┌───────────┼──────────────────┼──────────────────┼──────────────────────────────────────-┐
-│           │                  │     INFRASTRUCTURE                                      │
-│           ▼                  ▼                  ▼                                      │
-│    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐             │
-│    │ PostgreSQL  │    │    Redis    │    │   MongoDB   │    │  RabbitMQ   │             │
-│    │   Events    │    │    Cache    │    │ Read Models │    │  Messaging  │             │
-│    └─────────────┘    └─────────────┘    └─────────────┘    └─────────────┘             │
-└─────────────────────────────────────────────────────────────────────────────────────────┘
+┌───────────────────────────────────────────────────────────────────────────────────────────┐
+│                                    MICROSERVICES                                          │
+│                                                                                           │
+│  Platform (Supporting)                                                                    │
+│    ┌─────────────┐  ┌─────────────┐                                                       │
+│    │   TENANCY   │  │    AUTH     │                                                       │
+│    │  • Tenants  │  │  • Users    │                                                       │
+│    │  • Features │  │  • Perms    │                                                       │
+│    └─────────────┘  └─────────────┘                                                       │
+│                                                                                           │
+│  Core Domain                                                                              │
+│    ┌─────────────┐  ┌─────────────┐  ┌──────────────┐  ┌─────────────┐                    │
+│    │   CATALOG   │  │  INVENTORY  │  │    ORDER     │  │   FINANCE   │                    │
+│    │  • Products │  │  • Stock    │  │  • Order     │  │  • Account  │                    │
+│    │  • Variants │  │  • Reserve  │  │  • OrderSaga │  │  • Payment  │                    │
+│    │  • Category │  │ (Redis+CAS) │  │ (Process Mgr)│  │   Schedule  │                    │
+│    └─────────────┘  └─────────────┘  └─────────────┘  └─────────────┘                     │
+│                                                                                           │
+└─────────────────────────────────────────────┬─────────────────────────────────────────────┘
+                                              │
+┌─────────────────────────────────────────────┼─────────────────────────────────────────────┐
+│    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐               │
+│    │ PostgreSQL  │    │    Redis    │    │   MongoDB   │    │  RabbitMQ   │               │
+│    │ Events+Data │    │  Cache/Gate │    │ Read Models │    │  Messaging  │               │
+│    └─────────────┘    └─────────────┘    └─────────────┘    └─────────────┘               │
+│                                     INFRASTRUCTURE                                        │
+└───────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ### Data Flow (CQRS + Event Sourcing)
@@ -116,45 +122,46 @@
 
 ---
 
-## � Bounded Contexts
+## 🧩 Bounded Contexts
 
 ```mermaid
 graph TB
-    subgraph Catalog["📦 Catalog Bounded Context"]
-        direction TB
-        PA["Product Aggregate<br/>(SPU/SKU)"]
-        CA["Category Aggregate"]
+    subgraph Platform["🏢 Platform (Supporting)"]
+        TEN["Tenancy<br/>Tenant · Feature"]
+        AUTH["Authorization<br/>Organization · User"]
+    end
+    subgraph Core["🟢 Core Domain"]
+        CAT["Catalog<br/>Product (SPU/SKU) · Category"]
+        INV["Inventory<br/>Inventory · Reservation"]
+        ORD["Order<br/>Order · OrderSaga (Process Manager)"]
+        FIN["Finance<br/>Account"]
     end
 
-    subgraph Authorization["🔐 Authorization Bounded Context"]
-        OA["Organization Aggregate"]
-        UA["User Aggregate"]
-    end
+    AUTH -->|"OrganizationCreated"| CAT
+    TEN -->|"feature flags / settings"| Core
+    ORD -->|"MakeReservation / Confirm / Release"| INV
+    INV -->|"InventoryReserved / InventoryReservationFailed"| ORD
+    ORD -->|"MakePayment"| FIN
+    FIN -->|"OrderPaymentScheduled / OrderPaymentScheduleFailed"| ORD
 
-    subgraph Tenancy["🏢 Tenancy Bounded Context"]
-        TA["Tenant Aggregate"]
-        FA["Feature Management"]
-    end
-
-    Authorization -->|"OrganizationCreated<br/>(Integration Event)"| Catalog
-    Tenancy -->|"Tenant Settings<br/>Feature Flags"| Catalog
-
-    style Catalog fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
-    style Authorization fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
-    style Tenancy fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    style Platform fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    style Core fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
 ```
 
-| Bounded Context | Aggregate Roots | Persistence | Status |
-|:----------------|:----------------|:------------|:-------|
-| **Tenancy** | Tenant, Feature | Event Sourcing (PostgreSQL) | ✅ Production-ready |
-| **Authorization** | Organization, User | Event Sourcing (PostgreSQL) | ✅ Production-ready |
-| **Catalog** | Product (SPU/SKU), Category | Event Sourcing (PostgreSQL) → Read Model (MongoDB) | ✅ Implemented |
+| Bounded Context | Domain Type | Aggregate Roots | Persistence | README |
+|:----------------|:------------|:----------------|:------------|:-------|
+| **Tenancy** | Supporting | Tenant, Feature | Event Sourcing (PostgreSQL) | — |
+| **Authorization** | Supporting | Organization, User | Event Sourcing (PostgreSQL) | [README](Authorization/src/EShop.Authorization.API/README.md) |
+| **Catalog** | Core | Product (SPU/SKU), Category | Event Sourcing (PostgreSQL) → Read Model (MongoDB) | [README](Catalog/src/EShop.Catalog.Application/README.md) |
+| **Inventory** | Core | Inventory, Reservation | EF Core (PostgreSQL) + Redis gate | [README](Inventory/src/EShop.Inventory.API/README.md) |
+| **Order** | Core | Order, OrderSaga | EF Core + event-sourced saga (PostgreSQL) | [README](Order/src/EShop.Order.API/README.md) |
+| **Finance** | Core | Account | EF Core (PostgreSQL) | [README](Finance/src/EShop.Finance.API/README.md) |
 
-> For detailed Product Aggregate documentation including Event Storming, State Machines, Specifications, and SPU/SKU modeling, see [Catalog README](Catalog/src/EShop.Catalog.Application/README.md).
+> **Place-Order saga** — the flagship cross-context flow. `Order`'s Process Manager reserves stock with `Inventory`, schedules payment with `Finance`, then confirms or compensates based on the replies. See the [Order README](Order/src/EShop.Order.API/README.md) for the full state machine and the two command rails.
 
 ---
 
-## �🛠 Technology Stack
+## 🛠 Technology Stack
 
 ### Core Technologies
 
@@ -212,6 +219,10 @@ graph TB
 | **CQRS** | Separate Command/Query models | Optimized read/write paths |
 | **Event Sourcing** | Immutable event stream | Full audit trail, temporal queries |
 | **Microservices** | Bounded context per service | Independent deployment |
+| **Saga / Process Manager** | Event-sourced `OrderSaga` (`AggregateSaga`) coordinating Inventory + Finance | Distributed transaction with compensation |
+| **Two Command Rails** | Integration commands (`ICommandBus` → RabbitMQ) vs local commands (`ICommandDispatcher`) | Clear cross-service vs in-process boundaries |
+| **Outbox / Inbox** | Transactional outbox + `inbox_messages` dedup | At-least-once delivery, idempotent consumers |
+| **Deduct-on-Order + CAS** | Redis Lua gate → PostgreSQL compare-and-swap | No oversell under concurrency |
 
 ### Domain-Driven Design
 
@@ -270,6 +281,18 @@ EShop/
 │   │   └── EShop.Catalog.ReadModels.MongoDb/ # Read model projections (MongoDB via EF Core)
 │   └── tests/
 │       └── EShop.Catalog.Tests/             # Unit + BDD Tests (Reqnroll)
+│
+├── 📂 Inventory/                      # ── Stock Management Context (Core) ──
+│   ├── src/ (API · Application · Domain · Infrastructure)  # Deduct-on-order, Redis gate + CAS
+│   └── tests/
+│
+├── 📂 Order/                          # ── Order & Process Manager Context (Core) ──
+│   ├── src/ (API · Application · Domain · Infrastructure)  # OrderSaga (event-sourced) + two command rails
+│   └── tests/EShop.Order.Tests/
+│
+├── 📂 Finance/                        # ── Payment Schedule Context (Core) ──
+│   ├── src/ (API · Application · Domain · Infrastructure)  # Strategy-based payment schedule
+│   └── tests/EShop.Finance.Tests/
 │
 ├── 📂 Configuration/                  # ── Configuration Context ──
 │   ├── src/
@@ -383,6 +406,22 @@ For a complete step-by-step guide — prerequisites, secret files, migrations, r
 | **RabbitMQ + MassTransit** | Reliable messaging with saga support |
 | **JSON:API** | Standardized REST API with filtering, sorting, pagination out of the box |
 | **Reqnroll BDD** | Executable specifications bridging domain experts and developers |
+| **Saga as AggregateSaga** | The Process Manager is event-sourced — its routing decisions are auditable and replayable |
+| **Deduct-on-Order** | Stock is removed at reservation, not payment — prevents overselling under concurrency |
+| **CAS + Redis Gate** | Redis rejects sold-out requests early; PostgreSQL CAS is the authoritative no-oversell decision |
+| **Strategy-based Payment Schedule** | One strategy per frequency (OneOff/Monthly/Quarterly/Annually) — Open/Closed extension |
+
+---
+
+## 📚 Service READMEs
+
+| Service | Domain Type | README |
+|---------|-------------|--------|
+| Catalog | Core | [Catalog/src/EShop.Catalog.Application/README.md](Catalog/src/EShop.Catalog.Application/README.md) |
+| Inventory | Core | [Inventory/src/EShop.Inventory.API/README.md](Inventory/src/EShop.Inventory.API/README.md) |
+| Order | Core | [Order/src/EShop.Order.API/README.md](Order/src/EShop.Order.API/README.md) |
+| Finance | Core | [Finance/src/EShop.Finance.API/README.md](Finance/src/EShop.Finance.API/README.md) |
+| Authorization | Supporting | [Authorization/src/EShop.Authorization.API/README.md](Authorization/src/EShop.Authorization.API/README.md) |
 
 ---
 
