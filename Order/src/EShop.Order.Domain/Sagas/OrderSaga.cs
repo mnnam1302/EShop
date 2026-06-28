@@ -19,7 +19,7 @@ public sealed class OrderSaga : AggregateSaga, IScoped
     public Guid ReservationId { get; private set; }
     public Guid AccountId { get; private set; }
 
-    public OrderSagaStateMachine State { get; private set; } = new();
+    public OrderSagaStateMachine StateMachine { get; private set; } = new();
 
     public string TenantId { get; private set; } = string.Empty;
     public string Scope { get; private set; } = string.Empty;
@@ -58,9 +58,9 @@ public sealed class OrderSaga : AggregateSaga, IScoped
 
     public void HandleAsync(InventoryReserved message, UserData currentUser)
     {
-        if (!State.CanFire(OrderSagaTrigger.InventoryReserved))
+        if (!StateMachine.CanFire(OrderSagaTrigger.InventoryReserved))
         {
-            throw new DomainException("OrderSaga", $"Cannot handle InventoryReserved in saga state '{State}'.");
+            throw new DomainException("OrderSaga", $"Cannot handle InventoryReserved in saga state '{StateMachine}'.");
         }
 
         RaiseEvent(new SagaInventoryReservedEvent { ReservationId = message.ReservationId });
@@ -80,9 +80,9 @@ public sealed class OrderSaga : AggregateSaga, IScoped
 
     public void HandleAsync(InventoryReservationFailed message)
     {
-        if (!State.CanFire(OrderSagaTrigger.InventoryReservationFailed))
+        if (!StateMachine.CanFire(OrderSagaTrigger.InventoryReservationFailed))
         {
-            throw new DomainException("OrderSaga", $"Cannot handle InventoryReservationFailed in saga state '{State}'.");
+            throw new DomainException("OrderSaga", $"Cannot handle InventoryReservationFailed in saga state '{StateMachine}'.");
         }
 
         RaiseEvent(new SagaInventoryReservationFailedEvent());
@@ -98,9 +98,9 @@ public sealed class OrderSaga : AggregateSaga, IScoped
 
     public void HandleAsync(OrderPaymentScheduled message, UserData currentUser)
     {
-        if (!State.CanFire(OrderSagaTrigger.PaymentScheduled))
+        if (!StateMachine.CanFire(OrderSagaTrigger.PaymentScheduled))
         {
-            throw new DomainException("OrderSaga", $"Cannot handle OrderPaymentScheduled in saga state '{State}'.");
+            throw new DomainException("OrderSaga", $"Cannot handle OrderPaymentScheduled in saga state '{StateMachine}'.");
         }
 
         RaiseEvent(new SagaPaymentScheduledEvent { AccountId = message.AccountId });
@@ -120,9 +120,9 @@ public sealed class OrderSaga : AggregateSaga, IScoped
 
     public void HandleAsync(OrderPaymentScheduleFailed message, UserData currentUser)
     {
-        if (!State.CanFire(OrderSagaTrigger.PaymentScheduleFailed))
+        if (!StateMachine.CanFire(OrderSagaTrigger.PaymentScheduleFailed))
         {
-            throw new DomainException("OrderSaga", $"Cannot handle OrderPaymentScheduleFailed in saga state '{State}'.");
+            throw new DomainException("OrderSaga", $"Cannot handle OrderPaymentScheduleFailed in saga state '{StateMachine}'.");
         }
 
         RaiseEvent(new SagaPaymentScheduleFailedEvent { Reason = message.Reason });
@@ -142,9 +142,9 @@ public sealed class OrderSaga : AggregateSaga, IScoped
 
     public void HandleExpire()
     {
-        if (!State.CanFire(OrderSagaTrigger.Expire))
+        if (!StateMachine.CanFire(OrderSagaTrigger.Expire))
         {
-            throw new DomainException("OrderSaga", $"Cannot handle Expire in saga state '{State}'.");
+            throw new DomainException("OrderSaga", $"Cannot handle Expire in saga state '{StateMachine}'.");
         }
 
         RaiseEvent(new SagaExpiredEvent());
@@ -169,28 +169,28 @@ public sealed class OrderSaga : AggregateSaga, IScoped
 
     public void Apply(SagaInventoryReservedEvent @event)
     {
-        State.Fire(OrderSagaTrigger.InventoryReserved);
+        StateMachine.Fire(OrderSagaTrigger.InventoryReserved);
         ReservationId = @event.ReservationId;
     }
 
     public void Apply(SagaInventoryReservationFailedEvent _)
     {
-        State.Fire(OrderSagaTrigger.InventoryReservationFailed);
+        StateMachine.Fire(OrderSagaTrigger.InventoryReservationFailed);
     }
 
     public void Apply(SagaExpiredEvent _)
     {
-        State.Fire(OrderSagaTrigger.Expire);
+        StateMachine.Fire(OrderSagaTrigger.Expire);
     }
 
     public void Apply(SagaPaymentScheduledEvent @event)
     {
-        State.Fire(OrderSagaTrigger.PaymentScheduled);
+        StateMachine.Fire(OrderSagaTrigger.PaymentScheduled);
         AccountId = @event.AccountId;
     }
 
     public void Apply(SagaPaymentScheduleFailedEvent _)
     {
-        State.Fire(OrderSagaTrigger.PaymentScheduleFailed);
+        StateMachine.Fire(OrderSagaTrigger.PaymentScheduleFailed);
     }
 }

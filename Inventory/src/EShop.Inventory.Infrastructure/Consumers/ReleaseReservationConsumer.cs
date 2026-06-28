@@ -1,4 +1,5 @@
 using EShop.Inventory.Application.Services;
+using EShop.Inventory.Domain.Abstractions;
 using EShop.Inventory.Domain.Enums;
 using EShop.Shared.Authentication.Abstractions;
 using EShop.Shared.Contracts.Services.Order.Saga;
@@ -8,39 +9,32 @@ using Microsoft.Extensions.Logging;
 
 namespace EShop.Inventory.Infrastructure.Consumers;
 
-/// <summary>
-/// Handles <see cref="ReleaseReservationCommand"/> sent by the PlaceOrder saga
-/// during the compensation path (stock reservation released back to available).
-/// </summary>
-internal sealed class ReleaseReservationConsumer(
+public sealed class ReleaseReservationConsumer(
     InventoryDbContext dbContext,
+    IInventoryRepository inventoryRepository,
     IStockCacheService redisGateway,
     IUserDetailsProvider userDetailsProvider,
     ILogger<ReleaseReservationConsumer> logger) : IConsumer<ReleaseReservationCommand>
 {
     public async Task Consume(ConsumeContext<ReleaseReservationCommand> context)
     {
-        var cmd = context.Message;
+        var command = context.Message;
 
-        using var _ = userDetailsProvider.CreateSystemUserScope(
-            cmd.TenantId, cmd.ActionUserId, cmd.ActionUserType);
+        using var _ = userDetailsProvider.CreateSystemUserScope(command.TenantId, command.ActionUserId, command.ActionUserType);
 
         var reservation = await dbContext.Reservations
             .Include(r => r.Items)
-            .FirstOrDefaultAsync(
-                r => r.Id == cmd.ReservationId && r.OrderId == cmd.OrderId && r.TenantId == cmd.TenantId,
-                context.CancellationToken);
+            .FirstOrDefaultAsync(r => r.Id == command.ReservationId && r.OrderId == command.OrderId, context.CancellationToken);
 
         if (reservation is null)
         {
-            logger.LogWarning("ReleaseReservationCommand for Reservation {ReservationId} / Order {OrderId}: not found — no-op.", cmd.ReservationId, cmd.OrderId);
+            logger.LogWarning("ReleaseReservationCommand for Reservation {ReservationId} / Order {OrderId}: not found — no-op.", command.ReservationId, command.OrderId);
             return;
         }
 
-        // Idempotent: already released or expired — no stock change, just ACK.
         if (reservation.Status != nameof(ReservationStatus.Pending))
         {
-            logger.LogInformation("ReleaseReservationCommand for Reservation {ReservationId}: status is {Status} — skipping.", cmd.ReservationId, reservation.Status);
+            logger.LogInformation("ReleaseReservationCommand for Reservation {ReservationId}: status is {Status} — skipping.", command.ReservationId, reservation.Status);
             return;
         }
 
@@ -52,15 +46,9 @@ internal sealed class ReleaseReservationConsumer(
 
             foreach (var item in reservation.Items)
             {
-                var inventory = await dbContext.Inventories
-                    .Where(i => i.VariantId == item.VariantId && i.TenantId == cmd.TenantId)
-                    .FirstOrDefaultAsync(context.CancellationToken);
-
-                if (inventory is not null)
-                {
-                    inventory.StockAvailable += item.Quantity;
-                    inventory.ReservedStock = Math.Max(0, inventory.ReservedStock - item.Quantity);
-                }
+                // Atomic add-back (UPDATE ... SET stock_available = stock_available + qty) so concurrent
+                // releases of the same variant cannot lose updates — mirrors the CAS deduct on placement.
+                await inventoryRepository.AddBackStockAsync(item.VariantId, command.TenantId, item.Quantity, context.CancellationToken);
 
                 redisItems.Add(new StockReservationRequest { VariantId = item.VariantId, Quantity = item.Quantity });
             }
@@ -72,12 +60,12 @@ internal sealed class ReleaseReservationConsumer(
             // Redis compensation — best-effort after Postgres commit.
             await redisGateway.ReleaseAsync(redisItems, context.CancellationToken);
 
-            logger.LogInformation("Released reservation {ReservationId} for Order {OrderId} ({Count} items).", cmd.ReservationId, cmd.OrderId, reservation.Items.Count);
+            logger.LogInformation("Released reservation {ReservationId} for Order {OrderId} ({Count} items).", command.ReservationId, command.OrderId, reservation.Items.Count);
         }
         catch (Exception ex)
         {
             await tx.RollbackAsync(context.CancellationToken);
-            logger.LogError(ex, "Error releasing reservation {ReservationId} for Order {OrderId}.", cmd.ReservationId, cmd.OrderId);
+            logger.LogError(ex, "Error releasing reservation {ReservationId} for Order {OrderId}.", command.ReservationId, command.OrderId);
             throw;
         }
     }

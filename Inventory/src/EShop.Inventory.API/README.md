@@ -308,21 +308,21 @@ sequenceDiagram
     end
 
     rect rgb(232,245,233)
-        Note over PM,HOLD: Planned — payment-aware step (not issued by the saga yet)
-        PM->>INV: ConfirmReservationCommand
+        Note over PM,HOLD: Payment-aware step — driven by Finance's reply (OrderPaymentScheduled / Failed)
+        PM->>INV: ConfirmReservationCommand (payment scheduled)
         INV->>HOLD: Pending → Confirmed (no stock change)
-        PM->>INV: ReleaseReservationCommand
-        INV->>HOLD: Pending → Released (available += qty)
+        PM->>INV: ReleaseReservationCommand (payment schedule failed)
+        INV->>HOLD: Pending → Released (atomic available += qty)
     end
 ```
 
 | Saga sends | Inventory does | Reply | Status today |
 |------------|----------------|-------|--------------|
 | `MakeReservation` | Redis gate + CAS deduct + create `Pending` hold | `StocksReserved` / `StocksNotReserved` | ✅ Live |
-| `ConfirmReservationCommand` | `Pending → Confirmed` (no stock change) | — | ⏳ Inventory side ready; saga does not issue it yet |
-| `ReleaseReservationCommand` | `Pending → Released`, add stock back | — | ⏳ Inventory side ready; saga does not issue it yet |
+| `ConfirmReservationCommand` | `Pending → Confirmed` (no stock change) | — | ✅ Live — issued when Finance replies `OrderPaymentScheduled` |
+| `ReleaseReservationCommand` | `Pending → Released`, **atomic** stock add-back (`AddBackStockAsync`) + Redis compensation | — | ✅ Live — issued when Finance replies `OrderPaymentScheduleFailed` |
 
-> The release/confirm handlers exist in Inventory, but the Order saga has no payment-awaiting state to trigger them. That work is tracked in the [Order README roadmap](../../../Order/src/EShop.Order.API/README.md#roadmap--next-steps). Until then, the `ExpireReservationsJob` TTL sweeper is the only thing that releases unconfirmed holds.
+> Both commands are **idempotent** (guarded by `Status == Pending`) and **fire-and-forget** — the saga has already completed, so Inventory sends no reply. The release path adds stock back with an atomic SQL `UPDATE` (no lost updates under concurrent releases), inside a transaction with the `Pending → Released` status change, then compensates Redis after commit.
 
 ---
 
