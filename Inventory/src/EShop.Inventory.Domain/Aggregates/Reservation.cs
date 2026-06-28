@@ -4,6 +4,7 @@ using EShop.Inventory.Domain.DomainEvents;
 using EShop.Inventory.Domain.Enums;
 using EShop.Shared.DomainTools.Aggregates;
 using EShop.Shared.DomainTools.Entities;
+using Microsoft.Extensions.Logging;
 
 namespace EShop.Inventory.Domain.Aggregates;
 

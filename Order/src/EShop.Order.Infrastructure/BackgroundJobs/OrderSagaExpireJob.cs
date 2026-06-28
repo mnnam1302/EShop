@@ -21,13 +21,13 @@ public sealed class OrderSagaExpireJob(
             return;
         }
 
-        if (!saga.State.IsInState(OrderSagaState.ReservingInventory))
+        if (!saga.StateMachine.IsInState(OrderSagaState.ReservingInventory))
         {
-            logger.LogDebug("Saga {SagaId} is in state {State}. Already past ReservingInventory — expiration is a no-op.", sagaId, saga.State);
+            logger.LogDebug("Saga {SagaId} is in state {State}. Already past ReservingInventory — expiration is a no-op.", sagaId, saga.StateMachine);
             return;
         }
 
-        logger.LogInformation("Saga {SagaId} (Order {OrderId}) expires in state {State}.", sagaId, orderId, saga.State);
+        logger.LogInformation("Saga {SagaId} (Order {OrderId}) expires in state {State}.", sagaId, orderId, saga.StateMachine);
 
         saga.HandleExpire();
         await sagaStore.UpdateAggregateSagaAsync(saga, cancellationToken);

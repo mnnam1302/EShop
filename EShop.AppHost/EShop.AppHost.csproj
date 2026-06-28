@@ -19,6 +19,7 @@
     <ProjectReference Include="..\Authorization\src\EShop.Authorization.API\EShop.Authorization.API.csproj" />
     <ProjectReference Include="..\Catalog\src\EShop.Catalog.Application\EShop.Catalog.Application.csproj" />
     <ProjectReference Include="..\Catalog\src\EShop.Catalog.ReadModels.MongoDb\EShop.Catalog.ReadModels.MongoDb.csproj" />
+    <ProjectReference Include="..\Finance\src\EShop.Finance.API\EShop.Finance.API.csproj" />
     <ProjectReference Include="..\Inventory\src\EShop.Inventory.API\EShop.Inventory.API.csproj" />
     <ProjectReference Include="..\Order\src\EShop.Order.API\EShop.Order.API.csproj" />
     <ProjectReference Include="..\ReverseProxy\src\EShop.ApiGateway\EShop.ApiGateway.csproj" />

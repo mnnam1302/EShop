@@ -1,4 +1,4 @@
-﻿using EShop.Shared.Contracts.Abstractions.MessageBus;
+using EShop.Shared.Contracts.Abstractions.MessageBus;
 using EShop.Shared.DomainTools.Entities;
 
 namespace EShop.Shared.DomainTools.Aggregates

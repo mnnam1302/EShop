@@ -107,57 +107,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EShop.Catalog.ReadModels.Mo
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Aspire", "Aspire", "{31242E98-E92A-4500-8463-9CDA3627C571}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Deployment", "Deployment", "{645D1914-2B57-4FF2-85EC-2D25E851A35C}"
-	ProjectSection(SolutionItems) = preProject
-		Deployment\postgres_password.txt = Deployment\postgres_password.txt
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Scripts", "Scripts", "{EBD46815-F3D7-4179-A308-766644D0DE61}"
-	ProjectSection(SolutionItems) = preProject
-		Deployment\Scripts\delete-tables.sql = Deployment\Scripts\delete-tables.sql
-		Deployment\Scripts\postgres-init.sql = Deployment\Scripts\postgres-init.sql
-	EndProjectSection
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EShop.AppHost", "EShop.AppHost\EShop.AppHost.csproj", "{D2933B25-8CA4-4EB4-BE39-1EE067B97AC8}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EShop.ServiceDefaults", "EShop.ServiceDefaults\EShop.ServiceDefaults.csproj", "{3941E297-4449-5207-EC32-3679FF14F902}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "config", "config", "{1097CEB2-31DF-41CF-858A-7F45E466E0E4}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "otelcollector", "otelcollector", "{5FADD516-2E42-4F15-8AF2-4FFC8EFA5EEC}"
-	ProjectSection(SolutionItems) = preProject
-		Deployment\config\otelcollector\config.yaml = Deployment\config\otelcollector\config.yaml
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "prometheus", "prometheus", "{0D4D5188-2103-4258-AB55-899D3609E2A1}"
-	ProjectSection(SolutionItems) = preProject
-		Deployment\config\prometheus\prometheus.yml = Deployment\config\prometheus\prometheus.yml
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "grafana", "grafana", "{E557D7C1-2308-4B6C-8445-978FB85AD3DF}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "config", "config", "{7CBB3ED0-73EA-4991-8D1E-807195E5F44B}"
-	ProjectSection(SolutionItems) = preProject
-		Deployment\config\grafana\config\grafana.ini = Deployment\config\grafana\config\grafana.ini
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "dashboards", "dashboards", "{79AAF616-02BE-451F-98E2-792EBA87F479}"
-	ProjectSection(SolutionItems) = preProject
-		Deployment\config\grafana\dashboards\aspnetcore-endpoint.json = Deployment\config\grafana\dashboards\aspnetcore-endpoint.json
-		Deployment\config\grafana\dashboards\aspnetcore.json = Deployment\config\grafana\dashboards\aspnetcore.json
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "provisioning", "provisioning", "{13EC8C82-2325-4D0E-BE52-9DEBA3FB5030}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "dashboards", "dashboards", "{06139DD8-DD58-42ED-9629-0461B34C82AC}"
-	ProjectSection(SolutionItems) = preProject
-		Deployment\config\grafana\config\provisioning\dashboards\default.yaml = Deployment\config\grafana\config\provisioning\dashboards\default.yaml
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "datasources", "datasources", "{C768983A-8003-479D-8D18-897EA5A19B43}"
-	ProjectSection(SolutionItems) = preProject
-		Deployment\config\grafana\config\provisioning\datasources\default.yaml = Deployment\config\grafana\config\provisioning\datasources\default.yaml
-	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EShop.Shared.SystemClock", "Shared\src\EShop.Shared.SystemClock\EShop.Shared.SystemClock.csproj", "{20828C5E-7ED3-4059-BD1F-F6B7E4639596}"
 EndProject
@@ -238,6 +190,22 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "secrets", "secrets", "{43E4
 		deploy\secrets\redis_password.txt.example = deploy\secrets\redis_password.txt.example
 		deploy\secrets\tenancy_connstr.txt.example = deploy\secrets\tenancy_connstr.txt.example
 	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Finance", "Finance", "{AA78AF7D-7B0C-4ADD-B89A-CD97DB547B18}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{333E461D-91C4-4943-9CCC-2BC02D82ED3F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{A07E96D2-DBF2-460F-8CAE-154B284222E0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EShop.Finance.API", "Finance\src\EShop.Finance.API\EShop.Finance.API.csproj", "{4C4ECCAD-999A-B91F-230B-58EE94F8D532}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EShop.Finance.Domain", "Finance\src\EShop.Finance.Domain\EShop.Finance.Domain.csproj", "{C29463D5-41F8-46E9-B225-AA451EA83E40}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EShop.Finance.Application", "Finance\src\EShop.Finance.Application\EShop.Finance.Application.csproj", "{45A343A4-FD3B-4F40-A494-8334A1D85CBA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EShop.Finance.Infrastructure", "Finance\src\EShop.Finance.Infrastructure\EShop.Finance.Infrastructure.csproj", "{79677544-C264-497F-8904-31A37930CCAC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EShop.Finance.Tests", "Finance\tests\EShop.Finance.Tests\EShop.Finance.Tests.csproj", "{129EEFAF-8FB7-45C3-B2B1-55AF18C3E204}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -429,6 +397,26 @@ Global
 		{F2F2CAED-4D22-428B-9AA2-A23A645A6393}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F2F2CAED-4D22-428B-9AA2-A23A645A6393}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F2F2CAED-4D22-428B-9AA2-A23A645A6393}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4C4ECCAD-999A-B91F-230B-58EE94F8D532}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4C4ECCAD-999A-B91F-230B-58EE94F8D532}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4C4ECCAD-999A-B91F-230B-58EE94F8D532}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4C4ECCAD-999A-B91F-230B-58EE94F8D532}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C29463D5-41F8-46E9-B225-AA451EA83E40}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C29463D5-41F8-46E9-B225-AA451EA83E40}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C29463D5-41F8-46E9-B225-AA451EA83E40}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C29463D5-41F8-46E9-B225-AA451EA83E40}.Release|Any CPU.Build.0 = Release|Any CPU
+		{45A343A4-FD3B-4F40-A494-8334A1D85CBA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{45A343A4-FD3B-4F40-A494-8334A1D85CBA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{45A343A4-FD3B-4F40-A494-8334A1D85CBA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{45A343A4-FD3B-4F40-A494-8334A1D85CBA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{79677544-C264-497F-8904-31A37930CCAC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{79677544-C264-497F-8904-31A37930CCAC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{79677544-C264-497F-8904-31A37930CCAC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{79677544-C264-497F-8904-31A37930CCAC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{129EEFAF-8FB7-45C3-B2B1-55AF18C3E204}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{129EEFAF-8FB7-45C3-B2B1-55AF18C3E204}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{129EEFAF-8FB7-45C3-B2B1-55AF18C3E204}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{129EEFAF-8FB7-45C3-B2B1-55AF18C3E204}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -474,18 +462,8 @@ Global
 		{16AF590E-1687-4E0E-BA15-51F333E3BE11} = {DF247757-C88D-4BD6-9946-FDEAC84BF886}
 		{8E18FB73-87D0-47EA-A4F0-19390752B4DC} = {8BBFDBAB-6497-4B10-A539-A17ACA855A86}
 		{012E1CBC-EBC5-45FE-8AE7-30D29FF97B35} = {D0916B7D-F7B6-7D7C-08CD-3AA4546D8309}
-		{EBD46815-F3D7-4179-A308-766644D0DE61} = {645D1914-2B57-4FF2-85EC-2D25E851A35C}
 		{D2933B25-8CA4-4EB4-BE39-1EE067B97AC8} = {31242E98-E92A-4500-8463-9CDA3627C571}
 		{3941E297-4449-5207-EC32-3679FF14F902} = {31242E98-E92A-4500-8463-9CDA3627C571}
-		{1097CEB2-31DF-41CF-858A-7F45E466E0E4} = {645D1914-2B57-4FF2-85EC-2D25E851A35C}
-		{5FADD516-2E42-4F15-8AF2-4FFC8EFA5EEC} = {1097CEB2-31DF-41CF-858A-7F45E466E0E4}
-		{0D4D5188-2103-4258-AB55-899D3609E2A1} = {1097CEB2-31DF-41CF-858A-7F45E466E0E4}
-		{E557D7C1-2308-4B6C-8445-978FB85AD3DF} = {1097CEB2-31DF-41CF-858A-7F45E466E0E4}
-		{7CBB3ED0-73EA-4991-8D1E-807195E5F44B} = {E557D7C1-2308-4B6C-8445-978FB85AD3DF}
-		{79AAF616-02BE-451F-98E2-792EBA87F479} = {E557D7C1-2308-4B6C-8445-978FB85AD3DF}
-		{13EC8C82-2325-4D0E-BE52-9DEBA3FB5030} = {7CBB3ED0-73EA-4991-8D1E-807195E5F44B}
-		{06139DD8-DD58-42ED-9629-0461B34C82AC} = {13EC8C82-2325-4D0E-BE52-9DEBA3FB5030}
-		{C768983A-8003-479D-8D18-897EA5A19B43} = {13EC8C82-2325-4D0E-BE52-9DEBA3FB5030}
 		{20828C5E-7ED3-4059-BD1F-F6B7E4639596} = {DF247757-C88D-4BD6-9946-FDEAC84BF886}
 		{12C2DC6C-D649-42DE-8CCF-15F73FCCC530} = {DDA5240E-D98D-46C2-A5F1-2A2E500F36D6}
 		{97F2BA4F-D31C-E389-82EC-771FA6189AA2} = {12C2DC6C-D649-42DE-8CCF-15F73FCCC530}
@@ -509,6 +487,13 @@ Global
 		{0BED3C2E-3926-4754-92C5-5A6D2AFC2643} = {84C560F2-F8FF-410D-A601-60CB860E981B}
 		{A71E29AD-F3F9-4F74-AE5F-2412A181DF88} = {84C560F2-F8FF-410D-A601-60CB860E981B}
 		{43E4DC9B-DBDD-4B45-9AB4-4D7E5F698EA8} = {84C560F2-F8FF-410D-A601-60CB860E981B}
+		{333E461D-91C4-4943-9CCC-2BC02D82ED3F} = {AA78AF7D-7B0C-4ADD-B89A-CD97DB547B18}
+		{A07E96D2-DBF2-460F-8CAE-154B284222E0} = {AA78AF7D-7B0C-4ADD-B89A-CD97DB547B18}
+		{4C4ECCAD-999A-B91F-230B-58EE94F8D532} = {333E461D-91C4-4943-9CCC-2BC02D82ED3F}
+		{C29463D5-41F8-46E9-B225-AA451EA83E40} = {333E461D-91C4-4943-9CCC-2BC02D82ED3F}
+		{45A343A4-FD3B-4F40-A494-8334A1D85CBA} = {333E461D-91C4-4943-9CCC-2BC02D82ED3F}
+		{79677544-C264-497F-8904-31A37930CCAC} = {333E461D-91C4-4943-9CCC-2BC02D82ED3F}
+		{129EEFAF-8FB7-45C3-B2B1-55AF18C3E204} = {A07E96D2-DBF2-460F-8CAE-154B284222E0}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {BB890EFB-EE36-4A0E-A948-F28A53D375E6}

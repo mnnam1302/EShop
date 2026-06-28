@@ -1,4 +1,4 @@
-﻿using Asp.Versioning.ApiExplorer;
+using Asp.Versioning.ApiExplorer;
 using Microsoft.Extensions.Options;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using Swashbuckle.AspNetCore.SwaggerUI;
@@ -10,7 +10,7 @@ internal static class SwaggerExtensions
     public static void AddSwaggerAPI(this IServiceCollection services)
     {
         services.AddSwaggerGen();
-        services.AddTransient<IConfigureOptions<SwaggerGenOptions>, InventorySwaggerOptions>();
+        services.AddTransient<IConfigureOptions<SwaggerGenOptions>, OrderSwaggerOptions>();
     }
 
     public static void UseSwaggerAPI(this IApplicationBuilder app)
