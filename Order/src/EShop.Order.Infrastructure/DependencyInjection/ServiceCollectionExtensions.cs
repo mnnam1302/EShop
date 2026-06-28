@@ -3,6 +3,7 @@ using EShop.Order.Infrastructure.BackgroundJobs;
 using EShop.Order.Infrastructure.Repositories;
 using EShop.Shared.Authentication.Filters;
 using EShop.Shared.Contracts.JsonConverters;
+using EShop.Shared.Contracts.Services.Inventory;
 using EShop.Shared.Contracts.Services.Order;
 using EShop.Shared.Contracts.Services.Order.Saga;
 using EShop.Shared.Diagnostics;
@@ -100,6 +101,7 @@ public static class ServiceCollectionExtensions
                 bus.SendTopology.UseCorrelationId<OrderCreated>(x => x.OrderId);
                 bus.SendTopology.UseCorrelationId<MakeReservation>(x => x.OrderId);
                 bus.SendTopology.UseCorrelationId<ReleaseReservationCommand>(x => x.OrderId);
+                bus.SendTopology.UseCorrelationId<ConfirmReservationCommand>(x => x.OrderId);
                 bus.SendTopology.UseCorrelationId<MakePayment>(x => x.OrderId);
 
                 if (configuration.IsRunningInAspire())

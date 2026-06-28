@@ -60,10 +60,12 @@ The checkboxes below reflect the original plan and are kept for history; this se
 - [ ] 5.3 Register Finance service + its PostgreSQL database in `EShop.AppHost`
 - [x] 5.4 Apply migration on startup (match existing services' approach)
 
-## 6. Order saga wiring
+## 6. Order saga wiring — DONE (2026-06-28)
 
-- [ ] 6.1 Consume `OrderPaymentCompleted` → confirm reservation (`ConfirmReservationCommand`) and advance saga out of `ProcessingPayment`
-- [ ] 6.2 Consume `OrderPaymentFailed` → release reservation (`ReleaseReservationCommand`) and fail the saga
+- [x] 6.1 Consume `OrderPaymentScheduled` → `AcceptOrderCommand` + `ConfirmReservationCommand`, advance saga `ProcessingPayment → Completed` (`OrderPaymentScheduledConsumer`)
+- [x] 6.2 Consume `OrderPaymentScheduleFailed` → `RejectOrderCommand` + `ReleaseReservationCommand`, `ProcessingPayment → Failed` (`OrderPaymentScheduleFailedConsumer`)
+- [x] 6.3 Saga stays alive through `ProcessingPayment` (removed premature `MarkComplete` on `InventoryReserved`); new triggers/transitions + `SagaPaymentScheduled(Failed)Event`; `ConfirmReservationCommand` promoted to `IntegrationCommand`. Covered by `EShop.Order.Tests/OrderSagaTests` (4 tests).
+- [ ] 6.4 FOLLOW-UP: the saga still sends a **hardcoded** `MakePayment` total (`1200 VND`) — it needs the real order total (sum of `OrderCreated.Items`) carried on the saga.
 
 ## 7. Tests (BDD + unit)
 

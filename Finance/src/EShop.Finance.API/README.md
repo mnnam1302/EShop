@@ -97,7 +97,9 @@ sequenceDiagram
 - The handler publishes the reply (success or failure) — the consumer stays thin (just maps the command).
 - **Idempotent**: a redelivered `MakePayment` finds the existing account and **re-publishes**
   `OrderPaymentScheduled` (no duplicate account), so a lost reply still reaches the saga.
-- The Order saga consuming these replies (confirm / release the reservation) is the **Order-side ticket**.
+- The Order saga consumes these replies: `OrderPaymentScheduled` → accept order + confirm reservation
+  (`ProcessingPayment → Completed`); `OrderPaymentScheduleFailed` → reject order + release reservation
+  (`ProcessingPayment → Failed`). See `OrderPaymentScheduledConsumer` / `OrderPaymentScheduleFailedConsumer`.
 
 ---
 

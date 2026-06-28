@@ -20,7 +20,12 @@ public sealed class OrderSagaStateMachine : StateMachine<OrderSagaState, OrderSa
             .Permit(OrderSagaTrigger.InventoryReservationFailed, OrderSagaState.Failed)
             .Permit(OrderSagaTrigger.Expire, OrderSagaState.Expired);
 
-        Configure(OrderSagaState.ProcessingPayment);
+        Configure(OrderSagaState.ProcessingPayment)
+            .Permit(OrderSagaTrigger.PaymentScheduled, OrderSagaState.Completed)
+            .Permit(OrderSagaTrigger.PaymentScheduleFailed, OrderSagaState.Failed)
+            .Permit(OrderSagaTrigger.Expire, OrderSagaState.Expired);
+
+        Configure(OrderSagaState.Completed);
 
         Configure(OrderSagaState.Failed);
 
@@ -41,5 +46,7 @@ public enum OrderSagaTrigger
 {
     InventoryReserved,
     InventoryReservationFailed,
+    PaymentScheduled,
+    PaymentScheduleFailed,
     Expire,
 }

@@ -3,6 +3,7 @@ using EShop.Order.Domain.Sagas.DomainEvents;
 using EShop.Order.Domain.StateMachines;
 using EShop.Shared.Authentication;
 using EShop.Shared.Authentication.Abstractions;
+using EShop.Shared.Contracts.Services.Inventory;
 using EShop.Shared.Contracts.Services.Order;
 using EShop.Shared.Contracts.Services.Order.Saga;
 using EShop.Shared.DomainTools.Entities;
@@ -16,6 +17,7 @@ public sealed class OrderSaga : AggregateSaga, IScoped
     public string BuyerId { get; set; } = string.Empty;
     public Guid OrderId { get; set; }
     public Guid ReservationId { get; private set; }
+    public Guid AccountId { get; private set; }
 
     public OrderSagaStateMachine State { get; private set; } = new();
 
@@ -74,8 +76,6 @@ public sealed class OrderSaga : AggregateSaga, IScoped
             ActionUserId = currentUser.ActionUserId,
             ActionUserType = currentUser.ActionUserType
         });
-
-        MarkComplete();
     }
 
     public void HandleAsync(InventoryReservationFailed message)
@@ -91,6 +91,50 @@ public sealed class OrderSaga : AggregateSaga, IScoped
         {
             OrderId = OrderId,
             Reason = message.FailureReason
+        });
+
+        MarkComplete();
+    }
+
+    public void HandleAsync(OrderPaymentScheduled message, UserData currentUser)
+    {
+        if (!State.CanFire(OrderSagaTrigger.PaymentScheduled))
+        {
+            throw new DomainException("OrderSaga", $"Cannot handle OrderPaymentScheduled in saga state '{State}'.");
+        }
+
+        RaiseEvent(new SagaPaymentScheduledEvent { AccountId = message.AccountId });
+
+        Publish(new AcceptOrderCommand { OrderId = OrderId });
+        Publish(new ConfirmReservationCommand
+        {
+            OrderId = OrderId,
+            ReservationId = ReservationId,
+            TenantId = currentUser.TenantId,
+            ActionUserId = currentUser.ActionUserId,
+            ActionUserType = currentUser.ActionUserType
+        });
+
+        MarkComplete();
+    }
+
+    public void HandleAsync(OrderPaymentScheduleFailed message, UserData currentUser)
+    {
+        if (!State.CanFire(OrderSagaTrigger.PaymentScheduleFailed))
+        {
+            throw new DomainException("OrderSaga", $"Cannot handle OrderPaymentScheduleFailed in saga state '{State}'.");
+        }
+
+        RaiseEvent(new SagaPaymentScheduleFailedEvent { Reason = message.Reason });
+
+        Publish(new RejectOrderCommand { OrderId = OrderId, Reason = message.Reason });
+        Publish(new ReleaseReservationCommand
+        {
+            OrderId = OrderId,
+            ReservationId = ReservationId,
+            TenantId = currentUser.TenantId,
+            ActionUserId = currentUser.ActionUserId,
+            ActionUserType = currentUser.ActionUserType
         });
 
         MarkComplete();
@@ -137,5 +181,16 @@ public sealed class OrderSaga : AggregateSaga, IScoped
     public void Apply(SagaExpiredEvent _)
     {
         State.Fire(OrderSagaTrigger.Expire);
+    }
+
+    public void Apply(SagaPaymentScheduledEvent @event)
+    {
+        State.Fire(OrderSagaTrigger.PaymentScheduled);
+        AccountId = @event.AccountId;
+    }
+
+    public void Apply(SagaPaymentScheduleFailedEvent _)
+    {
+        State.Fire(OrderSagaTrigger.PaymentScheduleFailed);
     }
 }
