@@ -6,7 +6,8 @@ DO
 $do$
 DECLARE
    userpassword varchar[];
-   users varchar[] := array[['authorization','authorization-password-dev'],
+   users varchar[] := array[['monitor_user', 'monitor-password-dev'],
+                            ['authorization','authorization-password-dev'],
                             ['tenancy','tenancy-password-dev'],
                             ['catalog','catalog-password-dev'],
                             ['inventory','inventory-password-dev'],
@@ -89,3 +90,23 @@ GRANT ALL PRIVILEGES ON SCHEMA public TO finance;
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO finance;
 GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO finance;
 GRANT ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA public TO finance;
+
+
+-- =============================================================================
+-- Monitoring user permissions
+-- Grants minimal read-only access for postgres_exporter.
+-- pg_monitor is a built-in PostgreSQL role (v10+) that allows reading
+-- pg_stat_* views and pg_settings WITHOUT access to actual table data.
+-- Must run AFTER all databases are created above.
+-- =============================================================================
+
+-- pg_monitor only needs to be granted once at the instance level, it then applies across all databases automatically
+GRANT pg_monitor TO monitor_user;
+
+-- CONNECT must be granted per-database explicitly, otherwise monitor_user cannot even open a connection to query pg_stat views
+GRANT CONNECT ON DATABASE eshop_tenancy TO monitor_user;
+GRANT CONNECT ON DATABASE eshop_authorization TO monitor_user;
+GRANT CONNECT ON DATABASE eshop_catalog TO monitor_user;
+GRANT CONNECT ON DATABASE eshop_inventory TO monitor_user;
+GRANT CONNECT ON DATABASE eshop_order TO monitor_user;
+GRANT CONNECT ON DATABASE eshop_finance TO monitor_user;
