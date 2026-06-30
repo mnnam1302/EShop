@@ -71,7 +71,7 @@ public static class ExternalServiceRegistrationExtensions
 
         #region Infrastructure resources
 
-        var pathToDbInitDirectory = Path.GetFullPath(Path.Combine(Environment.CurrentDirectory, @"..\deploy\Scripts\"));
+        var pathToDbInitDirectory = Path.GetFullPath(Path.Combine(Environment.CurrentDirectory, @"..\deploy\scripts\"));
 
         var redis = useExternalService
             ? builder.AddConnectionString(ResourceNames.Redis)
@@ -127,11 +127,6 @@ public static class ExternalServiceRegistrationExtensions
                 .WithDataVolume("ehop-data")
                 .WithInitFiles(pathToDbInitDirectory)
                 .WithArgs("-c", "max_connections=200")
-                .WithPgAdmin(rb =>
-                {
-                    rb.WithLifetime(ContainerLifetime.Persistent);
-                    rb.WithHostPort(5442);
-                })
                 .WithLifetime(ContainerLifetime.Persistent);
 
             var mongodb = builder

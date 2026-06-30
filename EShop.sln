@@ -174,7 +174,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "env", "env", "{0BED3C2E-392
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "scripts", "scripts", "{A71E29AD-F3F9-4F74-AE5F-2412A181DF88}"
 	ProjectSection(SolutionItems) = preProject
-		deploy\scripts\delete-tables.sql = deploy\scripts\delete-tables.sql
 		deploy\scripts\mongodb-init-prod.sh = deploy\scripts\mongodb-init-prod.sh
 		deploy\scripts\mongodb-init.js = deploy\scripts\mongodb-init.js
 		deploy\scripts\postgres-init.sql = deploy\scripts\postgres-init.sql

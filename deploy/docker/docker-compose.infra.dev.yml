@@ -49,6 +49,24 @@ services:
       - eshop-internal
 
   # ---------------------------------------------------------------------------
+  # postgres-exporter — exposes pg_stat_* metrics for Prometheus to scrape.
+  # Connects as monitor_user (pg_monitor role, granted in postgres-init.sql).
+  # ---------------------------------------------------------------------------
+  postgres-exporter:
+    image: prometheuscommunity/postgres-exporter:v0.15.0
+    container_name: postgres-exporter
+    restart: unless-stopped
+    environment:
+      DATA_SOURCE_NAME: postgresql://monitor_user:monitor-password-dev@postgres:5432/eshop_tenancy?sslmode=disable
+    ports:
+      - "9187:9187"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - eshop-internal
+
+  # ---------------------------------------------------------------------------
   # Redis — no authentication in dev. App services connect with Host only,
   # no password needed. RedisOptions.ConnectionString = "localhost:6379".
   # ---------------------------------------------------------------------------
