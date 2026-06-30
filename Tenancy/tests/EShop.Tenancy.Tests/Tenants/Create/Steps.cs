@@ -1,4 +1,4 @@
-﻿using EShop.Shared.Contracts.Services.Tenancy.Tenants;
+using EShop.Tenancy.Domain.Commands;
 using Reqnroll;
 
 namespace EShop.Tenancy.Tests.Tenants.Create;
@@ -10,7 +10,7 @@ internal class Steps(StepContext stepContext)
     [When("System user registers a new tenant with following details")]
     public async Task WhenSystemUserRegistersANewTenantWithFollowingDetails(DataTable dataTable)
     {
-        var request = dataTable.CreateInstance<Command.CreateTenantCommand>();
+        var request = dataTable.CreateInstance<CreateTenantCommand>();
         await stepContext.CreateTenantAsync(request);
     }
 

@@ -1,0 +1,21 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs: []
+
+otlp:
+  translation_strategy: UnderscoreEscapingWithSuffixes
+#
+# This commented block controls how Prometheus converts incoming OTLP
+# metric names to its own naming convention.
+#
+# Background: OTLP uses dots in metric names (e.g. "http.server.duration")
+# but Prometheus only allows underscores (e.g. "http_server_duration").
+# Prometheus must translate every incoming metric name on ingest.
+#
+# UnderscoreEscapingWithSuffixes — the default strategy:
+#   - Replaces dots with underscores:  http.server.duration
+#                                   -> http_server_duration
+#   - Appends a unit suffix if the metric carries unit metadata:
+#                                   -> http_server_duration_seconds
+#   - Appends _total for counters:  -> http_server_requests_total

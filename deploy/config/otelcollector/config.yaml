@@ -1,0 +1,67 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+processors:
+  batch:
+     send_batch_size: 512
+     timeout: 5s
+  memory_limiter:
+    check_interval: 1s
+    limit_mib: 256
+    spike_limit_mib: 64
+
+exporters:
+  debug:
+    verbosity: detailed # MUST be removed or set to `verbosity: basic` in production.
+
+  otlp/aspire:
+    endpoint: ${env:ASPIRE_ENDPOINT}
+    headers:
+      x-otlp-api-key: ${env:ASPIRE_API_KEY}
+    tls:
+      insecure: ${env:ASPIRE_INSECURE}
+      insecure_skip_verify: true # ❌ Never use insecure_skip_verify: true in production.
+
+  # Approach 1: Uses OTLP-over-HTTP (not the classic Prometheus scrape model).
+  # Prometheus must be started with `--web.enable-otlp-receiver` flag.
+  #
+  # OTLP-over-HTTP vs classic scrape:
+  #  - Scrape: Prometheus pulls /metrics from each service on its schedule.
+  # otlphttp/prometheus:
+  #   endpoint: ${env:PROMETHEUS_ENDPOINT}
+  #   tls:
+  #     insecure: true
+
+  # Approach 2: Use classic Prometheus scrape model
+  prometheus:
+    endpoint: "0.0.0.0:8889" # Collector listens here for Prometheus
+    # Prevents Collector from dropping a metric series if no new data
+    # arrives between scrape intervals. Without this, a metric that stops
+    # updating gets evicted from memory and disappears from Grafana.
+    resource_to_telemetry_conversion:
+      enabled: true
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp/aspire]
+
+    logs:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp/aspire]
+
+    metrics:
+      receivers: [otlp]
+      processors: [memory_limiter, batch]
+      exporters:
+        - otlp/aspire
+        - prometheus
+        # - otlphttp/prometheus
