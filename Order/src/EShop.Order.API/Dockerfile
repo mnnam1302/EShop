@@ -12,9 +12,6 @@ USER $APP_UID
 WORKDIR /app
 EXPOSE 8080
 
-# Optional: Install any additional runtime dependencies here
-# RUN apk add --no-cache icu-libs
-
 
 # ============================================================
 # Stage 2: Build - Use SDK for compilation
@@ -26,12 +23,12 @@ WORKDIR /src
 COPY ["Directory.Build.props", "."]
 COPY ["Directory.Packages.props", "."]
 
-COPY ["Tenancy/src/EShop.Tenancy.API/EShop.Tenancy.API.csproj", "Tenancy/src/EShop.Tenancy.API/"]
-COPY ["Tenancy/src/EShop.Tenancy.Application/EShop.Tenancy.Application.csproj", "Tenancy/src/EShop.Tenancy.Application/"]
-COPY ["Tenancy/src/EShop.Tenancy.Domain/EShop.Tenancy.Domain.csproj", "Tenancy/src/EShop.Tenancy.Domain/"]
-COPY ["Tenancy/src/EShop.Tenancy.Infrastructure/EShop.Tenancy.Infrastructure.csproj", "Tenancy/src/EShop.Tenancy.Infrastructure/"]
-COPY ["Tenancy/src/EShop.Tenancy.Persistence/EShop.Tenancy.Persistence.csproj", "Tenancy/src/EShop.Tenancy.Persistence/"]
-COPY ["Tenancy/src/EShop.Tenancy.Presentation/EShop.Tenancy.Presentation.csproj", "Tenancy/src/EShop.Tenancy.Presentation/"]
+COPY ["Order/src/EShop.Order.API/EShop.Order.API.csproj", "Order/src/EShop.Order.API/"]
+COPY ["Order/src/EShop.Order.Application/EShop.Order.Application.csproj", "Order/src/EShop.Order.Application/"]
+COPY ["Order/src/EShop.Order.Domain/EShop.Order.Domain.csproj", "Order/src/EShop.Order.Domain/"]
+COPY ["Order/src/EShop.Order.Infrastructure/EShop.Order.Infrastructure.csproj", "Order/src/EShop.Order.Infrastructure/"]
+
+COPY ["EShop.ServiceDefaults/EShop.ServiceDefaults.csproj", "EShop.ServiceDefaults/"]
 
 COPY ["Shared/src/EShop.Shared.Authentication/EShop.Shared.Authentication.csproj", "Shared/src/EShop.Shared.Authentication/"]
 COPY ["Shared/src/EShop.Shared.Cache/EShop.Shared.Cache.csproj", "Shared/src/EShop.Shared.Cache/"]
@@ -45,12 +42,12 @@ COPY ["Shared/src/EShop.Shared.HealthChecks/EShop.Shared.HealthChecks.csproj", "
 COPY ["Shared/src/EShop.Shared.JsonApi/EShop.Shared.JsonApi.csproj", "Shared/src/EShop.Shared.JsonApi/"]
 COPY ["Shared/src/EShop.Shared.Scoping/EShop.Shared.Scoping.csproj", "Shared/src/EShop.Shared.Scoping/"]
 
-RUN dotnet restore "Tenancy/src/EShop.Tenancy.API/EShop.Tenancy.API.csproj"
+RUN dotnet restore "Order/src/EShop.Order.API/EShop.Order.API.csproj"
 
 COPY . .
 
-WORKDIR "/src/Tenancy/src/EShop.Tenancy.API"
-RUN dotnet build "EShop.Tenancy.API.csproj" \
+WORKDIR "/src/Order/src/EShop.Order.API"
+RUN dotnet build "EShop.Order.API.csproj" \
     -c $BUILD_CONFIGURATION \
     -o /app/build
 
@@ -61,7 +58,7 @@ RUN dotnet build "EShop.Tenancy.API.csproj" \
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
 
-RUN dotnet publish "EShop.Tenancy.API.csproj" \
+RUN dotnet publish "EShop.Order.API.csproj" \
     -c $BUILD_CONFIGURATION \
     -o /app/publish \
     /p:UseAppHost=false
@@ -72,19 +69,13 @@ RUN dotnet publish "EShop.Tenancy.API.csproj" \
 # ============================================================
 FROM base AS final
 
-# Add labels for image metadata
-LABEL org.opencontainers.image.title="EShop.Tenancy.API" \
-      org.opencontainers.image.description="Tenancy microservice for EShop platform" \
+LABEL org.opencontainers.image.title="EShop.Order.API" \
+      org.opencontainers.image.description="Order microservice for EShop platform" \
       org.opencontainers.image.vendor="EShop" \
       org.opencontainers.image.version="1.0.0"
-
-# Set environment variables for production
-#ENV ASPNETCORE_ENVIRONMENT=Production \
-    #DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false \
-    #ASPNETCORE_HTTP_PORTS=8080
 
 WORKDIR /app
 
 COPY --from=publish /app/publish .
 
-ENTRYPOINT ["dotnet", "EShop.Tenancy.API.dll"]
+ENTRYPOINT ["dotnet", "EShop.Order.API.dll"]

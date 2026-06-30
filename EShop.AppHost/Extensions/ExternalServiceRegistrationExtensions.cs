@@ -86,7 +86,7 @@ public static class ExternalServiceRegistrationExtensions
             ? builder.AddConnectionString(ResourceNames.RabbitMq)
             : builder
                 .AddRabbitMQ(ResourceNames.RabbitMq)
-                .WithImageTag("4.1")
+                .WithImageTag("3")
                 .WithDataVolume("eshop-rabbitmq-data")
                 .WithLifetime(ContainerLifetime.Persistent)
                 .WithManagementPlugin();
@@ -124,7 +124,7 @@ public static class ExternalServiceRegistrationExtensions
         {
             var postgres = builder.AddPostgres(ResourceNames.PostgreSql, port: 5432)
                 .WithImageTag("17.0")
-                .WithDataVolume("ehop-data")
+                .WithDataVolume("eshop-data")
                 .WithInitFiles(pathToDbInitDirectory)
                 .WithArgs("-c", "max_connections=200")
                 .WithLifetime(ContainerLifetime.Persistent);
@@ -178,97 +178,97 @@ public static class ExternalServiceRegistrationExtensions
                 .WaitFor(rabbitmq);
         }
 
-        //var catalogApplication = builder.AddProject<Projects.EShop_Catalog_Application>(ResourceNames.CatalogWriteApi)
-        //    .WithExternalServiceMode(useExternalService)
-        //    .WithReference(catalogDatabase)
-        //    .WithReference(redis)
-        //    .WithReference(rabbitmq);
+        var catalogApplication = builder.AddProject<Projects.EShop_Catalog_Application>(ResourceNames.CatalogWriteApi)
+            .WithExternalServiceMode(useExternalService)
+            .WithReference(catalogDatabase)
+            .WithReference(redis)
+            .WithReference(rabbitmq);
 
-        //if (!useExternalService)
-        //{
-        //    catalogApplication
-        //        .WaitFor(catalogDatabase)
-        //        .WaitFor(redis)
-        //        .WaitFor(rabbitmq);
-        //}
+        if (!useExternalService)
+        {
+            catalogApplication
+                .WaitFor(catalogDatabase)
+                .WaitFor(redis)
+                .WaitFor(rabbitmq);
+        }
 
-        //var catalogReadModel = builder.AddProject<Projects.EShop_Catalog_ReadModels_MongoDb>(ResourceNames.CatalogReadApi)
-        //    .WithExternalServiceMode(useExternalService)
-        //    .WithReference(catalogMongoDatabase)
-        //    .WithReference(redis)
-        //    .WithReference(rabbitmq);
+        var catalogReadModel = builder.AddProject<Projects.EShop_Catalog_ReadModels_MongoDb>(ResourceNames.CatalogReadApi)
+            .WithExternalServiceMode(useExternalService)
+            .WithReference(catalogMongoDatabase)
+            .WithReference(redis)
+            .WithReference(rabbitmq);
 
-        //if (!useExternalService)
-        //{
-        //    catalogReadModel
-        //        .WaitFor(catalogMongoDatabase)
-        //        .WaitFor(redis)
-        //        .WaitFor(rabbitmq)
-        //        .WaitFor(catalogApplication);
-        //}
+        if (!useExternalService)
+        {
+            catalogReadModel
+                .WaitFor(catalogMongoDatabase)
+                .WaitFor(redis)
+                .WaitFor(rabbitmq)
+                .WaitFor(catalogApplication);
+        }
 
-        //var inventory = builder.AddProject<Projects.EShop_Inventory_API>(ResourceNames.InventoryApi)
-        //    .WithExternalServiceMode(useExternalService)
-        //    .WithReference(inventoryDatabase)
-        //    .WithReference(redis)
-        //    .WithReference(rabbitmq);
+        var inventory = builder.AddProject<Projects.EShop_Inventory_API>(ResourceNames.InventoryApi)
+            .WithExternalServiceMode(useExternalService)
+            .WithReference(inventoryDatabase)
+            .WithReference(redis)
+            .WithReference(rabbitmq);
 
-        //if (!useExternalService)
-        //{
-        //    inventory
-        //        .WaitFor(inventoryDatabase)
-        //        .WaitFor(redis)
-        //        .WaitFor(rabbitmq);
-        //}
+        if (!useExternalService)
+        {
+            inventory
+                .WaitFor(inventoryDatabase)
+                .WaitFor(redis)
+                .WaitFor(rabbitmq);
+        }
 
-        //var order = builder.AddProject<Projects.EShop_Order_API>(ResourceNames.OrderApi)
-        //    .WithExternalServiceMode(useExternalService)
-        //    .WithReference(orderDatabase)
-        //    .WithReference(redis)
-        //    .WithReference(rabbitmq);
+        var order = builder.AddProject<Projects.EShop_Order_API>(ResourceNames.OrderApi)
+            .WithExternalServiceMode(useExternalService)
+            .WithReference(orderDatabase)
+            .WithReference(redis)
+            .WithReference(rabbitmq);
 
-        //if (!useExternalService)
-        //{
-        //    order
-        //        .WaitFor(orderDatabase)
-        //        .WaitFor(redis)
-        //        .WaitFor(rabbitmq);
-        //}
+        if (!useExternalService)
+        {
+            order
+                .WaitFor(orderDatabase)
+                .WaitFor(redis)
+                .WaitFor(rabbitmq);
+        }
 
-        //var finance = builder.AddProject<Projects.EShop_Finance_API>(ResourceNames.FinanceApi)
-        //    .WithExternalServiceMode(useExternalService)
-        //    .WithReference(financeDatabase)
-        //    .WithReference(redis)
-        //    .WithReference(rabbitmq);
+        var finance = builder.AddProject<Projects.EShop_Finance_API>(ResourceNames.FinanceApi)
+            .WithExternalServiceMode(useExternalService)
+            .WithReference(financeDatabase)
+            .WithReference(redis)
+            .WithReference(rabbitmq);
 
-        //if (!useExternalService)
-        //{
-        //    finance
-        //        .WaitFor(financeDatabase)
-        //        .WaitFor(redis)
-        //        .WaitFor(rabbitmq);
-        //}
+        if (!useExternalService)
+        {
+            finance
+                .WaitFor(financeDatabase)
+                .WaitFor(redis)
+                .WaitFor(rabbitmq);
+        }
 
         #endregion Microservices
 
         #region Api Gateway
 
-        //var apiGateway = builder.AddProject<Projects.EShop_ApiGateway>(ResourceNames.ApiGateway)
-        //    .WithReference(redis)
-        //    .WithReference(tenancy)
-        //    .WithReference(authorization)
-        //    .WithReference(catalogApplication)
-        //    .WithReference(catalogReadModel);
+        var apiGateway = builder.AddProject<Projects.EShop_ApiGateway>(ResourceNames.ApiGateway)
+            .WithReference(redis)
+            .WithReference(tenancy)
+            .WithReference(authorization)
+            .WithReference(catalogApplication)
+            .WithReference(catalogReadModel);
 
-        //if (!useExternalService)
-        //{
-        //    apiGateway
-        //        .WaitFor(redis)
-        //        .WaitFor(tenancy)
-        //        .WaitFor(authorization)
-        //        .WaitFor(catalogApplication)
-        //        .WaitFor(catalogReadModel);
-        //}
+        if (!useExternalService)
+        {
+            apiGateway
+                .WaitFor(redis)
+                .WaitFor(tenancy)
+                .WaitFor(authorization)
+                .WaitFor(catalogApplication)
+                .WaitFor(catalogReadModel);
+        }
 
         #endregion Api Gateway
 

@@ -376,18 +376,32 @@ EShop/
 
 ## 🚀 Getting Started
 
-For a complete step-by-step guide — prerequisites, secret files, migrations, running with Docker Compose, and troubleshooting — see:
+Run the whole stack two ways — see the full guide (prerequisites, access URLs, troubleshooting):
 
 👉 **[deploy/README.md](deploy/README.md)**
 
-### Quick overview
+### Quick start
 
+**Option A — Docker only (no .NET SDK needed):**
+
+```bash
+git clone https://github.com/mnnam1302/EShop.git && cd EShop
+docker compose \
+  -f deploy/docker/docker-compose.infra.dev.yml \
+  -f deploy/docker/docker-compose.dev.yml \
+  up -d --build
 ```
-1. Clone the repo
-2. docker compose -f deploy/docker/docker-compose.infra.dev.yml up -d
-3. Run EF migrations per service (dotnet ef database update)
-4. dotnet run  (or bring up all services via docker-compose.dev.yml)
+
+**Option B — .NET Aspire:**
+
+```bash
+dotnet workload install aspire   # one-time
+dotnet run --project EShop.AppHost
 ```
+
+No secret files and no manual `dotnet ef` migrations are needed for dev — databases are
+created and migrated automatically on first run. API Gateway: http://localhost:5000 ·
+Aspire dashboard: http://localhost:18888.
 
 ---
 
