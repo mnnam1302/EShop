@@ -135,14 +135,113 @@ services:
     networks:
       - eshop-internal
 
+  # ---------------------------------------------------------------------------
+  # Observability — mirrors the stack provisioned by the Aspire AppHost so both
+  # paths give the same telemetry experience. Shared config lives in
+  # deploy/config/** (single source of truth).
+  # ---------------------------------------------------------------------------
+
+  # Aspire Dashboard — receives OTLP traces/logs/metrics from the collector and
+  # services, and serves the UI. Unsecured in dev: no API key required.
+  dashboard:
+    image: mcr.microsoft.com/dotnet/aspire-dashboard:9.0
+    container_name: dashboard
+    restart: unless-stopped
+    environment:
+      DOTNET_DASHBOARD_UNSECURED_ALLOW_ANONYMOUS: "true"
+    ports:
+      - "18888:18888"   # dashboard UI
+      - "18889:18889"   # OTLP ingest (gRPC)
+    networks:
+      - eshop-internal
+
+  # OpenTelemetry Collector — same image/tag and config as the Aspire path.
+  # Receives OTLP on 4317/4318, forwards to the dashboard, exposes a Prometheus
+  # scrape endpoint on 8889.
+  otel-collector:
+    image: ghcr.io/open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-contrib:0.135.0
+    container_name: otel-collector
+    restart: unless-stopped
+    command: ["--config=/etc/otelcol-contrib/config.yaml"]
+    environment:
+      ASPIRE_ENDPOINT: "http://dashboard:18889"
+      ASPIRE_API_KEY: ""
+      ASPIRE_INSECURE: "true"
+    volumes:
+      - ../config/otelcollector/config.yaml:/etc/otelcol-contrib/config.yaml:ro
+    ports:
+      - "4317:4317"     # OTLP gRPC
+      - "4318:4318"     # OTLP HTTP
+    depends_on:
+      dashboard:
+        condition: service_started
+    networks:
+      - eshop-internal
+
+  # Prometheus — scrapes the collector, node-exporter and postgres-exporter.
+  prometheus:
+    image: prom/prometheus:v3.5.0
+    container_name: prometheus
+    restart: unless-stopped
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.retention.time=30d"
+      - "--storage.tsdb.path=/prometheus"
+    volumes:
+      - ../config/prometheus/prometheus_pull.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - "9090:9090"
+    depends_on:
+      otel-collector:
+        condition: service_started
+    networks:
+      - eshop-internal
+
+  # Node Exporter — host-level metrics for Prometheus.
+  node-exporter:
+    image: prom/node-exporter:v1.8.2
+    container_name: node-exporter
+    restart: unless-stopped
+    command:
+      - "--path.procfs=/host/proc"
+      - "--path.rootfs=/rootfs"
+      - "--path.sysfs=/host/sys"
+      - "--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)"
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    ports:
+      - "9100:9100"
+    networks:
+      - eshop-internal
+
+  # Grafana — dashboards provisioned from deploy/config/grafana/**.
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    restart: unless-stopped
+    volumes:
+      - ../config/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ../config/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    ports:
+      - "3000:3000"
+    depends_on:
+      prometheus:
+        condition: service_started
+    networks:
+      - eshop-internal
+
 volumes:
   eshop-data:
   eshop-redis:
   eshop-rabbitmq:
   eshop-mongodb:
 
+# Networks are created by this base file so a fresh clone needs no manual
+# `docker network create`. App services (docker-compose.dev.yml) join them.
 networks:
   eshop-public:
-    external: true
+    name: eshop-public
   eshop-internal:
-    external: true
+    name: eshop-internal
