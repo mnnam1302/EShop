@@ -12,83 +12,71 @@
 # Usage (infrastructure only):
 #   docker compose -f deploy/docker/docker-compose.infra.dev.yml up -d
 #
-# Usage (full dev stack with app services):
-#   docker compose \
-#     -f deploy/docker/docker-compose.infra.dev.yml \
-#     -f deploy/docker/docker-compose.dev.yml \
-#     up -d
+# Usage (microsevices and infrastructure):
+#   docker compose -f deploy/docker/docker-compose.infra.dev.yml -f deploy/docker/docker-compose.dev.yml up -d
+#
+# Usage commands
+# - docker compose -f deploy/docker/docker-compose.infra.dev.yml up <service-name> -d
+# - docker compose -f deploy/docker/docker-compose.infra.dev.yml down -v <service-name>
 #
 # =============================================================================
 
 services:
-
-  # ---------------------------------------------------------------------------
   # PostgreSQL
-  # Superuser password is a plain env var — fine for local dev.
-  # App user passwords are hardcoded in deploy/scripts/postgres-init.sql.
-  # ---------------------------------------------------------------------------
   postgres:
     image: postgres:17.0
     container_name: postgres
     restart: unless-stopped
+    ports:
+      - "5432:5432"
+    env_file:
+      - ../env/dev.env
+    volumes:
+      - ../postgres/init-scripts/init.sql:/docker-entrypoint-initdb.d/1-init.sql
+      - eshop-data:/var/lib/postgresql/data
+    command: postgres -c 'max_connections=200'
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 10s
       timeout: 5s
       retries: 5
-    command: postgres -c 'max_connections=200'
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres-dev
-    volumes:
-      - ../scripts/postgres-init.sql:/docker-entrypoint-initdb.d/1-init.sql
-      - eshop-data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
     networks:
       - eshop-internal
 
-  # ---------------------------------------------------------------------------
-  # postgres-exporter — exposes pg_stat_* metrics for Prometheus to scrape.
+  # Postgres Exporter
   # Connects as monitor_user (pg_monitor role, granted in postgres-init.sql).
-  # ---------------------------------------------------------------------------
-  postgres-exporter:
-    image: prometheuscommunity/postgres-exporter:v0.15.0
-    container_name: postgres-exporter
-    restart: unless-stopped
-    environment:
-      DATA_SOURCE_NAME: postgresql://monitor_user:monitor-password-dev@postgres:5432/eshop_tenancy?sslmode=disable
-    ports:
-      - "9187:9187"
-    depends_on:
-      postgres:
-        condition: service_healthy
-    networks:
-      - eshop-internal
+  # postgres-exporter:
+  #   image: prometheuscommunity/postgres-exporter:v0.15.0
+  #   container_name: postgres-exporter
+  #   restart: unless-stopped
+  #   environment:
+  #     DATA_SOURCE_NAME: postgresql://monitor_user:monitor-password-dev@postgres:5432/eshop_tenancy?sslmode=disable
+  #   ports:
+  #     - "9187:9187"
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
+  #   networks:
+  #     - eshop-internal
 
-  # ---------------------------------------------------------------------------
-  # Redis — no authentication in dev. App services connect with Host only,
-  # no password needed. RedisOptions.ConnectionString = "localhost:6379".
-  # ---------------------------------------------------------------------------
+  # Redis
   redis:
     image: redis:7.4.7
     container_name: redis
     restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - eshop-redis:/data
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
       timeout: 5s
       retries: 5
-    volumes:
-      - eshop-redis:/data
-    ports:
-      - "6379:6379"
     networks:
       - eshop-internal
 
-  # ---------------------------------------------------------------------------
-  # RabbitMQ — plain credentials in dev.
-  # ---------------------------------------------------------------------------
+  # RabbitMQ
   rabbitmq:
     image: rabbitmq:3-management-alpine
     container_name: rabbitmq
@@ -99,10 +87,8 @@ services:
       timeout: 5s
       retries: 5
       start_period: 30s
-    environment:
-      RABBITMQ_DEFAULT_USER: guest
-      RABBITMQ_DEFAULT_PASS: guest
-      RABBITMQ_DEFAULT_VHOST: eshop01012025
+    env_file:
+      - ../env/dev.env
     volumes:
       - eshop-rabbitmq:/var/lib/rabbitmq
     ports:
@@ -111,27 +97,25 @@ services:
     networks:
       - eshop-internal
 
-  # ---------------------------------------------------------------------------
-  # MongoDB — root user (sa) for admin only; app users created via init script.
-  # Each service authenticates against its own database — no authSource needed.
-  # ---------------------------------------------------------------------------
+  # MongoDB
   mongodb:
     image: mongo:6.0
     container_name: mongodb
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "mongosh", "-u", "catalog", "-p", "catalog-dev", "--authenticationDatabase", "eshop-catalog", "--eval", "db.adminCommand('ping')"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: sa
-      MONGO_INITDB_ROOT_PASSWORD: sa1302139
+    ports:
+      - "27017:27017"
+    env_file:
+      - ../env/dev.env
     volumes:
       - ../scripts/mongodb-init.js:/docker-entrypoint-initdb.d/1-init.js:ro
       - eshop-mongodb:/data/db
-    ports:
-      - "27017:27017"
+    healthcheck:
+      test: ["CMD", "mongosh", "-u", "catalog", "-p", "catalog-dev",
+            "--authenticationDatabase", "eshop-catalog",
+            "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     networks:
       - eshop-internal
 
@@ -143,94 +127,94 @@ services:
 
   # Aspire Dashboard — receives OTLP traces/logs/metrics from the collector and
   # services, and serves the UI. Unsecured in dev: no API key required.
-  dashboard:
-    image: mcr.microsoft.com/dotnet/aspire-dashboard:9.0
-    container_name: dashboard
-    restart: unless-stopped
-    environment:
-      DOTNET_DASHBOARD_UNSECURED_ALLOW_ANONYMOUS: "true"
-    ports:
-      - "18888:18888"   # dashboard UI
-      - "18889:18889"   # OTLP ingest (gRPC)
-    networks:
-      - eshop-internal
+  # dashboard:
+  #   image: mcr.microsoft.com/dotnet/aspire-dashboard:9.0
+  #   container_name: dashboard
+  #   restart: unless-stopped
+  #   environment:
+  #     DOTNET_DASHBOARD_UNSECURED_ALLOW_ANONYMOUS: "true"
+  #   ports:
+  #     - "18888:18888"   dashboard UI
+  #     - "18889:18889"   OTLP ingest (gRPC)
+  #   networks:
+  #     - eshop-internal
 
   # OpenTelemetry Collector — same image/tag and config as the Aspire path.
   # Receives OTLP on 4317/4318, forwards to the dashboard, exposes a Prometheus
   # scrape endpoint on 8889.
-  otel-collector:
-    image: ghcr.io/open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-contrib:0.135.0
-    container_name: otel-collector
-    restart: unless-stopped
-    command: ["--config=/etc/otelcol-contrib/config.yaml"]
-    environment:
-      ASPIRE_ENDPOINT: "http://dashboard:18889"
-      ASPIRE_API_KEY: ""
-      ASPIRE_INSECURE: "true"
-    volumes:
-      - ../config/otelcollector/config.yaml:/etc/otelcol-contrib/config.yaml:ro
-    ports:
-      - "4317:4317"     # OTLP gRPC
-      - "4318:4318"     # OTLP HTTP
-    depends_on:
-      dashboard:
-        condition: service_started
-    networks:
-      - eshop-internal
+  # otel-collector:
+  #   image: ghcr.io/open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-contrib:0.135.0
+  #   container_name: otel-collector
+  #   restart: unless-stopped
+  #   command: ["--config=/etc/otelcol-contrib/config.yaml"]
+  #   environment:
+  #     ASPIRE_ENDPOINT: "http://dashboard:18889"
+  #     ASPIRE_API_KEY: ""
+  #     ASPIRE_INSECURE: "true"
+  #   volumes:
+  #     - ../config/otelcollector/config.yaml:/etc/otelcol-contrib/config.yaml:ro
+  #   ports:
+  #     - "4317:4317"     OTLP gRPC
+  #     - "4318:4318"     OTLP HTTP
+  #   depends_on:
+  #     dashboard:
+  #       condition: service_started
+  #   networks:
+  #     - eshop-internal
 
   # Prometheus — scrapes the collector, node-exporter and postgres-exporter.
-  prometheus:
-    image: prom/prometheus:v3.5.0
-    container_name: prometheus
-    restart: unless-stopped
-    command:
-      - "--config.file=/etc/prometheus/prometheus.yml"
-      - "--storage.tsdb.retention.time=30d"
-      - "--storage.tsdb.path=/prometheus"
-    volumes:
-      - ../config/prometheus/prometheus_pull.yml:/etc/prometheus/prometheus.yml:ro
-    ports:
-      - "9090:9090"
-    depends_on:
-      otel-collector:
-        condition: service_started
-    networks:
-      - eshop-internal
+  # prometheus:
+  #   image: prom/prometheus:v3.5.0
+  #   container_name: prometheus
+  #   restart: unless-stopped
+  #   command:
+  #     - "--config.file=/etc/prometheus/prometheus.yml"
+  #     - "--storage.tsdb.retention.time=30d"
+  #     - "--storage.tsdb.path=/prometheus"
+  #   volumes:
+  #     - ../config/prometheus/prometheus_pull.yml:/etc/prometheus/prometheus.yml:ro
+  #   ports:
+  #     - "9090:9090"
+  #   depends_on:
+  #     otel-collector:
+  #       condition: service_started
+  #   networks:
+  #     - eshop-internal
 
   # Node Exporter — host-level metrics for Prometheus.
-  node-exporter:
-    image: prom/node-exporter:v1.8.2
-    container_name: node-exporter
-    restart: unless-stopped
-    command:
-      - "--path.procfs=/host/proc"
-      - "--path.rootfs=/rootfs"
-      - "--path.sysfs=/host/sys"
-      - "--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)"
-    volumes:
-      - /proc:/host/proc:ro
-      - /sys:/host/sys:ro
-      - /:/rootfs:ro
-    ports:
-      - "9100:9100"
-    networks:
-      - eshop-internal
+  # node-exporter:
+  #   image: prom/node-exporter:v1.8.2
+  #   container_name: node-exporter
+  #   restart: unless-stopped
+  #   command:
+  #     - "--path.procfs=/host/proc"
+  #     - "--path.rootfs=/rootfs"
+  #     - "--path.sysfs=/host/sys"
+  #     - "--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)"
+  #   volumes:
+  #     - /proc:/host/proc:ro
+  #     - /sys:/host/sys:ro
+  #     - /:/rootfs:ro
+  #   ports:
+  #     - "9100:9100"
+  #   networks:
+  #     - eshop-internal
 
   # Grafana — dashboards provisioned from deploy/config/grafana/**.
-  grafana:
-    image: grafana/grafana:latest
-    container_name: grafana
-    restart: unless-stopped
-    volumes:
-      - ../config/grafana/provisioning:/etc/grafana/provisioning:ro
-      - ../config/grafana/dashboards:/var/lib/grafana/dashboards:ro
-    ports:
-      - "3000:3000"
-    depends_on:
-      prometheus:
-        condition: service_started
-    networks:
-      - eshop-internal
+  # grafana:
+  #   image: grafana/grafana:latest
+  #   container_name: grafana
+  #   restart: unless-stopped
+  #   volumes:
+  #     - ../config/grafana/provisioning:/etc/grafana/provisioning:ro
+  #     - ../config/grafana/dashboards:/var/lib/grafana/dashboards:ro
+  #   ports:
+  #     - "3000:3000"
+  #   depends_on:
+  #     prometheus:
+  #       condition: service_started
+  #   networks:
+  #     - eshop-internal
 
 volumes:
   eshop-data:

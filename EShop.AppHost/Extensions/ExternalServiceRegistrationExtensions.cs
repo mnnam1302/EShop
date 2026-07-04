@@ -71,8 +71,6 @@ public static class ExternalServiceRegistrationExtensions
 
         #region Infrastructure resources
 
-        var pathToDbInitDirectory = Path.GetFullPath(Path.Combine(Environment.CurrentDirectory, @"..\deploy\scripts\"));
-
         var redis = useExternalService
             ? builder.AddConnectionString(ResourceNames.Redis)
             : builder
@@ -122,6 +120,8 @@ public static class ExternalServiceRegistrationExtensions
         }
         else
         {
+            var pathToDbInitDirectory = Path.GetFullPath(Path.Combine(Environment.CurrentDirectory, @"..\deploy\postgres\init-scripts\"));
+
             var postgres = builder.AddPostgres(ResourceNames.PostgreSql, port: 5432)
                 .WithImageTag("17.0")
                 .WithDataVolume("eshop-data")

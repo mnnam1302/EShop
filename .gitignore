@@ -359,9 +359,8 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 *.env
-# Committed dev env: non-secret local config only (needed for clone-and-run).
-!deploy/env/dev.env
 
-# Docker secrets - sensitive data
-Deployment/secrets/*.txt
-!Deployment/secrets/*.txt.example
+
+# Environment files — credentials no commit
+deploy/env/*.env
+!deploy/env/*.env.example
