@@ -1,85 +1,24 @@
 # =============================================================================
 # Application services — LOCAL DEVELOPMENT (full stack).
 #
-# Runs every microservice + the API Gateway in containers. The host needs only
-# Docker — each service is built in-container via its multi-stage Dockerfile.
-#
-# Credentials: plain dev values (matching docker-compose.infra.dev.yml). No
-# Docker secret files are required to run the dev stack — just clone and up.
-# Connection strings point at the per-service Postgres users created by
-# deploy/scripts/postgres-init.sql (user <svc> / <svc>-password-dev).
-#
-# Database schema is applied automatically on service boot (each service runs
-# its DbInitializer → EF Core MigrateAsync before serving traffic).
-#
-# Usage (full dev stack):
-#   docker compose \
-#     -f deploy/docker/docker-compose.infra.dev.yml \
-#     -f deploy/docker/docker-compose.dev.yml \
-#     up -d --build
+# Runs every microservice + the API Gateway in containers.
+# Usage:
+#   docker compose -f deploy/docker/docker-compose.infra.dev.yml -f deploy/docker/docker-compose.dev.yml up -d --build
 #
 # Access points:
-#   API Gateway     http://localhost:5000
-#   Tenancy         http://localhost:5001
-#   Authorization   http://localhost:5002
-#   Catalog (write) http://localhost:5003
-#   Catalog (read)  http://localhost:5004
-#   Inventory       http://localhost:5005
-#   Order           http://localhost:5006
-#   Finance         http://localhost:5007
-#   Aspire dashboard http://localhost:18888
-#   Grafana          http://localhost:3000
-#   Prometheus       http://localhost:9090
-#   RabbitMQ UI      http://localhost:15672 (guest/guest)
+#   API Gateway       http://localhost:5000
+#   Tenancy           http://localhost:5001
+#   Authorization     http://localhost:5002
+#   Catalog (write)   http://localhost:5003
+#   Catalog (read)    http://localhost:5004
+#   Inventory         http://localhost:5005
+#   Order             http://localhost:5006
+#   Finance           http://localhost:5007
+#   Aspire dashboard  http://localhost:18888
+#   Grafana           http://localhost:3000
+#   Prometheus        http://localhost:9090
+#   RabbitMQ UI       http://localhost:15672 (guest/guest)
 # =============================================================================
-
-# Shared dev settings applied to every .NET service via YAML anchors.
-x-eshop-service: &eshop-service
-  restart: unless-stopped
-  env_file:
-    - ../env/dev.env
-  networks:
-    - eshop-public
-    - eshop-internal
-  depends_on:
-    postgres:
-      condition: service_healthy
-    redis:
-      condition: service_healthy
-    rabbitmq:
-      condition: service_healthy
-    dashboard:
-      condition: service_started
-  deploy:
-    resources:
-      limits:
-        cpus: '1.0'
-        memory: 512M
-      reservations:
-        cpus: '0.5'
-        memory: 256M
-  logging:
-    driver: "json-file"
-    options:
-      max-size: "10m"
-      max-file: "3"
-
-x-eshop-healthcheck: &eshop-healthcheck
-  test: ["CMD-SHELL", "wget -q --spider http://localhost:8080/health || exit 1"]
-  interval: 30s
-  timeout: 10s
-  retries: 3
-  start_period: 40s
-
-# Common broker + cache env shared by all services.
-x-broker-cache-env: &broker-cache-env
-  RedisOptions__Enabled: "true"
-  RedisOptions__Host: "redis:6379"
-  MasstransitConfiguration__Host: "rabbitmq"
-  MasstransitConfiguration__Port: "5672"
-  MasstransitConfiguration__VirtualHost: "eshop01012025"
-  MasstransitConfiguration__Username: "guest"
-  MasstransitConfiguration__Password: "guest"
 
 services:
 
@@ -87,80 +26,31 @@ services:
   # Tenancy
   # ---------------------------------------------------------------------------
   tenancy:
-    <<: *eshop-service
+    restart: unless-stopped
+    env_file:
+      - ../env/dev.env
+    networks:
+      - eshop-public
+      - eshop-internal
     image: ${DOCKER_REGISTRY-}eshop/tenancy
     container_name: tenancy
     build:
       context: ../..
       dockerfile: Tenancy/src/EShop.Tenancy.API/Dockerfile
     environment:
-      <<: *broker-cache-env
+      RedisOptions__Enabled: "true"
+      RedisOptions__Host: "redis:6379"
+      MasstransitConfiguration__Host: "rabbitmq"
+      MasstransitConfiguration__Port: "5672"
+      MasstransitConfiguration__VirtualHost: "eshop01012025"
+      MasstransitConfiguration__Username: "guest"
+      MasstransitConfiguration__Password: "guest"
       ASPNETCORE_ENVIRONMENT: Development
       ConnectionStrings__DefaultConnection: "Username=tenancy;Password=tenancy-password-dev;Server=postgres;Port=5432;Database=eshop_tenancy"
       Services__Authorization: "http://authorization:8080"
       OTEL_SERVICE_NAME: tenancy-api
     ports:
       - "5001:8080"
-    healthcheck: *eshop-healthcheck
-
-  # ---------------------------------------------------------------------------
-  # Authorization
-  # ---------------------------------------------------------------------------
-  authorization:
-    <<: *eshop-service
-    image: ${DOCKER_REGISTRY-}eshop/authorization
-    container_name: authorization
-    build:
-      context: ../..
-      dockerfile: Authorization/src/EShop.Authorization.API/Dockerfile
-    environment:
-      <<: *broker-cache-env
-      ASPNETCORE_ENVIRONMENT: Development
-      ConnectionStrings__DefaultConnection: "Username=authorization;Password=authorization-password-dev;Server=postgres;Port=5432;Database=eshop_authorization"
-      Services__Tenancy: "http://tenancy:8080"
-      OTEL_SERVICE_NAME: authorization-api
-    ports:
-      - "5002:8080"
-    healthcheck: *eshop-healthcheck
-
-  # ---------------------------------------------------------------------------
-  # Catalog — write side (event-sourced)
-  # ---------------------------------------------------------------------------
-  catalog-write:
-    <<: *eshop-service
-    image: ${DOCKER_REGISTRY-}eshop/catalog-write
-    container_name: catalog-write
-    build:
-      context: ../..
-      dockerfile: Catalog/src/EShop.Catalog.Application/Dockerfile
-    environment:
-      <<: *broker-cache-env
-      ASPNETCORE_ENVIRONMENT: Development
-      ConnectionStrings__DefaultConnection: "Username=catalog;Password=catalog-password-dev;Server=postgres;Port=5432;Database=eshop_catalog"
-      OTEL_SERVICE_NAME: catalog-write-api
-    ports:
-      - "5003:8080"
-    healthcheck: *eshop-healthcheck
-
-  # ---------------------------------------------------------------------------
-  # Catalog — read model (MongoDB projection)
-  # ---------------------------------------------------------------------------
-  catalog-read:
-    <<: *eshop-service
-    image: ${DOCKER_REGISTRY-}eshop/catalog-read
-    container_name: catalog-read
-    build:
-      context: ../..
-      dockerfile: Catalog/src/EShop.Catalog.ReadModels.MongoDb/Dockerfile
-    environment:
-      <<: *broker-cache-env
-      ASPNETCORE_ENVIRONMENT: Development
-      MongoDbSettings__ConnectionString: "mongodb://catalog:catalog-dev@mongodb:27017/eshop-catalog"
-      MongoDbSettings__DatabaseName: "eshop-catalog"
-      OTEL_SERVICE_NAME: catalog-read-api
-    ports:
-      - "5004:8080"
-    healthcheck: *eshop-healthcheck
     depends_on:
       postgres:
         condition: service_healthy
@@ -168,75 +58,330 @@ services:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
-      mongodb:
+      dashboard:
+        condition: service_started
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:8080/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ---------------------------------------------------------------------------
+  # Authorization
+  # ---------------------------------------------------------------------------
+  authorization:
+    restart: unless-stopped
+    env_file:
+      - ../env/dev.env
+    networks:
+      - eshop-public
+      - eshop-internal
+    image: ${DOCKER_REGISTRY-}eshop/authorization
+    container_name: authorization
+    build:
+      context: ../..
+      dockerfile: Authorization/src/EShop.Authorization.API/Dockerfile
+    environment:
+      RedisOptions__Enabled: "true"
+      RedisOptions__Host: "redis:6379"
+      MasstransitConfiguration__Host: "rabbitmq"
+      MasstransitConfiguration__Port: "5672"
+      MasstransitConfiguration__VirtualHost: "eshop01012025"
+      MasstransitConfiguration__Username: "guest"
+      MasstransitConfiguration__Password: "guest"
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__DefaultConnection: "Username=authorization;Password=authorization-password-dev;Server=postgres;Port=5432;Database=eshop_authorization"
+      Services__Tenancy: "http://tenancy:8080"
+      OTEL_SERVICE_NAME: authorization-api
+    ports:
+      - "5002:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
         condition: service_healthy
       dashboard:
         condition: service_started
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:8080/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ---------------------------------------------------------------------------
+  # Catalog — write side (event-sourced)
+  # ---------------------------------------------------------------------------
+  catalog-write:
+    restart: unless-stopped
+    env_file:
+      - ../env/dev.env
+    networks:
+      - eshop-public
+      - eshop-internal
+    image: ${DOCKER_REGISTRY-}eshop/catalog-write
+    container_name: catalog-write
+    build:
+      context: ../..
+      dockerfile: Catalog/src/EShop.Catalog.Application/Dockerfile
+    environment:
+      RedisOptions__Enabled: "true"
+      RedisOptions__Host: "redis:6379"
+      MasstransitConfiguration__Host: "rabbitmq"
+      MasstransitConfiguration__Port: "5672"
+      MasstransitConfiguration__VirtualHost: "eshop01012025"
+      MasstransitConfiguration__Username: "guest"
+      MasstransitConfiguration__Password: "guest"
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__DefaultConnection: "Username=catalog;Password=catalog-password-dev;Server=postgres;Port=5432;Database=eshop_catalog"
+      OTEL_SERVICE_NAME: catalog-write-api
+    ports:
+      - "5003:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      dashboard:
+        condition: service_started
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:8080/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ---------------------------------------------------------------------------
+  # Catalog — read model (MongoDB projection)
+  # ---------------------------------------------------------------------------
+  catalog-read:
+    restart: unless-stopped
+    env_file:
+      - ../env/dev.env
+    networks:
+      - eshop-public
+      - eshop-internal
+    image: ${DOCKER_REGISTRY-}eshop/catalog-read
+    container_name: catalog-read
+    build:
+      context: ../..
+      dockerfile: Catalog/src/EShop.Catalog.ReadModels.MongoDb/Dockerfile
+    environment:
+      RedisOptions__Enabled: "true"
+      RedisOptions__Host: "redis:6379"
+      MasstransitConfiguration__Host: "rabbitmq"
+      MasstransitConfiguration__Port: "5672"
+      MasstransitConfiguration__VirtualHost: "eshop01012025"
+      MasstransitConfiguration__Username: "guest"
+      MasstransitConfiguration__Password: "guest"
+      ASPNETCORE_ENVIRONMENT: Development
+      MongoDbSettings__ConnectionString: "mongodb://catalog:catalog-dev@mongodb:27017/eshop-catalog"
+      MongoDbSettings__DatabaseName: "eshop-catalog"
+      OTEL_SERVICE_NAME: catalog-read-api
+    ports:
+      - "5004:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      dashboard:
+        condition: service_started
+      mongodb:
+        condition: service_healthy
       catalog-write:
         condition: service_started
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:8080/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   # ---------------------------------------------------------------------------
   # Inventory
   # ---------------------------------------------------------------------------
   inventory:
-    <<: *eshop-service
+    restart: unless-stopped
+    env_file:
+      - ../env/dev.env
+    networks:
+      - eshop-public
+      - eshop-internal
     image: ${DOCKER_REGISTRY-}eshop/inventory
     container_name: inventory
     build:
       context: ../..
       dockerfile: Inventory/src/EShop.Inventory.API/Dockerfile
     environment:
-      <<: *broker-cache-env
+      RedisOptions__Enabled: "true"
+      RedisOptions__Host: "redis:6379"
+      MasstransitConfiguration__Host: "rabbitmq"
+      MasstransitConfiguration__Port: "5672"
+      MasstransitConfiguration__VirtualHost: "eshop01012025"
+      MasstransitConfiguration__Username: "guest"
+      MasstransitConfiguration__Password: "guest"
       ASPNETCORE_ENVIRONMENT: Development
       ConnectionStrings__DefaultConnection: "Username=inventory;Password=inventory-password-dev;Server=postgres;Port=5432;Database=eshop_inventory"
       OTEL_SERVICE_NAME: inventory-api
     ports:
       - "5005:8080"
-    healthcheck: *eshop-healthcheck
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      dashboard:
+        condition: service_started
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:8080/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   # ---------------------------------------------------------------------------
   # Order
   # ---------------------------------------------------------------------------
   order:
-    <<: *eshop-service
+    restart: unless-stopped
+    env_file:
+      - ../env/dev.env
+    networks:
+      - eshop-public
+      - eshop-internal
     image: ${DOCKER_REGISTRY-}eshop/order
     container_name: order
     build:
       context: ../..
       dockerfile: Order/src/EShop.Order.API/Dockerfile
     environment:
-      <<: *broker-cache-env
+      RedisOptions__Enabled: "true"
+      RedisOptions__Host: "redis:6379"
+      MasstransitConfiguration__Host: "rabbitmq"
+      MasstransitConfiguration__Port: "5672"
+      MasstransitConfiguration__VirtualHost: "eshop01012025"
+      MasstransitConfiguration__Username: "guest"
+      MasstransitConfiguration__Password: "guest"
       ASPNETCORE_ENVIRONMENT: Development
       ConnectionStrings__DefaultConnection: "Username=order;Password=order-password-dev;Server=postgres;Port=5432;Database=eshop_order"
       OTEL_SERVICE_NAME: order-api
     ports:
       - "5006:8080"
-    healthcheck: *eshop-healthcheck
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      dashboard:
+        condition: service_started
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:8080/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   # ---------------------------------------------------------------------------
   # Finance
   # ---------------------------------------------------------------------------
   finance:
-    <<: *eshop-service
+    restart: unless-stopped
+    env_file:
+      - ../env/dev.env
+    networks:
+      - eshop-public
+      - eshop-internal
     image: ${DOCKER_REGISTRY-}eshop/finance
     container_name: finance
     build:
       context: ../..
       dockerfile: Finance/src/EShop.Finance.API/Dockerfile
     environment:
-      <<: *broker-cache-env
+      RedisOptions__Enabled: "true"
+      RedisOptions__Host: "redis:6379"
+      MasstransitConfiguration__Host: "rabbitmq"
+      MasstransitConfiguration__Port: "5672"
+      MasstransitConfiguration__VirtualHost: "eshop01012025"
+      MasstransitConfiguration__Username: "guest"
+      MasstransitConfiguration__Password: "guest"
       ASPNETCORE_ENVIRONMENT: Development
       ConnectionStrings__DefaultConnection: "Username=finance;Password=finance-password-dev;Server=postgres;Port=5432;Database=eshop_finance"
       OTEL_SERVICE_NAME: finance-api
     ports:
       - "5007:8080"
-    healthcheck: *eshop-healthcheck
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      dashboard:
+        condition: service_started
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:8080/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   # ---------------------------------------------------------------------------
   # API Gateway — edge service (routes to tenancy + authorization).
   # ---------------------------------------------------------------------------
   eshop.apigateway:
-    <<: *eshop-service
+    restart: unless-stopped
+    env_file:
+      - ../env/dev.env
+    networks:
+      - eshop-public
+      - eshop-internal
     image: ${DOCKER_REGISTRY-}eshop/apigateway
     container_name: apigateway
     build:
@@ -251,15 +396,17 @@ services:
       OTEL_SERVICE_NAME: api-gateway
     ports:
       - "5000:8080"
-    healthcheck: *eshop-healthcheck
-    deploy:
-      resources:
-        limits:
-          cpus: '0.5'
-          memory: 256M
-        reservations:
-          cpus: '0.25'
-          memory: 128M
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:8080/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
     depends_on:
       tenancy:
         condition: service_started
