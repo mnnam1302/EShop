@@ -43,21 +43,20 @@ services:
     networks:
       - eshop-internal
 
-  # Postgres Exporter
-  # Connects as monitor_user (pg_monitor role, granted in postgres-init.sql).
-  # postgres-exporter:
-  #   image: prometheuscommunity/postgres-exporter:v0.15.0
-  #   container_name: postgres-exporter
-  #   restart: unless-stopped
-  #   environment:
-  #     DATA_SOURCE_NAME: postgresql://monitor_user:monitor-password-dev@postgres:5432/eshop_tenancy?sslmode=disable
-  #   ports:
-  #     - "9187:9187"
-  #   depends_on:
-  #     postgres:
-  #       condition: service_healthy
-  #   networks:
-  #     - eshop-internal
+  # Postgres Exporter - connect monitor_user (pg_monitor role, granted in postgres-init.sql)
+  postgres-exporter:
+    image: prometheuscommunity/postgres-exporter:v0.15.0
+    container_name: postgres-exporter
+    restart: unless-stopped
+    environment:
+      DATA_SOURCE_NAME: postgresql://monitor_user:monitor-password-dev@postgres:5432/eshop_tenancy?sslmode=disable
+    ports:
+      - "9187:9187"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - eshop-internal
 
   # Redis
   redis:
@@ -76,7 +75,22 @@ services:
     networks:
       - eshop-internal
 
-  # RabbitMQ
+  # Redis Exporter
+  redis-exporter:
+    image: oliver006/redis_exporter:v1.67.0-alpine
+    container_name: redis-exporter
+    restart: unless-stopped
+    environment:
+      REDIS_ADDR: "redis://redis:6379"
+    ports:
+      - "9121:9121"
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - eshop-internal
+
+  # RabbitMQ — rabbitmq_prometheus plugin enabled via enabled_plugins mount, exposes /metrics on 15692 for Prometheus.
   rabbitmq:
     image: rabbitmq:3-management-alpine
     container_name: rabbitmq
@@ -91,9 +105,11 @@ services:
       - ../env/dev.env
     volumes:
       - eshop-rabbitmq:/var/lib/rabbitmq
+      - ../config/rabbitmq/enabled_plugins:/etc/rabbitmq/enabled_plugins:ro
     ports:
       - "5672:5672"
       - "15672:15672"
+      - "15692:15692"
     networks:
       - eshop-internal
 
@@ -120,101 +136,97 @@ services:
       - eshop-internal
 
   # ---------------------------------------------------------------------------
-  # Observability — mirrors the stack provisioned by the Aspire AppHost so both
-  # paths give the same telemetry experience. Shared config lives in
-  # deploy/config/** (single source of truth).
+  # Observability
   # ---------------------------------------------------------------------------
+  # Aspire Dashboard — receives OTLP traces/logs/metrics from the collector and services, and serves the UI.
+  dashboard:
+    image: mcr.microsoft.com/dotnet/aspire-dashboard:9.0
+    container_name: dashboard
+    restart: unless-stopped
+    environment:
+      DASHBOARD__FRONTEND__AUTHMODE: "Unsecured"
+      DASHBOARD__OTLP__AUTHMODE: "ApiKey"
+      DASHBOARD__OTLP__PRIMARYAPIKEY: "eshop-dev-otlp-key"
+    ports:
+      - "18888:18888"   # dashboard UI (anonymous)
+      - "18889:18889"   # OTLP ingest (gRPC) — requires API key
+    networks:
+      - eshop-internal
 
-  # Aspire Dashboard — receives OTLP traces/logs/metrics from the collector and
-  # services, and serves the UI. Unsecured in dev: no API key required.
-  # dashboard:
-  #   image: mcr.microsoft.com/dotnet/aspire-dashboard:9.0
-  #   container_name: dashboard
-  #   restart: unless-stopped
-  #   environment:
-  #     DOTNET_DASHBOARD_UNSECURED_ALLOW_ANONYMOUS: "true"
-  #   ports:
-  #     - "18888:18888"   dashboard UI
-  #     - "18889:18889"   OTLP ingest (gRPC)
-  #   networks:
-  #     - eshop-internal
+  # OpenTelemetry Collector
+  otel-collector:
+    image: ghcr.io/open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-contrib:0.135.0
+    container_name: otel-collector
+    restart: unless-stopped
+    command: ["--config=/etc/otelcol-contrib/config.yaml"]
+    environment:
+      ASPIRE_ENDPOINT: "http://dashboard:18889"
+      ASPIRE_API_KEY: "eshop-dev-otlp-key"
+      ASPIRE_INSECURE: "true"
+    volumes:
+      - ../config/otelcollector/config.yaml:/etc/otelcol-contrib/config.yaml:ro
+    ports:
+      - "4317:4317"     # OTLP gRPC
+      - "4318:4318"     # OTLP HTTP
+    depends_on:
+      dashboard:
+        condition: service_started
+    networks:
+      - eshop-internal
 
-  # OpenTelemetry Collector — same image/tag and config as the Aspire path.
-  # Receives OTLP on 4317/4318, forwards to the dashboard, exposes a Prometheus
-  # scrape endpoint on 8889.
-  # otel-collector:
-  #   image: ghcr.io/open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-contrib:0.135.0
-  #   container_name: otel-collector
-  #   restart: unless-stopped
-  #   command: ["--config=/etc/otelcol-contrib/config.yaml"]
-  #   environment:
-  #     ASPIRE_ENDPOINT: "http://dashboard:18889"
-  #     ASPIRE_API_KEY: ""
-  #     ASPIRE_INSECURE: "true"
-  #   volumes:
-  #     - ../config/otelcollector/config.yaml:/etc/otelcol-contrib/config.yaml:ro
-  #   ports:
-  #     - "4317:4317"     OTLP gRPC
-  #     - "4318:4318"     OTLP HTTP
-  #   depends_on:
-  #     dashboard:
-  #       condition: service_started
-  #   networks:
-  #     - eshop-internal
-
-  # Prometheus — scrapes the collector, node-exporter and postgres-exporter.
-  # prometheus:
-  #   image: prom/prometheus:v3.5.0
-  #   container_name: prometheus
-  #   restart: unless-stopped
-  #   command:
-  #     - "--config.file=/etc/prometheus/prometheus.yml"
-  #     - "--storage.tsdb.retention.time=30d"
-  #     - "--storage.tsdb.path=/prometheus"
-  #   volumes:
-  #     - ../config/prometheus/prometheus_pull.yml:/etc/prometheus/prometheus.yml:ro
-  #   ports:
-  #     - "9090:9090"
-  #   depends_on:
-  #     otel-collector:
-  #       condition: service_started
-  #   networks:
-  #     - eshop-internal
+  # Prometheus — scrapes the collector, node-exporter, postgres-exporter, redis-exporter and rabbitmq (rabbitmq_prometheus plugin).
+  prometheus:
+    image: prom/prometheus:v3.5.0
+    container_name: prometheus
+    restart: unless-stopped
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.retention.time=30d"
+      - "--storage.tsdb.path=/prometheus"
+    volumes:
+      - ../config/prometheus/prometheus_pull.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - "9090:9090"
+    depends_on:
+      otel-collector:
+        condition: service_started
+    networks:
+      - eshop-internal
 
   # Node Exporter — host-level metrics for Prometheus.
-  # node-exporter:
-  #   image: prom/node-exporter:v1.8.2
-  #   container_name: node-exporter
-  #   restart: unless-stopped
-  #   command:
-  #     - "--path.procfs=/host/proc"
-  #     - "--path.rootfs=/rootfs"
-  #     - "--path.sysfs=/host/sys"
-  #     - "--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)"
-  #   volumes:
-  #     - /proc:/host/proc:ro
-  #     - /sys:/host/sys:ro
-  #     - /:/rootfs:ro
-  #   ports:
-  #     - "9100:9100"
-  #   networks:
-  #     - eshop-internal
+  node-exporter:
+    image: prom/node-exporter:v1.8.2
+    container_name: node-exporter
+    restart: unless-stopped
+    command:
+      - "--path.procfs=/host/proc"
+      - "--path.rootfs=/rootfs"
+      - "--path.sysfs=/host/sys"
+      - "--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)"
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    ports:
+      - "9100:9100"
+    networks:
+      - eshop-internal
 
-  # Grafana — dashboards provisioned from deploy/config/grafana/**.
-  # grafana:
-  #   image: grafana/grafana:latest
-  #   container_name: grafana
-  #   restart: unless-stopped
-  #   volumes:
-  #     - ../config/grafana/provisioning:/etc/grafana/provisioning:ro
-  #     - ../config/grafana/dashboards:/var/lib/grafana/dashboards:ro
-  #   ports:
-  #     - "3000:3000"
-  #   depends_on:
-  #     prometheus:
-  #       condition: service_started
-  #   networks:
-  #     - eshop-internal
+  # Grafana
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    restart: unless-stopped
+    volumes:
+      - ../config/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ../config/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    ports:
+      - "3000:3000"
+    depends_on:
+      prometheus:
+        condition: service_started
+    networks:
+      - eshop-internal
 
 volumes:
   eshop-data:
@@ -222,8 +234,7 @@ volumes:
   eshop-rabbitmq:
   eshop-mongodb:
 
-# Networks are created by this base file so a fresh clone needs no manual
-# `docker network create`. App services (docker-compose.dev.yml) join them.
+# Networks are created by this file so a fresh clone needs no manual `docker network create`.
 networks:
   eshop-public:
     name: eshop-public

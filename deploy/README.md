@@ -32,8 +32,7 @@ docker compose \
 
 That's it. The `eshop-public` / `eshop-internal` networks are created automatically,
 databases/users are created by `deploy/scripts/postgres-init.sql`, and each service
-applies its EF Core migrations on startup before serving traffic — **no manual
-`dotnet ef` step**.
+applies its EF Core migrations on startup before serving traffic.
 
 Check status / stop:
 
@@ -100,15 +99,21 @@ project. The Aspire dashboard URL is printed in the console on startup.
 | Inventory API | http://localhost:5005 | |
 | Order API | http://localhost:5006 | |
 | Finance API | http://localhost:5007 | |
-| Aspire Dashboard | http://localhost:18888 | traces / logs / metrics (unsecured in dev) |
+| Aspire Dashboard | http://localhost:18888 | traces / logs / metrics; UI is anonymous, OTLP ingest requires an API key (dev.env) |
 | Grafana | http://localhost:3000 | dashboards provisioned from `deploy/config/grafana` |
 | Prometheus | http://localhost:9090 | |
 | RabbitMQ Management | http://localhost:15672 | `guest` / `guest` |
+| RabbitMQ Prometheus metrics | http://localhost:15692/metrics | `rabbitmq_prometheus` plugin |
+| Postgres Exporter metrics | http://localhost:9187/metrics | |
+| Redis Exporter metrics | http://localhost:9121/metrics | |
 | PostgreSQL | localhost:5432 | `postgres` / `postgres-dev` |
 | MongoDB | localhost:27017 | `sa` / see infra compose |
 | Redis | localhost:6379 | no auth (dev) |
 
 > Health endpoint for every service: `GET /health`.
+
+Grafana auto-provisions 5 dashboards from `deploy/config/grafana/dashboards`: ASP.NET
+OTEL metrics, Node Exporter (host), PostgreSQL, Redis, and RabbitMQ.
 
 ---
 
@@ -125,8 +130,9 @@ deploy/
     otelcollector/config.yaml
     prometheus/prometheus_pull.yml
     grafana/**
+    rabbitmq/enabled_plugins        ← enables rabbitmq_prometheus (Compose only)
   env/
-    dev.env                        ← committed, NON-secret dev config (OTLP endpoint, broker user/vhost)
+    dev.env                        ← committed, NON-secret dev config (OTLP endpoint + API key, broker user/vhost)
     prod.env                       ← non-secret prod config (template)
   scripts/
     postgres-init.sql              ← creates DB users + databases on first run
@@ -139,8 +145,11 @@ deploy/
 ### Why no secret files in dev?
 
 Dev infrastructure uses plain, well-known credentials (matching
-`docker-compose.infra.dev.yml`) and the Aspire Dashboard runs **unsecured**
-(`DOTNET_DASHBOARD_UNSECURED_ALLOW_ANONYMOUS`), so there is nothing secret to manage.
+`docker-compose.infra.dev.yml`). The Aspire Dashboard's browser UI runs
+**unsecured** (`DASHBOARD__FRONTEND__AUTHMODE=Unsecured`); its OTLP ingest
+endpoint requires an API key, but the key is a fixed, non-secret dev value
+(`eshop-dev-otlp-key`, committed in `dev.env` / `docker-compose.infra.dev.yml`) —
+so there is still nothing secret to manage in dev.
 The `deploy/secrets/*.txt.example` templates and `deploy/secrets/*.txt` (git-ignored)
 are used **only** by the production compose files.
 
@@ -160,6 +169,9 @@ Both paths pin the same images. When changing any of these, update **both**
 | Prometheus | `prom/prometheus:v3.5.0` |
 | Node Exporter | `prom/node-exporter:v1.8.2` |
 | OTel Collector | `...opentelemetry-collector-contrib:0.135.0` |
+| Postgres Exporter | `prometheuscommunity/postgres-exporter:v0.15.0` (Compose only) |
+| Redis Exporter | `oliver006/redis_exporter:v1.67.0-alpine` (Compose only) |
+| RabbitMQ `rabbitmq_prometheus` plugin | bundled with `rabbitmq:3-management-alpine`, enabled via `deploy/config/rabbitmq/enabled_plugins` (Compose only) |
 
 > **RabbitMQ is pinned to 3.x** for both paths. Upgrading to 4.x is deliberately left
 > as a separate, dedicated change.

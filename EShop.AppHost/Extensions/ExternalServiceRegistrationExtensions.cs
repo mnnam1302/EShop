@@ -4,23 +4,29 @@ namespace EShop.AppHost.Extensions;
 
 public static class ExternalServiceRegistrationExtensions
 {
-    public static IDistributedApplicationBuilder AddExternalServices(this IDistributedApplicationBuilder builder)
+    public static IDistributedApplicationBuilder AddExternalServices(this IDistributedApplicationBuilder builder, bool isEnabledObservability)
     {
-        return AddServices(builder, true);
+        return AddServices(
+            builder,
+            useExternalService: true,
+            isEnabledObservability);
     }
 
-    public static IDistributedApplicationBuilder AddServiceDefaults(this IDistributedApplicationBuilder builder)
+    public static IDistributedApplicationBuilder AddServiceDefaults(this IDistributedApplicationBuilder builder, bool isEnabledObservability)
     {
-        return AddServices(builder, false);
+        return AddServices(
+            builder,
+            useExternalService: false,
+            isEnabledObservability);
     }
 
-    private static IDistributedApplicationBuilder AddServices(IDistributedApplicationBuilder builder, bool useExternalService)
+    private static IDistributedApplicationBuilder AddServices(IDistributedApplicationBuilder builder, bool useExternalService, bool isEnabledObservability)
     {
         #region Observability
 
         IResourceBuilder<IResourceWithEndpoints>? grafana = null;
 
-        if (!useExternalService)
+        if (isEnabledObservability)
         {
             // Push approach: OTelCollector + Prometheus
             //var prometheus = builder.AddContainer(ResourceNames.Prometheus, "prom/prometheus", "v3.5.0")
