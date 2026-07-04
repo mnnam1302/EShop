@@ -50,7 +50,7 @@ Authorization: Bearer {{accessToken}}
   "orderItems": [
     {
       "variantId": "214fe0df-9941-46f8-bb45-16ce39d9f3e6",
-      "quantity": 110,
+      "quantity": 5,
       "unitPrice": 990,
       "discount": 0
     }

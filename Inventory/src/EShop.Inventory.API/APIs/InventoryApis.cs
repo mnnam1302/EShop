@@ -30,7 +30,7 @@ public static class InventoryApis
             .RequireOneOfPermissionsFilter(PermissionConstants.Inventory.ViewInventory, PermissionConstants.Inventory.ManageInventory);
 
         endpointsV1
-            .MapPatch("", WarnUpStockInventoryV1Async)
+            .MapPost("warn-up", WarnUpStockInventoryV1Async)
             .RequirePermissionFilter(PermissionConstants.Inventory.ManageInventory);
 
         return routerBuilder;
