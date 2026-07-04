@@ -1,0 +1,34 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" --max-time 5 https://grafana.com/api/dashboards/763/revisions/1/download)",
+      "Bash(grep -o '\\\\${DS_PROMETHEUS}' 9628-postgresql-database.json)",
+      "Bash(grep -c '\\\\${DS_PROMETHEUS}' 9628-postgresql-database.json)",
+      "Bash(curl -s --max-time 15 https://grafana.com/api/dashboards/763/revisions/1/download -o /tmp/763.json)",
+      "Bash(curl -s --max-time 15 https://grafana.com/api/dashboards/10991/revisions/1/download -o /tmp/10991.json)",
+      "Read(//tmp/**)",
+      "Bash(grep -o '\"tags\": *\\\\[[^]]*\\\\]' /tmp/10991.json | head -1; echo ---; grep -o 'rabbitmq_[a-z_]*' /tmp/10991.json | sort -u | head -10; echo ---panelcount---; grep -c '\"type\": *\"graph\"\\\\|\"type\": *\"timeseries\"\\\\|\"type\": *\"stat\"' /tmp/10991.json)",
+      "Bash(grep -o '\"datasource\": *\"[^\"]*\"' /tmp/763.json | sort -u; echo ---; grep -o '\"datasource\": *\"[^\"]*\"' /tmp/10991.json | sort -u; echo ---; grep -o '\"datasource\": *{[^}]*}' /tmp/10991.json | sort -u | head -5)",
+      "Bash(grep -A3 '\"__inputs\"' /tmp/763.json | head -10)",
+      "Bash(sed 's/\\\\${DS_PROM}/prometheus-PBFA97CFB590B2093/g' /tmp/763.json)",
+      "Bash(sed 's/\\\\${DS_PROMETHEUS}/prometheus-PBFA97CFB590B2093/g' /tmp/10991.json)",
+      "Bash(grep -c '\\\\${DS_PROM}\\\\|\\\\${DS_PROMETHEUS}' 763-redis-dashboard-for-prometheus-redis-exporter.json 10991-rabbitmq-overview.json)",
+      "Bash(docker version *)",
+      "Bash(docker compose *)",
+      "Bash(docker exec *)",
+      "Bash(curl -s http://localhost:15692/metrics)",
+      "Bash(curl -s http://localhost:9090/api/v1/targets)",
+      "Bash(python3 -c ' *)",
+      "Bash(curl -s http://localhost:3000/api/health)",
+      "Bash(curl -s -u admin:admin http://localhost:3000/api/datasources)",
+      "Bash(curl -s -u admin:admin http://localhost:3000/api/search?type=dash-db)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:18888)",
+      "Bash(python -c ' *)",
+      "Bash(curl -s http://localhost:9121/metrics)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" -X POST http://localhost:18889/v1/traces -H \"Content-Type: application/json\" -d '{}')",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" -X POST http://localhost:18889/v1/traces -H \"Content-Type: application/json\" -H \"x-otlp-api-key: eshop-dev-otlp-key\" -d '{}')",
+      "Bash(curl -s -o /dev/null -w \"collector http status: %{http_code}\\\\n\" -X POST http://localhost:4318/v1/traces -H \"Content-Type: application/json\" -d '{\"resourceSpans\":[]}')",
+      "Bash(dotnet run *)"
+    ]
+  }
+}

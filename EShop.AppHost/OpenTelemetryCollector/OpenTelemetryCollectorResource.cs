@@ -1,7 +1,11 @@
-﻿namespace EShop.AppHost.OpenTelemetryCollector;
+namespace EShop.AppHost.OpenTelemetryCollector;
 
-internal class OpenTelemetryCollectorResource(string name) : ContainerResource(name)
+internal sealed class OpenTelemetryCollectorResource : ContainerResource
 {
     internal const string OtlpGrpcEndpointName = "grpc";
     internal const string OtlpHttpEndpointName = "http";
+
+    public OpenTelemetryCollectorResource(string name) : base(name)
+    {
+    }
 }

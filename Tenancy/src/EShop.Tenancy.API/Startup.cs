@@ -1,4 +1,4 @@
-﻿using Carter;
+using Carter;
 using EShop.Shared.JsonApi.Extensions;
 using EShop.Shared.JsonApi.Middlewares;
 using EShop.Tenancy.API.Boostrapping;

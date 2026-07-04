@@ -1,6 +1,119 @@
 # Getting Started — Local Development
 
-This guide walks you through everything needed to run the full EShop stack locally using Docker Compose.
+Run the **entire** EShop stack (all microservices + API Gateway + infrastructure +
+observability) locally in one of two supported ways:
+
+| Path | Prerequisites | Best for |
+|------|---------------|----------|
+| **A. Docker Compose** | Docker Desktop only | Just want it running; no .NET toolchain |
+| **B. .NET Aspire** | .NET 8 SDK + Aspire workload + Docker | Day-to-day service development & debugging |
+
+Both paths use the **same** infrastructure versions, the **same** shared config under
+`deploy/config/**`, apply database schema **automatically on first run**, and require
+**no secret files** for dev. Pick one and go.
+
+---
+
+## Path A — Docker Compose (Docker is the only prerequisite)
+
+A fresh clone needs nothing but Docker. Every service is built inside a multi-stage
+container, so no .NET SDK is required on the host.
+
+```bash
+git clone https://github.com/mnnam1302/EShop.git
+cd EShop
+
+# Build + start the full stack (infra + observability + all services)
+docker compose \
+  -f deploy/docker/docker-compose.infra.dev.yml \
+  -f deploy/docker/docker-compose.dev.yml \
+  up -d --build
+```
+
+That's it. The `eshop-public` / `eshop-internal` networks are created automatically,
+databases/users are created by `deploy/scripts/postgres-init.sql`, and each service
+applies its EF Core migrations on startup before serving traffic.
+
+Check status / stop:
+
+```bash
+docker compose -f deploy/docker/docker-compose.infra.dev.yml -f deploy/docker/docker-compose.dev.yml ps
+docker compose -f deploy/docker/docker-compose.infra.dev.yml -f deploy/docker/docker-compose.dev.yml down
+```
+
+> First build pulls base images and compiles all services — expect a few minutes.
+> Subsequent runs are fast (layer cache); drop `--build` to skip rebuilding.
+
+### Infrastructure only (run services from your IDE)
+
+If you'd rather run the .NET services yourself, start just the infrastructure +
+observability:
+
+```bash
+docker compose -f deploy/docker/docker-compose.infra.dev.yml up -d
+docker compose -f deploy/docker/docker-compose.infra.dev.yml down
+```
+
+Then run a service against it, e.g.:
+
+```bash
+dotnet run --project Tenancy/src/EShop.Tenancy.API
+```
+
+(The services default to `localhost` infra; connection strings use the per-service
+Postgres users created by `postgres-init.sql`, e.g.
+`Username=tenancy;Password=tenancy-password-dev;Server=localhost;Port=5432;Database=eshop_tenancy`.)
+
+---
+
+## Path B — .NET Aspire
+
+Aspire orchestrates the same infrastructure, observability, and all services, with a
+live dependency dashboard.
+
+```bash
+# One-time: install the Aspire workload
+dotnet workload install aspire
+
+git clone https://github.com/mnnam1302/EShop.git
+cd EShop
+
+dotnet run --project EShop.AppHost
+```
+
+Aspire provisions PostgreSQL, MongoDB, Redis, RabbitMQ, the OpenTelemetry Collector,
+Prometheus, Grafana and Node Exporter as containers, then launches every service
+project. The Aspire dashboard URL is printed in the console on startup.
+
+---
+
+## Access points
+
+| Service | URL | Notes |
+|---------|-----|-------|
+| API Gateway | http://localhost:5000 | routes to Tenancy + Authorization |
+| Tenancy API | http://localhost:5001 | |
+| Authorization API | http://localhost:5002 | |
+| Catalog (write) | http://localhost:5003 | event-sourced |
+| Catalog (read) | http://localhost:5004 | MongoDB projection |
+| Inventory API | http://localhost:5005 | |
+| Order API | http://localhost:5006 | |
+| Finance API | http://localhost:5007 | |
+| Aspire Dashboard | http://localhost:18888 | traces / logs / metrics; UI is anonymous, OTLP ingest requires an API key (dev.env) |
+| Grafana | http://localhost:3000 | dashboards provisioned from `deploy/config/grafana` |
+| Prometheus | http://localhost:9090 | |
+| RabbitMQ Management | http://localhost:15672 | `guest` / `guest` |
+| RabbitMQ Prometheus metrics | http://localhost:15692/metrics | `rabbitmq_prometheus` plugin |
+| Postgres Exporter metrics | http://localhost:9187/metrics | |
+| Redis Exporter metrics | http://localhost:9121/metrics | |
+| PostgreSQL | localhost:5432 | `postgres` / `postgres-dev` |
+| MongoDB | localhost:27017 | `sa` / see infra compose |
+| Redis | localhost:6379 | no auth (dev) |
+
+> Health endpoint for every service: `GET /health`.
+
+Grafana auto-provisions 5 dashboards from `deploy/config/grafana/dashboards`: ASP.NET
+OTEL metrics, Node Exporter (host), PostgreSQL, Redis, and RabbitMQ.
 
 ---
 
@@ -9,209 +122,96 @@ This guide walks you through everything needed to run the full EShop stack local
 ```
 deploy/
   docker/
-    docker-compose.infra.dev.yml        ← dev infra: postgres, redis, rabbitmq (plain env, no auth)
-    docker-compose.infra.prod.yml       ← prod infra: postgres, redis, rabbitmq (Docker secrets)
-    docker-compose.dev.yml              ← application services (dev)
-    docker-compose.prod.yml             ← application services (prod)
+    docker-compose.infra.dev.yml   ← dev infra + observability (plain env, no auth) — creates the networks
+    docker-compose.dev.yml         ← all application services (dev, plain env, no secret files)
+    docker-compose.infra.prod.yml  ← prod infra (Docker secrets)
+    docker-compose.prod.yml        ← prod application services (Docker secrets)
+  config/                          ← single source of truth, shared by Compose AND Aspire
+    otelcollector/config.yaml
+    prometheus/prometheus_pull.yml
+    grafana/**
+    rabbitmq/enabled_plugins        ← enables rabbitmq_prometheus (Compose only)
   env/
-    dev.env                             ← non-sensitive dev config
-    prod.env                            ← non-sensitive prod config (template)
+    dev.env                        ← committed, NON-secret dev config (OTLP endpoint + API key, broker user/vhost)
+    prod.env                       ← non-secret prod config (template)
   scripts/
-    postgres-init.sql                   ← creates DB users + databases on first run
+    postgres-init.sql              ← creates DB users + databases on first run
+    mongodb-init.js                ← creates Mongo users on first run
   secrets/
-    *.txt.example                       ← templates — copy to *.txt and fill in
-    *.txt                               ← real secrets — git-ignored, never commit
+    *.txt.example                  ← prod secret templates — copy to *.txt and fill in
+    *.txt                          ← real prod secrets — git-ignored, never commit
 ```
+
+### Why no secret files in dev?
+
+Dev infrastructure uses plain, well-known credentials (matching
+`docker-compose.infra.dev.yml`). The Aspire Dashboard's browser UI runs
+**unsecured** (`DASHBOARD__FRONTEND__AUTHMODE=Unsecured`); its OTLP ingest
+endpoint requires an API key, but the key is a fixed, non-secret dev value
+(`eshop-dev-otlp-key`, committed in `dev.env` / `docker-compose.infra.dev.yml`) —
+so there is still nothing secret to manage in dev.
+The `deploy/secrets/*.txt.example` templates and `deploy/secrets/*.txt` (git-ignored)
+are used **only** by the production compose files.
 
 ---
 
-## Prerequisites
+## Versions & keeping the two paths in sync
 
-| Tool | Minimum version | Install |
-|------|----------------|---------|
-| .NET SDK | 8.0 | https://dot.net/download |
-| Docker Desktop | 4.x | https://docs.docker.com/desktop |
-| Git | any | https://git-scm.com |
+Both paths pin the same images. When changing any of these, update **both**
+`docker-compose.infra.dev.yml` and `EShop.AppHost`:
 
-Verify your setup:
+| Component | Image / tag |
+|-----------|-------------|
+| PostgreSQL | `postgres:17.0` |
+| MongoDB | `mongo:6.0` |
+| Redis | `redis:7.4.7` |
+| RabbitMQ | `rabbitmq:3-management-alpine` (Aspire: tag `3` + management plugin) |
+| Prometheus | `prom/prometheus:v3.5.0` |
+| Node Exporter | `prom/node-exporter:v1.8.2` |
+| OTel Collector | `...opentelemetry-collector-contrib:0.135.0` |
+| Postgres Exporter | `prometheuscommunity/postgres-exporter:v0.15.0` (Compose only) |
+| Redis Exporter | `oliver006/redis_exporter:v1.67.0-alpine` (Compose only) |
+| RabbitMQ `rabbitmq_prometheus` plugin | bundled with `rabbitmq:3-management-alpine`, enabled via `deploy/config/rabbitmq/enabled_plugins` (Compose only) |
 
-```bash
-dotnet --version      # 8.x.x
-docker --version
-docker compose version
-```
-
----
-
-## 1. Clone the repository
-
-```bash
-git clone https://github.com/mnnam1302/EShop.git
-cd EShop
-```
-
----
-
-## 2. Secret files
-
-Dev infrastructure (postgres, redis, rabbitmq) runs with **plain env var credentials** —
-no secret files are needed to start infra locally.
-
-Secret files are only required when running **containerized app services** (the commented
-services in `docker-compose.dev.yml`). Copy from the example templates if needed:
-
-```powershell
-$secrets = @("rabbitmq_password", "tenancy_connstr", "authorization_connstr")
-foreach ($s in $secrets) {
-    Copy-Item "deploy/secrets/$s.txt.example" "deploy/secrets/$s.txt"
-}
-```
-
-| File | Used for |
-|------|----------|
-| `rabbitmq_password.txt` | RabbitMQ password for containerized app services |
-| `tenancy_connstr.txt` | Tenancy DB connection string |
-| `authorization_connstr.txt` | Authorization DB connection string |
-
-> **Production** additionally requires `postgres_password.txt` and `redis_password.txt` —
-> used by `docker-compose.infra.prod.yml` via Docker secrets.
-
----
-
-## 3. Start infrastructure
-
-Start PostgreSQL, Redis, RabbitMQ, and the Aspire observability dashboard:
-
-```bash
-docker compose -f deploy/docker/docker-compose.infra.dev.yml up -d
-```
-
-Verify all containers are healthy before continuing:
-
-```bash
-docker compose -f deploy/docker/docker-compose.infra.dev.yml ps
-```
-
-All services should show `healthy` or `running`.
-
----
-
-## 4. Run database migrations
-
-The `postgres-init.sql` script runs automatically the first time the postgres container starts — it creates each service's database user and empty database. EF Core migrations then create the schema tables inside those databases.
-
-Run migrations for each service you need (from the **repository root**):
-
-```bash
-# Tenancy
-dotnet ef database update \
-  --project Tenancy/src/EShop.Tenancy.Infrastructure \
-  --startup-project Tenancy/src/EShop.Tenancy.API
-
-# Authorization
-dotnet ef database update \
-  --project Authorization/src/EShop.Authorization.Infrastructure \
-  --startup-project Authorization/src/EShop.Authorization.API
-
-# Inventory
-dotnet ef database update \
-  --project Inventory/src/EShop.Inventory.Infrastructure \
-  --startup-project Inventory/src/EShop.Inventory.API
-```
-
----
-
-## 5. Run services locally (without Docker)
-
-When running `dotnet run` outside a container, secrets are not at `/run/secrets/`. Supply config via environment variables instead:
-
-```powershell
-# Tenancy — PowerShell example
-$env:ConnectionStrings__DefaultConnection  = "Username=tenancy;Password=tenancy-password-dev;Server=localhost;Port=5432;Database=eshop_tenancy"
-$env:MasstransitConfiguration__Host       = "localhost"
-$env:MasstransitConfiguration__Port       = "5672"
-$env:MasstransitConfiguration__Username   = "guest"
-$env:MasstransitConfiguration__Password   = "guest"
-$env:MasstransitConfiguration__VirtualHost = "eshop01012025"
-$env:RedisOptions__Host                  = "localhost:6379"
-$env:ASPNETCORE_ENVIRONMENT               = "Development"
-
-dotnet run --project Tenancy/src/EShop.Tenancy.API
-```
-
----
-
-## 6. Run everything in Docker (full stack)
-
-Start infrastructure and all application services together:
-
-```bash
-docker compose -f deploy/docker/docker-compose.infra.dev.yml -f deploy/docker/docker-compose.dev.yml up -d --build
-```
-
-> `--build` rebuilds service images from source. Omit it on subsequent runs for faster startup.
-
-Stop everything:
-
-```bash
-docker compose -f deploy/docker/docker-compose.infra.dev.yml -f deploy/docker/docker-compose.dev.yml down
-```
-
----
-
-## 7. Access points
-
-| Service | URL | Credential |
-|---------|-----|------------|
-| **API Gateway** | http://localhost:5000 | — |
-| **Tenancy API** | http://localhost:5001 | — (dev only) |
-| **Authorization API** | http://localhost:5002 | — (dev only) |
-| **Aspire Dashboard** | http://localhost:18888 | — |
-| **RabbitMQ Management** | http://localhost:15672 | `guest` / `rabbitmq_password.txt` |
-| **PostgreSQL** | localhost:5432 | `postgres` / `postgres_password.txt` |
-| **Redis** | localhost:6379 | no auth (dev) |
+> **RabbitMQ is pinned to 3.x** for both paths. Upgrading to 4.x is deliberately left
+> as a separate, dedicated change.
 
 ---
 
 ## Troubleshooting
 
-### Containers not starting / unhealthy
+**Containers unhealthy** — inspect logs:
 
 ```bash
-docker logs postgres  --tail 50
-docker logs rabbitmq  --tail 50
-docker logs redis     --tail 50
+docker logs postgres --tail 50
+docker logs rabbitmq --tail 50
+docker compose -f deploy/docker/docker-compose.infra.dev.yml -f deploy/docker/docker-compose.dev.yml logs <service> --tail 80
 ```
 
-### `secret file not found`
-
-Verify all secret `.txt` files exist (not just the `.example` files):
-
-```powershell
-Get-ChildItem deploy/secrets/*.txt
-```
-
-### EF migration fails — "entry point exited without ever building an IHost"
-
-The startup project's DI container fails to build. Common cause: a service is registered that depends on something not yet configured (e.g. `IPublishEndpoint` without MassTransit). Check `DependencyInjection/ServiceCollectionExtensions.cs` in the Infrastructure project.
-
-### Port already in use
+**Port already in use** (e.g. 5432) — stop the conflicting process or change the host
+port mapping in `docker/docker-compose.dev.yml`:
 
 ```powershell
-# Find what is using port 5432
 netstat -ano | findstr :5432
 ```
 
-Stop the conflicting process or change the host port mapping in `docker/docker-compose.dev.yml`.
-
-### Reset everything (clean slate)
+**`network eshop-internal exists but was not created by compose`** — you have leftover
+networks from the old (pre-consolidation) setup. Remove them once and re-run:
 
 ```bash
-# Removes containers AND volumes — all database data will be lost
+docker network rm eshop-internal eshop-public
+```
+
+**Reset everything (clean slate — destroys all data):**
+
+```bash
 docker compose \
   -f deploy/docker/docker-compose.infra.dev.yml \
   -f deploy/docker/docker-compose.dev.yml \
   down -v
 ```
 
-After this, re-run EF migrations (step 4) before starting services again.
+Schema is re-created automatically on the next startup.
+
+> **Note:** the legacy root `docker-compose.yml` / `docker-compose.override.yml` have
+> been removed. Use the `deploy/docker/*` files above as the single source of truth.

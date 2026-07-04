@@ -174,10 +174,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "env", "env", "{0BED3C2E-392
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "scripts", "scripts", "{A71E29AD-F3F9-4F74-AE5F-2412A181DF88}"
 	ProjectSection(SolutionItems) = preProject
-		deploy\scripts\delete-tables.sql = deploy\scripts\delete-tables.sql
 		deploy\scripts\mongodb-init-prod.sh = deploy\scripts\mongodb-init-prod.sh
 		deploy\scripts\mongodb-init.js = deploy\scripts\mongodb-init.js
-		deploy\scripts\postgres-init.sql = deploy\scripts\postgres-init.sql
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "secrets", "secrets", "{43E4DC9B-DBDD-4B45-9AB4-4D7E5F698EA8}"
@@ -206,6 +204,46 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EShop.Finance.Infrastructure", "Finance\src\EShop.Finance.Infrastructure\EShop.Finance.Infrastructure.csproj", "{79677544-C264-497F-8904-31A37930CCAC}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EShop.Finance.Tests", "Finance\tests\EShop.Finance.Tests\EShop.Finance.Tests.csproj", "{129EEFAF-8FB7-45C3-B2B1-55AF18C3E204}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "config", "config", "{E1328B63-98D6-41AC-B804-DD1AA7F4DD67}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "otelcollector", "otelcollector", "{708CE9AF-1C9B-44F6-BEFF-736D7EDCCF30}"
+	ProjectSection(SolutionItems) = preProject
+		deploy\config\otelcollector\config.yaml = deploy\config\otelcollector\config.yaml
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "prometheus", "prometheus", "{967B3B0F-F390-40CB-A75A-1DAA7619BCE2}"
+	ProjectSection(SolutionItems) = preProject
+		deploy\config\prometheus\prometheus_pull.yml = deploy\config\prometheus\prometheus_pull.yml
+		deploy\config\prometheus\prometheus_push.yml = deploy\config\prometheus\prometheus_push.yml
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "grafana", "grafana", "{CEADD110-FD25-4FDA-A564-94CB37E253B6}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "provisioning", "provisioning", "{DAE0DFB5-76AB-42CA-8B11-81EF8FE0DAD8}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "dashboards", "dashboards", "{868FBB4F-CA9F-4566-990B-293ADCF1482D}"
+	ProjectSection(SolutionItems) = preProject
+		deploy\config\grafana\dashboards\17706-aspnet-otel.json = deploy\config\grafana\dashboards\17706-aspnet-otel.json
+		deploy\config\grafana\dashboards\1860-node-exporter-full.json = deploy\config\grafana\dashboards\1860-node-exporter-full.json
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "datasources", "datasources", "{7A260626-1066-4BF2-A6FC-DA6C5E6593E2}"
+	ProjectSection(SolutionItems) = preProject
+		deploy\config\grafana\provisioning\datasources\datasources.yaml = deploy\config\grafana\provisioning\datasources\datasources.yaml
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "dashboards", "dashboards", "{2073A2BA-ED09-49EF-9A4B-EA367035089D}"
+	ProjectSection(SolutionItems) = preProject
+		deploy\config\grafana\provisioning\dashboards\dashboards.yaml = deploy\config\grafana\provisioning\dashboards\dashboards.yaml
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "postgres", "postgres", "{44DD385B-FBC9-4C73-8E36-6C13AD79818E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "init-scripts", "init-scripts", "{CB40ABE6-83CC-48B1-B445-754D99C7F286}"
+	ProjectSection(SolutionItems) = preProject
+		deploy\postgres\init-scripts\init.sql = deploy\postgres\init-scripts\init.sql
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -494,6 +532,16 @@ Global
 		{45A343A4-FD3B-4F40-A494-8334A1D85CBA} = {333E461D-91C4-4943-9CCC-2BC02D82ED3F}
 		{79677544-C264-497F-8904-31A37930CCAC} = {333E461D-91C4-4943-9CCC-2BC02D82ED3F}
 		{129EEFAF-8FB7-45C3-B2B1-55AF18C3E204} = {A07E96D2-DBF2-460F-8CAE-154B284222E0}
+		{E1328B63-98D6-41AC-B804-DD1AA7F4DD67} = {84C560F2-F8FF-410D-A601-60CB860E981B}
+		{708CE9AF-1C9B-44F6-BEFF-736D7EDCCF30} = {E1328B63-98D6-41AC-B804-DD1AA7F4DD67}
+		{967B3B0F-F390-40CB-A75A-1DAA7619BCE2} = {E1328B63-98D6-41AC-B804-DD1AA7F4DD67}
+		{CEADD110-FD25-4FDA-A564-94CB37E253B6} = {E1328B63-98D6-41AC-B804-DD1AA7F4DD67}
+		{DAE0DFB5-76AB-42CA-8B11-81EF8FE0DAD8} = {CEADD110-FD25-4FDA-A564-94CB37E253B6}
+		{868FBB4F-CA9F-4566-990B-293ADCF1482D} = {CEADD110-FD25-4FDA-A564-94CB37E253B6}
+		{7A260626-1066-4BF2-A6FC-DA6C5E6593E2} = {DAE0DFB5-76AB-42CA-8B11-81EF8FE0DAD8}
+		{2073A2BA-ED09-49EF-9A4B-EA367035089D} = {DAE0DFB5-76AB-42CA-8B11-81EF8FE0DAD8}
+		{44DD385B-FBC9-4C73-8E36-6C13AD79818E} = {84C560F2-F8FF-410D-A601-60CB860E981B}
+		{CB40ABE6-83CC-48B1-B445-754D99C7F286} = {44DD385B-FBC9-4C73-8E36-6C13AD79818E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {BB890EFB-EE36-4A0E-A948-F28A53D375E6}

@@ -18,7 +18,7 @@ Content-Type: application/json
 
 # Extract the access token from login response
 # After running the login request above, copy the accessToken value and paste it below
-@accessToken = eyJhbGciOiJSUzI1NiIsImtpZCI6Ijg1ZDQ1MGJkLTVhY2UtNDdhOC1iZjY5LTAxYzM3ZGMwMjFiMiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIzNzhkMTc0Ni04ZTk3LTQ5ODQtYjc0YS0yOTdhMTRiMzM2OTkiLCJzdWIiOiJvd25lci1hY2NvdW50QGVzaG9wLXN0YWdpbmciLCJ0ZW5hbnRfaWQiOiJlc2hvcC1zdGFnaW5nIiwia2V5X2lkIjoiODVkNDUwYmQtNWFjZS00N2E4LWJmNjktMDFjMzdkYzAyMWIyIiwibmJmIjoxNzgyMDI4OTA4LCJleHAiOjE3ODIwMzI1MDgsImlhdCI6MTc4MjAyODkwOCwiaXNzIjoiaHR0cDovL2F1dGhvcml6YXRpb24iLCJhdWQiOiJodHRwOi8vYXV0aG9yaXphdGlvbiJ9.oKYjLk0yj8-4zVPHwmNNUeQN59FUoDgQevshWqDgW5UEF96zNB2DyVIe2hB3Chs3az1gytKBUhxr_V5QBOBf0kZ-0Brjm6uwRX67829DlnkRDY8k5H5IsUx2VhJrL87HAUrcUzXiNWnhr8kNG6_in8baK1b8BHyAHSwbwh8MYwemwp8NBE2QLd5NFeRDQrDZM6oKv2IiDkhjqDwRd9tLrGgNszMsCAeDNQeN7ENdJsOSBJeXEjYkrDWEeg82nBsr02Pi42Eed1WM21b_6LSaEDNgDL1BPa41ZfxovS7JLRQxdfqrOU__oM15K3rPG-8l9HtHGAuMhBEFHAe6otiFMg
+@accessToken = eyJhbGciOiJSUzI1NiIsImtpZCI6IjhmNjA4OTY1LWIxODItNDBmNy04M2ZkLWYyZjA4ZGFhMjBhMCIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI4MWMwY2ViZS0yNDdhLTQ1OGItYjQ2Ny1iMzlhZjIzODcxNzMiLCJzdWIiOiJvd25lci1hY2NvdW50QGVzaG9wLXN0YWdpbmciLCJ0ZW5hbnRfaWQiOiJlc2hvcC1zdGFnaW5nIiwia2V5X2lkIjoiOGY2MDg5NjUtYjE4Mi00MGY3LTgzZmQtZjJmMDhkYWEyMGEwIiwibmJmIjoxNzgzMTU5ODEzLCJleHAiOjE3ODMxNjM0MTMsImlhdCI6MTc4MzE1OTgxMywiaXNzIjoiaHR0cDovL2F1dGhvcml6YXRpb24iLCJhdWQiOiJodHRwOi8vYXV0aG9yaXphdGlvbiJ9.p9ud9iNtGZJ7zCpJE0VcMvztDY-oFOrLiQ4XlmIOKEeKSnJL3_irSNLCxzqlYtpZAhMau0yvdsHdOt-CyRDMQdE3sECEXdE4rPLfQTqfi5aNLOYTiPeMr03yhh72gKijhHCkmifalewrDK1hZUH2OIAAb5-Z3D3G3-zB64OKyx3mymFwgNhMGrH29SO8fxpj4MGwF7iMlKEEZT-Fs2MOTSKx6yxMpg11hekcAn-vAS8OuNaMstybym67fKXzNQuyN1bnic99t3aZ-fITQCvPHk2yj9DKSRp1Gm_1N_o1wqyZigMN0rDLvkHkoNIUQYe-2GheI05-wKmBaUe96GcHLA
 
 ###
 
@@ -44,8 +44,8 @@ Content-Type: application/json
 Authorization: Bearer {{accessToken}}
 
 {
-  "productId": "911b2c0b-7924-484a-ad0a-fbd9fbf0b08a",
-  "variantId": "214fe0df-9941-46f8-bb45-16ce39d9f3e6",
+  "productId": "1aac2bed-f06d-49f3-98f4-422402266dbe",
+  "variantId": "28956cb9-2a93-42b7-96b5-f82916d1c388",
   "sku": "SHIRT-GRN-S",
   "stockAvailable": 50,
   "minimumStock": 0
@@ -53,15 +53,29 @@ Authorization: Bearer {{accessToken}}
 
 ###
 
+POST {{Inventory_URL}}/api/v1/inventories
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "productId": "1aac2bed-f06d-49f3-98f4-422402266dbe",
+  "variantId": "3690be10-3fc4-4071-ba89-cb06273bb577",
+  "sku": "SHIRT-BLU-L",
+  "stockAvailable": 100,
+  "minimumStock": 0
+}
+
+###
+
 # Get Inventories by Product ID
-GET {{Inventory_URL}}/api/v1/inventories?productId=911b2c0b-7924-484a-ad0a-fbd9fbf0b08a
+GET {{Inventory_URL}}/api/v1/inventories?productId=1aac2bed-f06d-49f3-98f4-422402266dbe
 Accept: application/json
 Authorization: Bearer {{accessToken}}
 
 ###
 
 # Get Inventories by Product ID with Pagination
-GET {{Inventory_URL}}/api/v1/inventories?productId=3fa85f64-5717-4562-b3fc-2c963f66afa6&pageIndex=1&pageSize=20
+GET {{Inventory_URL}}/api/v1/inventories?productId=1aac2bed-f06d-49f3-98f4-422402266dbe&pageIndex=1&pageSize=20
 Accept: application/json
 Authorization: Bearer {{accessToken}}
 
@@ -69,12 +83,12 @@ Authorization: Bearer {{accessToken}}
 
   
 # Add inventory's stock available from Postgres to Redis
-PATCH {{Inventory_URL}}/api/v1/inventories
+POST {{Inventory_URL}}/api/v1/inventories/warn-up
 Content-Type: application/json
 Authorization: Bearer {{accessToken}}
 
 {
-  "variantId": "214fe0df-9941-46f8-bb45-16ce39d9f3e6"
+  "variantId": "28956cb9-2a93-42b7-96b5-f82916d1c388"
 }
 
 ###

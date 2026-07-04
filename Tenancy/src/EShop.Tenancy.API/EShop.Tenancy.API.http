@@ -1,0 +1,63 @@
+@Authorization_URL = http://localhost:5002
+@Tenancy_URL = http://localhost:5001
+
+# ============================================
+# 1. Login (system account)
+# ============================================
+POST {{Authorization_URL}}/api/v1/auth/login
+Content-Type: application/json
+
+{
+    "username": "system",
+    "password": "System.eshoP-123"
+}
+
+###
+
+@accessToken = eyJhbGciOiJSUzI1NiIsImtpZCI6IjBiYzUzM2RjLTg3NjAtNDQxZC05N2YwLWUxMGZlZDNjYzI2YyIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJmOTQ2Yjg0Ny1iMzFjLTRlMWEtOGM2My02YjNiMTg0MzE1N2QiLCJzdWIiOiJzeXN0ZW0iLCJ0ZW5hbnRfaWQiOiJzeXN0ZW0iLCJrZXlfaWQiOiIwYmM1MzNkYy04NzYwLTQ0MWQtOTdmMC1lMTBmZWQzY2MyNmMiLCJuYmYiOjE3ODMxNTM4OTksImV4cCI6MTc4MzE1NzQ5OSwiaWF0IjoxNzgzMTUzODk5LCJpc3MiOiJodHRwOi8vYXV0aG9yaXphdGlvbiIsImF1ZCI6Imh0dHA6Ly9hdXRob3JpemF0aW9uIn0.WXD9_CkR4gMJhmRqIRGt9asE4V_JNJvPAl3v8YoTfXZMBfpGNCqwi_ezLQco-i_OAM07m2FIeUcVWY5AKByrsJ-b51UDVNqnxAD40RFLs4_IiGy92qWFOm950kj_x1Nsqxt-ZV8PNtTqxw49sbjtLKBJ3WzLMO9v0TypltnCGYMWtygyyKc2mQutVQp_sPEa7PcGybMhRd_Hu-dmUeaTjrSIXi2DsXJG2acf2lTKTYhaPVHqtOc-J7LrLEWx_hVTSJnwHqjmrSHrxWzARRE6L0c_vo7w8gMA31cnCb-m3FLhCvZ65EWtxRuqGMFCBvaXIPC85UtcUaU8_6W1A6ZtzA
+
+###
+
+# ============================================
+# 2. System Account setup tenant onboarding
+# ============================================
+POST {{Tenancy_URL}}/api/v1/tenants
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+    "id": "eshop-staging",
+    "name": "eShop",
+    "ownerUsername": "owner-account@eshop-staging",
+    "ownerEmail": "nam608072@gmail.com",
+    "phoneNumber": "0969988210",
+    "description": "Root Organization"
+}
+###
+
+# ============================================
+# 3. Verfication (tenant's owner account)
+# ============================================
+POST {{Authorization_URL}}/api/v1/users/owner-account@eshop-staging/confirmInvitation
+Content-Type: application/json
+
+{
+    "temporaryPassword": "fQvHD4Yn5)L5",
+    "newPassword": "owner.eshop-staing-123"
+}
+
+###
+
+# ============================================
+# 2. Login (system account)
+# ============================================
+POST {{Authorization_URL}}/api/v1/auth/login
+Content-Type: application/json
+
+{
+    "username": "owner-account@eshop-staging",
+    "password": "owner.eshop-staing-123"
+}
+
+
+###

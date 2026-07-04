@@ -1,11 +1,12 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.ServiceDiscovery;
 using OpenTelemetry;
 using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 
 namespace Microsoft.Extensions.Hosting;
@@ -53,6 +54,13 @@ public static class Extensions
         });
 
         builder.Services.AddOpenTelemetry()
+            .ConfigureResource(resource =>
+            {
+                if (string.IsNullOrWhiteSpace(builder.Configuration["OTEL_SERVICE_NAME"]))
+                {
+                    resource.AddService(builder.Environment.ApplicationName);
+                }
+            })
             .WithMetrics(metrics =>
             {
                 metrics.AddAspNetCoreInstrumentation()
@@ -65,8 +73,8 @@ public static class Extensions
                     .AddAspNetCoreInstrumentation(tracing =>
                         // Exclude health check requests from tracing
                         tracing.Filter = context =>
-                            !context.Request.Path.StartsWithSegments(HealthEndpointPath)
-                            && !context.Request.Path.StartsWithSegments(AlivenessEndpointPath)
+                            !context.Request.Path.StartsWithSegments(HealthEndpointPath) &&
+                            !context.Request.Path.StartsWithSegments(AlivenessEndpointPath)
                     )
                     // Uncomment the following line to enable gRPC instrumentation (requires the OpenTelemetry.Instrumentation.GrpcNetClient package)
                     //.AddGrpcClientInstrumentation()
@@ -81,12 +89,27 @@ public static class Extensions
 
     private static TBuilder AddOpenTelemetryExporters<TBuilder>(this TBuilder builder) where TBuilder : IHostApplicationBuilder
     {
-        var useOtlpExporter = !string.IsNullOrWhiteSpace(builder.Configuration["OTEL_EXPORTER_OTLP_ENDPOINT"]);
+        var settings = builder.Configuration.GetSection(OtlpExporterSettings.SectionName).Get<OtlpExporterSettings>()
+            ?? new OtlpExporterSettings();
 
-        if (useOtlpExporter)
+        var endpoint = builder.Configuration["OTEL_EXPORTER_OTLP_ENDPOINT"] ?? settings.Endpoint;
+
+        if (string.IsNullOrWhiteSpace(endpoint))
         {
-            builder.Services.AddOpenTelemetry().UseOtlpExporter();
+            return builder;
         }
+
+        var protocol = builder.Configuration["OTEL_EXPORTER_OTLP_PROTOCOL"] ?? settings.Protocol;
+        var headers = builder.Configuration["OTEL_EXPORTER_OTLP_HEADERS"] ?? BuildApiKeyHeader(settings.ApiKey);
+
+        builder.Configuration.AddInMemoryCollection(new Dictionary<string, string?>
+        {
+            ["OTEL_EXPORTER_OTLP_ENDPOINT"] = endpoint,
+            ["OTEL_EXPORTER_OTLP_PROTOCOL"] = protocol,
+            ["OTEL_EXPORTER_OTLP_HEADERS"] = headers,
+        });
+
+        builder.Services.AddOpenTelemetry().UseOtlpExporter();
 
         // Uncomment the following lines to enable the Azure Monitor exporter (requires the Azure.Monitor.OpenTelemetry.AspNetCore package)
         //if (!string.IsNullOrEmpty(builder.Configuration["APPLICATIONINSIGHTS_CONNECTION_STRING"]))
@@ -97,6 +120,9 @@ public static class Extensions
 
         return builder;
     }
+
+    private static string? BuildApiKeyHeader(string? apiKey) =>
+        string.IsNullOrWhiteSpace(apiKey) ? null : $"x-otlp-api-key={apiKey}";
 
     public static TBuilder AddDefaultHealthChecks<TBuilder>(this TBuilder builder) where TBuilder : IHostApplicationBuilder
     {

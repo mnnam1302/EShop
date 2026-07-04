@@ -1,135 +1,201 @@
+using EShop.AppHost.OpenTelemetryCollector;
+
 namespace EShop.AppHost.Extensions;
 
 public static class ExternalServiceRegistrationExtensions
 {
-    public static IDistributedApplicationBuilder AddExternalServices(this IDistributedApplicationBuilder builder)
+    public static IDistributedApplicationBuilder AddExternalServices(this IDistributedApplicationBuilder builder, bool useExternalObservability)
     {
-        return AddServices(builder, true);
+        return AddServices(
+            builder,
+            useExternalInfrastructure: true,
+            useExternalObservability);
     }
 
-    public static IDistributedApplicationBuilder AddServiceDefaults(this IDistributedApplicationBuilder builder)
+    public static IDistributedApplicationBuilder AddServiceDefaults(this IDistributedApplicationBuilder builder, bool useExternalObservability)
     {
-        return AddServices(builder, false);
+        return AddServices(
+            builder,
+            useExternalInfrastructure: false,
+            useExternalObservability);
     }
 
-    private static IDistributedApplicationBuilder AddServices(IDistributedApplicationBuilder builder, bool useExternalService)
+    private static IDistributedApplicationBuilder AddServices(IDistributedApplicationBuilder builder, bool useExternalInfrastructure, bool useExternalObservability)
     {
         #region Observability
 
-        //var prometheus = builder.AddContainer(ResourceNames.Prometheus, "prom/prometheus", "v3.5.0")
-        //    .WithBindMount("../Deployment/config/prometheus/prometheus.yml", "/etc/prometheus/prometheus.yml", isReadOnly: true)
-        //    .WithArgs("--web.enable-otlp-receiver", "--config.file=/etc/prometheus/prometheus.yml")
-        //    .WithHttpEndpoint(targetPort: 9090, name: "http");
+        Action<IResourceBuilder<IResourceWithEnvironment>>? applyGrafanaUrl;
 
-        //var grafana = builder.AddContainer(ResourceNames.Grafana, "grafana/grafana")
-        //    .WithBindMount("../Deployment/config/grafana/config", "/etc/grafana", isReadOnly: true)
-        //    .WithBindMount("../Deployment/config/grafana/dashboards", "/var/lib/grafana/dashboards", isReadOnly: true)
-        //    .WithEnvironment("PROMETHEUS_ENDPOINT", prometheus.GetEndpoint("http"))
-        //    .WithHttpEndpoint(targetPort: 3000, name: "http");
+        if (useExternalObservability)
+        {
+            var externalGrafana = builder.AddConnectionString(ResourceNames.Grafana);
+            applyGrafanaUrl = resource => resource.WithEnvironment("GRAFANA_URL", externalGrafana);
+        }
+        else
+        {
+            // Push approach: OTelCollector + Prometheus
+            //var prometheus = builder.AddContainer(ResourceNames.Prometheus, "prom/prometheus", "v3.5.0")
+            //    .WithBindMount("../deploy/config/prometheus/prometheus_push.yml", "/etc/prometheus/prometheus.yml", isReadOnly: true)
+            //    .WithArgs(
+            //        "--web.enable-otlp-receiver",           // enable to expose the endpoint POST /api/v1/otlp.
+            //        "--config.file=/etc/prometheus/prometheus.yml",
+            //        "--storage.tsdb.retention.time=30d",    // keep 30 days of data
+            //        "--storage.tsdb.path=/prometheus"       // explicit data directory
+            //    )
+            //    .WithHttpEndpoint(targetPort: 9090, name: "http");
 
-        //builder.AddOpenTelemetryCollector(ResourceNames.OpenTelemetryCollector, @"..\Deployment\config\otelcollector\config.yaml")
-        //       .WithEnvironment("PROMETHEUS_ENDPOINT", $"{prometheus.GetEndpoint("http")}/api/v1/otlp");
+            // Pull approach: OTelCollector + Prometheus
+            // Auto add environment variable "OTEL_EXPORTER_OTLP_ENDPOINT" into microservice resources to enable OTel configuration
+            var otelCollector = builder.AddOpenTelemetryCollector(ResourceNames.OpenTelemetryCollector, @"..\deploy\config\otelcollector\config.yaml");
+
+            var prometheus = builder.AddContainer(ResourceNames.Prometheus, "prom/prometheus", "v3.5.0")
+                .WithBindMount("../deploy/config/prometheus/prometheus_pull.yml", "/etc/prometheus/prometheus.yml", isReadOnly: true)
+                .WithArgs("--config.file=/etc/prometheus/prometheus.yml", "--storage.tsdb.retention.time=30d", "--storage.tsdb.path=/prometheus")
+                .WithHttpEndpoint(targetPort: 9090, name: "http")
+                .WaitFor(otelCollector);
+
+            builder.AddContainer("node-exporter", "prom/node-exporter", "v1.8.2")
+                .WithBindMount("/proc", "/host/proc", isReadOnly: true)
+                .WithBindMount("/sys", "/host/sys", isReadOnly: true)
+                .WithBindMount("/", "/rootfs", isReadOnly: true)
+                .WithArgs(
+                    "--path.procfs=/host/proc",
+                    "--path.rootfs=/rootfs",
+                    "--path.sysfs=/host/sys",
+                    "--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($|/)"
+                )
+                .WithHttpEndpoint(targetPort: 9100, name: "http")
+                .WaitFor(prometheus);
+
+            var grafana = builder.AddContainer(ResourceNames.Grafana, "grafana/grafana")
+                .WithBindMount("../deploy/config/grafana/provisioning", "/etc/grafana/provisioning", isReadOnly: true)
+                .WithBindMount("../deploy/config/grafana/dashboards", "/var/lib/grafana/dashboards", isReadOnly: true)
+                .WithEnvironment("PROMETHEUS_ENDPOINT", prometheus.GetEndpoint("http"))
+                .WithHttpEndpoint(targetPort: 3000, name: "http")
+                .WaitFor(prometheus);
+
+            var grafanaEndpoint = grafana.GetEndpoint("http");
+            applyGrafanaUrl = resource => resource.WithEnvironment("GRAFANA_URL", grafanaEndpoint);
+        }
 
         #endregion Observability
 
         #region Infrastructure resources
 
-        var pathToDbInitDirectory = Path.GetFullPath(Path.Combine(Environment.CurrentDirectory, @"..\Deployment\Scripts\"));
-
-        var redis = useExternalService
+        var redis = useExternalInfrastructure
             ? builder.AddConnectionString(ResourceNames.Redis)
             : builder
                 .AddRedis(ResourceNames.Redis)
                 .WithImageTag("7.4.7")
-                .WithDataVolume("eshop-redis-data")
+                .WithDataVolume("eshop-redis")
                 .WithRedisInsight()
                 .WithLifetime(ContainerLifetime.Persistent);
 
-        var rabbitmq = useExternalService
+        var rabbitmq = useExternalInfrastructure
             ? builder.AddConnectionString(ResourceNames.RabbitMq)
             : builder
                 .AddRabbitMQ(ResourceNames.RabbitMq)
-                .WithImageTag("4.1")
-                .WithDataVolume("eshop-rabbitmq-data")
+                .WithImageTag("3")
+                .WithDataVolume("eshop-rabbitmq")
                 .WithLifetime(ContainerLifetime.Persistent)
                 .WithManagementPlugin();
 
-        IResourceBuilder<IResourceWithConnectionString> tenancyDatabase;
-        IResourceBuilder<IResourceWithConnectionString> authorizationDatabase;
-        IResourceBuilder<IResourceWithConnectionString> catalogDatabase;
-        IResourceBuilder<IResourceWithConnectionString> catalogMongoDatabase;
-        IResourceBuilder<IResourceWithConnectionString> inventoryDatabase;
-        IResourceBuilder<IResourceWithConnectionString> orderDatabase;
-        IResourceBuilder<IResourceWithConnectionString> financeDatabase;
+        #endregion Infrastructure resources
 
-        if (useExternalService)
+        if (useExternalInfrastructure)
         {
-            var postgresServer = builder.AddConnectionString(ResourceNames.PostgreSql);
-            var mongoServer = builder.AddConnectionString(ResourceNames.MongoDb);
+            var postgres = builder.AddConnectionString(ResourceNames.PostgreSql);
 
-            tenancyDatabase = builder.AddConnectionString("tenancyDatabase")
-                .WithParentRelationship(postgresServer);
-            authorizationDatabase = builder.AddConnectionString("authorizationDatabase")
-                .WithParentRelationship(postgresServer);
-            catalogDatabase = builder.AddConnectionString("catalogDatabase")
-                .WithParentRelationship(postgresServer);
-            inventoryDatabase = builder.AddConnectionString("inventoryDatabase")
-                .WithParentRelationship(postgresServer);
-            orderDatabase = builder.AddConnectionString("orderDatabase")
-                .WithParentRelationship(postgresServer);
-            financeDatabase = builder.AddConnectionString("financeDatabase")
-                .WithParentRelationship(postgresServer);
+            var tenancyDatabase = builder.AddConnectionString("tenancyDatabase").WithParentRelationship(postgres);
+            var authorizationDatabase = builder.AddConnectionString("authorizationDatabase").WithParentRelationship(postgres);
 
-            catalogMongoDatabase = builder.AddConnectionString("catalogMongoDatabase")
-                .WithParentRelationship(mongoServer);
+            var catalogWriteDatabase = builder.AddConnectionString("catalogDatabase").WithParentRelationship(postgres);
+            var mongoDb = builder.AddConnectionString(ResourceNames.MongoDb);
+            var catalogReadDatabase = builder.AddConnectionString("catalogMongoDatabase").WithParentRelationship(mongoDb);
+
+            var inventoryDatabase = builder.AddConnectionString("inventoryDatabase").WithParentRelationship(postgres);
+            var orderDatabase = builder.AddConnectionString("orderDatabase").WithParentRelationship(postgres);
+            var financeDatabase = builder.AddConnectionString("financeDatabase").WithParentRelationship(postgres);
+
+            RegisterMicroservices(
+                builder,
+                useExternalInfrastructure,
+                redis,
+                rabbitmq,
+                tenancyDatabase,
+                authorizationDatabase,
+                catalogWriteDatabase,
+                catalogReadDatabase,
+                inventoryDatabase,
+                orderDatabase,
+                financeDatabase,
+                applyGrafanaUrl);
         }
         else
         {
-            var postgres = builder.AddPostgres(ResourceNames.PostgreSql, port: 5432)
+            var mongodbContainer = builder.AddMongoDB(ResourceNames.MongoDb)
+                .WithImageTag("6.0")
+                .WithDataVolume("eshop-mongodb")
+                .WithLifetime(ContainerLifetime.Persistent);
+
+            var pathToDbInitDirectory = Path.GetFullPath(Path.Combine(Environment.CurrentDirectory, @"..\deploy\postgres\init-scripts\"));
+
+            var postgresContainer = builder.AddPostgres(ResourceNames.PostgreSql, port: 5432)
                 .WithImageTag("17.0")
-                .WithDataVolume("ehop-data")
+                .WithDataVolume("eshop-data")
                 .WithInitFiles(pathToDbInitDirectory)
                 .WithArgs("-c", "max_connections=200")
-                .WithPgAdmin(rb =>
-                {
-                    rb.WithLifetime(ContainerLifetime.Persistent);
-                    rb.WithHostPort(5442);
-                })
                 .WithLifetime(ContainerLifetime.Persistent);
 
-            var mongodb = builder
-                .AddMongoDB(ResourceNames.MongoDb)
-                .WithImageTag("6.0")
-                .WithDataVolume("eshop-mongodb-data")
-                .WithLifetime(ContainerLifetime.Persistent);
+            var tenancyDatabase = postgresContainer.AddDatabase("tenancyDatabase", "eshop_tenancy");
+            var authorizationDatabase = postgresContainer.AddDatabase("authorizationDatabase", "eshop_authorization");
 
-            tenancyDatabase = postgres.AddDatabase("tenancyDatabase", "eshop_tenancy");
-            authorizationDatabase = postgres.AddDatabase("authorizationDatabase", "eshop_authorization");
-            catalogDatabase = postgres.AddDatabase("catalogDatabase", "eshop_catalog");
-            inventoryDatabase = postgres.AddDatabase("inventoryDatabase", "eshop_inventory");
-            orderDatabase = postgres.AddDatabase("orderDatabase", "eshop_order");
-            financeDatabase = postgres.AddDatabase("financeDatabase", "eshop_finance");
-            catalogMongoDatabase = mongodb.AddDatabase("catalogMongoDatabase", "eshop-catalog");
+            var catalogWriteDatabase = postgresContainer.AddDatabase("catalogDatabase", "eshop_catalog");
+            var catalogReadDatabase = mongodbContainer.AddDatabase("catalogMongoDatabase", "eshop-catalog");
+
+            var inventoryDatabase = postgresContainer.AddDatabase("inventoryDatabase", "eshop_inventory");
+            var orderDatabase = postgresContainer.AddDatabase("orderDatabase", "eshop_order");
+            var financeDatabase = postgresContainer.AddDatabase("financeDatabase", "eshop_finance");
+
+            RegisterMicroservices(
+                builder,
+                useExternalInfrastructure,
+                redis,
+                rabbitmq,
+                tenancyDatabase,
+                authorizationDatabase,
+                catalogWriteDatabase,
+                catalogReadDatabase,
+                inventoryDatabase,
+                orderDatabase,
+                financeDatabase,
+                applyGrafanaUrl);
         }
 
-        #endregion Infrastructure resources
+        return builder;
+    }
 
+    private static void RegisterMicroservices(
+        IDistributedApplicationBuilder builder,
+        bool useExternalService,
+        IResourceBuilder<IResourceWithConnectionString> redis,
+        IResourceBuilder<IResourceWithConnectionString> rabbitmq,
+        IResourceBuilder<IResourceWithConnectionString> tenancyDatabase,
+        IResourceBuilder<IResourceWithConnectionString> authorizationDatabase,
+        IResourceBuilder<IResourceWithConnectionString> catalogDatabase,
+        IResourceBuilder<IResourceWithConnectionString> catalogMongoDatabase,
+        IResourceBuilder<IResourceWithConnectionString> inventoryDatabase,
+        IResourceBuilder<IResourceWithConnectionString> orderDatabase,
+        IResourceBuilder<IResourceWithConnectionString> financeDatabase,
+        Action<IResourceBuilder<IResourceWithEnvironment>>? applyGrafanaUrl)
+    {
         #region Microservices
 
         var tenancy = builder.AddProject<Projects.EShop_Tenancy_API>(ResourceNames.TenancyApi)
             .WithExternalServiceMode(useExternalService)
-            //.WithEnvironment("GRAFANA_URL", grafana.GetEndpoint("http")) // add the same for other microservices
             .WithReference(tenancyDatabase)
             .WithReference(redis)
             .WithReference(rabbitmq);
-
-        if (!useExternalService)
-        {
-            tenancy
-                .WaitFor(tenancyDatabase)
-                .WaitFor(redis)
-                .WaitFor(rabbitmq);
-        }
 
         var authorization = builder.AddProject<Projects.EShop_Authorization_API>(ResourceNames.AuthorizationApi)
             .WithExternalServiceMode(useExternalService)
@@ -137,27 +203,11 @@ public static class ExternalServiceRegistrationExtensions
             .WithReference(redis)
             .WithReference(rabbitmq);
 
-        if (!useExternalService)
-        {
-            authorization
-                .WaitFor(authorizationDatabase)
-                .WaitFor(redis)
-                .WaitFor(rabbitmq);
-        }
-
         var catalogApplication = builder.AddProject<Projects.EShop_Catalog_Application>(ResourceNames.CatalogWriteApi)
             .WithExternalServiceMode(useExternalService)
             .WithReference(catalogDatabase)
             .WithReference(redis)
             .WithReference(rabbitmq);
-
-        if (!useExternalService)
-        {
-            catalogApplication
-                .WaitFor(catalogDatabase)
-                .WaitFor(redis)
-                .WaitFor(rabbitmq);
-        }
 
         var catalogReadModel = builder.AddProject<Projects.EShop_Catalog_ReadModels_MongoDb>(ResourceNames.CatalogReadApi)
             .WithExternalServiceMode(useExternalService)
@@ -165,42 +215,17 @@ public static class ExternalServiceRegistrationExtensions
             .WithReference(redis)
             .WithReference(rabbitmq);
 
-        if (!useExternalService)
-        {
-            catalogReadModel
-                .WaitFor(catalogMongoDatabase)
-                .WaitFor(redis)
-                .WaitFor(rabbitmq)
-                .WaitFor(catalogApplication);
-        }
-
         var inventory = builder.AddProject<Projects.EShop_Inventory_API>(ResourceNames.InventoryApi)
             .WithExternalServiceMode(useExternalService)
             .WithReference(inventoryDatabase)
             .WithReference(redis)
             .WithReference(rabbitmq);
 
-        if (!useExternalService)
-        {
-            inventory
-                .WaitFor(inventoryDatabase)
-                .WaitFor(redis)
-                .WaitFor(rabbitmq);
-        }
-
         var order = builder.AddProject<Projects.EShop_Order_API>(ResourceNames.OrderApi)
             .WithExternalServiceMode(useExternalService)
             .WithReference(orderDatabase)
             .WithReference(redis)
             .WithReference(rabbitmq);
-
-        if (!useExternalService)
-        {
-            order
-                .WaitFor(orderDatabase)
-                .WaitFor(redis)
-                .WaitFor(rabbitmq);
-        }
 
         var finance = builder.AddProject<Projects.EShop_Finance_API>(ResourceNames.FinanceApi)
             .WithExternalServiceMode(useExternalService)
@@ -210,22 +235,61 @@ public static class ExternalServiceRegistrationExtensions
 
         if (!useExternalService)
         {
-            finance
-                .WaitFor(financeDatabase)
+            tenancy.WaitFor(tenancyDatabase)
+                .WaitFor(redis)
+                .WaitFor(rabbitmq);
+
+            authorization.WaitFor(authorizationDatabase)
+                .WaitFor(redis)
+                .WaitFor(rabbitmq);
+
+            catalogApplication.WaitFor(catalogDatabase)
+                .WaitFor(redis)
+                .WaitFor(rabbitmq);
+
+            catalogReadModel
+                .WaitFor(catalogMongoDatabase)
+                .WaitFor(redis)
+                .WaitFor(rabbitmq)
+                .WaitFor(catalogApplication);
+
+            inventory.WaitFor(inventoryDatabase)
+                .WaitFor(redis)
+                .WaitFor(rabbitmq);
+
+            order.WaitFor(orderDatabase)
+                .WaitFor(redis)
+                .WaitFor(rabbitmq);
+
+            finance.WaitFor(financeDatabase)
                 .WaitFor(redis)
                 .WaitFor(rabbitmq);
         }
 
-        #endregion Microservices
+        if (applyGrafanaUrl is not null)
+        {
+            applyGrafanaUrl(tenancy);
+            applyGrafanaUrl(authorization);
+            applyGrafanaUrl(catalogApplication);
+            applyGrafanaUrl(catalogReadModel);
+            applyGrafanaUrl(inventory);
+            applyGrafanaUrl(order);
+            applyGrafanaUrl(finance);
+        }
 
-        #region Api Gateway
+        #endregion
+
+        #region API Gateway - YARP Reserve Proxy
 
         //var apiGateway = builder.AddProject<Projects.EShop_ApiGateway>(ResourceNames.ApiGateway)
         //    .WithReference(redis)
         //    .WithReference(tenancy)
         //    .WithReference(authorization)
         //    .WithReference(catalogApplication)
-        //    .WithReference(catalogReadModel);
+        //    .WithReference(catalogReadModel)
+        //    .WithReference(inventory)
+        //    .WithReference(order)
+        //    .WithReference(finance);
 
         //if (!useExternalService)
         //{
@@ -234,12 +298,13 @@ public static class ExternalServiceRegistrationExtensions
         //        .WaitFor(tenancy)
         //        .WaitFor(authorization)
         //        .WaitFor(catalogApplication)
-        //        .WaitFor(catalogReadModel);
+        //        .WaitFor(catalogReadModel)
+        //        .WaitFor(inventory)
+        //        .WaitFor(order)
+        //        .WaitFor(finance);
         //}
 
-        #endregion Api Gateway
-
-        return builder;
+        #endregion
     }
 
     public static IResourceBuilder<T> WithExternalServiceMode<T>(this IResourceBuilder<T> builder, bool isExternal) where T : IResourceWithEnvironment

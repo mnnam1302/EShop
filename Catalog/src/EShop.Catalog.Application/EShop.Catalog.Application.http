@@ -1,0 +1,179 @@
+@Authorization_URL = http://localhost:5002
+@Catalog_Write_Url = http://localhost:5003
+@Catalog_Read_Url = http://localhost:5004
+
+# ============================================
+# 1. Login tenant account
+# ============================================
+
+POST {{Authorization_URL}}/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "username": "owner-account@eshop-staging",
+  "password": "owner.eshop-staing-123"
+}
+
+###
+
+@accessToken = eyJhbGciOiJSUzI1NiIsImtpZCI6IjhmNjA4OTY1LWIxODItNDBmNy04M2ZkLWYyZjA4ZGFhMjBhMCIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIyNGQ4MTdkMy02MmNmLTQ4YmYtYjIxOS0zMTc5ODg1ODQ1NmQiLCJzdWIiOiJvd25lci1hY2NvdW50QGVzaG9wLXN0YWdpbmciLCJ0ZW5hbnRfaWQiOiJlc2hvcC1zdGFnaW5nIiwia2V5X2lkIjoiOGY2MDg5NjUtYjE4Mi00MGY3LTgzZmQtZjJmMDhkYWEyMGEwIiwibmJmIjoxNzgzMTU3OTkyLCJleHAiOjE3ODMxNjE1OTIsImlhdCI6MTc4MzE1Nzk5MiwiaXNzIjoiaHR0cDovL2F1dGhvcml6YXRpb24iLCJhdWQiOiJodHRwOi8vYXV0aG9yaXphdGlvbiJ9.liPtqa-i2H5WNgRMb836EgwzhUp1muTVGilewFWgYd4XqEK6ttCd754SFKY-wG2ipV0vb4ZHRSl28SLiVt5LzB5upsbpqFVUsi0261nNUO824HvEsJnHQWDqsmkirpiHvhWoNeorG98r3l1SACTz6WmCCxoUNKQRlDF6ZoNGK1-oZd9RoB6e3gHdHHHzNIab-9BjNSzPZFq1kVLj4DGUcnKGXukqcwTPnTkHSyvP8uFVhzPrdyk6AsQHFuV5JinK0aVLuMQFePhpvvBl8OkbuixwY0p0DfvEmVHfhNCd3CWWk4hPLfOfVZs--CwL6ZqRhkiAxrCZnUu6ryibf45yuQ
+
+###
+
+# ============================================
+# 2. Create category
+# ============================================
+POST {{Catalog_Write_Url}}/api/v1/categories
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+    "name": "Clothes",
+    "reference": "clothes",
+    "slug": "https://example.com/blog/clothes-url-slug"
+}
+
+###
+
+# ============================================
+# 3. Get category
+# ============================================
+GET {{Catalog_Read_Url}}/api/v1/categories?page[number]=1&page[size]=10
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+###
+
+# ============================================
+# 4. Create product SPU
+# ============================================
+POST {{Catalog_Write_Url}}/api/v1/products
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+    "name": "Ao thun han quoc - Nam",
+    "description": "Bề mặt cải mịn và nhẹ tăng sự co giãn để bạn thoải mái tập luyện",
+    "categoryId": "acc2b36b-06df-4181-a330-29dab70c4c8d",
+    "images": ["https://thumbs.shopdev.com/p/thumb123456"]
+}
+
+###
+
+# ============================================
+# 5. Get product
+# ============================================
+GET {{Catalog_Read_Url}}/api/v1/products?page[number]=1&page[size]=10
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+###
+
+# ============================================
+# 4. Add variantion dimension
+# ============================================
+POST {{Catalog_Write_Url}}/api/v1/products/1aac2bed-f06d-49f3-98f4-422402266dbe/variation-dimensions
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+    "name": "Color",
+    "displayName": "Color",
+    "values": ["Red", "Blue", "Green"],
+    "displayStyle": " Color"
+}
+
+###
+
+POST {{Catalog_Write_Url}}/api/v1/products/1aac2bed-f06d-49f3-98f4-422402266dbe/variation-dimensions
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+    "name": "Size",
+    "displayName": "Size",
+    "values": ["S", "M", "L", "XL"],
+    "displayStyle": " Text"
+}
+
+ ###
+
+# ============================================
+# 5. Add variantion dimension
+# ============================================
+POST {{Catalog_Write_Url}}/api/v1/products/1aac2bed-f06d-49f3-98f4-422402266dbe/variation-dimensions
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+    "name": "Color",
+    "displayName": "Color",
+    "values": ["Red", "Blue", "Green"],
+    "displayStyle": " Color"
+}
+
+###
+
+# ============================================
+# 6. Get product details
+# ============================================
+GET {{Catalog_Read_Url}}/api/v1/products/1aac2bed-f06d-49f3-98f4-422402266dbe
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+###
+
+# ============================================
+# 7. Add variants
+# ============================================
+POST {{Catalog_Write_Url}}/api/v1/products/1aac2bed-f06d-49f3-98f4-422402266dbe/variants
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+    "name": "SHIRT-BLU-L",
+    "sku": "SHIRT-BLU-L",
+    "price": 499,
+    "discountPrice": 449,
+    "dimensionValues": [
+        { "name": "Color", "value": "Blue" },
+        { "name": "Size", "value": "L" }
+    ]
+}
+
+###
+
+POST {{Catalog_Write_Url}}/api/v1/products/1aac2bed-f06d-49f3-98f4-422402266dbe/variants
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "name": "SHIRT-GRN-S",
+  "sku": "SHIRT-GRN-S",
+  "price": 299,
+  "discountPrice": 290,
+  "dimensionValues": [
+    { "name": "Color", "value": "Green" },
+    { "name": "Size", "value": "S" }
+  ]
+}
+
+###
+
+# ============================================
+# 8. Publish product
+# ============================================
+POST {{Catalog_Write_Url}}/api/v1/products/1aac2bed-f06d-49f3-98f4-422402266dbe/publish
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+###
+
+# ============================================
+# 9. Unpublish product
+# ============================================
+POST {{Catalog_Write_Url}}/api/v1/products/1aac2bed-f06d-49f3-98f4-422402266dbe/unpublish
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+###

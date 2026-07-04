@@ -1,24 +1,26 @@
-﻿using EShop.AppHost.Extensions;
+using EShop.AppHost.Extensions;
 using Microsoft.Extensions.Hosting;
 
 namespace EShop.AppHost.OpenTelemetryCollector;
 
 internal static class OpenTelemetryCollectorResourceBuilderExtensions
 {
-    private const string DashboardOtlpUrlVariableName = "ASPIRE_DASHBOARD_OTLP_ENDPOINT_URL";
     private const string OTelCollectorImageName = "ghcr.io/open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-contrib";
     private const string OTelCollectorImageTag = "0.135.0";
-    private const string DashboardOtlpApiKeyVariableName = "AppHost:OtlpApiKey";
+
+    private const string AspireDashboardOtlpUrlVariableName = "ASPIRE_DASHBOARD_OTLP_ENDPOINT_URL";
+    private const string AspireDashboardOtlpApiKeyVariableName = "AppHost:OtlpApiKey";
 
     public static IResourceBuilder<OpenTelemetryCollectorResource> AddOpenTelemetryCollector(
         this IDistributedApplicationBuilder builder, string name, string configureFileLocaltion)
     {
         builder.AddOpenTelemetryCollectorInfrastructure();
 
-        var url = builder.Configuration[DashboardOtlpUrlVariableName] ?? throw new InvalidOperationException($"Environment variable '{DashboardOtlpUrlVariableName}' is not set.");
-        var isHttpsEnabled = url.StartsWith("https", StringComparison.OrdinalIgnoreCase);
+        var url = builder.Configuration[AspireDashboardOtlpUrlVariableName]
+            ?? throw new InvalidOperationException($"Environment variable '{AspireDashboardOtlpUrlVariableName}' is not set.");
+        var aspireDashboardEndpoint = new HostUrl(url);
 
-        var dashboardOtlpEndpoint = new HostUrl(url);
+        var isHttpsEnabled = url.StartsWith("https", StringComparison.OrdinalIgnoreCase);
 
         var resource = new OpenTelemetryCollectorResource(name);
         var resourceBuilder = builder.AddResource(resource)
@@ -26,8 +28,8 @@ internal static class OpenTelemetryCollectorResourceBuilderExtensions
             .WithEndpoint(targetPort: 4317, name: OpenTelemetryCollectorResource.OtlpGrpcEndpointName, scheme: isHttpsEnabled ? "https" : "http")
             .WithEndpoint(targetPort: 4318, name: OpenTelemetryCollectorResource.OtlpHttpEndpointName, scheme: isHttpsEnabled ? "https" : "http")
             .WithBindMount(configureFileLocaltion, "/etc/otelcol-contrib/config.yaml")
-            .WithEnvironment("ASPIRE_ENDPOINT", $"{dashboardOtlpEndpoint}")
-            .WithEnvironment("ASPIRE_API_KEY", builder.Configuration[DashboardOtlpApiKeyVariableName])
+            .WithEnvironment("ASPIRE_ENDPOINT", $"{aspireDashboardEndpoint}")
+            .WithEnvironment("ASPIRE_API_KEY", builder.Configuration[AspireDashboardOtlpApiKeyVariableName])
             .WithEnvironment("ASPIRE_INSECURE", isHttpsEnabled ? "false" : "true");
 
         if (isHttpsEnabled && builder.ExecutionContext.IsRunMode && builder.Environment.IsDevelopment())

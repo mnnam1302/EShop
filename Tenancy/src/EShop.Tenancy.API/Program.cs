@@ -1,8 +1,9 @@
 using EShop.Shared.Diagnostics;
-using EShop.Tenancy.API;
 using Serilog;
 
-public class Program
+namespace EShop.Tenancy.API;
+
+public static class Program
 {
     private const int ShutdownTimeoutInSeconds = 90;
     internal const string ApplicationName = "Tenancy";

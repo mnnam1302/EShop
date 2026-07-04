@@ -360,6 +360,7 @@ MigrationBackup/
 FodyWeavers.xsd
 *.env
 
-# Docker secrets - sensitive data
-Deployment/secrets/*.txt
-!Deployment/secrets/*.txt.example
+
+# Environment files — credentials no commit
+deploy/env/*.env
+!deploy/env/*.env.example
