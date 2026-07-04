@@ -56,10 +56,6 @@ public static class Extensions
         builder.Services.AddOpenTelemetry()
             .ConfigureResource(resource =>
             {
-                // OTEL_SERVICE_NAME is set as a real process env var by Aspire and by
-                // docker-compose.dev.yml, and already wins (last AddService(...) call takes
-                // priority). This only supplies a fallback for standalone runs (e.g. `dotnet
-                // run` from the IDE) — without it, the dashboard shows "unknown_service:<process>".
                 if (string.IsNullOrWhiteSpace(builder.Configuration["OTEL_SERVICE_NAME"]))
                 {
                     resource.AddService(builder.Environment.ApplicationName);

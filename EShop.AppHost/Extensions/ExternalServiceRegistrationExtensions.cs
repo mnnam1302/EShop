@@ -4,29 +4,34 @@ namespace EShop.AppHost.Extensions;
 
 public static class ExternalServiceRegistrationExtensions
 {
-    public static IDistributedApplicationBuilder AddExternalServices(this IDistributedApplicationBuilder builder, bool isEnabledObservability)
+    public static IDistributedApplicationBuilder AddExternalServices(this IDistributedApplicationBuilder builder, bool useExternalObservability)
     {
         return AddServices(
             builder,
-            useExternalService: true,
-            isEnabledObservability);
+            useExternalInfrastructure: true,
+            useExternalObservability);
     }
 
-    public static IDistributedApplicationBuilder AddServiceDefaults(this IDistributedApplicationBuilder builder, bool isEnabledObservability)
+    public static IDistributedApplicationBuilder AddServiceDefaults(this IDistributedApplicationBuilder builder, bool useExternalObservability)
     {
         return AddServices(
             builder,
-            useExternalService: false,
-            isEnabledObservability);
+            useExternalInfrastructure: false,
+            useExternalObservability);
     }
 
-    private static IDistributedApplicationBuilder AddServices(IDistributedApplicationBuilder builder, bool useExternalService, bool isEnabledObservability)
+    private static IDistributedApplicationBuilder AddServices(IDistributedApplicationBuilder builder, bool useExternalInfrastructure, bool useExternalObservability)
     {
         #region Observability
 
-        IResourceBuilder<IResourceWithEndpoints>? grafana = null;
+        Action<IResourceBuilder<IResourceWithEnvironment>>? applyGrafanaUrl;
 
-        if (isEnabledObservability)
+        if (useExternalObservability)
+        {
+            var externalGrafana = builder.AddConnectionString(ResourceNames.Grafana);
+            applyGrafanaUrl = resource => resource.WithEnvironment("GRAFANA_URL", externalGrafana);
+        }
+        else
         {
             // Push approach: OTelCollector + Prometheus
             //var prometheus = builder.AddContainer(ResourceNames.Prometheus, "prom/prometheus", "v3.5.0")
@@ -62,19 +67,22 @@ public static class ExternalServiceRegistrationExtensions
                 .WithHttpEndpoint(targetPort: 9100, name: "http")
                 .WaitFor(prometheus);
 
-            grafana = builder.AddContainer(ResourceNames.Grafana, "grafana/grafana")
+            var grafana = builder.AddContainer(ResourceNames.Grafana, "grafana/grafana")
                 .WithBindMount("../deploy/config/grafana/provisioning", "/etc/grafana/provisioning", isReadOnly: true)
                 .WithBindMount("../deploy/config/grafana/dashboards", "/var/lib/grafana/dashboards", isReadOnly: true)
                 .WithEnvironment("PROMETHEUS_ENDPOINT", prometheus.GetEndpoint("http"))
                 .WithHttpEndpoint(targetPort: 3000, name: "http")
                 .WaitFor(prometheus);
+
+            var grafanaEndpoint = grafana.GetEndpoint("http");
+            applyGrafanaUrl = resource => resource.WithEnvironment("GRAFANA_URL", grafanaEndpoint);
         }
 
         #endregion Observability
 
         #region Infrastructure resources
 
-        var redis = useExternalService
+        var redis = useExternalInfrastructure
             ? builder.AddConnectionString(ResourceNames.Redis)
             : builder
                 .AddRedis(ResourceNames.Redis)
@@ -83,7 +91,7 @@ public static class ExternalServiceRegistrationExtensions
                 .WithRedisInsight()
                 .WithLifetime(ContainerLifetime.Persistent);
 
-        var rabbitmq = useExternalService
+        var rabbitmq = useExternalInfrastructure
             ? builder.AddConnectionString(ResourceNames.RabbitMq)
             : builder
                 .AddRabbitMQ(ResourceNames.RabbitMq)
@@ -94,7 +102,7 @@ public static class ExternalServiceRegistrationExtensions
 
         #endregion Infrastructure resources
 
-        if (useExternalService)
+        if (useExternalInfrastructure)
         {
             var postgres = builder.AddConnectionString(ResourceNames.PostgreSql);
 
@@ -111,7 +119,7 @@ public static class ExternalServiceRegistrationExtensions
 
             RegisterMicroservices(
                 builder,
-                useExternalService,
+                useExternalInfrastructure,
                 redis,
                 rabbitmq,
                 tenancyDatabase,
@@ -121,7 +129,7 @@ public static class ExternalServiceRegistrationExtensions
                 inventoryDatabase,
                 orderDatabase,
                 financeDatabase,
-                grafana: null);
+                applyGrafanaUrl);
         }
         else
         {
@@ -151,7 +159,7 @@ public static class ExternalServiceRegistrationExtensions
 
             RegisterMicroservices(
                 builder,
-                useExternalService,
+                useExternalInfrastructure,
                 redis,
                 rabbitmq,
                 tenancyDatabase,
@@ -161,7 +169,7 @@ public static class ExternalServiceRegistrationExtensions
                 inventoryDatabase,
                 orderDatabase,
                 financeDatabase,
-                grafana: grafana);
+                applyGrafanaUrl);
         }
 
         return builder;
@@ -179,7 +187,7 @@ public static class ExternalServiceRegistrationExtensions
         IResourceBuilder<IResourceWithConnectionString> inventoryDatabase,
         IResourceBuilder<IResourceWithConnectionString> orderDatabase,
         IResourceBuilder<IResourceWithConnectionString> financeDatabase,
-        IResourceBuilder<IResourceWithEndpoints>? grafana)
+        Action<IResourceBuilder<IResourceWithEnvironment>>? applyGrafanaUrl)
     {
         #region Microservices
 
@@ -256,18 +264,17 @@ public static class ExternalServiceRegistrationExtensions
             finance.WaitFor(financeDatabase)
                 .WaitFor(redis)
                 .WaitFor(rabbitmq);
+        }
 
-            if (grafana is not null)
-            {
-                var grafanaEndpoint = grafana.GetEndpoint("http");
-                tenancy.WithEnvironment("GRAFANA_URL", grafanaEndpoint);
-                authorization.WithEnvironment("GRAFANA_URL", grafanaEndpoint);
-                catalogApplication.WithEnvironment("GRAFANA_URL", grafanaEndpoint);
-                catalogReadModel.WithEnvironment("GRAFANA_URL", grafanaEndpoint);
-                inventory.WithEnvironment("GRAFANA_URL", grafanaEndpoint);
-                order.WithEnvironment("GRAFANA_URL", grafanaEndpoint);
-                finance.WithEnvironment("GRAFANA_URL", grafanaEndpoint);
-            }
+        if (applyGrafanaUrl is not null)
+        {
+            applyGrafanaUrl(tenancy);
+            applyGrafanaUrl(authorization);
+            applyGrafanaUrl(catalogApplication);
+            applyGrafanaUrl(catalogReadModel);
+            applyGrafanaUrl(inventory);
+            applyGrafanaUrl(order);
+            applyGrafanaUrl(finance);
         }
 
         #endregion

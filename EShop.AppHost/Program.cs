@@ -3,16 +3,16 @@ using Microsoft.Extensions.Configuration;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
-var externalInfrastructureMode = builder.Configuration.GetValue("ExternalInfrastructureMode", false);
-var isEnabledObservability = builder.Configuration.GetValue("IsEnableObservability", false);
+var useExternalInfrastructureMode = builder.Configuration.GetValue("ExternalInfrastructureMode", false);
+var useExternalObservability = builder.Configuration.GetValue("ExternalObservabilityMode", false);
 
-if (externalInfrastructureMode)
+if (useExternalInfrastructureMode)
 {
-    builder.AddExternalServices(isEnabledObservability);
+    builder.AddExternalServices(useExternalObservability);
 }
 else
 {
-    builder.AddServiceDefaults(isEnabledObservability);
+    builder.AddServiceDefaults(useExternalObservability);
 }
 
 await builder.Build().RunAsync();
