@@ -39,7 +39,8 @@ public static class ExternalServiceRegistrationExtensions
             //    )
             //    .WithHttpEndpoint(targetPort: 9090, name: "http");
 
-            // Pull approach: OTelCollector + Prometheus + Grafana (Chỉ chạy ở Local)
+            // Pull approach: OTelCollector + Prometheus
+            // Auto add environment variable "OTEL_EXPORTER_OTLP_ENDPOINT" into microservice resources to enable OTel configuration
             var otelCollector = builder.AddOpenTelemetryCollector(ResourceNames.OpenTelemetryCollector, @"..\deploy\config\otelcollector\config.yaml");
 
             var prometheus = builder.AddContainer(ResourceNames.Prometheus, "prom/prometheus", "v3.5.0")

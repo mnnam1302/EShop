@@ -1,4 +1,4 @@
-﻿using EShop.Authorization.API.APIs;
+using EShop.Authorization.API.APIs;
 using EShop.Authorization.API.Boostrapping;
 using EShop.Shared.JsonApi.Extensions;
 using EShop.Shared.JsonApi.Middlewares;
