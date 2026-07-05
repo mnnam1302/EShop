@@ -11,7 +11,6 @@ public sealed class NoAuthAuthenticationProvider : IAuthenticationProvider
 
     public void ApplyAuthentication(HttpRequestMessage request)
     {
-        // No authentication.
     }
 
     public Task<bool> VerifyAuthentication(AuthenticationOptions options, CancellationToken cancellationToken)

@@ -49,7 +49,6 @@ public sealed class AesFieldEncryptor : IFieldEncryptor
 
             iv.CopyTo(ivDestination);
 
-            // Encrypt plaintext directly into the pre-allocated combined payload
             if (!aes.TryEncryptCbc(
                     plaintextBuffer.AsSpan(0, plaintextBytesCount),
                     iv,

@@ -1,9 +1,5 @@
 namespace EShop.Finance.Application.Services.IntegrationProvider.Authentication;
 
-/// <summary>
-/// Typed view over a tenant's connection-details dictionary, used by the authentication providers.
-/// Keys are read case-insensitively; the raw dictionary is retained for provider-specific values.
-/// </summary>
 public sealed class AuthenticationOptions
 {
     public string Scheme { get; private init; } = AuthenticationSchemes.OAuth;

@@ -6,16 +6,8 @@ using Microsoft.Extensions.Logging;
 
 namespace EShop.Finance.Application.Services.IntegrationProvider.Http;
 
-/// <summary>
-/// Executes a YAML-configured HTTP request: renders templates, applies auth, and shapes the response.
-/// </summary>
 public interface IHttpIntegrationClient
 {
-    /// <summary>
-    /// Runs <paramref name="request"/> with <paramref name="templateData"/> as the Handlebars model.
-    /// Returns the response shaped by the request's <c>ResponseTemplate</c> (a flat string map), or <c>null</c> on 404/empty.
-    /// Throws <see cref="ServerCommunicationException"/> on other error statuses.
-    /// </summary>
     Task<IReadOnlyDictionary<string, string?>?> ExecuteRequest(
         RequestConfiguration request,
         IReadOnlyDictionary<string, object?> templateData,
@@ -64,7 +56,6 @@ public sealed class HttpIntegrationClient(
 
         if (!response.IsSuccessStatusCode)
         {
-            // Redacted: do not log request/response bodies (may contain sensitive data).
             logger.LogWarning("Provider rejected request '{Name}' with status {Status}.", request.Name, (int)response.StatusCode);
             throw new ServerCommunicationException($"Provider request '{request.Name}' failed with status {(int)response.StatusCode}.", (int)response.StatusCode);
         }

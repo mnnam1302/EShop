@@ -8,15 +8,12 @@ using EShop.Shared.Contracts.Abstractions.Shared;
 
 namespace EShop.Finance.Application.Services.IntegrationProvider.Generic;
 
-/// <summary>
-/// YAML-driven accounting provider. Books a payment by finding an existing external transaction
-/// (idempotency) and creating one when absent; failures are returned as <see cref="Result"/>, not thrown.
-/// </summary>
 public sealed class GenericHttpAccountingProvider(
     IAccountingCompanyRepository accountingCompanies,
     IConnectionDetailsStore connectionDetailsStore,
     IHttpIntegrationClient httpClient,
-    IAuthenticationProviderResolver authenticationResolver) : IAccountingIntegrationProvider
+    IAuthenticationProviderResolver authenticationResolver,
+    ITemplateDataAdapter<PaymentBookingContext> paymentTemplateAdapter) : IAccountingIntegrationProvider
 {
     private const string BookingIdKey = "bookingId";
 
@@ -25,7 +22,8 @@ public sealed class GenericHttpAccountingProvider(
     public async Task<Result<PaymentBookingResult>> BookPaymentAsync(PaymentBookingContext context, CancellationToken cancellationToken)
     {
         var httpContext = await BuildContext(context.TenantId, cancellationToken);
-        var templateData = httpContext.BuildTemplateData(context);
+        var renderContext = new TemplateRenderContext(httpContext.AuthOptions.BaseUrl, httpContext.Configuration.DateFormat ?? "yyyy-MM-dd");
+        var templateData = paymentTemplateAdapter.ToTemplateData(context, renderContext);
 
         try
         {

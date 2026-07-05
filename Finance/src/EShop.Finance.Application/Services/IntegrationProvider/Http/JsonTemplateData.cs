@@ -2,23 +2,14 @@ using System.Text.Json;
 
 namespace EShop.Finance.Application.Services.IntegrationProvider.Http;
 
-/// <summary>
-/// Converts JSON into Handlebars-friendly template data and flattens a JSON object into a string map.
-/// </summary>
 internal static class JsonTemplateData
 {
-    /// <summary>
-    /// Parses JSON into nested dictionaries/lists/scalars usable as Handlebars template data.
-    /// </summary>
     public static object? Parse(string json)
     {
         using var document = JsonDocument.Parse(json);
         return Convert(document.RootElement);
     }
 
-    /// <summary>
-    /// Flattens a JSON object's top-level properties into a string map (nested values kept as raw JSON).
-    /// </summary>
     public static IReadOnlyDictionary<string, string?> FlattenObject(string json)
     {
         var result = new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase);

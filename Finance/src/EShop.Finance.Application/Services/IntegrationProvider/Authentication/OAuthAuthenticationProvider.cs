@@ -6,12 +6,6 @@ using Microsoft.Extensions.Logging;
 
 namespace EShop.Finance.Application.Services.IntegrationProvider.Authentication;
 
-/// <summary>
-/// OAuth 2.0 client-credentials authentication.
-/// Acquires an access token from the tenant's token endpoint and reuses the per-tenant cached token (in <see cref="IProviderSessionStore"/>)
-/// until it nears expiry. Credentials go in the request body, or in a Basic header when
-/// <see cref="AuthenticationOptions.UseClientCredentialsInHeader"/> is set.
-/// </summary>
 public sealed class OAuthAuthenticationProvider(
     IHttpClientFactory httpClientFactory,
     IProviderSessionStore sessionStore,

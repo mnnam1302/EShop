@@ -2,10 +2,6 @@ using YamlDotNet.Serialization;
 
 namespace EShop.Finance.Application.Services.IntegrationProvider.Configuration;
 
-/// <summary>
-/// A tenant's YAML-driven provider behaviour: the HTTP <see cref="Requests"/> and the
-/// <see cref="Triggers"/> that map a booking operation/action to a named request.
-/// </summary>
 public sealed class FinanceConfiguration
 {
     private Dictionary<(string Trigger, string Action), RequestConfiguration> _requestCache = new();

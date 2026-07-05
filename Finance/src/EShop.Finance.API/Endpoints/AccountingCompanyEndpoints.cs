@@ -88,7 +88,7 @@ public static class AccountingCompanyEndpoints
         CancellationToken cancellationToken)
     {
         var provider = factory.GetByName(request.ProviderType);
-        var valid = await provider.TestConnection(request.ConnectionDetails, cancellationToken);
+        var valid = await provider.TestConnectionAsync(request.ConnectionDetails, cancellationToken);
 
         return Results.Ok(new { Valid = valid });
     }
