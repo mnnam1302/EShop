@@ -1,4 +1,10 @@
+using EShop.Finance.Application.Services.IntegrationProvider;
+using EShop.Finance.Application.Services.IntegrationProvider.Authentication;
+using EShop.Finance.Application.Services.IntegrationProvider.Http;
+using EShop.Finance.Application.Services.IntegrationProvider.Security;
 using EShop.Finance.Domain.Abstractions;
+using EShop.Finance.Infrastructure.Integration;
+using EShop.Finance.Infrastructure.Integration.Security;
 using EShop.Finance.Infrastructure.Repositories;
 using EShop.Shared.Authentication.Filters;
 using EShop.Shared.Contracts.JsonConverters;
@@ -37,6 +43,7 @@ public static class ServiceCollectionExtensions
     {
         services.AddScoped<IUnitOfWork, EFUnitOfWork<FinanceDbContext>>();
         services.AddScoped<IAccountRepository, AccountRepository>();
+        services.AddScoped<IAccountingCompanyRepository, AccountingCompanyRepository>();
 
         return services;
     }
@@ -45,9 +52,26 @@ public static class ServiceCollectionExtensions
     {
         services
             .AddEventBus()
-            .AddMasstransitRabbitMQ(configuration);
+            .AddMasstransitRabbitMQ(configuration)
+            .AddAccountingIntegrationInfrastructure(configuration);
 
         services.AddSingleton(typeof(CorrelationIdLogEnrichFilter<>));
+
+        return services;
+    }
+
+    private static IServiceCollection AddAccountingIntegrationInfrastructure(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddOptions<AesEncryptionOptions>()
+            .Bind(configuration.GetSection(AesEncryptionOptions.SectionName));
+
+        services.AddSingleton<IFieldEncryptor, AesFieldEncryptor>();
+        services.AddScoped<IProviderSessionStore, ProviderSessionStore>();
+        services.AddScoped<IConnectionDetailsStore, ConnectionDetailsStore>();
+
+        // Resilient HttpClient for provider booking calls (retry + circuit breaker + timeout).
+        services.AddHttpClient(OAuthAuthenticationProvider.TokenClientName);
+        services.AddHttpClient(HttpIntegrationClient.HttpClientName).AddStandardResilienceHandler();
 
         return services;
     }
@@ -68,7 +92,6 @@ public static class ServiceCollectionExtensions
 
             cfg.UsingRabbitMq((context, bus) =>
             {
-                // Messages published FROM Finance — stamp OrderId as the envelope CorrelationId.
                 bus.SendTopology.UseCorrelationId<OrderPaymentScheduled>(x => x.OrderId);
                 bus.SendTopology.UseCorrelationId<OrderPaymentScheduleFailed>(x => x.OrderId);
 

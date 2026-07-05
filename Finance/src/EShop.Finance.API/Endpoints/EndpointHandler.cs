@@ -5,7 +5,8 @@ public static class EndpointHandler
     public static IEndpointRouteBuilder MapEndpoints(this IEndpointRouteBuilder endpoints)
     {
         return endpoints
-            .MapAccountEndpoints();
+            .MapAccountEndpoints()
+            .MapAccountingCompanyEndpoints();
     }
 }
 
