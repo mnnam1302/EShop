@@ -459,15 +459,63 @@ dotnet test Finance/tests/EShop.Finance.Tests
 
 ---
 
+## Accounting Provider Integration (`GenericHttp`)
+
+Each tenant books its scheduled payments into its **own** accounting system without shipping code per tenant. A tenant's `AccountingCompany` (provisioned on `TenantCreated`, one per tenant) holds a **provider type**, a **YAML behaviour configuration**, and **connection details** (base URL + secrets) stored **encrypted at rest in the Finance database** (`Finance:Encryption:Key`, base64 AES key — never in Redis, never in the YAML).
+
+**Booking flow (async, idempotent):**
+
+```
+CreateAccountCommandHandler schedules payments
+  → publishes PaymentsScheduled (independent of the OrderPaymentScheduled saga reply)
+    → BookAccountPaymentsConsumer → BookAccountPaymentsCommand
+        resolve provider for tenant (AccountingIntegrationProviderFactory; None ⇒ no-op)
+        per pending payment without an ExternalBookingReference:
+          Find at provider (idempotency) → else Create → Account.BookPayment(paymentId, ref)
+        one payment's failure is isolated (PaymentBookingFailed) and retried by the bus
+```
+
+Idempotency is the existing `Payment.ExternalBookingReference` + idempotent `Payment.MarkBooked` plus find-before-create — no separate table.
+
+**Authentication** is chosen by the connection details' `Scheme`: `OAuth` (client-credentials; token cached per tenant in `IntegrationProviderSessions`, encrypted, reused until ~3 min before expiry), `Basic`, or `NoAuth`.
+
+**YAML shape** — `triggers → actions → requests`, each request a Handlebars template:
+
+```yaml
+triggers:
+  - name: BookPayment
+    actions:
+      - { name: Find,   request: FindInvoice }   # idempotency: adopt existing
+      - { name: Create, request: CreateInvoice }
+requests:
+  - name: FindInvoice
+    urlTemplate: "{{{baseUrl}}}/invoices?ref={{{paymentId}}}"
+    method: GET
+    responseTemplate: '{ "bookingId": "{{{id}}}" }'
+  - name: CreateInvoice
+    urlTemplate: "{{{baseUrl}}}/invoices"
+    method: POST
+    requestTemplate: '{ "amount": {{{amount}}}, "currency": "{{{currency}}}", "dueDate": "{{{dueDate}}}" }'
+    responseTemplate: '{ "bookingId": "{{{id}}}", "bookingReference": "{{{reference}}}" }'
+```
+
+**Management API** (`api/v1/accounting-company`): `GET` (provider type + YAML + `hasConnectionDetails`, never secrets), `PUT` (configure provider type + YAML), `PUT /credentials` (save encrypted connection details), `POST /test-connection` (validate without booking).
+
+> **Migration:** this change adds two tables (`AccountingCompanies`, `IntegrationProviderSessions`); generate/apply the EF migration manually.
+
+For the reference implementation and design rationale see OpenSpec change `finance-generic-http-accounting-provider`.
+
+---
+
 ## Roadmap
 
 ### Gap Analysis
 
 | # | Gap | Status |
 |---|-----|--------|
-| G1 | **Booking deferred.** Pushing payments to a tenant's external accounting provider (`GenericHttp` provider), recording collected payments (`PaymentReceived` → `RecordPayment` → `Completed`). The domain `BookPayment`/`RecordPayment` exist and are unit-tested, but no application/infrastructure orchestration drives them. | Open |
+| G1 | **Booking (accounting side) done.** The `GenericHttp` accounting provider books scheduled payments via `PaymentsScheduled` → `BookAccountPaymentsConsumer` → `Account.BookPayment`. **Still open:** the collection side (`PaymentReceived` → `RecordPayment` → `Completed`). | **Partially Resolved** |
 | G2 | **`Account.Fail` is never orchestrated.** `AccountStatus.Failed` is reachable only via the domain method; no consumer/handler calls it today. | Open |
-| G3 | **Account read endpoint not wired.** `AccountEndpoints.MapAccountEndpoints()` is defined but not called in `Startup.Configure`. | Open |
+| G3 | **Endpoints wired.** `Startup.Configure` now calls `MapEndpoints()`, exposing the account read endpoint and the accounting-company management endpoints. | **Resolved** |
 | G4 | **`InboxMessages` scaffolded but unused.** Idempotency relies on `FindByOrderIdAsync` + `UNIQUE(tenant_id, order_id)`. | Open |
 | G5 | Strategy-based schedule calculation + aggregate-owned integrity assertion + saga reply flow. | **Resolved** |
 

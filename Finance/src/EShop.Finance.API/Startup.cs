@@ -1,4 +1,5 @@
 using EShop.Finance.API.DependencyInjections;
+using EShop.Finance.API.Endpoints;
 using EShop.Finance.Application.DependencyInjection;
 using EShop.Finance.Infrastructure.DependencyInjection;
 using EShop.Shared.JsonApi.Middlewares;
@@ -38,6 +39,7 @@ public class Startup
 
         app.UseRouting();
 
+        app.MapEndpoints();
         app.MapDefaultEndpoints();
     }
 }
