@@ -2,10 +2,9 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using EShop.Finance.Application.Services.IntegrationProvider.Models;
 using Microsoft.Extensions.Logging;
 
-namespace EShop.Finance.Application.Services.IntegrationProvider.Client;
+namespace EShop.Finance.Application.Services.IntegrationProvider.Authentication;
 
 /// <summary>
 /// OAuth 2.0 client-credentials authentication.

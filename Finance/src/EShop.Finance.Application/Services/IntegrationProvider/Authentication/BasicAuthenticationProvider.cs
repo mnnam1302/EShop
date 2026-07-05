@@ -1,8 +1,7 @@
 using System.Net.Http.Headers;
 using System.Text;
-using EShop.Finance.Application.Services.IntegrationProvider.Models;
 
-namespace EShop.Finance.Application.Services.IntegrationProvider.Client;
+namespace EShop.Finance.Application.Services.IntegrationProvider.Authentication;
 
 public sealed class BasicAuthenticationProvider : IAuthenticationProvider
 {

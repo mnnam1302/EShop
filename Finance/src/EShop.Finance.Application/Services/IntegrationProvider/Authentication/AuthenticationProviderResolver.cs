@@ -1,4 +1,4 @@
-namespace EShop.Finance.Application.Services.IntegrationProvider.Client;
+namespace EShop.Finance.Application.Services.IntegrationProvider.Authentication;
 
 public interface IAuthenticationProviderResolver
 {

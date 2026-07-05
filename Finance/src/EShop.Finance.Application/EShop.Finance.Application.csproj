@@ -11,6 +11,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="YamlDotNet" />
+    <PackageReference Include="Handlebars.Net" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\..\Shared\src\EShop.Shared.CQRS\EShop.Shared.CQRS.csproj" />
     <ProjectReference Include="..\..\..\Shared\src\EShop.Shared.EventBus\EShop.Shared.EventBus.csproj" />
     <ProjectReference Include="..\EShop.Finance.Domain\EShop.Finance.Domain.csproj" />

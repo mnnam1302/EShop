@@ -1,6 +1,4 @@
-using EShop.Finance.Application.Services.IntegrationProvider.Models;
-
-namespace EShop.Finance.Application.Services.IntegrationProvider.Client;
+namespace EShop.Finance.Application.Services.IntegrationProvider.Authentication;
 
 /// <summary>
 /// An authentication scheme (OAuth / Basic / NoAuth) applied to outgoing integration requests.
