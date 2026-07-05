@@ -9,7 +9,7 @@ using EShop.Finance.Domain.Aggregates.AccountingCompany;
 using FluentAssertions;
 using Moq;
 
-namespace EShop.Finance.Tests.Integrations;
+namespace EShop.Finance.Tests.Application.Integrations;
 
 public class GenericHttpAccountingProviderTests
 {
@@ -47,8 +47,7 @@ public class GenericHttpAccountingProviderTests
         _companies.Object,
         _connectionDetails.Object,
         _httpClient.Object,
-        new AuthenticationProviderResolver([new NoAuthAuthenticationProvider(), new BasicAuthenticationProvider()]),
-        new PaymentTemplateDataAdapter());
+        new AuthenticationProviderResolver([new NoAuthAuthenticationProvider(), new BasicAuthenticationProvider()]));
 
     private static PaymentBookingContext Payment() => new()
     {

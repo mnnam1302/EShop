@@ -2,6 +2,7 @@ using EShop.Finance.Application.Services.IntegrationProvider.Authentication;
 using EShop.Finance.Application.Services.IntegrationProvider.Http;
 using EShop.Finance.Application.Services.IntegrationProvider.Configuration;
 using EShop.Finance.Application.Services.IntegrationProvider.Models;
+using EShop.Finance.Application.Services.IntegrationProvider.TemplateData;
 using EShop.Finance.Domain.Abstractions;
 using EShop.Finance.Domain.Aggregates.AccountingCompany;
 using EShop.Shared.Contracts.Abstractions.Shared;
@@ -12,8 +13,7 @@ public sealed class GenericHttpAccountingProvider(
     IAccountingCompanyRepository accountingCompanies,
     IConnectionDetailsStore connectionDetailsStore,
     IHttpIntegrationClient httpClient,
-    IAuthenticationProviderResolver authenticationResolver,
-    ITemplateDataAdapter<PaymentBookingContext> paymentTemplateAdapter) : IAccountingIntegrationProvider
+    IAuthenticationProviderResolver authenticationResolver) : IAccountingIntegrationProvider
 {
     private const string BookingIdKey = "bookingId";
 
@@ -22,8 +22,8 @@ public sealed class GenericHttpAccountingProvider(
     public async Task<Result<PaymentBookingResult>> BookPaymentAsync(PaymentBookingContext context, CancellationToken cancellationToken)
     {
         var httpContext = await BuildContext(context.TenantId, cancellationToken);
-        var renderContext = new TemplateRenderContext(httpContext.AuthOptions.BaseUrl, httpContext.Configuration.DateFormat ?? "yyyy-MM-dd");
-        var templateData = paymentTemplateAdapter.ToTemplateData(context, renderContext);
+        var templateModel = PaymentBookingTemplateModel.Parse(context, httpContext.Configuration.DateFormat ?? "yyyy-MM-dd");
+        var templateData = templateModel.GetTemplateDataModel();
 
         try
         {

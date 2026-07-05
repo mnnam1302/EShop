@@ -2,7 +2,6 @@ using EShop.Finance.Application.Services.IntegrationProvider;
 using EShop.Finance.Application.Services.IntegrationProvider.Authentication;
 using EShop.Finance.Application.Services.IntegrationProvider.Http;
 using EShop.Finance.Application.Services.IntegrationProvider.Generic;
-using EShop.Finance.Application.Services.IntegrationProvider.Models;
 using EShop.Shared.CQRS;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -29,7 +28,6 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IAuthenticationProviderResolver, AuthenticationProviderResolver>();
 
         services.AddScoped<IHttpIntegrationClient, HttpIntegrationClient>();
-        services.AddSingleton<ITemplateDataAdapter<PaymentBookingContext>, PaymentTemplateDataAdapter>();
 
         return services;
     }

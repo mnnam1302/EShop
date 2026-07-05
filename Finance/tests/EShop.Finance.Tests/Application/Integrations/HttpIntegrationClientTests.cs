@@ -8,7 +8,7 @@ using FluentAssertions;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 
-namespace EShop.Finance.Tests.Integrations;
+namespace EShop.Finance.Tests.Application.Integrations;
 
 public class HttpIntegrationClientTests
 {
@@ -33,7 +33,7 @@ public class HttpIntegrationClientTests
     [Fact]
     public async Task Shapes_successful_response_via_response_template()
     {
-        var handler = new StubHandler(HttpStatusCode.OK, """{ "id": "INV-1", "reference": "R-1", "extra": "ignored" }""");
+        using var handler = new StubHandler(HttpStatusCode.OK, """{ "id": "INV-1", "reference": "R-1", "extra": "ignored" }""");
         var client = CreateClient(handler);
 
         var result = await client.ExecuteRequest(CreateInvoice, TemplateData, "tenant-1", NoAuth(), CancellationToken.None);
@@ -47,7 +47,7 @@ public class HttpIntegrationClientTests
     [Fact]
     public async Task Returns_null_on_not_found()
     {
-        var client = CreateClient(new StubHandler(HttpStatusCode.NotFound, ""));
+       var client = CreateClient(new StubHandler(HttpStatusCode.NotFound, ""));
 
         var result = await client.ExecuteRequest(CreateInvoice, TemplateData, "tenant-1", NoAuth(), CancellationToken.None);
 

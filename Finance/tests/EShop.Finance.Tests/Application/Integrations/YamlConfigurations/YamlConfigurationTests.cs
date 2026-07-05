@@ -3,7 +3,7 @@ using EShop.Finance.Application.Services.IntegrationProvider.Configuration;
 using FluentAssertions;
 using static EShop.Finance.Application.Services.IntegrationProvider.Configuration.FinanceConfigurationConstants;
 
-namespace EShop.Finance.Tests.Integrations.YamlConfigurations;
+namespace EShop.Finance.Tests.Application.Integrations.YamlConfigurations;
 
 public class YamlConfigurationTests
 {

@@ -30,14 +30,16 @@ public sealed class HttpIntegrationClient(
         AuthenticationOptions authOptions,
         CancellationToken cancellationToken)
     {
+        var renderData = BuildRenderData(templateData, authOptions);
+
         var method = new HttpMethod(request.Method);
-        var url = HandlebarsHelper.Render(request.UrlTemplate, templateData);
+        var url = HandlebarsHelper.Render(request.UrlTemplate, renderData);
 
         using var httpRequest = new HttpRequestMessage(method, url);
 
         if (!string.Equals(request.Method, "GET", StringComparison.OrdinalIgnoreCase) && !string.IsNullOrEmpty(request.RequestTemplate))
         {
-            var body = HandlebarsHelper.Render(request.RequestTemplate, templateData);
+            var body = HandlebarsHelper.Render(request.RequestTemplate, renderData);
             httpRequest.Content = new StringContent(body, Encoding.UTF8, "application/json");
         }
 
@@ -74,5 +76,20 @@ public sealed class HttpIntegrationClient(
         }
 
         return JsonTemplateData.FlattenObject(content);
+    }
+
+    private static Dictionary<string, object?> BuildRenderData(IReadOnlyDictionary<string, object?> templateData, AuthenticationOptions authOptions)
+    {
+        var renderData = new Dictionary<string, object?>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["baseUrl"] = authOptions.BaseUrl?.TrimEnd('/'),
+        };
+
+        foreach (var (key, value) in templateData)
+        {
+            renderData[key] = value;
+        }
+
+        return renderData;
     }
 }

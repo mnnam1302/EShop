@@ -7,7 +7,7 @@ using FluentAssertions;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 
-namespace EShop.Finance.Tests.Integrations.Authentication;
+namespace EShop.Finance.Tests.Application.Integrations.Authentication;
 
 public class AuthenticationStackTests
 {
