@@ -3,7 +3,7 @@ using EShop.Finance.Domain.Enums;
 using EShop.Shared.DomainTools.Exceptions;
 using FluentAssertions;
 
-namespace EShop.Finance.Tests;
+namespace EShop.Finance.Tests.Domain;
 
 public class AccountTests
 {

@@ -3,7 +3,7 @@ using EShop.Finance.Domain.Services.PaymentSchedule;
 using EShop.Shared.DomainTools.Exceptions;
 using FluentAssertions;
 
-namespace EShop.Finance.Tests;
+namespace EShop.Finance.Tests.Domain.PaymentCalculationStrategies;
 
 public class PaymentScheduleStrategyTests
 {
