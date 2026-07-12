@@ -210,6 +210,21 @@ await this.FeatureBackgroundAsync();
 #line 20
  await testRunner.ThenAsync("the system responds with status \'NoContent\'", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
+                global::Reqnroll.Table table20 = new global::Reqnroll.Table(new string[] {
+                            "Domain",
+                            "Scope",
+                            "Unit",
+                            "RequestsPerUnit",
+                            "Burst"});
+                table20.AddRow(new string[] {
+                            "*",
+                            "User",
+                            "Minute",
+                            "120",
+                            "150"});
+#line 21
+ await testRunner.AndAsync("the tenant \'test-tenant\' has follow rate-limit policies", ((string)(null)), table20, "And ");
+#line hidden
             }
             await this.ScenarioCleanupAsync();
         }
@@ -225,7 +240,7 @@ await this.FeatureBackgroundAsync();
             global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Tenant user cannot set the rate-limit policy", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
-#line 22
+#line 25
 this.ScenarioInitialize(scenarioInfo, ruleInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
@@ -238,37 +253,37 @@ this.ScenarioInitialize(scenarioInfo, ruleInfo);
 #line 6
 await this.FeatureBackgroundAsync();
 #line hidden
-                global::Reqnroll.Table table20 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table21 = new global::Reqnroll.Table(new string[] {
                             "Id",
                             "Name",
                             "OwnerUserName",
                             "OwnerEmail",
                             "PhoneNumber"});
-                table20.AddRow(new string[] {
+                table21.AddRow(new string[] {
                             "test-tenant",
                             "Test Owner",
                             "test-owner",
                             "test-owner@eshop.com",
                             "\'123456789\'"});
-#line 23
- await testRunner.GivenAsync("System User has registered tenants with following details", ((string)(null)), table20, "Given ");
+#line 26
+ await testRunner.GivenAsync("System User has registered tenants with following details", ((string)(null)), table21, "Given ");
 #line hidden
-                global::Reqnroll.Table table21 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table22 = new global::Reqnroll.Table(new string[] {
                             "Domain",
                             "Scope",
                             "Unit",
                             "RequestsPerUnit",
                             "Burst"});
-                table21.AddRow(new string[] {
+                table22.AddRow(new string[] {
                             "*",
                             "User",
                             "Minute",
                             "120",
                             "150"});
-#line 26
- await testRunner.WhenAsync("a tenant user of \'test-tenant\' sets the rate-limit policy with following rules", ((string)(null)), table21, "When ");
-#line hidden
 #line 29
+ await testRunner.WhenAsync("a tenant user of \'test-tenant\' sets the rate-limit policy with following rules", ((string)(null)), table22, "When ");
+#line hidden
+#line 32
  await testRunner.ThenAsync("the system responds with status \'Forbidden\'", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
             }
@@ -286,7 +301,7 @@ await this.FeatureBackgroundAsync();
             global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("System User cannot set an invalid rate-limit policy", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
-#line 31
+#line 34
 this.ScenarioInitialize(scenarioInfo, ruleInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
@@ -299,38 +314,38 @@ this.ScenarioInitialize(scenarioInfo, ruleInfo);
 #line 6
 await this.FeatureBackgroundAsync();
 #line hidden
-                global::Reqnroll.Table table22 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table23 = new global::Reqnroll.Table(new string[] {
                             "Id",
                             "Name",
                             "OwnerUserName",
                             "OwnerEmail",
                             "PhoneNumber"});
-                table22.AddRow(new string[] {
+                table23.AddRow(new string[] {
                             "test-tenant",
                             "Test Owner",
                             "test-owner",
                             "test-owner@eshop.com",
                             "\'123456789\'"});
-#line 32
- await testRunner.GivenAsync("System User has registered tenants with following details", ((string)(null)), table22, "Given ");
+#line 35
+ await testRunner.GivenAsync("System User has registered tenants with following details", ((string)(null)), table23, "Given ");
 #line hidden
-                global::Reqnroll.Table table23 = new global::Reqnroll.Table(new string[] {
+                global::Reqnroll.Table table24 = new global::Reqnroll.Table(new string[] {
                             "Domain",
                             "Scope",
                             "Unit",
                             "RequestsPerUnit",
                             "Burst"});
-                table23.AddRow(new string[] {
+                table24.AddRow(new string[] {
                             "*",
                             "User",
                             "Minute",
                             "0",
                             ""});
-#line 35
- await testRunner.WhenAsync("System User sets the rate-limit policy for tenant \'test-tenant\' with following ru" +
-                        "les", ((string)(null)), table23, "When ");
-#line hidden
 #line 38
+ await testRunner.WhenAsync("System User sets the rate-limit policy for tenant \'test-tenant\' with following ru" +
+                        "les", ((string)(null)), table24, "When ");
+#line hidden
+#line 41
  await testRunner.ThenAsync("the system raise an error with message \'non-positive requestsPerUnit\'", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
             }

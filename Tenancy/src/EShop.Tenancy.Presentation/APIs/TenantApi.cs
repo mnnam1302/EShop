@@ -3,6 +3,7 @@ using EShop.Shared.CQRS;
 using EShop.Shared.JsonApi.Abstractions;
 using EShop.Shared.JsonApi.ResourceAccessControl;
 using EShop.Tenancy.Application.UseCases.Tenants.EnableTenantFeature;
+using EShop.Tenancy.Application.UseCases.Tenants.GetRateLimitPolicy;
 using EShop.Tenancy.Application.UseCases.Tenants.GetTenant;
 using EShop.Tenancy.Application.UseCases.Tenants.SetRateLimitPolicy;
 using EShop.Tenancy.Domain.Commands;
@@ -36,6 +37,9 @@ public sealed class TenantApi : ICarterModule
 
         group.MapPut("{tenantId}/rate-limit-policy", SetRateLimitPolicyAsync)
             .RequireSupportUserFilter();
+
+        group.MapGet("{tenantId}/rate-limit-policy", GetRateLimitPolicyAsync)
+            .RequireSystemUserFilter();
     }
 
     private static async Task<IResult> CreateTenantAsync(
@@ -119,5 +123,22 @@ public sealed class TenantApi : ICarterModule
         }
 
         return Results.NoContent();
+    }
+
+    private static async Task<IResult> GetRateLimitPolicyAsync(
+        [FromRoute] string tenantId,
+        [FromServices] IMediator mediator,
+        CancellationToken cancellationToken)
+    {
+        var query = new GetTenantRateLimitPolicyQuery(tenantId);
+
+        var result = await mediator.QueryAsync<GetTenantRateLimitPolicyQuery, TenantRateLimitPolicyResponse>(query, cancellationToken);
+
+        if (result.IsFailure)
+        {
+            return ApiEndpointHandler.Failure(result);
+        }
+
+        return Results.Ok(result);
     }
 }

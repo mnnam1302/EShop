@@ -10,7 +10,7 @@
 ## 2. Tenancy API endpoints
 
 - [x] 2.1 Admin write endpoint (system/support-restricted) to set a tenant's policy via command handler; tests: system admin succeeds, tenant user forbidden, invalid policy rejected
-- [ ] 2.2 Internal service-to-service read endpoint returning a tenant's stored policy with system scope, distinguishing "no policy" from "tenant not found"; integration tests for both cases
+- [x] 2.2 Internal service-to-service read endpoint returning a tenant's stored policy with system scope, distinguishing "no policy" from "tenant not found"; integration tests for both cases
 
 ## 3. Policy distribution (D3)
 

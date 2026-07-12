@@ -1,3 +1,4 @@
+using EShop.Shared.Authentication.Abstractions;
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.CQRS.Command;
 using EShop.Shared.DomainTools.Exceptions;
@@ -8,11 +9,14 @@ using EShop.Tenancy.Domain.Entities;
 namespace EShop.Tenancy.Application.UseCases.Tenants.SetRateLimitPolicy;
 
 internal sealed class SetTenantRateLimitPolicyCommandHandler(
+    IUserDetailsProvider userDetailsProvider,
     ITenantRepository tenantRepository,
     IUnitOfWork unitOfWork) : ICommandHandler<SetTenantRateLimitPolicyCommand>
 {
     public async Task<Result> HandleAsync(SetTenantRateLimitPolicyCommand command, CancellationToken cancellationToken)
     {
+        using var scope = userDetailsProvider.CreateSystemUserScope(command.TenantId);
+
         var tenant = await tenantRepository.FindByIdAsync(
             command.TenantId,
             trackChanges: true,

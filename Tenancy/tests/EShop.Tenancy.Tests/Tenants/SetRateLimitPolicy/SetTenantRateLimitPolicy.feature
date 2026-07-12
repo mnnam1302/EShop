@@ -7,7 +7,7 @@ Background:
 	Given System user with following permissions
 		| PermissionId               |
 		| Users_ViewSystemSettings   |
-		| Users_ManageSystemSettings |
+		| Users_ManageSystemSettings |s
 	And all features are available for System User
 
 Scenario: System User sets a valid rate-limit policy for a tenant
@@ -18,6 +18,9 @@ Scenario: System User sets a valid rate-limit policy for a tenant
 		| Domain | Scope | Unit   | RequestsPerUnit | Burst |
 		| *      | User  | Minute | 120             | 150   |
 	Then the system responds with status 'NoContent'
+	And the tenant 'test-tenant' has follow rate-limit policies
+		| Domain | Scope | Unit   | RequestsPerUnit | Burst |fv
+		| *      | User  | Minute | 120             | 150   |
 
 Scenario: Tenant user cannot set the rate-limit policy
 	Given System User has registered tenants with following details

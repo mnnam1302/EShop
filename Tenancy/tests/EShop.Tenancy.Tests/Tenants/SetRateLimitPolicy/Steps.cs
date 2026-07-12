@@ -1,4 +1,8 @@
+using EShop.Tenancy.Application.UseCases.Tenants.GetRateLimitPolicy;
+using EShop.Tenancy.Domain.Entities;
 using EShop.Tenancy.Presentation.Models;
+using FluentAssertions;
+using Polly;
 using Reqnroll;
 
 namespace EShop.Tenancy.Tests.Tenants.SetRateLimitPolicy;
@@ -18,5 +22,19 @@ internal sealed class Steps(StepContext stepContext)
     {
         var rules = dataTable.CreateSet<RateLimitRuleRequest>().ToList();
         await stepContext.SetRateLimitPolicyAsTenantUser(tenantId, rules);
+    }
+
+    [Then("the tenant {string} has follow rate-limit policies")]
+    public async Task ThenTheTenantHasFollowRate_LimitPolicies(string tenantId, DataTable dataTable)
+    {
+        await stepContext.ReadRateLimitPolicyAsSystemUser(tenantId);
+
+        stepContext.LastPolicyResult.Should().NotBeNull();
+        stepContext.LastPolicyResult!.IsSuccess.Should().BeTrue();
+
+        var response = stepContext.LastPolicyResult.Value;
+
+        var expectedRules = dataTable.CreateSet<RateLimitRuleResponse>().ToList();
+        response.Rules.Should().BeEquivalentTo(expectedRules);
     }
 }

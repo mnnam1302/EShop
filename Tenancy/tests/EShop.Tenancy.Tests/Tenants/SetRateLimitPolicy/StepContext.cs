@@ -1,4 +1,6 @@
 using EShop.Shared.Authentication;
+using EShop.Shared.Contracts.Abstractions.Shared;
+using EShop.Tenancy.Application.UseCases.Tenants.GetRateLimitPolicy;
 using EShop.Tenancy.Presentation.Models;
 using EShop.Tenancy.Tests.Setups;
 
@@ -7,6 +9,14 @@ namespace EShop.Tenancy.Tests.Tenants.SetRateLimitPolicy;
 internal sealed class StepContext(ApiContext apiContext)
 {
     private const string BaseUrl = "/api/v1/tenants";
+
+    public Result<TenantRateLimitPolicyResponse>? LastPolicyResult { get; private set; }
+
+    public async Task ReadRateLimitPolicyAsSystemUser(string tenantId)
+    {
+        var systemUser = UserData.GetSystemUser(tenantId);
+        LastPolicyResult = await apiContext.GetAsync<TenantRateLimitPolicyResponse>($"{BaseUrl}/{tenantId}/rate-limit-policy", systemUser);
+    }
 
     public async Task SetRateLimitPolicyAsSystemUser(string tenantId, IReadOnlyList<RateLimitRuleRequest> rules)
     {
