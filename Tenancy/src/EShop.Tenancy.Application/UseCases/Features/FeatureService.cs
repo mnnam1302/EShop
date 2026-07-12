@@ -9,7 +9,7 @@ using EShop.Tenancy.Domain.UnitOfWorks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
-namespace EShop.Tenancy.Application.Services;
+namespace EShop.Tenancy.Application.UseCases.Features;
 
 public interface IFeatureService
 {

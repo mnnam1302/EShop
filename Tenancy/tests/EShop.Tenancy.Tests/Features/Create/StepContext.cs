@@ -1,5 +1,5 @@
 using EShop.Shared.Authentication;
-using EShop.Tenancy.Application.UseCases.Queries.Features;
+using EShop.Tenancy.Application.UseCases.Features.GetFeature;
 using EShop.Tenancy.Presentation.Models;
 using EShop.Tenancy.Tests.Setups;
 using EShop.Testing.JsonApiApplication;

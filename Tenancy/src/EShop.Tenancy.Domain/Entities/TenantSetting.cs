@@ -1,5 +1,4 @@
-﻿using EShop.Shared.DomainTools.Entities;
-using EShop.Tenancy.Domain.RateLimiting;
+using EShop.Shared.DomainTools.Entities;
 using System.ComponentModel.DataAnnotations;
 
 namespace EShop.Tenancy.Domain.Entities;

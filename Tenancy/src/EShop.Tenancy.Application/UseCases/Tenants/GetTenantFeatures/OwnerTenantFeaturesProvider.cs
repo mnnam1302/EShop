@@ -1,7 +1,8 @@
-﻿using EShop.Shared.Scoping.ResourceAccessControl;
+using EShop.Shared.Scoping.ResourceAccessControl;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers.TenantFeaturesProvider;
+using EShop.Tenancy.Application.UseCases.Features;
 
-namespace EShop.Tenancy.Application.Services;
+namespace EShop.Tenancy.Application.UseCases.Tenants.GetTenantFeatures;
 
 public class OwnerTenantFeaturesProvider : ITenantFeaturesProvider
 {

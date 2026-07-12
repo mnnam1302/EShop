@@ -8,11 +8,10 @@ using EShop.Tenancy.Application.Abstractions;
 using EShop.Tenancy.Domain.Abstractions.Repositories;
 using EShop.Tenancy.Domain.Entities;
 using EShop.Tenancy.Domain.Enumerations;
-using EShop.Tenancy.Domain.RateLimiting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
-namespace EShop.Tenancy.Application.Services;
+namespace EShop.Tenancy.Application.UseCases.Tenants.InitializeSystem;
 
 public sealed class SystemInitializer(
     ILogger<SystemInitializer> logger,

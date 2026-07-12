@@ -1,12 +1,11 @@
 using EShop.Shared.Contracts.Abstractions.Mediator;
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.CQRS.Command;
-using EShop.Tenancy.Application.Services;
 using EShop.Tenancy.Domain.Entities;
 
-namespace EShop.Tenancy.Application.UseCases.Commands.Features;
+namespace EShop.Tenancy.Application.UseCases.Features.CreateFeature;
 
-public sealed class CreateSystemFeatureCommand : ICommand
+public sealed class CreateFeatureCommand : ICommand
 {
     public required string Id { get; init; }
     public required string Name { get; init; }
@@ -15,16 +14,16 @@ public sealed class CreateSystemFeatureCommand : ICommand
     public string Module { get; init; } = string.Empty;
 }
 
-internal sealed class CreateSystemFeatureCommandHandler : ICommandHandler<CreateSystemFeatureCommand>
+internal sealed class CreateFeatureCommandHandler : ICommandHandler<CreateFeatureCommand>
 {
     private readonly IFeatureService featureService;
 
-    public CreateSystemFeatureCommandHandler(IFeatureService featureService)
+    public CreateFeatureCommandHandler(IFeatureService featureService)
     {
         this.featureService = featureService;
     }
 
-    public async Task<Result> HandleAsync(CreateSystemFeatureCommand command, CancellationToken cancellationToken)
+    public async Task<Result> HandleAsync(CreateFeatureCommand command, CancellationToken cancellationToken)
     {
         var feature = Feature.Create(
             command.Id,

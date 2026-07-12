@@ -1,6 +1,6 @@
 using EShop.Shared.DomainTools.Specifications;
+using EShop.Tenancy.Domain.Entities;
 using EShop.Tenancy.Domain.Enumerations;
-using EShop.Tenancy.Domain.RateLimiting;
 
 namespace EShop.Tenancy.Domain.Specifications;
 

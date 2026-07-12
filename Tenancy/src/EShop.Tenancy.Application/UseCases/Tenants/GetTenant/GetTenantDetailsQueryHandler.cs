@@ -1,21 +1,8 @@
-using EShop.Shared.Contracts.Abstractions.Mediator;
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.CQRS.Query;
 using EShop.Tenancy.Domain.Abstractions.Repositories;
 
-namespace EShop.Tenancy.Application.UseCases.Queries.Tenants;
-
-public sealed record GetTenantDetailsQuery(string TenantId) : IQuery<TenantDetailsResponse>;
-
-public sealed class TenantDetailsResponse
-{
-    public string Id { get; init; } = string.Empty;
-    public string Name { get; init; } = string.Empty;
-    public string OwnerUsername { get; init; } = string.Empty;
-    public string OwnerEmail { get; init; } = string.Empty;
-    public string? PhoneNumber { get; init; }
-    public string? Description { get; init; }
-}
+namespace EShop.Tenancy.Application.UseCases.Tenants.GetTenant;
 
 internal sealed class GetTenantDetailsQueryHandler : IQueryHandler<GetTenantDetailsQuery, TenantDetailsResponse>
 {

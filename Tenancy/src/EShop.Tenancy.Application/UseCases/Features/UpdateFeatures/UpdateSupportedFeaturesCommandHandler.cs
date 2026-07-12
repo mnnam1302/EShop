@@ -3,41 +3,27 @@ using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.Contracts.Services.Tenancy.Features;
 using EShop.Shared.CQRS.Command;
 using EShop.Shared.DomainTools;
-using EShop.Tenancy.Application.Services;
 using Microsoft.Extensions.Logging;
 
-namespace EShop.Tenancy.Application.UseCases.Events;
+namespace EShop.Tenancy.Application.UseCases.Features.UpdateFeatures;
 
-public sealed class UpdateSupportedFeaturesInternalCommand : ICommand
-{
-    public required string SourceSystemReference { get; init; }
-
-    public IFeature[] Features { get; init; } = [];
-
-    public SupportedFeaturesAction Action { get; init; }
-
-    public required string TenantId { get; init; }
-
-    public required string ActionUserId { get; init; }
-}
-
-public class UpdateSupportedFeaturesInternalCommandHandler : ICommandHandler<UpdateSupportedFeaturesInternalCommand>
+public class UpdateSupportedFeaturesCommandHandler : ICommandHandler<UpdateSupportedFeaturesCommand>
 {
     private readonly IFeatureService _featureService;
     private readonly IResiliencePolicyFactory _resiliencePolicyFactory;
     private readonly ILogger _logger;
 
-    public UpdateSupportedFeaturesInternalCommandHandler(
+    public UpdateSupportedFeaturesCommandHandler(
         IFeatureService featureService,
         IResiliencePolicyFactory resiliencePolicyFactory,
-        ILogger<UpdateSupportedFeaturesInternalCommandHandler> logger)
+        ILogger<UpdateSupportedFeaturesCommandHandler> logger)
     {
         _featureService = featureService;
         _resiliencePolicyFactory = resiliencePolicyFactory;
         _logger = logger;
     }
 
-    public async Task<Result> HandleAsync(UpdateSupportedFeaturesInternalCommand command, CancellationToken cancellationToken)
+    public async Task<Result> HandleAsync(UpdateSupportedFeaturesCommand command, CancellationToken cancellationToken)
     {
         _logger.LogDebug("{Action} {Count} features of source system: {SourceSystemReference}",
             command.Action,

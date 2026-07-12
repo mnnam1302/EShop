@@ -4,7 +4,6 @@ using EShop.Shared.DomainTools.Entities;
 using EShop.Shared.DomainTools.Exceptions;
 using EShop.Shared.DomainTools.Specifications;
 using EShop.Tenancy.Domain.Commands;
-using EShop.Tenancy.Domain.RateLimiting;
 using EShop.Tenancy.Domain.Specifications;
 using System.ComponentModel.DataAnnotations;
 

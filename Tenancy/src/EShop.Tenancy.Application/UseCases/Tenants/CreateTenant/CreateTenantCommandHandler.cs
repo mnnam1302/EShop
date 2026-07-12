@@ -12,7 +12,7 @@ using EShop.Tenancy.Domain.Commands;
 using EShop.Tenancy.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
-namespace EShop.Tenancy.Application.UseCases.Commands.Tenants;
+namespace EShop.Tenancy.Application.UseCases.Tenants.CreateTenant;
 
 internal sealed class CreateTenantCommandHandler(
     ITenantRepository tenantRepository,

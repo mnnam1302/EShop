@@ -1,28 +1,22 @@
-using EShop.Shared.Contracts.Abstractions.Mediator;
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.Contracts.Services.Tenancy.Features;
 using EShop.Shared.CQRS.Query;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers.TenantFeaturesProvider;
 
-namespace EShop.Tenancy.Application.UseCases.Queries.Tenants;
-
-public sealed class GetTenantFeaturesQuery : IQuery<Response.TenantFeaturesResponse>
-{
-    public required string TenantId { get; init; }
-}
+namespace EShop.Tenancy.Application.UseCases.Tenants.GetTenantFeatures;
 
 public sealed class GetTenantFeaturesQueryHandler : IQueryHandler<GetTenantFeaturesQuery, Response.TenantFeaturesResponse>
 {
-    private readonly ITenantFeaturesProvider _tenantFeaturesProvider;
+    private readonly ITenantFeaturesProvider _provider;
 
-    public GetTenantFeaturesQueryHandler(ITenantFeaturesProvider tenantFeaturesProvider)
+    public GetTenantFeaturesQueryHandler(ITenantFeaturesProvider provider)
     {
-        _tenantFeaturesProvider = tenantFeaturesProvider;
+        _provider = provider;
     }
 
     public async Task<Result<Response.TenantFeaturesResponse>> HandleAsync(GetTenantFeaturesQuery query, CancellationToken cancellationToken = default)
     {
-        var features = await _tenantFeaturesProvider.GetFeatures(query.TenantId);
+        var features = await _provider.GetFeatures(query.TenantId);
 
         var result = new Response.TenantFeaturesResponse
         {
