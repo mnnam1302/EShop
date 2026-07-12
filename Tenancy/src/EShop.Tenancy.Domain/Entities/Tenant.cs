@@ -1,5 +1,4 @@
 using EShop.Shared.Authentication;
-using EShop.Shared.Contracts.Services.Tenancy.Tenants;
 using EShop.Shared.DomainTools.Aggregates;
 using EShop.Shared.DomainTools.Entities;
 using EShop.Shared.DomainTools.Exceptions;
@@ -28,7 +27,6 @@ public class Tenant : AggregateRoot<string>, IExcludedFromScoping
 
     private readonly List<TenantFeature> _tenantFeatures = [];
     public virtual IReadOnlyCollection<TenantFeature> TenantFeatures => _tenantFeatures.AsReadOnly();
-
 
     private readonly List<TenantSetting> tenantSettings = [];
     public virtual IReadOnlyCollection<TenantSetting> TenantSettings => tenantSettings.AsReadOnly();
@@ -61,14 +59,11 @@ public class Tenant : AggregateRoot<string>, IExcludedFromScoping
             Description = command.Description
         };
 
-        // TODO: Add domain event for tenant creation if needed
-
         return tenant;
     }
 
     private static void AssertTenant(CreateTenantCommand command)
     {
-        // TODO: TenantId should value object contains domain invariants
         AssertTenantId(command.Id);
 
         command.Id = command.Id.ToLowerInvariant();
