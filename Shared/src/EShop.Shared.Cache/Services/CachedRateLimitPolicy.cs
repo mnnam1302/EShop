@@ -8,6 +8,8 @@ public sealed class CachedRateLimitPolicy
 
 public sealed class CachedRateLimitRule
 {
+    public const string AllDomains = "*";
+
     public required string Domain { get; init; }
     public required string Scope { get; init; }
     public required string Unit { get; init; }
