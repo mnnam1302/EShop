@@ -2,7 +2,6 @@ using EShop.Shared.DomainTools.Exceptions;
 using EShop.Tenancy.Domain.Commands;
 using EShop.Tenancy.Domain.Entities;
 using EShop.Tenancy.Domain.Enumerations;
-using EShop.Tenancy.Domain.RateLimiting;
 using FluentAssertions;
 using Xunit;
 

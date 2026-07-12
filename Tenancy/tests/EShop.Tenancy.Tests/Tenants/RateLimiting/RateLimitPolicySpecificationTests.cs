@@ -1,5 +1,5 @@
+using EShop.Tenancy.Domain.Entities;
 using EShop.Tenancy.Domain.Enumerations;
-using EShop.Tenancy.Domain.RateLimiting;
 using EShop.Tenancy.Domain.Specifications;
 using FluentAssertions;
 using Xunit;
