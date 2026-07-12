@@ -13,5 +13,11 @@ internal class TenantSettingConfiguration : IEntityTypeConfiguration<TenantSetti
         builder.HasKey(ts => ts.Id);
 
         builder.HasIndex(ts => ts.Scope);
+
+        builder.OwnsOne(ts => ts.RateLimitPolicy, policy =>
+        {
+            policy.ToJson();
+            policy.OwnsMany(p => p.Rules);
+        });
     }
 }

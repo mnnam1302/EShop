@@ -16,7 +16,7 @@ public sealed class TenantSetRateLimitPolicyTests
         var tenant = CreateTenantWithSettings();
         var policy = new RateLimitPolicy(
         [
-            new RateLimitRule { Domain = "*", Scope = RateLimitScope.User, Unit = RateLimitUnit.Minute, RequestsPerUnit = 120, Burst = 20 }
+            new RateLimitRule { Domain = "*", Scope = RateLimitScope.User, Unit = RateLimitUnit.Minute, RequestsPerUnit = 120, Burst = 150 }
         ]);
 
         tenant.SetRateLimitPolicy(policy);

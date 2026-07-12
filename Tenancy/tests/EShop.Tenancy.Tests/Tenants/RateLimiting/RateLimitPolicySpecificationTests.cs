@@ -13,7 +13,7 @@ public sealed class RateLimitPolicySpecificationTests
     {
         var policy = new RateLimitPolicy(
         [
-            new RateLimitRule { Domain = "*", Scope = RateLimitScope.User, Unit = RateLimitUnit.Minute, RequestsPerUnit = 120, Burst = 20 },
+            new RateLimitRule { Domain = "*", Scope = RateLimitScope.User, Unit = RateLimitUnit.Minute, RequestsPerUnit = 120, Burst = 150 },
             new RateLimitRule { Domain = "authorization", Scope = RateLimitScope.AnonymousIp, Unit = RateLimitUnit.Minute, RequestsPerUnit = 5 }
         ]);
 
