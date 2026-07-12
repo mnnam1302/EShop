@@ -1,5 +1,3 @@
-using EShop.Tenancy.Domain.Enumerations;
-
 namespace EShop.Tenancy.Domain.Entities;
 
 public class RateLimitPolicy
@@ -24,9 +22,9 @@ public class RateLimitRule
 
     public required string Domain { get; init; }
 
-    public required RateLimitScope Scope { get; init; }
+    public required string Scope { get; init; }
 
-    public required RateLimitUnit Unit { get; init; }
+    public required string Unit { get; init; }
 
     public required int RequestsPerUnit { get; init; }
 

@@ -1,8 +1,6 @@
 using EShop.Tenancy.Application.UseCases.Tenants.GetRateLimitPolicy;
-using EShop.Tenancy.Domain.Entities;
 using EShop.Tenancy.Presentation.Models;
 using FluentAssertions;
-using Polly;
 using Reqnroll;
 
 namespace EShop.Tenancy.Tests.Tenants.SetRateLimitPolicy;

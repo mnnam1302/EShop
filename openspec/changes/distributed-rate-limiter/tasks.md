@@ -14,7 +14,7 @@
 
 ## 3. Policy distribution (D3)
 
-- [ ] 3.1 Add `RateLimitPolicyCacheKeyProvider` and `RateLimitPolicyCachingService` to `EShop.Shared.Cache` (Redis TTL ~10 min, separate from TenantFeatures)
+- [x] 3.1 Add `RateLimitPolicyCacheKeyProvider` and `RateLimitPolicyCachingService` to `EShop.Shared.Cache` (Redis TTL ~10 min, separate from TenantFeatures)
 - [ ] 3.2 Implement gateway-side policy resolver: L1 MemoryCache (~60 s) → Redis → Tenancy HTTP fallback (service discovery + Polly, ~2 s timeout), with negative caching and per-key single-flight guard
 - [ ] 3.3 Implement most-specific-first rule resolution (tenant → system tenant → compiled safety constants) with unit tests for each fallback level
 

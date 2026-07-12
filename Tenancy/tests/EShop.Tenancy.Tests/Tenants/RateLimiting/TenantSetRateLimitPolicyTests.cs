@@ -15,7 +15,7 @@ public sealed class TenantSetRateLimitPolicyTests
         var tenant = CreateTenantWithSettings();
         var policy = new RateLimitPolicy(
         [
-            new RateLimitRule { Domain = "*", Scope = RateLimitScope.User, Unit = RateLimitUnit.Minute, RequestsPerUnit = 120, Burst = 150 }
+            new RateLimitRule { Domain = "*", Scope = nameof(RateLimitScope.User), Unit = nameof(RateLimitUnit.Minute), RequestsPerUnit = 120, Burst = 150 }
         ]);
 
         tenant.SetRateLimitPolicy(policy);
@@ -29,7 +29,7 @@ public sealed class TenantSetRateLimitPolicyTests
         var tenant = CreateTenantWithSettings();
         var invalidPolicy = new RateLimitPolicy(
         [
-            new RateLimitRule { Domain = "*", Scope = RateLimitScope.User, Unit = RateLimitUnit.Minute, RequestsPerUnit = 0 }
+            new RateLimitRule { Domain = "*", Scope = nameof(RateLimitScope.User), Unit = nameof(RateLimitUnit.Minute), RequestsPerUnit = 0 }
         ]);
 
         var act = () => tenant.SetRateLimitPolicy(invalidPolicy);
@@ -58,7 +58,7 @@ public sealed class TenantSetRateLimitPolicyTests
         });
 
         var policy = new RateLimitPolicy([
-            new RateLimitRule { Domain = "*", Scope = RateLimitScope.User, Unit = RateLimitUnit.Minute, RequestsPerUnit = 10 }
+            new RateLimitRule { Domain = "*", Scope = nameof(RateLimitScope.User), Unit = nameof(RateLimitUnit.Minute), RequestsPerUnit = 10 }
         ]);
 
         var act = () => tenant.SetRateLimitPolicy(policy);

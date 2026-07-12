@@ -32,12 +32,22 @@ public sealed class RateLimitPolicySpecification : Specification<RateLimitPolicy
             yield return $"policy contains {rules.Count} rules which exceeds the maximum of {MaxRules}";
         }
 
-        var seenRules = new HashSet<(string Domain, RateLimitScope Scope)>(rules.Count);
+        var seenRules = new HashSet<(string Domain, string Scope)>(rules.Count);
 
         foreach (var rule in rules)
         {
             if (rule is null)
                 continue;
+
+            if (!Enum.TryParse<RateLimitScope>(rule.Scope, out _))
+            {
+                yield return $"rule '{rule.Domain}/{rule.Scope}' has an invalid scope '{rule.Scope}'";
+            }
+
+            if (!Enum.TryParse<RateLimitUnit>(rule.Unit, out _))
+            {
+                yield return $"rule '{rule.Domain}/{rule.Scope}' has an invalid unit '{rule.Unit}'";
+            }
 
             if (rule.RequestsPerUnit <= 0)
             {

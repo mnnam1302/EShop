@@ -77,8 +77,8 @@ public sealed class SystemInitializer(
             new RateLimitRule
             {
                 Domain = "authorization",
-                Scope = RateLimitScope.AnonymousIp,
-                Unit = RateLimitUnit.Minute,
+                Scope = nameof(RateLimitScope.AnonymousIp),
+                Unit = nameof(RateLimitUnit.Minute),
                 RequestsPerUnit = 5
             }
         ]);

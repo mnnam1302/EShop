@@ -13,8 +13,8 @@ public sealed class RateLimitPolicySpecificationTests
     {
         var policy = new RateLimitPolicy(
         [
-            new RateLimitRule { Domain = "*", Scope = RateLimitScope.User, Unit = RateLimitUnit.Minute, RequestsPerUnit = 120, Burst = 150 },
-            new RateLimitRule { Domain = "authorization", Scope = RateLimitScope.AnonymousIp, Unit = RateLimitUnit.Minute, RequestsPerUnit = 5 }
+            new RateLimitRule { Domain = "*", Scope = nameof(RateLimitScope.User), Unit = nameof(RateLimitUnit.Minute), RequestsPerUnit = 120, Burst = 150 },
+            new RateLimitRule { Domain = "authorization", Scope = nameof(RateLimitScope.AnonymousIp), Unit = nameof(RateLimitUnit.Minute), RequestsPerUnit = 5 }
         ]);
 
         var result = RateLimitPolicySpecification.New().IsSatisfiedBy(policy);
@@ -27,7 +27,7 @@ public sealed class RateLimitPolicySpecificationTests
     {
         var policy = new RateLimitPolicy(
         [
-            new RateLimitRule { Domain = "*", Scope = RateLimitScope.User, Unit = RateLimitUnit.Minute, RequestsPerUnit = 0 }
+            new RateLimitRule { Domain = "*", Scope = nameof(RateLimitScope.User), Unit = nameof(RateLimitUnit.Minute), RequestsPerUnit = 0 }
         ]);
 
         var reasons = RateLimitPolicySpecification.New().WhyIsNotSatisfiedBy(policy);
@@ -40,7 +40,7 @@ public sealed class RateLimitPolicySpecificationTests
     {
         var policy = new RateLimitPolicy(
         [
-            new RateLimitRule { Domain = "*", Scope = RateLimitScope.User, Unit = RateLimitUnit.Minute, RequestsPerUnit = 100, Burst = 5 }
+            new RateLimitRule { Domain = "*", Scope = nameof(RateLimitScope.User), Unit = nameof(RateLimitUnit.Minute), RequestsPerUnit = 100, Burst = 5 }
         ]);
 
         var reasons = RateLimitPolicySpecification.New().WhyIsNotSatisfiedBy(policy);
@@ -53,8 +53,8 @@ public sealed class RateLimitPolicySpecificationTests
     {
         var policy = new RateLimitPolicy(
         [
-            new RateLimitRule { Domain = "catalog", Scope = RateLimitScope.Tenant, Unit = RateLimitUnit.Minute, RequestsPerUnit = 100 },
-            new RateLimitRule { Domain = "catalog", Scope = RateLimitScope.Tenant, Unit = RateLimitUnit.Hour, RequestsPerUnit = 1000 }
+            new RateLimitRule { Domain = "catalog", Scope = nameof(RateLimitScope.Tenant), Unit = nameof(RateLimitUnit.Minute), RequestsPerUnit = 100 },
+            new RateLimitRule { Domain = "catalog", Scope = nameof(RateLimitScope.Tenant), Unit = nameof(RateLimitUnit.Hour), RequestsPerUnit = 1000 }
         ]);
 
         var reasons = RateLimitPolicySpecification.New().WhyIsNotSatisfiedBy(policy);
@@ -66,7 +66,7 @@ public sealed class RateLimitPolicySpecificationTests
     public void Policy_Exceeding_Max_Rules_Is_Rejected()
     {
         var rules = Enumerable.Range(0, RateLimitPolicySpecification.MaxRules + 1)
-            .Select(i => new RateLimitRule { Domain = $"domain-{i}", Scope = RateLimitScope.Tenant, Unit = RateLimitUnit.Minute, RequestsPerUnit = 10 });
+            .Select(i => new RateLimitRule { Domain = $"domain-{i}", Scope = nameof(RateLimitScope.Tenant), Unit = nameof(RateLimitUnit.Minute), RequestsPerUnit = 10 });
 
         var policy = new RateLimitPolicy(rules);
 
