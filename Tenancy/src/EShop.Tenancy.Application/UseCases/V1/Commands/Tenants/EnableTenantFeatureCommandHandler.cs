@@ -6,7 +6,7 @@ using EShop.Shared.Contracts.Services.Tenancy.Features;
 using EShop.Shared.CQRS.Command;
 using EShop.Shared.DomainTools.Exceptions;
 using EShop.Shared.DomainTools.UnitOfWorks;
-using EShop.Tenancy.Domain.Repositories;
+using EShop.Tenancy.Domain.Abstractions.Repositories;
 
 namespace EShop.Tenancy.Application.UseCases.V1.Commands.Tenants;
 

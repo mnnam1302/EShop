@@ -7,9 +7,9 @@ using EShop.Shared.DomainTools.Exceptions;
 using EShop.Shared.DomainTools.Extensions;
 using EShop.Shared.DomainTools.UnitOfWorks;
 using EShop.Shared.Scoping.ResourceAccessControl;
+using EShop.Tenancy.Domain.Abstractions.Repositories;
 using EShop.Tenancy.Domain.Commands;
 using EShop.Tenancy.Domain.Entities;
-using EShop.Tenancy.Domain.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 namespace EShop.Tenancy.Application.UseCases.V1.Commands.Tenants;

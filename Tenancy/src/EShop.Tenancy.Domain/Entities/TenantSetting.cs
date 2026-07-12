@@ -1,4 +1,5 @@
 ﻿using EShop.Shared.DomainTools.Entities;
+using EShop.Tenancy.Domain.RateLimiting;
 using System.ComponentModel.DataAnnotations;
 
 namespace EShop.Tenancy.Domain.Entities;
@@ -28,4 +29,6 @@ public class TenantSetting : EntityBase<Guid>, IScoped
 
     [MaxLength(ModelConstants.VeryLongText)]
     public string Scope { get; set; } = string.Empty;
+
+    public RateLimitPolicy? RateLimitPolicy { get; set; }
 }

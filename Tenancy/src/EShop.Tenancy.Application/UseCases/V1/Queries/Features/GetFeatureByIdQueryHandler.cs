@@ -2,7 +2,7 @@ using EShop.Shared.Contracts.Abstractions.Mediator;
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.CQRS.Query;
 using EShop.Shared.DomainTools.Exceptions;
-using EShop.Tenancy.Domain.Repositories;
+using EShop.Tenancy.Domain.Abstractions.Repositories;
 
 namespace EShop.Tenancy.Application.UseCases.V1.Queries.Features
 {

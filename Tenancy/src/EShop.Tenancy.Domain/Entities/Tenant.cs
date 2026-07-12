@@ -2,7 +2,10 @@ using EShop.Shared.Authentication;
 using EShop.Shared.DomainTools.Aggregates;
 using EShop.Shared.DomainTools.Entities;
 using EShop.Shared.DomainTools.Exceptions;
+using EShop.Shared.DomainTools.Specifications;
 using EShop.Tenancy.Domain.Commands;
+using EShop.Tenancy.Domain.RateLimiting;
+using EShop.Tenancy.Domain.Specifications;
 using System.ComponentModel.DataAnnotations;
 
 namespace EShop.Tenancy.Domain.Entities;
@@ -168,5 +171,18 @@ public class Tenant : AggregateRoot<string>, IExcludedFromScoping
         };
 
         tenantSettings.Add(tenantSetting);
+    }
+
+    public void SetRateLimitPolicy(RateLimitPolicy policy)
+    {
+        RateLimitPolicySpecification.New().ThrowDomainErrorIfNotSatisfied(policy);
+
+        var tenantSetting = tenantSettings.SingleOrDefault();
+        if (tenantSetting is null)
+        {
+            throw new BadRequestException("Tenant settings must be initialized before setting a rate-limit policy.");
+        }
+
+        tenantSetting.RateLimitPolicy = policy;
     }
 }

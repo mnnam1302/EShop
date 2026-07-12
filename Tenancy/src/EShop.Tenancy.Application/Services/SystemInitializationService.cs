@@ -5,8 +5,8 @@ using EShop.Shared.Contracts.Services.Tenancy.Tenants;
 using EShop.Shared.DomainTools.Extensions;
 using EShop.Shared.DomainTools.UnitOfWorks;
 using EShop.Tenancy.Application.Abstractions;
+using EShop.Tenancy.Domain.Abstractions.Repositories;
 using EShop.Tenancy.Domain.Entities;
-using EShop.Tenancy.Domain.Repositories;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
