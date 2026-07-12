@@ -3,7 +3,7 @@ using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.CQRS.Command;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers.TenantFeaturesProvider;
 
-namespace EShop.Tenancy.Application.UseCases.V1.Events;
+namespace EShop.Tenancy.Application.UseCases.Events;
 
 public sealed class UpdateTenantFeaturesCommand : ICommand
 {

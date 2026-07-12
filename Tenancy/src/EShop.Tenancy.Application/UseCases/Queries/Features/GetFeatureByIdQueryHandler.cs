@@ -4,7 +4,7 @@ using EShop.Shared.CQRS.Query;
 using EShop.Shared.DomainTools.Exceptions;
 using EShop.Tenancy.Domain.Abstractions.Repositories;
 
-namespace EShop.Tenancy.Application.UseCases.V1.Queries.Features
+namespace EShop.Tenancy.Application.UseCases.Queries.Features
 {
     public sealed class GetFeatureByIdQuery(string id) : IQuery<FeatureResponse>
     {

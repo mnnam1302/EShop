@@ -6,7 +6,7 @@ using EShop.Shared.DomainTools;
 using EShop.Tenancy.Application.Services;
 using Microsoft.Extensions.Logging;
 
-namespace EShop.Tenancy.Application.UseCases.V1.Events;
+namespace EShop.Tenancy.Application.UseCases.Events;
 
 public sealed class UpdateSupportedFeaturesInternalCommand : ICommand
 {

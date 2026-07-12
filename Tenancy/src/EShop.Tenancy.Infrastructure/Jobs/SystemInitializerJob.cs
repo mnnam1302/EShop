@@ -1,12 +1,12 @@
-﻿using EShop.Tenancy.Application.Abstractions;
+using EShop.Tenancy.Application.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace EShop.Tenancy.Infrastructure.Jobs;
 
-internal sealed class SystemInitializationJob(
-    ILogger<SystemInitializationJob> logger,
+internal sealed class SystemInitializerJob(
+    ILogger<SystemInitializerJob> logger,
     IServiceScopeFactory serviceScopeFactory) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -19,8 +19,8 @@ internal sealed class SystemInitializationJob(
 
             var scope = serviceScopeFactory.CreateScope();
 
-            var initializationHandler = scope.ServiceProvider.GetRequiredService<ISystemInitializationService>();
-            await initializationHandler.InitializeSystemAsync(stoppingToken);
+            var initializationHandler = scope.ServiceProvider.GetRequiredService<ISystemInitializer>();
+            await initializationHandler.InitializeAsync(stoppingToken);
 
             logger.LogInformation("System initialization completed.");
         }

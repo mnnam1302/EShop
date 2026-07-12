@@ -3,7 +3,7 @@ using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.CQRS.Query;
 using EShop.Tenancy.Domain.Abstractions.Repositories;
 
-namespace EShop.Tenancy.Application.UseCases.V1.Queries.Tenants;
+namespace EShop.Tenancy.Application.UseCases.Queries.Tenants;
 
 public sealed record GetTenantDetailsQuery(string TenantId) : IQuery<TenantDetailsResponse>;
 

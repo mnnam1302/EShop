@@ -40,6 +40,14 @@ public sealed class TenantSetRateLimitPolicyTests
     }
 
     [Fact]
+    public void New_Tenant_Has_No_Seeded_RateLimitPolicy()
+    {
+        var tenant = CreateTenantWithSettings();
+
+        tenant.TenantSettings.Single().RateLimitPolicy.Should().BeNull();
+    }
+
+    [Fact]
     public void SetRateLimitPolicy_Without_TenantSetting_Throws()
     {
         var tenant = Tenant.Create(new CreateTenantCommand

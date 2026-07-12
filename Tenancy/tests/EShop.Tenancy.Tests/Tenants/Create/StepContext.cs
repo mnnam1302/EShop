@@ -1,5 +1,5 @@
 using EShop.Shared.Authentication;
-using EShop.Tenancy.Application.UseCases.V1.Queries.Tenants;
+using EShop.Tenancy.Application.UseCases.Queries.Tenants;
 using EShop.Tenancy.Domain.Commands;
 using EShop.Tenancy.Tests.Setups;
 

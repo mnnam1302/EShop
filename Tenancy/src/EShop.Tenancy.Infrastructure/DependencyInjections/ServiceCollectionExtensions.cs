@@ -110,7 +110,7 @@ public static class ServiceCollectionExtensions
 
     private static void AddSystemInitialization(this IServiceCollection services)
     {
-        services.AddTransient<ISystemInitializationService, SystemInitializationService>();
-        services.AddHostedService<SystemInitializationJob>();
+        services.AddTransient<ISystemInitializer, SystemInitializer>();
+        services.AddHostedService<SystemInitializerJob>();
     }
 }

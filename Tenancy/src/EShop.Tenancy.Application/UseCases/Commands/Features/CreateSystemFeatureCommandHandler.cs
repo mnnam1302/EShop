@@ -4,7 +4,7 @@ using EShop.Shared.CQRS.Command;
 using EShop.Tenancy.Application.Services;
 using EShop.Tenancy.Domain.Entities;
 
-namespace EShop.Tenancy.Application.UseCases.V1.Commands.Features;
+namespace EShop.Tenancy.Application.UseCases.Commands.Features;
 
 public sealed class CreateSystemFeatureCommand : ICommand
 {

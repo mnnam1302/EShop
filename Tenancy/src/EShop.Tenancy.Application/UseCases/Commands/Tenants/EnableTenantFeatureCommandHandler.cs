@@ -8,7 +8,7 @@ using EShop.Shared.DomainTools.Exceptions;
 using EShop.Shared.DomainTools.UnitOfWorks;
 using EShop.Tenancy.Domain.Abstractions.Repositories;
 
-namespace EShop.Tenancy.Application.UseCases.V1.Commands.Tenants;
+namespace EShop.Tenancy.Application.UseCases.Commands.Tenants;
 
 public sealed class EnableTenantFeatureCommand : ICommand
 {

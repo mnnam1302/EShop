@@ -4,7 +4,7 @@ using EShop.Shared.Contracts.Services.Tenancy.Features;
 using EShop.Shared.CQRS.Query;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers.TenantFeaturesProvider;
 
-namespace EShop.Tenancy.Application.UseCases.V1.Queries.Tenants;
+namespace EShop.Tenancy.Application.UseCases.Queries.Tenants;
 
 public sealed class GetTenantFeaturesQuery : IQuery<Response.TenantFeaturesResponse>
 {
