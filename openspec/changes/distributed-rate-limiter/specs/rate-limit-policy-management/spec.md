@@ -6,7 +6,7 @@
 The Tenancy service SHALL persist an optional rate-limit policy as part of a tenant's settings, consisting of rules with a route-group domain (`tenancy`, `authorization`, `catalog`, or `*`), a scope (`Tenant`, `User`, or `AnonymousIp`), a time unit (`Second`, `Minute`, `Hour`, `Day`), a requests-per-unit value, and an optional burst capacity.
 
 #### Scenario: Policy with rules is persisted and retrievable
-- **WHEN** a policy containing the rule `{ domain: "*", scope: User, unit: Minute, requestsPerUnit: 120, burst: 20 }` is set on a tenant
+- **WHEN** a policy containing the rule `{ domain: "*", scope: User, unit: Minute, requestsPerUnit: 120, burst: 150 }` is set on a tenant
 - **THEN** reading the tenant's settings returns the policy with that rule intact
 
 #### Scenario: Tenant without a policy

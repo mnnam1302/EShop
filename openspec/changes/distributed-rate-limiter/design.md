@@ -62,6 +62,8 @@ tenant (domain, scope) → tenant (*, scope) → system (domain, scope) → syst
 1. Initial values from capacity budgeting, top-down: measured sustainable throughput of the constraining downstream (DB/service p99 headroom) → reserve margin → divide across expected active tenants (tenant quota) → divide by expected active users per tenant (user bucket). Burst = short-window client behavior (page load, SPA fan-out), not sustained rate. Security rules (login) are sized from threat math, not capacity — 5/min/IP class.
 2. Calibration from shadow mode, bottom-up: compare seeded values against observed legitimate traffic percentiles (e.g., user limit ≥ p99.9 of per-user request rates; tenant quota ≥ max observed tenant rate + growth margin) and adjust before enforcement. A default that would shadow-reject legitimate traffic is a wrong default, not a strict one.
 
+**Seeded value: `authorization`/`AnonymousIp` = 5 requests/minute.** This is the only rule seeded on the system tenant at this stage (task 1.4) — it is sized from threat math per (1) above, not capacity, so it needed no shadow-mode traffic to justify: 5/min per IP is generous enough that a user mistyping a password a few times in a row is never blocked, while being restrictive enough to make scripted credential-stuffing against a single IP impractical (12 attempts/hour max). No `Tenant`/`User` scope defaults are seeded yet — those require capacity data this design doesn't have, so they deliberately fall through to the compiled safety constants (D2 resolution chain) until shadow mode produces real percentiles to size them from.
+
 ### D3. Policy distribution: dedicated cache path, TTL propagation
 
 ```

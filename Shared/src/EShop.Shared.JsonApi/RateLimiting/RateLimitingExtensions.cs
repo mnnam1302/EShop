@@ -1,10 +1,10 @@
+using System.Globalization;
+using System.Threading.RateLimiting;
 using EShop.Shared.Authentication.Abstractions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using System.Globalization;
-using System.Threading.RateLimiting;
 
 namespace EShop.Shared.JsonApi.RateLimiting;
 

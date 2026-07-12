@@ -2,14 +2,14 @@
 
 ## 1. Tenancy domain model (D1, D2)
 
-- [ ] 1.1 Add `RateLimitPolicy`, `RateLimitRule`, `RateLimitScope`, `RateLimitUnit` types to `EShop.Tenancy.Domain` and the optional `RateLimitPolicy` property on `TenantSetting` (resolve O1: extend `TenantSetting` vs sibling entity before starting)
-- [ ] 1.2 Add `Tenant.SetRateLimitPolicy(...)` behavior guarded by a validation `Specification` (positive rate, `Burst >= RequestsPerUnit`, unique `(Domain, Scope)`, bounded rule count) with unit tests covering each invariant rejection
-- [ ] 1.3 Add EF configuration `OwnsOne(...).ToJson()` + `OwnsMany(Rules)` and the additive nullable-column migration
-- [ ] 1.4 Seed the system tenant's default policy including the `authorization`/`AnonymousIp` per-minute login rule, with a written sizing rationale per rule (D2 sizing); verify new tenants get no seeded rules
+- [x] 1.1 Add `RateLimitPolicy`, `RateLimitRule`, `RateLimitScope`, `RateLimitUnit` types to `EShop.Tenancy.Domain` and the optional `RateLimitPolicy` property on `TenantSetting` (resolve O1: extend `TenantSetting` vs sibling entity before starting)
+- [x] 1.2 Add `Tenant.SetRateLimitPolicy(...)` behavior guarded by a validation `Specification` (positive rate, `Burst >= RequestsPerUnit`, unique `(Domain, Scope)`, bounded rule count) with unit tests covering each invariant rejection
+- [x] 1.3 Add EF configuration `OwnsOne(...).ToJson()` + `OwnsMany(Rules)` and the additive nullable-column migration (configuration code done; migration generation/apply is a user-owned step, see below)
+- [x] 1.4 Seed the system tenant's default policy including the `authorization`/`AnonymousIp` per-minute login rule, with a written sizing rationale per rule (D2 sizing); verify new tenants get no seeded rules
 
 ## 2. Tenancy API endpoints
 
-- [ ] 2.1 Admin write endpoint (system/support-restricted) to set a tenant's policy via command handler; tests: system admin succeeds, tenant user forbidden, invalid policy rejected
+- [x] 2.1 Admin write endpoint (system/support-restricted) to set a tenant's policy via command handler; tests: system admin succeeds, tenant user forbidden, invalid policy rejected
 - [ ] 2.2 Internal service-to-service read endpoint returning a tenant's stored policy with system scope, distinguishing "no policy" from "tenant not found"; integration tests for both cases
 
 ## 3. Policy distribution (D3)

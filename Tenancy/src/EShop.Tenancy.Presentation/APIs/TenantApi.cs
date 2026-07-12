@@ -4,7 +4,9 @@ using EShop.Shared.JsonApi.Abstractions;
 using EShop.Shared.JsonApi.ResourceAccessControl;
 using EShop.Tenancy.Application.UseCases.Tenants.EnableTenantFeature;
 using EShop.Tenancy.Application.UseCases.Tenants.GetTenant;
+using EShop.Tenancy.Application.UseCases.Tenants.SetRateLimitPolicy;
 using EShop.Tenancy.Domain.Commands;
+using EShop.Tenancy.Presentation.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -18,8 +20,7 @@ public sealed class TenantApi : ICarterModule
 
     public void AddRoutes(IEndpointRouteBuilder app)
     {
-        var group = app
-            .NewVersionedApi("Tenants")
+        var group = app.NewVersionedApi("Tenants")
             .MapGroup(BaseUrl)
             .HasApiVersion(1)
             .RequireAuthorization();
@@ -32,6 +33,9 @@ public sealed class TenantApi : ICarterModule
 
         group.MapPatch("{tenantId}/features/{featureId}/enable", EnableTenantFeatureAsync)
             .RequireSystemUserFilter();
+
+        group.MapPut("{tenantId}/rate-limit-policy", SetRateLimitPolicyAsync)
+            .RequireSupportUserFilter();
     }
 
     private static async Task<IResult> CreateTenantAsync(
@@ -76,6 +80,35 @@ public sealed class TenantApi : ICarterModule
         {
             TenantId = tenantId,
             FeatureId = featureId
+        };
+
+        var result = await mediator.SendAsync(command, cancellationToken);
+
+        if (result.IsFailure)
+        {
+            return ApiEndpointHandler.Failure(result);
+        }
+
+        return Results.NoContent();
+    }
+
+    private static async Task<IResult> SetRateLimitPolicyAsync(
+        [FromRoute] string tenantId,
+        [FromBody] SetRateLimitPolicyRequest request,
+        [FromServices] IMediator mediator,
+        CancellationToken cancellationToken)
+    {
+        var command = new SetTenantRateLimitPolicyCommand
+        {
+            TenantId = tenantId,
+            Rules = request.Rules.Select(rule => new RateLimitRuleInput
+            {
+                Domain = rule.Domain,
+                Scope = rule.Scope,
+                Unit = rule.Unit,
+                RequestsPerUnit = rule.RequestsPerUnit,
+                Burst = rule.Burst
+            }).ToList()
         };
 
         var result = await mediator.SendAsync(command, cancellationToken);
