@@ -39,6 +39,7 @@
     <PackageVersion Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="8.0.22" />
     <PackageVersion Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="8.0.10" />
     <PackageVersion Include="Microsoft.Extensions.Caching.Memory" Version="8.0.1" />
+    <PackageVersion Include="StackExchange.Redis" Version="2.9.11" />
     <PackageVersion Include="Microsoft.Extensions.Http.Polly" Version="8.0.10" />
     <!-- ================================================================ -->
     <!-- ASP.NET Core and Web Framework                                   -->

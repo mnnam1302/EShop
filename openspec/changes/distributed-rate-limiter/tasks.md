@@ -20,10 +20,10 @@
 
 ## 4. Shared limiter core (D4, D5, D6)
 
-- [ ] 4.1 Create `EShop.Shared.RateLimiting` project; define limiter abstractions and options usable without ASP.NET (reusable by Finance later)
-- [ ] 4.2 Write the token-bucket Lua script (tenant + user keys checked atomically in one call, Redis `TIME` as clock, TTL on keys, returns `(allowed, remaining, retry_after_ms)` per scope)
-- [ ] 4.3 Write the sliding-window-counter Lua script for IP scope with the same return contract and TTL behavior
-- [ ] 4.4 Implement script loading/`EVALSHA` execution over StackExchange.Redis with tenant-hash-tagged key builders (`rl:{tenantId}:...`)
+- [x] 4.1 Create `EShop.Shared.RateLimiting` project; define limiter abstractions and options usable without ASP.NET (reusable by Finance later)
+- [x] 4.2 Write the token-bucket Lua script (tenant + user keys checked atomically in one call, Redis `TIME` as clock, TTL on keys, returns `(allowed, remaining, retry_after_ms)` per scope)
+- [x] 4.3 Write the sliding-window-counter Lua script for IP scope with the same return contract and TTL behavior
+- [x] 4.4 Implement script loading/`EVALSHA` execution over StackExchange.Redis with tenant-hash-tagged key builders (`rl:{tenantId}:...`)
 - [ ] 4.5 Testcontainers integration tests against real Redis: exact admission at the limit under concurrent bursts, refill over time, cross-"replica" correctness (two limiter instances, one Redis), tenant-qualified user keys isolated across tenants, key expiry after idle period
 
 ## 5. ASP.NET integration (D7, D8)
