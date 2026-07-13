@@ -1,4 +1,4 @@
-namespace EShop.Shared.RateLimiting;
+namespace EShop.Shared.RateLimiting.Abstractions;
 
 public interface IRateLimiter
 {

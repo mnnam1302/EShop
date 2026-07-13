@@ -1,3 +1,5 @@
+using EShop.Shared.RateLimiting.Abstractions;
+using EShop.Shared.RateLimiting.Redis;
 using FluentAssertions;
 
 namespace EShop.Shared.RateLimiting.Tests;

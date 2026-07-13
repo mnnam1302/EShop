@@ -1,12 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <EmbeddedResource Include="Scripts\*.lua" />
+    <EmbeddedResource Include="Redis\Scripts\*.lua" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
     <PackageReference Include="StackExchange.Redis" />
+    <PackageReference Include="System.Threading.RateLimiting" />
   </ItemGroup>
 
 </Project>

@@ -28,7 +28,7 @@
 
 ## 5. ASP.NET integration (D7, D8)
 
-- [ ] 5.1 Implement the custom `RateLimiter` (`AcquireAsyncCore` → limiter core) and partition logic: tenant+user for authenticated requests, IP for anonymous on the authorization domain, `QueueLimit = 0`
+- [x] 5.1 Implement the custom `RateLimiter` (`AcquireAsyncCore` → limiter core) and partition logic: tenant+user for authenticated requests, IP for anonymous on the authorization domain, `QueueLimit = 0`
 - [ ] 5.2 Replace `ConfigureRateLimiters` in `EShop.Shared.JsonApi.RateLimiting`: register distributed policies, keep Layer-0 in-memory node guard, remove the per-tenant `ConcurrencyLimiter` and the shared `"anonymous-user"` partition
 - [ ] 5.3 Attach `RateLimiterPolicy` to all YARP routes (including authorization) in gateway config; resolve O2 (forwarded-headers configuration for real client IP) for the login rule
 

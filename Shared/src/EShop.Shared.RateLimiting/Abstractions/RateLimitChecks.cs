@@ -1,4 +1,4 @@
-namespace EShop.Shared.RateLimiting;
+namespace EShop.Shared.RateLimiting.Abstractions;
 
 public sealed record TokenBucketCheck(string Key, int Capacity, int RefillTokensPerPeriod, TimeSpan RefillPeriod);
 

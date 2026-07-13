@@ -1,6 +1,7 @@
+using EShop.Shared.RateLimiting.Abstractions;
 using StackExchange.Redis;
 
-namespace EShop.Shared.RateLimiting;
+namespace EShop.Shared.RateLimiting.Redis;
 
 public sealed class RedisRateLimiter : IRateLimiter
 {

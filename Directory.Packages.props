@@ -40,6 +40,7 @@
     <PackageVersion Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="8.0.10" />
     <PackageVersion Include="Microsoft.Extensions.Caching.Memory" Version="8.0.1" />
     <PackageVersion Include="StackExchange.Redis" Version="2.9.11" />
+    <PackageVersion Include="System.Threading.RateLimiting" Version="8.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Http.Polly" Version="8.0.10" />
     <!-- ================================================================ -->
     <!-- ASP.NET Core and Web Framework                                   -->

@@ -1,4 +1,4 @@
-namespace EShop.Shared.RateLimiting;
+namespace EShop.Shared.RateLimiting.Redis;
 
 public static class RateLimitKeyBuilder
 {
