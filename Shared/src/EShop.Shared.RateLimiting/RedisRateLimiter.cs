@@ -44,20 +44,6 @@ public sealed class RedisRateLimiter : IRateLimiter
         return new CombinedRateLimitResult(primaryResult, secondaryResult);
     }
 
-    public async Task<RateLimitResult> CheckSlidingWindowAsync(
-        SlidingWindowCheck check,
-        CancellationToken cancellationToken = default)
-    {
-        var database = _connectionMultiplexer.GetDatabase();
-
-        RedisKey[] keys = [check.Key];
-        RedisValue[] values = [check.Limit, (long)check.Window.TotalSeconds];
-
-        var reply = (RedisResult[])(await database.ScriptEvaluateAsync(_slidingWindowScript, keys, values))!;
-
-        return ParseResult(reply, 0);
-    }
-
     private static RedisValue[] BuildTokenBucketArgs(TokenBucketCheck check)
     {
         return [check.Capacity, check.RefillTokensPerPeriod, (long)check.RefillPeriod.TotalSeconds];
@@ -72,5 +58,19 @@ public sealed class RedisRateLimiter : IRateLimiter
         var retryAfterMs = (long)reply[offset + 2];
 
         return new RateLimitResult(allowed, remaining, TimeSpan.FromMilliseconds(retryAfterMs));
+    }
+
+    public async Task<RateLimitResult> CheckSlidingWindowAsync(
+        SlidingWindowCheck check,
+        CancellationToken cancellationToken = default)
+    {
+        var database = _connectionMultiplexer.GetDatabase();
+
+        RedisKey[] keys = [check.Key];
+        RedisValue[] values = [check.Limit, (long)check.Window.TotalSeconds];
+
+        var reply = (RedisResult[])(await database.ScriptEvaluateAsync(_slidingWindowScript, keys, values))!;
+
+        return ParseResult(reply, 0);
     }
 }
