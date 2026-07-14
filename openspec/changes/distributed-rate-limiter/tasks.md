@@ -29,17 +29,17 @@
 ## 5. ASP.NET integration (D7, D8)
 
 - [x] 5.1 Implement the custom `RateLimiter` (`AcquireAsyncCore` → limiter core) and partition logic: tenant+user for authenticated requests, IP for anonymous on the authorization domain, `QueueLimit = 0`
-- [ ] 5.2 Replace `ConfigureRateLimiters` in `EShop.Shared.JsonApi.RateLimiting`: register distributed policies, keep Layer-0 in-memory node guard, remove the per-tenant `ConcurrencyLimiter` and the shared `"anonymous-user"` partition
-- [ ] 5.3 Attach `RateLimiterPolicy` to all YARP routes (including authorization) in gateway config; resolve O2 (forwarded-headers configuration for real client IP) for the login rule
+- [x] 5.2 Replace `ConfigureRateLimiters` in `EShop.Shared.JsonApi.RateLimiting`: register distributed policies, keep Layer-0 in-memory node guard, remove the per-tenant `ConcurrencyLimiter` and the shared `"anonymous-user"` partition
+- [x] 5.3 Attach `RateLimiterPolicy` to all YARP routes (including authorization) in gateway config; resolve O2 (forwarded-headers configuration for real client IP) for the login rule
 
 ## 6. Client contract (D9)
 
-- [ ] 6.1 Emit `RateLimit-Limit` / `RateLimit-Remaining` / `RateLimit-Reset` headers on admitted responses from the script return values
-- [ ] 6.2 Implement the rejection response: 429 + `Retry-After` + JSON:API error body (`rate_limit_exceeded`, detail distinguishing user limit vs tenant quota); integration tests for both rejection scopes and success-header presence
+- [x] 6.1 Emit `RateLimit-Limit` / `RateLimit-Remaining` / `RateLimit-Reset` headers on admitted responses from the script return values
+- [x] 6.2 Implement the rejection response: 429 + `Retry-After` + JSON:API error body (`rate_limit_exceeded`, detail distinguishing user limit vs tenant quota); integration tests for both rejection scopes and success-header presence
 
 ## 7. Resilience (D10)
 
-- [ ] 7.1 Add hard ~50 ms timeout and circuit breaker for limiter Redis calls (extend `RedisResiliencePolicyProvider`)
+- [x] 7.1 Add hard ~50 ms timeout and circuit breaker for limiter Redis calls (extend `RedisResiliencePolicyProvider`)
 - [ ] 7.2 Implement fail-open path: circuit open → per-node in-memory fallback limits, `rate_limiter.fail_open` metric; test Redis-outage admission and recovery without restart
 
 ## 8. Observability and shadow mode (D11)

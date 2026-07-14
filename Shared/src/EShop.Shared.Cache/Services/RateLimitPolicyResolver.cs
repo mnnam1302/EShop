@@ -6,6 +6,8 @@ namespace EShop.Shared.Cache.Services;
 public interface IRateLimitPolicyResolver
 {
     Task<CachedRateLimitPolicy?> GetPolicy(string tenantId, CancellationToken cancellationToken = default);
+
+    bool TryGetCachedPolicy(string tenantId, out CachedRateLimitPolicy? policy);
 }
 
 public sealed class RateLimitPolicyResolver : IRateLimitPolicyResolver
@@ -82,6 +84,16 @@ public sealed class RateLimitPolicyResolver : IRateLimitPolicyResolver
         }
 
         return afterWait;
+    }
+
+    public bool TryGetCachedPolicy(string tenantId, out CachedRateLimitPolicy? policy)
+    {
+        if (string.IsNullOrWhiteSpace(tenantId))
+        {
+            throw new ArgumentException("TenantId is required", nameof(tenantId));
+        }
+
+        return _memoryCache.TryGetValue(GetL1CacheKey(tenantId), out policy);
     }
 
     private void SetL1Cache(string key, CachedRateLimitPolicy policy)

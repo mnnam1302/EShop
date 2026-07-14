@@ -13,5 +13,6 @@ namespace EShop.Shared.Diagnostics
         public static readonly EventId GetTenantsFailed = new EventId(2, nameof(GetTenantsFailed));
 
         public static readonly EventId RedisCircuitBreakerActivated = new EventId(55, nameof(RedisCircuitBreakerActivated));
+        public static readonly EventId RateLimiterFailOpen = new EventId(56, nameof(RateLimiterFailOpen));
     }
 }

@@ -3,6 +3,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Mvc" />
     <PackageReference Include="Microsoft.Extensions.ServiceDiscovery" />
+    <PackageReference Include="Yarp.ReverseProxy" />
   </ItemGroup>
 
   <ItemGroup>
@@ -10,6 +11,7 @@
     <ProjectReference Include="..\EShop.Shared.DbResourceAccessControl\EShop.Shared.DbResourceAccessControl.csproj" />
     <ProjectReference Include="..\EShop.Shared.DomainTools\EShop.Shared.DomainTools.csproj" />
     <ProjectReference Include="..\EShop.Shared.HealthChecks\EShop.Shared.HealthChecks.csproj" />
+    <ProjectReference Include="..\EShop.Shared.RateLimiting\EShop.Shared.RateLimiting.csproj" />
     <ProjectReference Include="..\EShop.Shared.Scoping\EShop.Shared.Scoping.csproj" />
   </ItemGroup>
 
