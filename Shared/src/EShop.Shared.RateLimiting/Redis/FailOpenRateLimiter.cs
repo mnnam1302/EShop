@@ -62,5 +62,6 @@ public sealed class FailOpenRateLimiter : IRateLimiter
     private void LogFailOpen(Exception ex)
     {
         _logger.LogWarning(LogEvents.RateLimiterFailOpen, ex, "Rate limiter failing open to in-memory fallback due to Redis unavailability");
+        RateLimiterMetrics.FailOpen.Add(1);
     }
 }

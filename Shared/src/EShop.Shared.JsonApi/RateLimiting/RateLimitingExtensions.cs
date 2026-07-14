@@ -130,8 +130,12 @@ public static class RateLimitingExtensions
                 ToPeriod(rule.Unit));
         }
 
-        return new DistributedTokenBucketRateLimiter(rateLimiter, httpContextAccessor, ResolveTenantCheck, "tenant", ResolveUserCheck, "user");
+        return new DistributedTokenBucketRateLimiter(rateLimiter, httpContextAccessor, ResolveTenantCheck, "tenant", tenantId, domain, ResolveUserCheck, "user");
     }
+
+    // No real tenant identity applies to anonymous traffic; this sentinel is the "tenant" metric tag
+    // for the anonymous-IP layer so it doesn't collide with any real tenant ID.
+    private const string AnonymousTenantTag = "anonymous";
 
     private static RateLimiter CreateAnonymousIpLimiter(HttpContext context, string ipAddress, string domain)
     {
@@ -149,7 +153,7 @@ public static class RateLimitingExtensions
                 ToPeriod(rule.Unit));
         }
 
-        return new DistributedSlidingWindowRateLimiter(rateLimiter, httpContextAccessor, ResolveIpCheck, "ip");
+        return new DistributedSlidingWindowRateLimiter(rateLimiter, httpContextAccessor, ResolveIpCheck, "ip", AnonymousTenantTag, domain);
     }
 
     private static CachedRateLimitRule ResolveRule(

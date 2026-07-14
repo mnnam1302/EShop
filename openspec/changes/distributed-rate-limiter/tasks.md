@@ -44,7 +44,7 @@
 
 ## 8. Observability and shadow mode (D11)
 
-- [ ] 8.1 Add OTel counters in `EShop.Shared.Diagnostics`: `rate_limiter.requests{decision, layer, tenant, domain}`, `rate_limiter.redis_latency`, `rate_limiter.fail_open`
+- [x] 8.1 Add OTel counters in `EShop.Shared.Diagnostics`: `rate_limiter.requests{decision, layer, tenant, domain}`, `rate_limiter.redis_latency`, `rate_limiter.fail_open`
 - [ ] 8.2 Implement per-layer shadow/enforce flags (config-reloadable, no redeploy): shadow evaluates and counts `shadow_reject` but admits; tests for shadow admission and flag flip to enforce
 
 ## 9. Verification and rollout preparation

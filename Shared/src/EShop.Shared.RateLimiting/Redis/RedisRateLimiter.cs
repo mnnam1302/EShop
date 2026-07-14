@@ -1,5 +1,7 @@
+using EShop.Shared.Diagnostics;
 using EShop.Shared.RateLimiting.Abstractions;
 using StackExchange.Redis;
+using System.Diagnostics;
 
 namespace EShop.Shared.RateLimiting.Redis;
 
@@ -37,7 +39,9 @@ public sealed class RedisRateLimiter : IRateLimiter
             values = [.. BuildTokenBucketArgs(primary), .. BuildTokenBucketArgs(secondary)];
         }
 
+        var stopwatch = Stopwatch.StartNew();
         var reply = (RedisResult[])(await database.ScriptEvaluateAsync(_tokenBucketScript, keys, values))!;
+        RateLimiterMetrics.RedisLatency.Record(stopwatch.Elapsed.TotalMilliseconds);
 
         var primaryResult = ParseResult(reply, 0);
         var secondaryResult = secondary is null ? null : ParseResult(reply, 1);
@@ -70,7 +74,9 @@ public sealed class RedisRateLimiter : IRateLimiter
         RedisKey[] keys = [check.Key];
         RedisValue[] values = [check.Limit, (long)check.Window.TotalSeconds];
 
+        var stopwatch = Stopwatch.StartNew();
         var reply = (RedisResult[])(await database.ScriptEvaluateAsync(_slidingWindowScript, keys, values))!;
+        RateLimiterMetrics.RedisLatency.Record(stopwatch.Elapsed.TotalMilliseconds);
 
         return ParseResult(reply, 0);
     }
