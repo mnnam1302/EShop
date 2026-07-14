@@ -9,7 +9,7 @@ using StackExchange.Redis;
 
 namespace EShop.Shared.RateLimiting.Redis;
 
-// Design D10: a broken/slow Redis must never become a platform outage or an unbounded flood. Every
+// Design: a broken/slow Redis must never become a platform outage or an unbounded flood. Every
 // check goes through a ~50ms timeout + circuit breaker (PollyPolicies.RateLimiterTimeoutPolicy /
 // RateLimiterCircuitBreakerPolicy); once either trips, the request is served from an in-memory
 // per-node fallback rather than the exception propagating or the request being dropped.

@@ -40,7 +40,7 @@
 ## 7. Resilience (D10)
 
 - [x] 7.1 Add hard ~50 ms timeout and circuit breaker for limiter Redis calls (extend `RedisResiliencePolicyProvider`)
-- [ ] 7.2 Implement fail-open path: circuit open → per-node in-memory fallback limits, `rate_limiter.fail_open` metric; test Redis-outage admission and recovery without restart
+- [x] 7.2 Implement fail-open path: circuit open → per-node in-memory fallback limits, `rate_limiter.fail_open` metric; test Redis-outage admission and recovery without restart
 
 ## 8. Observability and shadow mode (D11)
 

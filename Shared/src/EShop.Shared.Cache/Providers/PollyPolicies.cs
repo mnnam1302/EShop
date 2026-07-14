@@ -14,7 +14,7 @@ public static class PollyPolicies
     private const int _exceptionsAllowedBeforeBreaking = 3;
     private const int _durationOfBreakInSeconds = 60;
 
-    // Distributed rate-limiter checks run on the request hot path (design D10): a strict timeout so
+    // Distributed rate-limiter checks run on the request hot path: a strict timeout so
     // a slow/overloaded Redis never adds meaningful latency, and a circuit breaker that trips fast
     // (fewer allowed failures, shorter break) so the gateway stops paying the timeout cost per request
     // once Redis is genuinely down, falling open to the in-memory Layer-0 limiter instead.

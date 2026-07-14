@@ -9,7 +9,7 @@ public static class RateLimitingServiceCollectionExtensions
 {
     public static IServiceCollection AddDistributedRateLimiter(this IServiceCollection services)
     {
-        // FailOpenRateLimiter wraps RedisRateLimiter with the resilience/fail-open behavior (D10).
+        // FailOpenRateLimiter wraps RedisRateLimiter with the resilience/fail-open behavior.
         // Both are registered as singletons — RedisRateLimiter loads its Lua scripts once at
         // construction, and FailOpenRateLimiter's only dependencies (IRateLimiter, ILogger<T>) are
         // themselves singleton-safe, so nothing here captures a scoped service into a singleton.

@@ -3,15 +3,30 @@ using EShop.Shared.RateLimiting.Redis;
 using FluentAssertions;
 using Microsoft.Extensions.Logging.Abstractions;
 using StackExchange.Redis;
+using System.Diagnostics;
 using Testcontainers.Redis;
 
 namespace EShop.Shared.RateLimiting.Tests;
 
-// Owns a dedicated Redis container (not the shared RedisCollection fixture) because this test stops
-// and restarts Redis mid-run to simulate an outage — that must not affect other tests running in
-// parallel against the shared container.
+// Owns a dedicated Redis container (not the shared RedisCollection fixture) because this test
+// simulates an outage mid-run, which must not affect other tests sharing that container.
+//
+// The outage is simulated via `docker pause`/`unpause`, not by stopping/restarting the container:
+// on Docker Desktop's WSL2 backend, restarting the same container can leave the host-side port
+// forward broken indefinitely (confirmed with a raw PingAsync that never reconnected within 2
+// minutes, no rate-limiter code involved). Pausing freezes the container without tearing down its
+// network namespace, so the client just sees an unresponsive server and recovers instantly on
+// unpause.
 public sealed class FailOpenRateLimiterTests : IAsyncLifetime
 {
+    // Mirrors PollyPolicies' rate-limiter circuit breaker config, so this test provably exercises
+    // "circuit open" behavior (not just isolated timeouts) if that config ever changes.
+    private const int FailuresToTripCircuitBreaker = 5;
+    private const int CallsDuringOutage = FailuresToTripCircuitBreaker + 1;
+    private const int CircuitBreakerBreakDurationSeconds = 15;
+
+    private const int FallbackBucketCapacity = 50;
+
     private RedisContainer _redisContainer = null!;
     private IConnectionMultiplexer _connection = null!;
     private FailOpenRateLimiter _limiter = null!;
@@ -22,8 +37,7 @@ public sealed class FailOpenRateLimiterTests : IAsyncLifetime
         await _redisContainer.StartAsync();
 
         _connection = await ConnectionMultiplexer.ConnectAsync(_redisContainer.GetConnectionString());
-        var inner = new RedisRateLimiter(_connection);
-        _limiter = new FailOpenRateLimiter(inner, NullLogger<FailOpenRateLimiter>.Instance);
+        _limiter = new FailOpenRateLimiter(new RedisRateLimiter(_connection), NullLogger<FailOpenRateLimiter>.Instance);
     }
 
     public async Task DisposeAsync()
@@ -35,41 +49,49 @@ public sealed class FailOpenRateLimiterTests : IAsyncLifetime
     [Fact]
     public async Task Admits_Via_InMemory_Fallback_During_Redis_Outage_And_Recovers_Without_Restart()
     {
-        // Capacity is deliberately well above the loop count below: the in-memory fallback is a
-        // fresh, separate bucket from the Redis-side one, so this test must not conflate "did the
-        // fallback's own capacity get exhausted" with "did fail-open kick in".
-        var check = new TokenBucketCheck(
-            $"rl:test:failopen:{Guid.NewGuid()}",
-            Capacity: 50,
-            RefillTokensPerPeriod: 50,
-            RefillPeriod: TimeSpan.FromHours(1));
+        var outageCheck = NewCheck($"rl:test:failopen:outage:{Guid.NewGuid()}");
 
-        var beforeOutage = await _limiter.CheckTokenBucketsAsync(check, null);
+        var beforeOutage = await _limiter.CheckTokenBucketsAsync(outageCheck, null);
         beforeOutage.Allowed.Should().BeTrue("Redis is healthy at this point");
 
-        await _redisContainer.StopAsync();
+        await PauseRedisAsync();
 
-        // Drive enough failed calls to trip the circuit breaker (5 allowed failures), then confirm
-        // requests keep being admitted (fail-open) rather than throwing or being denied outright.
-        for (var i = 0; i < 6; i++)
+        for (var i = 0; i < CallsDuringOutage; i++)
         {
-            var duringOutage = await _limiter.CheckTokenBucketsAsync(check, null);
+            var duringOutage = await _limiter.CheckTokenBucketsAsync(outageCheck, null);
             duringOutage.Allowed.Should().BeTrue($"call {i} during the outage should fail open, not throw or deny");
         }
 
-        await _redisContainer.StartAsync();
+        await UnpauseRedisAsync();
 
-        // The circuit breaker's break duration must elapse before it attempts to close again.
-        await Task.Delay(TimeSpan.FromSeconds(16));
+        // The circuit breaker's break duration must elapse before it gives Redis another chance.
+        await Task.Delay(TimeSpan.FromSeconds(CircuitBreakerBreakDurationSeconds + 1));
 
-        var afterRecoveryKey = $"rl:test:failopen-recovery:{Guid.NewGuid()}";
-        var recoveryCheck = new TokenBucketCheck(afterRecoveryKey, Capacity: 50, RefillTokensPerPeriod: 50, RefillPeriod: TimeSpan.FromHours(1));
-
-        var afterRecovery = await _limiter.CheckTokenBucketsAsync(recoveryCheck, null);
+        var recoveryKey = $"rl:test:failopen:recovery:{Guid.NewGuid()}";
+        var afterRecovery = await _limiter.CheckTokenBucketsAsync(NewCheck(recoveryKey), null);
         afterRecovery.Allowed.Should().BeTrue();
 
         // If the check went through Redis (not the in-memory fallback) the key now exists there.
         var database = _connection.GetDatabase();
-        (await database.KeyExistsAsync(afterRecoveryKey)).Should().BeTrue("recovery means checks are served by Redis again, not the fallback");
+        (await database.KeyExistsAsync(recoveryKey)).Should().BeTrue("recovery means checks are served by Redis again, not the fallback");
+    }
+
+    private static TokenBucketCheck NewCheck(string key) =>
+        new(key, Capacity: FallbackBucketCapacity, RefillTokensPerPeriod: FallbackBucketCapacity, RefillPeriod: TimeSpan.FromHours(1));
+
+    private Task PauseRedisAsync() => RunDockerAsync($"pause {_redisContainer.Id}");
+
+    private Task UnpauseRedisAsync() => RunDockerAsync($"unpause {_redisContainer.Id}");
+
+    private static async Task RunDockerAsync(string arguments)
+    {
+        var psi = new ProcessStartInfo("docker", arguments)
+        {
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            UseShellExecute = false
+        };
+        using var process = Process.Start(psi)!;
+        await process.WaitForExitAsync();
     }
 }

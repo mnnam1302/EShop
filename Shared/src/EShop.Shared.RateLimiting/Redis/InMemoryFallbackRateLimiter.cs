@@ -4,7 +4,7 @@ using System.Threading.RateLimiting;
 
 namespace EShop.Shared.RateLimiting.Redis;
 
-// Layer-0 fallback (design D10): a per-node, in-memory limiter used only while FailOpenRateLimiter's
+// Layer-0 fallback: a per-node, in-memory limiter used only while FailOpenRateLimiter's
 // circuit to Redis is open. Built on the BCL's own token-bucket/sliding-window limiters rather than
 // reimplementing bucket math — this path exists purely so a Redis outage degrades to "bounded
 // per-node admission" instead of either an unhandled exception or an unbounded flood.
