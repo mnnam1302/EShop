@@ -18,7 +18,7 @@ public static class ServiceCollectionExtensions
             .AddTenantAuthenticationProvider()
             .AddCurrentUserAccessor()
             .AddRateLimitPolicyResolver()
-            .AddDistributedRateLimiter();
+            .AddDistributedRateLimiter(configuration);
 
         return services;
     }

@@ -96,10 +96,10 @@ public sealed class RateLimitPolicyResolver : IRateLimitPolicyResolver
         return _memoryCache.TryGetValue(GetL1CacheKey(tenantId), out policy);
     }
 
+    private static string GetL1CacheKey(string tenantId) => $"ratelimit-policy:l1:{tenantId}";
+
     private void SetL1Cache(string key, CachedRateLimitPolicy policy)
     {
         _memoryCache.Set(key, policy, L1CacheDuration);
     }
-
-    private static string GetL1CacheKey(string tenantId) => $"ratelimit-policy:l1:{tenantId}";
 }

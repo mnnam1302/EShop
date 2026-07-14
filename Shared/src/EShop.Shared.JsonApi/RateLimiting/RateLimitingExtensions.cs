@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using System.Globalization;
 using System.Threading.RateLimiting;
 using Yarp.ReverseProxy.Model;
@@ -74,6 +75,17 @@ public static class RateLimitingExtensions
         return services;
     }
 
+    private static string GetRejectionDetail(string? exceededScope)
+    {
+        return exceededScope switch
+        {
+            "tenant" => "The tenant's rate limit quota has been exceeded.",
+            "user" => "Your request rate limit has been exceeded.",
+            "ip" => "Too many requests from this IP address.",
+            _ => "Rate limit exceeded."
+        };
+    }
+
     private static RateLimitPartition<string> BuildDistributedPartition(HttpContext context)
     {
         var userDetailsProvider = context.RequestServices.GetService<IUserDetailsProvider>();
@@ -96,10 +108,25 @@ public static class RateLimitingExtensions
             _ => CreateAnonymousIpLimiter(context, ipAddress, domain));
     }
 
-    private static RateLimiter CreateTenantAndUserLimiter(HttpContext context, string tenantId, string userId, string domain)
+    private static string GetDomain(HttpContext context)
+    {
+        var routeId = context.Features.Get<IReverseProxyFeature>()?.Route.Config.RouteId;
+        if (string.IsNullOrEmpty(routeId))
+        {
+            return CachedRateLimitRule.AllDomains;
+        }
+
+        const string RouteSuffix = "-route";
+        return routeId.EndsWith(RouteSuffix, StringComparison.OrdinalIgnoreCase)
+            ? routeId[..^RouteSuffix.Length]
+            : routeId;
+    }
+
+    private static DistributedTokenBucketRateLimiter CreateTenantAndUserLimiter(HttpContext context, string tenantId, string userId, string domain)
     {
         var rateLimiter = context.RequestServices.GetRequiredService<IRateLimiter>();
         var httpContextAccessor = context.RequestServices.GetRequiredService<IHttpContextAccessor>();
+        var enforcementOptions = context.RequestServices.GetRequiredService<IOptionsMonitor<RateLimiterEnforcementOptions>>();
 
         // This RateLimiter instance is cached and reused by ASP.NET Core for every future request
         // that maps to this same partition key, so these closures must never use `context` directly
@@ -111,6 +138,7 @@ public static class RateLimitingExtensions
             var requestServices = httpContextAccessor.HttpContext!.RequestServices;
             var (tenantPolicy, systemPolicy) = GetCachedPolicies(requestServices, tenantId);
             var rule = ResolveRule(requestServices, tenantPolicy, systemPolicy, domain, RateLimitScopeNames.Tenant);
+
             return new TokenBucketCheck(
                 RateLimitKeyBuilder.TenantQuotaKey(tenantId, domain),
                 rule.Burst ?? rule.RequestsPerUnit,
@@ -123,6 +151,7 @@ public static class RateLimitingExtensions
             var requestServices = httpContextAccessor.HttpContext!.RequestServices;
             var (tenantPolicy, systemPolicy) = GetCachedPolicies(requestServices, tenantId);
             var rule = ResolveRule(requestServices, tenantPolicy, systemPolicy, domain, RateLimitScopeNames.User);
+
             return new TokenBucketCheck(
                 RateLimitKeyBuilder.UserBucketKey(tenantId, userId, domain),
                 rule.Burst ?? rule.RequestsPerUnit,
@@ -130,30 +159,41 @@ public static class RateLimitingExtensions
                 ToPeriod(rule.Unit));
         }
 
-        return new DistributedTokenBucketRateLimiter(rateLimiter, httpContextAccessor, ResolveTenantCheck, "tenant", tenantId, domain, ResolveUserCheck, "user");
+        return new DistributedTokenBucketRateLimiter(
+            rateLimiter,
+            httpContextAccessor,
+            ResolveTenantCheck,
+            "tenant",
+            tenantId,
+            domain,
+            enforcementOptions,
+            ResolveUserCheck,
+            "user");
     }
 
     // No real tenant identity applies to anonymous traffic; this sentinel is the "tenant" metric tag
     // for the anonymous-IP layer so it doesn't collide with any real tenant ID.
     private const string AnonymousTenantTag = "anonymous";
 
-    private static RateLimiter CreateAnonymousIpLimiter(HttpContext context, string ipAddress, string domain)
+    private static DistributedSlidingWindowRateLimiter CreateAnonymousIpLimiter(HttpContext context, string ipAddress, string domain)
     {
         var rateLimiter = context.RequestServices.GetRequiredService<IRateLimiter>();
         var httpContextAccessor = context.RequestServices.GetRequiredService<IHttpContextAccessor>();
+        var enforcementOptions = context.RequestServices.GetRequiredService<IOptionsMonitor<RateLimiterEnforcementOptions>>();
 
         SlidingWindowCheck ResolveIpCheck()
         {
             var requestServices = httpContextAccessor.HttpContext!.RequestServices;
             var (_, systemPolicy) = GetCachedPolicies(requestServices, tenantId: null);
             var rule = ResolveRule(requestServices, tenantPolicy: null, systemPolicy, domain, RateLimitScopeNames.AnonymousIp);
+
             return new SlidingWindowCheck(
                 RateLimitKeyBuilder.AnonymousIpKey(ipAddress, domain),
                 rule.RequestsPerUnit,
                 ToPeriod(rule.Unit));
         }
 
-        return new DistributedSlidingWindowRateLimiter(rateLimiter, httpContextAccessor, ResolveIpCheck, "ip", AnonymousTenantTag, domain);
+        return new DistributedSlidingWindowRateLimiter(rateLimiter, httpContextAccessor, ResolveIpCheck, "ip", AnonymousTenantTag, domain, enforcementOptions);
     }
 
     private static CachedRateLimitRule ResolveRule(
@@ -167,9 +207,9 @@ public static class RateLimitingExtensions
         return ruleResolver.ResolveRule(tenantPolicy, systemPolicy, domain, scope);
     }
 
-    // Both lookups are synchronous, L1-memory-only reads (never Redis/HTTP) so this can safely run
-    // inside RateLimitPartition's synchronous factory callback. On a cache miss, the request proceeds
-    // using IRateLimitRuleResolver's compiled safety defaults (never blocks), and a background task
+    // Both lookups are synchronous
+    // - L1-memory-only reads (never Redis/HTTP) so this can safely run inside RateLimitPartition's synchronous factory callback.
+    // - On a cache miss, the request proceeds using IRateLimitRuleResolver's compiled safety defaults (never blocks), and a background task
     // warms the cache via the existing async path so the next request for this tenant gets real data.
     private static (CachedRateLimitPolicy? TenantPolicy, CachedRateLimitPolicy? SystemPolicy) GetCachedPolicies(IServiceProvider requestServices, string? tenantId)
     {
@@ -204,31 +244,6 @@ public static class RateLimitingExtensions
                 logger?.LogWarning(ex, "Failed to warm rate-limit policy cache for tenant '{TenantId}'", tenantId);
             }
         });
-    }
-
-    private static string GetDomain(HttpContext context)
-    {
-        var routeId = context.Features.Get<IReverseProxyFeature>()?.Route.Config.RouteId;
-        if (string.IsNullOrEmpty(routeId))
-        {
-            return CachedRateLimitRule.AllDomains;
-        }
-
-        const string RouteSuffix = "-route";
-        return routeId.EndsWith(RouteSuffix, StringComparison.OrdinalIgnoreCase)
-            ? routeId[..^RouteSuffix.Length]
-            : routeId;
-    }
-
-    private static string GetRejectionDetail(string? exceededScope)
-    {
-        return exceededScope switch
-        {
-            "tenant" => "The tenant's rate limit quota has been exceeded.",
-            "user" => "Your request rate limit has been exceeded.",
-            "ip" => "Too many requests from this IP address.",
-            _ => "Rate limit exceeded."
-        };
     }
 
     private static TimeSpan ToPeriod(string unit)

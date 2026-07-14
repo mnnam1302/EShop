@@ -1,6 +1,7 @@
 using EShop.Shared.Diagnostics;
 using EShop.Shared.RateLimiting.Abstractions;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Options;
 using System.Diagnostics;
 using System.Threading.RateLimiting;
 
@@ -14,17 +15,16 @@ public sealed class DistributedSlidingWindowRateLimiter : RateLimiter
     private readonly string _scopeName;
     private readonly string _tenantId;
     private readonly string _domain;
+    private readonly IOptionsMonitor<RateLimiterEnforcementOptions> _enforcementOptions;
 
-    // See DistributedTokenBucketRateLimiter: a factory (not a frozen check) so a rule change takes
-    // effect on the next request for a partition that ASP.NET Core keeps reusing; tenantId/domain are
-    // safe to capture once since they're baked into the partition key itself.
     public DistributedSlidingWindowRateLimiter(
         IRateLimiter rateLimiter,
         IHttpContextAccessor httpContextAccessor,
         Func<SlidingWindowCheck> checkFactory,
         string scopeName,
         string tenantId,
-        string domain)
+        string domain,
+        IOptionsMonitor<RateLimiterEnforcementOptions> enforcementOptions)
     {
         _rateLimiter = rateLimiter;
         _httpContextAccessor = httpContextAccessor;
@@ -32,6 +32,7 @@ public sealed class DistributedSlidingWindowRateLimiter : RateLimiter
         _scopeName = scopeName;
         _tenantId = tenantId;
         _domain = domain;
+        _enforcementOptions = enforcementOptions;
     }
 
     public override TimeSpan? IdleDuration => null;
@@ -41,22 +42,24 @@ public sealed class DistributedSlidingWindowRateLimiter : RateLimiter
         var check = _checkFactory();
         var result = await _rateLimiter.CheckSlidingWindowAsync(check, cancellationToken);
 
-        // "Reset" for a sliding window is approximate (the window boundary, not the exact moment the
-        // weighted count clears the limit) since the Lua script doesn't echo back elapsed-in-window —
-        // it's an informational header, not something enforcement depends on, so this is an accepted
-        // simplification rather than round-tripping more state through Redis for it.
         RateLimitHeaderWriter.Write(_httpContextAccessor.HttpContext, check.Limit, result.Remaining, (long)check.Window.TotalSeconds);
 
+        var enforced = _enforcementOptions.CurrentValue.IsEnforced(_scopeName);
+        var decision = RateLimitDecisionNames.From(result.Allowed, enforced);
         RateLimiterMetrics.Requests.Add(1, new TagList
         {
-            { "decision", result.Allowed ? "allow" : "reject" },
+            { "decision", decision },
             { "layer", _scopeName },
             { "tenant", _tenantId },
             { "domain", _domain }
         });
 
-        var exceededScope = result.Allowed ? null : _scopeName;
-        return new DistributedRateLimitLease(result.Allowed, result.Remaining, result.RetryAfter, exceededScope);
+        if (!result.Allowed && enforced)
+        {
+            return new DistributedRateLimitLease(false, result.Remaining, result.RetryAfter, _scopeName);
+        }
+
+        return new DistributedRateLimitLease(true, result.Remaining, TimeSpan.Zero, exceededScope: null);
     }
 
     protected override RateLimitLease AttemptAcquireCore(int permitCount)

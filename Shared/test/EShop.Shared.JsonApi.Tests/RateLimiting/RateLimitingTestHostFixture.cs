@@ -50,7 +50,14 @@ public sealed class RateLimitingTestHostFixture : IAsyncLifetime
                     {
                         ["RedisOptions:Enabled"] = "true",
                         ["RedisOptions:Host"] = _redisContainer.GetConnectionString(),
-                        ["Services:Tenancy"] = "http://localhost:1"
+                        ["Services:Tenancy"] = "http://localhost:1",
+                        // This fixture exercises the enforced (not shadow) client contract — 429s,
+                        // headers, rejection detail — so all layers are enforced by default here.
+                        // Shadow-mode behavior itself is covered by DistributedTokenBucketRateLimiterTests
+                        // / DistributedSlidingWindowRateLimiterTests, which don't need a full HTTP host.
+                        ["RateLimiting:Enforcement:TenantEnforced"] = "true",
+                        ["RateLimiting:Enforcement:UserEnforced"] = "true",
+                        ["RateLimiting:Enforcement:AnonymousIpEnforced"] = "true"
                     });
                 });
 
@@ -60,7 +67,7 @@ public sealed class RateLimitingTestHostFixture : IAsyncLifetime
                     services.AddSingleton<ISystemInternalJwtTokenFactory, FakeSystemInternalJwtTokenFactory>();
                     services.AddRedisCacheInfrastructure(context.Configuration);
                     services.AddRateLimitPolicyResolver();
-                    services.AddDistributedRateLimiter();
+                    services.AddDistributedRateLimiter(context.Configuration);
                     services.AddHttpContextAccessor();
                     services.AddScoped<IUserDetailsProvider, TestUserDetailsProvider>();
                     services.ConfigureRateLimiters();
