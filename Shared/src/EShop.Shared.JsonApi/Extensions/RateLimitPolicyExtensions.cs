@@ -1,7 +1,5 @@
 using EShop.Shared.Cache.DependencyInejctions.Extensions;
 using EShop.Shared.Cache.Services;
-using EShop.Shared.DomainTools.Extensions;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace EShop.Shared.JsonApi.Extensions;
@@ -28,11 +26,12 @@ public static class RateLimitPolicyExtensions
         });
 
         services
-            .AddHttpClient<RateLimitPolicyHttpClient>((serviceProvider, httpClient) =>
+            .AddHttpClient<RateLimitPolicyHttpClient>(httpClient =>
             {
-                var configuration = serviceProvider.GetRequiredService<IConfiguration>();
-                var tenancyServiceUrl = configuration["Services:Tenancy"].Require();
-                httpClient.BaseAddress = new Uri(tenancyServiceUrl);
+                // "tenancy" is a service name, resolved dynamically via AddServiceDiscovery() from
+                // the Services:tenancy:http config section (the same one YARP's own cluster
+                // destinations use) — not a literal URL.
+                httpClient.BaseAddress = new Uri("http://tenancy");
                 httpClient.Timeout = TimeSpan.FromSeconds(2);
             })
             .AddPolicyHandler(ResilientClientPolicies.GetRetryOnErrorAndNotFoundPolicy())

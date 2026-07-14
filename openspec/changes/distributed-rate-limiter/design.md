@@ -165,4 +165,4 @@ Counter data needs no durability: Redis restart resets counters → brief over-a
 
 - O1: `RateLimitPolicy` on the existing `TenantSetting` (recommended, one JSON column) vs a new sibling child entity (`TenantRateLimitSetting`) if display-settings vs throttle-policy separation inside Tenancy is preferred.
 - O2: Ingress topology — is there a trusted proxy/CDN chain requiring `ForwardedHeaders` configuration for correct client IPs on the login rule?
-- O3: Confirm cache TTLs (proposed: L1 60 s, Redis 10 min) and shadow-mode duration (proposed: 1 week).
+- ~~O3: Confirm cache TTLs (proposed: L1 60 s, Redis 10 min) and shadow-mode duration (proposed: 1 week).~~ **Resolved**: proposed values confirmed as final — see `rollout-runbook.md`.

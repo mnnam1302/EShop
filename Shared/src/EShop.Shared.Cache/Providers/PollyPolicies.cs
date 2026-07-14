@@ -22,8 +22,12 @@ public static class PollyPolicies
     private const int _rateLimiterExceptionsAllowedBeforeBreaking = 5;
     private const int _rateLimiterDurationOfBreakInSeconds = 15;
 
+    // Pessimistic (not Optimistic): StackExchange.Redis's ScriptEvaluateAsync doesn't observe a
+    // CancellationToken, so Optimistic's cooperative cancellation never fires — a hung connection
+    // would run until StackExchange.Redis's own ~5s internal timeout instead of this policy's 50ms.
+    // Pessimistic forcibly races the call against a timer regardless of whether it cooperates.
     public static readonly AsyncTimeoutPolicy RateLimiterTimeoutPolicy =
-        Policy.TimeoutAsync(TimeSpan.FromMilliseconds(_rateLimiterTimeoutMilliseconds), TimeoutStrategy.Optimistic);
+        Policy.TimeoutAsync(TimeSpan.FromMilliseconds(_rateLimiterTimeoutMilliseconds), TimeoutStrategy.Pessimistic);
 
     public static readonly AsyncCircuitBreakerPolicy RateLimiterCircuitBreakerPolicy =
         Policy

@@ -162,13 +162,13 @@ public static class RateLimitingExtensions
         return new DistributedTokenBucketRateLimiter(
             rateLimiter,
             httpContextAccessor,
-            ResolveTenantCheck,
-            "tenant",
+            primaryFactory: ResolveTenantCheck,
+            primaryScopeName: "tenant",
             tenantId,
             domain,
             enforcementOptions,
-            ResolveUserCheck,
-            "user");
+            secondaryFactory: ResolveUserCheck,
+            secondaryScopeName: "user");
     }
 
     // No real tenant identity applies to anonymous traffic; this sentinel is the "tenant" metric tag
@@ -193,7 +193,14 @@ public static class RateLimitingExtensions
                 ToPeriod(rule.Unit));
         }
 
-        return new DistributedSlidingWindowRateLimiter(rateLimiter, httpContextAccessor, ResolveIpCheck, "ip", AnonymousTenantTag, domain, enforcementOptions);
+        return new DistributedSlidingWindowRateLimiter(
+            rateLimiter,
+            httpContextAccessor,
+            checkFactory: ResolveIpCheck,
+            scopeName: "ip",
+            tenantId: AnonymousTenantTag,
+            domain,
+            enforcementOptions);
     }
 
     private static CachedRateLimitRule ResolveRule(

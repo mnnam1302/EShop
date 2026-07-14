@@ -49,5 +49,5 @@
 
 ## 9. Verification and rollout preparation
 
-- [ ] 9.1 End-to-end run via Aspire: multi-replica gateway against one Redis exercising the cross-replica scenario, login IP rule, policy change propagation within TTL, and Redis-outage fail-open
-- [ ] 9.2 Document the rollout runbook (shadow ≥ 1 week, calibration of defaults from shadow percentiles per D2 sizing, enforcement order: login IP → user → tenant quota, rollback = flag to shadow) and resolve O3 (TTLs, shadow duration)
+- [x] 9.1 End-to-end run via Aspire: multi-replica gateway against one Redis exercising the cross-replica scenario, login IP rule, policy change propagation within TTL, and Redis-outage fail-open
+- [x] 9.2 Document the rollout runbook (shadow ≥ 1 week, calibration of defaults from shadow percentiles per D2 sizing, enforcement order: login IP → user → tenant quota, rollback = flag to shadow) and resolve O3 (TTLs, shadow duration)
