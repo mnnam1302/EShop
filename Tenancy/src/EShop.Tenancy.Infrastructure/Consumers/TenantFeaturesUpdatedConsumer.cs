@@ -1,7 +1,7 @@
 using EShop.Shared.Contracts.Abstractions.Shared;
 using EShop.Shared.Contracts.Services.Tenancy.Features;
 using EShop.Shared.CQRS;
-using EShop.Tenancy.Application.UseCases.V1.Events;
+using EShop.Tenancy.Application.UseCases.Tenants.ClearTenantFeatures;
 using EShop.Tenancy.Persistence;
 
 namespace EShop.Tenancy.Infrastructure.Consumers;
@@ -17,7 +17,7 @@ public sealed class TenantFeaturesUpdatedConsumer : IdempotentConsumer<TenantFea
 
     protected override async Task<Result> HandleMessageAsync(TenantFeaturesUpdated message, CancellationToken cancellationToken)
     {
-        var command = new UpdateTenantFeaturesCommand
+        var command = new ClearTenantFeaturesCommand
         {
             TenantId = message.TenantId
         };

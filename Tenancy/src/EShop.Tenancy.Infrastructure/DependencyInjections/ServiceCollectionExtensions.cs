@@ -8,7 +8,7 @@ using EShop.Shared.EventBus.DependencyInjections.Options;
 using EShop.Shared.EventBus.PipelineObservers;
 using EShop.Shared.Scoping.ResourceAccessControl;
 using EShop.Tenancy.Application.Abstractions;
-using EShop.Tenancy.Application.Services;
+using EShop.Tenancy.Application.UseCases.Tenants.InitializeSystem;
 using EShop.Tenancy.Infrastructure.Consumers;
 using EShop.Tenancy.Infrastructure.Jobs;
 using EShop.Tenancy.Infrastructure.Producers;
@@ -110,7 +110,7 @@ public static class ServiceCollectionExtensions
 
     private static void AddSystemInitialization(this IServiceCollection services)
     {
-        services.AddTransient<ISystemInitializationService, SystemInitializationService>();
-        services.AddHostedService<SystemInitializationJob>();
+        services.AddTransient<ISystemInitializer, SystemInitializer>();
+        services.AddHostedService<SystemInitializerJob>();
     }
 }

@@ -1,0 +1,39 @@
+using EShop.Shared.Contracts.Abstractions.Shared;
+using EShop.Shared.CQRS.Query;
+using EShop.Shared.DomainTools.Exceptions;
+using EShop.Tenancy.Domain.Abstractions.Repositories;
+
+namespace EShop.Tenancy.Application.UseCases.Features.GetFeature;
+
+internal sealed class GetFeatureByIdQueryHandler : IQueryHandler<GetFeatureByIdQuery, FeatureResponse>
+{
+    private readonly IFeatureRepository _featureRepository;
+
+    public GetFeatureByIdQueryHandler(IFeatureRepository featureRepository)
+    {
+        _featureRepository = featureRepository;
+    }
+
+    public async Task<Result<FeatureResponse>> HandleAsync(GetFeatureByIdQuery query, CancellationToken cancellationToken = default)
+    {
+        var feature = await _featureRepository.FindByIdAsync(query.Id, cancellationToken: cancellationToken);
+
+        if (feature is null)
+        {
+            throw new NotFoundException($"Feature with id '{query.Id}' was not found.");
+        }
+
+        var response = new FeatureResponse
+        {
+            Id = feature.Id,
+            Name = feature.Name,
+            Description = feature.Description,
+            State = feature.State,
+            Module = feature.Module,
+            DefaultStateForNewTenant = feature.DefaultStateForNewTenant,
+            Category = feature.Category
+        };
+
+        return Result.Success(response);
+    }
+}

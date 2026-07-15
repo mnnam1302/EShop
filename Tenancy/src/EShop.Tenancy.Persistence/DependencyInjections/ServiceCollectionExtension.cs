@@ -1,7 +1,7 @@
-﻿using EShop.Shared.Diagnostics;
+using EShop.Shared.Diagnostics;
 using EShop.Shared.DomainTools.UnitOfWorks;
 using EShop.Shared.JsonApi.Extensions;
-using EShop.Tenancy.Domain.Repositories;
+using EShop.Tenancy.Domain.Abstractions.Repositories;
 using EShop.Tenancy.Domain.UnitOfWorks;
 using EShop.Tenancy.Persistence.Repositories;
 using Microsoft.AspNetCore.Hosting;

@@ -2,9 +2,9 @@ using Carter;
 using EShop.Shared.CQRS;
 using EShop.Shared.JsonApi.Abstractions;
 using EShop.Shared.JsonApi.ResourceAccessControl;
-using EShop.Tenancy.Application.UseCases.V1.Commands.Features;
-using EShop.Tenancy.Application.UseCases.V1.Queries.Features;
-using EShop.Tenancy.Application.UseCases.V1.Queries.Tenants;
+using EShop.Tenancy.Application.UseCases.Features.CreateFeature;
+using EShop.Tenancy.Application.UseCases.Features.GetFeature;
+using EShop.Tenancy.Application.UseCases.Tenants.GetTenantFeatures;
 using EShop.Tenancy.Presentation.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -71,7 +71,7 @@ public sealed class FeatureApi : ICarterModule
 
     private static async Task<IResult> CreateSystemFeatureAsync([FromBody] CreateSystemFeatureRequest request, [FromServices] IMediator sender, CancellationToken cancellationToken)
     {
-        var command = new CreateSystemFeatureCommand
+        var command = new CreateFeatureCommand
         {
             Id = request.Id,
             Name = request.Name,

@@ -1,6 +1,6 @@
-﻿using EShop.Shared.DomainTools.Repositories;
+using EShop.Shared.DomainTools.Repositories;
+using EShop.Tenancy.Domain.Abstractions.Repositories;
 using EShop.Tenancy.Domain.Entities;
-using EShop.Tenancy.Domain.Repositories;
 
 namespace EShop.Tenancy.Persistence.Repositories;
 

@@ -266,43 +266,47 @@ public static class ExternalServiceRegistrationExtensions
                 .WaitFor(rabbitmq);
         }
 
-        if (applyGrafanaUrl is not null)
-        {
-            applyGrafanaUrl(tenancy);
-            applyGrafanaUrl(authorization);
-            applyGrafanaUrl(catalogApplication);
-            applyGrafanaUrl(catalogReadModel);
-            applyGrafanaUrl(inventory);
-            applyGrafanaUrl(order);
-            applyGrafanaUrl(finance);
-        }
+        //if (applyGrafanaUrl is not null)
+        //{
+        //    applyGrafanaUrl(tenancy);
+        //    applyGrafanaUrl(authorization);
+        //    applyGrafanaUrl(catalogApplication);
+        //    applyGrafanaUrl(catalogReadModel);
+        //    applyGrafanaUrl(inventory);
+        //    applyGrafanaUrl(order);
+        //    applyGrafanaUrl(finance);
+        //}
 
         #endregion
 
         #region API Gateway - YARP Reserve Proxy
 
-        //var apiGateway = builder.AddProject<Projects.EShop_ApiGateway>(ResourceNames.ApiGateway)
-        //    .WithReference(redis)
-        //    .WithReference(tenancy)
-        //    .WithReference(authorization)
-        //    .WithReference(catalogApplication)
-        //    .WithReference(catalogReadModel)
-        //    .WithReference(inventory)
-        //    .WithReference(order)
-        //    .WithReference(finance);
+        // .WithReplicas(2) for task 9.1 (distributed-rate-limiter): verifying the cross-replica
+        // scenario requires two gateway processes actually running side by side against the same
+        // Redis, not just two RedisRateLimiter instances in a test.
+        var apiGateway = builder.AddProject<Projects.EShop_ApiGateway>(ResourceNames.ApiGateway)
+            //.WithReplicas(2) // uncomment when dev test - rate limting share multiple-servers
+            .WithReference(redis)
+            .WithReference(tenancy)
+            .WithReference(authorization)
+            .WithReference(catalogApplication)
+            .WithReference(catalogReadModel)
+            .WithReference(inventory)
+            .WithReference(order)
+            .WithReference(finance);
 
-        //if (!useExternalService)
-        //{
-        //    apiGateway
-        //        .WaitFor(redis)
-        //        .WaitFor(tenancy)
-        //        .WaitFor(authorization)
-        //        .WaitFor(catalogApplication)
-        //        .WaitFor(catalogReadModel)
-        //        .WaitFor(inventory)
-        //        .WaitFor(order)
-        //        .WaitFor(finance);
-        //}
+        if (!useExternalService)
+        {
+            apiGateway
+                .WaitFor(redis)
+                .WaitFor(tenancy)
+                .WaitFor(authorization)
+                .WaitFor(catalogApplication)
+                .WaitFor(catalogReadModel)
+                .WaitFor(inventory)
+                .WaitFor(order)
+                .WaitFor(finance);
+        }
 
         #endregion
     }

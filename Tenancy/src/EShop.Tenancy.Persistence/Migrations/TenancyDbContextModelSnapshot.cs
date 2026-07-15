@@ -276,6 +276,58 @@ namespace EShop.Tenancy.Persistence.Migrations
                         .HasForeignKey("TenantId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.OwnsOne("EShop.Tenancy.Domain.RateLimiting.RateLimitPolicy", "RateLimitPolicy", b1 =>
+                        {
+                            b1.Property<Guid>("TenantSettingId")
+                                .HasColumnType("uuid");
+
+                            b1.HasKey("TenantSettingId");
+
+                            b1.ToTable("TenantSettings");
+
+                            b1.ToJson("RateLimitPolicy");
+
+                            b1.WithOwner()
+                                .HasForeignKey("TenantSettingId");
+
+                            b1.OwnsMany("EShop.Tenancy.Domain.RateLimiting.RateLimitRule", "Rules", b2 =>
+                                {
+                                    b2.Property<Guid>("RateLimitPolicyTenantSettingId")
+                                        .HasColumnType("uuid");
+
+                                    b2.Property<int>("Id")
+                                        .ValueGeneratedOnAdd()
+                                        .HasColumnType("integer");
+
+                                    b2.Property<int?>("Burst")
+                                        .HasColumnType("integer");
+
+                                    b2.Property<string>("Domain")
+                                        .IsRequired()
+                                        .HasColumnType("text");
+
+                                    b2.Property<int>("RequestsPerUnit")
+                                        .HasColumnType("integer");
+
+                                    b2.Property<int>("Scope")
+                                        .HasColumnType("integer");
+
+                                    b2.Property<int>("Unit")
+                                        .HasColumnType("integer");
+
+                                    b2.HasKey("RateLimitPolicyTenantSettingId", "Id");
+
+                                    b2.ToTable("TenantSettings");
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("RateLimitPolicyTenantSettingId");
+                                });
+
+                            b1.Navigation("Rules");
+                        });
+
+                    b.Navigation("RateLimitPolicy");
                 });
 
             modelBuilder.Entity("EShop.Tenancy.Domain.Entities.Tenant", b =>

@@ -65,7 +65,11 @@ public static class Extensions
             {
                 metrics.AddAspNetCoreInstrumentation()
                     .AddHttpClientInstrumentation()
-                    .AddRuntimeInstrumentation();
+                    .AddRuntimeInstrumentation()
+                    // Must match EShop.Shared.Diagnostics.RateLimiterMetrics.MeterName; a literal here
+                    // (like "MassTransit" below) avoids this foundational, package-only project taking
+                    // a reference on Shared/*.
+                    .AddMeter("EShop.RateLimiter");
             })
             .WithTracing(tracing =>
             {

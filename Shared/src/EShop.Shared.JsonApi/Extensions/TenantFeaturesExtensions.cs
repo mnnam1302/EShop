@@ -1,11 +1,9 @@
 ﻿using EShop.Shared.Cache.Providers;
 using EShop.Shared.Cache.Services;
-using EShop.Shared.DomainTools.Extensions;
 using EShop.Shared.HealthChecks;
 using EShop.Shared.Scoping.ResourceAccessControl;
 using EShop.Shared.Scoping.ResourceAccessControl.Providers.TenantFeaturesProvider;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
@@ -65,11 +63,12 @@ public static class TenantFeaturesExtensions
         });
 
         services
-            .AddHttpClient<TenancyHttpClient>((serviceProvider, httpClient) =>
+            .AddHttpClient<TenancyHttpClient>(httpClient =>
             {
-                var configuration = serviceProvider.GetRequiredService<IConfiguration>();
-                var tenancyServiceUrl = configuration["Services:Tenancy"].Require();
-                httpClient.BaseAddress = new Uri(tenancyServiceUrl);
+                // "tenancy" is a service name, resolved dynamically via AddServiceDiscovery() from
+                // the Services:tenancy:http config section (the same one YARP's own cluster
+                // destinations use) — not a literal URL.
+                httpClient.BaseAddress = new Uri("http://tenancy");
             })
             .AddPolicyHandler(ResilientClientPolicies.GetRetryOnErrorAndNotFoundPolicy())
             .AddPolicyHandler(ResilientClientPolicies.GetCircuitBreakerPolicy());
