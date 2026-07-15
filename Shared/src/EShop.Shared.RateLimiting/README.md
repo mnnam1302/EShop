@@ -262,9 +262,4 @@ This project was also verified end-to-end live via .NET Aspire (multi-replica ga
 
 ## Design rationale and open-question resolutions
 
-Full design decisions (D1–D11), rejected alternatives, and resolved open questions live in:
-- [`openspec/changes/distributed-rate-limiter/design.md`](../../../openspec/changes/distributed-rate-limiter/design.md)
-- [`openspec/changes/distributed-rate-limiter/specs/distributed-rate-limiting/spec.md`](../../../openspec/changes/distributed-rate-limiter/specs/distributed-rate-limiting/spec.md)
-- [`openspec/changes/distributed-rate-limiter/rollout-runbook.md`](../../../openspec/changes/distributed-rate-limiter/rollout-runbook.md)
-
 Deferred / out of scope for this change: outbound throttling of Finance's calls to tenants' accounting providers (will reuse this same core — the reason `Abstractions`/`Redis` are ASP.NET-agnostic); organization-level limits; multi-region synchronization; endpoint-granular rules (the `Domain` field is extensible to this if needed later).

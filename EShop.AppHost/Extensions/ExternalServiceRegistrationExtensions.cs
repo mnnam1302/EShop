@@ -203,23 +203,23 @@ public static class ExternalServiceRegistrationExtensions
             .WithReference(redis)
             .WithReference(rabbitmq);
 
-        //var catalogApplication = builder.AddProject<Projects.EShop_Catalog_Application>(ResourceNames.CatalogWriteApi)
-        //    .WithExternalServiceMode(useExternalService)
-        //    .WithReference(catalogDatabase)
-        //    .WithReference(redis)
-        //    .WithReference(rabbitmq);
+        var catalogApplication = builder.AddProject<Projects.EShop_Catalog_Application>(ResourceNames.CatalogWriteApi)
+            .WithExternalServiceMode(useExternalService)
+            .WithReference(catalogDatabase)
+            .WithReference(redis)
+            .WithReference(rabbitmq);
 
-        //var catalogReadModel = builder.AddProject<Projects.EShop_Catalog_ReadModels_MongoDb>(ResourceNames.CatalogReadApi)
-        //    .WithExternalServiceMode(useExternalService)
-        //    .WithReference(catalogMongoDatabase)
-        //    .WithReference(redis)
-        //    .WithReference(rabbitmq);
+        var catalogReadModel = builder.AddProject<Projects.EShop_Catalog_ReadModels_MongoDb>(ResourceNames.CatalogReadApi)
+            .WithExternalServiceMode(useExternalService)
+            .WithReference(catalogMongoDatabase)
+            .WithReference(redis)
+            .WithReference(rabbitmq);
 
-        //var inventory = builder.AddProject<Projects.EShop_Inventory_API>(ResourceNames.InventoryApi)
-        //    .WithExternalServiceMode(useExternalService)
-        //    .WithReference(inventoryDatabase)
-        //    .WithReference(redis)
-        //    .WithReference(rabbitmq);
+        var inventory = builder.AddProject<Projects.EShop_Inventory_API>(ResourceNames.InventoryApi)
+            .WithExternalServiceMode(useExternalService)
+            .WithReference(inventoryDatabase)
+            .WithReference(redis)
+            .WithReference(rabbitmq);
 
         var order = builder.AddProject<Projects.EShop_Order_API>(ResourceNames.OrderApi)
             .WithExternalServiceMode(useExternalService)
@@ -227,11 +227,11 @@ public static class ExternalServiceRegistrationExtensions
             .WithReference(redis)
             .WithReference(rabbitmq);
 
-        //var finance = builder.AddProject<Projects.EShop_Finance_API>(ResourceNames.FinanceApi)
-        //    .WithExternalServiceMode(useExternalService)
-        //    .WithReference(financeDatabase)
-        //    .WithReference(redis)
-        //    .WithReference(rabbitmq);
+        var finance = builder.AddProject<Projects.EShop_Finance_API>(ResourceNames.FinanceApi)
+            .WithExternalServiceMode(useExternalService)
+            .WithReference(financeDatabase)
+            .WithReference(redis)
+            .WithReference(rabbitmq);
 
         if (!useExternalService)
         {
@@ -243,27 +243,27 @@ public static class ExternalServiceRegistrationExtensions
                 .WaitFor(redis)
                 .WaitFor(rabbitmq);
 
-            //catalogApplication.WaitFor(catalogDatabase)
-            //    .WaitFor(redis)
-            //    .WaitFor(rabbitmq);
+            catalogApplication.WaitFor(catalogDatabase)
+                .WaitFor(redis)
+                .WaitFor(rabbitmq);
 
-            //catalogReadModel
-            //    .WaitFor(catalogMongoDatabase)
-            //    .WaitFor(redis)
-            //    .WaitFor(rabbitmq)
-            //    .WaitFor(catalogApplication);
+            catalogReadModel
+                .WaitFor(catalogMongoDatabase)
+                .WaitFor(redis)
+                .WaitFor(rabbitmq)
+                .WaitFor(catalogApplication);
 
-            //inventory.WaitFor(inventoryDatabase)
-            //    .WaitFor(redis)
-            //    .WaitFor(rabbitmq);
+            inventory.WaitFor(inventoryDatabase)
+                .WaitFor(redis)
+                .WaitFor(rabbitmq);
 
             order.WaitFor(orderDatabase)
                 .WaitFor(redis)
                 .WaitFor(rabbitmq);
 
-            //finance.WaitFor(financeDatabase)
-            //    .WaitFor(redis)
-            //    .WaitFor(rabbitmq);
+            finance.WaitFor(financeDatabase)
+                .WaitFor(redis)
+                .WaitFor(rabbitmq);
         }
 
         //if (applyGrafanaUrl is not null)
@@ -289,11 +289,11 @@ public static class ExternalServiceRegistrationExtensions
             .WithReference(redis)
             .WithReference(tenancy)
             .WithReference(authorization)
-            //.WithReference(catalogApplication)
-            //.WithReference(catalogReadModel)
-            //.WithReference(inventory)
-            .WithReference(order);
-            //.WithReference(finance);
+            .WithReference(catalogApplication)
+            .WithReference(catalogReadModel)
+            .WithReference(inventory)
+            .WithReference(order)
+            .WithReference(finance);
 
         if (!useExternalService)
         {
@@ -301,11 +301,11 @@ public static class ExternalServiceRegistrationExtensions
                 .WaitFor(redis)
                 .WaitFor(tenancy)
                 .WaitFor(authorization)
-                //.WaitFor(catalogApplication)
-                //.WaitFor(catalogReadModel)
-                //.WaitFor(inventory)
-                .WaitFor(order);
-                //.WaitFor(finance);
+                .WaitFor(catalogApplication)
+                .WaitFor(catalogReadModel)
+                .WaitFor(inventory)
+                .WaitFor(order)
+                .WaitFor(finance);
         }
 
         #endregion
